@@ -1,6 +1,6 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
-// @author Mohit Cheppudira
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
+// @author Mohit Cheppudira
 
 import { BoundingBox } from './boundingbox';
 import { Font, FontInfo, FontStyle, FontWeight } from './font';

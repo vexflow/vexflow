@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // Author Taehoon Moon 2014
 
 import { Font, FontInfo, FontStyle, FontWeight } from './font';

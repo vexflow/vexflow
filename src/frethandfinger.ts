@@ -1,6 +1,5 @@
-// VexFlow - Music Engraving for HTML5
-// Copyright Mohit Muthanna 2010
-// Author Larry Kuhns 2013
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// Author: Larry Kuhns 2013
 // Class to draws string numbers into the notation.
 
 import { Builder } from './easyscore';

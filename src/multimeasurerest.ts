@@ -1,5 +1,4 @@
-// VexFlow - Music Engraving for HTML5
-// Copyright Mohit Muthanna 2010
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 //
 // This class implements multiple measure rests.
 
