@@ -1,5 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
-// Author Radosaw Eichler 2012
+// @author: Radosaw Eichler 2012
 
 import { Font, FontInfo, FontStyle, FontWeight } from './font';
 import { Glyph } from './glyph';

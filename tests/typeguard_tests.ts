@@ -1,5 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
-// Author: Ron B. Yeh
+// @author Ron B. Yeh
 // MIT License
 //
 // TypeGuard Tests

@@ -1,5 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
-// Author: Larry Kuhns 2013
+// @author Larry Kuhns 2013
 // Class to draws string numbers into the notation.
 
 import { Builder } from './easyscore';

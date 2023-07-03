@@ -1,5 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
-// Author Taehoon Moon 2014
+// @author: Taehoon Moon 2014
 
 import { ModifierContext } from './modifiercontext';
 import { Note } from './note';

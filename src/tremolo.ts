@@ -1,5 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
-// Author: Mike Corrigan <corrigan@gmail.com>
+// @author Mike Corrigan <corrigan@gmail.com>
 // MIT License
 
 import { Glyph } from './glyph';

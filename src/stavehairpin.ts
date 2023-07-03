@@ -1,7 +1,7 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 //
 // ## Description
-// Author: Raffaele Viglianti, 2012 http://itisnotsound.wordpress.com/
+// @author Raffaele Viglianti, 2012 http://itisnotsound.wordpress.com/
 //
 // This class implements hairpins between notes.
 // Hairpins can be either crescendo or decrescendo.

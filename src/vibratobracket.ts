@@ -1,5 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
-// Author: Balazs Forian-Szabo
+// @author Balazs Forian-Szabo
 // MIT License
 
 import { Element } from './element';

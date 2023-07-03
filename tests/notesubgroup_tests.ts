@@ -1,6 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
-// Author: Taehoon Moon 2016
+// @author Taehoon Moon 2016
 //
 // NoteSubGroup Tests
 

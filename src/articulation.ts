@@ -1,5 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
-// Author: Larry Kuhns.
+// @author Larry Kuhns.
 // MIT License
 
 import { Builder } from './easyscore';

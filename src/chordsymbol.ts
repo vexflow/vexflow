@@ -1,6 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 //
-// Author: Aaron (@AaronDavidNewman)
+// @author Aaron (@AaronDavidNewman)
 //
 // This implements chord symbols above/below a chord.
 // Chord symbols are modifiers that can be attached to notes.

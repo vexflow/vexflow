@@ -1,6 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
-// Author: Raffaele Viglianti, 2012
+// @author Raffaele Viglianti, 2012
 //
 // StaveHairpin Tests
 

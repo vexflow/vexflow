@@ -1,5 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
-// Author: Cyril Silverman
+// @author Cyril Silverman
 //
 // This file implements `TextBrackets` which extend between two notes.
 // The octave transposition markings (8va, 8vb, 15va, 15vb) can be created
