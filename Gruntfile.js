@@ -121,8 +121,7 @@ const versionInfo = require('./tools/version_info');
 // Add a banner to the top of some CJS output files.
 const banner =
   `VexFlow ${versionInfo.VERSION}   ${versionInfo.DATE}   ${versionInfo.ID}\n` +
-  `Copyright (c) 2010 Mohit Muthanna Cheppudira <mohit@muthanna.com>\n` +
-  `https://www.vexflow.com   https://github.com/0xfe/vexflow`;
+  `Copyright (c) 2023-present VexFlow contributors (see https://github.com/vexflow/vexflow/blob/main/AUTHORS.md).\n`;
 
 // Output directories & files.
 const BASE_DIR = __dirname;
