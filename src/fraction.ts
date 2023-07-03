@@ -1,8 +1,8 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
-// Author: Joshua Koo / @zz85
-// Author: @incompleteopus
+// @author Joshua Koo / @zz85
+// @author @incompleteopus
 
 import { Category } from './typeguard';
 import { RuntimeError } from './util';

@@ -1,4 +1,4 @@
-// Author: Ron B. Yeh
+// @author Ron B. Yeh
 // MIT License
 // See: https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API
 

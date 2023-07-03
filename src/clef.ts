@@ -1,6 +1,6 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna Cheppudira 2013.
-// Co-author: Benjamin W. Bohl
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
+// Co-author: Benjamin W. Bohl
 
 import { Glyph } from './glyph';
 import { Stave } from './stave';

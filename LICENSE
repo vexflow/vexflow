@@ -1,5 +1,7 @@
-Vex Flow - A JavaScript library for rendering music notation.
-Copyright (c) 2010 Mohit Muthanna Cheppudira
+VexFlow - A JavaScript library for rendering music notation.
+
+Copyright (c) 2023-present VexFlow contributors (see AUTHORS.md).
+Copyright (c) 2010-2022 Mohit Muthanna Cheppudira
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -1,5 +1,5 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
-// Author Taehoon Moon 2014
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// @author: Taehoon Moon 2014
 
 import { Font, FontInfo, FontStyle, FontWeight } from './font';
 import { Stave } from './stave';

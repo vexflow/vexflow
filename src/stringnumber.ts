@@ -1,5 +1,5 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
-// Author: Larry Kuhns
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// @author Larry Kuhns
 //
 // This file implements the `StringNumber` class which renders string
 // number annotations beside notes.

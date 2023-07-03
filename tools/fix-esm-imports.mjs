@@ -1,4 +1,4 @@
-// Author: Ron B. Yeh
+// @author Ron B. Yeh
 
 // node ./tools/fix-esm-imports.mjs ./build/esm/
 // See the `build:esm` task in Gruntfile.js.

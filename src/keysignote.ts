@@ -1,5 +1,5 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
-// Author Mark Meeus 2019
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// @author: Mark Meeus 2019
 
 import { KeySignature } from './keysignature';
 import { ModifierContext } from './modifiercontext';
