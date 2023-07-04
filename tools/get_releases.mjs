@@ -130,6 +130,8 @@ async function getReleasesForVersion4OrLater() {
     if (fs.existsSync(tempDir)) {
       fs.rmdirSync(tempDir, { recursive: true });
     }
+    // Make the temporary directory.
+    fs.mkdirSync(tempDir);
 
     console.log('\nDownload', ver, 'from npm.');
     execSync(`npm pack vexflow@${ver} --pack-destination ${tempDir} 2> /dev/null`).toString();
