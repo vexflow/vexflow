@@ -322,6 +322,7 @@ export class VexFlowTests {
     }
     const testTypeLowerCase = testType.toLowerCase();
     fontStacks.forEach((fontStackName: string) => {
+      // eslint-disable-next-line
       QUnit.test(name, (assert: any) => {
         useTempFontStack(fontStackName);
         const elementId = VexFlowTests.generateTestID(`${testTypeLowerCase}_` + fontStackName);

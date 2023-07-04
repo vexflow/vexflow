@@ -33,12 +33,12 @@ function formatTextNotes(options: TestOptions): void {
 
   const voice1 = score.voice([
     f
-      .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stem_direction: -1, duration: 'h' })
+      .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stemDirection: -1, duration: 'h' })
       .addModifier(f.Accidental({ type: 'b' }), 0)
       .addModifier(f.Accidental({ type: '#' }), 1),
-    f.StaveNote({ keys: ['d/4', 'e/4', 'f/4'], stem_direction: -1, duration: 'q' }),
+    f.StaveNote({ keys: ['d/4', 'e/4', 'f/4'], stemDirection: -1, duration: 'q' }),
     f
-      .StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stem_direction: -1, duration: 'q' })
+      .StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stemDirection: -1, duration: 'q' })
       .addModifier(f.Accidental({ type: 'n' }), 0)
       .addModifier(f.Accidental({ type: '#' }), 1),
   ]);
@@ -62,23 +62,23 @@ function formatTextNotes2(options: TestOptions): void {
   const score = f.EasyScore();
 
   const voice1 = score.voice([
-    f.StaveNote({ keys: ['g/4'], stem_direction: 1, duration: '16' }),
-    f.StaveNote({ keys: ['g/4'], stem_direction: 1, duration: '16' }),
-    f.StaveNote({ keys: ['g/4'], stem_direction: 1, duration: '16' }),
+    f.StaveNote({ keys: ['g/4'], stemDirection: 1, duration: '16' }),
+    f.StaveNote({ keys: ['g/4'], stemDirection: 1, duration: '16' }),
+    f.StaveNote({ keys: ['g/4'], stemDirection: 1, duration: '16' }),
 
-    f.StaveNote({ keys: ['g/5'], stem_direction: -1, duration: '16' }),
-    f.StaveNote({ keys: ['g/5'], stem_direction: -1, duration: '16' }),
-    f.StaveNote({ keys: ['g/5'], stem_direction: -1, duration: '16' }),
+    f.StaveNote({ keys: ['g/5'], stemDirection: -1, duration: '16' }),
+    f.StaveNote({ keys: ['g/5'], stemDirection: -1, duration: '16' }),
+    f.StaveNote({ keys: ['g/5'], stemDirection: -1, duration: '16' }),
 
-    f.StaveNote({ keys: ['g/5', 'a/5'], stem_direction: -1, duration: '16' }),
-    f.StaveNote({ keys: ['g/5', 'a/5'], stem_direction: -1, duration: '16' }),
-    f.StaveNote({ keys: ['g/5', 'a/5'], stem_direction: -1, duration: '16' }),
+    f.StaveNote({ keys: ['g/5', 'a/5'], stemDirection: -1, duration: '16' }),
+    f.StaveNote({ keys: ['g/5', 'a/5'], stemDirection: -1, duration: '16' }),
+    f.StaveNote({ keys: ['g/5', 'a/5'], stemDirection: -1, duration: '16' }),
 
-    f.StaveNote({ keys: ['g/4', 'a/4'], stem_direction: 1, duration: '16' }),
-    f.StaveNote({ keys: ['g/4', 'a/4'], stem_direction: 1, duration: '16' }),
-    f.StaveNote({ keys: ['g/4', 'a/4'], stem_direction: 1, duration: '16' }),
+    f.StaveNote({ keys: ['g/4', 'a/4'], stemDirection: 1, duration: '16' }),
+    f.StaveNote({ keys: ['g/4', 'a/4'], stemDirection: 1, duration: '16' }),
+    f.StaveNote({ keys: ['g/4', 'a/4'], stemDirection: 1, duration: '16' }),
 
-    f.StaveNote({ keys: ['g/4', 'a/4'], stem_direction: 1, duration: 'q' }),
+    f.StaveNote({ keys: ['g/4', 'a/4'], stemDirection: 1, duration: 'q' }),
   ]);
 
   const voice2 = score.voice([
@@ -117,12 +117,12 @@ function superscriptAndSubscript(options: TestOptions): void {
 
   const voice1 = score.voice([
     f
-      .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stem_direction: 1, duration: 'h' })
+      .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stemDirection: 1, duration: 'h' })
       .addModifier(f.Accidental({ type: 'b' }), 0)
       .addModifier(f.Accidental({ type: '#' }), 1),
-    f.StaveNote({ keys: ['d/4', 'e/4', 'f/4'], stem_direction: 1, duration: 'q' }),
+    f.StaveNote({ keys: ['d/4', 'e/4', 'f/4'], stemDirection: 1, duration: 'q' }),
     f
-      .StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stem_direction: 1, duration: 'q' })
+      .StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stemDirection: 1, duration: 'q' })
       .addModifier(f.Accidental({ type: 'n' }), 0)
       .addModifier(f.Accidental({ type: '#' }), 1),
   ]);
@@ -159,13 +159,13 @@ function formatTextGlyphs0(options: TestOptions): void {
 
   const voice1 = score.voice([
     f
-      .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stem_direction: -1, duration: 'h' })
+      .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stemDirection: -1, duration: 'h' })
       .addModifier(f.Accidental({ type: 'b' }), 0)
       .addModifier(f.Accidental({ type: '#' }), 1),
-    f.StaveNote({ keys: ['d/4', 'e/4', 'f/4'], stem_direction: -1, duration: '8' }),
-    f.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stem_direction: -1, duration: '8' }),
-    f.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stem_direction: -1, duration: '8' }),
-    f.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stem_direction: -1, duration: '8' }),
+    f.StaveNote({ keys: ['d/4', 'e/4', 'f/4'], stemDirection: -1, duration: '8' }),
+    f.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stemDirection: -1, duration: '8' }),
+    f.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stemDirection: -1, duration: '8' }),
+    f.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stemDirection: -1, duration: '8' }),
   ]);
 
   const voice2 = score.voice([
@@ -175,8 +175,8 @@ function formatTextGlyphs0(options: TestOptions): void {
     f.TextNote({ glyph: 'm', duration: '8' }),
     f.TextNote({ glyph: 'z', duration: '8' }),
 
-    f.TextNote({ glyph: 'mordent_upper', duration: '16' }),
-    f.TextNote({ glyph: 'mordent_lower', duration: '16' }),
+    f.TextNote({ glyph: 'mordentUpper', duration: '16' }),
+    f.TextNote({ glyph: 'mordentLower', duration: '16' }),
     f.TextNote({ glyph: 'segno', duration: '8' }),
     f.TextNote({ glyph: 'coda', duration: '8' }),
   ]);
@@ -197,22 +197,22 @@ function formatTextGlyphs1(options: TestOptions): void {
 
   const voice1 = score.voice([
     f
-      .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stem_direction: -1, duration: 'h' })
+      .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stemDirection: -1, duration: 'h' })
       .addModifier(f.Accidental({ type: 'b' }), 0)
       .addModifier(f.Accidental({ type: '#' }), 1),
-    f.StaveNote({ keys: ['d/4', 'e/4', 'f/4'], stem_direction: -1, duration: '8' }),
-    f.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stem_direction: -1, duration: '8' }),
-    f.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stem_direction: -1, duration: '8' }),
-    f.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stem_direction: -1, duration: '8' }),
+    f.StaveNote({ keys: ['d/4', 'e/4', 'f/4'], stemDirection: -1, duration: '8' }),
+    f.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stemDirection: -1, duration: '8' }),
+    f.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stemDirection: -1, duration: '8' }),
+    f.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stemDirection: -1, duration: '8' }),
   ]);
 
   const voice2 = score.voice([
     f.TextNote({ glyph: 'turn', duration: '16' }),
-    f.TextNote({ glyph: 'turn_inverted', duration: '16' }),
-    f.TextNote({ glyph: 'pedal_open', duration: '8' }).setLine(10),
-    f.TextNote({ glyph: 'pedal_close', duration: '8' }).setLine(10),
-    f.TextNote({ glyph: 'caesura_curved', duration: '8' }).setLine(3),
-    f.TextNote({ glyph: 'caesura_straight', duration: '8' }).setLine(3),
+    f.TextNote({ glyph: 'turnInverted', duration: '16' }),
+    f.TextNote({ glyph: 'pedalOpen', duration: '8' }).setLine(10),
+    f.TextNote({ glyph: 'pedalClose', duration: '8' }).setLine(10),
+    f.TextNote({ glyph: 'caesuraCurved', duration: '8' }).setLine(3),
+    f.TextNote({ glyph: 'caesuraStraight', duration: '8' }).setLine(3),
     f.TextNote({ glyph: 'breath', duration: '8' }).setLine(2),
     f.TextNote({ glyph: 'tick', duration: '8' }).setLine(3),
     f.TextNote({ glyph: 'tr', duration: '8', smooth: true }).setJustification(TextNote.Justification.CENTER),

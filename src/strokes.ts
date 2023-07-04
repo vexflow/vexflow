@@ -37,8 +37,8 @@ export class Stroke extends Modifier {
 
   // Arrange strokes inside `ModifierContext`
   static format(strokes: Stroke[], state: ModifierContextState): boolean {
-    const left_shift = state.left_shift;
-    const stroke_spacing = 0;
+    const leftShift = state.leftShift;
+    const strokeSpacing = 0;
 
     if (!strokes || strokes.length === 0) return false;
 
@@ -59,41 +59,41 @@ export class Stroke extends Modifier {
       }
     });
 
-    const strokeShift = left_shift;
+    const strokeShift = leftShift;
 
     // There can only be one stroke .. if more than one, they overlay each other
     const xShift = strokeList.reduce((xShift, { stroke, shift }) => {
       stroke.setXShift(strokeShift + shift);
-      return Math.max(stroke.getWidth() + stroke_spacing, xShift);
+      return Math.max(stroke.getWidth() + strokeSpacing, xShift);
     }, 0);
 
-    state.left_shift += xShift;
+    state.leftShift += xShift;
 
     return true;
   }
 
-  protected options: { all_voices: boolean };
-  protected all_voices: boolean;
+  protected options: { allVoices: boolean };
+  protected allVoices: boolean;
   protected type: number;
-  protected note_end?: Note;
-  public render_options: {
-    font_scale: number;
+  protected noteEnd?: Note;
+  public renderOptions: {
+    fontScale: number;
   };
 
-  constructor(type: number, options?: { all_voices: boolean }) {
+  constructor(type: number, options?: { allVoices: boolean }) {
     super();
 
-    this.options = { all_voices: true, ...options };
+    this.options = { allVoices: true, ...options };
 
     // multi voice - span stroke across all voices if true
-    this.all_voices = this.options.all_voices;
+    this.allVoices = this.options.allVoices;
 
     // multi voice - end note of stroke, set in draw()
     this.type = type;
     this.position = Modifier.Position.LEFT;
 
-    this.render_options = {
-      font_scale: Tables.NOTATION_FONT_SCALE,
+    this.renderOptions = {
+      fontScale: Tables.NOTATION_FONT_SCALE,
     };
 
     this.resetFont();
@@ -107,7 +107,7 @@ export class Stroke extends Modifier {
   }
 
   addEndNote(note: Note): this {
-    this.note_end = note;
+    this.noteEnd = note;
     return this;
   }
 
@@ -117,11 +117,11 @@ export class Stroke extends Modifier {
     this.setRendered();
 
     const start = note.getModifierStartXY(this.position, this.index);
-    let ys = note.getYs();
+    let yPositions = note.getYs();
     let topY = start.y;
     let botY = start.y;
     const x = start.x - 5;
-    const line_space = note.checkStave().getSpacingBetweenLines();
+    const lineSpace = note.checkStave().getSpacingBetweenLines();
 
     const notes = this.checkModifierContext().getMembers(note.getCategory());
     for (let i = 0; i < notes.length; i++) {
@@ -129,101 +129,105 @@ export class Stroke extends Modifier {
       if (isNote(note)) {
         // Only Note objects have getYs().
         // note is an instance of either StaveNote or TabNote.
-        ys = note.getYs();
-        for (let n = 0; n < ys.length; n++) {
-          if (this.note === notes[i] || this.all_voices) {
-            topY = Math.min(topY, ys[n]);
-            botY = Math.max(botY, ys[n]);
+        yPositions = note.getYs();
+        for (let n = 0; n < yPositions.length; n++) {
+          if (this.note === notes[i] || this.allVoices) {
+            topY = Math.min(topY, yPositions[n]);
+            botY = Math.max(botY, yPositions[n]);
           }
         }
       }
     }
 
     let arrow = '';
-    let arrow_shift_x = 0;
-    let arrow_y = 0;
-    let text_shift_x = 0;
-    let text_y = 0;
+    let arrowShiftX = 0;
+    let arrowY = 0;
+    let textShiftX = 0;
+    let textY = 0;
 
     switch (this.type) {
       case Stroke.Type.BRUSH_DOWN:
         arrow = 'arrowheadBlackUp';
-        arrow_shift_x = -3;
-        arrow_y = topY - line_space / 2 + 10;
-        botY += line_space / 2;
+        arrowShiftX = -3;
+        arrowY = topY - lineSpace / 2 + 10;
+        botY += lineSpace / 2;
         break;
       case Stroke.Type.BRUSH_UP:
         arrow = 'arrowheadBlackDown';
-        arrow_shift_x = 0.5;
-        arrow_y = botY + line_space / 2;
-        topY -= line_space / 2;
+        arrowShiftX = 0.5;
+        arrowY = botY + lineSpace / 2;
+        topY -= lineSpace / 2;
         break;
       case Stroke.Type.ROLL_DOWN:
       case Stroke.Type.RASQUEDO_DOWN:
         arrow = 'arrowheadBlackUp';
-        arrow_shift_x = -3;
-        text_shift_x = this.x_shift + arrow_shift_x - 2;
+        arrowShiftX = -3;
+        textShiftX = this.xShift + arrowShiftX - 2;
         if (isStaveNote(note)) {
-          topY += 1.5 * line_space;
+          topY += 1.5 * lineSpace;
           if ((botY - topY) % 2 !== 0) {
-            botY += 0.5 * line_space;
+            botY += 0.5 * lineSpace;
           } else {
-            botY += line_space;
+            botY += lineSpace;
           }
-          arrow_y = topY - line_space;
-          text_y = botY + line_space + 2;
+          arrowY = topY - lineSpace;
+          textY = botY + lineSpace + 2;
         } else {
-          topY += 1.5 * line_space;
-          botY += line_space;
-          arrow_y = topY - 0.75 * line_space;
-          text_y = botY + 0.25 * line_space;
+          topY += 1.5 * lineSpace;
+          botY += lineSpace;
+          arrowY = topY - 0.75 * lineSpace;
+          textY = botY + 0.25 * lineSpace;
         }
         break;
       case Stroke.Type.ROLL_UP:
       case Stroke.Type.RASQUEDO_UP:
         arrow = 'arrowheadBlackDown';
-        arrow_shift_x = -4;
-        text_shift_x = this.x_shift + arrow_shift_x - 1;
+        arrowShiftX = -4;
+        textShiftX = this.xShift + arrowShiftX - 1;
         if (isStaveNote(note)) {
-          arrow_y = line_space / 2;
-          topY += 0.5 * line_space;
+          arrowY = lineSpace / 2;
+          topY += 0.5 * lineSpace;
           if ((botY - topY) % 2 === 0) {
-            botY += line_space / 2;
+            botY += lineSpace / 2;
           }
-          arrow_y = botY + 0.5 * line_space;
-          text_y = topY - 1.25 * line_space;
+          arrowY = botY + 0.5 * lineSpace;
+          textY = topY - 1.25 * lineSpace;
         } else {
-          topY += 0.25 * line_space;
-          botY += 0.5 * line_space;
-          arrow_y = botY + 0.25 * line_space;
-          text_y = topY - line_space;
+          topY += 0.25 * lineSpace;
+          botY += 0.5 * lineSpace;
+          arrowY = botY + 0.25 * lineSpace;
+          textY = topY - lineSpace;
         }
         break;
       case Stroke.Type.ARPEGGIO_DIRECTIONLESS:
-        topY += 0.5 * line_space;
-        botY += line_space; // * 0.5 can lead to slight underlap instead of overlap sometimes
+        topY += 0.5 * lineSpace;
+        botY += lineSpace; // * 0.5 can lead to slight underlap instead of overlap sometimes
         break;
       default:
         throw new RuntimeError('InvalidType', `The stroke type ${this.type} does not exist`);
     }
 
-    let strokeLine = 'straight';
+    // The first letter is capitalized.
+    // We later prepend 'stroke' to create a camelCased glyph category: 'strokeStraight' or 'strokeWiggly'.
+    // See: common_metrics.ts
+    let type = 'Straight';
+
     // Draw the stroke
     if (this.type === Stroke.Type.BRUSH_DOWN || this.type === Stroke.Type.BRUSH_UP) {
-      ctx.fillRect(x + this.x_shift, topY, 1, botY - topY);
+      ctx.fillRect(x + this.xShift, topY, 1, botY - topY);
     } else {
-      strokeLine = 'wiggly';
+      type = 'Wiggly';
       if (isStaveNote(note)) {
-        for (let i = topY; i <= botY; i += line_space) {
-          Glyph.renderGlyph(ctx, x + this.x_shift - 4, i, this.render_options.font_scale, 'vexWiggleArpeggioUp');
+        for (let i = topY; i <= botY; i += lineSpace) {
+          Glyph.renderGlyph(ctx, x + this.xShift - 4, i, this.renderOptions.fontScale, 'vexWiggleArpeggioUp');
         }
       } else {
         let i;
         for (i = topY; i <= botY; i += 10) {
-          Glyph.renderGlyph(ctx, x + this.x_shift - 4, i, this.render_options.font_scale, 'vexWiggleArpeggioUp');
+          Glyph.renderGlyph(ctx, x + this.xShift - 4, i, this.renderOptions.fontScale, 'vexWiggleArpeggioUp');
         }
         if (this.type === Stroke.Type.RASQUEDO_DOWN) {
-          text_y = i + 0.25 * line_space;
+          textY = i + 0.25 * lineSpace;
         }
       }
     }
@@ -233,15 +237,15 @@ export class Stroke extends Modifier {
     }
 
     // Draw the arrow head
-    Glyph.renderGlyph(ctx, x + this.x_shift + arrow_shift_x, arrow_y, this.render_options.font_scale, arrow, {
-      category: `stroke_${strokeLine}.${arrow}`,
+    Glyph.renderGlyph(ctx, x + this.xShift + arrowShiftX, arrowY, this.renderOptions.fontScale, arrow, {
+      category: `stroke${type}.${arrow}`,
     });
 
     // Draw the rasquedo "R"
     if (this.type === Stroke.Type.RASQUEDO_DOWN || this.type === Stroke.Type.RASQUEDO_UP) {
       ctx.save();
       ctx.setFont(this.textFont);
-      ctx.fillText('R', x + text_shift_x, text_y);
+      ctx.fillText('R', x + textShiftX, textY);
       ctx.restore();
     }
   }

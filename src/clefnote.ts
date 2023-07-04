@@ -13,6 +13,16 @@ export class ClefNote extends Note {
     return Category.ClefNote;
   }
 
+  glyphCategory(): string {
+    const s = this.size;
+    if (!s) {
+      return 'clefNote';
+    } else {
+      // Capitalize first letter of this.size.
+      return 'clefNote' + s.charAt(0).toUpperCase() + s.slice(1);
+    }
+  }
+
   protected clef: ClefType;
   protected annotation?: ClefAnnotatiomType;
   protected type: string;
@@ -25,10 +35,10 @@ export class ClefNote extends Note {
     this.clef = clef.clef;
     this.annotation = clef.annotation;
     this.size = size === undefined ? 'default' : size;
-    this.setWidth(Glyph.getWidth(this.clef.code, Clef.getPoint(this.size), `clefNote_${this.size}`));
+    this.setWidth(Glyph.getWidth(this.clef.code, Clef.getPoint(this.size), this.glyphCategory()));
 
     // Note properties
-    this.ignore_ticks = true;
+    this.ignoreTicks = true;
   }
 
   /** Set clef type, size and annotation. */
@@ -38,7 +48,7 @@ export class ClefNote extends Note {
     const clef = new Clef(type, size, annotation);
     this.clef = clef.clef;
     this.annotation = clef.annotation;
-    this.setWidth(Glyph.getWidth(this.clef.code, Clef.getPoint(this.size), `clefNote_${this.size}`));
+    this.setWidth(Glyph.getWidth(this.clef.code, Clef.getPoint(this.size), this.glyphCategory()));
     return this;
   }
 
@@ -58,10 +68,10 @@ export class ClefNote extends Note {
     const ctx = this.checkContext();
 
     this.setRendered();
-    const abs_x = this.getAbsoluteX();
+    const absoluteX = this.getAbsoluteX();
 
-    Glyph.renderGlyph(ctx, abs_x, stave.getYForLine(this.clef.line), Clef.getPoint(this.size), this.clef.code, {
-      category: `clefNote_${this.size}`,
+    Glyph.renderGlyph(ctx, absoluteX, stave.getYForLine(this.clef.line), Clef.getPoint(this.size), this.clef.code, {
+      category: this.glyphCategory(),
     });
 
     // If the Vex.Flow.Clef has an annotation, such as 8va, draw it.
@@ -70,8 +80,8 @@ export class ClefNote extends Note {
       attachment.setContext(ctx);
       attachment.setStave(stave);
       attachment.setYShift(stave.getYForLine(this.annotation.line) - stave.getYForGlyphs());
-      attachment.setXShift(this.annotation.x_shift);
-      attachment.renderToStave(abs_x);
+      attachment.setXShift(this.annotation.xShift);
+      attachment.renderToStave(absoluteX);
     }
   }
 }

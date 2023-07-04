@@ -35,13 +35,13 @@ function drawSlash(options: TestOptions, contextBuilder: ContextBuilder): void {
   stave.draw();
 
   const notes: StaveNoteStruct[] = [
-    { keys: ['b/4'], duration: 'ws', stem_direction: -1 },
-    { keys: ['b/4'], duration: 'hs', stem_direction: -1 },
-    { keys: ['b/4'], duration: 'qs', stem_direction: -1 },
-    { keys: ['b/4'], duration: '8s', stem_direction: -1 },
-    { keys: ['b/4'], duration: '16s', stem_direction: -1 },
-    { keys: ['b/4'], duration: '32s', stem_direction: -1 },
-    { keys: ['b/4'], duration: '64s', stem_direction: -1 },
+    { keys: ['b/4'], duration: 'ws', stemDirection: -1 },
+    { keys: ['b/4'], duration: 'hs', stemDirection: -1 },
+    { keys: ['b/4'], duration: 'qs', stemDirection: -1 },
+    { keys: ['b/4'], duration: '8s', stemDirection: -1 },
+    { keys: ['b/4'], duration: '16s', stemDirection: -1 },
+    { keys: ['b/4'], duration: '32s', stemDirection: -1 },
+    { keys: ['b/4'], duration: '64s', stemDirection: -1 },
   ];
   options.assert.expect(notes.length * 2);
 
@@ -71,7 +71,7 @@ function drawBasic(options: TestOptions, contextBuilder: ContextBuilder): void {
   staveBar1.addKeySignature('C');
   staveBar1.setContext(ctx).draw();
 
-  const notesBar1 = [new StaveNote({ keys: ['b/4'], duration: '1s', stem_direction: -1 })];
+  const notesBar1 = [new StaveNote({ keys: ['b/4'], duration: '1s', stemDirection: -1 })];
 
   // Helper function to justify and draw a 4/4 voice
   Formatter.FormatAndDraw(ctx, staveBar1, notesBar1);
@@ -84,8 +84,8 @@ function drawBasic(options: TestOptions, contextBuilder: ContextBuilder): void {
 
   // bar 2
   const notesBar2 = [
-    new StaveNote({ keys: ['b/4'], duration: '2s', stem_direction: -1 }),
-    new StaveNote({ keys: ['b/4'], duration: '2s', stem_direction: -1 }),
+    new StaveNote({ keys: ['b/4'], duration: '2s', stemDirection: -1 }),
+    new StaveNote({ keys: ['b/4'], duration: '2s', stemDirection: -1 }),
   ];
 
   // Helper function to justify and draw a 4/4 voice
@@ -100,22 +100,22 @@ function drawBasic(options: TestOptions, contextBuilder: ContextBuilder): void {
     new StaveNote({
       keys: ['b/4'],
       duration: '4s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '4s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '4s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '4s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
   ];
 
@@ -131,42 +131,42 @@ function drawBasic(options: TestOptions, contextBuilder: ContextBuilder): void {
     new StaveNote({
       keys: ['b/4'],
       duration: '8s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '8s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '8s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '8s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '8s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '8s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '8s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '8s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
   ];
 
@@ -188,56 +188,56 @@ function drawBeamedSlashNotes(options: TestOptions, contextBuilder: ContextBuild
   staveBar1.setContext(ctx).draw();
 
   // bar 4
-  const notesBar1_part1 = [
+  const notesBar1Part1 = [
     new StaveNote({
       keys: ['b/4'],
       duration: '8s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '8s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '8s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '8s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
   ];
 
-  const notesBar1_part2 = [
+  const notesBar1Part2 = [
     new StaveNote({
       keys: ['b/4'],
       duration: '8s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '8s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '8s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '8s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
   ];
 
   // create the beams for 8th notes in 2nd measure
-  const beam1 = new Beam(notesBar1_part1);
-  const beam2 = new Beam(notesBar1_part2);
-  const notesBar1 = notesBar1_part1.concat(notesBar1_part2);
+  const beam1 = new Beam(notesBar1Part1);
+  const beam2 = new Beam(notesBar1Part2);
+  const notesBar1 = notesBar1Part1.concat(notesBar1Part2);
 
   // Helper function to justify and draw a 4/4 voice
   Formatter.FormatAndDraw(ctx, staveBar1, notesBar1);
@@ -262,55 +262,55 @@ function drawSlashAndBeamAndRests(options: TestOptions, contextBuilder: ContextB
   staveBar1.setContext(ctx).draw();
 
   // bar 1
-  const notesBar1_part1 = [
+  const notesBar1Part1 = [
     new StaveNote({
       keys: ['b/4'],
       duration: '8s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
-    new StaveNote({ keys: ['b/4'], duration: '8s', stem_direction: -1 }),
+    new StaveNote({ keys: ['b/4'], duration: '8s', stemDirection: -1 }),
   ];
 
-  notesBar1_part1[0].addModifier(new Annotation('C7').setFont('Times', VexFlowTests.Font.size + 2), 0);
+  notesBar1Part1[0].addModifier(new Annotation('C7').setFont('Times', VexFlowTests.Font.size + 2), 0);
 
-  const notesBar1_part2 = [
+  const notesBar1Part2 = [
     new StaveNote({
       keys: ['b/4'],
       duration: '8r',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '8s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '8r',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '8s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '8r',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '8s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
   ];
 
   // create the beams for 8th notes in 2nd measure
-  const beam1 = new Beam(notesBar1_part1);
+  const beam1 = new Beam(notesBar1Part1);
 
   // Helper function to justify and draw a 4/4 voice
-  Formatter.FormatAndDraw(ctx, staveBar1, notesBar1_part1.concat(notesBar1_part2));
+  Formatter.FormatAndDraw(ctx, staveBar1, notesBar1Part1.concat(notesBar1Part2));
 
   // Render beams
   beam1.setContext(ctx).draw();
@@ -323,7 +323,7 @@ function drawSlashAndBeamAndRests(options: TestOptions, contextBuilder: ContextB
     new StaveNote({
       keys: ['b/4'],
       duration: '1s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
   ];
 
@@ -347,60 +347,60 @@ function drawSixtenthWithScratches(options: TestOptions, contextBuilder: Context
   staveBar1.setContext(ctx).draw();
 
   // bar 1
-  const notesBar1_part1 = [
+  const notesBar1Part1 = [
     new StaveNote({
       keys: ['b/4'],
       duration: '16s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '16s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '16m',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '16s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
   ];
 
-  const notesBar1_part2 = [
+  const notesBar1Part2 = [
     new StaveNote({
       keys: ['b/4'],
       duration: '16m',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '16s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '16r',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '16s',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
   ];
 
-  notesBar1_part1[0].addModifier(new Annotation('C7').setFont('Times', VexFlowTests.Font.size + 3), 0);
+  notesBar1Part1[0].addModifier(new Annotation('C7').setFont('Times', VexFlowTests.Font.size + 3), 0);
 
   // create the beams for 8th notes in 2nd measure
-  const beam1 = new Beam(notesBar1_part1);
-  const beam2 = new Beam(notesBar1_part2);
+  const beam1 = new Beam(notesBar1Part1);
+  const beam2 = new Beam(notesBar1Part2);
 
   // Helper function to justify and draw a 4/4 voice
-  Formatter.FormatAndDraw(ctx, staveBar1, notesBar1_part1.concat(notesBar1_part2));
+  Formatter.FormatAndDraw(ctx, staveBar1, notesBar1Part1.concat(notesBar1Part2));
 
   // Render beams
   beam1.setContext(ctx).draw();
@@ -422,56 +422,56 @@ function drawThirtySecondWithScratches(options: TestOptions, contextBuilder: Con
   staveBar1.setContext(ctx).draw();
 
   // bar 1
-  const notesBar1_part1 = [
+  const notesBar1Part1 = [
     new StaveNote({
       keys: ['b/4'],
       duration: '32s',
-      stem_direction: 1,
+      stemDirection: 1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '32s',
-      stem_direction: 1,
+      stemDirection: 1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '32m',
-      stem_direction: 1,
+      stemDirection: 1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '32s',
-      stem_direction: 1,
+      stemDirection: 1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '32m',
-      stem_direction: 1,
+      stemDirection: 1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '32s',
-      stem_direction: 1,
+      stemDirection: 1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '32r',
-      stem_direction: 1,
+      stemDirection: 1,
     }),
     new StaveNote({
       keys: ['b/4'],
       duration: '32s',
-      stem_direction: 1,
+      stemDirection: 1,
     }),
   ];
 
-  notesBar1_part1[0].addModifier(new Annotation('C7').setFont('Times', VexFlowTests.Font.size + 3), 0);
+  notesBar1Part1[0].addModifier(new Annotation('C7').setFont('Times', VexFlowTests.Font.size + 3), 0);
 
   // Create the beams for 8th notes in 2nd measure.
-  const beam1 = new Beam(notesBar1_part1);
+  const beam1 = new Beam(notesBar1Part1);
 
   // Helper function to justify and draw a 4/4 voice.
-  Formatter.FormatAndDraw(ctx, staveBar1, notesBar1_part1);
+  Formatter.FormatAndDraw(ctx, staveBar1, notesBar1Part1);
 
   // Render beams
   beam1.setContext(ctx).draw();

@@ -80,7 +80,7 @@ export class TimeSignatureGlyph extends Glyph {
     this.lineShift = height > 22 ? 1 : 0;
 
     this.width = Math.max(topWidth, botWidth);
-    this.xMin = this.getMetrics().x_min;
+    this.xMin = this.getMetrics().xMin;
     this.topStartX = (this.width - topWidth) / 2.0;
     this.botStartX = (this.width - botWidth) / 2.0;
     this.reset();
@@ -88,8 +88,8 @@ export class TimeSignatureGlyph extends Glyph {
 
   getMetrics(): GlyphMetrics {
     return {
-      x_min: this.xMin,
-      x_max: this.xMin + this.width,
+      xMin: this.xMin,
+      xMax: this.xMin + this.width,
       width: this.width,
     } as GlyphMetrics;
   }
@@ -98,23 +98,23 @@ export class TimeSignatureGlyph extends Glyph {
     const stave = this.checkStave();
     const ctx = this.checkContext();
 
-    let start_x = x + this.topStartX;
+    let startX = x + this.topStartX;
     let y = 0;
     if (this.botGlyphs.length > 0) y = stave.getYForLine(this.timeSignature.topLine - this.lineShift);
     else y = (stave.getYForLine(this.timeSignature.topLine) + stave.getYForLine(this.timeSignature.bottomLine)) / 2;
     for (let i = 0; i < this.topGlyphs.length; ++i) {
       const glyph = this.topGlyphs[i];
-      Glyph.renderOutline(ctx, glyph.getMetrics().outline, this.scale, start_x + this.x_shift, y);
-      start_x += defined(glyph.getMetrics().width);
+      Glyph.renderOutline(ctx, glyph.getMetrics().outline, this.scale, startX + this.xShift, y);
+      startX += defined(glyph.getMetrics().width);
     }
 
-    start_x = x + this.botStartX;
+    startX = x + this.botStartX;
     y = stave.getYForLine(this.timeSignature.bottomLine + this.lineShift);
     for (let i = 0; i < this.botGlyphs.length; ++i) {
       const glyph = this.botGlyphs[i];
       this.timeSignature.placeGlyphOnLine(glyph, stave, this.timeSignature.getLine());
-      Glyph.renderOutline(ctx, glyph.getMetrics().outline, this.scale, start_x + glyph.getMetrics().x_shift, y);
-      start_x += defined(glyph.getMetrics().width);
+      Glyph.renderOutline(ctx, glyph.getMetrics().outline, this.scale, startX + glyph.getMetrics().xShift, y);
+      startX += defined(glyph.getMetrics().width);
     }
   }
 }

@@ -12,8 +12,8 @@ import { Category } from './typeguard';
 import { defined, RuntimeError, sumArray } from './util';
 
 export interface VoiceTime {
-  num_beats: number;
-  beat_value: number;
+  numBeats: number;
+  beatValue: number;
   /** Defaults to `Flow.RESOLUTION` if not provided. */
   resolution?: number;
 }
@@ -70,8 +70,8 @@ export class Voice extends Element {
       const match = time.match(/(\d+)\/(\d+)/);
       if (match) {
         voiceTime = {
-          num_beats: parseInt(match[1]),
-          beat_value: parseInt(match[2]),
+          numBeats: parseInt(match[1]),
+          beatValue: parseInt(match[2]),
         };
       }
     } else {
@@ -80,14 +80,14 @@ export class Voice extends Element {
 
     // Default time signature is 4/4.
     this.time = {
-      num_beats: 4,
-      beat_value: 4,
+      numBeats: 4,
+      beatValue: 4,
       resolution: Tables.RESOLUTION,
       ...voiceTime,
     };
 
     // Recalculate total ticks.
-    this.totalTicks = new Fraction(this.time.num_beats * (this.time.resolution / this.time.beat_value), 1);
+    this.totalTicks = new Fraction(this.time.numBeats * (this.time.resolution / this.time.beatValue), 1);
     // until tickables are added, the smallestTickCount is the same as the stated totalTicks duration.
     this.smallestTickCount = this.totalTicks.clone();
   }

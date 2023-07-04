@@ -31,8 +31,8 @@ export class Parenthesis extends Modifier {
   static format(parentheses: Parenthesis[], state: ModifierContextState): boolean {
     if (!parentheses || parentheses.length === 0) return false;
 
-    let x_widthL = 0;
-    let x_widthR = 0;
+    let xWidthL = 0;
+    let xWidthR = 0;
 
     for (let i = 0; i < parentheses.length; ++i) {
       const parenthesis = parentheses[i];
@@ -44,16 +44,16 @@ export class Parenthesis extends Modifier {
 
       if (pos === ModifierPosition.RIGHT) {
         shift = note.getRightParenthesisPx(index);
-        x_widthR = x_widthR > shift + parenthesis.width ? x_widthR : shift + parenthesis.width;
+        xWidthR = xWidthR > shift + parenthesis.width ? xWidthR : shift + parenthesis.width;
       }
       if (pos === ModifierPosition.LEFT) {
         shift = note.getLeftParenthesisPx(index);
-        x_widthL = x_widthL > shift + parenthesis.width ? x_widthL : shift + parenthesis.width;
+        xWidthL = xWidthL > shift + parenthesis.width ? xWidthL : shift + parenthesis.width;
       }
       parenthesis.setXShift(shift);
     }
-    state.left_shift += x_widthL;
-    state.right_shift += x_widthR;
+    state.leftShift += xWidthL;
+    state.rightShift += xWidthR;
 
     return true;
   }
@@ -91,8 +91,8 @@ export class Parenthesis extends Modifier {
     this.setRendered();
 
     const start = note.getModifierStartXY(this.position, this.index, { forceFlagRight: true });
-    const x = start.x + this.x_shift;
-    const y = start.y + this.y_shift;
+    const x = start.x + this.xShift;
+    const y = start.y + this.yShift;
     if (this.position == Modifier.Position.RIGHT) {
       Glyph.renderGlyph(ctx, x + 1, y, this.point, 'noteheadParenthesisRight', {
         category: `noteHead.standard.noteheadParenthesisRight`,

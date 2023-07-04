@@ -28,8 +28,8 @@ export class GraceNote extends StaveNote {
 
   constructor(noteStruct: GraceNoteStruct) {
     super({
-      glyph_font_scale: Tables.NOTATION_FONT_SCALE * GraceNote.SCALE,
-      stroke_px: GraceNote.LEDGER_LINE_OFFSET,
+      glyphFontScale: Tables.NOTATION_FONT_SCALE * GraceNote.SCALE,
+      strokePx: GraceNote.LEDGER_LINE_OFFSET,
       ...noteStruct,
     });
 
@@ -42,8 +42,8 @@ export class GraceNote extends StaveNote {
   }
 
   getStemExtension(): number {
-    if (this.stem_extension_override) {
-      return this.stem_extension_override;
+    if (this.stemExtensionOverride) {
+      return this.stemExtensionOverride;
     }
 
     const glyphProps = this.getGlyphProps();
@@ -60,7 +60,7 @@ export class GraceNote extends StaveNote {
   }
 
   getStaveNoteScale(): number {
-    return this.render_options.glyph_font_scale / Tables.NOTATION_FONT_SCALE;
+    return this.renderOptions.glyphFontScale / Tables.NOTATION_FONT_SCALE;
   }
 
   draw(): void {
@@ -85,25 +85,23 @@ export class GraceNote extends StaveNote {
           beam: 5 * offsetScale,
         });
       } else {
-        const stem_direction = this.getStemDirection();
+        const stemDirection = this.getStemDirection();
         const noteHeadBounds = this.getNoteHeadBounds();
         const noteStemHeight = stem.getHeight();
         let x = this.getAbsoluteX();
         let y =
-          stem_direction === Stem.DOWN
-            ? noteHeadBounds.y_top - noteStemHeight
-            : noteHeadBounds.y_bottom - noteStemHeight;
+          stemDirection === Stem.DOWN ? noteHeadBounds.yTop - noteStemHeight : noteHeadBounds.yBottom - noteStemHeight;
 
         const defaultStemExtention =
-          stem_direction === Stem.DOWN ? this.glyphProps.stem_down_extension : this.glyphProps.stem_up_extension;
+          stemDirection === Stem.DOWN ? this.glyphProps.stemDownExtension : this.glyphProps.stemUpExtension;
 
         let defaultOffsetY = Tables.STEM_HEIGHT;
         defaultOffsetY -= defaultOffsetY / 2.8;
         defaultOffsetY += defaultStemExtention;
-        y += defaultOffsetY * staveNoteScale * stem_direction;
+        y += defaultOffsetY * staveNoteScale * stemDirection;
 
         const offsets =
-          stem_direction === Stem.UP
+          stemDirection === Stem.UP
             ? {
                 x1: 1,
                 y1: 0,
@@ -149,33 +147,33 @@ export class GraceNote extends StaveNote {
     const beam = this.beam;
     if (!beam) throw new RuntimeError('NoBeam', "Can't calculate without a beam.");
 
-    const beam_slope = beam.slope;
+    const beamSlope = beam.slope;
     const isBeamEndNote = beam.notes[beam.notes.length - 1] === this;
     const scaleX = isBeamEndNote ? -1 : 1;
-    const beam_angle = Math.atan(beam_slope * scaleX);
+    const beamAngle = Math.atan(beamSlope * scaleX);
 
     // slash line intersecting point on beam.
     const iPointOnBeam = {
-      dx: Math.cos(beam_angle) * slashBeamOffset,
-      dy: Math.sin(beam_angle) * slashBeamOffset,
+      dx: Math.cos(beamAngle) * slashBeamOffset,
+      dy: Math.sin(beamAngle) * slashBeamOffset,
     };
 
     slashStemOffset *= this.getStemDirection();
-    const slash_angle = Math.atan((iPointOnBeam.dy - slashStemOffset) / iPointOnBeam.dx);
-    const protrusion_stem_dx = Math.cos(slash_angle) * protrusions.stem * scaleX;
-    const protrusion_stem_dy = Math.sin(slash_angle) * protrusions.stem;
-    const protrusion_beam_dx = Math.cos(slash_angle) * protrusions.beam * scaleX;
-    const protrusion_beam_dy = Math.sin(slash_angle) * protrusions.beam;
+    const slashAngle = Math.atan((iPointOnBeam.dy - slashStemOffset) / iPointOnBeam.dx);
+    const protrusionStemDeltaX = Math.cos(slashAngle) * protrusions.stem * scaleX;
+    const protrusionStemDeltaY = Math.sin(slashAngle) * protrusions.stem;
+    const protrusionBeamDeltaX = Math.cos(slashAngle) * protrusions.beam * scaleX;
+    const protrusionBeamDeltaY = Math.sin(slashAngle) * protrusions.beam;
 
     const stemX = this.getStemX();
     const stem0X = beam.notes[0].getStemX();
-    const stemY = beam.getBeamYToDraw() + (stemX - stem0X) * beam_slope;
+    const stemY = beam.getBeamYToDraw() + (stemX - stem0X) * beamSlope;
 
     const ret = {
-      x1: stemX - protrusion_stem_dx,
-      y1: stemY + slashStemOffset - protrusion_stem_dy,
-      x2: stemX + iPointOnBeam.dx * scaleX + protrusion_beam_dx,
-      y2: stemY + iPointOnBeam.dy + protrusion_beam_dy,
+      x1: stemX - protrusionStemDeltaX,
+      y1: stemY + slashStemOffset - protrusionStemDeltaY,
+      x2: stemX + iPointOnBeam.dx * scaleX + protrusionBeamDeltaX,
+      y2: stemY + iPointOnBeam.dy + protrusionBeamDeltaY,
     };
     return ret;
   }

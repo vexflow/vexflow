@@ -79,7 +79,7 @@ export class TextDynamics extends Note {
     this.line = noteStruct.line || 0;
     this.glyphs = [];
 
-    this.render_options = { ...this.render_options, glyph_font_size: Tables.NOTATION_FONT_SCALE };
+    this.renderOptions = { ...this.renderOptions, glyphFontSize: Tables.NOTATION_FONT_SCALE };
 
     L('New Dynamics Text: ', this.sequence);
   }
@@ -92,7 +92,7 @@ export class TextDynamics extends Note {
 
   /** Preformat the dynamics text. */
   preFormat(): this {
-    let total_width = 0;
+    let totalWidth = 0;
     // length of this.glyphs must be <=
     // length of this.sequence, so if we're formatted before
     // create new glyphs.
@@ -100,20 +100,20 @@ export class TextDynamics extends Note {
     // Iterate through each letter
     this.sequence.split('').forEach((letter) => {
       // Get the glyph data for the letter
-      const glyph_data = TextDynamics.GLYPHS[letter];
-      if (!glyph_data) throw new RuntimeError('Invalid dynamics character: ' + letter);
+      const glyphData = TextDynamics.GLYPHS[letter];
+      if (!glyphData) throw new RuntimeError('Invalid dynamics character: ' + letter);
 
-      const size = defined(this.render_options.glyph_font_size);
-      const glyph = new Glyph(glyph_data.code, size, { category: 'textNote' });
+      const size = defined(this.renderOptions.glyphFontSize);
+      const glyph = new Glyph(glyphData.code, size, { category: 'textNote' });
 
       // Add the glyph
       this.glyphs.push(glyph);
 
-      total_width += glyph_data.width;
+      totalWidth += glyphData.width;
     });
 
     // Store the width of the text
-    this.setWidth(total_width);
+    this.setWidth(totalWidth);
     this.preFormatted = true;
     return this;
   }
@@ -126,11 +126,11 @@ export class TextDynamics extends Note {
 
     L('Rendering Dynamics: ', this.sequence);
 
-    let letter_x = x;
+    let letterX = x;
     this.glyphs.forEach((glyph, index) => {
-      const current_letter = this.sequence[index];
-      glyph.render(this.checkContext(), letter_x, y);
-      letter_x += TextDynamics.GLYPHS[current_letter].width;
+      const currentLetter = this.sequence[index];
+      glyph.render(this.checkContext(), letterX, y);
+      letterX += TextDynamics.GLYPHS[currentLetter].width;
     });
   }
 }

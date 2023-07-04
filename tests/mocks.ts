@@ -16,7 +16,7 @@ class MockTickable extends Tickable {
   voice?: Voice;
   stave?: Stave;
   width: number = 0;
-  ignore_ticks: boolean = false;
+  ignoreTicks: boolean = false;
 
   init(): void {
     // DO NOTHING.
@@ -83,12 +83,12 @@ class MockTickable extends Tickable {
   }
 
   setIgnoreTicks(flag: boolean): this {
-    this.ignore_ticks = flag;
+    this.ignoreTicks = flag;
     return this;
   }
 
   shouldIgnoreTicks(): boolean {
-    return this.ignore_ticks;
+    return this.ignoreTicks;
   }
 
   preFormat(): void {

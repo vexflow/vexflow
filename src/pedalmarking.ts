@@ -21,8 +21,8 @@ function L(...args: any[]) {
  * coordinate shifts.
  */
 function drawPedalGlyph(name: string, context: RenderContext, x: number, y: number, point: number): void {
-  const glyph_data = PedalMarking.GLYPHS[name];
-  const glyph = new Glyph(glyph_data.code, point, { category: 'pedalMarking' });
+  const glyphData = PedalMarking.GLYPHS[name];
+  const glyph = new Glyph(glyphData.code, point, { category: 'pedalMarking' });
   // Center the middle of the glyph with the middle of the note head (Tables.STAVE_LINE_DISTANCE / 2)
   glyph.render(context, x - (glyph.getMetrics().width - Tables.STAVE_LINE_DISTANCE) / 2, y);
 }
@@ -51,22 +51,23 @@ export class PedalMarking extends Element {
 
   protected line: number;
   protected type: number;
-  protected custom_depress_text: string;
-  protected custom_release_text: string;
-  public render_options: {
+  protected customDepressText: string;
+  protected customReleaseText: string;
+
+  public renderOptions: {
     color: string;
-    bracket_height: number;
-    text_margin_right: number;
-    bracket_line_width: number;
+    bracketHeight: number;
+    textMarginRight: number;
+    bracketLineWidth: number;
   };
   protected notes: StaveNote[];
 
   /** Glyph data */
   static readonly GLYPHS: Record<string, { code: string }> = {
-    pedal_depress: {
+    pedalDepress: {
       code: 'keyboardPedalPed',
     },
-    pedal_release: {
+    pedalRelease: {
       code: 'keyboardPedalUp',
     },
   };
@@ -118,15 +119,15 @@ export class PedalMarking extends Element {
     this.line = 0;
 
     // Custom text for the release/depress markings
-    this.custom_depress_text = '';
-    this.custom_release_text = '';
+    this.customDepressText = '';
+    this.customReleaseText = '';
 
     this.resetFont();
 
-    this.render_options = {
-      bracket_height: 10,
-      text_margin_right: 6,
-      bracket_line_width: 1,
+    this.renderOptions = {
+      bracketHeight: 10,
+      textMarginRight: 6,
+      bracketLineWidth: 1,
       color: 'black',
     };
   }
@@ -146,8 +147,8 @@ export class PedalMarking extends Element {
    * set if the parameter is falsy.
    */
   setCustomText(depress: string, release?: string): this {
-    this.custom_depress_text = depress || '';
-    this.custom_release_text = release || '';
+    this.customDepressText = depress || '';
+    this.customReleaseText = release || '';
     return this;
   }
 
@@ -160,75 +161,75 @@ export class PedalMarking extends Element {
   /** Draw the bracket based pedal markings. */
   drawBracketed(): void {
     const ctx = this.checkContext();
-    let is_pedal_depressed = false;
-    let prev_x: number;
-    let prev_y: number;
+    let isPedalDepressed = false;
+    let prevX: number;
+    let prevY: number;
 
     // Iterate through each note
     this.notes.forEach((note, index, notes) => {
       // Each note triggers the opposite pedal action
-      is_pedal_depressed = !is_pedal_depressed;
+      isPedalDepressed = !isPedalDepressed;
 
       // Get the initial coordinates for the note
       const x = note.getAbsoluteX();
       const y = note.checkStave().getYForBottomText(this.line + 3);
 
       // Throw if current note is positioned before the previous note
-      if (x < prev_x) {
+      if (x < prevX) {
         throw new RuntimeError('InvalidConfiguration', 'The notes provided must be in order of ascending x positions');
       }
 
       // Determine if the previous or next note are the same
       // as the current note. We need to keep track of this for
       // when adjustments are made for the release+depress action
-      const next_is_same = notes[index + 1] === note;
-      const prev_is_same = notes[index - 1] === note;
+      const nextNoteIsSame = notes[index + 1] === note;
+      const prevNoteIsSame = notes[index - 1] === note;
 
-      let x_shift = 0;
+      let xShift = 0;
       const point =
-        Tables.currentMusicFont().lookupMetric(`pedalMarking.${is_pedal_depressed ? 'down' : 'up'}.point`) ??
+        Tables.currentMusicFont().lookupMetric(`pedalMarking.${isPedalDepressed ? 'down' : 'up'}.point`) ??
         Tables.NOTATION_FONT_SCALE;
 
-      if (is_pedal_depressed) {
+      if (isPedalDepressed) {
         // Adjustment for release+depress
-        x_shift = prev_is_same ? 5 : 0;
+        xShift = prevNoteIsSame ? 5 : 0;
 
-        if (this.type === PedalMarking.type.MIXED && !prev_is_same) {
+        if (this.type === PedalMarking.type.MIXED && !prevNoteIsSame) {
           // For MIXED style, start with text instead of bracket
-          if (this.custom_depress_text) {
+          if (this.customDepressText) {
             // If we have custom text, use instead of the default "Ped" glyph
-            const text_width = ctx.measureText(this.custom_depress_text).width;
-            ctx.fillText(this.custom_depress_text, x - text_width / 2, y);
-            x_shift = text_width / 2 + this.render_options.text_margin_right;
+            const textWidth = ctx.measureText(this.customDepressText).width;
+            ctx.fillText(this.customDepressText, x - textWidth / 2, y);
+            xShift = textWidth / 2 + this.renderOptions.textMarginRight;
           } else {
             // Render the Ped glyph in position
-            drawPedalGlyph('pedal_depress', ctx, x, y, point);
-            x_shift = 20 + this.render_options.text_margin_right;
+            drawPedalGlyph('pedalDepress', ctx, x, y, point);
+            xShift = 20 + this.renderOptions.textMarginRight;
           }
         } else {
           // Draw start bracket
           ctx.beginPath();
-          ctx.moveTo(x, y - this.render_options.bracket_height);
-          ctx.lineTo(x + x_shift, y);
+          ctx.moveTo(x, y - this.renderOptions.bracketHeight);
+          ctx.lineTo(x + xShift, y);
           ctx.stroke();
           ctx.closePath();
         }
       } else {
         // Adjustment for release+depress
-        x_shift = next_is_same ? -5 : 0;
+        xShift = nextNoteIsSame ? -5 : 0;
 
         // Draw end bracket
         ctx.beginPath();
-        ctx.moveTo(prev_x, prev_y);
-        ctx.lineTo(x + x_shift, y);
-        ctx.lineTo(x, y - this.render_options.bracket_height);
+        ctx.moveTo(prevX, prevY);
+        ctx.lineTo(x + xShift, y);
+        ctx.lineTo(x, y - this.renderOptions.bracketHeight);
         ctx.stroke();
         ctx.closePath();
       }
 
       // Store previous coordinates
-      prev_x = x + x_shift;
-      prev_y = y;
+      prevX = x + xShift;
+      prevY = y;
     });
   }
 
@@ -238,33 +239,33 @@ export class PedalMarking extends Element {
    */
   drawText(): void {
     const ctx = this.checkContext();
-    let is_pedal_depressed = false;
+    let isPedalDepressed = false;
 
     // Iterate through each note, placing glyphs or custom text accordingly
     this.notes.forEach((note) => {
-      is_pedal_depressed = !is_pedal_depressed;
+      isPedalDepressed = !isPedalDepressed;
       const stave = note.checkStave();
       const x = note.getAbsoluteX();
       const y = stave.getYForBottomText(this.line + 3);
 
       const point =
-        Tables.currentMusicFont().lookupMetric(`pedalMarking.${is_pedal_depressed ? 'down' : 'up'}.point`) ??
+        Tables.currentMusicFont().lookupMetric(`pedalMarking.${isPedalDepressed ? 'down' : 'up'}.point`) ??
         Tables.NOTATION_FONT_SCALE;
 
-      let text_width = 0;
-      if (is_pedal_depressed) {
-        if (this.custom_depress_text) {
-          text_width = ctx.measureText(this.custom_depress_text).width;
-          ctx.fillText(this.custom_depress_text, x - text_width / 2, y);
+      let textWidth = 0;
+      if (isPedalDepressed) {
+        if (this.customDepressText) {
+          textWidth = ctx.measureText(this.customDepressText).width;
+          ctx.fillText(this.customDepressText, x - textWidth / 2, y);
         } else {
-          drawPedalGlyph('pedal_depress', ctx, x, y, point);
+          drawPedalGlyph('pedalDepress', ctx, x, y, point);
         }
       } else {
-        if (this.custom_release_text) {
-          text_width = ctx.measureText(this.custom_release_text).width;
-          ctx.fillText(this.custom_release_text, x - text_width / 2, y);
+        if (this.customReleaseText) {
+          textWidth = ctx.measureText(this.customReleaseText).width;
+          ctx.fillText(this.customReleaseText, x - textWidth / 2, y);
         } else {
-          drawPedalGlyph('pedal_release', ctx, x, y, point);
+          drawPedalGlyph('pedalRelease', ctx, x, y, point);
         }
       }
     });
@@ -276,14 +277,14 @@ export class PedalMarking extends Element {
     this.setRendered();
 
     ctx.save();
-    ctx.setStrokeStyle(this.render_options.color);
-    ctx.setFillStyle(this.render_options.color);
+    ctx.setStrokeStyle(this.renderOptions.color);
+    ctx.setFillStyle(this.renderOptions.color);
     ctx.setFont(this.textFont);
 
     L('Rendering Pedal Marking');
 
     if (this.type === PedalMarking.type.BRACKET || this.type === PedalMarking.type.MIXED) {
-      ctx.setLineWidth(this.render_options.bracket_line_width);
+      ctx.setLineWidth(this.renderOptions.bracketLineWidth);
       this.drawBracketed();
     } else if (this.type === PedalMarking.type.TEXT) {
       this.drawText();

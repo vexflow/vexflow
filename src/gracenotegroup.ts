@@ -35,89 +35,89 @@ export class GraceNoteGroup extends Modifier {
   }
 
   protected readonly voice: Voice;
-  protected readonly grace_notes: StemmableNote[];
-  protected readonly show_slur?: boolean;
+  protected readonly graceNotes: StemmableNote[];
+  protected readonly showSlur?: boolean;
 
   protected preFormatted: boolean = false;
   protected formatter?: Formatter;
-  public render_options: { slur_y_shift: number };
+  public renderOptions: { slurYShift: number };
   protected slur?: StaveTie | TabTie;
   protected beams: Beam[];
 
   /** Arranges groups inside a `ModifierContext`. */
-  static format(gracenote_groups: GraceNoteGroup[], state: ModifierContextState): boolean {
-    const group_spacing_stave = 4;
-    const group_spacing_tab = 0;
+  static format(gracenoteGroups: GraceNoteGroup[], state: ModifierContextState): boolean {
+    const groupSpacingStave = 4;
+    const groupSpacingTab = 0;
 
-    if (!gracenote_groups || gracenote_groups.length === 0) return false;
+    if (!gracenoteGroups || gracenoteGroups.length === 0) return false;
 
-    const group_list = [];
-    let prev_note = null;
+    const groupList = [];
+    let prevNote = null;
     let shiftL = 0;
 
-    for (let i = 0; i < gracenote_groups.length; ++i) {
-      const gracenote_group = gracenote_groups[i];
-      const note = gracenote_group.getNote();
-      const is_stavenote = isStaveNote(note);
-      const spacing = is_stavenote ? group_spacing_stave : group_spacing_tab;
+    for (let i = 0; i < gracenoteGroups.length; ++i) {
+      const gracenoteGroup = gracenoteGroups[i];
+      const note = gracenoteGroup.getNote();
+      const isStavenote = isStaveNote(note);
+      const spacing = isStavenote ? groupSpacingStave : groupSpacingTab;
 
-      if (is_stavenote && note !== prev_note) {
+      if (isStavenote && note !== prevNote) {
         // Iterate through all notes to get the displaced pixels
         for (let n = 0; n < note.keys.length; ++n) {
           shiftL = Math.max(note.getLeftDisplacedHeadPx(), shiftL);
         }
-        prev_note = note;
+        prevNote = note;
       }
 
-      group_list.push({ shift: shiftL, gracenote_group, spacing });
+      groupList.push({ shift: shiftL, gracenoteGroup, spacing });
     }
 
     // If first note left shift in case it is displaced
-    let group_shift = group_list[0].shift;
+    let groupShift = groupList[0].shift;
     let formatWidth;
-    for (let i = 0; i < group_list.length; ++i) {
-      const gracenote_group = group_list[i].gracenote_group;
-      gracenote_group.preFormat();
-      formatWidth = gracenote_group.getWidth() + group_list[i].spacing;
-      group_shift = Math.max(formatWidth, group_shift);
+    for (let i = 0; i < groupList.length; ++i) {
+      const gracenoteGroup = groupList[i].gracenoteGroup;
+      gracenoteGroup.preFormat();
+      formatWidth = gracenoteGroup.getWidth() + groupList[i].spacing;
+      groupShift = Math.max(formatWidth, groupShift);
     }
 
-    for (let i = 0; i < group_list.length; ++i) {
-      const gracenote_group = group_list[i].gracenote_group;
-      formatWidth = gracenote_group.getWidth() + group_list[i].spacing;
-      gracenote_group.setSpacingFromNextModifier(
-        group_shift - Math.min(formatWidth, group_shift) + StaveNote.minNoteheadPadding
+    for (let i = 0; i < groupList.length; ++i) {
+      const gracenoteGroup = groupList[i].gracenoteGroup;
+      formatWidth = gracenoteGroup.getWidth() + groupList[i].spacing;
+      gracenoteGroup.setSpacingFromNextModifier(
+        groupShift - Math.min(formatWidth, groupShift) + StaveNote.minNoteheadPadding
       );
     }
 
-    state.left_shift += group_shift;
+    state.leftShift += groupShift;
     return true;
   }
 
   //** `GraceNoteGroup` inherits from `Modifier` and is placed inside a `ModifierContext`. */
-  constructor(grace_notes: StemmableNote[], show_slur?: boolean) {
+  constructor(graceNotes: StemmableNote[], showSlur?: boolean) {
     super();
 
     this.position = Modifier.Position.LEFT;
-    this.grace_notes = grace_notes;
+    this.graceNotes = graceNotes;
     this.width = 0;
 
-    this.show_slur = show_slur;
+    this.showSlur = showSlur;
     this.slur = undefined;
 
     this.voice = new Voice({
-      num_beats: 4,
-      beat_value: 4,
+      numBeats: 4,
+      beatValue: 4,
       resolution: Tables.RESOLUTION,
     }).setStrict(false);
 
-    this.render_options = {
-      slur_y_shift: 0,
+    this.renderOptions = {
+      slurYShift: 0,
     };
 
     this.beams = [];
 
-    this.voice.addTickables(this.grace_notes);
+    this.voice.addTickables(this.graceNotes);
 
     return this;
   }
@@ -133,13 +133,13 @@ export class GraceNoteGroup extends Modifier {
     this.preFormatted = true;
   }
 
-  beamNotes(grace_notes?: StemmableNote[]): this {
-    grace_notes = grace_notes || this.grace_notes;
-    if (grace_notes.length > 1) {
-      const beam = new Beam(grace_notes);
+  beamNotes(graceNotes?: StemmableNote[]): this {
+    graceNotes = graceNotes || this.graceNotes;
+    if (graceNotes.length > 1) {
+      const beam = new Beam(graceNotes);
 
-      beam.render_options.beam_width = 3;
-      beam.render_options.partial_beam_length = 4;
+      beam.renderOptions.beamWidth = 3;
+      beam.renderOptions.partialBeamLength = 4;
 
       this.beams.push(beam);
     }
@@ -157,7 +157,7 @@ export class GraceNoteGroup extends Modifier {
   }
 
   getGraceNotes(): Note[] {
-    return this.grace_notes;
+    return this.graceNotes;
   }
 
   draw(): void {
@@ -170,24 +170,24 @@ export class GraceNoteGroup extends Modifier {
     this.alignSubNotesWithNote(this.getGraceNotes(), note); // Modifier function
 
     // Draw grace notes.
-    this.grace_notes.forEach((graceNote) => graceNote.setContext(ctx).draw());
+    this.graceNotes.forEach((graceNote) => graceNote.setContext(ctx).draw());
     // Draw beams.
     this.beams.forEach((beam) => beam.setContext(ctx).draw());
 
-    if (this.show_slur) {
+    if (this.showSlur) {
       // Create and draw slur.
-      const is_stavenote = isStaveNote(note);
-      const TieClass = is_stavenote ? StaveTie : TabTie;
+      const isStavenote = isStaveNote(note);
+      const TieClass = isStavenote ? StaveTie : TabTie;
 
       this.slur = new TieClass({
-        last_note: this.grace_notes[0],
-        first_note: note,
-        first_indices: [0],
-        last_indices: [0],
+        lastNote: this.graceNotes[0],
+        firstNote: note,
+        firstIndexes: [0],
+        lastIndexes: [0],
       });
 
-      this.slur.render_options.cp2 = 12;
-      this.slur.render_options.y_shift = (is_stavenote ? 7 : 5) + this.render_options.slur_y_shift;
+      this.slur.renderOptions.cp2 = 12;
+      this.slur.renderOptions.yShift = (isStavenote ? 7 : 5) + this.renderOptions.slurYShift;
       this.slur.setContext(ctx).draw();
     }
   }

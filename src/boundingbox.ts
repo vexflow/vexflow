@@ -93,15 +93,15 @@ export class BoundingBox implements Bounds {
   mergeWith(boundingBox: BoundingBox): this {
     const that = boundingBox;
 
-    const new_x = this.x < that.x ? this.x : that.x;
-    const new_y = this.y < that.y ? this.y : that.y;
-    const new_w = Math.max(this.x + this.w, that.x + that.w) - new_x;
-    const new_h = Math.max(this.y + this.h, that.y + that.h) - new_y;
+    const newX = this.x < that.x ? this.x : that.x;
+    const newY = this.y < that.y ? this.y : that.y;
+    const newW = Math.max(this.x + this.w, that.x + that.w) - newX;
+    const newH = Math.max(this.y + this.h, that.y + that.h) - newY;
 
-    this.x = new_x;
-    this.y = new_y;
-    this.w = new_w;
-    this.h = new_h;
+    this.x = newX;
+    this.y = newY;
+    this.w = newW;
+    this.h = newH;
 
     return this;
   }

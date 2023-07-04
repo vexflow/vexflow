@@ -151,9 +151,9 @@ function multiNotationAndTab(options: TestOptions): void {
   // notation upper voice notes
   const notes1 = score.notes('(g4 b4 e5)/4, (g4 b4 e5), (g4 b4 e5), (g4 b4 e5)', { stem: 'up' });
 
-  notes1[0].addStroke(0, new Stroke(3, { all_voices: false }));
+  notes1[0].addStroke(0, new Stroke(3, { allVoices: false }));
   notes1[1].addStroke(0, new Stroke(6));
-  notes1[2].addStroke(0, new Stroke(2, { all_voices: false }));
+  notes1[2].addStroke(0, new Stroke(2, { allVoices: false }));
   notes1[3].addStroke(0, new Stroke(1));
 
   const notes2 = score.notes('g3/4, g3, g3, g3', { stem: 'down' });
@@ -196,9 +196,9 @@ function multiNotationAndTab(options: TestOptions): void {
     }),
   ];
 
-  tabNotes1[0].addStroke(0, new Stroke(3, { all_voices: false }));
+  tabNotes1[0].addStroke(0, new Stroke(3, { allVoices: false }));
   tabNotes1[1].addStroke(0, new Stroke(6));
-  tabNotes1[2].addStroke(0, new Stroke(2, { all_voices: false }));
+  tabNotes1[2].addStroke(0, new Stroke(2, { allVoices: false }));
   tabNotes1[3].addStroke(0, new Stroke(1));
 
   const tabNotes2 = [
@@ -314,17 +314,17 @@ function notesWithTab(options: TestOptions): void {
 
   const notes = [
     f
-      .StaveNote({ keys: ['b/4', 'd/5', 'g/5'], stem_direction: -1, duration: '4' })
+      .StaveNote({ keys: ['b/4', 'd/5', 'g/5'], stemDirection: -1, duration: '4' })
       .addModifier(f.Accidental({ type: 'b' }), 1)
       .addModifier(f.Accidental({ type: 'b' }), 0),
-    f.StaveNote({ keys: ['c/5', 'd/5'], stem_direction: -1, duration: '4' }),
-    f.StaveNote({ keys: ['b/3', 'e/4', 'a/4', 'd/5'], stem_direction: 1, duration: '8' }),
+    f.StaveNote({ keys: ['c/5', 'd/5'], stemDirection: -1, duration: '4' }),
+    f.StaveNote({ keys: ['b/3', 'e/4', 'a/4', 'd/5'], stemDirection: 1, duration: '8' }),
     f
-      .StaveNote({ keys: ['a/3', 'e/4', 'a/4', 'c/5', 'e/5', 'a/5'], stem_direction: 1, duration: '8' })
+      .StaveNote({ keys: ['a/3', 'e/4', 'a/4', 'c/5', 'e/5', 'a/5'], stemDirection: 1, duration: '8' })
       .addModifier(f.Accidental({ type: '#' }), 3),
-    f.StaveNote({ keys: ['b/3', 'e/4', 'a/4', 'd/5'], stem_direction: 1, duration: '8' }),
+    f.StaveNote({ keys: ['b/3', 'e/4', 'a/4', 'd/5'], stemDirection: 1, duration: '8' }),
     f
-      .StaveNote({ keys: ['a/3', 'e/4', 'a/4', 'c/5', 'f/5', 'a/5'], stem_direction: 1, duration: '8' })
+      .StaveNote({ keys: ['a/3', 'e/4', 'a/4', 'c/5', 'f/5', 'a/5'], stemDirection: 1, duration: '8' })
       .addModifier(f.Accidental({ type: '#' }), 3)
       .addModifier(f.Accidental({ type: '#' }), 4),
   ];
@@ -411,14 +411,14 @@ function notesWithTab(options: TestOptions): void {
   tabNotes[5].addStroke(0, new Stroke(6));
 
   f.StaveConnector({
-    top_stave: stave,
-    bottom_stave: tabstave,
+    topStave: stave,
+    bottomStave: tabstave,
     type: 'bracket',
   });
 
   f.StaveConnector({
-    top_stave: stave,
-    bottom_stave: tabstave,
+    topStave: stave,
+    bottomStave: tabstave,
     type: 'single',
   });
 

@@ -49,7 +49,7 @@ const TWO_PI = 2 * Math.PI;
 export interface State {
   state: Attributes;
   attributes: Attributes;
-  shadow_attributes: Attributes;
+  shadowAttributes: Attributes;
   lineWidth: number;
 }
 
@@ -117,9 +117,9 @@ export class SVGContext extends RenderContext {
   pen: { x: number; y: number };
   lineWidth: number;
   attributes: Attributes;
-  shadow_attributes: Attributes;
+  shadowAttributes: Attributes;
   state: Attributes;
-  state_stack: State[];
+  stateStack: State[];
 
   // Always points to the current group.
   // Calls to add() or openGroup() will append the new element to `this.parent`.
@@ -179,12 +179,12 @@ export class SVGContext extends RenderContext {
     this.applyAttributes(svg, this.attributes);
     this.groupAttributes.push({ ...this.attributes });
 
-    this.shadow_attributes = {
+    this.shadowAttributes = {
       width: 0,
       color: 'black',
     };
 
-    this.state_stack = [];
+    this.stateStack = [];
   }
 
   protected round(n: number): number {
@@ -254,7 +254,7 @@ export class SVGContext extends RenderContext {
   }
 
   setShadowColor(color: string): this {
-    this.shadow_attributes.color = color;
+    this.shadowAttributes.color = color;
     return this;
   }
 
@@ -264,7 +264,7 @@ export class SVGContext extends RenderContext {
    * @returns this
    */
   setShadowBlur(blur: number): this {
-    this.shadow_attributes.width = blur;
+    this.shadowAttributes.width = blur;
     return this;
   }
 
@@ -352,11 +352,11 @@ export class SVGContext extends RenderContext {
    * 1 arg: string in the "x y w h" format
    * 4 args: x:number, y:number, w:number, h:number
    */
-  setViewBox(viewBox_or_minX: string | number, minY?: number, width?: number, height?: number): void {
-    if (typeof viewBox_or_minX === 'string') {
-      this.svg.setAttribute('viewBox', viewBox_or_minX);
+  setViewBox(viewBoxOrMinX: string | number, minY?: number, width?: number, height?: number): void {
+    if (typeof viewBoxOrMinX === 'string') {
+      this.svg.setAttribute('viewBox', viewBoxOrMinX);
     } else {
-      const viewBoxString = viewBox_or_minX + ' ' + minY + ' ' + width + ' ' + height;
+      const viewBoxString = viewBoxOrMinX + ' ' + minY + ' ' + width + ' ' + height;
       this.svg.setAttribute('viewBox', viewBoxString);
     }
   }
@@ -548,7 +548,7 @@ export class SVGContext extends RenderContext {
   }
 
   private getShadowStyle(): string {
-    const sa = this.shadow_attributes;
+    const sa = this.shadowAttributes;
     // A CSS drop-shadow filter blur looks different than a canvas shadowBlur
     // of the same radius, so we scale the drop-shadow radius here to make it
     // look close to the canvas shadow.
@@ -562,7 +562,7 @@ export class SVGContext extends RenderContext {
     }
 
     attributes.d = this.path;
-    if ((this.shadow_attributes.width as number) > 0) {
+    if ((this.shadowAttributes.width as number) > 0) {
       attributes.style = this.getShadowStyle();
     }
 
@@ -579,7 +579,7 @@ export class SVGContext extends RenderContext {
       'stroke-width': this.lineWidth,
       d: this.path,
     };
-    if ((this.shadow_attributes.width as number) > 0) {
+    if ((this.shadowAttributes.width as number) > 0) {
       attributes.style = this.getShadowStyle();
     }
 
@@ -615,7 +615,7 @@ export class SVGContext extends RenderContext {
 
   // TODO: State should be deep-copied.
   save(): this {
-    this.state_stack.push({
+    this.stateStack.push({
       state: {
         'font-family': this.state['font-family'],
         'font-weight': this.state['font-weight'],
@@ -633,9 +633,9 @@ export class SVGContext extends RenderContext {
         'stroke-width': this.attributes['stroke-width'],
         'stroke-dasharray': this.attributes['stroke-dasharray'],
       },
-      shadow_attributes: {
-        width: this.shadow_attributes.width,
-        color: this.shadow_attributes.color,
+      shadowAttributes: {
+        width: this.shadowAttributes.width,
+        color: this.shadowAttributes.color,
       },
       lineWidth: this.lineWidth,
     });
@@ -644,7 +644,7 @@ export class SVGContext extends RenderContext {
 
   // TODO: State should be deep-restored.
   restore(): this {
-    const savedState = this.state_stack.pop();
+    const savedState = this.stateStack.pop();
     if (savedState) {
       const state = savedState;
       this.state['font-family'] = state.state['font-family'];
@@ -663,8 +663,8 @@ export class SVGContext extends RenderContext {
       this.attributes['stroke-width'] = state.attributes['stroke-width'];
       this.attributes['stroke-dasharray'] = state.attributes['stroke-dasharray'];
 
-      this.shadow_attributes.width = state.shadow_attributes.width;
-      this.shadow_attributes.color = state.shadow_attributes.color;
+      this.shadowAttributes.width = state.shadowAttributes.width;
+      this.shadowAttributes.color = state.shadowAttributes.color;
 
       this.lineWidth = state.lineWidth;
     }

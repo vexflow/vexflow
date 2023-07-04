@@ -169,10 +169,10 @@ export class TextFormatter {
    * bounding box metrics such as:
    * ```
    * {
-   *    x_min: 48,
-   *    x_max: 235,
-   *    y_min: -17,
-   *    y_max: 734,
+   *    xMin: 48,
+   *    xMax: 235,
+   *    yMin: -17,
+   *    yMax: 734,
    *    ha: 751,
    *    leftSideBearing: 48,
    *    advanceWidth: 286,
@@ -271,11 +271,11 @@ export class TextFormatter {
     if (!metrics) {
       return rv;
     } else {
-      if (typeof metrics.y_min === 'number') {
-        rv.yMin = (metrics.y_min / this.resolution) * this.fontSizeInPixels;
+      if (typeof metrics.yMin === 'number') {
+        rv.yMin = (metrics.yMin / this.resolution) * this.fontSizeInPixels;
       }
-      if (typeof metrics.y_max === 'number') {
-        rv.yMax = (metrics.y_max / this.resolution) * this.fontSizeInPixels;
+      if (typeof metrics.yMax === 'number') {
+        rv.yMax = (metrics.yMax / this.resolution) * this.fontSizeInPixels;
       }
       rv.height = rv.yMax - rv.yMin;
       return rv;

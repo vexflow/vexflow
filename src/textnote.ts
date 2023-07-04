@@ -17,7 +17,7 @@ export enum TextJustification {
 export interface TextNoteStruct extends NoteStruct {
   text?: string;
   glyph?: string;
-  ignore_ticks?: boolean;
+  ignoreTicks?: boolean;
   smooth?: boolean;
   font?: FontInfo;
   subscript?: string;
@@ -56,10 +56,10 @@ export class TextNote extends Note {
       mordent: {
         code: 'ornamentMordent',
       },
-      mordent_upper: {
+      mordentUpper: {
         code: 'ornamentShortTrill',
       },
-      mordent_lower: {
+      mordentLower: {
         code: 'ornamentMordent',
       },
       f: {
@@ -80,16 +80,16 @@ export class TextNote extends Note {
       coda: {
         code: 'coda',
       },
-      pedal_open: {
+      pedalOpen: {
         code: 'keyboardPedalPed',
       },
-      pedal_close: {
+      pedalClose: {
         code: 'keyboardPedalUp',
       },
-      caesura_straight: {
+      caesuraStraight: {
         code: 'caesura',
       },
-      caesura_curved: {
+      caesuraCurved: {
         code: 'caesuraCurved',
       },
       breath: {
@@ -101,7 +101,7 @@ export class TextNote extends Note {
       turn: {
         code: 'ornamentTurn',
       },
-      turn_inverted: {
+      turnInverted: {
         code: 'ornamentTurnSlash',
       },
     };
@@ -124,7 +124,7 @@ export class TextNote extends Note {
     this.setFont(noteStruct.font);
     this.line = noteStruct.line || 0;
     this.smooth = noteStruct.smooth || false;
-    this.ignore_ticks = noteStruct.ignore_ticks || false;
+    this.ignoreTicks = noteStruct.ignoreTicks || false;
     this.justification = TextJustification.LEFT;
 
     // Determine and set initial note width. Note that the text width is

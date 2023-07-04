@@ -195,7 +195,7 @@ export class Factory {
       x: 0,
       y: 0,
       width: this.options.renderer.width - staveSpace * 1.0,
-      options: { spacing_between_lines_px: staveSpace * 1.0 },
+      options: { spacingBetweenLinesPx: staveSpace * 1.0 },
       ...params,
     };
 
@@ -212,7 +212,7 @@ export class Factory {
       x: 0,
       y: 0,
       width: this.options.renderer.width - staveSpace * 1.0,
-      options: { spacing_between_lines_px: staveSpace * 1.3 },
+      options: { spacingBetweenLinesPx: staveSpace * 1.3 },
       ...params,
     };
 
@@ -477,7 +477,7 @@ export class Factory {
   }
 
   MultiMeasureRest(params: MultimeasureRestRenderOptions): MultiMeasureRest {
-    const numMeasures = defined(params.number_of_measures, 'NoNumberOfMeasures');
+    const numMeasures = defined(params.numberOfMeasures, 'NoNumberOfMeasures');
     const multiMeasureRest = new MultiMeasureRest(numMeasures, params);
     multiMeasureRest.setContext(this.context);
     this.renderQ.push(multiMeasureRest);
@@ -494,8 +494,8 @@ export class Factory {
     return voice;
   }
 
-  StaveConnector(params: { top_stave: Stave; bottom_stave: Stave; type: StaveConnectorType }): StaveConnector {
-    const connector = new StaveConnector(params.top_stave, params.bottom_stave);
+  StaveConnector(params: { topStave: Stave; bottomStave: Stave; type: StaveConnectorType }): StaveConnector {
+    const connector = new StaveConnector(params.topStave, params.bottomStave);
     connector.setType(params.type).setContext(this.context);
     this.renderQ.push(connector);
     return connector;
@@ -547,17 +547,17 @@ export class Factory {
   StaveTie(params: {
     from?: Note | null;
     to?: Note | null;
-    first_indices?: number[];
-    last_indices?: number[];
+    firstIndexes?: number[];
+    lastIndexes?: number[];
     text?: string;
     options?: { direction?: number };
   }): StaveTie {
     const tie = new StaveTie(
       {
-        first_note: params.from,
-        last_note: params.to,
-        first_indices: params.first_indices,
-        last_indices: params.last_indices,
+        firstNote: params.from,
+        lastNote: params.to,
+        firstIndexes: params.firstIndexes,
+        lastIndexes: params.lastIndexes,
       },
       params.text
     );
@@ -571,15 +571,15 @@ export class Factory {
   StaveLine(params: {
     from: StaveNote;
     to: StaveNote;
-    first_indices: number[];
-    last_indices: number[];
+    firstIndexes: number[];
+    lastIndexes: number[];
     options?: { text?: string; font?: FontInfo };
   }): StaveLine {
     const line = new StaveLine({
-      first_note: params.from,
-      last_note: params.to,
-      first_indices: params.first_indices,
-      last_indices: params.last_indices,
+      firstNote: params.from,
+      lastNote: params.to,
+      firstIndexes: params.firstIndexes,
+      lastIndexes: params.lastIndexes,
     });
 
     if (params.options?.text) line.setText(params.options.text);

@@ -50,7 +50,7 @@ export class BarNote extends Note {
     };
 
     // Tell the formatter that bar notes have no duration.
-    this.ignore_ticks = true;
+    this.ignoreTicks = true;
     this.setType(type);
   }
 

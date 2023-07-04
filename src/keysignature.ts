@@ -89,7 +89,7 @@ export class KeySignature extends StaveModifier {
     },
   };
 
-  // Create a new Key Signature based on a `key_spec`
+  // Create a new Key Signature based on a `keySpec`
   constructor(keySpec: string, cancelKeySpec?: string, alterKeySpec?: string[]) {
     super();
 
@@ -141,14 +141,14 @@ export class KeySignature extends StaveModifier {
 
   convertToCancelAccList(spec: string): { type: string; accList: { type: string; line: number }[] } | undefined {
     // Get the accidental list for the cancelled key signature
-    const cancel_accList = Tables.keySignature(spec);
+    const cancelAccList = Tables.keySignature(spec);
 
     // If the cancelled key has a different accidental type, ie: # vs b
-    const different_types =
-      this.accList.length > 0 && cancel_accList.length > 0 && cancel_accList[0].type !== this.accList[0].type;
+    const differentTypes =
+      this.accList.length > 0 && cancelAccList.length > 0 && cancelAccList[0].type !== this.accList[0].type;
 
     // Determine how many naturals needed to add
-    const naturals = different_types ? cancel_accList.length : cancel_accList.length - this.accList.length;
+    const naturals = differentTypes ? cancelAccList.length : cancelAccList.length - this.accList.length;
 
     // Return if no naturals needed
     if (naturals < 1) return undefined;
@@ -157,11 +157,11 @@ export class KeySignature extends StaveModifier {
     const cancelled: { type: string; line: number }[] = [];
     for (let i = 0; i < naturals; i++) {
       let index = i;
-      if (!different_types) {
-        index = cancel_accList.length - naturals + i;
+      if (!differentTypes) {
+        index = cancelAccList.length - naturals + i;
       }
 
-      const acc = cancel_accList[index];
+      const acc = cancelAccList[index];
       cancelled.push({ type: 'n', line: acc.line });
     }
 
@@ -170,7 +170,7 @@ export class KeySignature extends StaveModifier {
 
     return {
       accList: cancelled,
-      type: cancel_accList[0].type,
+      type: cancelAccList[0].type,
     };
   }
 

@@ -54,10 +54,10 @@ export class Ornament extends Modifier {
   protected delayed: boolean;
   protected reportedWidth: number;
   protected adjustForStemDirection: boolean;
-  public render_options: {
+  public renderOptions: {
     accidentalUpperPadding: number;
     accidentalLowerPadding: number;
-    font_scale: number;
+    fontScale: number;
   };
   protected glyph: Glyph;
   protected accidentalUpper?: Glyph;
@@ -69,8 +69,8 @@ export class Ornament extends Modifier {
     if (!ornaments || ornaments.length === 0) return false;
 
     let width = 0; // width is used by ornaments, which are always centered on the note head
-    let right_shift = state.right_shift; // jazz ornaments calculate r/l shift separately
-    let left_shift = state.left_shift;
+    let rightShift = state.rightShift; // jazz ornaments calculate r/l shift separately
+    let leftShift = state.leftShift;
     let yOffset = 0;
 
     for (let i = 0; i < ornaments.length; ++i) {
@@ -78,15 +78,15 @@ export class Ornament extends Modifier {
       const increment = 2;
 
       if (Ornament.ornamentRelease.indexOf(ornament.type) >= 0) {
-        ornament.x_shift += right_shift + 2;
+        ornament.xShift += rightShift + 2;
       }
       if (Ornament.ornamentAttack.indexOf(ornament.type) >= 0) {
-        ornament.x_shift -= left_shift + 2;
+        ornament.xShift -= leftShift + 2;
       }
-      if (ornament.reportedWidth && ornament.x_shift < 0) {
-        left_shift += ornament.reportedWidth;
-      } else if (ornament.reportedWidth && ornament.x_shift >= 0) {
-        right_shift += ornament.reportedWidth + Ornament.minPadding;
+      if (ornament.reportedWidth && ornament.xShift < 0) {
+        leftShift += ornament.reportedWidth;
+      } else if (ornament.reportedWidth && ornament.xShift >= 0) {
+        rightShift += ornament.reportedWidth + Ornament.minPadding;
       } else {
         width = Math.max(ornament.getWidth(), width);
       }
@@ -96,29 +96,29 @@ export class Ornament extends Modifier {
         // on the line number, but also allow it to be overridden.
         const ornamentNote = defined(ornament.note, 'NoAttachedNote');
         if (ornamentNote.getLineNumber() >= 3 || ornament.getPosition() === Modifier.Position.ABOVE) {
-          state.top_text_line += increment;
-          ornament.y_shift += yOffset;
+          state.topTextLine += increment;
+          ornament.yShift += yOffset;
           yOffset -= ornament.glyph.bbox.getH();
         } else {
-          state.text_line += increment;
-          ornament.y_shift += yOffset;
+          state.textLine += increment;
+          ornament.yShift += yOffset;
           yOffset += ornament.glyph.bbox.getH();
         }
       } else {
         if (ornament.getPosition() === Modifier.Position.ABOVE) {
-          ornament.setTextLine(state.top_text_line);
-          state.top_text_line += increment;
+          ornament.setTextLine(state.topTextLine);
+          state.topTextLine += increment;
         } else {
-          ornament.setTextLine(state.text_line);
-          state.text_line += increment;
+          ornament.setTextLine(state.textLine);
+          state.textLine += increment;
         }
       }
     }
 
     // Note: 'legit' ornaments don't consider other modifiers when calculating their
     // X position, but jazz ornaments sometimes need to.
-    state.left_shift = left_shift + width / 2;
-    state.right_shift = right_shift + width / 2;
+    state.leftShift = leftShift + width / 2;
+    state.rightShift = rightShift + width / 2;
     return true;
   }
 
@@ -180,8 +180,8 @@ export class Ornament extends Modifier {
     this.type = type;
     this.delayed = false;
 
-    this.render_options = {
-      font_scale: Tables.NOTATION_FONT_SCALE,
+    this.renderOptions = {
+      fontScale: Tables.NOTATION_FONT_SCALE,
       accidentalLowerPadding: 3,
       accidentalUpperPadding: 3,
     };
@@ -208,10 +208,10 @@ export class Ornament extends Modifier {
       throw new RuntimeError('ArgumentError', `Ornament not found: '${this.type}'`);
     }
 
-    this.x_shift = metrics ? metrics.xOffset : 0;
-    this.y_shift = metrics ? metrics.yOffset : 0;
+    this.xShift = metrics ? metrics.xOffset : 0;
+    this.yShift = metrics ? metrics.yOffset : 0;
 
-    this.glyph = new Glyph(this.ornament.code, this.render_options.font_scale, {
+    this.glyph = new Glyph(this.ornament.code, this.renderOptions.fontScale, {
       category: `ornament.${this.ornament.code}`,
     });
 
@@ -235,7 +235,7 @@ export class Ornament extends Modifier {
 
   /** Set the upper accidental for the ornament. */
   setUpperAccidental(accid: string): this {
-    const scale = this.render_options.font_scale / 1.3;
+    const scale = this.renderOptions.fontScale / 1.3;
     this.accidentalUpper = new Glyph(Tables.accidentalCodes(accid).code, scale);
     this.accidentalUpper.setOrigin(0.5, 1.0);
     return this;
@@ -243,7 +243,7 @@ export class Ornament extends Modifier {
 
   /** Set the lower accidental for the ornament. */
   setLowerAccidental(accid: string): this {
-    const scale = this.render_options.font_scale / 1.3;
+    const scale = this.renderOptions.fontScale / 1.3;
     this.accidentalLower = new Glyph(Tables.accidentalCodes(accid).code, scale);
     this.accidentalLower.setOrigin(0.5, 1.0);
     return this;
@@ -269,11 +269,11 @@ export class Ornament extends Modifier {
     if (isTabNote(note)) {
       if (note.hasStem()) {
         if (stemDir === Stem.DOWN) {
-          y = stave.getYForTopText(this.text_line);
+          y = stave.getYForTopText(this.textLine);
         }
       } else {
         // Without a stem
-        y = stave.getYForTopText(this.text_line);
+        y = stave.getYForTopText(this.textLine);
       }
     }
 
@@ -286,7 +286,7 @@ export class Ornament extends Modifier {
       lineSpacing += 0.5;
     }
 
-    const totalSpacing = spacing * (this.text_line + lineSpacing);
+    const totalSpacing = spacing * (this.textLine + lineSpacing);
     const glyphYBetweenLines = y - totalSpacing;
 
     // Get initial coordinates for the modifier position
@@ -297,8 +297,8 @@ export class Ornament extends Modifier {
     // but use the 'natural' modifier y
     let glyphY = this.ornamentAlignWithNoteHead
       ? start.y
-      : Math.min(stave.getYForTopText(this.text_line), glyphYBetweenLines);
-    glyphY += this.y_shift;
+      : Math.min(stave.getYForTopText(this.textLine), glyphYBetweenLines);
+    glyphY += this.yShift;
 
     // Ajdust x position if ornament is delayed
     if (this.delayed) {
@@ -324,7 +324,7 @@ export class Ornament extends Modifier {
     if (this.accidentalLower) {
       this.accidentalLower.render(ctx, glyphX, glyphY);
       glyphY -= this.accidentalLower.getMetrics().height;
-      glyphY -= this.render_options.accidentalLowerPadding;
+      glyphY -= this.renderOptions.accidentalLowerPadding;
     }
 
     if (this.stemUpYOffset && note.hasStem() && note.getStemDirection() === 1) {
@@ -334,10 +334,10 @@ export class Ornament extends Modifier {
       glyphY = note.checkStave().getBoundingBox().getY() + 40;
     }
 
-    this.glyph.render(ctx, glyphX + this.x_shift, glyphY);
+    this.glyph.render(ctx, glyphX + this.xShift, glyphY);
 
     if (this.accidentalUpper) {
-      glyphY -= this.glyph.getMetrics().height + this.render_options.accidentalUpperPadding;
+      glyphY -= this.glyph.getMetrics().height + this.renderOptions.accidentalUpperPadding;
       this.accidentalUpper.render(ctx, glyphX, glyphY);
     }
     ctx.closeGroup();

@@ -20,10 +20,10 @@ export class GraceTabNote extends TabNote {
   constructor(noteStruct: TabNoteStruct) {
     super(noteStruct, false);
 
-    this.render_options = {
-      ...this.render_options,
+    this.renderOptions = {
+      ...this.renderOptions,
       // vertical shift from stave line
-      y_shift: 0.3,
+      yShift: 0.3,
       // grace glyph scale
       scale: 0.6,
       // grace tablature font

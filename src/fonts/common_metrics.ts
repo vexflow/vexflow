@@ -98,7 +98,7 @@ export const CommonMetrics = {
     },
   },
 
-  clef_default: {
+  clefDefault: {
     width: 26,
     annotations: {
       '8va': {
@@ -120,7 +120,7 @@ export const CommonMetrics = {
     },
   },
 
-  clef_small: {
+  clefSmall: {
     width: 20,
     annotations: {
       '8va': {
@@ -356,15 +356,15 @@ export const CommonMetrics = {
         shiftX: -1,
       },
     },
-    clef_default: {},
-    clef_small: {
+    clefDefault: {},
+    clefSmall: {
       gClef: {
         shiftY: 1.5,
       },
     },
-    clefNote_default: {},
-    clefNote_small: {},
-    stroke_straight: {
+    clefNoteDefault: {},
+    clefNoteSmall: {},
+    strokeStraight: {
       arrowheadBlackDown: {
         shiftX: -4.5,
       },
@@ -372,7 +372,7 @@ export const CommonMetrics = {
         shiftX: -0.85,
       },
     },
-    stroke_wiggly: {
+    strokeWiggly: {
       arrowheadBlackDown: {
         shiftX: -1,
         shiftY: 1,

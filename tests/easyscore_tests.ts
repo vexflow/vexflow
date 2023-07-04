@@ -473,16 +473,16 @@ function drawTupletsTest(options: TestOptions): void {
   const { voice, notes, tuplet, beam } = createShortcuts(score);
 
   // Voice 1, with stems pointed down.
-  const v1_tuplet = tuplet(notes('(c4 e4 g4)/q, cbb4/q, c4/q', { stem: 'down' }), {
+  const v1Tuplet = tuplet(notes('(c4 e4 g4)/q, cbb4/q, c4/q', { stem: 'down' }), {
     location: Tuplet.LOCATION_BOTTOM,
   });
-  const v1_halfNote = notes('c4/h', { stem: 'down' });
-  const v1 = voice([...v1_tuplet, ...v1_halfNote]);
+  const v1HalfNote = notes('c4/h', { stem: 'down' });
+  const v1 = voice([...v1Tuplet, ...v1HalfNote]);
 
   // Voice 2, with stems pointed up.
-  const v2_halfNote = notes('c#5/h.', { stem: 'up' });
-  const v2_tuplet = tuplet(beam(notes('cb5/8, cn5/8, c5/8', { stem: 'up' })));
-  const v2 = voice([...v2_halfNote, ...v2_tuplet]);
+  const v2HalfNote = notes('c#5/h.', { stem: 'up' });
+  const v2Tuplet = tuplet(beam(notes('cb5/8, cn5/8, c5/8', { stem: 'up' })));
+  const v2 = voice([...v2HalfNote, ...v2Tuplet]);
 
   system.addStave({ voices: [v1, v2] }).addClef('treble');
 
@@ -522,23 +522,23 @@ function drawOptionsTest(options: TestOptions): void {
 
   const note0 = notes[0];
   const note1 = notes[1];
-  const note0_modifier0 = note0.getModifiers()[0] as Articulation;
-  const note0_modifier1 = note0.getModifiers()[1] as Articulation;
-  const note1_modifier0 = note1.getModifiers()[0] as Articulation;
+  const note0Modifier0 = note0.getModifiers()[0] as Articulation;
+  const note0Modifier1 = note0.getModifiers()[1] as Articulation;
+  const note1Modifier0 = note1.getModifiers()[0] as Articulation;
 
   options.assert.equal(note0.getAttribute('id'), 'foobar');
   options.assert.ok(note0.hasClass('red'));
   options.assert.ok(note0.hasClass('bold'));
-  options.assert.equal(note0_modifier0.getCategory(), Articulation.CATEGORY);
-  options.assert.equal(note0_modifier0.type, 'a.');
-  options.assert.equal(note0_modifier0.getPosition(), Modifier.Position.BELOW);
-  options.assert.equal(note0_modifier1.getCategory(), Articulation.CATEGORY);
-  options.assert.equal(note0_modifier1.type, 'a-');
-  options.assert.equal(note0_modifier1.getPosition(), Modifier.Position.ABOVE);
+  options.assert.equal(note0Modifier0.getCategory(), Articulation.CATEGORY);
+  options.assert.equal(note0Modifier0.type, 'a.');
+  options.assert.equal(note0Modifier0.getPosition(), Modifier.Position.BELOW);
+  options.assert.equal(note0Modifier1.getCategory(), Articulation.CATEGORY);
+  options.assert.equal(note0Modifier1.type, 'a-');
+  options.assert.equal(note0Modifier1.getPosition(), Modifier.Position.ABOVE);
   options.assert.equal(note0.getStemDirection(), Stem.UP);
-  options.assert.equal(note1_modifier0.getCategory(), Articulation.CATEGORY);
-  options.assert.equal(note1_modifier0.type, 'a>');
-  options.assert.equal(note1_modifier0.getPosition(), Modifier.Position.ABOVE);
+  options.assert.equal(note1Modifier0.getCategory(), Articulation.CATEGORY);
+  options.assert.equal(note1Modifier0.type, 'a>');
+  options.assert.equal(note1Modifier0.getPosition(), Modifier.Position.ABOVE);
   options.assert.equal(notes[2].getStemDirection(), Stem.DOWN);
 }
 
@@ -555,34 +555,34 @@ function drawFingeringsTest(options: TestOptions): void {
 
   f.draw();
 
-  const note0_modifier0 = notes[0].getModifiers()[0] as FretHandFinger;
-  options.assert.equal(note0_modifier0.getCategory(), FretHandFinger.CATEGORY);
-  options.assert.equal(note0_modifier0.getFretHandFinger(), '1');
-  options.assert.equal(note0_modifier0.getPosition(), Modifier.Position.LEFT);
+  const note0Modifier0 = notes[0].getModifiers()[0] as FretHandFinger;
+  options.assert.equal(note0Modifier0.getCategory(), FretHandFinger.CATEGORY);
+  options.assert.equal(note0Modifier0.getFretHandFinger(), '1');
+  options.assert.equal(note0Modifier0.getPosition(), Modifier.Position.LEFT);
 
-  const note1_modifier0 = notes[1].getModifiers()[0] as FretHandFinger;
-  options.assert.equal(note1_modifier0.getCategory(), FretHandFinger.CATEGORY);
-  options.assert.equal(note1_modifier0.getFretHandFinger(), '3');
-  options.assert.equal(note1_modifier0.getPosition(), Modifier.Position.ABOVE);
+  const note1Modifier0 = notes[1].getModifiers()[0] as FretHandFinger;
+  options.assert.equal(note1Modifier0.getCategory(), FretHandFinger.CATEGORY);
+  options.assert.equal(note1Modifier0.getFretHandFinger(), '3');
+  options.assert.equal(note1Modifier0.getPosition(), Modifier.Position.ABOVE);
 
-  const note2_modifier0 = notes[2].getModifiers()[0] as FretHandFinger;
-  options.assert.equal(note2_modifier0.getCategory(), FretHandFinger.CATEGORY);
-  options.assert.equal(note2_modifier0.getFretHandFinger(), '5');
-  options.assert.equal(note2_modifier0.getPosition(), Modifier.Position.BELOW);
+  const note2Modifier0 = notes[2].getModifiers()[0] as FretHandFinger;
+  options.assert.equal(note2Modifier0.getCategory(), FretHandFinger.CATEGORY);
+  options.assert.equal(note2Modifier0.getFretHandFinger(), '5');
+  options.assert.equal(note2Modifier0.getPosition(), Modifier.Position.BELOW);
 
-  const note3_modifiers: FretHandFinger[] = notes[3].getModifiers() as FretHandFinger[];
-  const note3_modifier0 = note3_modifiers[0];
-  const note3_modifier1 = note3_modifiers[1];
-  const note3_modifier2 = note3_modifiers[2];
-  options.assert.equal(note3_modifier0.getCategory(), FretHandFinger.CATEGORY);
-  options.assert.equal(note3_modifier0.getFretHandFinger(), '1');
-  options.assert.equal(note3_modifier0.getPosition(), Modifier.Position.LEFT);
-  options.assert.equal(note3_modifier1.getCategory(), FretHandFinger.CATEGORY);
-  options.assert.equal(note3_modifier1.getFretHandFinger(), '3');
-  options.assert.equal(note3_modifier1.getPosition(), Modifier.Position.LEFT);
-  options.assert.equal(note3_modifier2.getCategory(), FretHandFinger.CATEGORY);
-  options.assert.equal(note3_modifier2.getFretHandFinger(), '5');
-  options.assert.equal(note3_modifier2.getPosition(), Modifier.Position.LEFT);
+  const note3Modifiers: FretHandFinger[] = notes[3].getModifiers() as FretHandFinger[];
+  const note3Modifier0 = note3Modifiers[0];
+  const note3Modifier1 = note3Modifiers[1];
+  const note3Modifier2 = note3Modifiers[2];
+  options.assert.equal(note3Modifier0.getCategory(), FretHandFinger.CATEGORY);
+  options.assert.equal(note3Modifier0.getFretHandFinger(), '1');
+  options.assert.equal(note3Modifier0.getPosition(), Modifier.Position.LEFT);
+  options.assert.equal(note3Modifier1.getCategory(), FretHandFinger.CATEGORY);
+  options.assert.equal(note3Modifier1.getFretHandFinger(), '3');
+  options.assert.equal(note3Modifier1.getPosition(), Modifier.Position.LEFT);
+  options.assert.equal(note3Modifier2.getCategory(), FretHandFinger.CATEGORY);
+  options.assert.equal(note3Modifier2.getFretHandFinger(), '5');
+  options.assert.equal(note3Modifier2.getPosition(), Modifier.Position.LEFT);
 }
 
 function keys(options: TestOptions): void {

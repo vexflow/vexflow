@@ -52,11 +52,11 @@ function basic(options: TestOptions, contextBuilder: ContextBuilder): void {
   const formatter = new Formatter();
   const voice = new Voice(Flow.TIME4_4).setStrict(false);
 
-  const note_head1 = new NoteHead({ duration: '4', line: 3 });
-  const note_head2 = new NoteHead({ duration: '1', line: 2.5 });
-  const note_head3 = new NoteHead({ duration: '2', line: 0 });
+  const noteHead1 = new NoteHead({ duration: '4', line: 3 });
+  const noteHead2 = new NoteHead({ duration: '1', line: 2.5 });
+  const noteHead3 = new NoteHead({ duration: '2', line: 0 });
 
-  voice.addTickables([note_head1, note_head2, note_head3]);
+  voice.addTickables([noteHead1, noteHead2, noteHead3]);
   formatter.joinVoices([voice]).formatToStave([voice], stave);
 
   voice.draw(ctx, stave);
@@ -113,7 +113,7 @@ function variousHeads(options: TestOptions, contextBuilder: ContextBuilder): voi
 
     for (let i = 0; i < notes.length; ++i) {
       const note = notes[i];
-      note.stem_direction = staveNum === 0 ? -1 : 1;
+      note.stemDirection = staveNum === 0 ? -1 : 1;
       const staveNote = showNote(note, stave, ctx, (i + 1) * 25);
 
       options.assert.ok(staveNote.getX() > 0, 'Note ' + i + ' has X value');
@@ -182,7 +182,7 @@ function variousNoteHeads(options: TestOptions, contextBuilder: ContextBuilder):
 
     for (let i = 0; i < notes.length; ++i) {
       const note = notes[i];
-      note.stem_direction = staveNum === 0 ? -1 : 1;
+      note.stemDirection = staveNum === 0 ? -1 : 1;
       const staveNote = showNote(note, stave, ctx, (i + 1) * 25);
 
       options.assert.ok(staveNote.getX() > 0, 'Note ' + i + ' has X value');
@@ -193,14 +193,14 @@ function variousNoteHeads(options: TestOptions, contextBuilder: ContextBuilder):
 
 function variousNoteHeads2(options: TestOptions, contextBuilder: ContextBuilder): void {
   const notes: StaveNoteStruct[] = [
-    { keys: ['g/5/do'], duration: '4', auto_stem: true },
-    { keys: ['g/5/re'], duration: '4', auto_stem: true },
-    { keys: ['g/5/mi'], duration: '4', auto_stem: true },
-    { keys: ['g/5/fa'], duration: '4', auto_stem: true },
-    { keys: ['e/4/faup'], duration: '4', auto_stem: true },
-    { keys: ['g/5/so'], duration: '4', auto_stem: true },
-    { keys: ['g/5/la'], duration: '4', auto_stem: true },
-    { keys: ['g/5/ti'], duration: '4', auto_stem: true },
+    { keys: ['g/5/do'], duration: '4', autoStem: true },
+    { keys: ['g/5/re'], duration: '4', autoStem: true },
+    { keys: ['g/5/mi'], duration: '4', autoStem: true },
+    { keys: ['g/5/fa'], duration: '4', autoStem: true },
+    { keys: ['e/4/faup'], duration: '4', autoStem: true },
+    { keys: ['g/5/so'], duration: '4', autoStem: true },
+    { keys: ['g/5/la'], duration: '4', autoStem: true },
+    { keys: ['g/5/ti'], duration: '4', autoStem: true },
   ];
 
   const ctx = contextBuilder(options.elementId, notes.length * 25 + 100, 240);
@@ -248,7 +248,7 @@ function drumChordHeads(options: TestOptions, contextBuilder: ContextBuilder): v
 
     for (let i = 0; i < notes.length; ++i) {
       const note = notes[i];
-      note.stem_direction = h === 0 ? -1 : 1;
+      note.stemDirection = h === 0 ? -1 : 1;
       const staveNote = showNote(note, stave, ctx, (i + 1) * 25);
 
       options.assert.ok(staveNote.getX() > 0, 'Note ' + i + ' has X value');

@@ -21,51 +21,51 @@ const MultiMeasureRestTests = {
 function simple(options: TestOptions): void {
   const width = 910;
   const f = VexFlowTests.makeFactory(options, width, 300);
-  const line_spacing_15px = { options: { spacing_between_lines_px: 15 } };
+  const lineSpacing15px = { options: { spacingBetweenLinesPx: 15 } };
 
   // Each item below is an array that contains:
   //   item[0] => staveParams to adjust vertical spacing between lines
   //   item[1] => multiMeasureRestParams
   // eslint-disable-next-line
   const params: [any, MultimeasureRestRenderOptions][] = [
-    [{}, { number_of_measures: 2, show_number: false }],
-    [{}, { number_of_measures: 2 }],
-    [{}, { number_of_measures: 2, line_thickness: 8, serif_thickness: 3 }],
-    [{}, { number_of_measures: 1, use_symbols: true }],
-    [{}, { number_of_measures: 2, use_symbols: true }],
-    [{}, { number_of_measures: 3, use_symbols: true }],
-    [{}, { number_of_measures: 4, use_symbols: true }],
-    [{}, { number_of_measures: 5, use_symbols: true }],
-    [{}, { number_of_measures: 6, use_symbols: true }],
-    [{}, { number_of_measures: 7, use_symbols: true }],
-    [{}, { number_of_measures: 8, use_symbols: true }],
-    [{}, { number_of_measures: 9, use_symbols: true }],
-    [{}, { number_of_measures: 10, use_symbols: true }],
-    [{}, { number_of_measures: 11, use_symbols: true }],
-    [{}, { number_of_measures: 11, use_symbols: false, padding_left: 20, padding_right: 20 }],
-    [{}, { number_of_measures: 11, use_symbols: true, symbol_spacing: 5 }],
-    [{}, { number_of_measures: 11, use_symbols: false, line: 3, number_line: 2 }],
-    [{}, { number_of_measures: 11, use_symbols: true, line: 3, number_line: 2 }],
-    [line_spacing_15px, { number_of_measures: 12 }],
-    [line_spacing_15px, { number_of_measures: 9, use_symbols: true }],
-    [line_spacing_15px, { number_of_measures: 12, spacing_between_lines_px: 15, number_glyph_point: 40 * 1.5 }],
+    [{}, { numberOfMeasures: 2, showNumber: false }],
+    [{}, { numberOfMeasures: 2 }],
+    [{}, { numberOfMeasures: 2, lineThickness: 8, serifThickness: 3 }],
+    [{}, { numberOfMeasures: 1, useSymbols: true }],
+    [{}, { numberOfMeasures: 2, useSymbols: true }],
+    [{}, { numberOfMeasures: 3, useSymbols: true }],
+    [{}, { numberOfMeasures: 4, useSymbols: true }],
+    [{}, { numberOfMeasures: 5, useSymbols: true }],
+    [{}, { numberOfMeasures: 6, useSymbols: true }],
+    [{}, { numberOfMeasures: 7, useSymbols: true }],
+    [{}, { numberOfMeasures: 8, useSymbols: true }],
+    [{}, { numberOfMeasures: 9, useSymbols: true }],
+    [{}, { numberOfMeasures: 10, useSymbols: true }],
+    [{}, { numberOfMeasures: 11, useSymbols: true }],
+    [{}, { numberOfMeasures: 11, useSymbols: false, paddingLeft: 20, paddingRight: 20 }],
+    [{}, { numberOfMeasures: 11, useSymbols: true, symbolSpacing: 5 }],
+    [{}, { numberOfMeasures: 11, useSymbols: false, line: 3, numberLine: 2 }],
+    [{}, { numberOfMeasures: 11, useSymbols: true, line: 3, numberLine: 2 }],
+    [lineSpacing15px, { numberOfMeasures: 12 }],
+    [lineSpacing15px, { numberOfMeasures: 9, useSymbols: true }],
+    [lineSpacing15px, { numberOfMeasures: 12, spacingBetweenLinesPx: 15, numberGlyphPoint: 40 * 1.5 }],
     [
-      line_spacing_15px,
+      lineSpacing15px,
       {
-        number_of_measures: 9,
-        spacing_between_lines_px: 15,
-        use_symbols: true,
-        number_glyph_point: 40 * 1.5,
+        numberOfMeasures: 9,
+        spacingBetweenLinesPx: 15,
+        useSymbols: true,
+        numberGlyphPoint: 40 * 1.5,
       },
     ],
     [
-      line_spacing_15px,
+      lineSpacing15px,
       {
-        number_of_measures: 9,
-        spacing_between_lines_px: 15,
-        use_symbols: true,
-        number_glyph_point: 40 * 1.5,
-        semibreve_rest_glyph_scale: Flow.NOTATION_FONT_SCALE * 1.5,
+        numberOfMeasures: 9,
+        spacingBetweenLinesPx: 15,
+        useSymbols: true,
+        numberGlyphPoint: 40 * 1.5,
+        semibreveRestGlyphScale: Flow.NOTATION_FONT_SCALE * 1.5,
       },
     ],
   ];
@@ -112,16 +112,16 @@ function staveWithModifiers(options: TestOptions): void {
 
   // eslint-disable-next-line
   const params: [any, MultimeasureRestRenderOptions][] = [
-    [{ clef: 'treble', params: { width: 150 } }, { number_of_measures: 5 }],
-    [{ clef: 'treble', keySig: 'G', params: { width: 150 } }, { number_of_measures: 5 }],
-    [{ clef: 'treble', timeSig: '4/4', keySig: 'G', params: { width: 150 } }, { number_of_measures: 5 }],
-    [{ clef: 'treble', endClef: 'bass', params: { width: 150 } }, { number_of_measures: 5 }],
-    [{ clef: 'treble', endKeySig: 'F', params: { width: 150 } }, { number_of_measures: 5 }],
-    [{ clef: 'treble', endTimeSig: '2/4', params: { width: 150 } }, { number_of_measures: 5 }],
-    [{ clef: 'treble', endClef: 'bass', endTimeSig: '2/4', params: { width: 150 } }, { number_of_measures: 5 }],
+    [{ clef: 'treble', params: { width: 150 } }, { numberOfMeasures: 5 }],
+    [{ clef: 'treble', keySig: 'G', params: { width: 150 } }, { numberOfMeasures: 5 }],
+    [{ clef: 'treble', timeSig: '4/4', keySig: 'G', params: { width: 150 } }, { numberOfMeasures: 5 }],
+    [{ clef: 'treble', endClef: 'bass', params: { width: 150 } }, { numberOfMeasures: 5 }],
+    [{ clef: 'treble', endKeySig: 'F', params: { width: 150 } }, { numberOfMeasures: 5 }],
+    [{ clef: 'treble', endTimeSig: '2/4', params: { width: 150 } }, { numberOfMeasures: 5 }],
+    [{ clef: 'treble', endClef: 'bass', endTimeSig: '2/4', params: { width: 150 } }, { numberOfMeasures: 5 }],
     [
       { clef: 'treble', endClef: 'bass', endTimeSig: '2/4', params: { width: 150 } },
-      { number_of_measures: 5, use_symbols: true },
+      { numberOfMeasures: 5, useSymbols: true },
     ],
   ];
 

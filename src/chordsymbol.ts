@@ -361,11 +361,11 @@ export class ChordSymbol extends Modifier {
       symbol.updateOverBarAdjustments();
 
       if (symbol.getVertical() === ChordSymbolVerticalJustify.TOP) {
-        symbol.setTextLine(state.top_text_line);
-        state.top_text_line += lineSpaces;
+        symbol.setTextLine(state.topTextLine);
+        state.topTextLine += lineSpaces;
       } else {
-        symbol.setTextLine(state.text_line + 1);
-        state.text_line += lineSpaces + 1;
+        symbol.setTextLine(state.textLine + 1);
+        state.textLine += lineSpaces + 1;
       }
       if (symbol.getReportWidth() && isStemmableNote(note)) {
         const glyphWidth = note.getGlyphProps().getWidth();
@@ -386,12 +386,12 @@ export class ChordSymbol extends Modifier {
     }
     const rightOverlap = Math.min(
       Math.max(rightWidth - maxRightGlyphWidth, 0),
-      Math.max(rightWidth - state.right_shift, 0)
+      Math.max(rightWidth - state.rightShift, 0)
     );
-    const leftOverlap = Math.min(Math.max(leftWidth - maxLeftGlyphWidth, 0), Math.max(leftWidth - state.left_shift, 0));
+    const leftOverlap = Math.min(Math.max(leftWidth - maxLeftGlyphWidth, 0), Math.max(leftWidth - state.leftShift, 0));
 
-    state.left_shift += leftOverlap;
-    state.right_shift += rightOverlap;
+    state.leftShift += leftOverlap;
+    state.rightShift += rightOverlap;
     return true;
   }
 
@@ -501,7 +501,7 @@ export class ChordSymbol extends Modifier {
       currSymbol.glyph !== undefined &&
       currSymbol.glyph.code === ChordSymbol.glyphs.over.code
     ) {
-      adjustment += currSymbol.glyph.metrics.x_shift;
+      adjustment += currSymbol.glyph.metrics.xShift;
     }
 
     if (
@@ -510,7 +510,7 @@ export class ChordSymbol extends Modifier {
       prevSymbol.glyph !== undefined &&
       prevSymbol.glyph.code === ChordSymbol.glyphs.over.code
     ) {
-      adjustment += prevSymbol.glyph.metrics.x_shift;
+      adjustment += prevSymbol.glyph.metrics.xShift;
     }
 
     // For superscripts that follow a letter without much top part, move it to the left slightly
@@ -705,7 +705,7 @@ export class ChordSymbol extends Modifier {
     for (i = 0; i < text.length; ++i) {
       const metrics = this.textFormatter.getGlyphMetrics(text[i]);
       if (metrics) {
-        const yMax = metrics.y_max ?? 0;
+        const yMax = metrics.yMax ?? 0;
         acc = yMax < acc ? yMax : acc;
       }
     }
@@ -737,21 +737,21 @@ export class ChordSymbol extends Modifier {
 
     if (this.vertical === ChordSymbolVerticalJustify.BOTTOM) {
       // HACK: We need to compensate for the text's height since its origin is bottom-right.
-      y = stave.getYForBottomText(this.text_line + Tables.TEXT_HEIGHT_OFFSET_HACK);
+      y = stave.getYForBottomText(this.textLine + Tables.TEXT_HEIGHT_OFFSET_HACK);
       if (hasStem) {
-        const stem_ext = note.checkStem().getExtents();
+        const stemExt = note.checkStem().getExtents();
         const spacing = stave.getSpacingBetweenLines();
-        const stem_base = note.getStemDirection() === 1 ? stem_ext.baseY : stem_ext.topY;
-        y = Math.max(y, stem_base + spacing * (this.text_line + 2));
+        const stemBase = note.getStemDirection() === 1 ? stemExt.baseY : stemExt.topY;
+        y = Math.max(y, stemBase + spacing * (this.textLine + 2));
       }
     } else {
       // (this.vertical === VerticalJustify.TOP)
       const topY = Math.min(...note.getYs());
-      y = Math.min(stave.getYForTopText(this.text_line), topY - 10);
+      y = Math.min(stave.getYForTopText(this.textLine), topY - 10);
       if (hasStem) {
-        const stem_ext = note.checkStem().getExtents();
+        const stemExt = note.checkStem().getExtents();
         const spacing = stave.getSpacingBetweenLines();
-        y = Math.min(y, stem_ext.topY - 5 - spacing * this.text_line);
+        y = Math.min(y, stemExt.topY - 5 - spacing * this.textLine);
       }
     }
 

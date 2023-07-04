@@ -91,8 +91,8 @@ const rounded = createTest(
       from: notes[0],
       to: notes[3],
       options: {
-        x_shift: -10,
-        y_shift: 30,
+        xShift: -10,
+        yShift: 30,
         cps: [
           { x: 0, y: 20 },
           { x: 0, y: 50 },
@@ -122,8 +122,8 @@ const thickThin = createTest(
       to: notes[3],
       options: {
         thickness: 10,
-        x_shift: -10,
-        y_shift: 30,
+        xShift: -10,
+        yShift: 30,
         cps: [
           { x: 0, y: 20 },
           { x: 0, y: 50 },
@@ -153,10 +153,10 @@ const top = createTest(
       from: notes[0],
       to: notes[7],
       options: {
-        x_shift: -3,
-        y_shift: 10,
+        xShift: -3,
+        yShift: 10,
         position: CurvePosition.NEAR_TOP,
-        position_end: CurvePosition.NEAR_HEAD,
+        positionEnd: CurvePosition.NEAR_HEAD,
         cps: [
           { x: 0, y: 20 },
           { x: 40, y: 80 },

@@ -130,11 +130,11 @@ function draw(options: TestOptions, contextBuilder: ContextBuilder): void {
 
 function drawOpenStave(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 400, 350);
-  let stave = new Stave(10, 10, 300, { left_bar: false });
+  let stave = new Stave(10, 10, 300, { leftBar: false });
   stave.setContext(ctx);
   stave.draw();
 
-  stave = new Stave(10, 150, 300, { right_bar: false });
+  stave = new Stave(10, 150, 300, { rightBar: false });
   stave.setContext(ctx);
   stave.draw();
 
@@ -169,14 +169,14 @@ function drawMultipleMeasures(options: TestOptions, contextBuilder: ContextBuild
   staveBar2.setEndBarType(BarlineType.END);
   staveBar2.setContext(ctx).draw();
 
-  const notesBar2_part1 = [
+  const notesBar2Part1 = [
     new StaveNote({ keys: ['c/4'], duration: '8' }),
     new StaveNote({ keys: ['d/4'], duration: '8' }),
     new StaveNote({ keys: ['g/4'], duration: '8' }),
     new StaveNote({ keys: ['e/4'], duration: '8' }),
   ];
 
-  const notesBar2_part2 = [
+  const notesBar2Part2 = [
     new StaveNote({ keys: ['c/4'], duration: '8' }),
     new StaveNote({ keys: ['d/4'], duration: '8' }),
     new StaveNote({ keys: ['g/4'], duration: '8' }),
@@ -184,9 +184,9 @@ function drawMultipleMeasures(options: TestOptions, contextBuilder: ContextBuild
   ];
 
   // create the beams for 8th notes in 2nd measure
-  const beam1 = new Beam(notesBar2_part1);
-  const beam2 = new Beam(notesBar2_part2);
-  const notesBar2 = notesBar2_part1.concat(notesBar2_part2);
+  const beam1 = new Beam(notesBar2Part1);
+  const beam2 = new Beam(notesBar2Part2);
+  const notesBar2 = notesBar2Part1.concat(notesBar2Part2);
 
   // Helper function to justify and draw a 4/4 voice
   Formatter.FormatAndDraw(ctx, staveBar2, notesBar2);
@@ -225,26 +225,26 @@ function drawRepeats(options: TestOptions, contextBuilder: ContextBuilder): void
   staveBar2.setEndBarType(BarlineType.REPEAT_END);
   staveBar2.setContext(ctx).draw();
 
-  const notesBar2_part1 = [
+  const notesBar2Part1 = [
     new StaveNote({ keys: ['c/4'], duration: '8' }),
     new StaveNote({ keys: ['d/4'], duration: '8' }),
     new StaveNote({ keys: ['g/4'], duration: '8' }),
     new StaveNote({ keys: ['e/4'], duration: '8' }),
   ];
 
-  const notesBar2_part2 = [
+  const notesBar2Part2 = [
     new StaveNote({ keys: ['c/4'], duration: '8' }),
     new StaveNote({ keys: ['d/4'], duration: '8' }),
     new StaveNote({ keys: ['g/4'], duration: '8' }),
     new StaveNote({ keys: ['e/4'], duration: '8' }),
   ];
-  notesBar2_part2[0].addModifier(new Accidental('#'), 0);
-  notesBar2_part2[1].addModifier(new Accidental('#'), 0);
-  notesBar2_part2[3].addModifier(new Accidental('b'), 0);
+  notesBar2Part2[0].addModifier(new Accidental('#'), 0);
+  notesBar2Part2[1].addModifier(new Accidental('#'), 0);
+  notesBar2Part2[3].addModifier(new Accidental('b'), 0);
   // create the beams for 8th notes in 2nd measure
-  const beam1 = new Beam(notesBar2_part1);
-  const beam2 = new Beam(notesBar2_part2);
-  const notesBar2 = notesBar2_part1.concat(notesBar2_part2);
+  const beam1 = new Beam(notesBar2Part1);
+  const beam2 = new Beam(notesBar2Part2);
+  const notesBar2 = notesBar2Part1.concat(notesBar2Part2);
 
   // Helper function to justify and draw a 4/4 voice
   Formatter.FormatAndDraw(ctx, staveBar2, notesBar2);
@@ -586,7 +586,7 @@ function drawVoltaModifier(options: TestOptions, contextBuilder: ContextBuilder)
   // Helper function to justify and draw a 4/4 voice
   Formatter.FormatAndDraw(ctx, mm1, notesmm1);
 
-  // bar 2: volta begin_mid, with modifiers (clef, keysignature)
+  // bar 2: volta beginMid, with modifiers (clef, keysignature)
   const mm2 = new Stave(mm1.getX() + mm1.getWidth(), mm1.getY(), 175);
   mm2.setBegBarType(BarlineType.REPEAT_BEGIN);
   mm2.setRepetitionType(Repetition.type.DS);
@@ -654,10 +654,10 @@ function drawTempo(options: TestOptions, contextBuilder: ContextBuilder): void {
   let x = 0;
   let y = 50;
 
-  function drawTempoStaveBar(width: number, tempo: StaveTempoOptions, tempo_y: number, notes?: StaveNote[]) {
+  function drawTempoStaveBar(width: number, tempo: StaveTempoOptions, tempoY: number, notes?: StaveNote[]) {
     const staveBar = new Stave(padding + x, y, width);
     if (x === 0) staveBar.addClef('treble');
-    staveBar.setTempo(tempo, tempo_y);
+    staveBar.setTempo(tempo, tempoY);
     staveBar.setContext(ctx).draw();
 
     const notesBar = notes || [
@@ -759,14 +759,14 @@ function drawStaveText(options: TestOptions, contextBuilder: ContextBuilder): vo
 function drawStaveTextMultiLine(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 900, 200);
   const stave = new Stave(300, 40, 300);
-  stave.setText('Violin', Modifier.Position.LEFT, { shift_y: -10 });
-  stave.setText('2nd line', Modifier.Position.LEFT, { shift_y: 10 });
-  stave.setText('Right Text', Modifier.Position.RIGHT, { shift_y: -10 });
-  stave.setText('2nd line', Modifier.Position.RIGHT, { shift_y: 10 });
-  stave.setText('Above Text', Modifier.Position.ABOVE, { shift_y: -10 });
-  stave.setText('2nd line', Modifier.Position.ABOVE, { shift_y: 10 });
-  stave.setText('Left Below Text', Modifier.Position.BELOW, { shift_y: -10, justification: TextJustification.LEFT });
-  stave.setText('Right Below Text', Modifier.Position.BELOW, { shift_y: 10, justification: TextJustification.RIGHT });
+  stave.setText('Violin', Modifier.Position.LEFT, { shiftY: -10 });
+  stave.setText('2nd line', Modifier.Position.LEFT, { shiftY: 10 });
+  stave.setText('Right Text', Modifier.Position.RIGHT, { shiftY: -10 });
+  stave.setText('2nd line', Modifier.Position.RIGHT, { shiftY: 10 });
+  stave.setText('Above Text', Modifier.Position.ABOVE, { shiftY: -10 });
+  stave.setText('2nd line', Modifier.Position.ABOVE, { shiftY: 10 });
+  stave.setText('Left Below Text', Modifier.Position.BELOW, { shiftY: -10, justification: TextJustification.LEFT });
+  stave.setText('Right Below Text', Modifier.Position.BELOW, { shiftY: 10, justification: TextJustification.RIGHT });
   stave.setContext(ctx).draw();
 
   options.assert.ok(true, 'all pass');
@@ -775,8 +775,8 @@ function drawStaveTextMultiLine(options: TestOptions, contextBuilder: ContextBui
 function factoryAPI(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, 900, 200);
   const stave = f.Stave({ x: 300, y: 40, width: 300 });
-  stave.setText('Violin', Modifier.Position.LEFT, { shift_y: -10 });
-  stave.setText('2nd line', Modifier.Position.LEFT, { shift_y: 10 });
+  stave.setText('Violin', Modifier.Position.LEFT, { shiftY: -10 });
+  stave.setText('2nd line', Modifier.Position.LEFT, { shiftY: 10 });
   f.draw();
 
   options.assert.ok(true, 'all pass');

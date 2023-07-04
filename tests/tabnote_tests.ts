@@ -234,7 +234,7 @@ function drawStemsUp(options: TestOptions, contextBuilder: ContextBuilder): void
 
   const notes = specs.map((struct) => {
     const tabNote = new TabNote(struct);
-    tabNote.render_options.draw_stem = true;
+    tabNote.renderOptions.drawStem = true;
     return tabNote;
   });
 
@@ -306,7 +306,7 @@ function drawStemsDown(options: TestOptions, contextBuilder: ContextBuilder): vo
 
   const notes = specs.map((struct) => {
     const tabNote = new TabNote(struct);
-    tabNote.render_options.draw_stem = true;
+    tabNote.renderOptions.drawStem = true;
     tabNote.setStemDirection(-1);
     return tabNote;
   });
@@ -379,8 +379,8 @@ function drawStemsUpThrough(options: TestOptions, contextBuilder: ContextBuilder
 
   const notes = specs.map((struct) => {
     const tabNote = new TabNote(struct);
-    tabNote.render_options.draw_stem = true;
-    tabNote.render_options.draw_stem_through_stave = true;
+    tabNote.renderOptions.drawStem = true;
+    tabNote.renderOptions.drawStemThroughStave = true;
     return tabNote;
   });
 
@@ -395,7 +395,7 @@ function drawStemsUpThrough(options: TestOptions, contextBuilder: ContextBuilder
 function drawStemsDownThrough(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 600, 250);
   ctx.font = '10pt Arial';
-  const stave = new TabStave(10, 10, 550, { num_lines: 8 });
+  const stave = new TabStave(10, 10, 550, { numLines: 8 });
   stave.setContext(ctx);
   stave.draw();
 
@@ -456,8 +456,8 @@ function drawStemsDownThrough(options: TestOptions, contextBuilder: ContextBuild
 
   const notes = specs.map((struct) => {
     const tabNote = new TabNote(struct);
-    tabNote.render_options.draw_stem = true;
-    tabNote.render_options.draw_stem_through_stave = true;
+    tabNote.renderOptions.drawStem = true;
+    tabNote.renderOptions.drawStemThroughStave = true;
     tabNote.setStemDirection(-1);
     return tabNote;
   });
@@ -499,7 +499,7 @@ function drawStemsDotted(options: TestOptions, contextBuilder: ContextBuilder): 
         { str: 4, fret: 5 },
       ],
       duration: '4dd',
-      stem_direction: -1,
+      stemDirection: -1,
     },
     {
       positions: [
@@ -507,11 +507,11 @@ function drawStemsDotted(options: TestOptions, contextBuilder: ContextBuilder): 
         { str: 4, fret: 5 },
       ],
       duration: '16',
-      stem_direction: -1,
+      stemDirection: -1,
     },
   ];
 
-  const notes = specs.map((struct) => new TabNote(struct, true /* draw_stem */));
+  const notes = specs.map((struct) => new TabNote(struct, true /* drawStem */));
 
   Dot.buildAndAttach([notes[0], notes[2], notes[2]]);
 

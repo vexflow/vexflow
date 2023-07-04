@@ -51,13 +51,13 @@ const basic = createTest((f: Factory, score: EasyScore) => {
   score.voice(
     [
       f.GhostNote({ duration: '2' }),
-      f.StaveNote({ keys: ['f/4'], stem_direction: -1, duration: '4' }),
+      f.StaveNote({ keys: ['f/4'], stemDirection: -1, duration: '4' }),
       f.GhostNote({ duration: '4' }),
-      f.StaveNote({ keys: ['e/4'], stem_direction: -1, duration: '4' }),
+      f.StaveNote({ keys: ['e/4'], stemDirection: -1, duration: '4' }),
       f.GhostNote({ duration: '8' }),
-      f.StaveNote({ keys: ['d/4'], stem_direction: -1, duration: '8' }).addModifier(f.Accidental({ type: '##' }), 0),
-      f.StaveNote({ keys: ['c/4'], stem_direction: -1, duration: '8' }),
-      f.StaveNote({ keys: ['c/4'], stem_direction: -1, duration: '8' }),
+      f.StaveNote({ keys: ['d/4'], stemDirection: -1, duration: '8' }).addModifier(f.Accidental({ type: '##' }), 0),
+      f.StaveNote({ keys: ['c/4'], stemDirection: -1, duration: '8' }),
+      f.StaveNote({ keys: ['c/4'], stemDirection: -1, duration: '8' }),
     ],
     { time: '7/4' }
   );
@@ -71,28 +71,28 @@ const dotted = createTest((f: Factory, score: EasyScore) => {
   const voice1 = score.voice(
     [
       f.GhostNote({ duration: '4d' }),
-      f.StaveNote({ duration: '8', keys: ['f/5'], stem_direction: 1 }),
-      f.StaveNote({ duration: '4', keys: ['d/5'], stem_direction: 1 }),
-      f.StaveNote({ duration: '8', keys: ['c/5'], stem_direction: 1 }),
-      f.StaveNote({ duration: '16', keys: ['c/5'], stem_direction: 1 }),
-      f.StaveNote({ duration: '16', keys: ['d/5'], stem_direction: 1 }),
+      f.StaveNote({ duration: '8', keys: ['f/5'], stemDirection: 1 }),
+      f.StaveNote({ duration: '4', keys: ['d/5'], stemDirection: 1 }),
+      f.StaveNote({ duration: '8', keys: ['c/5'], stemDirection: 1 }),
+      f.StaveNote({ duration: '16', keys: ['c/5'], stemDirection: 1 }),
+      f.StaveNote({ duration: '16', keys: ['d/5'], stemDirection: 1 }),
       f.GhostNote({ duration: '2dd' }),
-      f.StaveNote({ duration: '8', keys: ['f/5'], stem_direction: 1 }),
+      f.StaveNote({ duration: '8', keys: ['f/5'], stemDirection: 1 }),
     ],
     { time: '8/4' }
   );
 
   const voice2 = score.voice(
     [
-      f.StaveNote({ duration: '4', keys: ['f/4'], stem_direction: -1 }),
-      f.StaveNote({ duration: '8', keys: ['e/4'], stem_direction: -1 }),
-      f.StaveNote({ duration: '8', keys: ['d/4'], stem_direction: -1 }),
+      f.StaveNote({ duration: '4', keys: ['f/4'], stemDirection: -1 }),
+      f.StaveNote({ duration: '8', keys: ['e/4'], stemDirection: -1 }),
+      f.StaveNote({ duration: '8', keys: ['d/4'], stemDirection: -1 }),
       f.GhostNote({ duration: '4dd' }),
-      f.StaveNote({ duration: '16', keys: ['c/4'], stem_direction: -1 }),
-      f.StaveNote({ duration: '2', keys: ['c/4'], stem_direction: -1 }),
-      f.StaveNote({ duration: '4', keys: ['d/4'], stem_direction: -1 }),
-      f.StaveNote({ duration: '8', keys: ['f/4'], stem_direction: -1 }),
-      f.StaveNote({ duration: '8', keys: ['e/4'], stem_direction: -1 }),
+      f.StaveNote({ duration: '16', keys: ['c/4'], stemDirection: -1 }),
+      f.StaveNote({ duration: '2', keys: ['c/4'], stemDirection: -1 }),
+      f.StaveNote({ duration: '4', keys: ['d/4'], stemDirection: -1 }),
+      f.StaveNote({ duration: '8', keys: ['f/4'], stemDirection: -1 }),
+      f.StaveNote({ duration: '8', keys: ['e/4'], stemDirection: -1 }),
     ],
     { time: '8/4' }
   );

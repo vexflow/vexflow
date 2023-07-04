@@ -19,9 +19,9 @@ export class Tremolo extends Modifier {
   protected readonly code: string;
   protected readonly num: number;
   /** Extra spacing required for big strokes. */
-  public y_spacing_scale: number;
+  public ySpacingScale: number;
   /** Font scaling for big strokes. */
-  public extra_stroke_scale: number;
+  public extraStrokeScale: number;
 
   /**
    * @param num number of bars
@@ -33,8 +33,8 @@ export class Tremolo extends Modifier {
     this.position = Modifier.Position.CENTER;
     this.code = 'tremolo1';
     // big strokes scales initialised to 1 (no scale)
-    this.y_spacing_scale = 1;
-    this.extra_stroke_scale = 1;
+    this.ySpacingScale = 1;
+    this.extraStrokeScale = 1;
   }
 
   /** Draw the tremolo on the rendering context. */
@@ -53,10 +53,10 @@ export class Tremolo extends Modifier {
     const category = `tremolo.${gn ? 'grace' : 'default'}`;
 
     const musicFont = Tables.currentMusicFont();
-    let y_spacing = musicFont.lookupMetric(`${category}.spacing`) * stemDirection;
-    // add y_spacing_scale for big strokes (#1258)
-    y_spacing *= this.y_spacing_scale;
-    const height = this.num * y_spacing;
+    let ySpacing = musicFont.lookupMetric(`${category}.spacing`) * stemDirection;
+    // add ySpacingScale for big strokes (#1258)
+    ySpacing *= this.ySpacingScale;
+    const height = this.num * ySpacing;
     let y = note.getStemExtents().baseY - height;
 
     if (stemDirection < 0) {
@@ -69,8 +69,8 @@ export class Tremolo extends Modifier {
 
     x += musicFont.lookupMetric(`${category}.offsetXStem${stemDirection === Stem.UP ? 'Up' : 'Down'}`);
     for (let i = 0; i < this.num; ++i) {
-      Glyph.renderGlyph(ctx, x, y, fontScale, this.code, { category, scale: this.extra_stroke_scale });
-      y += y_spacing;
+      Glyph.renderGlyph(ctx, x, y, fontScale, this.code, { category, scale: this.extraStrokeScale });
+      y += ySpacing;
     }
   }
 }

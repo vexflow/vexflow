@@ -33,10 +33,10 @@ import { log, RuntimeError } from './util';
 import { Vibrato } from './vibrato';
 
 export interface ModifierContextState {
-  right_shift: number;
-  left_shift: number;
-  text_line: number;
-  top_text_line: number;
+  leftShift: number;
+  rightShift: number;
+  textLine: number;
+  topTextLine: number;
 }
 
 export interface ModifierContextMetrics {
@@ -57,10 +57,10 @@ export class ModifierContext {
 
   // Formatting data.
   protected state: ModifierContextState = {
-    left_shift: 0,
-    right_shift: 0,
-    text_line: 0,
-    top_text_line: 0,
+    leftShift: 0,
+    rightShift: 0,
+    textLine: 0,
+    topTextLine: 0,
   };
 
   // Current members -- a mapping of Category (string) to a list of Tickables, Modifiers,
@@ -116,11 +116,11 @@ export class ModifierContext {
   }
 
   getLeftShift(): number {
-    return this.state.left_shift;
+    return this.state.leftShift;
   }
 
   getRightShift(): number {
-    return this.state.right_shift;
+    return this.state.rightShift;
   }
 
   getState(): ModifierContextState {
@@ -133,7 +133,7 @@ export class ModifierContext {
     }
 
     return {
-      width: this.state.left_shift + this.state.right_shift + this.spacing,
+      width: this.state.leftShift + this.state.rightShift + this.spacing,
       spacing: this.spacing,
     };
   }
@@ -163,7 +163,7 @@ export class ModifierContext {
     Vibrato.format(members[Category.Vibrato] as Vibrato[], state, this);
 
     // Update width of this member context
-    this.width = state.left_shift + state.right_shift;
+    this.width = state.leftShift + state.rightShift;
     this.preFormatted = true;
   }
 

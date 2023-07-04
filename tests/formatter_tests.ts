@@ -62,7 +62,7 @@ const FormatterTests = {
 /** Calculate the glyph's width in the current music font. */
 // How is this different from Glyph.getWidth()? The numbers don't match up.
 function getGlyphWidth(glyphName: string): number {
-  // `38` seems to be the `font_scale` specified in many classes, such as
+  // `38` seems to be the `fontScale` specified in many classes, such as
   // Accidental, Articulation, Ornament, Strokes. Does this mean `38pt`???
   //
   // However, tables.ts specifies:
@@ -70,7 +70,7 @@ function getGlyphWidth(glyphName: string): number {
   //   TABLATURE_FONT_SCALE: 39,
   const musicFont = Tables.currentMusicFont();
   const glyph: FontGlyph = musicFont.getGlyphs()[glyphName];
-  const widthInEm = (glyph.x_max - glyph.x_min) / musicFont.getResolution();
+  const widthInEm = (glyph.xMax - glyph.xMin) / musicFont.getResolution();
   return widthInEm * 38 * Font.scaleToPxFrom.pt;
 }
 
@@ -142,10 +142,10 @@ function rightJustify(options: TestOptions): void {
     stave.draw();
     voice.draw(f.getContext(), stave);
   };
-  renderTest({ num_beats: 4, beat_value: 4, resolution: 4 * 4096 }, 3, '4', '2', 10, 300);
-  renderTest({ num_beats: 4, beat_value: 4, resolution: 4 * 4096 }, 1, 'w', 'w', 310, 300);
-  renderTest({ num_beats: 3, beat_value: 4, resolution: 4 * 4096 }, 3, '4', '4', 610, 300);
-  renderTest({ num_beats: 3, beat_value: 4, resolution: 4 * 4096 }, 6, '8', '8', 910, 300);
+  renderTest({ numBeats: 4, beatValue: 4, resolution: 4 * 4096 }, 3, '4', '2', 10, 300);
+  renderTest({ numBeats: 4, beatValue: 4, resolution: 4 * 4096 }, 1, 'w', 'w', 310, 300);
+  renderTest({ numBeats: 3, beatValue: 4, resolution: 4 * 4096 }, 3, '4', '4', 610, 300);
+  renderTest({ numBeats: 3, beatValue: 4, resolution: 4 * 4096 }, 6, '8', '8', 910, 300);
   options.assert.ok(true);
 }
 
@@ -163,7 +163,7 @@ function penultimateNote(options: TestOptions): void {
     system = f.System({
       width: staffWidth,
       y,
-      formatOptions: { align_rests: true },
+      formatOptions: { alignRests: true },
       details: { softmaxFactor: softmax },
     });
     notes = [];
@@ -354,9 +354,9 @@ function unalignedNoteDurations2(options: TestOptions): void {
 
   const f = VexFlowTests.makeFactory(options, 750, 280);
   const context = f.getContext();
-  const voice1 = new Voice({ num_beats: 4, beat_value: 4 });
+  const voice1 = new Voice({ numBeats: 4, beatValue: 4 });
   voice1.addTickables(notes1);
-  const voice2 = new Voice({ num_beats: 4, beat_value: 4 });
+  const voice2 = new Voice({ numBeats: 4, beatValue: 4 });
   voice2.addTickables(notes2);
 
   const formatter = new Formatter({ globalSoftmax: options.params.globalSoftmax });
@@ -399,7 +399,7 @@ function alignedMixedElements(options: TestOptions): void {
         new Annotation('ttt').setVerticalJustification(AnnotationVerticalJustify.BOTTOM).setFont('sans-serif', 20),
         0
       ),
-    new StaveNote({ keys: ['c/5'], duration: '8', stem_direction: Stem.DOWN })
+    new StaveNote({ keys: ['c/5'], duration: '8', stemDirection: Stem.DOWN })
       .addModifier(new StringNumber('3').setPosition(ModifierPosition.BELOW), 0)
       .addModifier(new Articulation('a.').setPosition(ModifierPosition.BELOW), 0)
       .addModifier(new Articulation('a>').setPosition(ModifierPosition.BELOW), 0),
@@ -411,7 +411,7 @@ function alignedMixedElements(options: TestOptions): void {
       .addModifier(new StringNumber('3').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('a.').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Annotation('yyyy').setVerticalJustification(AnnotationVerticalJustify.TOP), 0),
-    new StaveNote({ keys: ['c/5'], duration: '8', stem_direction: Stem.DOWN })
+    new StaveNote({ keys: ['c/5'], duration: '8', stemDirection: Stem.DOWN })
       .addModifier(new FretHandFinger('4').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new StringNumber('3').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('a.').setPosition(ModifierPosition.ABOVE), 0)
@@ -561,8 +561,8 @@ function multiStaves(options: TestOptions): void {
     f.Stave({ y: staveYs[2], width: staveWidth }).addClef('bass').addTimeSignature('6/8'),
   ];
   f.StaveConnector({
-    top_stave: staves[1],
-    bottom_stave: staves[2],
+    topStave: staves[1],
+    bottomStave: staves[2],
     type: 'brace',
   });
   for (let i = 0; i < staves.length; ++i) {
@@ -627,10 +627,10 @@ function proportional(options: TestOptions): void {
   const score = f.EasyScore();
   const voices = [
     score.notes('c5/8, c5'),
-    score.tuplet(score.notes('a4/8, a4, a4'), { notes_occupied: 2 }),
+    score.tuplet(score.notes('a4/8, a4, a4'), { notesOccupied: 2 }),
     score.notes('c5/16, c5, c5, c5'),
-    score.tuplet(score.notes('a4/16, a4, a4, a4, a4'), { notes_occupied: 4 }),
-    score.tuplet(score.notes('a4/32, a4, a4, a4, a4, a4, a4'), { notes_occupied: 8 }),
+    score.tuplet(score.notes('a4/16, a4, a4, a4, a4'), { notesOccupied: 4 }),
+    score.tuplet(score.notes('a4/32, a4, a4, a4, a4, a4, a4'), { notesOccupied: 8 }),
   ];
 
   const createVoice = (notes: StemmableNote[]) => score.voice(notes, { time: '1/4' });
@@ -872,7 +872,7 @@ function annotations(options: TestOptions): void {
       }
     });
 
-    const voice1 = new Voice({ num_beats: beats, beat_value: beatsPer }).setMode(Voice.Mode.SOFT).addTickables(notes);
+    const voice1 = new Voice({ numBeats: beats, beatValue: beatsPer }).setMode(Voice.Mode.SOFT).addTickables(notes);
 
     const fmt = new Formatter({ softmaxFactor: sm.sm, maxIterations: 2 }).joinVoices([voice1]);
     fmt.format([voice1], sm.width - 11);

@@ -19,7 +19,7 @@ export class KeySigNote extends Note {
     this.keySignature = new KeySignature(keySpec, cancelKeySpec, alterKeySpec);
 
     // Note properties
-    this.ignore_ticks = true;
+    this.ignoreTicks = true;
   }
 
   /* Overridden to ignore */

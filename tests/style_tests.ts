@@ -65,15 +65,15 @@ function stave(options: TestOptions): void {
 
   const notes = [
     f
-      .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stem_direction: 1, duration: '4' })
+      .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stemDirection: 1, duration: '4' })
       .addModifier(f.Accidental({ type: 'b' }), 0)
       .addModifier(f.Accidental({ type: '#' }), 1),
     f
-      .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stem_direction: 1, duration: '4' })
+      .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stemDirection: 1, duration: '4' })
       .addModifier(f.Accidental({ type: 'b' }), 0)
       .addModifier(f.Accidental({ type: '#' }), 1),
-    f.StaveNote({ keys: ['e/4'], stem_direction: 1, duration: '4' }),
-    f.StaveNote({ keys: ['f/4'], stem_direction: 1, duration: '8' }),
+    f.StaveNote({ keys: ['e/4'], stemDirection: 1, duration: '4' }),
+    f.StaveNote({ keys: ['f/4'], stemDirection: 1, duration: '8' }),
 
     // voice.draw() test.
     f.TextDynamics({ text: 'sfz', duration: '16' }).setStyle(FS('blue')),
@@ -134,7 +134,7 @@ function tab(options: TestOptions, contextBuilder: ContextBuilder): void {
       duration: 'h',
     })
       .addModifier(new Bend('Full').setStyle(FS('brown')), 0)
-      .addStroke(0, new Stroke(1, { all_voices: false }).setStyle(FS('blue'))),
+      .addStroke(0, new Stroke(1, { allVoices: false }).setStyle(FS('blue'))),
   ];
 
   Formatter.FormatAndDraw(ctx, stave, notes);

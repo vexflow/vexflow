@@ -38,8 +38,8 @@ export interface FontMetrics extends Record<string, any> {
   smufl: boolean;
   stave?: Record<string, number>;
   accidental?: Record<string, number>;
-  clef_default?: ClefMetrics;
-  clef_small?: ClefMetrics;
+  clefDefault?: ClefMetrics;
+  clefSmall?: ClefMetrics;
   pedalMarking?: Record<string, Record<string, number>>;
   digits?: Record<string, number>;
   articulation?: Record<string, Record<string, number>>;
@@ -62,10 +62,10 @@ export interface FontMetrics extends Record<string, any> {
 }
 
 export interface FontGlyph {
-  x_min: number;
-  x_max: number;
-  y_min?: number;
-  y_max?: number;
+  xMin: number;
+  xMax: number;
+  yMin?: number;
+  yMax?: number;
   ha: number;
   leftSideBearing?: number;
   advanceWidth?: number;
@@ -73,7 +73,7 @@ export interface FontGlyph {
   // The o (outline) field is optional, because robotoslab_glyphs.ts & petalumascript_glyphs.ts
   // do not include glyph outlines. We rely on *.woff files to provide the glyph outlines.
   o?: string;
-  cached_outline?: number[];
+  cachedOutline?: number[];
 }
 
 export enum FontWeight {

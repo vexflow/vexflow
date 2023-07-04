@@ -20,7 +20,7 @@ export class TimeSigNote extends Note {
     this.setWidth(this.timeSig.getGlyph().getMetrics().width);
 
     // Note properties
-    this.ignore_ticks = true;
+    this.ignoreTicks = true;
   }
 
   /* Overridden to ignore */

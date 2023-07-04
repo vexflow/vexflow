@@ -32,7 +32,7 @@ export class NoteSubGroup extends Modifier {
       width += group.getWidth();
     }
 
-    state.left_shift += width;
+    state.leftShift += width;
     return true;
   }
 
@@ -53,8 +53,8 @@ export class NoteSubGroup extends Modifier {
 
     this.formatter = new Formatter();
     this.voice = new Voice({
-      num_beats: 4,
-      beat_value: 4,
+      numBeats: 4,
+      beatValue: 4,
       resolution: Tables.RESOLUTION,
     }).setStrict(false);
 

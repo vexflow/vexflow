@@ -64,14 +64,14 @@ function tremoloBig(options: TestOptions): void {
   const notes1 = score.notes('e4/4, e4, e4, e4', { stem: 'up' });
 
   const tremolo1 = new Tremolo(3);
-  tremolo1.extra_stroke_scale = 1.7;
-  tremolo1.y_spacing_scale = 1.5;
+  tremolo1.extraStrokeScale = 1.7;
+  tremolo1.ySpacingScale = 1.5;
   const tremolo2 = new Tremolo(2);
-  tremolo2.extra_stroke_scale = 1.7;
-  tremolo2.y_spacing_scale = 1.5;
+  tremolo2.extraStrokeScale = 1.7;
+  tremolo2.ySpacingScale = 1.5;
   const tremolo3 = new Tremolo(1);
-  tremolo3.extra_stroke_scale = 1.7;
-  tremolo3.y_spacing_scale = 1.5;
+  tremolo3.extraStrokeScale = 1.7;
+  tremolo3.ySpacingScale = 1.5;
   notes1[0].addModifier(tremolo1, 0);
   notes1[1].addModifier(tremolo2, 0);
   notes1[2].addModifier(tremolo3, 0);
@@ -88,14 +88,14 @@ function tremoloBig(options: TestOptions): void {
   const notes2 = score.notes('e5/4, e5, e5, e5', { stem: 'down' });
 
   const tremolo4 = new Tremolo(1);
-  tremolo4.extra_stroke_scale = 1.7;
-  tremolo4.y_spacing_scale = 1.5;
+  tremolo4.extraStrokeScale = 1.7;
+  tremolo4.ySpacingScale = 1.5;
   const tremolo5 = new Tremolo(2);
-  tremolo5.extra_stroke_scale = 1.7;
-  tremolo5.y_spacing_scale = 1.5;
+  tremolo5.extraStrokeScale = 1.7;
+  tremolo5.ySpacingScale = 1.5;
   const tremolo6 = new Tremolo(3);
-  tremolo6.extra_stroke_scale = 1.7;
-  tremolo6.y_spacing_scale = 1.5;
+  tremolo6.extraStrokeScale = 1.7;
+  tremolo6.ySpacingScale = 1.5;
   notes2[1].addModifier(tremolo4, 0);
   notes2[2].addModifier(tremolo5, 0);
   notes2[3].addModifier(tremolo6, 0);

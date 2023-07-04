@@ -25,7 +25,7 @@ import { RuntimeError } from './util';
 // for both multi-labeling (e.g., an element can have multiple classes)
 // and efficient lookup.
 class Index {
-  // [attribute_name][attribute_value][element_id] => Element
+  // [attributeName][attributeValue][elementId] => Element
   [key: string]: { [key: string]: { [key: string]: Element } };
   constructor() {
     this.id = {};
@@ -115,12 +115,12 @@ export class Registry {
   }
 
   getElementsByAttribute(attribute: string, value: string): Element[] {
-    const index_attr = this.index[attribute];
-    if (index_attr) {
-      const index_attr_val = index_attr[value];
-      if (index_attr_val) {
-        const keys = Object.keys(index_attr_val);
-        return keys.map((k) => index_attr_val[k]);
+    const indexAttr = this.index[attribute];
+    if (indexAttr) {
+      const indexAttrVal = indexAttr[value];
+      if (indexAttrVal) {
+        const keys = Object.keys(indexAttrVal);
+        return keys.map((k) => indexAttrVal[k]);
       }
     }
     return [];
