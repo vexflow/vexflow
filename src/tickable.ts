@@ -53,8 +53,8 @@ export abstract class Tickable extends Element {
   protected intrinsicTicks: number;
   protected alignCenter: boolean;
 
-  private _preFormatted: boolean = false;
-  private _postFormatted: boolean = false;
+  #preFormatted: boolean = false;
+  #postFormatted: boolean = false;
 
   constructor() {
     super();
@@ -132,7 +132,7 @@ export abstract class Tickable extends Element {
 
   /** Get width of note. Used by the formatter for positioning. */
   getWidth(): number {
-    if (!this._preFormatted) {
+    if (!this.#preFormatted) {
       throw new RuntimeError('UnformattedNote', "Can't call GetWidth on an unformatted note.");
     }
 
@@ -269,7 +269,7 @@ export abstract class Tickable extends Element {
       this.modifierContext.addMember(this.modifiers[i]);
     }
     this.modifierContext.addMember(this);
-    this._preFormatted = false;
+    this.#preFormatted = false;
     return this;
   }
 
@@ -280,7 +280,7 @@ export abstract class Tickable extends Element {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   addModifier(modifier: Modifier, index: number = 0): this {
     this.modifiers.push(modifier);
-    this._preFormatted = false;
+    this.#preFormatted = false;
     return this;
   }
 
@@ -292,7 +292,7 @@ export abstract class Tickable extends Element {
   /** Set the Tick Context. */
   setTickContext(tc: TickContext): void {
     this.tickContext = tc;
-    this._preFormatted = false;
+    this.#preFormatted = false;
   }
 
   checkTickContext(message = 'Tickable has no tick context.'): TickContext {
@@ -301,7 +301,7 @@ export abstract class Tickable extends Element {
 
   /** Preformat the Tickable. */
   preFormat(): void {
-    if (this._preFormatted) return;
+    if (this.#preFormatted) return;
 
     this.width = 0;
     if (this.modifierContext) {
@@ -312,27 +312,27 @@ export abstract class Tickable extends Element {
 
   /** Set preformatted status. */
   set preFormatted(value: boolean) {
-    this._preFormatted = value;
+    this.#preFormatted = value;
   }
 
   get preFormatted(): boolean {
-    return this._preFormatted;
+    return this.#preFormatted;
   }
 
   /** Postformat the Tickable. */
   postFormat(): this {
-    if (this._postFormatted) return this;
-    this._postFormatted = true;
+    if (this.#postFormatted) return this;
+    this.#postFormatted = true;
     return this;
   }
 
   /** Set postformatted status. */
   set postFormatted(value: boolean) {
-    this._postFormatted = value;
+    this.#postFormatted = value;
   }
 
   get postFormatted(): boolean {
-    return this._postFormatted;
+    return this.#postFormatted;
   }
 
   /** Return the intrinsic ticks. */

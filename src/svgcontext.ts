@@ -547,7 +547,7 @@ export class SVGContext extends RenderContext {
     return this;
   }
 
-  private getShadowStyle(): string {
+  #getShadowStyle(): string {
     const sa = this.shadowAttributes;
     // A CSS drop-shadow filter blur looks different than a canvas shadowBlur
     // of the same radius, so we scale the drop-shadow radius here to make it
@@ -563,7 +563,7 @@ export class SVGContext extends RenderContext {
 
     attributes.d = this.path;
     if ((this.shadowAttributes.width as number) > 0) {
-      attributes.style = this.getShadowStyle();
+      attributes.style = this.#getShadowStyle();
     }
 
     this.applyAttributes(path, attributes);
@@ -580,7 +580,7 @@ export class SVGContext extends RenderContext {
       d: this.path,
     };
     if ((this.shadowAttributes.width as number) > 0) {
-      attributes.style = this.getShadowStyle();
+      attributes.style = this.#getShadowStyle();
     }
 
     this.applyAttributes(path, attributes);

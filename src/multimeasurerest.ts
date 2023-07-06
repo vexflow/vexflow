@@ -79,10 +79,10 @@ export class MultiMeasureRest extends Element {
 
   protected stave?: Stave;
 
-  private hasPaddingLeft = false;
-  private hasPaddingRight = false;
-  private hasLineThickness = false;
-  private hasSymbolSpacing = false;
+  #hasPaddingLeft = false;
+  #hasPaddingRight = false;
+  #hasLineThickness = false;
+  #hasSymbolSpacing = false;
 
   /**
    *
@@ -95,10 +95,10 @@ export class MultiMeasureRest extends Element {
     this.numberOfMeasures = numberOfMeasures;
 
     // Keep track of whether these four options were provided.
-    this.hasPaddingLeft = typeof options.paddingLeft === 'number';
-    this.hasPaddingRight = typeof options.paddingRight === 'number';
-    this.hasLineThickness = typeof options.lineThickness === 'number';
-    this.hasSymbolSpacing = typeof options.symbolSpacing === 'number';
+    this.#hasPaddingLeft = typeof options.paddingLeft === 'number';
+    this.#hasPaddingRight = typeof options.paddingRight === 'number';
+    this.#hasLineThickness = typeof options.lineThickness === 'number';
+    this.#hasSymbolSpacing = typeof options.symbolSpacing === 'number';
 
     const musicFont = Tables.currentMusicFont();
     this.renderOptions = {
@@ -147,7 +147,7 @@ export class MultiMeasureRest extends Element {
     right -= padding;
 
     let lineThicknessHalf;
-    if (this.hasLineThickness) {
+    if (this.#hasLineThickness) {
       lineThicknessHalf = options.lineThickness * 0.5;
     } else {
       lineThicknessHalf = spacingBetweenLines * 0.25;
@@ -203,7 +203,7 @@ export class MultiMeasureRest extends Element {
     };
 
     /* 10: normal spacingBetweenLines */
-    const spacing = this.hasSymbolSpacing ? options.symbolSpacing : 10;
+    const spacing = this.#hasSymbolSpacing ? options.symbolSpacing : 10;
 
     const width = n4 * glyphs[2].width + n2 * glyphs[2].width + n1 * glyphs[1].width + (n4 + n2 + n1 - 1) * spacing;
     let x = left + (right - left) * 0.5 - width * 0.5;
@@ -252,10 +252,10 @@ export class MultiMeasureRest extends Element {
     }
 
     const options = this.renderOptions;
-    if (this.hasPaddingLeft) {
+    if (this.#hasPaddingLeft) {
       left = stave.getX() + options.paddingLeft;
     }
-    if (this.hasPaddingRight) {
+    if (this.#hasPaddingRight) {
       right = stave.getX() + stave.getWidth() - options.paddingRight;
     }
 

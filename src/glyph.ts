@@ -100,25 +100,32 @@ class GlyphCache {
 }
 
 class GlyphOutline {
-  private i: number = 0;
-  private precision = 1;
+  #i: number = 0;
+  #outline: number[];
+  #originX: number;
+  #originY: number;
+  #scale: number;
+  #precision = 1;
 
-  constructor(private outline: number[], private originX: number, private originY: number, private scale: number) {
-    // Automatically assign private properties: this.outline, this.originX, this.originY, and this.scale.
-    this.precision = Math.pow(10, Tables.RENDER_PRECISION_PLACES);
+  constructor(outline: number[], originX: number, originY: number, scale: number) {
+    this.#outline = outline;
+    this.#originX = originX;
+    this.#originY = originY;
+    this.#scale = scale;
+    this.#precision = Math.pow(10, Tables.RENDER_PRECISION_PLACES);
   }
 
   done(): boolean {
-    return this.i >= this.outline.length;
+    return this.#i >= this.#outline.length;
   }
   next(): number {
-    return Math.round((this.outline[this.i++] * this.precision) / this.precision);
+    return Math.round((this.#outline[this.#i++] * this.#precision) / this.#precision);
   }
   nextX(): number {
-    return Math.round((this.originX + this.outline[this.i++] * this.scale) * this.precision) / this.precision;
+    return Math.round((this.#originX + this.#outline[this.#i++] * this.#scale) * this.#precision) / this.#precision;
   }
   nextY(): number {
-    return Math.round((this.originY - this.outline[this.i++] * this.scale) * this.precision) / this.precision;
+    return Math.round((this.#originY - this.#outline[this.#i++] * this.#scale) * this.#precision) / this.#precision;
   }
 
   static parse(str: string): number[] {

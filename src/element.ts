@@ -88,10 +88,11 @@ export abstract class Element {
     style: FontStyle.NORMAL,
   };
 
-  private context?: RenderContext;
+  #context?: RenderContext;
+  #attrs: ElementAttributes;
+
   protected rendered: boolean;
   protected style?: ElementStyle;
-  private attrs: ElementAttributes;
   protected boundingBox?: BoundingBox;
   protected registry?: Registry;
 
@@ -103,7 +104,7 @@ export abstract class Element {
   protected textFont?: Required<FontInfo>;
 
   constructor() {
-    this.attrs = {
+    this.#attrs = {
       id: Element.newID(),
       type: this.getCategory(),
       class: '',
@@ -174,7 +175,7 @@ export abstract class Element {
 
   /** Apply the element style to `context`. */
   applyStyle(
-    context: RenderContext | undefined = this.context,
+    context: RenderContext | undefined = this.#context,
     style: ElementStyle | undefined = this.getStyle()
   ): this {
     if (!style) return this;
@@ -191,7 +192,7 @@ export abstract class Element {
 
   /** Restore the style of `context`. */
   restoreStyle(
-    context: RenderContext | undefined = this.context,
+    context: RenderContext | undefined = this.#context,
     style: ElementStyle | undefined = this.getStyle()
   ): this {
     if (!style) return this;
@@ -217,17 +218,17 @@ export abstract class Element {
 
   /** Check if it has a class label (An element can have multiple class labels).  */
   hasClass(className: string): boolean {
-    if (!this.attrs.class) return false;
-    return this.attrs.class?.split(' ').indexOf(className) != -1;
+    if (!this.#attrs.class) return false;
+    return this.#attrs.class?.split(' ').indexOf(className) != -1;
   }
 
   /** Add a class label (An element can have multiple class labels).  */
   addClass(className: string): this {
     if (this.hasClass(className)) return this;
-    if (!this.attrs.class) this.attrs.class = `${className}`;
-    else this.attrs.class = `${this.attrs.class} ${className}`;
+    if (!this.#attrs.class) this.#attrs.class = `${className}`;
+    else this.#attrs.class = `${this.#attrs.class} ${className}`;
     this.registry?.onUpdate({
-      id: this.attrs.id,
+      id: this.#attrs.id,
       name: 'class',
       value: className,
       oldValue: undefined,
@@ -238,13 +239,13 @@ export abstract class Element {
   /** Remove a class label (An element can have multiple class labels).  */
   removeClass(className: string): this {
     if (!this.hasClass(className)) return this;
-    const arr = this.attrs.class?.split(' ');
+    const arr = this.#attrs.class?.split(' ');
     if (arr) {
       arr.splice(arr.indexOf(className));
-      this.attrs.class = arr.join(' ');
+      this.#attrs.class = arr.join(' ');
     }
     this.registry?.onUpdate({
-      id: this.attrs.id,
+      id: this.#attrs.id,
       name: 'class',
       value: undefined,
       oldValue: className,
@@ -271,27 +272,27 @@ export abstract class Element {
 
   /** Return the element attributes. */
   getAttributes(): ElementAttributes {
-    return this.attrs;
+    return this.#attrs;
   }
 
   /** Return an attribute, such as 'id', 'type' or 'class'. */
   // eslint-disable-next-line
   getAttribute(name: string): any {
-    return this.attrs[name];
+    return this.#attrs[name];
   }
 
   /** Return associated SVGElement. */
   getSVGElement(suffix: string = ''): SVGElement | undefined {
-    const id = prefix(this.attrs.id + suffix);
+    const id = prefix(this.#attrs.id + suffix);
     const element = document.getElementById(id);
     if (element) return element as unknown as SVGElement;
   }
 
   /** Set an attribute such as 'id', 'class', or 'type'. */
   setAttribute(name: string, value: string | undefined): this {
-    const oldID = this.attrs.id;
-    const oldValue = this.attrs[name];
-    this.attrs[name] = value;
+    const oldID = this.#attrs.id;
+    const oldValue = this.#attrs[name];
+    this.#attrs[name] = value;
     // Register with old id to support id changes.
     this.registry?.onUpdate({ id: oldID, name, value, oldValue });
     return this;
@@ -304,18 +305,18 @@ export abstract class Element {
 
   /** Return the context, such as an SVGContext or CanvasContext object. */
   getContext(): RenderContext | undefined {
-    return this.context;
+    return this.#context;
   }
 
   /** Set the context to an SVGContext or CanvasContext object */
   setContext(context?: RenderContext): this {
-    this.context = context;
+    this.#context = context;
     return this;
   }
 
   /** Validate and return the rendering context. */
   checkContext(): RenderContext {
-    return defined(this.context, 'NoContext', 'No rendering context attached to instance.');
+    return defined(this.#context, 'NoContext', 'No rendering context attached to instance.');
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
