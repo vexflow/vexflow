@@ -1,7 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // @author: Larry Kuhns 2011
 
-import { Font, FontInfo, FontStyle, FontWeight } from './font';
 import { Stave } from './stave';
 import { StaveModifier } from './stavemodifier';
 import { Category } from './typeguard';
@@ -23,13 +22,6 @@ export class Volta extends StaveModifier {
     return VoltaType;
   }
 
-  static TEXT_FONT: Required<FontInfo> = {
-    family: Font.SANS_SERIF,
-    size: 9,
-    weight: FontWeight.BOLD,
-    style: FontStyle.NORMAL,
-  };
-
   protected volta: number;
   protected number: string;
 
@@ -41,7 +33,6 @@ export class Volta extends StaveModifier {
     this.x = x;
     this.yShift = yShift;
     this.number = number;
-    this.resetFont();
   }
 
   setShiftY(y: number): this {

@@ -3,7 +3,6 @@
 // Class to draws string numbers into the notation.
 
 import { Builder } from './easyscore';
-import { Font, FontInfo, FontStyle, FontWeight } from './font';
 import { Modifier, ModifierPosition } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { StemmableNote } from './stemmablenote';
@@ -16,13 +15,6 @@ export class FretHandFinger extends Modifier {
   static get CATEGORY(): string {
     return Category.FretHandFinger;
   }
-
-  static TEXT_FONT: Required<FontInfo> = {
-    family: Font.SANS_SERIF,
-    size: 9,
-    weight: FontWeight.BOLD,
-    style: FontStyle.NORMAL,
-  };
 
   // Arrange fingerings inside a ModifierContext.
   static format(nums: FretHandFinger[], state: ModifierContextState): boolean {
@@ -135,11 +127,9 @@ export class FretHandFinger extends Modifier {
     this.finger = finger;
     this.width = 7;
     this.position = Modifier.Position.LEFT; // Default position above stem or note head
-    this.xShift = 0;
-    this.yShift = 0;
     this.xOffset = 0; // Horizontal offset from default
     this.yOffset = 0; // Vertical offset from default
-    this.resetFont();
+    
   }
 
   setFretHandFinger(finger: string): this {

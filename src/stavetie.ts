@@ -4,7 +4,6 @@
 // ties include: regular ties, hammer ons, pull offs, and slides.
 
 import { Element } from './element';
-import { FontInfo } from './font';
 import { Note } from './note';
 import { Category } from './typeguard';
 import { RuntimeError } from './util';
@@ -24,9 +23,6 @@ export class StaveTie extends Element {
     return Category.StaveTie;
   }
 
-  /** Default text font. */
-  static TEXT_FONT: Required<FontInfo> = { ...Element.TEXT_FONT };
-
   public renderOptions: {
     cp2: number;
     lastXShift: number;
@@ -36,8 +32,6 @@ export class StaveTie extends Element {
     textShiftX: number;
     yShift: number;
   };
-
-  protected text?: string;
 
   // notes is initialized by the constructor via this.setNotes(notes).
   protected notes!: TieNotes;
@@ -56,7 +50,7 @@ export class StaveTie extends Element {
    *
    * @param text
    */
-  constructor(notes: TieNotes, text?: string) {
+  constructor(notes: TieNotes, text = '') {
     super();
     this.setNotes(notes);
     this.text = text;
@@ -69,8 +63,6 @@ export class StaveTie extends Element {
       yShift: 7,
       tieSpacing: 0,
     };
-
-    this.resetFont();
   }
 
   setDirection(direction: number): this {
@@ -168,7 +160,7 @@ export class StaveTie extends Element {
    * @param firstX specified in pixels
    * @param lastX specified in pixels
    */
-  renderText(firstX: number, lastX: number): void {
+  renderTieText(firstX: number, lastX: number): void {
     if (!this.text) return;
     const ctx = this.checkContext();
     let centerX = (firstX + lastX) / 2;
@@ -238,7 +230,7 @@ export class StaveTie extends Element {
       direction: stemDirection,
     });
 
-    this.renderText(firstX, lastX);
+    this.renderTieText(firstX, lastX);
     return true;
   }
 }

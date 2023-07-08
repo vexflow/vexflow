@@ -3,11 +3,12 @@
 // @author Mohit Cheppudira
 
 import { BoundingBox } from './boundingbox';
-import { Font, FontInfo, FontStyle, FontWeight } from './font';
+import { Font, FontInfo } from './font';
 import { Registry } from './registry';
 import { RenderContext } from './rendercontext';
+import { Tables } from './tables';
 import { Category } from './typeguard';
-import { defined, prefix } from './util';
+import { defined, prefix, RuntimeError } from './util';
 
 /** Element attributes. */
 export interface ElementAttributes {
@@ -59,12 +60,11 @@ export interface ElementStyle {
  * Element implements a generic base class for VexFlow, with implementations
  * of general functions and properties that can be inherited by all VexFlow elements.
  *
- * The Element is an abstract class that needs to be subclassed to work. It handles
- * style and text-font properties for the Element and any child elements, along with
- * working with the Registry to create unique ids, but does not have any tools for
- * formatting x or y positions or connections to a Stave.
+ * The Element handles style and text-font properties for the Element and any child
+ * elements, along with working with the Registry to create unique ids, but does not
+ * have any tools for formatting x or y positions or connections to a Stave.
  */
-export abstract class Element {
+export class Element {
   static get CATEGORY(): string {
     return Category.Element;
   }
@@ -77,17 +77,6 @@ export abstract class Element {
     return `auto${Element.ID++}`;
   }
 
-  /**
-   * Default font for text. This is not related to music engraving. Instead, see `Flow.setMusicFont(...fontNames)`
-   * to customize the font for musical symbols placed on the score.
-   */
-  static TEXT_FONT: Required<FontInfo> = {
-    family: Font.SANS_SERIF,
-    size: Font.SIZE,
-    weight: FontWeight.NORMAL,
-    style: FontStyle.NORMAL,
-  };
-
   #context?: RenderContext;
   #attrs: ElementAttributes;
 
@@ -97,20 +86,38 @@ export abstract class Element {
   protected registry?: Registry;
 
   /**
-   * Some elements include text.
    * The `textFont` property contains information required to style the text (i.e., font family, size, weight, and style).
-   * It is undefined by default, and can be set using `setFont(...)` or `resetFont()`.
    */
-  protected textFont?: Required<FontInfo>;
+  protected textFont: Required<FontInfo>;
+  protected text = '';
+  protected textMetrics: TextMetrics = {
+    fontBoundingBoxAscent: 0,
+    fontBoundingBoxDescent: 0,
+    actualBoundingBoxAscent: 0,
+    actualBoundingBoxDescent: 0,
+    actualBoundingBoxLeft: 0,
+    actualBoundingBoxRight: 0,
+    width: 0,
+  };
 
-  constructor() {
+  protected width: number = 0;
+  protected yShift: number = 0;
+  protected xShift: number = 0;
+
+  constructor(category?: string) {
     this.#attrs = {
       id: Element.newID(),
-      type: this.getCategory(),
+      type: category ? category : (<typeof Element>this.constructor).CATEGORY,
       class: '',
     };
 
     this.rendered = false;
+    this.textFont = {
+      family: Tables.lookupMetric(`${this.#attrs.type}.fontFamily`),
+      size: Tables.lookupMetric(`${this.#attrs.type}.fontSize`),
+      weight: Tables.lookupMetric(`${this.#attrs.type}.fontWeight`),
+      style: Tables.lookupMetric(`${this.#attrs.type}.fontStyle`),
+    };
 
     // If a default registry exist, then register with it right away.
     Registry.getDefaultRegistry()?.register(this);
@@ -131,7 +138,7 @@ export abstract class Element {
   }
 
   getCategory(): string {
-    return (<typeof Element>this.constructor).CATEGORY;
+    return `${this.#attrs.type}`;
   }
 
   /**
@@ -213,8 +220,9 @@ export abstract class Element {
   }
 
   /** Draw an element. */
-  // eslint-disable-next-line
-  abstract draw(...args: any[]): void;
+  draw(): void {
+    throw new RuntimeError('Element', 'Draw not defined');
+  }
 
   /** Check if it has a class label (An element can have multiple class labels).  */
   hasClass(className: string): boolean {
@@ -351,12 +359,15 @@ export abstract class Element {
    * Each Element subclass may specify its own default by overriding the static `TEXT_FONT` property.
    */
   setFont(font?: string | FontInfo, size?: string | number, weight?: string | number, style?: string): this {
-    // Allow subclasses to override `TEXT_FONT`.
-    const defaultTextFont: Required<FontInfo> = (<typeof Element>this.constructor).TEXT_FONT;
+    const defaultTextFont: Required<FontInfo> = {
+      family: Tables.lookupMetric(`${this.#attrs.type}.fontFamily`),
+      size: Tables.lookupMetric(`${this.#attrs.type}.fontSize`),
+      weight: Tables.lookupMetric(`${this.#attrs.type}.fontWeight`),
+      style: Tables.lookupMetric(`${this.#attrs.type}.fontStyle`),
+    };
 
     const fontIsObject = typeof font === 'object';
     const fontIsString = typeof font === 'string';
-    const fontIsUndefined = font === undefined;
     const sizeWeightStyleAreUndefined = size === undefined && weight === undefined && style === undefined;
 
     if (fontIsObject) {
@@ -365,13 +376,7 @@ export abstract class Element {
     } else if (fontIsString && sizeWeightStyleAreUndefined) {
       // `font` is case 2) CSS font shorthand.
       this.textFont = Font.fromCSSString(font);
-    } else if (fontIsUndefined && sizeWeightStyleAreUndefined) {
-      // All arguments are undefined. Do not check for `arguments.length === 0`,
-      // which fails on the edge case: `setFont(undefined)`.
-      // TODO: See if we can remove this case entirely without introducing a visual diff.
-      // The else case below seems like it should be equivalent to this case.
-      this.textFont = { ...defaultTextFont };
-    } else {
+     } else {
       // `font` is case 3) a font family string (e.g., 'Times New Roman').
       // The other parameters represent the size, weight, and style.
       // It is okay for `font` to be undefined while one or more of the other arguments is provided.
@@ -383,6 +388,7 @@ export abstract class Element {
         style ?? defaultTextFont.style
       );
     }
+    this.measureText();
     return this;
   }
 
@@ -391,28 +397,14 @@ export abstract class Element {
    * 'bold 10pt Arial'.
    */
   getFont(): string {
-    if (!this.textFont) {
-      this.resetFont();
-    }
     return Font.toCSSString(this.textFont);
-  }
-
-  /**
-   * Reset the text font to the style indicated by the static `TEXT_FONT` property.
-   * Subclasses can call this to initialize `textFont` for the first time.
-   */
-  resetFont(): void {
-    this.setFont();
   }
 
   /** Return a copy of the current FontInfo object. */
   get fontInfo(): Required<FontInfo> {
-    if (!this.textFont) {
-      this.resetFont();
-    }
     // We can cast to Required<FontInfo> here, because
     // we just called resetFont() above to ensure this.textFont is set.
-    return { ...this.textFont } as Required<FontInfo>;
+    return this.textFont;
   }
 
   set fontInfo(fontInfo: FontInfo) {
@@ -490,5 +482,96 @@ export abstract class Element {
   set fontWeight(weight: string | number) {
     const fontInfo = this.fontInfo;
     this.setFont(fontInfo.family, fontInfo.size, weight, fontInfo.style);
+  }
+
+  /** Get element width. */
+  getWidth(): number {
+    return this.width;
+  }
+
+  /** Set element width. */
+  setWidth(width: number): this {
+    this.width = width;
+    return this;
+  }
+
+  /** Shift element down `y` pixels. Negative values shift up. */
+  setYShift(y: number): this {
+    this.yShift = y;
+    return this;
+  }
+
+  /** Get shift element `y` */
+  getYShift(): number {
+    return this.yShift;
+  }
+
+  /**
+   * Set shift element right `x` pixels. Negative values shift left.
+   */
+  setXShift(x: number): this {
+    this.xShift = x;
+    return this;
+  }
+
+  /** Get shift element `x` */
+  getXShift(): number {
+    return this.xShift;
+  }
+
+  /**
+   * Set element text
+   */
+  setText(txt: string): this {
+    this.text = txt;
+    return this;
+  }
+
+  /** Get element text */
+  getText(): string {
+    return this.text;
+  }
+
+  /**
+   * Render the element text .
+   */
+  renderText(ctx: RenderContext, xPos: number, yPos: number): void {
+    ctx.save();
+    ctx.setFont(this.textFont);
+    ctx.fillText(this.text, xPos + this.xShift, yPos + this.yShift);
+    ctx.restore();
+  }
+
+  /** Canvas used to measure text */
+  protected static txtCanvas?: HTMLCanvasElement;
+
+  measureText(): TextMetrics {
+    let txtCanvas = Element.txtCanvas;
+    if (!txtCanvas) {
+      // Create the SVG text element that will be used to measure text in the event
+      // of a cache miss.
+      txtCanvas = document.createElement('canvas');
+      Element.txtCanvas = txtCanvas;
+    }
+    const context = txtCanvas.getContext('2d');
+    if (!context) throw new RuntimeError('Font', 'No txt context');
+    context.font = Font.toCSSString(Font.validate(this.textFont));
+    this.textMetrics = context.measureText(this.text);
+    this.boundingBox = new BoundingBox(
+      0,
+      -this.textMetrics.actualBoundingBoxAscent,
+      this.textMetrics.width,
+      this.textMetrics.actualBoundingBoxDescent + this.textMetrics.actualBoundingBoxAscent
+    );
+    this.width = this.textMetrics.width;
+    return this.textMetrics;
+  }
+
+  getTextMetrics(): TextMetrics {
+    return this.textMetrics;
+  }
+
+  getHeight() {
+    return this.textMetrics.actualBoundingBoxDescent + this.textMetrics.actualBoundingBoxAscent;
   }
 }

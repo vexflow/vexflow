@@ -6,7 +6,7 @@
 // using this class.
 
 import { Element } from './element';
-import { Font, FontInfo, FontStyle, FontWeight } from './font';
+import { Font } from './font';
 import { Note } from './note';
 import { RenderContext } from './rendercontext';
 import { Renderer } from './renderer';
@@ -39,13 +39,6 @@ export class TextBracket extends Element {
   static get CATEGORY(): string {
     return Category.TextBracket;
   }
-
-  static TEXT_FONT: Required<FontInfo> = {
-    family: Font.SERIF,
-    size: 15,
-    weight: FontWeight.NORMAL,
-    style: FontStyle.ITALIC,
-  };
 
   public renderOptions: {
     dashed: boolean;
@@ -105,8 +98,6 @@ export class TextBracket extends Element {
     this.position = typeof position === 'string' ? TextBracket.PositionString[position] : position;
 
     this.line = 1;
-
-    this.resetFont();
 
     this.renderOptions = {
       dashed: true,

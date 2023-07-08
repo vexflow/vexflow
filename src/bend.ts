@@ -31,9 +31,6 @@ export class Bend extends Modifier {
     return 1;
   }
 
-  /** Default text font. */
-  static TEXT_FONT: Required<FontInfo> = { ...Element.TEXT_FONT };
-
   // Arrange bends in `ModifierContext`
   static format(bends: Bend[], state: ModifierContextState): boolean {
     if (!bends || bends.length === 0) return false;
@@ -109,10 +106,9 @@ export class Bend extends Modifier {
     super();
 
     this.text = text;
-    this.xShift = 0;
     this.release = release;
     this.tap = '';
-    this.resetFont();
+
     this.renderOptions = {
       lineWidth: 1.5,
       lineStyle: '#777777',

@@ -1,7 +1,7 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // @author: Larry Kuhns 2011
 
-import { Font, FontInfo, FontStyle, FontWeight } from './font';
+import { Font } from './font';
 import { Glyph } from './glyph';
 import { Stave } from './stave';
 import { StaveModifier } from './stavemodifier';
@@ -12,13 +12,6 @@ export class Repetition extends StaveModifier {
   static get CATEGORY(): string {
     return Category.Repetition;
   }
-
-  static TEXT_FONT: Required<FontInfo> = {
-    family: Font.SERIF,
-    size: Tables.NOTATION_FONT_SCALE / 3,
-    weight: FontWeight.BOLD,
-    style: FontStyle.NORMAL,
-  };
 
   static readonly type = {
     NONE: 1, // no coda or segno
@@ -48,8 +41,6 @@ export class Repetition extends StaveModifier {
     this.x = x;
     this.xShift = 0;
     this.yShift = yShift;
-
-    this.resetFont();
   }
 
   setShiftX(x: number): this {

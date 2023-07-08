@@ -9,7 +9,6 @@
 // purposes, such as diagrams.
 
 import { Element } from './element';
-import { FontInfo } from './font';
 import { RenderContext } from './rendercontext';
 import { StaveNote } from './stavenote';
 import { Tables } from './tables';
@@ -53,9 +52,6 @@ export class StaveLine extends Element {
   static get CATEGORY(): string {
     return Category.StaveLine;
   }
-
-  /** Default text font. */
-  static TEXT_FONT: Required<FontInfo> = { ...Element.TEXT_FONT };
 
   // Text Positioning
   static readonly TextVerticalPosition = {
@@ -107,7 +103,6 @@ export class StaveLine extends Element {
     this.setNotes(notes);
 
     this.text = '';
-    this.resetFont();
 
     this.renderOptions = {
       // Space to add to the left or the right

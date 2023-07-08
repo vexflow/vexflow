@@ -747,10 +747,10 @@ function configureAllLines(options: TestOptions, contextBuilder: ContextBuilder)
 function drawStaveText(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 900, 140);
   const stave = new Stave(300, 10, 300);
-  stave.setText('Violin', Modifier.Position.LEFT);
-  stave.setText('Right Text', Modifier.Position.RIGHT);
-  stave.setText('Above Text', Modifier.Position.ABOVE);
-  stave.setText('Below Text', Modifier.Position.BELOW);
+  stave.setStaveText('Violin', Modifier.Position.LEFT);
+  stave.setStaveText('Right Text', Modifier.Position.RIGHT);
+  stave.setStaveText('Above Text', Modifier.Position.ABOVE);
+  stave.setStaveText('Below Text', Modifier.Position.BELOW);
   stave.setContext(ctx).draw();
 
   options.assert.ok(true, 'all pass');
@@ -759,14 +759,20 @@ function drawStaveText(options: TestOptions, contextBuilder: ContextBuilder): vo
 function drawStaveTextMultiLine(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 900, 200);
   const stave = new Stave(300, 40, 300);
-  stave.setText('Violin', Modifier.Position.LEFT, { shiftY: -10 });
-  stave.setText('2nd line', Modifier.Position.LEFT, { shiftY: 10 });
-  stave.setText('Right Text', Modifier.Position.RIGHT, { shiftY: -10 });
-  stave.setText('2nd line', Modifier.Position.RIGHT, { shiftY: 10 });
-  stave.setText('Above Text', Modifier.Position.ABOVE, { shiftY: -10 });
-  stave.setText('2nd line', Modifier.Position.ABOVE, { shiftY: 10 });
-  stave.setText('Left Below Text', Modifier.Position.BELOW, { shiftY: -10, justification: TextJustification.LEFT });
-  stave.setText('Right Below Text', Modifier.Position.BELOW, { shiftY: 10, justification: TextJustification.RIGHT });
+  stave.setStaveText('Violin', Modifier.Position.LEFT, { shiftY: -10 });
+  stave.setStaveText('2nd line', Modifier.Position.LEFT, { shiftY: 10 });
+  stave.setStaveText('Right Text', Modifier.Position.RIGHT, { shiftY: -10 });
+  stave.setStaveText('2nd line', Modifier.Position.RIGHT, { shiftY: 10 });
+  stave.setStaveText('Above Text', Modifier.Position.ABOVE, { shiftY: -10 });
+  stave.setStaveText('2nd line', Modifier.Position.ABOVE, { shiftY: 10 });
+  stave.setStaveText('Left Below Text', Modifier.Position.BELOW, {
+    shiftY: -10,
+    justification: TextJustification.LEFT,
+  });
+  stave.setStaveText('Right Below Text', Modifier.Position.BELOW, {
+    shiftY: 10,
+    justification: TextJustification.RIGHT,
+  });
   stave.setContext(ctx).draw();
 
   options.assert.ok(true, 'all pass');
@@ -775,8 +781,8 @@ function drawStaveTextMultiLine(options: TestOptions, contextBuilder: ContextBui
 function factoryAPI(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, 900, 200);
   const stave = f.Stave({ x: 300, y: 40, width: 300 });
-  stave.setText('Violin', Modifier.Position.LEFT, { shiftY: -10 });
-  stave.setText('2nd line', Modifier.Position.LEFT, { shiftY: 10 });
+  stave.setStaveText('Violin', Modifier.Position.LEFT, { shiftY: -10 });
+  stave.setStaveText('2nd line', Modifier.Position.LEFT, { shiftY: 10 });
   f.draw();
 
   options.assert.ok(true, 'all pass');

@@ -1,7 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // @author: Taehoon Moon 2014
 
-import { Font, FontInfo, FontStyle, FontWeight } from './font';
 import { Stave } from './stave';
 import { StaveModifier, StaveModifierPosition } from './stavemodifier';
 import { TextJustification, TextNote } from './textnote';
@@ -12,13 +11,6 @@ export class StaveText extends StaveModifier {
   static get CATEGORY(): string {
     return Category.StaveText;
   }
-
-  static TEXT_FONT: Required<FontInfo> = {
-    family: Font.SERIF,
-    size: 16,
-    weight: FontWeight.NORMAL,
-    style: FontStyle.NORMAL,
-  };
 
   protected options: {
     shiftX: number;
@@ -46,8 +38,6 @@ export class StaveText extends StaveModifier {
       justification: TextNote.Justification.CENTER,
       ...options,
     };
-
-    this.resetFont();
   }
 
   setStaveText(text: string): this {

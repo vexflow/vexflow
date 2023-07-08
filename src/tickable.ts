@@ -43,8 +43,6 @@ export abstract class Tickable extends Element {
   protected ticks: Fraction;
   protected centerXShift: number;
   protected voice?: Voice;
-  protected width: number;
-  protected xShift: number;
   protected modifierContext?: ModifierContext;
   protected tickContext?: TickContext;
   protected modifiers: Modifier[];
@@ -64,10 +62,6 @@ export abstract class Tickable extends Element {
     this.ticks = new Fraction(0, 1); // Fractional value of ticks
     this.intrinsicTicks = 0; // Floating point value of ticks
     this.tickMultiplier = new Fraction(1, 1);
-
-    // Formatter metrics
-    this.width = 0;
-    this.xShift = 0; // Shift from tick context
 
     this.modifiers = [];
     this.tupletStack = [];
@@ -125,11 +119,6 @@ export abstract class Tickable extends Element {
     return this;
   }
 
-  /** Set width of note. Used by the formatter for positioning. */
-  setWidth(width: number): void {
-    this.width = width;
-  }
-
   /** Get width of note. Used by the formatter for positioning. */
   getWidth(): number {
     if (!this.#preFormatted) {
@@ -137,17 +126,6 @@ export abstract class Tickable extends Element {
     }
 
     return this.width + (this.modifierContext ? this.modifierContext.getWidth() : 0);
-  }
-
-  /** Displace note by `x` pixels. Used by the formatter. */
-  setXShift(x: number): this {
-    this.xShift = x;
-    return this;
-  }
-
-  /** Get the `x` displaced pixels of the note. */
-  getXShift(): number {
-    return this.xShift;
   }
 
   /** Get `x` position of this tick context. */
