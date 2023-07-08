@@ -42,20 +42,20 @@ export interface RegistryUpdate {
 }
 
 export class Registry {
-  private static defaultRegistry?: Registry;
+  static #defaultRegistry?: Registry;
 
   static getDefaultRegistry(): Registry | undefined {
-    return Registry.defaultRegistry;
+    return Registry.#defaultRegistry;
   }
 
   // If you call `enableDefaultRegistry`, any new elements will auto-register with
   // the provided registry as soon as they're constructed.
   static enableDefaultRegistry(registry: Registry): void {
-    Registry.defaultRegistry = registry;
+    Registry.#defaultRegistry = registry;
   }
 
   static disableDefaultRegistry(): void {
-    Registry.defaultRegistry = undefined;
+    Registry.#defaultRegistry = undefined;
   }
 
   protected index: Index;

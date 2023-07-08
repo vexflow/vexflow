@@ -26,7 +26,7 @@ function L(...args: any[]) {
   if (Crescendo.DEBUG) log('Vex.Flow.Crescendo', args);
 }
 
-// Private helper to draw the hairpin
+// Helper to draw the hairpin.
 function renderHairpin(ctx: RenderContext, params: CrescendoParams) {
   const beginX = params.beginX;
   const endX = params.endX;

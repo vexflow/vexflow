@@ -14,9 +14,8 @@ export class Fraction {
   }
 
   // Cached objects for comparisons.
-  private static __staticFractionA = new Fraction();
-  private static __staticFractionB = new Fraction();
-  private static __staticFractionTmp = new Fraction();
+  static #fractionA = new Fraction();
+  static #fractionB = new Fraction();
 
   /**
    * GCD: Greatest common divisor using the Euclidean algorithm.
@@ -128,22 +127,22 @@ export class Fraction {
 
   /** Simplify both sides and check if they are equal. */
   equals(compare: Fraction | number): boolean {
-    const a = Fraction.__staticFractionA.copy(compare).simplify();
-    const b = Fraction.__staticFractionB.copy(this).simplify();
+    const a = Fraction.#fractionA.copy(compare).simplify();
+    const b = Fraction.#fractionB.copy(this).simplify();
 
     return a.numerator === b.numerator && a.denominator === b.denominator;
   }
 
   /** Greater than operator. */
   greaterThan(compare: Fraction | number): boolean {
-    const a = Fraction.__staticFractionB.copy(this);
+    const a = Fraction.#fractionA.copy(this);
     a.subtract(compare);
     return a.numerator > 0;
   }
 
   /** Greater than or equals operator. */
   greaterThanEquals(compare: Fraction | number): boolean {
-    const a = Fraction.__staticFractionB.copy(this);
+    const a = Fraction.#fractionA.copy(this);
     a.subtract(compare);
     return a.numerator >= 0;
   }
@@ -166,7 +165,7 @@ export class Fraction {
   /** Copy value of another fraction. */
   copy(other: Fraction | number): this {
     if (typeof other === 'number') {
-      return this.set(other, 1);
+      return this.set(other);
     } else {
       return this.set(other.numerator, other.denominator);
     }
@@ -196,14 +195,14 @@ export class Fraction {
 
   /** Return a simplified string respresentation. */
   toSimplifiedString(): string {
-    return Fraction.__staticFractionTmp.copy(this).simplify().toString();
+    return Fraction.#fractionA.copy(this).simplify().toString();
   }
 
   /** Return string representation in mixed form. */
   toMixedString(): string {
     let s = '';
     const q = this.quotient();
-    const f = Fraction.__staticFractionTmp.copy(this);
+    const f = Fraction.#fractionA.copy(this);
 
     if (q < 0) {
       f.makeAbs();
