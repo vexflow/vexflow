@@ -7,13 +7,12 @@ import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Accidental } from '../src/accidental';
 import { ChordSymbol } from '../src/chordsymbol';
+import { Element } from '../src/element';
 import { Factory } from '../src/factory';
-import { Font, FontGlyph } from '../src/font';
 import { Formatter } from '../src/formatter';
 import { Ornament } from '../src/ornament';
 import { Stave } from '../src/stave';
 import { StaveNote } from '../src/stavenote';
-import { Tables } from '../src/tables';
 
 const ChordSymbolTests = {
   Start(): void {
@@ -39,18 +38,11 @@ const note = (factory: Factory, keys: string[], duration: string, chordSymbol: C
   factory.StaveNote({ keys, duration }).addModifier(chordSymbol, 0);
 
 /** Calculate the glyph's width in the current music font. */
-// How is this different from Glyph.getWidth()? The numbers don't match up.
 function getGlyphWidth(glyphName: string): number {
-  // `38` seems to be the `fontScale` specified in many classes, such as
-  // Accidental, Articulation, Ornament, Strokes. Does this mean `38pt`???
-  //
-  // However, tables.ts specifies:
-  //   NOTATION_FONT_SCALE: 39,
-  //   TABLATURE_FONT_SCALE: 39,
-  const musicFont = Tables.currentMusicFont();
-  const glyph: FontGlyph = musicFont.getGlyphs()[glyphName];
-  const widthInEm = (glyph.xMax - glyph.xMin) / musicFont.getResolution();
-  return widthInEm * 38 * Font.scaleToPxFrom.pt;
+  const el = new Element();
+  el.setText(String.fromCharCode(parseInt(glyphName, 16)));
+  el.measureText()
+  return el.getWidth();
 }
 function withModifiers(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, 750, 580);
@@ -69,7 +61,7 @@ function withModifiers(options: TestOptions): void {
     const formatter = f.Formatter();
     formatter.joinVoices([voice]);
     const voiceW = formatter.preCalculateMinTotalWidth([voice]);
-    const staffW = voiceW + Stave.defaultPadding + getGlyphWidth('gClef');
+    const staffW = voiceW + Stave.defaultPadding + getGlyphWidth('E050' /*gClef*/);
     formatter.format([voice], voiceW);
     const staff = f.Stave({ x: 10, y, width: staffW }).addClef('treble').draw();
     voice.draw(ctx, staff);
@@ -172,15 +164,9 @@ function fontSize(options: TestOptions): void {
       .addGlyphOrText('b9', superscript)
       .addGlyphOrText('#11', subscript)
       .addGlyph('rightParenTall')
-      .setReportWidth(false)
   );
   chords.push(
-    f
-      .ChordSymbol({ fontSize: 12 })
-      .addText('F7')
-      .addGlyphOrText('b9', superscript)
-      .addGlyphOrText('#11', subscript)
-      .setReportWidth(false)
+    f.ChordSymbol({ fontSize: 12 }).addText('F7').addGlyphOrText('b9', superscript).addGlyphOrText('#11', subscript)
   );
   chords.push(
     f
@@ -190,7 +176,6 @@ function fontSize(options: TestOptions): void {
       .addGlyphOrText('add 3', superscript)
       .addGlyphOrText('omit 9', subscript)
       .addGlyph('rightParenTall')
-      .setReportWidth(false)
   );
   chords.push(
     f
@@ -200,7 +185,6 @@ function fontSize(options: TestOptions): void {
       .addGlyphOrText('b9', superscript)
       .addGlyphOrText('#11', subscript)
       .addGlyph('rightParenTall')
-      .setReportWidth(false)
   );
   draw(chords, 40);
 
@@ -261,16 +245,16 @@ function kern(options: TestOptions): void {
   }
 
   let chords = [
-    f.ChordSymbol().addText('A').addGlyphSuperscript('dim').setReportWidth(false),
-    f.ChordSymbol({ kerning: false, reportWidth: false }).addText('A').addGlyphSuperscript('dim'),
-    f.ChordSymbol({ hJustify: 'left', reportWidth: false }).addText('C').addGlyph('halfDiminished', superscript),
-    f.ChordSymbol({ reportWidth: false }).addText('D').addGlyph('halfDiminished', superscript),
+    f.ChordSymbol().addText('A').addGlyphSuperscript('dim'),
+    f.ChordSymbol().addText('A').addGlyphSuperscript('dim'),
+    f.ChordSymbol({ hJustify: 'left' }).addText('C').addGlyph('halfDiminished', superscript),
+    f.ChordSymbol().addText('D').addGlyph('halfDiminished', superscript),
   ];
   draw(chords, 10);
 
   chords = [
     f.ChordSymbol().addText('A').addGlyphSuperscript('dim'),
-    f.ChordSymbol({ kerning: false }).addText('A').addGlyphSuperscript('dim'),
+    f.ChordSymbol().addText('A').addGlyphSuperscript('dim'),
     f.ChordSymbol().addText('A').addGlyphSuperscript('+').addTextSuperscript('5'),
     f.ChordSymbol().addText('G').addGlyphSuperscript('+').addTextSuperscript('5'),
   ];
@@ -316,16 +300,8 @@ function top(options: TestOptions): void {
     f.draw();
   }
 
-  let chord1 = f
-    .ChordSymbol({ reportWidth: false })
-    .addText('F7')
-    .setHorizontal('left')
-    .addGlyphOrText('(#11b9)', superscript);
-  let chord2 = f
-    .ChordSymbol({ reportWidth: false })
-    .addText('C')
-    .setHorizontal('left')
-    .addGlyphSuperscript('majorSeventh');
+  let chord1 = f.ChordSymbol().addText('F7').setHorizontal('left').addGlyphOrText('(#11b9)', superscript);
+  let chord2 = f.ChordSymbol().addText('C').setHorizontal('left').addGlyphSuperscript('majorSeventh');
 
   draw(chord1, chord2, 40);
 
@@ -418,7 +394,7 @@ function bottom(options: TestOptions): void {
   const chords = [
     f.ChordSymbol({ vJustify: 'bottom' }).addText('I').addTextSuperscript('6').addTextSubscript('4'),
     f.ChordSymbol({ vJustify: 'bottom' }).addGlyphOrText('V'),
-    f.ChordSymbol({ vJustify: 'bottom' }).addLine(12),
+    f.ChordSymbol({ vJustify: 'bottom' }).addLine(),
     f.ChordSymbol({ vJustify: 'bottom' }).addGlyphOrText('V/V'),
   ];
 
@@ -449,7 +425,7 @@ function bottomStemDown(options: TestOptions): void {
   const chords = [
     f.ChordSymbol({ vJustify: 'bottom' }).addGlyphOrText('F'),
     f.ChordSymbol({ vJustify: 'bottom' }).addGlyphOrText('C7'),
-    f.ChordSymbol({ vJustify: 'bottom' }).addLine(12),
+    f.ChordSymbol({ vJustify: 'bottom' }).addLine(),
     f.ChordSymbol({ vJustify: 'bottom' }).addText('A').addGlyphSuperscript('dim'),
   ];
 
@@ -479,7 +455,7 @@ function doubleBottom(options: TestOptions): void {
   const chords1: ChordSymbol[] = [
     f.ChordSymbol({ vJustify: 'bottom' }).addText('I').addTextSuperscript('6').addTextSubscript('4'),
     f.ChordSymbol({ vJustify: 'bottom' }).addGlyphOrText('V'),
-    f.ChordSymbol({ vJustify: 'bottom' }).addLine(12),
+    f.ChordSymbol({ vJustify: 'bottom' }).addLine(),
     f.ChordSymbol({ vJustify: 'bottom' }).addGlyphOrText('V/V'),
   ];
 

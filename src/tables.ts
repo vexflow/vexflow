@@ -32,14 +32,21 @@ export const CommonMetrics = {
   },
 
   ChordSymbol: {
-    fontFamily: 'Roboto Slab, Times, serif',
     fontSize: 12,
+    spacing: 0.05,
+    subscriptOffset: 0.1,
+    superscriptOffset: -0.5,
+    superSubRatio: 0.6,
   },
 
   FretHandFinger: {
     fontFamily: 'Arial, sans-serif',
     fontSize: 9,
     fontWeight: 'bold',
+  },
+
+  NoteHead: {
+    minPadding: 2,
   },
 
   PedalMarking: {

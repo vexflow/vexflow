@@ -1,4 +1,3 @@
-import { ChordSymbolMetrics } from './chordsymbol';
 import { ClefMetrics } from './clef';
 import { NoteHeadMetrics } from './notehead';
 import { OrnamentMetrics } from './ornament';
@@ -44,7 +43,6 @@ export interface FontMetrics extends Record<string, any> {
   digits?: Record<string, number>;
   articulation?: Record<string, Record<string, number>>;
   tremolo?: Record<string, Record<string, number>>;
-  chordSymbol?: ChordSymbolMetrics;
   ornament?: Record<string, OrnamentMetrics>;
   noteHead?: NoteHeadMetrics;
   stringNumber?: StringNumberMetrics;
@@ -326,7 +324,7 @@ export class Font {
    * Alternative: https://cdn.jsdelivr.net/npm/vexflow-fonts@1.0.3/
    * Or you can use your own host.
    */
-  static WEB_FONT_HOST = 'https://unpkg.com/vexflow-fonts@1.0.3/';
+  static WEB_FONT_HOST = 'https://unpkg.com/vexflow-fonts@1.0.5/';
 
   /**
    * These font files will be loaded from the CDN specified by `Font.WEB_FONT_HOST` when
@@ -334,8 +332,26 @@ export class Font {
    * set of fonts to load. See: `Font.loadWebFonts()`.
    */
   static WEB_FONT_FILES: Record<string /* fontName */, string /* fontPath */> = {
-    'Roboto Slab': 'robotoslab/RobotoSlab-Medium_2.001.woff',
-    PetalumaScript: 'petaluma/PetalumaScript_1.10_FS.woff',
+    Bravura: 'bravura/Bravura_1.392.woff2',
+    BravuraText: 'bravura/BravuraText_1.393.woff2',
+    GonvilleSmufl: 'gonvillesmufl/GonvilleSmufl_1.100.woff2',
+    Gootville: 'gootville/Gootville_1.3.woff2',
+    GootvilleText: 'gootville/GootvilleText_1.2.woff2',
+    Leland: 'leland/Leland_0.75.woff2',
+    LelandText: 'leland/LelandText_0.75.woff2',
+    Petaluma: 'petaluma/Petaluma_1.065.woff2',
+    PetalumaScript: 'petaluma/PetalumaScript_1.10_FS.woff2',
+    MuseJazz: 'musejazz/MuseJazz_1.0.woff2',
+    MuseJazzText: 'musejazz/MuseJazzText_1.0.woff2',
+    'Roboto Slab': 'robotoslab/RobotoSlab-Medium_2.001.woff2',
+    FinaleAsh: 'finale/FinaleAsh_1.7.woff2',
+    FinaleAshText: 'finale/FinaleAshText_1.3.woff2',
+    FinaleJazz: 'finale/FinaleJazz_1.9.woff2',
+    FinaleJazzText: 'finale/FinaleJazzText_1.3.woff2',
+    FinaleBroadway: 'finale/FinaleBroadway_1.4.woff2',
+    FinaleBroadwayText: 'finale/FinaleBroadwayText_1.1.woff2',
+    FinaleMaestro: 'finale/FinaleMaestro_2.7.woff2',
+    FinaleMaestroText: 'finale/FinaleMaestroText-Regular_1.6.woff2',
   };
 
   /**
