@@ -6,6 +6,7 @@ import { Clef, ClefAnnotatiomType, ClefType } from './clef';
 import { Glyph } from './glyph';
 import { Note } from './note';
 import { Category } from './typeguard';
+import { upperFirst } from './util';
 
 /** ClefNote implements clef annotations in measures. */
 export class ClefNote extends Note {
@@ -13,42 +14,31 @@ export class ClefNote extends Note {
     return Category.ClefNote;
   }
 
-  glyphCategory(): string {
-    const s = this.size;
-    if (!s) {
-      return 'clefNote';
-    } else {
-      // Capitalize first letter of this.size.
-      return 'clefNote' + s.charAt(0).toUpperCase() + s.slice(1);
-    }
-  }
-
-  protected clef: ClefType;
+  protected clef!: ClefType;
   protected annotation?: ClefAnnotatiomType;
-  protected type: string;
-  protected size: string;
+  protected type!: string;
+  protected size!: string;
 
-  constructor(type: string, size?: string, annotation?: string) {
+  #glyphCategory!: string;
+
+  constructor(type: string, size: string = 'default', annotation?: string) {
     super({ duration: 'b' });
-    this.type = type;
-    const clef = new Clef(type, size, annotation);
-    this.clef = clef.clef;
-    this.annotation = clef.annotation;
-    this.size = size === undefined ? 'default' : size;
-    this.setWidth(Glyph.getWidth(this.clef.code, Clef.getPoint(this.size), this.glyphCategory()));
-
-    // Note properties
+    this.setType(type, size, annotation);
     this.ignoreTicks = true;
   }
 
   /** Set clef type, size and annotation. */
-  setType(type: string, size: string, annotation: string): this {
+  setType(type: string, size: string = 'default', annotation?: string): this {
     this.type = type;
     this.size = size;
     const clef = new Clef(type, size, annotation);
     this.clef = clef.clef;
     this.annotation = clef.annotation;
-    this.setWidth(Glyph.getWidth(this.clef.code, Clef.getPoint(this.size), this.glyphCategory()));
+
+    const category = 'clefNote' + upperFirst(this.size);
+    this.#glyphCategory = category;
+
+    this.setWidth(Glyph.getWidth(this.clef.code, Clef.getPoint(this.size), category));
     return this;
   }
 
@@ -70,9 +60,9 @@ export class ClefNote extends Note {
     this.setRendered();
     const absoluteX = this.getAbsoluteX();
 
-    Glyph.renderGlyph(ctx, absoluteX, stave.getYForLine(this.clef.line), Clef.getPoint(this.size), this.clef.code, {
-      category: this.glyphCategory(),
-    });
+    const x = absoluteX;
+    const y = stave.getYForLine(this.clef.line);
+    Glyph.renderGlyph(ctx, x, y, Clef.getPoint(this.size), this.clef.code, { category: this.#glyphCategory });
 
     // If the Vex.Flow.Clef has an annotation, such as 8va, draw it.
     if (this.annotation !== undefined) {

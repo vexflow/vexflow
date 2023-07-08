@@ -308,8 +308,8 @@ export class Stave extends Element {
   }
 
   // Volta functions
-  setVoltaType(type: number, number: string, y: number): this {
-    this.modifiers.push(new Volta(type, number, this.x, y));
+  setVoltaType(type: number, label: string, y: number): this {
+    this.modifiers.push(new Volta(type, label, this.x, y));
     return this;
   }
 

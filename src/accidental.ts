@@ -15,7 +15,7 @@ import { Category, isAccidental, isGraceNote, isGraceNoteGroup, isStaveNote } fr
 import { defined, log } from './util';
 import { Voice } from './voice';
 
-export type StaveLineAccidentalLayoutMetrics = {
+type StaveLineAccidentalLayoutMetrics = {
   column: number;
   line: number;
   /**
@@ -228,7 +228,7 @@ export class Accidental extends Modifier {
       while (groupEnd + 1 < staveLineAccidentalLayoutMetrics.length && !noFurtherConflicts) {
         // if this note conflicts with the next:
         if (
-          this.checkCollision(
+          this.#checkCollision(
             staveLineAccidentalLayoutMetrics[groupEnd],
             staveLineAccidentalLayoutMetrics[groupEnd + 1]
           )
@@ -249,13 +249,13 @@ export class Accidental extends Modifier {
       };
 
       const notColliding = (...indexPairs: number[][]) =>
-        indexPairs.map(getGroupLines).every(([line1, line2]) => !this.checkCollision(line1, line2));
+        indexPairs.map(getGroupLines).every(([line1, line2]) => !this.#checkCollision(line1, line2));
 
       // Set columns for the lines in this group:
       const groupLength = groupEnd - groupStart + 1;
 
       // Set the accidental column for each line of the group
-      let endCase = this.checkCollision(
+      let endCase = this.#checkCollision(
         staveLineAccidentalLayoutMetrics[groupStart],
         staveLineAccidentalLayoutMetrics[groupEnd]
       )
@@ -305,7 +305,7 @@ export class Accidental extends Modifier {
           collisionDetected = false;
           for (let line = 0; line + patternLength < staveLineAccidentalLayoutMetrics.length; line++) {
             if (
-              this.checkCollision(
+              this.#checkCollision(
                 staveLineAccidentalLayoutMetrics[line],
                 staveLineAccidentalLayoutMetrics[line + patternLength]
               )
@@ -392,7 +392,7 @@ export class Accidental extends Modifier {
   }
 
   /** Helper function to determine whether two lines of accidentals collide vertically */
-  static checkCollision(line1: StaveLineAccidentalLayoutMetrics, line2: StaveLineAccidentalLayoutMetrics): boolean {
+  static #checkCollision(line1: StaveLineAccidentalLayoutMetrics, line2: StaveLineAccidentalLayoutMetrics): boolean {
     let clearance = line2.line - line1.line;
     let clearanceRequired = 3;
     // But less clearance is required for certain accidentals: b, bb and ##.

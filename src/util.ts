@@ -80,6 +80,14 @@ export function prefix(text: string): string {
 }
 
 /**
+ * @param s
+ * @returns `s` with the first letter capitalized.
+ */
+export function upperFirst(s: string = ''): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/**
  * Convert an arbitrary angle in radians to the equivalent one in the range [0, pi).
  */
 export function normalizeAngle(a: number): number {

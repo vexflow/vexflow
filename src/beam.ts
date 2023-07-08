@@ -661,15 +661,14 @@ export class Beam extends Element {
     }
 
     // Average the offsets to try and come up with a reasonable one that
-    //  works for all of the notes in the beam group.
+    // works for all of the notes in the beam group.
     let offset = total / notes.length;
 
     // In case the average isn't long enough, add or subtract some more
-    //  based on the highest or lowest note (again, based on the stem
-    //  direction). This also takes into account the added height due to
-    //  the width of the beams.
-    const beamWidthWithPadding = beamWidth * 1.5;
-    const extremeTest = minFlatBeamOffset + extremeBeamCount * beamWidthWithPadding;
+    // based on the highest or lowest note (again, based on the stem
+    // direction). This also takes into account the added height due to
+    // the width of the beams.
+    const extremeTest = minFlatBeamOffset + extremeBeamCount * beamWidth * 1.5;
     const newOffset = extremeY + extremeTest * -stemDirection;
     if (stemDirection === Stem.DOWN && offset < newOffset) {
       offset = extremeY + extremeTest;

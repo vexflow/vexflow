@@ -930,8 +930,8 @@ export class StaveNote extends StemmableNote {
 
   /**
    * @typedef {Object} noteHeadBounds
-   * @property {number} y_top the highest notehead bound
-   * @property {number} y_bottom the lowest notehead bound
+   * @property {number} yTop the highest notehead bound
+   * @property {number} yBottom the lowest notehead bound
    * @property {number|Null} displacedX the starting x for displaced noteheads
    * @property {number|Null} nonDisplacedX the starting x for non-displaced noteheads
    * @property {number} highestLine the highest notehead line in traditional music line
