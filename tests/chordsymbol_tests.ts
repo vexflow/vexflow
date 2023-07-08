@@ -41,7 +41,7 @@ const note = (factory: Factory, keys: string[], duration: string, chordSymbol: C
 /** Calculate the glyph's width in the current music font. */
 // How is this different from Glyph.getWidth()? The numbers don't match up.
 function getGlyphWidth(glyphName: string): number {
-  // `38` seems to be the `font_scale` specified in many classes, such as
+  // `38` seems to be the `fontScale` specified in many classes, such as
   // Accidental, Articulation, Ornament, Strokes. Does this mean `38pt`???
   //
   // However, tables.ts specifies:
@@ -49,7 +49,7 @@ function getGlyphWidth(glyphName: string): number {
   //   TABLATURE_FONT_SCALE: 39,
   const musicFont = Tables.currentMusicFont();
   const glyph: FontGlyph = musicFont.getGlyphs()[glyphName];
-  const widthInEm = (glyph.x_max - glyph.x_min) / musicFont.getResolution();
+  const widthInEm = (glyph.xMax - glyph.xMin) / musicFont.getResolution();
   return widthInEm * 38 * Font.scaleToPxFrom.pt;
 }
 function withModifiers(options: TestOptions): void {
@@ -302,7 +302,7 @@ function top(options: TestOptions): void {
 
   // Helper function for creating StaveNotes.
   const note = (factory: Factory, keys: string[], duration: string, chordSymbol: ChordSymbol, direction: number) =>
-    factory.StaveNote({ keys, duration, stem_direction: direction }).addModifier(chordSymbol, 0);
+    factory.StaveNote({ keys, duration, stemDirection: direction }).addModifier(chordSymbol, 0);
 
   function draw(c1: ChordSymbol, c2: ChordSymbol, y: number) {
     const stave = f.Stave({ x: 10, y, width: 450 }).addClef('treble').setContext(ctx).draw();
@@ -434,7 +434,7 @@ function bottomStemDown(options: TestOptions): void {
   function draw(chords: ChordSymbol[], y: number) {
     // Helper function to create a StaveNote with a ChordSymbol and the stem pointing down.
     const note = (keys: string[], duration: string, chordSymbol: ChordSymbol) =>
-      new StaveNote({ keys, duration, stem_direction: -1 }).addModifier(chordSymbol, 0);
+      new StaveNote({ keys, duration, stemDirection: -1 }).addModifier(chordSymbol, 0);
 
     const stave = new Stave(10, y, 400).addClef('treble').setContext(ctx).draw();
     const notes = [

@@ -47,14 +47,14 @@ export class TextBracket extends Element {
     style: FontStyle.ITALIC,
   };
 
-  public render_options: {
+  public renderOptions: {
     dashed: boolean;
     color: string;
-    line_width: number;
-    underline_superscript: boolean;
-    show_bracket: boolean;
+    lineWidth: number;
+    underlineSuperscript: boolean;
+    showBracket: boolean;
     dash: number[];
-    bracket_height: number;
+    bracketHeight: number;
   };
 
   protected readonly text: string;
@@ -108,17 +108,17 @@ export class TextBracket extends Element {
 
     this.resetFont();
 
-    this.render_options = {
+    this.renderOptions = {
       dashed: true,
       dash: [5],
       color: 'black',
-      line_width: 1,
-      show_bracket: true,
-      bracket_height: 8,
+      lineWidth: 1,
+      showBracket: true,
+      bracketHeight: 8,
 
       // In the BOTTOM position, the bracket line can extend
       // under the superscript.
-      underline_superscript: true,
+      underlineSuperscript: true,
     };
   }
 
@@ -129,10 +129,10 @@ export class TextBracket extends Element {
    */
   applyStyle(ctx: RenderContext): this {
     ctx.setFont(this.font);
-    const options = this.render_options;
+    const options = this.renderOptions;
     ctx.setStrokeStyle(options.color);
     ctx.setFillStyle(options.color);
-    ctx.setLineWidth(options.line_width);
+    ctx.setLineWidth(options.lineWidth);
 
     return this;
   }
@@ -140,8 +140,8 @@ export class TextBracket extends Element {
   // Set whether the bracket line should be `dashed`. You can also
   // optionally set the `dash` pattern by passing in an array of numbers
   setDashed(dashed: boolean, dash?: number[]): this {
-    this.render_options.dashed = dashed;
-    if (dash) this.render_options.dash = dash;
+    this.renderOptions.dashed = dashed;
+    if (dash) this.renderOptions.dash = dash;
     return this;
   }
 
@@ -174,7 +174,7 @@ export class TextBracket extends Element {
 
     L('Rendering TextBracket: start:', start, 'stop:', stop, 'y:', y);
 
-    const bracket_height = this.render_options.bracket_height * this.position;
+    const bracketHeight = this.renderOptions.bracketHeight * this.position;
 
     ctx.save();
     this.applyStyle(ctx);
@@ -183,12 +183,12 @@ export class TextBracket extends Element {
     ctx.fillText(this.text, start.x, start.y);
 
     // Get the width and height for the octave number
-    const main_measure = ctx.measureText(this.text);
-    const main_width = main_measure.width;
-    const main_height = main_measure.height;
+    const mainMeasure = ctx.measureText(this.text);
+    const mainWidth = mainMeasure.width;
+    const mainHeight = mainMeasure.height;
 
     // Calculate the y position for the super script
-    const super_y = start.y - main_height / 2.5;
+    const superY = start.y - mainHeight / 2.5;
 
     // We called this.resetFont() in the constructor, so we know this.textFont is available.
     // eslint-disable-next-line
@@ -196,53 +196,53 @@ export class TextBracket extends Element {
     // To draw the superscript, we scale the font size by 1/1.4.
     const smallerFontSize = Font.scaleSize(size, 0.714286);
     ctx.setFont(family, smallerFontSize, weight, style);
-    ctx.fillText(this.superscript, start.x + main_width + 1, super_y);
+    ctx.fillText(this.superscript, start.x + mainWidth + 1, superY);
 
     // Determine width and height of the superscript
-    const super_measure = ctx.measureText(this.superscript);
-    const super_width = super_measure.width;
-    const super_height = super_measure.height;
+    const superMeasure = ctx.measureText(this.superscript);
+    const superWidth = superMeasure.width;
+    const superHeight = superMeasure.height;
 
     // Setup initial coordinates for the bracket line
-    let start_x = start.x;
-    let line_y = super_y;
-    const end_x = stop.x + this.stop.getGlyphProps().getWidth();
+    let startX = start.x;
+    let lineY = superY;
+    const endX = stop.x + this.stop.getGlyphProps().getWidth();
 
     // Adjust x and y coordinates based on position
     if (this.position === TextBracketPosition.TOP) {
-      start_x += main_width + super_width + 5;
-      line_y -= super_height / 2.7;
+      startX += mainWidth + superWidth + 5;
+      lineY -= superHeight / 2.7;
     } else if (this.position === TextBracketPosition.BOTTOM) {
-      line_y += super_height / 2.7;
-      start_x += main_width + 2;
+      lineY += superHeight / 2.7;
+      startX += mainWidth + 2;
 
-      if (!this.render_options.underline_superscript) {
-        start_x += super_width;
+      if (!this.renderOptions.underlineSuperscript) {
+        startX += superWidth;
       }
     }
 
-    if (this.render_options.dashed) {
+    if (this.renderOptions.dashed) {
       // Main line
-      Renderer.drawDashedLine(ctx, start_x, line_y, end_x, line_y, this.render_options.dash);
+      Renderer.drawDashedLine(ctx, startX, lineY, endX, lineY, this.renderOptions.dash);
       // Ending Bracket
-      if (this.render_options.show_bracket) {
+      if (this.renderOptions.showBracket) {
         Renderer.drawDashedLine(
           ctx,
-          end_x,
-          line_y + 1 * this.position,
-          end_x,
-          line_y + bracket_height,
-          this.render_options.dash
+          endX,
+          lineY + 1 * this.position,
+          endX,
+          lineY + bracketHeight,
+          this.renderOptions.dash
         );
       }
     } else {
       ctx.beginPath();
-      ctx.moveTo(start_x, line_y);
+      ctx.moveTo(startX, lineY);
       // Main line
-      ctx.lineTo(end_x, line_y);
-      if (this.render_options.show_bracket) {
+      ctx.lineTo(endX, lineY);
+      if (this.renderOptions.showBracket) {
         // Ending bracket
-        ctx.lineTo(end_x, line_y + bracket_height);
+        ctx.lineTo(endX, lineY + bracketHeight);
       }
       ctx.stroke();
       ctx.closePath();

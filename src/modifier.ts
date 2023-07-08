@@ -59,10 +59,10 @@ export class Modifier extends Element {
   protected index?: number;
 
   protected width: number;
-  protected text_line: number;
+  protected textLine: number;
   protected position: ModifierPosition;
-  protected y_shift: number;
-  protected x_shift: number;
+  protected yShift: number;
+  protected xShift: number;
 
   private spacingFromNextModifier: number;
   private modifierContext?: ModifierContext;
@@ -72,11 +72,11 @@ export class Modifier extends Element {
 
     this.width = 0;
 
-    // The `text_line` is reserved space above or below a stave.
-    this.text_line = 0;
+    // The `textLine` is reserved space above or below a stave.
+    this.textLine = 0;
     this.position = Modifier.Position.LEFT;
-    this.x_shift = 0;
-    this.y_shift = 0;
+    this.xShift = 0;
+    this.yShift = 0;
     this.spacingFromNextModifier = 0;
   }
 
@@ -167,15 +167,15 @@ export class Modifier extends Element {
     return this;
   }
 
-  /** Set the `text_line` for the modifier. */
+  /** Set the `textLine` for the modifier. */
   setTextLine(line: number): this {
-    this.text_line = line;
+    this.textLine = line;
     return this;
   }
 
   /** Shift modifier down `y` pixels. Negative values shift up. */
   setYShift(y: number): this {
-    this.y_shift = y;
+    this.yShift = y;
     return this;
   }
 
@@ -194,18 +194,18 @@ export class Modifier extends Element {
    * shift reverse.
    */
   setXShift(x: number): this {
-    this.x_shift = 0;
+    this.xShift = 0;
     if (this.position === Modifier.Position.LEFT) {
-      this.x_shift -= x;
+      this.xShift -= x;
     } else {
-      this.x_shift += x;
+      this.xShift += x;
     }
     return this;
   }
 
   /** Get shift modifier `x` */
   getXShift(): number {
-    return this.x_shift;
+    return this.xShift;
   }
 
   /** Render the modifier onto the canvas. */

@@ -68,10 +68,10 @@ function drawArticulations(options: TestOptions): void {
 
   // bar 1
   const notesBar1 = [
-    f.StaveNote({ keys: ['a/3'], duration: 'q', stem_direction: 1 }),
-    f.StaveNote({ keys: ['a/4'], duration: 'q', stem_direction: 1 }),
-    f.StaveNote({ keys: ['c/4'], duration: 'q', stem_direction: 1 }),
-    f.StaveNote({ keys: ['a/4'], duration: 'q', stem_direction: 1 }),
+    f.StaveNote({ keys: ['a/3'], duration: 'q', stemDirection: 1 }),
+    f.StaveNote({ keys: ['a/4'], duration: 'q', stemDirection: 1 }),
+    f.StaveNote({ keys: ['c/4'], duration: 'q', stemDirection: 1 }),
+    f.StaveNote({ keys: ['a/4'], duration: 'q', stemDirection: 1 }),
   ];
   notesBar1[0].addModifier(new Articulation(sym1).setPosition(4), 0);
   notesBar1[1].addModifier(new Articulation(sym1).setPosition(4), 0);
@@ -83,10 +83,10 @@ function drawArticulations(options: TestOptions): void {
 
   // bar 2 - juxtaposing second bar next to first bar
   const notesBar2 = [
-    f.StaveNote({ keys: ['c/5'], duration: 'q', stem_direction: -1 }),
-    f.StaveNote({ keys: ['a/5'], duration: 'q', stem_direction: -1 }),
-    f.StaveNote({ keys: ['c/5'], duration: 'q', stem_direction: -1 }),
-    f.StaveNote({ keys: ['a/5'], duration: 'q', stem_direction: -1 }),
+    f.StaveNote({ keys: ['c/5'], duration: 'q', stemDirection: -1 }),
+    f.StaveNote({ keys: ['a/5'], duration: 'q', stemDirection: -1 }),
+    f.StaveNote({ keys: ['c/5'], duration: 'q', stemDirection: -1 }),
+    f.StaveNote({ keys: ['a/5'], duration: 'q', stemDirection: -1 }),
   ];
   notesBar2[0].addModifier(new Articulation(sym1).setPosition(3), 0);
   notesBar2[1].addModifier(new Articulation(sym1).setPosition(3), 0);
@@ -98,10 +98,10 @@ function drawArticulations(options: TestOptions): void {
 
   // bar 3 - juxtaposing second bar next to first bar
   const notesBar3 = [
-    f.StaveNote({ keys: ['c/4'], duration: 'q', stem_direction: 1 }),
-    f.StaveNote({ keys: ['c/5'], duration: 'q', stem_direction: 1 }),
-    f.StaveNote({ keys: ['c/4'], duration: 'q', stem_direction: 1 }),
-    f.StaveNote({ keys: ['a/4'], duration: 'q', stem_direction: 1 }),
+    f.StaveNote({ keys: ['c/4'], duration: 'q', stemDirection: 1 }),
+    f.StaveNote({ keys: ['c/5'], duration: 'q', stemDirection: 1 }),
+    f.StaveNote({ keys: ['c/4'], duration: 'q', stemDirection: 1 }),
+    f.StaveNote({ keys: ['a/4'], duration: 'q', stemDirection: 1 }),
   ];
   notesBar3[0].addModifier(new Articulation(sym2).setPosition(4), 0);
   notesBar3[1].addModifier(new Articulation(sym2).setPosition(4), 0);
@@ -112,10 +112,10 @@ function drawArticulations(options: TestOptions): void {
   x += formatAndDrawToWidth(x, y, width, notesBar3, Barline.type.NONE);
   // bar 4 - juxtaposing second bar next to first bar
   const notesBar4 = [
-    f.StaveNote({ keys: ['a/4'], duration: 'q', stem_direction: -1 }),
-    f.StaveNote({ keys: ['a/5'], duration: 'q', stem_direction: -1 }),
-    f.StaveNote({ keys: ['c/5'], duration: 'q', stem_direction: -1 }),
-    f.StaveNote({ keys: ['a/5'], duration: 'q', stem_direction: -1 }),
+    f.StaveNote({ keys: ['a/4'], duration: 'q', stemDirection: -1 }),
+    f.StaveNote({ keys: ['a/5'], duration: 'q', stemDirection: -1 }),
+    f.StaveNote({ keys: ['c/5'], duration: 'q', stemDirection: -1 }),
+    f.StaveNote({ keys: ['a/5'], duration: 'q', stemDirection: -1 }),
   ];
   notesBar4[0].addModifier(new Articulation(sym2).setPosition(3), 0);
   notesBar4[1].addModifier(new Articulation(sym2).setPosition(3), 0);
@@ -154,10 +154,10 @@ function drawFermata(options: TestOptions): void {
   options.assert.expect(0);
 
   const notesBar1 = [
-    f.StaveNote({ keys: ['c/4'], duration: 'q', stem_direction: 1 }),
-    f.StaveNote({ keys: ['a/4'], duration: 'q', stem_direction: 1 }),
-    f.StaveNote({ keys: ['c/4'], duration: 'q', stem_direction: -1 }),
-    f.StaveNote({ keys: ['a/4'], duration: 'q', stem_direction: -1 }),
+    f.StaveNote({ keys: ['c/4'], duration: 'q', stemDirection: 1 }),
+    f.StaveNote({ keys: ['a/4'], duration: 'q', stemDirection: 1 }),
+    f.StaveNote({ keys: ['c/4'], duration: 'q', stemDirection: -1 }),
+    f.StaveNote({ keys: ['a/4'], duration: 'q', stemDirection: -1 }),
   ];
   notesBar1[0].addModifier(new Articulation(sym1).setPosition(3), 0);
   notesBar1[1].addModifier(new Articulation(sym1).setPosition(3), 0);
@@ -167,10 +167,10 @@ function drawFermata(options: TestOptions): void {
 
   // bar 2 - juxtaposing second bar next to first bar
   const notesBar2 = [
-    f.StaveNote({ keys: ['c/5'], duration: 'q', stem_direction: 1 }),
-    f.StaveNote({ keys: ['a/5'], duration: 'q', stem_direction: 1 }),
-    f.StaveNote({ keys: ['c/5'], duration: 'q', stem_direction: -1 }),
-    f.StaveNote({ keys: ['a/5'], duration: 'q', stem_direction: -1 }),
+    f.StaveNote({ keys: ['c/5'], duration: 'q', stemDirection: 1 }),
+    f.StaveNote({ keys: ['a/5'], duration: 'q', stemDirection: 1 }),
+    f.StaveNote({ keys: ['c/5'], duration: 'q', stemDirection: -1 }),
+    f.StaveNote({ keys: ['a/5'], duration: 'q', stemDirection: -1 }),
   ];
   notesBar2[0].addModifier(new Articulation(sym1).setPosition(3), 0);
   notesBar2[1].addModifier(new Articulation(sym1).setPosition(3), 0);
@@ -192,7 +192,7 @@ function verticalPlacement(options: TestOptions, contextBuilder: ContextBuilder)
       .addModifier(new Articulation('a@u').setPosition(ModifierPosition.BELOW), 0)
       .addModifier(new Articulation('a.').setPosition(ModifierPosition.BELOW), 0)
       .addModifier(new Articulation('a-').setPosition(ModifierPosition.BELOW), 0),
-    staveNote({ keys: ['g/4'], duration: 'q', stem_direction: Stem.DOWN })
+    staveNote({ keys: ['g/4'], duration: 'q', stemDirection: Stem.DOWN })
       .addModifier(new Articulation('a@u').setPosition(ModifierPosition.BELOW), 0)
       .addModifier(new Articulation('a.').setPosition(ModifierPosition.BELOW), 0)
       .addModifier(new Articulation('a-').setPosition(ModifierPosition.BELOW), 0),
@@ -204,7 +204,7 @@ function verticalPlacement(options: TestOptions, contextBuilder: ContextBuilder)
       .addModifier(new Articulation('a.').setPosition(ModifierPosition.BELOW), 0)
       .addModifier(new Articulation('a-').setPosition(ModifierPosition.BELOW), 0)
       .addModifier(new Articulation('a@u').setPosition(ModifierPosition.BELOW), 0),
-    staveNote({ keys: ['g/4'], duration: 'q', stem_direction: Stem.DOWN })
+    staveNote({ keys: ['g/4'], duration: 'q', stemDirection: Stem.DOWN })
       .addModifier(new Articulation('a.').setPosition(ModifierPosition.BELOW), 0)
       .addModifier(new Articulation('a-').setPosition(ModifierPosition.BELOW), 0)
       .addModifier(new Articulation('a@u').setPosition(ModifierPosition.BELOW), 0),
@@ -212,7 +212,7 @@ function verticalPlacement(options: TestOptions, contextBuilder: ContextBuilder)
       .addModifier(new Articulation('a.').setPosition(ModifierPosition.BELOW), 0)
       .addModifier(new Articulation('a-').setPosition(ModifierPosition.BELOW), 0)
       .addModifier(new Articulation('a@u').setPosition(ModifierPosition.BELOW), 0),
-    staveNote({ keys: ['a/5'], duration: 'q', stem_direction: Stem.DOWN })
+    staveNote({ keys: ['a/5'], duration: 'q', stemDirection: Stem.DOWN })
       .addModifier(new Articulation('a@a').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('a.').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('a-').setPosition(ModifierPosition.ABOVE), 0),
@@ -220,11 +220,11 @@ function verticalPlacement(options: TestOptions, contextBuilder: ContextBuilder)
       .addModifier(new Articulation('a@a').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('a.').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('a-').setPosition(ModifierPosition.ABOVE), 0),
-    staveNote({ keys: ['b/4'], duration: 'q', stem_direction: Stem.DOWN })
+    staveNote({ keys: ['b/4'], duration: 'q', stemDirection: Stem.DOWN })
       .addModifier(new Articulation('a@a').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('a.').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('a-').setPosition(ModifierPosition.ABOVE), 0),
-    staveNote({ keys: ['a/5'], duration: 'q', stem_direction: Stem.DOWN })
+    staveNote({ keys: ['a/5'], duration: 'q', stemDirection: Stem.DOWN })
       .addModifier(new Articulation('a.').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('a-').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('a@a').setPosition(ModifierPosition.ABOVE), 0),
@@ -232,7 +232,7 @@ function verticalPlacement(options: TestOptions, contextBuilder: ContextBuilder)
       .addModifier(new Articulation('a.').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('a-').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('a@a').setPosition(ModifierPosition.ABOVE), 0),
-    staveNote({ keys: ['b/4'], duration: 'q', stem_direction: Stem.DOWN })
+    staveNote({ keys: ['b/4'], duration: 'q', stemDirection: Stem.DOWN })
       .addModifier(new Articulation('a.').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('a-').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('a@a').setPosition(ModifierPosition.ABOVE), 0),
@@ -253,7 +253,7 @@ function verticalPlacement2(options: TestOptions, contextBuilder: ContextBuilder
       .addModifier(new Articulation('fermataBelow'), 0)
       .addModifier(new Articulation('augmentationDot').setPosition(ModifierPosition.BELOW), 0)
       .addModifier(new Articulation('articTenutoBelow'), 0),
-    staveNote({ keys: ['g/4'], duration: 'q', stem_direction: Stem.DOWN })
+    staveNote({ keys: ['g/4'], duration: 'q', stemDirection: Stem.DOWN })
       .addModifier(new Articulation('fermataShortBelow'), 0)
       .addModifier(new Articulation('augmentationDot').setPosition(ModifierPosition.BELOW), 0)
       .addModifier(new Articulation('articTenutoBelow'), 0),
@@ -265,7 +265,7 @@ function verticalPlacement2(options: TestOptions, contextBuilder: ContextBuilder
       .addModifier(new Articulation('augmentationDot').setPosition(ModifierPosition.BELOW), 0)
       .addModifier(new Articulation('articTenutoBelow'), 0)
       .addModifier(new Articulation('fermataVeryShortBelow'), 0),
-    staveNote({ keys: ['g/4'], duration: 'q', stem_direction: Stem.DOWN })
+    staveNote({ keys: ['g/4'], duration: 'q', stemDirection: Stem.DOWN })
       .addModifier(new Articulation('augmentationDot').setPosition(ModifierPosition.BELOW), 0)
       .addModifier(new Articulation('articTenutoBelow'), 0)
       .addModifier(new Articulation('fermataVeryLongBelow'), 0),
@@ -273,7 +273,7 @@ function verticalPlacement2(options: TestOptions, contextBuilder: ContextBuilder
       .addModifier(new Articulation('augmentationDot').setPosition(ModifierPosition.BELOW).setBetweenLines(), 0)
       .addModifier(new Articulation('articTenutoBelow').setBetweenLines(), 0)
       .addModifier(new Articulation('fermataBelow'), 0),
-    staveNote({ keys: ['a/5'], duration: 'q', stem_direction: Stem.DOWN })
+    staveNote({ keys: ['a/5'], duration: 'q', stemDirection: Stem.DOWN })
       .addModifier(new Articulation('fermataAbove'), 0)
       .addModifier(new Articulation('augmentationDot').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('articTenutoAbove'), 0),
@@ -281,11 +281,11 @@ function verticalPlacement2(options: TestOptions, contextBuilder: ContextBuilder
       .addModifier(new Articulation('fermataShortAbove'), 0)
       .addModifier(new Articulation('augmentationDot').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('articTenutoAbove'), 0),
-    staveNote({ keys: ['b/4'], duration: 'q', stem_direction: Stem.DOWN })
+    staveNote({ keys: ['b/4'], duration: 'q', stemDirection: Stem.DOWN })
       .addModifier(new Articulation('fermataLongAbove'), 0)
       .addModifier(new Articulation('augmentationDot').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('articTenutoAbove'), 0),
-    staveNote({ keys: ['a/5'], duration: 'q', stem_direction: Stem.DOWN })
+    staveNote({ keys: ['a/5'], duration: 'q', stemDirection: Stem.DOWN })
       .addModifier(new Articulation('augmentationDot').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('articTenutoAbove'), 0)
       .addModifier(new Articulation('fermataVeryShortAbove'), 0),
@@ -293,7 +293,7 @@ function verticalPlacement2(options: TestOptions, contextBuilder: ContextBuilder
       .addModifier(new Articulation('augmentationDot').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('articTenutoAbove'), 0)
       .addModifier(new Articulation('fermataVeryLongAbove'), 0),
-    staveNote({ keys: ['b/4'], duration: 'q', stem_direction: Stem.DOWN })
+    staveNote({ keys: ['b/4'], duration: 'q', stemDirection: Stem.DOWN })
       .addModifier(new Articulation('augmentationDot').setPosition(ModifierPosition.ABOVE).setBetweenLines(), 0)
       .addModifier(new Articulation('articTenutoAbove').setBetweenLines(), 0)
       .addModifier(new Articulation('fermataAbove'), 0),
@@ -315,22 +315,22 @@ function drawArticulations2(options: TestOptions): void {
   // bar 1
   const stave1 = new Stave(10, 50, 500).setContext(ctx).draw();
   const notesBar1 = [
-    f.StaveNote({ keys: ['c/4'], duration: '16', stem_direction: 1 }),
-    f.StaveNote({ keys: ['d/4'], duration: '16', stem_direction: 1 }),
-    f.StaveNote({ keys: ['e/4'], duration: '16', stem_direction: 1 }),
-    f.StaveNote({ keys: ['f/4'], duration: '16', stem_direction: 1 }),
-    f.StaveNote({ keys: ['g/4'], duration: '16', stem_direction: 1 }),
-    f.StaveNote({ keys: ['a/4'], duration: '16', stem_direction: 1 }),
-    f.StaveNote({ keys: ['b/4'], duration: '16', stem_direction: 1 }),
-    f.StaveNote({ keys: ['c/5'], duration: '16', stem_direction: 1 }),
-    f.StaveNote({ keys: ['d/5'], duration: '16', stem_direction: -1 }),
-    f.StaveNote({ keys: ['e/5'], duration: '16', stem_direction: -1 }),
-    f.StaveNote({ keys: ['f/5'], duration: '16', stem_direction: -1 }),
-    f.StaveNote({ keys: ['g/5'], duration: '16', stem_direction: -1 }),
-    f.StaveNote({ keys: ['a/5'], duration: '16', stem_direction: -1 }),
-    f.StaveNote({ keys: ['b/5'], duration: '16', stem_direction: -1 }),
-    f.StaveNote({ keys: ['c/6'], duration: '16', stem_direction: -1 }),
-    f.StaveNote({ keys: ['d/6'], duration: '16', stem_direction: -1 }),
+    f.StaveNote({ keys: ['c/4'], duration: '16', stemDirection: 1 }),
+    f.StaveNote({ keys: ['d/4'], duration: '16', stemDirection: 1 }),
+    f.StaveNote({ keys: ['e/4'], duration: '16', stemDirection: 1 }),
+    f.StaveNote({ keys: ['f/4'], duration: '16', stemDirection: 1 }),
+    f.StaveNote({ keys: ['g/4'], duration: '16', stemDirection: 1 }),
+    f.StaveNote({ keys: ['a/4'], duration: '16', stemDirection: 1 }),
+    f.StaveNote({ keys: ['b/4'], duration: '16', stemDirection: 1 }),
+    f.StaveNote({ keys: ['c/5'], duration: '16', stemDirection: 1 }),
+    f.StaveNote({ keys: ['d/5'], duration: '16', stemDirection: -1 }),
+    f.StaveNote({ keys: ['e/5'], duration: '16', stemDirection: -1 }),
+    f.StaveNote({ keys: ['f/5'], duration: '16', stemDirection: -1 }),
+    f.StaveNote({ keys: ['g/5'], duration: '16', stemDirection: -1 }),
+    f.StaveNote({ keys: ['a/5'], duration: '16', stemDirection: -1 }),
+    f.StaveNote({ keys: ['b/5'], duration: '16', stemDirection: -1 }),
+    f.StaveNote({ keys: ['c/6'], duration: '16', stemDirection: -1 }),
+    f.StaveNote({ keys: ['d/6'], duration: '16', stemDirection: -1 }),
   ];
   let i;
   for (i = 0; i < 16; i++) {
@@ -351,22 +351,22 @@ function drawArticulations2(options: TestOptions): void {
   // bar 2 - juxtaposing second bar next to first bar
   const stave2 = new Stave(510, 50, 500).setContext(ctx).draw();
   const notesBar2 = [
-    f.StaveNote({ keys: ['f/3'], duration: '16', stem_direction: 1 }),
-    f.StaveNote({ keys: ['g/3'], duration: '16', stem_direction: 1 }),
-    f.StaveNote({ keys: ['a/3'], duration: '16', stem_direction: 1 }),
-    f.StaveNote({ keys: ['b/3'], duration: '16', stem_direction: 1 }),
-    f.StaveNote({ keys: ['c/4'], duration: '16', stem_direction: 1 }),
-    f.StaveNote({ keys: ['d/4'], duration: '16', stem_direction: 1 }),
-    f.StaveNote({ keys: ['e/4'], duration: '16', stem_direction: 1 }),
-    f.StaveNote({ keys: ['f/4'], duration: '16', stem_direction: 1 }),
-    f.StaveNote({ keys: ['g/4'], duration: '16', stem_direction: -1 }),
-    f.StaveNote({ keys: ['a/4'], duration: '16', stem_direction: -1 }),
-    f.StaveNote({ keys: ['b/4'], duration: '16', stem_direction: -1 }),
-    f.StaveNote({ keys: ['c/5'], duration: '16', stem_direction: -1 }),
-    f.StaveNote({ keys: ['d/5'], duration: '16', stem_direction: -1 }),
-    f.StaveNote({ keys: ['e/5'], duration: '16', stem_direction: -1 }),
-    f.StaveNote({ keys: ['f/5'], duration: '16', stem_direction: -1 }),
-    f.StaveNote({ keys: ['g/5'], duration: '16', stem_direction: -1 }),
+    f.StaveNote({ keys: ['f/3'], duration: '16', stemDirection: 1 }),
+    f.StaveNote({ keys: ['g/3'], duration: '16', stemDirection: 1 }),
+    f.StaveNote({ keys: ['a/3'], duration: '16', stemDirection: 1 }),
+    f.StaveNote({ keys: ['b/3'], duration: '16', stemDirection: 1 }),
+    f.StaveNote({ keys: ['c/4'], duration: '16', stemDirection: 1 }),
+    f.StaveNote({ keys: ['d/4'], duration: '16', stemDirection: 1 }),
+    f.StaveNote({ keys: ['e/4'], duration: '16', stemDirection: 1 }),
+    f.StaveNote({ keys: ['f/4'], duration: '16', stemDirection: 1 }),
+    f.StaveNote({ keys: ['g/4'], duration: '16', stemDirection: -1 }),
+    f.StaveNote({ keys: ['a/4'], duration: '16', stemDirection: -1 }),
+    f.StaveNote({ keys: ['b/4'], duration: '16', stemDirection: -1 }),
+    f.StaveNote({ keys: ['c/5'], duration: '16', stemDirection: -1 }),
+    f.StaveNote({ keys: ['d/5'], duration: '16', stemDirection: -1 }),
+    f.StaveNote({ keys: ['e/5'], duration: '16', stemDirection: -1 }),
+    f.StaveNote({ keys: ['f/5'], duration: '16', stemDirection: -1 }),
+    f.StaveNote({ keys: ['g/5'], duration: '16', stemDirection: -1 }),
   ];
   for (i = 0; i < 16; i++) {
     notesBar2[i].addModifier(new Articulation('a-').setPosition(3), 0);
@@ -385,7 +385,7 @@ function drawArticulations2(options: TestOptions): void {
 
   // bar 3 - juxtaposing second bar next to first bar
   const stave3 = new Stave(1010, 50, 100).setContext(ctx).draw();
-  const notesBar3 = [f.StaveNote({ keys: ['c/4'], duration: 'w', stem_direction: 1 })];
+  const notesBar3 = [f.StaveNote({ keys: ['c/4'], duration: 'w', stemDirection: 1 })];
   notesBar3[0].addModifier(new Articulation('a-').setPosition(3), 0);
   notesBar3[0].addModifier(new Articulation('a>').setPosition(3), 0);
   notesBar3[0].addModifier(new Articulation('a@a').setPosition(3), 0);
@@ -395,10 +395,10 @@ function drawArticulations2(options: TestOptions): void {
   // bar 4 - juxtaposing second bar next to first bar
   const stave4 = new Stave(1110, 50, 250).setContext(ctx).draw();
   const notesBar4 = [
-    f.StaveNote({ keys: ['c/5'], duration: 'q', stem_direction: -1 }),
-    f.StaveNote({ keys: ['a/5'], duration: 'q', stem_direction: -1 }),
-    f.StaveNote({ keys: ['c/5'], duration: 'q', stem_direction: -1 }),
-    f.StaveNote({ keys: ['a/5'], duration: 'q', stem_direction: -1 }),
+    f.StaveNote({ keys: ['c/5'], duration: 'q', stemDirection: -1 }),
+    f.StaveNote({ keys: ['a/5'], duration: 'q', stemDirection: -1 }),
+    f.StaveNote({ keys: ['c/5'], duration: 'q', stemDirection: -1 }),
+    f.StaveNote({ keys: ['a/5'], duration: 'q', stemDirection: -1 }),
   ];
   for (i = 0; i < 4; i++) {
     let position1 = 3;
@@ -451,13 +451,13 @@ function tabNotes(options: TestOptions, contextBuilder: ContextBuilder): void {
 
   const notes1 = specs.map((noteSpec) => {
     const tabNote = new TabNote(noteSpec);
-    tabNote.render_options.draw_stem = true;
+    tabNote.renderOptions.drawStem = true;
     return tabNote;
   });
 
   const notes2 = specs.map((noteSpec) => {
     const tabNote = new TabNote(noteSpec);
-    tabNote.render_options.draw_stem = true;
+    tabNote.renderOptions.drawStem = true;
     tabNote.setStemDirection(-1);
     return tabNote;
   });

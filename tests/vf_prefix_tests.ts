@@ -95,12 +95,12 @@ declare let Vex: Record<string, any> & { Flow: typeof Flow & Record<string, any>
 const VFPrefixTests = {
   Start(): void {
     QUnit.module('VF.* API');
-    QUnit.test('VF.* API', VF_Prefix);
-    QUnit.test('VF Alias', VF_Alias);
+    QUnit.test('VF.* API', VFPrefix);
+    QUnit.test('VF Alias', VFAlias);
   },
 };
 
-function VF_Prefix(assert: Assert): void {
+function VFPrefix(assert: Assert): void {
   // Intentionally use Vex.Flow here so we can verify that the Vex.Flow.* API
   // is equivalent to using the individual classes in TypeScript.
   const VF = Vex.Flow;
@@ -189,7 +189,7 @@ function VF_Prefix(assert: Assert): void {
  * If you have name collisions with VexFlow classes, consider extracting classes from Vex.Flow
  * and renaming them with a VF prefix.
  */
-function VF_Alias(assert: Assert): void {
+function VFAlias(assert: Assert): void {
   const Flow = Vex.Flow;
   const VFAliases = {
     get VFAccidental() {

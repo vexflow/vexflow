@@ -12,27 +12,27 @@ import { Category } from './typeguard';
 import { defined, RuntimeError } from './util';
 
 export interface GlyphProps {
-  code_head: string;
-  ledger_code_head?: string;
-  dot_shiftY: number;
+  codeHead: string;
+  ledgerCodeHead?: string;
+  dotShiftY: number;
   position: string;
   rest: boolean;
-  line_below: number;
-  line_above: number;
-  stem_beam_extension: number;
-  stem_up_extension: number;
-  stem_down_extension: number;
+  lineBelow: number;
+  lineAbove: number;
+  stemBeamExtension: number;
+  stemUpExtension: number;
+  stemDownExtension: number;
   stem: boolean;
   code?: string;
-  code_flag_upstem?: string;
-  code_flag_downstem?: string;
+  codeFlagUpstem?: string;
+  codeFlagDownstem?: string;
   flag?: boolean;
   width?: number;
   text?: string;
-  tabnote_stem_down_extension: number;
-  tabnote_stem_up_extension: number;
-  beam_count: number;
-  shift_y?: number;
+  tabnoteStemDownExtension: number;
+  tabnoteStemUpExtension: number;
+  beamCount: number;
+  shiftY?: number;
   getWidth(a?: number): number;
 }
 
@@ -43,10 +43,10 @@ export interface GlyphOptions {
 export interface GlyphMetrics {
   width: number;
   height: number;
-  x_min: number;
-  x_max: number;
-  x_shift: number;
-  y_shift: number;
+  xMin: number;
+  xMax: number;
+  xShift: number;
+  yShift: number;
   scale: number;
   ha: number;
   outline: number[];
@@ -70,8 +70,8 @@ class GlyphCacheEntry {
     this.bbox = Glyph.getOutlineBoundingBox(
       this.metrics.outline,
       this.metrics.scale,
-      this.metrics.x_shift,
-      this.metrics.y_shift
+      this.metrics.xShift,
+      this.metrics.yShift
     );
 
     if (category) {
@@ -216,33 +216,33 @@ export class Glyph extends Element {
 
     if (!glyph.o) throw new RuntimeError('BadGlyph', `Glyph ${code} has no outline defined.`);
 
-    let x_shift = 0;
-    let y_shift = 0;
+    let xShift = 0;
+    let yShift = 0;
     let scale = 1;
     if (category && font) {
-      x_shift = Glyph.lookupFontMetric(font, category, code, 'shiftX', 0);
-      y_shift = Glyph.lookupFontMetric(font, category, code, 'shiftY', 0);
+      xShift = Glyph.lookupFontMetric(font, category, code, 'shiftX', 0);
+      yShift = Glyph.lookupFontMetric(font, category, code, 'shiftY', 0);
       scale = Glyph.lookupFontMetric(font, category, code, 'scale', 1);
     }
 
-    const x_min = glyph.x_min;
-    const x_max = glyph.x_max;
+    const xMin = glyph.xMin;
+    const xMax = glyph.xMax;
     const ha = glyph.ha;
 
-    if (!glyph.cached_outline) {
-      glyph.cached_outline = GlyphOutline.parse(glyph.o);
+    if (!glyph.cachedOutline) {
+      glyph.cachedOutline = GlyphOutline.parse(glyph.o);
     }
 
     return {
-      x_min,
-      x_max,
-      x_shift,
-      y_shift,
+      xMin,
+      xMax,
+      xShift,
+      yShift,
       scale,
       ha,
-      outline: glyph.cached_outline,
+      outline: glyph.cachedOutline,
       font,
-      width: x_max - x_min,
+      width: xMax - xMin,
       height: ha,
     };
   }
@@ -251,8 +251,8 @@ export class Glyph extends Element {
    * Renders glyphs from the default font stack.
    *
    * @param ctx Canvas or SVG context
-   * @param x_pos x coordinate
-   * @param y_pos y coordinate
+   * @param xPos x coordinate
+   * @param yPos y coordinate
    * @param point the point size of the font
    * @param code the glyph code in font.getGlyphs()
    * @param options
@@ -260,8 +260,8 @@ export class Glyph extends Element {
    */
   static renderGlyph(
     ctx: RenderContext,
-    x_pos: number,
-    y_pos: number,
+    xPos: number,
+    yPos: number,
     point: number,
     code: string,
     options?: { category?: string; scale?: number }
@@ -279,14 +279,14 @@ export class Glyph extends Element {
       ctx,
       metrics.outline,
       scale,
-      x_pos + metrics.x_shift * customScale,
-      y_pos + metrics.y_shift * customScale
+      xPos + metrics.xShift * customScale,
+      yPos + metrics.yShift * customScale
     );
     return metrics;
   }
 
-  static renderOutline(ctx: RenderContext, outline: number[], scale: number, x_pos: number, y_pos: number): void {
-    const go = new GlyphOutline(outline, x_pos, y_pos, scale);
+  static renderOutline(ctx: RenderContext, outline: number[], scale: number, xPos: number, yPos: number): void {
+    const go = new GlyphOutline(outline, xPos, yPos, scale);
 
     ctx.beginPath();
     let x, y: number;
@@ -313,13 +313,13 @@ export class Glyph extends Element {
     ctx.fill();
   }
 
-  static getOutlineBoundingBox(outline: number[], scale: number, x_pos: number, y_pos: number): BoundingBox {
-    const go = new GlyphOutline(outline, x_pos, y_pos, scale);
+  static getOutlineBoundingBox(outline: number[], scale: number, xPos: number, yPos: number): BoundingBox {
+    const go = new GlyphOutline(outline, xPos, yPos, scale);
     const bboxComp = new BoundingBoxComputation();
 
     // (penX, penY) hold the pen position: the start of each stroke.
-    let penX: number = x_pos;
-    let penY: number = y_pos;
+    let penX: number = xPos;
+    let penY: number = yPos;
     let x, y: number;
     while (!go.done()) {
       switch (go.next()) {
@@ -376,8 +376,8 @@ export class Glyph extends Element {
 
   protected options: GlyphOptions = {};
   protected originShift: { x: number; y: number };
-  protected x_shift: number;
-  protected y_shift: number;
+  protected xShift: number;
+  protected yShift: number;
   scale: number = 1;
   protected point: number;
   protected stave?: Stave;
@@ -394,8 +394,8 @@ export class Glyph extends Element {
     this.point = point;
 
     this.originShift = { x: 0, y: 0 };
-    this.x_shift = 0;
-    this.y_shift = 0;
+    this.xShift = 0;
+    this.yShift = 0;
 
     if (options) {
       this.setOptions(options);
@@ -430,20 +430,20 @@ export class Glyph extends Element {
   }
 
   getXShift(): number {
-    return this.x_shift;
+    return this.xShift;
   }
 
-  setXShift(x_shift: number): this {
-    this.x_shift = x_shift;
+  setXShift(xShift: number): this {
+    this.xShift = xShift;
     return this;
   }
 
   getYshift(): number {
-    return this.y_shift;
+    return this.yShift;
   }
 
-  setYShift(y_shift: number): this {
-    this.y_shift = y_shift;
+  setYShift(yShift: number): this {
+    this.yShift = yShift;
     return this;
   }
 
@@ -472,13 +472,13 @@ export class Glyph extends Element {
     const metrics = this.checkMetrics();
     const metricsScale = metrics.scale;
     return {
-      x_min: metrics.x_min * this.scale * metricsScale,
-      x_max: metrics.x_max * this.scale * metricsScale,
+      xMin: metrics.xMin * this.scale * metricsScale,
+      xMax: metrics.xMax * this.scale * metricsScale,
       width: this.bbox.getW(),
       height: this.bbox.getH(),
       scale: this.scale * metricsScale,
-      x_shift: metrics.x_shift,
-      y_shift: metrics.y_shift,
+      xShift: metrics.xShift,
+      yShift: metrics.yShift,
       outline: metrics.outline,
       font: metrics.font,
       ha: metrics.ha,
@@ -512,8 +512,8 @@ export class Glyph extends Element {
 
     this.setRendered();
     this.applyStyle(ctx);
-    const xPos = x + this.originShift.x + metrics.x_shift;
-    const yPos = y + this.originShift.y + metrics.y_shift;
+    const xPos = x + this.originShift.x + metrics.xShift;
+    const yPos = y + this.originShift.y + metrics.yShift;
     Glyph.renderOutline(ctx, outline, scale, xPos, yPos);
     this.restoreStyle(ctx);
   }
@@ -533,8 +533,8 @@ export class Glyph extends Element {
     this.setRendered();
     this.applyStyle();
 
-    const xPos = x + this.x_shift + metrics.x_shift;
-    const yPos = stave.getYForGlyphs() + this.y_shift + metrics.y_shift;
+    const xPos = x + this.xShift + metrics.xShift;
+    const yPos = stave.getYForGlyphs() + this.yShift + metrics.yShift;
     Glyph.renderOutline(context, outline, scale, xPos, yPos);
     this.restoreStyle();
   }

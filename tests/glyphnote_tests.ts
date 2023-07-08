@@ -85,7 +85,7 @@ function basic(options: TestOptions): void {
 
   const voices: Note[][] = [
     [f.GlyphNote(new Glyph('repeat1Bar', 40), { duration: 'q' }, { line: 4 })],
-    [f.GlyphNote(new Glyph('repeat2Bars', 40), { duration: 'q', align_center: true })],
+    [f.GlyphNote(new Glyph('repeat2Bars', 40), { duration: 'q', alignCenter: true })],
     [
       f.GlyphNote(new Glyph('repeatBarSlash', 40), { duration: '16' }),
       f.GlyphNote(new Glyph('repeatBarSlash', 40), { duration: '16' }),

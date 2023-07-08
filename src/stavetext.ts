@@ -21,19 +21,19 @@ export class StaveText extends StaveModifier {
   };
 
   protected options: {
-    shift_x: number;
-    shift_y: number;
+    shiftX: number;
+    shiftY: number;
     justification: number;
   };
 
   protected text: string;
-  protected shift_x?: number;
-  protected shift_y?: number;
+  protected shiftX?: number;
+  protected shiftY?: number;
 
   constructor(
     text: string,
     position: number,
-    options: { shift_x?: number; shift_y?: number; justification?: number } = {}
+    options: { shiftX?: number; shiftY?: number; justification?: number } = {}
   ) {
     super();
 
@@ -41,8 +41,8 @@ export class StaveText extends StaveModifier {
     this.text = text;
     this.position = position;
     this.options = {
-      shift_x: 0,
-      shift_y: 0,
+      shiftX: 0,
+      shiftY: 0,
       justification: TextNote.Justification.CENTER,
       ...options,
     };
@@ -56,12 +56,12 @@ export class StaveText extends StaveModifier {
   }
 
   setShiftX(x: number): this {
-    this.shift_x = x;
+    this.shiftX = x;
     return this;
   }
 
   setShiftY(y: number): this {
-    this.shift_y = y;
+    this.shiftY = y;
     return this;
   }
 
@@ -77,33 +77,33 @@ export class StaveText extends StaveModifier {
     ctx.save();
     ctx.setLineWidth(2);
     ctx.setFont(this.textFont);
-    const text_width = ctx.measureText('' + this.text).width;
+    const textWidth = ctx.measureText('' + this.text).width;
 
     let x;
     let y;
     switch (this.position) {
       case StaveModifierPosition.LEFT:
       case StaveModifierPosition.RIGHT:
-        y = (stave.getYForLine(0) + stave.getBottomLineY()) / 2 + this.options.shift_y;
+        y = (stave.getYForLine(0) + stave.getBottomLineY()) / 2 + this.options.shiftY;
         if (this.position === StaveModifierPosition.LEFT) {
-          x = stave.getX() - text_width - 24 + this.options.shift_x;
+          x = stave.getX() - textWidth - 24 + this.options.shiftX;
         } else {
-          x = stave.getX() + stave.getWidth() + 24 + this.options.shift_x;
+          x = stave.getX() + stave.getWidth() + 24 + this.options.shiftX;
         }
         break;
       case StaveModifierPosition.ABOVE:
       case StaveModifierPosition.BELOW:
-        x = stave.getX() + this.options.shift_x;
+        x = stave.getX() + this.options.shiftX;
         if (this.options.justification === TextJustification.CENTER) {
-          x += stave.getWidth() / 2 - text_width / 2;
+          x += stave.getWidth() / 2 - textWidth / 2;
         } else if (this.options.justification === TextJustification.RIGHT) {
-          x += stave.getWidth() - text_width;
+          x += stave.getWidth() - textWidth;
         }
 
         if (this.position === StaveModifierPosition.ABOVE) {
-          y = stave.getYForTopText(2) + this.options.shift_y;
+          y = stave.getYForTopText(2) + this.options.shiftY;
         } else {
-          y = stave.getYForBottomText(2) + this.options.shift_y;
+          y = stave.getYForBottomText(2) + this.options.shiftY;
         }
         break;
       default:

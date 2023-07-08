@@ -29,19 +29,19 @@ export class StaveTempo extends StaveModifier {
   };
 
   protected tempo: StaveTempoOptions;
-  protected shift_x: number;
-  protected shift_y: number;
+  protected shiftX: number;
+  protected shiftY: number;
   /** Font size for note. */
-  public render_options = { glyph_font_scale: 30 };
+  public renderOptions = { glyphFontScale: 30 };
 
-  constructor(tempo: StaveTempoOptions, x: number, shift_y: number) {
+  constructor(tempo: StaveTempoOptions, x: number, shiftY: number) {
     super();
 
     this.tempo = tempo;
     this.position = StaveModifierPosition.ABOVE;
     this.x = x;
-    this.shift_x = 10;
-    this.shift_y = shift_y;
+    this.shiftX = 10;
+    this.shiftY = shiftY;
     this.resetFont();
   }
 
@@ -51,27 +51,27 @@ export class StaveTempo extends StaveModifier {
   }
 
   setShiftX(x: number): this {
-    this.shift_x = x;
+    this.shiftX = x;
     return this;
   }
 
   setShiftY(y: number): this {
-    this.shift_y = y;
+    this.shiftY = y;
     return this;
   }
 
-  draw(stave: Stave, shift_x: number): this {
+  draw(stave: Stave, shiftX: number): this {
     const ctx = stave.checkContext();
     this.setRendered();
 
-    const options = this.render_options;
-    const scale = options.glyph_font_scale / Tables.NOTATION_FONT_SCALE;
+    const options = this.renderOptions;
+    const scale = options.glyphFontScale / Tables.NOTATION_FONT_SCALE;
     const name = this.tempo.name;
     const duration = this.tempo.duration;
     const dots = this.tempo.dots || 0;
     const bpm = this.tempo.bpm;
-    let x = this.x + this.shift_x + shift_x;
-    const y = stave.getYForTopText(1) + this.shift_y;
+    let x = this.x + this.shiftX + shiftX;
+    const y = stave.getYForTopText(1) + this.shiftY;
 
     ctx.save();
     const textFormatter = TextFormatter.create(this.textFont);
@@ -97,22 +97,22 @@ export class StaveTempo extends StaveModifier {
       const glyphProps = Tables.getGlyphProps(duration);
 
       x += 3 * scale;
-      Glyph.renderGlyph(ctx, x, y, options.glyph_font_scale, glyphProps.code_head);
-      x += Glyph.getWidth(glyphProps.code_head, options.glyph_font_scale);
+      Glyph.renderGlyph(ctx, x, y, options.glyphFontScale, glyphProps.codeHead);
+      x += Glyph.getWidth(glyphProps.codeHead, options.glyphFontScale);
 
       // Draw stem and flags
       if (glyphProps.stem) {
-        let stem_height = 30;
+        let stemHeight = 30;
 
-        if (glyphProps.beam_count) stem_height += 3 * (glyphProps.beam_count - 1);
+        if (glyphProps.beamCount) stemHeight += 3 * (glyphProps.beamCount - 1);
 
-        stem_height *= scale;
+        stemHeight *= scale;
 
-        const y_top = y - stem_height;
-        ctx.fillRect(x - scale, y_top, scale, stem_height);
+        const yTop = y - stemHeight;
+        ctx.fillRect(x - scale, yTop, scale, stemHeight);
 
-        if (glyphProps.code && glyphProps.code_flag_upstem) {
-          const flagMetrics = Glyph.renderGlyph(ctx, x, y_top, options.glyph_font_scale, glyphProps.code_flag_upstem, {
+        if (glyphProps.code && glyphProps.codeFlagUpstem) {
+          const flagMetrics = Glyph.renderGlyph(ctx, x, yTop, options.glyphFontScale, glyphProps.codeFlagUpstem, {
             category: 'flag.staveTempo',
           });
           x += (flagMetrics.width * Tables.NOTATION_FONT_SCALE) / flagMetrics.font.getData().resolution;

@@ -147,8 +147,8 @@ function minuet1(options: TestOptions): void {
         { x: 0, y: 20 },
       ],
       invert: true,
-      position_end: 'nearTop',
-      y_shift: 20,
+      positionEnd: 'nearTop',
+      yShift: 20,
     },
   });
 
@@ -205,7 +205,7 @@ function minuet1(options: TestOptions): void {
       ],
       invert: true,
       position: 'nearTop',
-      position_end: 'nearTop',
+      positionEnd: 'nearTop',
     },
   });
 
@@ -375,7 +375,7 @@ function minuet1(options: TestOptions): void {
         { x: 0, y: 20 },
       ],
       invert: true,
-      position_end: 'nearTop',
+      positionEnd: 'nearTop',
     },
   });
 

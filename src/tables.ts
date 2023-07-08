@@ -70,81 +70,81 @@ const keySignatures: Record<string, { acc?: string; num: number }> = {
   'A#m': { acc: '#', num: 7 },
 };
 
-const clefs: Record<string, { line_shift: number }> = {
-  treble: { line_shift: 0 },
-  bass: { line_shift: 6 },
-  tenor: { line_shift: 4 },
-  alto: { line_shift: 3 },
-  soprano: { line_shift: 1 },
-  percussion: { line_shift: 0 },
-  'mezzo-soprano': { line_shift: 2 },
-  'baritone-c': { line_shift: 5 },
-  'baritone-f': { line_shift: 5 },
-  subbass: { line_shift: 7 },
-  french: { line_shift: -1 },
+const clefs: Record<string, { lineShift: number }> = {
+  treble: { lineShift: 0 },
+  bass: { lineShift: 6 },
+  tenor: { lineShift: 4 },
+  alto: { lineShift: 3 },
+  soprano: { lineShift: 1 },
+  percussion: { lineShift: 0 },
+  'mezzo-soprano': { lineShift: 2 },
+  'baritone-c': { lineShift: 5 },
+  'baritone-f': { lineShift: 5 },
+  subbass: { lineShift: 7 },
+  french: { lineShift: -1 },
 };
 
 const notesInfo: Record<
   string,
   {
     index: number;
-    int_val?: number;
+    intVal?: number;
     accidental?: string;
     rest?: boolean;
     octave?: number;
     code?: string;
-    shift_right?: number;
+    shiftRight?: number;
   }
 > = {
-  C: { index: 0, int_val: 0 },
-  CN: { index: 0, int_val: 0, accidental: 'n' },
-  'C#': { index: 0, int_val: 1, accidental: '#' },
-  'C##': { index: 0, int_val: 2, accidental: '##' },
-  CB: { index: 0, int_val: 11, accidental: 'b' },
-  CBB: { index: 0, int_val: 10, accidental: 'bb' },
-  D: { index: 1, int_val: 2 },
-  DN: { index: 1, int_val: 2, accidental: 'n' },
-  'D#': { index: 1, int_val: 3, accidental: '#' },
-  'D##': { index: 1, int_val: 4, accidental: '##' },
-  DB: { index: 1, int_val: 1, accidental: 'b' },
-  DBB: { index: 1, int_val: 0, accidental: 'bb' },
-  E: { index: 2, int_val: 4 },
-  EN: { index: 2, int_val: 4, accidental: 'n' },
-  'E#': { index: 2, int_val: 5, accidental: '#' },
-  'E##': { index: 2, int_val: 6, accidental: '##' },
-  EB: { index: 2, int_val: 3, accidental: 'b' },
-  EBB: { index: 2, int_val: 2, accidental: 'bb' },
-  F: { index: 3, int_val: 5 },
-  FN: { index: 3, int_val: 5, accidental: 'n' },
-  'F#': { index: 3, int_val: 6, accidental: '#' },
-  'F##': { index: 3, int_val: 7, accidental: '##' },
-  FB: { index: 3, int_val: 4, accidental: 'b' },
-  FBB: { index: 3, int_val: 3, accidental: 'bb' },
-  G: { index: 4, int_val: 7 },
-  GN: { index: 4, int_val: 7, accidental: 'n' },
-  'G#': { index: 4, int_val: 8, accidental: '#' },
-  'G##': { index: 4, int_val: 9, accidental: '##' },
-  GB: { index: 4, int_val: 6, accidental: 'b' },
-  GBB: { index: 4, int_val: 5, accidental: 'bb' },
-  A: { index: 5, int_val: 9 },
-  AN: { index: 5, int_val: 9, accidental: 'n' },
-  'A#': { index: 5, int_val: 10, accidental: '#' },
-  'A##': { index: 5, int_val: 11, accidental: '##' },
-  AB: { index: 5, int_val: 8, accidental: 'b' },
-  ABB: { index: 5, int_val: 7, accidental: 'bb' },
-  B: { index: 6, int_val: 11 },
-  BN: { index: 6, int_val: 11, accidental: 'n' },
-  'B#': { index: 6, int_val: 12, accidental: '#' },
-  'B##': { index: 6, int_val: 13, accidental: '##' },
-  BB: { index: 6, int_val: 10, accidental: 'b' },
-  BBB: { index: 6, int_val: 9, accidental: 'bb' },
+  C: { index: 0, intVal: 0 },
+  CN: { index: 0, intVal: 0, accidental: 'n' },
+  'C#': { index: 0, intVal: 1, accidental: '#' },
+  'C##': { index: 0, intVal: 2, accidental: '##' },
+  CB: { index: 0, intVal: 11, accidental: 'b' },
+  CBB: { index: 0, intVal: 10, accidental: 'bb' },
+  D: { index: 1, intVal: 2 },
+  DN: { index: 1, intVal: 2, accidental: 'n' },
+  'D#': { index: 1, intVal: 3, accidental: '#' },
+  'D##': { index: 1, intVal: 4, accidental: '##' },
+  DB: { index: 1, intVal: 1, accidental: 'b' },
+  DBB: { index: 1, intVal: 0, accidental: 'bb' },
+  E: { index: 2, intVal: 4 },
+  EN: { index: 2, intVal: 4, accidental: 'n' },
+  'E#': { index: 2, intVal: 5, accidental: '#' },
+  'E##': { index: 2, intVal: 6, accidental: '##' },
+  EB: { index: 2, intVal: 3, accidental: 'b' },
+  EBB: { index: 2, intVal: 2, accidental: 'bb' },
+  F: { index: 3, intVal: 5 },
+  FN: { index: 3, intVal: 5, accidental: 'n' },
+  'F#': { index: 3, intVal: 6, accidental: '#' },
+  'F##': { index: 3, intVal: 7, accidental: '##' },
+  FB: { index: 3, intVal: 4, accidental: 'b' },
+  FBB: { index: 3, intVal: 3, accidental: 'bb' },
+  G: { index: 4, intVal: 7 },
+  GN: { index: 4, intVal: 7, accidental: 'n' },
+  'G#': { index: 4, intVal: 8, accidental: '#' },
+  'G##': { index: 4, intVal: 9, accidental: '##' },
+  GB: { index: 4, intVal: 6, accidental: 'b' },
+  GBB: { index: 4, intVal: 5, accidental: 'bb' },
+  A: { index: 5, intVal: 9 },
+  AN: { index: 5, intVal: 9, accidental: 'n' },
+  'A#': { index: 5, intVal: 10, accidental: '#' },
+  'A##': { index: 5, intVal: 11, accidental: '##' },
+  AB: { index: 5, intVal: 8, accidental: 'b' },
+  ABB: { index: 5, intVal: 7, accidental: 'bb' },
+  B: { index: 6, intVal: 11 },
+  BN: { index: 6, intVal: 11, accidental: 'n' },
+  'B#': { index: 6, intVal: 12, accidental: '#' },
+  'B##': { index: 6, intVal: 13, accidental: '##' },
+  BB: { index: 6, intVal: 10, accidental: 'b' },
+  BBB: { index: 6, intVal: 9, accidental: 'bb' },
   R: { index: 6, rest: true }, // Rest
   X: {
     index: 6,
     accidental: '',
     octave: 4,
     code: 'noteheadXBlack',
-    shift_right: 5.5,
+    shiftRight: 5.5,
   },
 };
 
@@ -444,78 +444,78 @@ const accidentalColumns: Record<number, { [name: string]: number[] }> = {
   3: {
     a: [1, 3, 2],
     b: [1, 2, 1],
-    second_on_bottom: [1, 2, 3],
+    secondOnBottom: [1, 2, 3],
   },
   4: {
     a: [1, 3, 4, 2],
     b: [1, 2, 3, 1],
-    spaced_out_tetrachord: [1, 2, 1, 2],
+    spacedOutTetrachord: [1, 2, 1, 2],
   },
   5: {
     a: [1, 3, 5, 4, 2],
     b: [1, 2, 4, 3, 1],
-    spaced_out_pentachord: [1, 2, 3, 2, 1],
-    very_spaced_out_pentachord: [1, 2, 1, 2, 1],
+    spacedOutPentachord: [1, 2, 3, 2, 1],
+    verySpacedOutPentachord: [1, 2, 1, 2, 1],
   },
   6: {
     a: [1, 3, 5, 6, 4, 2],
     b: [1, 2, 4, 5, 3, 1],
-    spaced_out_hexachord: [1, 3, 2, 1, 3, 2],
-    very_spaced_out_hexachord: [1, 2, 1, 2, 1, 2],
+    spacedOutHexachord: [1, 3, 2, 1, 3, 2],
+    verySpacedOutHexachord: [1, 2, 1, 2, 1, 2],
   },
 };
 
 const articulations: Record<string, ArticulationStruct> = {
-  'a.': { code: 'augmentationDot', between_lines: true }, // Staccato
+  'a.': { code: 'augmentationDot', betweenLines: true }, // Staccato
   av: {
     aboveCode: 'articStaccatissimoAbove',
     belowCode: 'articStaccatissimoBelow',
-    between_lines: true,
+    betweenLines: true,
   }, // Staccatissimo
   'a>': {
     aboveCode: 'articAccentAbove',
     belowCode: 'articAccentBelow',
-    between_lines: true,
+    betweenLines: true,
   }, // Accent
   'a-': {
     aboveCode: 'articTenutoAbove',
     belowCode: 'articTenutoBelow',
-    between_lines: true,
+    betweenLines: true,
   }, // Tenuto
   'a^': {
     aboveCode: 'articMarcatoAbove',
     belowCode: 'articMarcatoBelow',
-    between_lines: false,
+    betweenLines: false,
   }, // Marcato
-  'a+': { code: 'pluckedLeftHandPizzicato', between_lines: false }, // Left hand pizzicato
+  'a+': { code: 'pluckedLeftHandPizzicato', betweenLines: false }, // Left hand pizzicato
   ao: {
     aboveCode: 'pluckedSnapPizzicatoAbove',
     belowCode: 'pluckedSnapPizzicatoBelow',
-    between_lines: false,
+    betweenLines: false,
   }, // Snap pizzicato
-  ah: { code: 'stringsHarmonic', between_lines: false }, // Natural harmonic or open note
-  'a@': { aboveCode: 'fermataAbove', belowCode: 'fermataBelow', between_lines: false }, // Fermata
-  'a@a': { code: 'fermataAbove', between_lines: false }, // Fermata above staff
-  'a@u': { code: 'fermataBelow', between_lines: false }, // Fermata below staff
-  'a@s': { aboveCode: 'fermataShortAbove', belowCode: 'fermataShortBelow', between_lines: false }, // Fermata short
-  'a@as': { code: 'fermataShortAbove', between_lines: false }, // Fermata short above staff
-  'a@us': { code: 'fermataShortBelow', between_lines: false }, // Fermata short below staff
-  'a@l': { aboveCode: 'fermataLongAbove', belowCode: 'fermataLongBelow', between_lines: false }, // Fermata long
-  'a@al': { code: 'fermataLongAbove', between_lines: false }, // Fermata long above staff
-  'a@ul': { code: 'fermataLongBelow', between_lines: false }, // Fermata long below staff
-  'a@vl': { aboveCode: 'fermataVeryLongAbove', belowCode: 'fermataVeryLongBelow', between_lines: false }, // Fermata very long
-  'a@avl': { code: 'fermataVeryLongAbove', between_lines: false }, // Fermata very long above staff
-  'a@uvl': { code: 'fermataVeryLongBelow', between_lines: false }, // Fermata very long below staff
-  'a|': { code: 'stringsUpBow', between_lines: false }, // Bow up - up stroke
-  am: { code: 'stringsDownBow', between_lines: false }, // Bow down - down stroke
-  'a,': { code: 'pictChokeCymbal', between_lines: false }, // Choked
+  ah: { code: 'stringsHarmonic', betweenLines: false }, // Natural harmonic or open note
+  'a@': { aboveCode: 'fermataAbove', belowCode: 'fermataBelow', betweenLines: false }, // Fermata
+  'a@a': { code: 'fermataAbove', betweenLines: false }, // Fermata above staff
+  'a@u': { code: 'fermataBelow', betweenLines: false }, // Fermata below staff
+  'a@s': { aboveCode: 'fermataShortAbove', belowCode: 'fermataShortBelow', betweenLines: false }, // Fermata short
+  'a@as': { code: 'fermataShortAbove', betweenLines: false }, // Fermata short above staff
+  'a@us': { code: 'fermataShortBelow', betweenLines: false }, // Fermata short below staff
+  'a@l': { aboveCode: 'fermataLongAbove', belowCode: 'fermataLongBelow', betweenLines: false }, // Fermata long
+  'a@al': { code: 'fermataLongAbove', betweenLines: false }, // Fermata long above staff
+  'a@ul': { code: 'fermataLongBelow', betweenLines: false }, // Fermata long below staff
+  'a@vl': { aboveCode: 'fermataVeryLongAbove', belowCode: 'fermataVeryLongBelow', betweenLines: false }, // Fermata very long
+  'a@avl': { code: 'fermataVeryLongAbove', betweenLines: false }, // Fermata very long above staff
+  'a@uvl': { code: 'fermataVeryLongBelow', betweenLines: false }, // Fermata very long below staff
+  'a|': { code: 'stringsUpBow', betweenLines: false }, // Bow up - up stroke
+  am: { code: 'stringsDownBow', betweenLines: false }, // Bow down - down stroke
+  'a,': { code: 'pictChokeCymbal', betweenLines: false }, // Choked
 };
 
 const ornaments: Record<string, { code: string }> = {
   mordent: { code: 'ornamentShortTrill' },
-  mordent_inverted: { code: 'ornamentMordent' },
+  mordentInverted: { code: 'ornamentMordent' },
   turn: { code: 'ornamentTurn' },
-  turn_inverted: { code: 'ornamentTurnSlash' },
+  turnInverted: { code: 'ornamentTurnSlash' },
   tr: { code: 'ornamentTrill' },
   upprall: { code: 'ornamentPrecompSlideTrillDAnglebert' },
   downprall: { code: 'ornamentPrecompDoubleCadenceUpperPrefix' },
@@ -581,7 +581,7 @@ export class Tables {
   // we have more robust text metrics.
   static TEXT_HEIGHT_OFFSET_HACK = 1;
 
-  static clefProperties(clef: string): { line_shift: number } {
+  static clefProperties(clef: string): { lineShift: number } {
     if (!clef || !(clef in clefs)) throw new RuntimeError('BadArgument', 'Invalid clef: ' + clef);
     return clefs[clef];
   }
@@ -589,11 +589,11 @@ export class Tables {
   /**
    * @param keyOctaveGlyph a string in the format "key/octave" (e.g., "c/5") or "key/octave/custom-note-head-code" (e.g., "g/5/t3").
    * @param clef
-   * @param params a struct with one option, `octave_shift` for clef ottavation (0 = default; 1 = 8va; -1 = 8vb, etc.).
+   * @param params a struct with one option, `octaveShift` for clef ottavation (0 = default; 1 = 8va; -1 = 8vb, etc.).
    * @returns properties for the specified note.
    */
-  static keyProperties(keyOctaveGlyph: string, clef: string = 'treble', params?: { octave_shift?: number }): KeyProps {
-    let options = { octave_shift: 0, duration: '4' };
+  static keyProperties(keyOctaveGlyph: string, clef: string = 'treble', params?: { octaveShift?: number }): KeyProps {
+    let options = { octaveShift: 0, duration: '4' };
     if (typeof params === 'object') {
       options = { ...options, ...params };
     }
@@ -614,12 +614,12 @@ export class Tables {
 
     let octave = parseInt(pieces[1], 10);
 
-    // Octave_shift is the shift to compensate for clef 8va/8vb.
-    octave += -1 * options.octave_shift;
+    // .octaveShift is the shift to compensate for clef 8va/8vb.
+    octave += -1 * options.octaveShift;
 
     const baseIndex = octave * 7 - 4 * 7;
     let line = (baseIndex + value.index) / 2;
-    line += Tables.clefProperties(clef).line_shift;
+    line += Tables.clefProperties(clef).lineShift;
 
     let stroke = 0;
 
@@ -627,11 +627,11 @@ export class Tables {
     if (line >= 6 && (line * 2) % 2 === 0) stroke = -1; // stroke down
 
     // Integer value for note arithmetic.
-    const int_value = typeof value.int_val !== 'undefined' ? octave * 12 + value.int_val : undefined;
+    const intValue = typeof value.intVal !== 'undefined' ? octave * 12 + value.intVal : undefined;
 
     // If the user specified a glyph, overwrite the glyph code.
     const code = value.code;
-    const shift_right = value.shift_right;
+    const shiftRight = value.shiftRight;
     let customNoteHeadProps = {};
     if (pieces.length > 2 && pieces[2]) {
       const glyphName = pieces[2].toUpperCase();
@@ -642,11 +642,11 @@ export class Tables {
       key,
       octave,
       line,
-      int_value,
+      intValue,
       accidental: value.accidental,
       code,
       stroke,
-      shift_right,
+      shiftRight,
       displaced: false,
       ...customNoteHeadProps,
     };
@@ -683,7 +683,7 @@ export class Tables {
   static tabToGlyphProps(fret: string, scale: number = 1.0): GlyphProps {
     let glyph = undefined;
     let width = 0;
-    let shift_y = 0;
+    let shiftY = 0;
 
     if (fret.toUpperCase() === 'X') {
       const glyphMetrics = new Glyph('accidentalDoubleSharp', Tables.TABLATURE_FONT_SCALE).getMetrics();
@@ -691,7 +691,7 @@ export class Tables {
       if (glyphMetrics.width == undefined || glyphMetrics.height == undefined)
         throw new RuntimeError('InvalidMetrics', 'Width and height required');
       width = glyphMetrics.width;
-      shift_y = -glyphMetrics.height / 2;
+      shiftY = -glyphMetrics.height / 2;
     } else {
       width = Tables.textWidth(fret);
     }
@@ -700,7 +700,7 @@ export class Tables {
       text: fret,
       code: glyph,
       getWidth: () => width * scale,
-      shift_y,
+      shiftY,
     } as GlyphProps;
   }
 
@@ -744,13 +744,13 @@ export class Tables {
 
     const notes = accidentalList[keySpec.acc];
 
-    const acc_list = [];
+    const accList = [];
     for (let i = 0; i < keySpec.num; ++i) {
       const line = notes[i];
-      acc_list.push({ type: keySpec.acc, line });
+      accList.push({ type: keySpec.acc, line });
     }
 
-    return acc_list;
+    return accList;
   }
 
   static getKeySignatures(): Record<string, { acc?: string; num: number }> {
@@ -1083,13 +1083,13 @@ export class Tables {
     // Try and get it from the custom list of note heads
     const codeNoteHead = Tables.codeNoteHead(type.toUpperCase(), duration);
     if (codeNoteHead != '')
-      glyphTypeProperties = { ...glyphTypeProperties, ...{ code_head: codeNoteHead, code: codeNoteHead } };
+      glyphTypeProperties = { ...glyphTypeProperties, ...{ codeHead: codeNoteHead, code: codeNoteHead } };
 
-    const code_head = glyphTypeProperties.code_head as string;
+    const codeHead = glyphTypeProperties.codeHead as string;
 
-    // The default implementation of getWidth() calls Glyph.getWidth(code_head, scale).
+    // The default implementation of getWidth() calls Glyph.getWidth(codeHead, scale).
     // This can be overridden by an individual glyph type (see slash noteheads below: Tables.SLASH_NOTEHEAD_WIDTH).
-    const getWidth = (scale = Tables.NOTATION_FONT_SCALE): number => Glyph.getWidth(code_head, scale);
+    const getWidth = (scale = Tables.NOTATION_FONT_SCALE): number => Glyph.getWidth(codeHead, scale);
 
     // Merge duration props for 'duration' with the note head properties.
     return { ...code.common, getWidth: getWidth, ...glyphTypeProperties } as GlyphProps;
@@ -1100,8 +1100,8 @@ export class Tables {
 
   // Default time signature.
   static TIME4_4 = {
-    num_beats: 4,
-    beat_value: 4,
+    numBeats: 4,
+    beatValue: 4,
     resolution: RESOLUTION,
   };
 }
@@ -1113,23 +1113,23 @@ export class Tables {
 const durationCodes: Record<string, Record<string, Partial<GlyphProps>>> = {
   '1/2': {
     common: {
-      code_head: '',
+      codeHead: '',
       stem: false,
       flag: false,
-      stem_up_extension: -Tables.STEM_HEIGHT,
-      stem_down_extension: -Tables.STEM_HEIGHT,
-      tabnote_stem_up_extension: -Tables.STEM_HEIGHT,
-      tabnote_stem_down_extension: -Tables.STEM_HEIGHT,
-      dot_shiftY: 0,
-      line_above: 0,
-      line_below: 0,
+      stemUpExtension: -Tables.STEM_HEIGHT,
+      stemDownExtension: -Tables.STEM_HEIGHT,
+      tabnoteStemUpExtension: -Tables.STEM_HEIGHT,
+      tabnoteStemDownExtension: -Tables.STEM_HEIGHT,
+      dotShiftY: 0,
+      lineAbove: 0,
+      lineBelow: 0,
     },
     r: {
       // Breve rest
-      code_head: 'restDoubleWhole',
+      codeHead: 'restDoubleWhole',
       rest: true,
       position: 'B/5',
-      dot_shiftY: 0.5,
+      dotShiftY: 0.5,
     },
     s: {
       // Breve note slash -
@@ -1141,24 +1141,24 @@ const durationCodes: Record<string, Record<string, Partial<GlyphProps>>> = {
 
   1: {
     common: {
-      code_head: '',
+      codeHead: '',
       stem: false,
       flag: false,
-      stem_up_extension: -Tables.STEM_HEIGHT,
-      stem_down_extension: -Tables.STEM_HEIGHT,
-      tabnote_stem_up_extension: -Tables.STEM_HEIGHT,
-      tabnote_stem_down_extension: -Tables.STEM_HEIGHT,
-      dot_shiftY: 0,
-      line_above: 0,
-      line_below: 0,
+      stemUpExtension: -Tables.STEM_HEIGHT,
+      stemDownExtension: -Tables.STEM_HEIGHT,
+      tabnoteStemUpExtension: -Tables.STEM_HEIGHT,
+      tabnoteStemDownExtension: -Tables.STEM_HEIGHT,
+      dotShiftY: 0,
+      lineAbove: 0,
+      lineBelow: 0,
     },
     r: {
       // Whole rest
-      code_head: 'restWhole',
-      ledger_code_head: 'restWholeLegerLine',
+      codeHead: 'restWhole',
+      ledgerCodeHead: 'restWholeLegerLine',
       rest: true,
       position: 'D/5',
-      dot_shiftY: 0.5,
+      dotShiftY: 0.5,
     },
     s: {
       // Whole note slash
@@ -1170,25 +1170,25 @@ const durationCodes: Record<string, Record<string, Partial<GlyphProps>>> = {
 
   2: {
     common: {
-      code_head: '',
+      codeHead: '',
       stem: true,
       flag: false,
-      stem_up_extension: 0,
-      stem_down_extension: 0,
-      tabnote_stem_up_extension: 0,
-      tabnote_stem_down_extension: 0,
-      dot_shiftY: 0,
-      line_above: 0,
-      line_below: 0,
+      stemUpExtension: 0,
+      stemDownExtension: 0,
+      tabnoteStemUpExtension: 0,
+      tabnoteStemDownExtension: 0,
+      dotShiftY: 0,
+      lineAbove: 0,
+      lineBelow: 0,
     },
     r: {
       // Half rest
-      code_head: 'restHalf',
-      ledger_code_head: 'restHalfLegerLine',
+      codeHead: 'restHalf',
+      ledgerCodeHead: 'restHalfLegerLine',
       stem: false,
       rest: true,
       position: 'B/4',
-      dot_shiftY: -0.5,
+      dotShiftY: -0.5,
     },
     s: {
       // Half note slash
@@ -1200,26 +1200,26 @@ const durationCodes: Record<string, Record<string, Partial<GlyphProps>>> = {
 
   4: {
     common: {
-      code_head: '',
+      codeHead: '',
       stem: true,
       flag: false,
-      stem_up_extension: 0,
-      stem_down_extension: 0,
-      tabnote_stem_up_extension: 0,
-      tabnote_stem_down_extension: 0,
-      dot_shiftY: 0,
-      line_above: 0,
-      line_below: 0,
+      stemUpExtension: 0,
+      stemDownExtension: 0,
+      tabnoteStemUpExtension: 0,
+      tabnoteStemDownExtension: 0,
+      dotShiftY: 0,
+      lineAbove: 0,
+      lineBelow: 0,
     },
     r: {
       // Quarter rest
-      code_head: 'restQuarter',
+      codeHead: 'restQuarter',
       stem: false,
       rest: true,
       position: 'B/4',
-      dot_shiftY: -0.5,
-      line_above: 1.5,
-      line_below: 1.5,
+      dotShiftY: -0.5,
+      lineAbove: 1.5,
+      lineBelow: 1.5,
     },
     s: {
       // Quarter slash
@@ -1231,31 +1231,31 @@ const durationCodes: Record<string, Record<string, Partial<GlyphProps>>> = {
 
   8: {
     common: {
-      code_head: '',
+      codeHead: '',
       stem: true,
       flag: true,
-      beam_count: 1,
-      stem_beam_extension: 0,
-      code_flag_upstem: 'flag8thUp',
-      code_flag_downstem: 'flag8thDown',
-      stem_up_extension: 0,
-      stem_down_extension: 0,
-      tabnote_stem_up_extension: 0,
-      tabnote_stem_down_extension: 0,
-      dot_shiftY: 0,
-      line_above: 0,
-      line_below: 0,
+      beamCount: 1,
+      stemBeamExtension: 0,
+      codeFlagUpstem: 'flag8thUp',
+      codeFlagDownstem: 'flag8thDown',
+      stemUpExtension: 0,
+      stemDownExtension: 0,
+      tabnoteStemUpExtension: 0,
+      tabnoteStemDownExtension: 0,
+      dotShiftY: 0,
+      lineAbove: 0,
+      lineBelow: 0,
     },
     r: {
       // Eighth rest
-      code_head: 'rest8th',
+      codeHead: 'rest8th',
       stem: false,
       flag: false,
       rest: true,
       position: 'B/4',
-      dot_shiftY: -0.5,
-      line_above: 1.0,
-      line_below: 1.0,
+      dotShiftY: -0.5,
+      lineAbove: 1.0,
+      lineBelow: 1.0,
     },
     s: {
       // Eighth slash
@@ -1267,31 +1267,31 @@ const durationCodes: Record<string, Record<string, Partial<GlyphProps>>> = {
 
   16: {
     common: {
-      code_head: '',
-      beam_count: 2,
-      stem_beam_extension: 0,
+      codeHead: '',
+      beamCount: 2,
+      stemBeamExtension: 0,
       stem: true,
       flag: true,
-      code_flag_upstem: 'flag16thUp',
-      code_flag_downstem: 'flag16thDown',
-      stem_up_extension: 0,
-      stem_down_extension: 0,
-      tabnote_stem_up_extension: 0,
-      tabnote_stem_down_extension: 0,
-      dot_shiftY: 0,
-      line_above: 0,
-      line_below: 0,
+      codeFlagUpstem: 'flag16thUp',
+      codeFlagDownstem: 'flag16thDown',
+      stemUpExtension: 0,
+      stemDownExtension: 0,
+      tabnoteStemUpExtension: 0,
+      tabnoteStemDownExtension: 0,
+      dotShiftY: 0,
+      lineAbove: 0,
+      lineBelow: 0,
     },
     r: {
       // Sixteenth rest
-      code_head: 'rest16th',
+      codeHead: 'rest16th',
       stem: false,
       flag: false,
       rest: true,
       position: 'B/4',
-      dot_shiftY: -0.5,
-      line_above: 1.0,
-      line_below: 2.0,
+      dotShiftY: -0.5,
+      lineAbove: 1.0,
+      lineBelow: 2.0,
     },
     s: {
       // Sixteenth slash
@@ -1303,31 +1303,31 @@ const durationCodes: Record<string, Record<string, Partial<GlyphProps>>> = {
 
   32: {
     common: {
-      code_head: '',
-      beam_count: 3,
-      stem_beam_extension: 7.5,
+      codeHead: '',
+      beamCount: 3,
+      stemBeamExtension: 7.5,
       stem: true,
       flag: true,
-      code_flag_upstem: 'flag32ndUp',
-      code_flag_downstem: 'flag32ndDown',
-      stem_up_extension: 9,
-      stem_down_extension: 9,
-      tabnote_stem_up_extension: 9,
-      tabnote_stem_down_extension: 9,
-      dot_shiftY: 0,
-      line_above: 0,
-      line_below: 0,
+      codeFlagUpstem: 'flag32ndUp',
+      codeFlagDownstem: 'flag32ndDown',
+      stemUpExtension: 9,
+      stemDownExtension: 9,
+      tabnoteStemUpExtension: 9,
+      tabnoteStemDownExtension: 9,
+      dotShiftY: 0,
+      lineAbove: 0,
+      lineBelow: 0,
     },
     r: {
       // Thirty-second rest
-      code_head: 'rest32nd',
+      codeHead: 'rest32nd',
       stem: false,
       flag: false,
       rest: true,
       position: 'B/4',
-      dot_shiftY: -1.5,
-      line_above: 2.0,
-      line_below: 2.0,
+      dotShiftY: -1.5,
+      lineAbove: 2.0,
+      lineBelow: 2.0,
     },
     s: {
       // Thirty-second slash
@@ -1339,31 +1339,31 @@ const durationCodes: Record<string, Record<string, Partial<GlyphProps>>> = {
 
   64: {
     common: {
-      code_head: '',
-      beam_count: 4,
-      stem_beam_extension: 15,
+      codeHead: '',
+      beamCount: 4,
+      stemBeamExtension: 15,
       stem: true,
       flag: true,
-      code_flag_upstem: 'flag64thUp',
-      code_flag_downstem: 'flag64thDown',
-      stem_up_extension: 13,
-      stem_down_extension: 13,
-      tabnote_stem_up_extension: 13,
-      tabnote_stem_down_extension: 13,
-      dot_shiftY: 0,
-      line_above: 0,
-      line_below: 0,
+      codeFlagUpstem: 'flag64thUp',
+      codeFlagDownstem: 'flag64thDown',
+      stemUpExtension: 13,
+      stemDownExtension: 13,
+      tabnoteStemUpExtension: 13,
+      tabnoteStemDownExtension: 13,
+      dotShiftY: 0,
+      lineAbove: 0,
+      lineBelow: 0,
     },
     r: {
       // Sixty-fourth rest
-      code_head: 'rest64th',
+      codeHead: 'rest64th',
       stem: false,
       flag: false,
       rest: true,
       position: 'B/4',
-      dot_shiftY: -1.5,
-      line_above: 2.0,
-      line_below: 3.0,
+      dotShiftY: -1.5,
+      lineAbove: 2.0,
+      lineBelow: 3.0,
     },
     s: {
       // Sixty-fourth slash
@@ -1375,31 +1375,31 @@ const durationCodes: Record<string, Record<string, Partial<GlyphProps>>> = {
 
   128: {
     common: {
-      code_head: '',
-      beam_count: 5,
-      stem_beam_extension: 22.5,
+      codeHead: '',
+      beamCount: 5,
+      stemBeamExtension: 22.5,
       stem: true,
       flag: true,
-      code_flag_upstem: 'flag128thUp',
-      code_flag_downstem: 'flag128thDown',
-      stem_up_extension: 22,
-      stem_down_extension: 22,
-      tabnote_stem_up_extension: 22,
-      tabnote_stem_down_extension: 22,
-      dot_shiftY: 0,
-      line_above: 0,
-      line_below: 0,
+      codeFlagUpstem: 'flag128thUp',
+      codeFlagDownstem: 'flag128thDown',
+      stemUpExtension: 22,
+      stemDownExtension: 22,
+      tabnoteStemUpExtension: 22,
+      tabnoteStemDownExtension: 22,
+      dotShiftY: 0,
+      lineAbove: 0,
+      lineBelow: 0,
     },
     r: {
       // Hundred-twenty-eight rest
-      code_head: 'rest128th',
+      codeHead: 'rest128th',
       stem: false,
       flag: false,
       rest: true,
       position: 'B/4',
-      dot_shiftY: -2.5,
-      line_above: 3.0,
-      line_below: 3.0,
+      dotShiftY: -2.5,
+      lineAbove: 3.0,
+      lineBelow: 3.0,
     },
     s: {
       // Hundred-twenty-eight slash

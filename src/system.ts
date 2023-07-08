@@ -171,8 +171,8 @@ export class System extends Element {
    */
   addConnector(type: StaveConnectorType = 'double'): StaveConnector {
     this.connector = this.factory.StaveConnector({
-      top_stave: this.partStaves[0],
-      bottom_stave: this.partStaves[this.partStaves.length - 1],
+      topStave: this.partStaves[0],
+      bottomStave: this.partStaves[this.partStaves.length - 1],
       type,
     });
     return this.connector;
@@ -193,7 +193,7 @@ export class System extends Element {
    * `]});`
    */
   addStave(params: SystemStave): Stave {
-    const staveOptions: StaveOptions = { left_bar: false, ...params.options };
+    const staveOptions: StaveOptions = { leftBar: false, ...params.options };
 
     const stave =
       params.stave ??
@@ -236,9 +236,9 @@ export class System extends Element {
 
   /** Format the system. */
   format(): void {
-    const options_details = this.options.details;
+    const optionsDetails = this.options.details;
     let justifyWidth = 0;
-    const formatter = new Formatter(options_details);
+    const formatter = new Formatter(optionsDetails);
     this.formatter = formatter;
 
     let y = this.options.y;
@@ -287,7 +287,7 @@ export class System extends Element {
     formatter.postFormat();
 
     for (let i = 0; i < this.options.formatIterations; i++) {
-      formatter.tune(options_details);
+      formatter.tune(optionsDetails);
     }
 
     this.startX = startX;

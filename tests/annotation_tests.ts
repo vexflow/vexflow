@@ -242,17 +242,17 @@ function placement(options: TestOptions, contextBuilder: ContextBuilder): void {
     new Annotation(text).setFont(Font.SERIF, fontSize).setVerticalJustification(vj);
 
   const notes = [
-    staveNote({ keys: ['e/4'], duration: 'q', stem_direction: Stem.DOWN })
+    staveNote({ keys: ['e/4'], duration: 'q', stemDirection: Stem.DOWN })
       .addModifier(new Articulation('a.').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('a-').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(annotation('v1', 10, AnnotationVerticalJustify.TOP), 0)
       .addModifier(annotation('v2', 10, AnnotationVerticalJustify.TOP), 0),
-    staveNote({ keys: ['b/4'], duration: 'q', stem_direction: Stem.DOWN })
+    staveNote({ keys: ['b/4'], duration: 'q', stemDirection: Stem.DOWN })
       .addModifier(new Articulation('a.').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('a-').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(annotation('v1', 10, AnnotationVerticalJustify.TOP), 0)
       .addModifier(annotation('v2', 10, AnnotationVerticalJustify.TOP), 0),
-    staveNote({ keys: ['c/5'], duration: 'q', stem_direction: Stem.DOWN })
+    staveNote({ keys: ['c/5'], duration: 'q', stemDirection: Stem.DOWN })
       .addModifier(new Articulation('a.').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('a-').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(annotation('v1', 10, AnnotationVerticalJustify.TOP), 0)
@@ -260,7 +260,7 @@ function placement(options: TestOptions, contextBuilder: ContextBuilder): void {
     staveNote({ keys: ['f/4'], duration: 'q' })
       .addModifier(annotation('v1', 14, AnnotationVerticalJustify.TOP), 0)
       .addModifier(annotation('v2', 14, AnnotationVerticalJustify.TOP), 0),
-    staveNote({ keys: ['f/4'], duration: 'q', stem_direction: Stem.DOWN })
+    staveNote({ keys: ['f/4'], duration: 'q', stemDirection: Stem.DOWN })
       .addModifier(new Articulation('am').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('a.').setPosition(ModifierPosition.ABOVE), 0)
       .addModifier(new Articulation('a-').setPosition(ModifierPosition.ABOVE), 0)
@@ -279,11 +279,11 @@ function placement(options: TestOptions, contextBuilder: ContextBuilder): void {
       .addModifier(new Articulation('a.').setPosition(ModifierPosition.BELOW), 0)
       .addModifier(annotation('v1', 11, AnnotationVerticalJustify.BOTTOM), 0)
       .addModifier(annotation('v2', 20, AnnotationVerticalJustify.BOTTOM), 0),
-    staveNote({ keys: ['f/5'], duration: 'q', stem_direction: Stem.DOWN })
+    staveNote({ keys: ['f/5'], duration: 'q', stemDirection: Stem.DOWN })
       .addModifier(new Articulation('am').setPosition(ModifierPosition.BELOW), 0)
       .addModifier(annotation('v1', 10, AnnotationVerticalJustify.BOTTOM), 0)
       .addModifier(annotation('v2', 20, AnnotationVerticalJustify.BOTTOM), 0),
-    staveNote({ keys: ['f/4'], duration: 'q', stem_direction: Stem.DOWN })
+    staveNote({ keys: ['f/4'], duration: 'q', stemDirection: Stem.DOWN })
       .addModifier(annotation('v1', 10, AnnotationVerticalJustify.BOTTOM), 0)
       .addModifier(annotation('v2', 20, AnnotationVerticalJustify.BOTTOM), 0),
     staveNote({ keys: ['f/5'], duration: 'w' })
@@ -383,13 +383,13 @@ function justificationStemDown(options: TestOptions, contextBuilder: ContextBuil
   for (let v = 1; v <= 4; ++v) {
     const stave = new Stave(10, (v - 1) * 150 + 40, 400).addClef('treble').setContext(ctx).draw();
     const notes = [
-      staveNote({ keys: ['c/3'], duration: 'q', stem_direction: -1 }).addModifier(annotation('Text', 1, v), 0),
-      staveNote({ keys: ['c/4', 'e/4', 'c/5'], duration: 'q', stem_direction: -1 }).addModifier(
+      staveNote({ keys: ['c/3'], duration: 'q', stemDirection: -1 }).addModifier(annotation('Text', 1, v), 0),
+      staveNote({ keys: ['c/4', 'e/4', 'c/5'], duration: 'q', stemDirection: -1 }).addModifier(
         annotation('Text', 2, v),
         0
       ),
-      staveNote({ keys: ['c/5'], duration: 'q', stem_direction: -1 }).addModifier(annotation('Text', 3, v), 0),
-      staveNote({ keys: ['c/6'], duration: 'q', stem_direction: -1 }).addModifier(annotation('Text', 4, v), 0),
+      staveNote({ keys: ['c/5'], duration: 'q', stemDirection: -1 }).addModifier(annotation('Text', 3, v), 0),
+      staveNote({ keys: ['c/6'], duration: 'q', stemDirection: -1 }).addModifier(annotation('Text', 4, v), 0),
     ];
     Formatter.FormatAndDraw(ctx, stave, notes);
   }
@@ -437,13 +437,13 @@ function tabNotes(options: TestOptions, contextBuilder: ContextBuilder): void {
 
   const notes1 = specs.map((noteSpec) => {
     const note = new TabNote(noteSpec);
-    note.render_options.draw_stem = true;
+    note.renderOptions.drawStem = true;
     return note;
   });
 
   const notes2 = specs.map((noteSpec) => {
     const note = new TabNote(noteSpec);
-    note.render_options.draw_stem = true;
+    note.renderOptions.drawStem = true;
     note.setStemDirection(-1);
     return note;
   });

@@ -19,35 +19,35 @@ function subgroup(el, iterations, params) {
 
   const stave1 = f.Stave({ x: 15, y: 40, width: options.systemWidth }).setClef('treble');
   const notes1 = [
-    { keys: ['f/5'], stem_direction: 1, duration: '4' },
-    { keys: ['d/4'], stem_direction: 1, duration: '4', clef: 'bass' },
-    { keys: ['c/5'], stem_direction: 1, duration: '4', clef: 'alto' },
-    { keys: ['c/5'], stem_direction: 1, duration: '4', clef: 'soprano' },
+    { keys: ['f/5'], stemDirection: 1, duration: '4' },
+    { keys: ['d/4'], stemDirection: 1, duration: '4', clef: 'bass' },
+    { keys: ['c/5'], stemDirection: 1, duration: '4', clef: 'alto' },
+    { keys: ['c/5'], stemDirection: 1, duration: '4', clef: 'soprano' },
   ].map(f.StaveNote);
 
   const notes2 = [
-    { keys: ['c/4'], stem_direction: -1, duration: '4' },
-    { keys: ['c/3'], stem_direction: -1, duration: '4', clef: 'bass' },
-    { keys: ['d/4'], stem_direction: -1, duration: '4', clef: 'alto' },
-    { keys: ['f/4'], stem_direction: -1, duration: '4', clef: 'soprano' },
+    { keys: ['c/4'], stemDirection: -1, duration: '4' },
+    { keys: ['c/3'], stemDirection: -1, duration: '4', clef: 'bass' },
+    { keys: ['d/4'], stemDirection: -1, duration: '4', clef: 'alto' },
+    { keys: ['f/4'], stemDirection: -1, duration: '4', clef: 'soprano' },
   ].map(f.StaveNote);
 
   const stave2 = f.Stave({ x: 15, y: 160, width: options.systemWidth }).setClef('bass');
 
   const notes3 = [
-    { keys: ['e/3'], duration: '8', stem_direction: -1, clef: 'bass' },
-    { keys: ['g/4'], duration: '8', stem_direction: 1, clef: 'treble' },
-    { keys: ['d/4'], duration: '8', stem_direction: 1, clef: 'treble' },
-    { keys: ['f/4'], duration: '8', stem_direction: 1, clef: 'treble' },
-    { keys: ['c/4'], duration: '8', stem_direction: 1, clef: 'treble' },
-    { keys: ['g/3'], duration: '8', stem_direction: -1, clef: 'bass' },
-    { keys: ['d/3'], duration: '8', stem_direction: -1, clef: 'bass' },
-    { keys: ['f/3'], duration: '8', stem_direction: -1, clef: 'bass' },
+    { keys: ['e/3'], duration: '8', stemDirection: -1, clef: 'bass' },
+    { keys: ['g/4'], duration: '8', stemDirection: 1, clef: 'treble' },
+    { keys: ['d/4'], duration: '8', stemDirection: 1, clef: 'treble' },
+    { keys: ['f/4'], duration: '8', stemDirection: 1, clef: 'treble' },
+    { keys: ['c/4'], duration: '8', stemDirection: 1, clef: 'treble' },
+    { keys: ['g/3'], duration: '8', stemDirection: -1, clef: 'bass' },
+    { keys: ['d/3'], duration: '8', stemDirection: -1, clef: 'bass' },
+    { keys: ['f/3'], duration: '8', stemDirection: -1, clef: 'bass' },
   ].map(f.StaveNote);
 
-  f.StaveConnector({ top_stave: stave1, bottom_stave: stave2, type: 'brace' });
-  f.StaveConnector({ top_stave: stave1, bottom_stave: stave2, type: 'singleLeft' });
-  f.StaveConnector({ top_stave: stave1, bottom_stave: stave2, type: 'singleRight' });
+  f.StaveConnector({ topStave: stave1, bottomStave: stave2, type: 'brace' });
+  f.StaveConnector({ topStave: stave1, bottomStave: stave2, type: 'singleLeft' });
+  f.StaveConnector({ topStave: stave1, bottomStave: stave2, type: 'singleRight' });
 
   function addAccidental(note, acc) {
     return note.addModifier(f.Accidental({ type: acc }), 0);
@@ -125,10 +125,10 @@ function tuplets(el, iterations, params) {
 
   const voices = [
     score.notes('c5/8, c5'),
-    score.tuplet(score.notes('a4/8, a4, a4'), { notes_occupied: 2 }),
+    score.tuplet(score.notes('a4/8, a4, a4'), { notesOccupied: 2 }),
     score.notes('c5/16, c5, c5, c5'),
-    score.tuplet(score.notes('a4/16, a4, a4, a4, a4'), { notes_occupied: 4 }),
-    score.tuplet(score.notes('a4/32, a4, a4, a4, a4, a4, a4'), { notes_occupied: 8 }),
+    score.tuplet(score.notes('a4/16, a4, a4, a4, a4'), { notesOccupied: 4 }),
+    score.tuplet(score.notes('a4/32, a4, a4, a4, a4, a4, a4'), { notesOccupied: 8 }),
   ];
 
   voices.map(newVoice).forEach(newStave);
@@ -172,8 +172,8 @@ function multistave(el, iterations, params) {
   const voice31 = score.voice(notes31, { time: '6/8' });
 
   f.StaveConnector({
-    top_stave: stave21,
-    bottom_stave: stave31,
+    topStave: stave21,
+    bottomStave: stave31,
     type: 'brace',
   });
 

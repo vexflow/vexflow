@@ -129,9 +129,9 @@ function drawClefChange(options: TestOptions): void {
     f.ClefNote({ type: 'french', options: { size: 'small' } }),
     f.StaveNote({ keys: ['c/4'], duration: '4', clef: 'french' }),
     f.ClefNote({ type: 'treble', options: { size: 'small', annotation: '8vb' } }),
-    f.StaveNote({ keys: ['c/4'], duration: '4', clef: 'treble', octave_shift: -1 }),
+    f.StaveNote({ keys: ['c/4'], duration: '4', clef: 'treble', octaveShift: -1 }),
     f.ClefNote({ type: 'treble', options: { size: 'small', annotation: '8va' } }),
-    f.StaveNote({ keys: ['c/4'], duration: '4', clef: 'treble', octave_shift: 1 }),
+    f.StaveNote({ keys: ['c/4'], duration: '4', clef: 'treble', octaveShift: 1 }),
   ];
   const voice = f.Voice({ time: '12/4' }).addTickables(notes);
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);

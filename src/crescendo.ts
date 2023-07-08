@@ -16,8 +16,8 @@ export interface CrescendoParams {
   reverse: boolean;
   height: number;
   y: number;
-  end_x: number;
-  begin_x: number;
+  beginX: number;
+  endX: number;
 }
 
 // To enable logging for this class. Set `Vex.Flow.Crescendo.DEBUG` to `true`.
@@ -28,21 +28,21 @@ function L(...args: any[]) {
 
 // Private helper to draw the hairpin
 function renderHairpin(ctx: RenderContext, params: CrescendoParams) {
-  const begin_x = params.begin_x;
-  const end_x = params.end_x;
+  const beginX = params.beginX;
+  const endX = params.endX;
   const y = params.y;
-  const half_height = params.height / 2;
+  const halfHeight = params.height / 2;
 
   ctx.beginPath();
 
   if (params.reverse) {
-    ctx.moveTo(begin_x, y - half_height);
-    ctx.lineTo(end_x, y);
-    ctx.lineTo(begin_x, y + half_height);
+    ctx.moveTo(beginX, y - halfHeight);
+    ctx.lineTo(endX, y);
+    ctx.lineTo(beginX, y + halfHeight);
   } else {
-    ctx.moveTo(end_x, y - half_height);
-    ctx.lineTo(begin_x, y);
-    ctx.lineTo(end_x, y + half_height);
+    ctx.moveTo(endX, y - halfHeight);
+    ctx.lineTo(beginX, y);
+    ctx.lineTo(endX, y + halfHeight);
   }
 
   ctx.stroke();
@@ -62,10 +62,10 @@ export class Crescendo extends Note {
   protected line: number;
   protected options = {
     // Extensions to the length of the crescendo on either side
-    extend_left: 0,
-    extend_right: 0,
+    extendLeft: 0,
+    extendRight: 0,
     // Vertical shift
-    y_shift: 0,
+    yShift: 0,
   };
 
   // Initialize the crescendo's properties
@@ -113,19 +113,19 @@ export class Crescendo extends Note {
     const stave = this.checkStave();
     this.setRendered();
 
-    const tick_context = this.getTickContext();
-    const next_context = TickContext.getNextContext(tick_context);
+    const tickContext = this.getTickContext();
+    const nextContext = TickContext.getNextContext(tickContext);
 
-    const begin_x = this.getAbsoluteX();
-    const end_x = next_context ? next_context.getX() : stave.getX() + stave.getWidth();
+    const beginX = this.getAbsoluteX();
+    const endX = nextContext ? nextContext.getX() : stave.getX() + stave.getWidth();
     const y = stave.getYForLine(this.line + -3) + 1;
 
-    L('Drawing ', this.decrescendo ? 'decrescendo ' : 'crescendo ', this.height, 'x', begin_x - end_x);
+    L('Drawing ', this.decrescendo ? 'decrescendo ' : 'crescendo ', this.height, 'x', beginX - endX);
 
     renderHairpin(ctx, {
-      begin_x: begin_x - this.options.extend_left,
-      end_x: end_x + this.options.extend_right,
-      y: y + this.options.y_shift,
+      beginX: beginX - this.options.extendLeft,
+      endX: endX + this.options.extendRight,
+      y: y + this.options.yShift,
       height: this.height,
       reverse: this.decrescendo,
     });

@@ -36,36 +36,36 @@ export class Repetition extends StaveModifier {
     TO_CODA: 13, // To Coda at end of stave
   };
 
-  protected symbol_type: number;
+  protected symbolType: number;
 
-  protected x_shift: number;
-  protected y_shift: number;
+  protected xShift: number;
+  protected yShift: number;
 
-  constructor(type: number, x: number, y_shift: number) {
+  constructor(type: number, x: number, yShift: number) {
     super();
 
-    this.symbol_type = type;
+    this.symbolType = type;
     this.x = x;
-    this.x_shift = 0;
-    this.y_shift = y_shift;
+    this.xShift = 0;
+    this.yShift = yShift;
 
     this.resetFont();
   }
 
   setShiftX(x: number): this {
-    this.x_shift = x;
+    this.xShift = x;
     return this;
   }
 
   setShiftY(y: number): this {
-    this.y_shift = y;
+    this.yShift = y;
     return this;
   }
 
   draw(stave: Stave, x: number): this {
     this.setRendered();
 
-    switch (this.symbol_type) {
+    switch (this.symbolType) {
       case Repetition.type.CODA_RIGHT:
         this.drawCodaFixed(stave, x + stave.getWidth());
         break;
@@ -110,10 +110,10 @@ export class Repetition extends StaveModifier {
   }
 
   drawCodaFixed(stave: Stave, x: number): this {
-    const y = stave.getYForTopText(stave.getNumLines()) + this.y_shift;
+    const y = stave.getYForTopText(stave.getNumLines()) + this.yShift;
     Glyph.renderGlyph(
       stave.checkContext(),
-      this.x + x + this.x_shift,
+      this.x + x + this.xShift,
       y + Tables.currentMusicFont().lookupMetric('staveRepetition.coda.offsetY'),
       40,
       'coda',
@@ -123,10 +123,10 @@ export class Repetition extends StaveModifier {
   }
 
   drawSignoFixed(stave: Stave, x: number): this {
-    const y = stave.getYForTopText(stave.getNumLines()) + this.y_shift;
+    const y = stave.getYForTopText(stave.getNumLines()) + this.yShift;
     Glyph.renderGlyph(
       stave.checkContext(),
-      this.x + x + this.x_shift,
+      this.x + x + this.xShift,
       y + Tables.currentMusicFont().lookupMetric('staveRepetition.segno.offsetY'),
       30,
       'segno',
@@ -135,22 +135,22 @@ export class Repetition extends StaveModifier {
     return this;
   }
 
-  drawSymbolText(stave: Stave, x: number, text: string, draw_coda: boolean): this {
+  drawSymbolText(stave: Stave, x: number, text: string, drawCoda: boolean): this {
     const ctx = stave.checkContext();
 
     ctx.save();
     ctx.setFont(this.textFont);
 
-    let text_x = 0;
-    let symbol_x = 0;
+    let textX = 0;
+    let symbolX = 0;
     const modifierWidth = stave.getNoteStartX() - this.x;
-    switch (this.symbol_type) {
+    switch (this.symbolType) {
       // To the left with symbol
       case Repetition.type.CODA_LEFT:
         // Offset Coda text to right of stave beginning
-        text_x = this.x + stave.getVerticalBarWidth();
-        symbol_x =
-          text_x +
+        textX = this.x + stave.getVerticalBarWidth();
+        symbolX =
+          textX +
           ctx.measureText(text).width +
           Tables.currentMusicFont().lookupMetric('staveRepetition.symbolText.offsetX');
         break;
@@ -160,10 +160,10 @@ export class Repetition extends StaveModifier {
       case Repetition.type.DS:
       case Repetition.type.DS_AL_FINE:
       case Repetition.type.FINE:
-        text_x =
+        textX =
           this.x +
           x +
-          this.x_shift +
+          this.xShift +
           stave.getWidth() -
           Tables.currentMusicFont().lookupMetric('staveRepetition.symbolText.spacing') -
           modifierWidth -
@@ -171,17 +171,17 @@ export class Repetition extends StaveModifier {
         break;
       // To the right with symbol
       default:
-        text_x =
+        textX =
           this.x +
           x +
-          this.x_shift +
+          this.xShift +
           stave.getWidth() -
           Tables.currentMusicFont().lookupMetric('staveRepetition.symbolText.spacing') -
           modifierWidth -
           ctx.measureText(text).width -
           Tables.currentMusicFont().lookupMetric('staveRepetition.symbolText.offsetX');
-        symbol_x =
-          text_x +
+        symbolX =
+          textX +
           ctx.measureText(text).width +
           Tables.currentMusicFont().lookupMetric('staveRepetition.symbolText.offsetX');
         break;
@@ -189,15 +189,15 @@ export class Repetition extends StaveModifier {
 
     const y =
       stave.getYForTopText(stave.getNumLines()) +
-      this.y_shift +
+      this.yShift +
       Tables.currentMusicFont().lookupMetric('staveRepetition.symbolText.offsetY');
-    if (draw_coda) {
-      Glyph.renderGlyph(ctx, symbol_x, y, Font.convertSizeToPointValue(this.textFont?.size) * 2, 'coda', {
+    if (drawCoda) {
+      Glyph.renderGlyph(ctx, symbolX, y, Font.convertSizeToPointValue(this.textFont?.size) * 2, 'coda', {
         category: 'coda',
       });
     }
 
-    ctx.fillText(text, text_x, y + 5);
+    ctx.fillText(text, textX, y + 5);
     ctx.restore();
 
     return this;

@@ -46,37 +46,37 @@ function basic(options: TestOptions, contextBuilder: ContextBuilder): void {
 
   const notes = [
     new StaveNote({ keys: ['c/4', 'e/4', 'a/4', 'b/4'], duration: 'w' }),
-    new StaveNote({ keys: ['a/4', 'b/4', 'c/5'], duration: '4', stem_direction: 1 }),
-    new StaveNote({ keys: ['g/4', 'a/4', 'b/4'], duration: '4', stem_direction: -1 }),
+    new StaveNote({ keys: ['a/4', 'b/4', 'c/5'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['g/4', 'a/4', 'b/4'], duration: '4', stemDirection: -1 }),
     new StaveNote({ keys: ['e/4', 'f/4', 'b/4', 'c/5'], duration: '4' }),
     new StaveNote({
       keys: ['g/4', 'a/4', 'd/5', 'e/5', 'g/5'],
       duration: '4',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
-    new StaveNote({ keys: ['g/4', 'b/4', 'd/5', 'e/5'], duration: '4', stem_direction: -1 }),
-    new StaveNote({ keys: ['e/4', 'g/4', 'b/4', 'c/5'], duration: '4', stem_direction: 1 }),
+    new StaveNote({ keys: ['g/4', 'b/4', 'd/5', 'e/5'], duration: '4', stemDirection: -1 }),
+    new StaveNote({ keys: ['e/4', 'g/4', 'b/4', 'c/5'], duration: '4', stemDirection: 1 }),
     new StaveNote({ keys: ['d/4', 'e/4', 'f/4', 'a/4', 'c/5', 'e/5', 'g/5'], duration: '2' }),
 
     new StaveNote({
       keys: ['f/4', 'g/4', 'a/4', 'b/4', 'c/5', 'e/5', 'g/5'],
       duration: '16',
-      stem_direction: -1,
+      stemDirection: -1,
     }),
 
-    new StaveNote({ keys: ['f/4', 'g/4', 'a/4', 'b/4', 'c/5', 'e/5', 'g/5'], duration: '16', stem_direction: 1 }),
+    new StaveNote({ keys: ['f/4', 'g/4', 'a/4', 'b/4', 'c/5', 'e/5', 'g/5'], duration: '16', stemDirection: 1 }),
 
     new StaveNote({
       keys: ['e/4', 'g/4', 'a/4', 'b/4', 'c/5', 'e/5', 'f/5'],
       duration: '16',
-      stem_direction: 1,
+      stemDirection: 1,
     }),
     new StaveNote({
       keys: ['e/4', 'g/4', 'a/4', 'b/4', 'c/5'],
       duration: '16',
-      stem_direction: 1,
+      stemDirection: 1,
     }),
-    new StaveNote({ keys: ['e/4', 'a/4', 'b/4', 'c/5'], duration: '16', stem_direction: 1 }),
+    new StaveNote({ keys: ['e/4', 'a/4', 'b/4', 'c/5'], duration: '16', stemDirection: 1 }),
   ];
   Dot.buildAndAttach(notes, { all: true });
   Dot.buildAndAttach([notes[7], notes[8], notes[9]], { all: true });
@@ -107,11 +107,11 @@ function multiVoice(options: TestOptions, contextBuilder: ContextBuilder): void 
   const stave = new Stave(30, 45, 700).setContext(ctx).draw();
 
   const notes1 = [
-    new StaveNote({ keys: ['c/4', 'e/4', 'a/4'], duration: '2', stem_direction: -1 }),
-    new StaveNote({ keys: ['c/4', 'e/4', 'c/5'], duration: '2', stem_direction: -1 }),
-    new StaveNote({ keys: ['d/4', 'c/5', 'd/5'], duration: '2', stem_direction: -1 }),
-    new StaveNote({ keys: ['d/4', 'c/5', 'd/5'], duration: '8', stem_direction: -1 }),
-    new StaveNote({ keys: ['d/4', 'c/5', 'd/5'], duration: '8', stem_direction: -1 }),
+    new StaveNote({ keys: ['c/4', 'e/4', 'a/4'], duration: '2', stemDirection: -1 }),
+    new StaveNote({ keys: ['c/4', 'e/4', 'c/5'], duration: '2', stemDirection: -1 }),
+    new StaveNote({ keys: ['d/4', 'c/5', 'd/5'], duration: '2', stemDirection: -1 }),
+    new StaveNote({ keys: ['d/4', 'c/5', 'd/5'], duration: '8', stemDirection: -1 }),
+    new StaveNote({ keys: ['d/4', 'c/5', 'd/5'], duration: '8', stemDirection: -1 }),
   ];
   Dot.buildAndAttach([notes1[0], notes1[2], notes1[3], notes1[4]], { all: true });
   Dot.buildAndAttach([notes1[0], notes1[2], notes1[3], notes1[4]], { all: true });
@@ -125,11 +125,11 @@ function multiVoice(options: TestOptions, contextBuilder: ContextBuilder): void 
   Dot.buildAndAttach([notes1[2], notes1[3], notes1[4]]);
 
   const notes2 = [
-    new StaveNote({ keys: ['d/5', 'a/5', 'b/5'], duration: '2', stem_direction: 1 }),
-    new StaveNote({ keys: ['d/5', 'a/5', 'b/5'], duration: '4', stem_direction: 1 }),
-    new StaveNote({ keys: ['d/5', 'a/5', 'b/5'], duration: '4', stem_direction: 1 }),
-    new StaveNote({ keys: ['d/5', 'g/5', 'a/5', 'b/5'], duration: '8', stem_direction: 1 }),
-    new StaveNote({ keys: ['d/5', 'a/5', 'b/5'], duration: '8', stem_direction: 1 }),
+    new StaveNote({ keys: ['d/5', 'a/5', 'b/5'], duration: '2', stemDirection: 1 }),
+    new StaveNote({ keys: ['d/5', 'a/5', 'b/5'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['d/5', 'a/5', 'b/5'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['d/5', 'g/5', 'a/5', 'b/5'], duration: '8', stemDirection: 1 }),
+    new StaveNote({ keys: ['d/5', 'a/5', 'b/5'], duration: '8', stemDirection: 1 }),
   ];
   Dot.buildAndAttach(notes2, { all: true });
   Dot.buildAndAttach([notes2[1]], { all: true });

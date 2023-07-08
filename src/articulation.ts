@@ -18,7 +18,7 @@ export interface ArticulationStruct {
   code?: string;
   aboveCode?: string;
   belowCode?: string;
-  between_lines: boolean;
+  betweenLines: boolean;
 }
 
 // eslint-disable-next-line
@@ -177,7 +177,7 @@ export class Articulation extends Modifier {
   /** Articulation code provided to the constructor. */
   readonly type: string;
 
-  public render_options: { font_scale: number };
+  public renderOptions: { fontScale: number };
   // articulation defined calling reset in constructor
   protected articulation!: ArticulationStruct;
   // glyph defined calling reset in constructor
@@ -236,27 +236,27 @@ export class Articulation extends Modifier {
         if (stemDirection === Stem.UP) {
           noteLine += stemHeight;
         }
-        let increment = getIncrement(articulation, state.top_text_line, ABOVE);
-        const curTop = noteLine + state.top_text_line + 0.5;
+        let increment = getIncrement(articulation, state.topTextLine, ABOVE);
+        const curTop = noteLine + state.topTextLine + 0.5;
         // If articulation must be above stave, add lines between note and stave top
-        if (!articulation.articulation.between_lines && curTop < lines) {
+        if (!articulation.articulation.betweenLines && curTop < lines) {
           increment += lines - curTop;
         }
-        articulation.setTextLine(state.top_text_line);
-        state.top_text_line += increment;
+        articulation.setTextLine(state.topTextLine);
+        state.topTextLine += increment;
       } else if (articulation.getPosition() === BELOW) {
         let noteLine = Math.max(lines - note.getLineNumber(), 0);
         if (stemDirection === Stem.DOWN) {
           noteLine += stemHeight;
         }
-        let increment = getIncrement(articulation, state.text_line, BELOW);
-        const curBottom = noteLine + state.text_line + 0.5;
+        let increment = getIncrement(articulation, state.textLine, BELOW);
+        const curBottom = noteLine + state.textLine + 0.5;
         // if articulation must be below stave, add lines from note to stave bottom
-        if (!articulation.articulation.between_lines && curBottom < lines) {
+        if (!articulation.articulation.betweenLines && curBottom < lines) {
           increment += lines - curBottom;
         }
-        articulation.setTextLine(state.text_line);
-        state.text_line += increment;
+        articulation.setTextLine(state.textLine);
+        state.textLine += increment;
       }
     });
 
@@ -265,11 +265,11 @@ export class Articulation extends Modifier {
       .reduce((maxWidth, articWidth) => Math.max(articWidth, maxWidth));
     const overlap = Math.min(
       Math.max(width - maxGlyphWidth, 0),
-      Math.max(width - (state.left_shift + state.right_shift), 0)
+      Math.max(width - (state.leftShift + state.rightShift), 0)
     );
 
-    state.left_shift += overlap / 2;
-    state.right_shift += overlap / 2;
+    state.leftShift += overlap / 2;
+    state.rightShift += overlap / 2;
     return true;
   }
 
@@ -306,8 +306,8 @@ export class Articulation extends Modifier {
 
     this.type = type;
     this.position = ABOVE;
-    this.render_options = {
-      font_scale: Tables.NOTATION_FONT_SCALE,
+    this.renderOptions = {
+      fontScale: Tables.NOTATION_FONT_SCALE,
     };
 
     this.reset();
@@ -317,13 +317,13 @@ export class Articulation extends Modifier {
     this.articulation = Tables.articulationCodes(this.type);
     // Use type as glyph code, if not defined as articulation code
     if (!this.articulation) {
-      this.articulation = { code: this.type, between_lines: false };
+      this.articulation = { code: this.type, betweenLines: false };
       if (this.type.endsWith('Above')) this.position = ABOVE;
       if (this.type.endsWith('Below')) this.position = BELOW;
     }
     const code =
       (this.position === ABOVE ? this.articulation.aboveCode : this.articulation.belowCode) || this.articulation.code;
-    this.glyph = new Glyph(code ?? '', this.render_options.font_scale);
+    this.glyph = new Glyph(code ?? '', this.renderOptions.fontScale);
     defined(this.glyph, 'ArgumentError', `Articulation not found: ${this.type}`);
 
     this.setWidth(defined(this.glyph.getMetrics().width));
@@ -331,7 +331,7 @@ export class Articulation extends Modifier {
 
   /** Set if articulation should be rendered between lines. */
   setBetweenLines(betweenLines = true): this {
-    this.articulation.between_lines = betweenLines;
+    this.articulation.betweenLines = betweenLines;
     return this;
   }
 
@@ -342,8 +342,8 @@ export class Articulation extends Modifier {
     this.setRendered();
 
     const index = this.checkIndex();
-    const { position, glyph, text_line: textLine } = this;
-    const canSitBetweenLines = this.articulation.between_lines;
+    const { position, glyph, textLine } = this;
+    const canSitBetweenLines = this.articulation.betweenLines;
 
     const stave = note.checkStave();
     const staffSpace = stave.getSpacingBetweenLines();

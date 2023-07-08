@@ -54,8 +54,8 @@ const simple = createTest(['(cb4 e#4 a4)/2, (d4 e4 f4)', { stem: 'down' }], (f, 
   f.StaveTie({
     from: notes[0],
     to: notes[1],
-    first_indices: [0, 1],
-    last_indices: [0, 1],
+    firstIndexes: [0, 1],
+    lastIndexes: [0, 1],
   });
 });
 
@@ -63,8 +63,8 @@ const chord = createTest(['(d4 e4 f4)/2, (cn4 f#4 a4)', { stem: 'down' }], (f, n
   f.StaveTie({
     from: notes[0],
     to: notes[1],
-    first_indices: [0, 1, 2],
-    last_indices: [0, 1, 2],
+    firstIndexes: [0, 1, 2],
+    lastIndexes: [0, 1, 2],
   });
 });
 
@@ -72,8 +72,8 @@ const stemUp = createTest(['(d4 e4 f4)/2, (cn4 f#4 a4)', { stem: 'up' }], (f, no
   f.StaveTie({
     from: notes[0],
     to: notes[1],
-    first_indices: [0, 1, 2],
-    last_indices: [0, 1, 2],
+    firstIndexes: [0, 1, 2],
+    lastIndexes: [0, 1, 2],
   });
 });
 
@@ -81,8 +81,8 @@ const noEndNote1 = createTest(['(cb4 e#4 a4)/2, (d4 e4 f4)', { stem: 'down' }], 
   stave.addEndClef('treble');
   f.StaveTie({
     from: notes[1],
-    first_indices: [2],
-    last_indices: [2],
+    firstIndexes: [2],
+    lastIndexes: [2],
     text: 'slow.',
   });
 });
@@ -90,8 +90,8 @@ const noEndNote1 = createTest(['(cb4 e#4 a4)/2, (d4 e4 f4)', { stem: 'down' }], 
 const noEndNote2 = createTest(['(cb4 e#4 a4)/2, (d4 e4 f4)', { stem: 'down' }], (f, notes) => {
   f.StaveTie({
     from: notes[1],
-    first_indices: [2],
-    last_indices: [2],
+    firstIndexes: [2],
+    lastIndexes: [2],
     text: 'slow.',
   });
 });
@@ -100,8 +100,8 @@ const noStartNote1 = createTest(['(cb4 e#4 a4)/2, (d4 e4 f4)', { stem: 'down' }]
   stave.addClef('treble');
   f.StaveTie({
     to: notes[0],
-    first_indices: [2],
-    last_indices: [2],
+    firstIndexes: [2],
+    lastIndexes: [2],
     text: 'H',
   });
 });
@@ -109,8 +109,8 @@ const noStartNote1 = createTest(['(cb4 e#4 a4)/2, (d4 e4 f4)', { stem: 'down' }]
 const noStartNote2 = createTest(['(cb4 e#4 a4)/2, (d4 e4 f4)', { stem: 'down' }], (f, notes) => {
   f.StaveTie({
     to: notes[0],
-    first_indices: [2],
-    last_indices: [2],
+    firstIndexes: [2],
+    lastIndexes: [2],
     text: 'H',
   });
 });
@@ -119,8 +119,8 @@ const setDirectionDown = createTest(['(cb4 e#4 a4)/2, (d4 e4 f4)', { stem: 'down
   f.StaveTie({
     from: notes[0],
     to: notes[1],
-    first_indices: [0, 1],
-    last_indices: [0, 1],
+    firstIndexes: [0, 1],
+    lastIndexes: [0, 1],
     options: { direction: Stem.DOWN },
   });
 });
@@ -129,8 +129,8 @@ const setDirectionUp = createTest(['(cb4 e#4 a4)/2, (d4 e4 f4)', { stem: 'down' 
   f.StaveTie({
     from: notes[0],
     to: notes[1],
-    first_indices: [0, 1],
-    last_indices: [0, 1],
+    firstIndexes: [0, 1],
+    lastIndexes: [0, 1],
     options: { direction: Stem.UP },
   });
 });

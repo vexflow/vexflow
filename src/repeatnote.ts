@@ -24,6 +24,6 @@ export class RepeatNote extends GlyphNote {
     const glyph = new Glyph(glyphCode, Tables.currentMusicFont().lookupMetric('repeatNote.point', 40), {
       category: 'repeatNote',
     });
-    super(glyph, { duration: 'q', align_center: type !== 'slash', ...noteStruct }, options);
+    super(glyph, { duration: 'q', alignCenter: type !== 'slash', ...noteStruct }, options);
   }
 }

@@ -35,7 +35,7 @@ const set = (key: string) => (value: number | string) => (object: any) => {
   object[key] = value;
   return object;
 };
-const setStemDirection = set('stem_direction');
+const setStemDirection = set('stemDirection');
 const setStemUp = setStemDirection(Stem.UP);
 const setStemDown = setStemDirection(Stem.DOWN);
 const setDurationToQuarterNote = set('duration')('4');
@@ -63,7 +63,7 @@ function simple(options: TestOptions): void {
 
   // 3/4 time
   const voice = f
-    .Voice({ time: { num_beats: 3, beat_value: 4 } })
+    .Voice({ time: { numBeats: 3, beatValue: 4 } })
     .setStrict(true)
     .addTickables(notes);
 
@@ -100,7 +100,7 @@ function beamed(options: TestOptions): void {
 
   // 3/8 time
   const voice = f
-    .Voice({ time: { num_beats: 3, beat_value: 8 } })
+    .Voice({ time: { numBeats: 3, beatValue: 8 } })
     .setStrict(true)
     .addTickables(notes);
 
@@ -141,7 +141,7 @@ function ratio(options: TestOptions): void {
     notes: notes.slice(3, 6),
     options: {
       ratioed: true,
-      notes_occupied: 4,
+      notesOccupied: 4,
     },
   });
 
@@ -184,7 +184,7 @@ function bottom(options: TestOptions): void {
   });
 
   const voice = f
-    .Voice({ time: { num_beats: 3, beat_value: 4 } })
+    .Voice({ time: { numBeats: 3, beatValue: 4 } })
     .setStrict(true)
     .addTickables(notes);
 
@@ -226,12 +226,12 @@ function bottomRatio(options: TestOptions): void {
     notes: notes.slice(3, 6),
     options: {
       location: Tuplet.LOCATION_BOTTOM,
-      notes_occupied: 1,
+      notesOccupied: 1,
     },
   });
 
   const voice = f
-    .Voice({ time: { num_beats: 5, beat_value: 8 } })
+    .Voice({ time: { numBeats: 5, beatValue: 8 } })
     .setStrict(true)
     .addTickables(notes);
 
@@ -270,7 +270,7 @@ function awkward(options: TestOptions): void {
   f.Tuplet({
     notes: notes.slice(0, 12),
     options: {
-      notes_occupied: 142,
+      notesOccupied: 142,
       ratioed: true,
     },
   });
@@ -334,8 +334,8 @@ function complex(options: TestOptions): void {
   f.Tuplet({
     notes: notes1.slice(3, 11),
     options: {
-      num_notes: 7,
-      notes_occupied: 4,
+      numNotes: 7,
+      notesOccupied: 4,
       ratioed: false,
     },
   });
@@ -343,7 +343,7 @@ function complex(options: TestOptions): void {
   f.Tuplet({
     notes: notes1.slice(11, 16),
     options: {
-      notes_occupied: 4,
+      notesOccupied: 4,
     },
   });
 
@@ -363,12 +363,12 @@ function mixedTop(options: TestOptions): void {
   const stave = f.Stave({ x: 10, y: 10 });
 
   const notes = [
-    { keys: ['a/4'], stem_direction: 1 },
-    { keys: ['c/6'], stem_direction: -1 },
-    { keys: ['a/4'], stem_direction: 1 },
-    { keys: ['f/5'], stem_direction: 1 },
-    { keys: ['a/4'], stem_direction: -1 },
-    { keys: ['c/6'], stem_direction: -1 },
+    { keys: ['a/4'], stemDirection: 1 },
+    { keys: ['c/6'], stemDirection: -1 },
+    { keys: ['a/4'], stemDirection: 1 },
+    { keys: ['f/5'], stemDirection: 1 },
+    { keys: ['a/4'], stemDirection: -1 },
+    { keys: ['c/6'], stemDirection: -1 },
   ]
     .map(setDurationToQuarterNote)
     .map(f.StaveNote.bind(f));
@@ -376,21 +376,21 @@ function mixedTop(options: TestOptions): void {
   f.Tuplet({
     notes: notes.slice(0, 2),
     options: {
-      notes_occupied: 3,
+      notesOccupied: 3,
     },
   });
 
   f.Tuplet({
     notes: notes.slice(2, 4),
     options: {
-      notes_occupied: 3,
+      notesOccupied: 3,
     },
   });
 
   f.Tuplet({
     notes: notes.slice(4, 6),
     options: {
-      notes_occupied: 3,
+      notesOccupied: 3,
     },
   });
 
@@ -408,12 +408,12 @@ function mixedBottom(options: TestOptions): void {
   const stave = f.Stave({ x: 10, y: 10 });
 
   const notes = [
-    { keys: ['f/3'], stem_direction: 1 },
-    { keys: ['a/5'], stem_direction: -1 },
-    { keys: ['a/4'], stem_direction: 1 },
-    { keys: ['f/3'], stem_direction: 1 },
-    { keys: ['a/4'], stem_direction: -1 },
-    { keys: ['c/4'], stem_direction: -1 },
+    { keys: ['f/3'], stemDirection: 1 },
+    { keys: ['a/5'], stemDirection: -1 },
+    { keys: ['a/4'], stemDirection: 1 },
+    { keys: ['f/3'], stemDirection: 1 },
+    { keys: ['a/4'], stemDirection: -1 },
+    { keys: ['c/4'], stemDirection: -1 },
   ]
     .map(setDurationToQuarterNote)
     .map(f.StaveNote.bind(f));
@@ -421,21 +421,21 @@ function mixedBottom(options: TestOptions): void {
   f.Tuplet({
     notes: notes.slice(0, 2),
     options: {
-      notes_occupied: 3,
+      notesOccupied: 3,
     },
   });
 
   f.Tuplet({
     notes: notes.slice(2, 4),
     options: {
-      notes_occupied: 3,
+      notesOccupied: 3,
     },
   });
 
   f.Tuplet({
     notes: notes.slice(4, 6),
     options: {
-      notes_occupied: 3,
+      notesOccupied: 3,
     },
   });
 
@@ -473,16 +473,16 @@ function nested(options: TestOptions): void {
   f.Tuplet({
     notes: notes.slice(0, 7),
     options: {
-      notes_occupied: 2,
-      num_notes: 3,
+      notesOccupied: 2,
+      numNotes: 3,
     },
   });
 
   f.Tuplet({
     notes: notes.slice(2, 7),
     options: {
-      notes_occupied: 4,
-      num_notes: 5,
+      notesOccupied: 4,
+      numNotes: 5,
     },
   });
 
@@ -521,8 +521,8 @@ function single(options: TestOptions): void {
   f.Tuplet({
     notes: notes.slice(0, -1),
     options: {
-      num_notes: 4,
-      notes_occupied: 3,
+      numNotes: 4,
+      notesOccupied: 3,
       ratioed: true,
       bracketed: true,
     },
@@ -532,8 +532,8 @@ function single(options: TestOptions): void {
   f.Tuplet({
     notes: notes.slice(0, 1),
     options: {
-      num_notes: 3,
-      notes_occupied: 2,
+      numNotes: 3,
+      notesOccupied: 2,
       ratioed: true,
     },
   });
@@ -542,8 +542,8 @@ function single(options: TestOptions): void {
   f.Tuplet({
     notes: notes.slice(1, 4),
     options: {
-      num_notes: 3,
-      notes_occupied: 2,
+      numNotes: 3,
+      notesOccupied: 2,
     },
   });
 
@@ -551,8 +551,8 @@ function single(options: TestOptions): void {
   f.Tuplet({
     notes: notes.slice(4, 5),
     options: {
-      num_notes: 3,
-      notes_occupied: 2,
+      numNotes: 3,
+      notesOccupied: 2,
       ratioed: true,
       bracketed: true,
     },
@@ -560,7 +560,7 @@ function single(options: TestOptions): void {
 
   // 4/4 time
   const voice = f
-    .Voice({ time: { num_beats: 4, beat_value: 4 } })
+    .Voice({ time: { numBeats: 4, beatValue: 4 } })
     .setStrict(true)
     .addTickables(notes);
 

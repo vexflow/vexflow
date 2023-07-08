@@ -66,14 +66,14 @@ function basic(options: TestOptions, contextBuilder: ContextBuilder): void {
   const { context, stave } = setupContext(options, contextBuilder, 700);
 
   const notes = [
-    new StaveNote({ keys: ['b/4'], stem_direction: 1, duration: 'wr' }),
-    new StaveNote({ keys: ['b/4'], stem_direction: 1, duration: 'hr' }),
-    new StaveNote({ keys: ['b/4'], stem_direction: 1, duration: '4r' }),
-    new StaveNote({ keys: ['b/4'], stem_direction: 1, duration: '8r' }),
-    new StaveNote({ keys: ['b/4'], stem_direction: 1, duration: '16r' }),
-    new StaveNote({ keys: ['b/4'], stem_direction: 1, duration: '32r' }),
-    new StaveNote({ keys: ['b/4'], stem_direction: 1, duration: '64r' }),
-    new StaveNote({ keys: ['b/4'], stem_direction: 1, duration: '128r' }),
+    new StaveNote({ keys: ['b/4'], stemDirection: 1, duration: 'wr' }),
+    new StaveNote({ keys: ['b/4'], stemDirection: 1, duration: 'hr' }),
+    new StaveNote({ keys: ['b/4'], stemDirection: 1, duration: '4r' }),
+    new StaveNote({ keys: ['b/4'], stemDirection: 1, duration: '8r' }),
+    new StaveNote({ keys: ['b/4'], stemDirection: 1, duration: '16r' }),
+    new StaveNote({ keys: ['b/4'], stemDirection: 1, duration: '32r' }),
+    new StaveNote({ keys: ['b/4'], stemDirection: 1, duration: '64r' }),
+    new StaveNote({ keys: ['b/4'], stemDirection: 1, duration: '128r' }),
   ];
   Dot.buildAndAttach(notes, { all: true });
 
@@ -89,12 +89,12 @@ function ledgerRest(options: TestOptions, contextBuilder: ContextBuilder): void 
   const { context, stave } = setupContext(options, contextBuilder, 700);
 
   const notes = [
-    new StaveNote({ keys: ['a/5'], stem_direction: 1, duration: 'wr' }),
-    new StaveNote({ keys: ['c/6'], stem_direction: 1, duration: 'hr' }),
-    new StaveNote({ keys: ['b/4'], stem_direction: 1, duration: 'hr' }),
-    new StaveNote({ keys: ['a/3'], stem_direction: 1, duration: 'wr' }),
-    new StaveNote({ keys: ['f/3'], stem_direction: 1, duration: 'hr' }),
-    new StaveNote({ keys: ['b/4'], stem_direction: 1, duration: 'wr' }),
+    new StaveNote({ keys: ['a/5'], stemDirection: 1, duration: 'wr' }),
+    new StaveNote({ keys: ['c/6'], stemDirection: 1, duration: 'hr' }),
+    new StaveNote({ keys: ['b/4'], stemDirection: 1, duration: 'hr' }),
+    new StaveNote({ keys: ['a/3'], stemDirection: 1, duration: 'wr' }),
+    new StaveNote({ keys: ['f/3'], stemDirection: 1, duration: 'hr' }),
+    new StaveNote({ keys: ['b/4'], stemDirection: 1, duration: 'wr' }),
   ];
   Formatter.FormatAndDraw(context, stave, notes);
 
@@ -111,20 +111,20 @@ function beamsUp(options: TestOptions, contextBuilder: ContextBuilder): void {
   const { context, stave } = setupContext(options, contextBuilder, 600, 160);
 
   const notes = [
-    note({ keys: ['e/5'], stem_direction: 1, duration: '8' }),
-    note({ keys: ['b/4'], stem_direction: 1, duration: '8r' }),
-    note({ keys: ['b/5'], stem_direction: 1, duration: '8' }),
-    note({ keys: ['c/5'], stem_direction: 1, duration: '8' }),
+    note({ keys: ['e/5'], stemDirection: 1, duration: '8' }),
+    note({ keys: ['b/4'], stemDirection: 1, duration: '8r' }),
+    note({ keys: ['b/5'], stemDirection: 1, duration: '8' }),
+    note({ keys: ['c/5'], stemDirection: 1, duration: '8' }),
 
-    note({ keys: ['b/4', 'd/5', 'a/5'], stem_direction: 1, duration: '8' }),
-    note({ keys: ['b/4'], stem_direction: 1, duration: '8r' }),
-    note({ keys: ['b/4'], stem_direction: 1, duration: '8r' }),
-    note({ keys: ['c/4'], stem_direction: 1, duration: '8' }),
+    note({ keys: ['b/4', 'd/5', 'a/5'], stemDirection: 1, duration: '8' }),
+    note({ keys: ['b/4'], stemDirection: 1, duration: '8r' }),
+    note({ keys: ['b/4'], stemDirection: 1, duration: '8r' }),
+    note({ keys: ['c/4'], stemDirection: 1, duration: '8' }),
 
-    note({ keys: ['b/4', 'd/5', 'a/5'], stem_direction: 1, duration: '8' }),
-    note({ keys: ['b/4'], stem_direction: 1, duration: '8' }),
-    note({ keys: ['b/4'], stem_direction: 1, duration: '8r' }),
-    note({ keys: ['c/4'], stem_direction: 1, duration: '8' }),
+    note({ keys: ['b/4', 'd/5', 'a/5'], stemDirection: 1, duration: '8' }),
+    note({ keys: ['b/4'], stemDirection: 1, duration: '8' }),
+    note({ keys: ['b/4'], stemDirection: 1, duration: '8r' }),
+    note({ keys: ['c/4'], stemDirection: 1, duration: '8' }),
   ];
 
   const beam1 = new Beam(notes.slice(0, 4));
@@ -147,20 +147,20 @@ function beamsDown(options: TestOptions, contextBuilder: ContextBuilder): void {
   const { context, stave } = setupContext(options, contextBuilder, 600, 160);
 
   const notes = [
-    note({ keys: ['a/5'], stem_direction: -1, duration: '8' }),
-    note({ keys: ['b/4'], stem_direction: -1, duration: '8r' }),
-    note({ keys: ['b/5'], stem_direction: -1, duration: '8' }),
-    note({ keys: ['c/5'], stem_direction: -1, duration: '8' }),
+    note({ keys: ['a/5'], stemDirection: -1, duration: '8' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '8r' }),
+    note({ keys: ['b/5'], stemDirection: -1, duration: '8' }),
+    note({ keys: ['c/5'], stemDirection: -1, duration: '8' }),
 
-    note({ keys: ['b/4', 'd/5', 'a/5'], stem_direction: -1, duration: '8' }),
-    note({ keys: ['b/4'], stem_direction: -1, duration: '8r' }),
-    note({ keys: ['b/4'], stem_direction: -1, duration: '8r' }),
-    note({ keys: ['e/4'], stem_direction: -1, duration: '8' }),
+    note({ keys: ['b/4', 'd/5', 'a/5'], stemDirection: -1, duration: '8' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '8r' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '8r' }),
+    note({ keys: ['e/4'], stemDirection: -1, duration: '8' }),
 
-    note({ keys: ['b/4', 'd/5', 'a/5'], stem_direction: -1, duration: '8' }),
-    note({ keys: ['b/4'], stem_direction: -1, duration: '8' }),
-    note({ keys: ['b/4'], stem_direction: -1, duration: '8r' }),
-    note({ keys: ['e/4'], stem_direction: -1, duration: '8' }),
+    note({ keys: ['b/4', 'd/5', 'a/5'], stemDirection: -1, duration: '8' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '8' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '8r' }),
+    note({ keys: ['e/4'], stemDirection: -1, duration: '8' }),
   ];
 
   const beam1 = new Beam(notes.slice(0, 4));
@@ -184,21 +184,21 @@ function tupletsUp(options: TestOptions, contextBuilder: ContextBuilder): void {
   const { context, stave } = setupContext(options, contextBuilder, 600, 160);
 
   const notes = [
-    note({ keys: ['b/4'], stem_direction: 1, duration: '4' }),
-    note({ keys: ['b/4'], stem_direction: 1, duration: '4' }),
-    note({ keys: ['a/5'], stem_direction: 1, duration: '4r' }),
+    note({ keys: ['b/4'], stemDirection: 1, duration: '4' }),
+    note({ keys: ['b/4'], stemDirection: 1, duration: '4' }),
+    note({ keys: ['a/5'], stemDirection: 1, duration: '4r' }),
 
-    note({ keys: ['a/5'], stem_direction: 1, duration: '4r' }),
-    note({ keys: ['g/5'], stem_direction: 1, duration: '4r' }),
-    note({ keys: ['b/5'], stem_direction: 1, duration: '4' }),
+    note({ keys: ['a/5'], stemDirection: 1, duration: '4r' }),
+    note({ keys: ['g/5'], stemDirection: 1, duration: '4r' }),
+    note({ keys: ['b/5'], stemDirection: 1, duration: '4' }),
 
-    note({ keys: ['a/5'], stem_direction: 1, duration: '4' }),
-    note({ keys: ['g/5'], stem_direction: 1, duration: '4r' }),
-    note({ keys: ['b/4'], stem_direction: 1, duration: '4' }),
+    note({ keys: ['a/5'], stemDirection: 1, duration: '4' }),
+    note({ keys: ['g/5'], stemDirection: 1, duration: '4r' }),
+    note({ keys: ['b/4'], stemDirection: 1, duration: '4' }),
 
-    note({ keys: ['a/5'], stem_direction: 1, duration: '4' }),
-    note({ keys: ['b/4'], stem_direction: 1, duration: '4r' }),
-    note({ keys: ['b/4'], stem_direction: 1, duration: '4r' }),
+    note({ keys: ['a/5'], stemDirection: 1, duration: '4' }),
+    note({ keys: ['b/4'], stemDirection: 1, duration: '4r' }),
+    note({ keys: ['b/4'], stemDirection: 1, duration: '4r' }),
   ];
 
   const tuplet1 = new Tuplet(notes.slice(0, 3)).setTupletLocation(Tuplet.LOCATION_TOP);
@@ -224,21 +224,21 @@ function tupletsDown(options: TestOptions, contextBuilder: ContextBuilder): void
   const { context, stave } = setupContext(options, contextBuilder, 600, 160);
 
   const notes = [
-    note({ keys: ['a/5'], stem_direction: -1, duration: '8r' }),
-    note({ keys: ['g/5'], stem_direction: -1, duration: '8r' }),
-    note({ keys: ['b/4'], stem_direction: -1, duration: '8' }),
+    note({ keys: ['a/5'], stemDirection: -1, duration: '8r' }),
+    note({ keys: ['g/5'], stemDirection: -1, duration: '8r' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '8' }),
 
-    note({ keys: ['a/5'], stem_direction: -1, duration: '8r' }),
-    note({ keys: ['g/5'], stem_direction: -1, duration: '8' }),
-    note({ keys: ['b/5'], stem_direction: -1, duration: '8' }),
+    note({ keys: ['a/5'], stemDirection: -1, duration: '8r' }),
+    note({ keys: ['g/5'], stemDirection: -1, duration: '8' }),
+    note({ keys: ['b/5'], stemDirection: -1, duration: '8' }),
 
-    note({ keys: ['a/5'], stem_direction: -1, duration: '8' }),
-    note({ keys: ['g/5'], stem_direction: -1, duration: '8r' }),
-    note({ keys: ['b/4'], stem_direction: -1, duration: '8' }),
+    note({ keys: ['a/5'], stemDirection: -1, duration: '8' }),
+    note({ keys: ['g/5'], stemDirection: -1, duration: '8r' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '8' }),
 
-    note({ keys: ['a/5'], stem_direction: -1, duration: '8' }),
-    note({ keys: ['g/5'], stem_direction: -1, duration: '8r' }),
-    note({ keys: ['b/4'], stem_direction: -1, duration: '8r' }),
+    note({ keys: ['a/5'], stemDirection: -1, duration: '8' }),
+    note({ keys: ['g/5'], stemDirection: -1, duration: '8r' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '8r' }),
   ];
 
   const beam1 = new Beam(notes.slice(0, 3));
@@ -275,25 +275,25 @@ function singleVoiceDefaultAlignment(options: TestOptions, contextBuilder: Conte
   const { context, stave } = setupContext(options, contextBuilder, 600, 160);
 
   const notes = [
-    note({ keys: ['b/4'], stem_direction: -1, duration: '4r' }),
-    note({ keys: ['b/4'], stem_direction: -1, duration: '4r' }),
-    note({ keys: ['f/4'], stem_direction: -1, duration: '4' }),
-    note({ keys: ['e/5'], stem_direction: -1, duration: '8' }),
-    note({ keys: ['b/4'], stem_direction: -1, duration: '8r' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '4r' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '4r' }),
+    note({ keys: ['f/4'], stemDirection: -1, duration: '4' }),
+    note({ keys: ['e/5'], stemDirection: -1, duration: '8' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '8r' }),
 
-    note({ keys: ['a/5'], stem_direction: -1, duration: '8' }),
-    note({ keys: ['b/4'], stem_direction: -1, duration: '8r' }),
-    note({ keys: ['b/4'], stem_direction: -1, duration: '8' }),
-    note({ keys: ['e/5'], stem_direction: -1, duration: '8' }),
+    note({ keys: ['a/5'], stemDirection: -1, duration: '8' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '8r' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '8' }),
+    note({ keys: ['e/5'], stemDirection: -1, duration: '8' }),
 
-    note({ keys: ['a/5'], stem_direction: 1, duration: '4' }),
-    note({ keys: ['b/4'], stem_direction: 1, duration: '4r' }),
-    note({ keys: ['b/5'], stem_direction: 1, duration: '4' }),
+    note({ keys: ['a/5'], stemDirection: 1, duration: '4' }),
+    note({ keys: ['b/4'], stemDirection: 1, duration: '4r' }),
+    note({ keys: ['b/5'], stemDirection: 1, duration: '4' }),
 
-    note({ keys: ['d/5'], stem_direction: -1, duration: '4' }),
-    note({ keys: ['g/5'], stem_direction: -1, duration: '4' }),
-    note({ keys: ['b/4'], stem_direction: -1, duration: '4r' }),
-    note({ keys: ['b/4'], stem_direction: -1, duration: '4r' }),
+    note({ keys: ['d/5'], stemDirection: -1, duration: '4' }),
+    note({ keys: ['g/5'], stemDirection: -1, duration: '4' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '4r' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '4r' }),
   ];
 
   const beam = new Beam(notes.slice(5, 9));
@@ -309,38 +309,38 @@ function singleVoiceDefaultAlignment(options: TestOptions, contextBuilder: Conte
 
 /**
  * The only difference between staveRestsAll() and staveRests() is that this test case
- * passes { align_rests: true } to Formatter.FormatAndDraw(...).
+ * passes { alignRests: true } to Formatter.FormatAndDraw(...).
  */
 function singleVoiceAlignAll(options: TestOptions, contextBuilder: ContextBuilder): void {
   const { context, stave } = setupContext(options, contextBuilder, 600, 160);
 
   const notes = [
-    note({ keys: ['b/4'], stem_direction: -1, duration: '4r' }),
-    note({ keys: ['b/4'], stem_direction: -1, duration: '4r' }),
-    note({ keys: ['f/4'], stem_direction: -1, duration: '4' }),
-    note({ keys: ['e/5'], stem_direction: -1, duration: '8' }),
-    note({ keys: ['b/4'], stem_direction: -1, duration: '8r' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '4r' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '4r' }),
+    note({ keys: ['f/4'], stemDirection: -1, duration: '4' }),
+    note({ keys: ['e/5'], stemDirection: -1, duration: '8' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '8r' }),
 
-    note({ keys: ['a/5'], stem_direction: -1, duration: '8' }),
-    note({ keys: ['b/4'], stem_direction: -1, duration: '8r' }),
-    note({ keys: ['b/4'], stem_direction: -1, duration: '8' }),
-    note({ keys: ['e/5'], stem_direction: -1, duration: '8' }),
+    note({ keys: ['a/5'], stemDirection: -1, duration: '8' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '8r' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '8' }),
+    note({ keys: ['e/5'], stemDirection: -1, duration: '8' }),
 
-    note({ keys: ['a/5'], stem_direction: 1, duration: '4' }),
-    note({ keys: ['b/4'], stem_direction: 1, duration: '4r' }),
-    note({ keys: ['b/5'], stem_direction: 1, duration: '4' }),
+    note({ keys: ['a/5'], stemDirection: 1, duration: '4' }),
+    note({ keys: ['b/4'], stemDirection: 1, duration: '4r' }),
+    note({ keys: ['b/5'], stemDirection: 1, duration: '4' }),
 
-    note({ keys: ['d/5'], stem_direction: -1, duration: '4' }),
-    note({ keys: ['g/5'], stem_direction: -1, duration: '4' }),
-    note({ keys: ['b/4'], stem_direction: -1, duration: '4r' }),
-    note({ keys: ['b/4'], stem_direction: -1, duration: '4r' }),
+    note({ keys: ['d/5'], stemDirection: -1, duration: '4' }),
+    note({ keys: ['g/5'], stemDirection: -1, duration: '4' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '4r' }),
+    note({ keys: ['b/4'], stemDirection: -1, duration: '4r' }),
   ];
 
   const beam = new Beam(notes.slice(5, 9));
   const tuplet = new Tuplet(notes.slice(9, 12)).setTupletLocation(Tuplet.LOCATION_TOP);
 
-  // Set { align_rests: true } to align rests (vertically) with nearby notes in each voice.
-  Formatter.FormatAndDraw(context, stave, notes, { align_rests: true });
+  // Set { alignRests: true } to align rests (vertically) with nearby notes in each voice.
+  Formatter.FormatAndDraw(context, stave, notes, { alignRests: true });
 
   tuplet.setContext(context).draw();
   beam.setContext(context).draw();
@@ -367,22 +367,23 @@ function multiVoice(options: TestOptions, contextBuilder: ContextBuilder): void 
   ];
 
   const notes2 = [
-    noteOnStave({ keys: ['e/3'], stem_direction: -1, duration: '8' }),
-    noteOnStave({ keys: ['b/4'], stem_direction: -1, duration: '8r' }),
-    noteOnStave({ keys: ['b/4'], stem_direction: -1, duration: '8r' }),
-    noteOnStave({ keys: ['e/3'], stem_direction: -1, duration: '8' }),
-    noteOnStave({ keys: ['e/3'], stem_direction: -1, duration: '8' }),
-    noteOnStave({ keys: ['b/4'], stem_direction: -1, duration: '8r' }),
-    noteOnStave({ keys: ['e/3'], stem_direction: -1, duration: '8' }),
-    noteOnStave({ keys: ['e/3'], stem_direction: -1, duration: '8' }),
+    noteOnStave({ keys: ['e/3'], stemDirection: -1, duration: '8' }),
+    noteOnStave({ keys: ['b/4'], stemDirection: -1, duration: '8r' }),
+    noteOnStave({ keys: ['b/4'], stemDirection: -1, duration: '8r' }),
+    noteOnStave({ keys: ['e/3'], stemDirection: -1, duration: '8' }),
+    noteOnStave({ keys: ['e/3'], stemDirection: -1, duration: '8' }),
+    noteOnStave({ keys: ['b/4'], stemDirection: -1, duration: '8r' }),
+    noteOnStave({ keys: ['e/3'], stemDirection: -1, duration: '8' }),
+    noteOnStave({ keys: ['e/3'], stemDirection: -1, duration: '8' }),
   ];
 
   const voice1 = new Voice(Flow.TIME4_4).addTickables(notes1);
   const voice2 = new Voice(Flow.TIME4_4).addTickables(notes2);
 
-  // Set { align_rests: true } to align rests (vertically) with nearby notes in each voice.
-  new Formatter().joinVoices([voice1, voice2]).formatToStave([voice1, voice2], stave, { align_rests: true });
+  // Set { alignRests: true } to align rests (vertically) with nearby notes in each voice.
+  new Formatter().joinVoices([voice1, voice2]).formatToStave([voice1, voice2], stave, { alignRests: true });
 
+  /* eslint-disable camelcase*/
   const beam2_1 = new Beam(notes2.slice(0, 4));
   const beam2_2 = new Beam(notes2.slice(4, 8));
 

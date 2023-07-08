@@ -130,9 +130,9 @@ function setTextFontToGeorgia(options: TestOptions): void {
   const score = factory.EasyScore();
 
   const voice1 = score.voice([
-    factory.StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stem_direction: -1, duration: 'h' }),
-    factory.StaveNote({ keys: ['d/4', 'f/4'], stem_direction: -1, duration: 'q' }),
-    factory.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stem_direction: -1, duration: 'q' }),
+    factory.StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stemDirection: -1, duration: 'h' }),
+    factory.StaveNote({ keys: ['d/4', 'f/4'], stemDirection: -1, duration: 'q' }),
+    factory.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stemDirection: -1, duration: 'q' }),
   ]);
 
   const defaultFont = TextNote.TEXT_FONT;
@@ -168,9 +168,9 @@ function setMusicFontToPetaluma(options: TestOptions): void {
   const score = factory.EasyScore();
 
   const voice = score.voice([
-    factory.StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stem_direction: -1, duration: 'h' }),
-    factory.StaveNote({ keys: ['d/4', 'f/4'], stem_direction: -1, duration: 'q' }),
-    factory.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stem_direction: -1, duration: 'q' }),
+    factory.StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stemDirection: -1, duration: 'h' }),
+    factory.StaveNote({ keys: ['d/4', 'f/4'], stemDirection: -1, duration: 'q' }),
+    factory.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stemDirection: -1, duration: 'q' }),
   ]);
 
   const formatter = factory.Formatter();

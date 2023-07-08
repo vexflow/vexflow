@@ -64,11 +64,11 @@ function roundN(x: number, n: number): number {
 
 /** Locate the mid point between stave lines. Returns a fractional line if a space. */
 export function midLine(a: number, b: number): number {
-  let mid_line = b + (a - b) / 2;
-  if (mid_line % 2 > 0) {
-    mid_line = roundN(mid_line * 10, 5) / 10;
+  let midLine = b + (a - b) / 2;
+  if (midLine % 2 > 0) {
+    midLine = roundN(midLine * 10, 5) / 10;
   }
-  return mid_line;
+  return midLine;
 }
 
 /**
@@ -77,6 +77,14 @@ export function midLine(a: number, b: number): number {
  */
 export function prefix(text: string): string {
   return `vf-${text}`;
+}
+
+/**
+ * @param s
+ * @returns `s` with the first letter capitalized.
+ */
+export function upperFirst(s: string = ''): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 /**

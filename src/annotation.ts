@@ -112,7 +112,7 @@ export class Annotation extends Modifier {
       let lines = 5;
 
       if (isTabNote(note)) {
-        if (note.render_options.draw_stem) {
+        if (note.renderOptions.drawStem) {
           const stem = (note as StemmableNote).getStem();
           if (stem) {
             stemHeight = Math.abs(stem.getHeight()) / Tables.STAVE_LINE_DISTANCE;
@@ -138,14 +138,14 @@ export class Annotation extends Modifier {
         if (stemDirection === Stem.UP) {
           noteLine += stemHeight;
         }
-        const curTop = noteLine + state.top_text_line + 0.5;
+        const curTop = noteLine + state.topTextLine + 0.5;
         if (curTop < lines) {
           annotation.setTextLine(lines - noteLine);
           verticalSpaceNeeded += lines - noteLine;
-          state.top_text_line = verticalSpaceNeeded;
+          state.topTextLine = verticalSpaceNeeded;
         } else {
-          annotation.setTextLine(state.top_text_line);
-          state.top_text_line += verticalSpaceNeeded;
+          annotation.setTextLine(state.topTextLine);
+          state.topTextLine += verticalSpaceNeeded;
         }
       } else if (annotation.verticalJustification === this.VerticalJustify.BOTTOM) {
         let noteLine = lines - note.getLineNumber();
@@ -155,26 +155,26 @@ export class Annotation extends Modifier {
         if (stemDirection === Stem.DOWN) {
           noteLine += stemHeight;
         }
-        const curBottom = noteLine + state.text_line + 1;
+        const curBottom = noteLine + state.textLine + 1;
         if (curBottom < lines) {
           annotation.setTextLine(lines - curBottom);
           verticalSpaceNeeded += lines - curBottom;
-          state.text_line = verticalSpaceNeeded;
+          state.textLine = verticalSpaceNeeded;
         } else {
-          annotation.setTextLine(state.text_line);
-          state.text_line += verticalSpaceNeeded;
+          annotation.setTextLine(state.textLine);
+          state.textLine += verticalSpaceNeeded;
         }
       } else {
-        annotation.setTextLine(state.text_line);
+        annotation.setTextLine(state.textLine);
       }
     }
     const rightOverlap = Math.min(
       Math.max(rightWidth - maxRightGlyphWidth, 0),
-      Math.max(rightWidth - state.right_shift, 0)
+      Math.max(rightWidth - state.rightShift, 0)
     );
-    const leftOverlap = Math.min(Math.max(leftWidth - maxLeftGlyphWidth, 0), Math.max(leftWidth - state.left_shift, 0));
-    state.left_shift += leftOverlap;
-    state.right_shift += rightOverlap;
+    const leftOverlap = Math.min(Math.max(leftWidth - maxLeftGlyphWidth, 0), Math.max(leftWidth - state.leftShift, 0));
+    state.leftShift += leftOverlap;
+    state.rightShift += rightOverlap;
     return true;
   }
 
@@ -244,30 +244,30 @@ export class Annotation extends Modifier {
     ctx.openGroup('annotation', this.getAttribute('id'));
     ctx.setFont(this.textFont);
 
-    const text_width = textFormatter.getWidthForTextInPx(this.text);
-    const text_height = textFormatter.getYForStringInPx(this.text).height;
+    const textWidth = textFormatter.getWidthForTextInPx(this.text);
+    const textHeight = textFormatter.getYForStringInPx(this.text).height;
     let x;
     let y;
 
     if (this.horizontalJustification === AnnotationHorizontalJustify.LEFT) {
       x = start.x;
     } else if (this.horizontalJustification === AnnotationHorizontalJustify.RIGHT) {
-      x = start.x - text_width;
+      x = start.x - textWidth;
     } else if (this.horizontalJustification === AnnotationHorizontalJustify.CENTER) {
-      x = start.x - text_width / 2;
+      x = start.x - textWidth / 2;
     } /* CENTER_STEM */ else {
-      x = (note as StemmableNote).getStemX() - text_width / 2;
+      x = (note as StemmableNote).getStemX() - textWidth / 2;
     }
 
-    let stem_ext: Record<string, number> = {};
+    let stemExt: Record<string, number> = {};
     let spacing = 0;
-    const has_stem = note.hasStem();
+    const hasStem = note.hasStem();
     const stave = note.checkStave();
 
     // The position of the text varies based on whether or not the note
     // has a stem.
-    if (has_stem) {
-      stem_ext = (note as StemmableNote).checkStem().getExtents();
+    if (hasStem) {
+      stemExt = (note as StemmableNote).checkStem().getExtents();
       spacing = stave.getSpacingBetweenLines();
     }
 
@@ -275,26 +275,26 @@ export class Annotation extends Modifier {
       // Use the largest (lowest) Y value
       const ys: number[] = note.getYs();
       y = ys.reduce((a, b) => (a > b ? a : b));
-      y += (this.text_line + 1) * Tables.STAVE_LINE_DISTANCE + text_height;
-      if (has_stem && stemDirection === Stem.DOWN) {
-        y = Math.max(y, stem_ext.topY + text_height + spacing * this.text_line);
+      y += (this.textLine + 1) * Tables.STAVE_LINE_DISTANCE + textHeight;
+      if (hasStem && stemDirection === Stem.DOWN) {
+        y = Math.max(y, stemExt.topY + textHeight + spacing * this.textLine);
       }
     } else if (this.verticalJustification === AnnotationVerticalJustify.CENTER) {
-      const yt = note.getYForTopText(this.text_line) - 1;
-      const yb = stave.getYForBottomText(this.text_line);
-      y = yt + (yb - yt) / 2 + text_height / 2;
+      const yt = note.getYForTopText(this.textLine) - 1;
+      const yb = stave.getYForBottomText(this.textLine);
+      y = yt + (yb - yt) / 2 + textHeight / 2;
     } else if (this.verticalJustification === AnnotationVerticalJustify.TOP) {
       const topY = Math.min(...note.getYs());
-      y = topY - (this.text_line + 1) * Tables.STAVE_LINE_DISTANCE;
-      if (has_stem && stemDirection === Stem.UP) {
+      y = topY - (this.textLine + 1) * Tables.STAVE_LINE_DISTANCE;
+      if (hasStem && stemDirection === Stem.UP) {
         // If the stem is above the stave already, go with default line width vs. actual
         // since the lines between don't really matter.
-        spacing = stem_ext.topY < stave.getTopLineTopY() ? Tables.STAVE_LINE_DISTANCE : spacing;
-        y = Math.min(y, stem_ext.topY - spacing * (this.text_line + 1));
+        spacing = stemExt.topY < stave.getTopLineTopY() ? Tables.STAVE_LINE_DISTANCE : spacing;
+        y = Math.min(y, stemExt.topY - spacing * (this.textLine + 1));
       }
     } /* CENTER_STEM */ else {
       const extents = note.getStemExtents();
-      y = extents.topY + (extents.baseY - extents.topY) / 2 + text_height / 2;
+      y = extents.topY + (extents.baseY - extents.topY) / 2 + textHeight / 2;
     }
 
     L('Rendering annotation: ', this.text, x, y);

@@ -219,7 +219,7 @@ function breakBeamsOnRests(options: TestOptions): void {
   );
 
   const beams = Beam.generateBeams(voice.getTickables() as StemmableNote[], {
-    beam_rests: false,
+    beamRests: false,
   });
 
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
@@ -242,8 +242,8 @@ function beamAcrossAllRestsWithStemlets(options: TestOptions): void {
   );
 
   const beams = Beam.generateBeams(voice.getTickables() as StemmableNote[], {
-    beam_rests: true,
-    show_stemlets: true,
+    beamRests: true,
+    showStemlets: true,
   });
 
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
@@ -266,7 +266,7 @@ function beamAcrossAllRests(options: TestOptions): void {
   );
 
   const beams = Beam.generateBeams(voice.getTickables() as StemmableNote[], {
-    beam_rests: true,
+    beamRests: true,
   });
 
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
@@ -289,8 +289,8 @@ function beamAcrossMiddleRests(options: TestOptions): void {
   );
 
   const beams = Beam.generateBeams(voice.getTickables() as StemmableNote[], {
-    beam_rests: true,
-    beam_middle_only: true,
+    beamRests: true,
+    beamMiddleOnly: true,
   });
 
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
@@ -322,8 +322,8 @@ function maintainStemDirections(options: TestOptions): void {
   );
 
   const beams = Beam.generateBeams(voice.getTickables() as StemmableNote[], {
-    beam_rests: false,
-    maintain_stem_directions: true,
+    beamRests: false,
+    maintainStemDirections: true,
   });
 
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
@@ -354,8 +354,8 @@ function maintainStemDirectionsBeamAcrossRests(options: TestOptions): void {
   );
 
   const beams = Beam.generateBeams(voice.getTickables() as StemmableNote[], {
-    beam_rests: true,
-    maintain_stem_directions: true,
+    beamRests: true,
+    maintainStemDirections: true,
   });
 
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
@@ -376,8 +376,8 @@ function groupWithUnbeamableNote(options: TestOptions): void {
 
   const beams = Beam.generateBeams(voice.getTickables() as StemmableNote[], {
     groups: [new Fraction(2, 2)],
-    beam_rests: false,
-    maintain_stem_directions: true,
+    beamRests: false,
+    maintainStemDirections: true,
   });
 
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
@@ -398,8 +398,8 @@ function groupWithUnbeamableNote1(options: TestOptions): void {
 
   const beams = Beam.generateBeams(voice.getTickables() as StemmableNote[], {
     groups: [new Fraction(3, 8)],
-    beam_rests: false,
-    maintain_stem_directions: true,
+    beamRests: false,
+    maintainStemDirections: true,
   });
 
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
@@ -500,7 +500,7 @@ function simpleTuplets(options: TestOptions): void {
     [
       ...tuplet(notes('c4/8, g4, c5')),
       ...notes('g5/8, a5'),
-      ...tuplet(notes('a5/16, (c5 e5), a5, d5, a5'), { ratioed: false, notes_occupied: 4 }),
+      ...tuplet(notes('a5/16, (c5 e5), a5, d5, a5'), { ratioed: false, notesOccupied: 4 }),
     ],
     { time: '3/4' }
   );
@@ -644,7 +644,7 @@ function secondaryBreaks1(options: TestOptions): void {
     )
   );
 
-  const beams = Beam.generateBeams(voice.getTickables() as StemmableNote[], { secondary_breaks: '8' });
+  const beams = Beam.generateBeams(voice.getTickables() as StemmableNote[], { secondaryBreaks: '8' });
 
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
 
@@ -674,7 +674,7 @@ function secondaryBreaks2(options: TestOptions): void {
     ].reduce(concat)
   );
 
-  const beams = Beam.generateBeams(voice.getTickables() as StemmableNote[], { secondary_breaks: '8' });
+  const beams = Beam.generateBeams(voice.getTickables() as StemmableNote[], { secondaryBreaks: '8' });
 
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
 
@@ -702,8 +702,8 @@ function flatBeamsUp(options: TestOptions): void {
   );
 
   const beams = Beam.generateBeams(voice.getTickables() as StemmableNote[], {
-    flat_beams: true,
-    stem_direction: 1,
+    flatBeams: true,
+    stemDirection: 1,
   });
 
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
@@ -727,8 +727,8 @@ function flatBeamsDown(options: TestOptions): void {
   );
 
   const beams = Beam.generateBeams(voice.getTickables() as StemmableNote[], {
-    flat_beams: true,
-    stem_direction: -1,
+    flatBeams: true,
+    stemDirection: -1,
   });
 
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
@@ -751,7 +751,7 @@ function flatBeamsMixed(options: TestOptions): void {
     )
   );
 
-  const beams = Beam.generateBeams(voice.getTickables() as StemmableNote[], { flat_beams: true });
+  const beams = Beam.generateBeams(voice.getTickables() as StemmableNote[], { flatBeams: true });
 
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
 
@@ -775,9 +775,9 @@ function flatBeamsUpUniform(options: TestOptions): void {
   ]);
 
   const beams = Beam.generateBeams(voice.getTickables() as StemmableNote[], {
-    flat_beams: true,
-    flat_beam_offset: 50,
-    stem_direction: 1,
+    flatBeams: true,
+    flatBeamOffset: 50,
+    stemDirection: 1,
   });
 
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
@@ -801,9 +801,9 @@ function flatBeamsDownUniform(options: TestOptions): void {
   );
 
   const beams = Beam.generateBeams(voice.getTickables() as StemmableNote[], {
-    flat_beams: true,
-    flat_beam_offset: 155,
-    stem_direction: -1,
+    flatBeams: true,
+    flatBeamOffset: 155,
+    stemDirection: -1,
   });
 
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
@@ -828,9 +828,9 @@ function flatBeamsUpBounds(options: TestOptions): void {
   ]);
 
   const beams = Beam.generateBeams(voice.getTickables() as StemmableNote[], {
-    flat_beams: true,
-    flat_beam_offset: 60,
-    stem_direction: 1,
+    flatBeams: true,
+    flatBeamOffset: 60,
+    stemDirection: 1,
   });
 
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
@@ -860,9 +860,9 @@ function flatBeamsDownBounds(options: TestOptions): void {
   );
 
   const beams = Beam.generateBeams(voice.getTickables() as StemmableNote[], {
-    flat_beams: true,
-    flat_beam_offset: 145,
-    stem_direction: -1,
+    flatBeams: true,
+    flatBeamOffset: 145,
+    stemDirection: -1,
   });
 
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);

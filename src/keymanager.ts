@@ -39,8 +39,8 @@ export class KeyManager {
     this.keyString = this.keyParts.root;
     if (this.keyParts.accidental) this.keyString += this.keyParts.accidental;
 
-    const is_supported_type = Music.scaleTypes[this.keyParts.type];
-    if (!is_supported_type) {
+    const isSupportedType = Music.scaleTypes[this.keyParts.type];
+    if (!isSupportedType) {
       throw new RuntimeError('BadArguments', `Unsupported key type: ${this.key}`);
     }
 
@@ -53,7 +53,7 @@ export class KeyManager {
     this.scaleMapByValue = {};
     this.originalScaleMapByValue = {};
 
-    const noteLocation = Music.root_indices[this.keyParts.root];
+    const noteLocation = Music.rootIndexes[this.keyParts.root];
 
     for (let i = 0; i < Music.roots.length; ++i) {
       const index = (noteLocation + i) % Music.roots.length;

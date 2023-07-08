@@ -7,7 +7,7 @@ import { Stave } from './stave';
 import { StaveModifier, StaveModifierPosition } from './stavemodifier';
 import { Tables } from './tables';
 import { Category } from './typeguard';
-import { defined, log } from './util';
+import { defined, log, upperFirst } from './util';
 
 export interface ClefType {
   code: string;
@@ -15,7 +15,7 @@ export interface ClefType {
 }
 
 export interface ClefAnnotatiomType extends ClefType {
-  x_shift: number;
+  xShift: number;
   point: number;
 }
 
@@ -57,6 +57,8 @@ export class Clef extends StaveModifier {
   protected attachment?: Glyph;
   protected size?: string;
   protected type?: string;
+
+  #glyphCategory!: string;
 
   /**
    * Every clef name is associated with a glyph code from the font file
@@ -128,19 +130,18 @@ export class Clef extends StaveModifier {
 
     this.setPosition(StaveModifierPosition.BEGIN);
     this.setType(type, size, annotation);
-    this.setWidth(Glyph.getWidth(this.clef.code, Clef.getPoint(this.size), `clef_${this.size}`));
+    this.setWidth(Glyph.getWidth(this.clef.code, Clef.getPoint(this.size), this.#glyphCategory));
     L('Creating clef:', type);
   }
 
   /** Set clef type, size and annotation. */
-  setType(type: string, size?: string, annotation?: string): this {
+  setType(type: string, size: string = 'default', annotation?: string): this {
     this.type = type;
     this.clef = Clef.types[type];
-    if (size === undefined) {
-      this.size = 'default';
-    } else {
-      this.size = size;
-    }
+    this.size = size;
+
+    // clefDefault or clefSmall
+    this.#glyphCategory = 'clef' + upperFirst(size);
 
     const musicFont = Tables.currentMusicFont();
 
@@ -148,14 +149,15 @@ export class Clef extends StaveModifier {
     if (annotation !== undefined) {
       const code = Clef.annotationSmufl[annotation];
       const point = (Clef.getPoint(this.size) / 5) * 3;
-      const line = musicFont.lookupMetric(`clef_${this.size}.annotations.${annotation}.${this.type}.line`);
-      const x_shift = musicFont.lookupMetric(`clef_${this.size}.annotations.${annotation}.${this.type}.shiftX`);
+      const prefix = this.#glyphCategory + `.annotations.${annotation}.${this.type}.`;
+      const line = musicFont.lookupMetric(prefix + 'line');
+      const xShift = musicFont.lookupMetric(prefix + 'shiftX');
 
-      this.annotation = { code, point, line, x_shift };
+      this.annotation = { code, point, line, xShift };
 
       this.attachment = new Glyph(this.annotation.code, this.annotation.point);
-      this.attachment.metrics.x_max = 0;
-      this.attachment.setXShift(this.annotation.x_shift);
+      this.attachment.metrics.xMax = 0;
+      this.attachment.setXShift(this.annotation.xShift);
     } else {
       this.annotation = undefined;
     }
@@ -191,9 +193,11 @@ export class Clef extends StaveModifier {
 
     this.applyStyle(ctx);
     ctx.openGroup('clef', this.getAttribute('id'));
-    Glyph.renderGlyph(ctx, this.x, stave.getYForLine(this.clef.line), Clef.getPoint(this.size), this.clef.code, {
-      category: `clef_${this.size}`,
-    });
+
+    const x = this.x;
+    const y = stave.getYForLine(this.clef.line);
+    Glyph.renderGlyph(ctx, x, y, Clef.getPoint(this.size), this.clef.code, { category: this.#glyphCategory });
+
     if (this.annotation !== undefined && this.attachment !== undefined) {
       this.placeGlyphOnLine(this.attachment, stave, this.annotation.line);
       this.attachment.setStave(stave);

@@ -39,10 +39,10 @@ export interface FormatterOptions {
 }
 
 export interface FormatParams {
-  align_rests?: boolean;
+  alignRests?: boolean;
   stave?: Stave;
   context?: RenderContext;
-  auto_beam?: boolean;
+  autoBeam?: boolean;
 }
 
 export interface AlignmentContexts<T> {
@@ -258,13 +258,13 @@ export class Formatter {
    * @param stave the stave to which to draw (`Stave` or `TabStave`)
    * @param notes array of `Note` instances (`Note`, `TextNote`, `TabNote`, etc.)
    * @param params one of below:
-   *    * Setting `autobeam` only `(context, stave, notes, true)` or
-   *      `(ctx, stave, notes, {autobeam: true})`
-   *    * Setting `align_rests` a struct is needed `(context, stave, notes, {align_rests: true})`
+   *    * Setting `autoBeam` only `(context, stave, notes, true)` or
+   *      `(ctx, stave, notes, {autoBeam: true})`
+   *    * Setting `alignRests` a struct is needed `(context, stave, notes, {alignRests: true})`
    *    * Setting both a struct is needed `(context, stave, notes, {
-   *      autobeam: true, align_rests: true})`
-   *    * `autobeam` automatically generates beams for the notes.
-   *    * `align_rests` aligns rests with nearby notes.
+   *      autoBeam: true, alignRests: true})`
+   *    * `autoBeam` automatically generates beams for the notes.
+   *    * `alignRests` aligns rests with nearby notes.
    */
   static FormatAndDraw(
     ctx: RenderContext,
@@ -273,26 +273,26 @@ export class Formatter {
     params?: FormatParams | boolean
   ): BoundingBox | undefined {
     let options = {
-      auto_beam: false,
-      align_rests: false,
+      autoBeam: false,
+      alignRests: false,
     };
 
     if (typeof params === 'object') {
       options = { ...options, ...params };
     } else if (typeof params === 'boolean') {
-      options.auto_beam = params;
+      options.autoBeam = params;
     }
 
     // Start by creating a voice and adding all the notes to it.
     const voice = new Voice(Tables.TIME4_4).setMode(Voice.Mode.SOFT).addTickables(notes);
 
     // Then create beams, if requested.
-    const beams = options.auto_beam ? Beam.applyAndGetBeams(voice) : [];
+    const beams = options.autoBeam ? Beam.applyAndGetBeams(voice) : [];
 
     // Instantiate a `Formatter` and format the notes.
     new Formatter()
-      .joinVoices([voice]) // , { align_rests: options.align_rests })
-      .formatToStave([voice], stave, { align_rests: options.align_rests, stave });
+      .joinVoices([voice]) // , { alignRests: options.alignRests })
+      .formatToStave([voice], stave, { alignRests: options.alignRests, stave });
 
     // Render the voice and beams to the stave.
     voice.setStave(stave).draw(ctx, stave);
@@ -310,10 +310,10 @@ export class Formatter {
    * @param stave a `Stave` instance on which to render `Note`s.
    * @param notes array of `Note` instances for the stave (`Note`, `BarNote`, etc.)
    * @param tabnotes array of `Note` instances for the tab stave (`TabNote`, `BarNote`, etc.)
-   * @param autobeam automatically generate beams.
+   * @param autoBeam automatically generate beams.
    * @param params a configuration object:
-   *    * `autobeam` automatically generates beams for the notes.
-   *    * `align_rests` aligns rests with nearby notes.
+   *    * `autoBeam` automatically generates beams for the notes.
+   *    * `alignRests` aligns rests with nearby notes.
    */
   static FormatAndDrawTab(
     ctx: RenderContext,
@@ -321,18 +321,18 @@ export class Formatter {
     stave: Stave,
     tabnotes: TabNote[],
     notes: Tickable[],
-    autobeam: boolean,
+    autoBeam: boolean,
     params: FormatParams
   ): void {
     let opts = {
-      auto_beam: autobeam,
-      align_rests: false,
+      autoBeam,
+      alignRests: false,
     };
 
     if (typeof params === 'object') {
       opts = { ...opts, ...params };
     } else if (typeof params === 'boolean') {
-      opts.auto_beam = params;
+      opts.autoBeam = params;
     }
 
     // Create a `4/4` voice for `notes`.
@@ -342,13 +342,13 @@ export class Formatter {
     const tabvoice = new Voice(Tables.TIME4_4).setMode(Voice.Mode.SOFT).addTickables(tabnotes);
 
     // Then create beams, if requested.
-    const beams = opts.auto_beam ? Beam.applyAndGetBeams(notevoice) : [];
+    const beams = opts.autoBeam ? Beam.applyAndGetBeams(notevoice) : [];
 
     // Instantiate a `Formatter` and align tab and stave notes.
     new Formatter()
-      .joinVoices([notevoice]) // , { align_rests: opts.align_rests })
+      .joinVoices([notevoice]) // , { alignRests: opts.alignRests })
       .joinVoices([tabvoice])
-      .formatToStave([notevoice, tabvoice], stave, { align_rests: opts.align_rests });
+      .formatToStave([notevoice, tabvoice], stave, { alignRests: opts.alignRests });
 
     // Render voices and beams to staves.
     notevoice.draw(ctx, stave);
@@ -1067,12 +1067,12 @@ export class Formatter {
    *
    * Voices are full justified to fit in `justifyWidth` pixels.
    *
-   * Set `options.context` to the rendering context. Set `options.align_rests`
+   * Set `options.context` to the rendering context. Set `options.alignRests`
    * to true to enable rest alignment.
    */
   format(voices: Voice[], justifyWidth?: number, options?: FormatParams): this {
     const opts = {
-      align_rests: false,
+      alignRests: false,
       ...options,
     };
 
@@ -1082,7 +1082,7 @@ export class Formatter {
       this.voices.forEach((v) => v.setSoftmaxFactor(softmaxFactor));
     }
 
-    this.alignRests(voices, opts.align_rests);
+    this.alignRests(voices, opts.alignRests);
     this.createTickContexts(voices);
     this.preFormat(justifyWidth, opts.context, voices, opts.stave);
 

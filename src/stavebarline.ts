@@ -169,11 +169,11 @@ export class Barline extends StaveModifier {
     this.restoreStyle(ctx);
   }
 
-  drawVerticalBar(stave: Stave, x: number, double_bar?: boolean): void {
+  drawVerticalBar(stave: Stave, x: number, doubleBar?: boolean): void {
     const staveCtx = stave.checkContext();
     const topY = stave.getTopLineTopY();
     const botY = stave.getBottomLineBottomY();
-    if (double_bar) {
+    if (doubleBar) {
       staveCtx.fillRect(x - 3, topY, 1, botY - topY);
     }
     staveCtx.fillRect(x, topY, 1, botY - topY);
@@ -192,40 +192,40 @@ export class Barline extends StaveModifier {
 
     const topY = stave.getTopLineTopY();
     const botY = stave.getBottomLineBottomY();
-    let x_shift = 3;
+    let xShift = 3;
 
     if (!begin) {
-      x_shift = -5;
+      xShift = -5;
     }
 
-    staveCtx.fillRect(x + x_shift, topY, 1, botY - topY);
+    staveCtx.fillRect(x + xShift, topY, 1, botY - topY);
     staveCtx.fillRect(x - 2, topY, 3, botY - topY);
 
-    const dot_radius = 2;
+    const dotRadius = 2;
 
     // Shift dots left or right
     if (begin) {
-      x_shift += 4;
+      xShift += 4;
     } else {
-      x_shift -= 4;
+      xShift -= 4;
     }
 
-    const dot_x = x + x_shift + dot_radius / 2;
+    const dotX = x + xShift + dotRadius / 2;
 
     // calculate the y offset based on number of stave lines
-    let y_offset = (stave.getNumLines() - 1) * stave.getSpacingBetweenLines();
-    y_offset = y_offset / 2 - stave.getSpacingBetweenLines() / 2;
-    let dot_y = topY + y_offset + dot_radius / 2;
+    let yOffset = (stave.getNumLines() - 1) * stave.getSpacingBetweenLines();
+    yOffset = yOffset / 2 - stave.getSpacingBetweenLines() / 2;
+    let dotY = topY + yOffset + dotRadius / 2;
 
     // draw the top repeat dot
     staveCtx.beginPath();
-    staveCtx.arc(dot_x, dot_y, dot_radius, 0, Math.PI * 2, false);
+    staveCtx.arc(dotX, dotY, dotRadius, 0, Math.PI * 2, false);
     staveCtx.fill();
 
     // draw the bottom repeat dot
-    dot_y += stave.getSpacingBetweenLines();
+    dotY += stave.getSpacingBetweenLines();
     staveCtx.beginPath();
-    staveCtx.arc(dot_x, dot_y, dot_radius, 0, Math.PI * 2, false);
+    staveCtx.arc(dotX, dotY, dotRadius, 0, Math.PI * 2, false);
     staveCtx.fill();
   }
 }

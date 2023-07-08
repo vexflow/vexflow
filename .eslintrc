@@ -14,7 +14,8 @@
     "simple-import-sort/exports": "warn",
     "import/first": "error",
     "import/no-duplicates": "error",
-    "import/newline-after-import": "warn"
+    "import/newline-after-import": "warn",
+    "camelcase": "warn"
   },
   "overrides": [
     {

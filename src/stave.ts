@@ -23,17 +23,17 @@ export interface StaveLineConfig {
 }
 
 export interface StaveOptions {
-  bottom_text_position?: number;
-  line_config?: StaveLineConfig[];
-  space_below_staff_ln?: number;
-  space_above_staff_ln?: number;
-  vertical_bar_width?: number;
-  fill_style?: string;
-  left_bar?: boolean;
-  right_bar?: boolean;
-  spacing_between_lines_px?: number;
-  top_text_position?: number;
-  num_lines?: number;
+  bottomTextPosition?: number;
+  lineConfig?: StaveLineConfig[];
+  spaceBelowStaffLn?: number;
+  spaceAboveStaffLn?: number;
+  verticalBarWidth?: number;
+  fillStyle?: string;
+  leftBar?: boolean;
+  rightBar?: boolean;
+  spacingBetweenLinesPx?: number;
+  topTextPosition?: number;
+  numLines?: number;
 }
 
 // Used by Stave.format() to sort the modifiers at the beginning and end of a stave.
@@ -67,7 +67,8 @@ export class Stave extends Element {
 
   readonly options: Required<StaveOptions>;
 
-  protected start_x: number;
+  protected startX: number;
+  protected endX: number;
   protected clef: string;
   protected endClef?: string;
 
@@ -78,7 +79,6 @@ export class Stave extends Element {
   protected height: number = 0;
 
   protected formatted: boolean;
-  protected end_x: number;
   protected measure: number;
   protected bounds: Bounds;
   protected readonly modifiers: StaveModifier[];
@@ -105,8 +105,8 @@ export class Stave extends Element {
     this.y = y;
     this.width = width;
     this.formatted = false;
-    this.start_x = x + 5;
-    this.end_x = x + width;
+    this.startX = x + 5;
+    this.endX = x + width;
     this.modifiers = []; // stave modifiers (clef, key, time, barlines, coda, segno, etc.)
     this.measure = 0;
     this.clef = 'treble';
@@ -114,17 +114,17 @@ export class Stave extends Element {
     this.resetFont();
 
     this.options = {
-      vertical_bar_width: 10, // Width around vertical bar end-marker
-      num_lines: 5,
-      fill_style: '#999999',
-      left_bar: true, // draw vertical bar on left
-      right_bar: true, // draw vertical bar on right
-      spacing_between_lines_px: Tables.STAVE_LINE_DISTANCE, // in pixels
-      space_above_staff_ln: 4, // in staff lines
-      space_below_staff_ln: 4, // in staff lines
-      top_text_position: 1, // in staff lines
-      bottom_text_position: 4, // in staff lines
-      line_config: [],
+      verticalBarWidth: 10, // Width around vertical bar end-marker
+      numLines: 5,
+      fillStyle: '#999999',
+      leftBar: true, // draw vertical bar on left
+      rightBar: true, // draw vertical bar on right
+      spacingBetweenLinesPx: Tables.STAVE_LINE_DISTANCE, // in pixels
+      spaceAboveStaffLn: 4, // in staff lines
+      spaceBelowStaffLn: 4, // in staff lines
+      topTextPosition: 1, // in staff lines
+      bottomTextPosition: 4, // in staff lines
+      lineConfig: [],
       ...options,
     };
     this.bounds = { x: this.x, y: this.y, w: this.width, h: 0 };
@@ -133,9 +133,9 @@ export class Stave extends Element {
     this.resetLines();
 
     // beg bar
-    this.addModifier(new Barline(this.options.left_bar ? BarlineType.SINGLE : BarlineType.NONE));
+    this.addModifier(new Barline(this.options.leftBar ? BarlineType.SINGLE : BarlineType.NONE));
     // end bar
-    this.addEndModifier(new Barline(this.options.right_bar ? BarlineType.SINGLE : BarlineType.NONE));
+    this.addEndModifier(new Barline(this.options.rightBar ? BarlineType.SINGLE : BarlineType.NONE));
   }
 
   /** Set default style for ledger lines. */
@@ -149,43 +149,43 @@ export class Stave extends Element {
   }
 
   space(spacing: number): number {
-    return this.options.spacing_between_lines_px * spacing;
+    return this.options.spacingBetweenLinesPx * spacing;
   }
 
   resetLines(): void {
-    this.options.line_config = [];
-    for (let i = 0; i < this.options.num_lines; i++) {
-      this.options.line_config.push({ visible: true });
+    this.options.lineConfig = [];
+    for (let i = 0; i < this.options.numLines; i++) {
+      this.options.lineConfig.push({ visible: true });
     }
-    this.height = (this.options.num_lines + this.options.space_above_staff_ln) * this.options.spacing_between_lines_px;
-    this.options.bottom_text_position = this.options.num_lines;
+    this.height = (this.options.numLines + this.options.spaceAboveStaffLn) * this.options.spacingBetweenLinesPx;
+    this.options.bottomTextPosition = this.options.numLines;
   }
 
   setNoteStartX(x: number): this {
     if (!this.formatted) this.format();
 
-    this.start_x = x;
+    this.startX = x;
     return this;
   }
 
   getNoteStartX(): number {
     if (!this.formatted) this.format();
 
-    return this.start_x;
+    return this.startX;
   }
 
   getNoteEndX(): number {
     if (!this.formatted) this.format();
 
-    return this.end_x;
+    return this.endX;
   }
 
   getTieStartX(): number {
-    return this.start_x;
+    return this.startX;
   }
 
   getTieEndX(): number {
-    return this.end_x;
+    return this.endX;
   }
 
   getX(): number {
@@ -193,11 +193,11 @@ export class Stave extends Element {
   }
 
   getNumLines(): number {
-    return this.options.num_lines;
+    return this.options.numLines;
   }
 
   setNumLines(n: number): this {
-    this.options.num_lines = n;
+    this.options.numLines = n;
     this.resetLines();
     return this;
   }
@@ -223,8 +223,8 @@ export class Stave extends Element {
     const shift = x - this.x;
     this.formatted = false;
     this.x = x;
-    this.start_x += shift;
-    this.end_x += shift;
+    this.startX += shift;
+    this.endX += shift;
     for (let i = 0; i < this.modifiers.length; i++) {
       const mod = this.modifiers[i];
       mod.setX(mod.getX() + shift);
@@ -235,10 +235,10 @@ export class Stave extends Element {
   setWidth(width: number): this {
     this.formatted = false;
     this.width = width;
-    this.end_x = this.x + width;
+    this.endX = this.x + width;
 
     // reset the x position of the end barline (TODO(0xfe): This makes no sense)
-    // this.modifiers[1].setX(this.end_x);
+    // this.modifiers[1].setX(this.endX);
     return this;
   }
 
@@ -248,8 +248,8 @@ export class Stave extends Element {
 
   getStyle(): ElementStyle {
     return {
-      fillStyle: this.options.fill_style,
-      strokeStyle: this.options.fill_style, // yes, this is correct for legacy compatibility
+      fillStyle: this.options.fillStyle,
+      strokeStyle: this.options.fillStyle, // yes, this is correct for legacy compatibility
       lineWidth: Tables.STAVE_LINE_THICKNESS,
       ...super.getStyle(),
     };
@@ -292,13 +292,13 @@ export class Stave extends Element {
       return 0;
     }
 
-    let start_x = this.start_x - this.x;
+    let startX = this.startX - this.x;
     const begBarline = this.modifiers[0] as Barline;
-    if (begBarline.getType() === BarlineType.REPEAT_BEGIN && start_x > begBarline.getWidth()) {
-      start_x -= begBarline.getWidth();
+    if (begBarline.getType() === BarlineType.REPEAT_BEGIN && startX > begBarline.getWidth()) {
+      startX -= begBarline.getWidth();
     }
 
-    return start_x;
+    return startX;
   }
 
   /** Coda & Segno Symbol functions */
@@ -308,8 +308,8 @@ export class Stave extends Element {
   }
 
   // Volta functions
-  setVoltaType(type: number, number_t: string, y: number): this {
-    this.modifiers.push(new Volta(type, number_t, this.x, y));
+  setVoltaType(type: number, label: string, y: number): this {
+    this.modifiers.push(new Volta(type, label, this.x, y));
     return this;
   }
 
@@ -332,8 +332,8 @@ export class Stave extends Element {
     text: string,
     position: number,
     options: {
-      shift_x?: number;
-      shift_y?: number;
+      shiftX?: number;
+      shiftY?: number;
       justification?: number;
     } = {}
   ): this {
@@ -346,7 +346,7 @@ export class Stave extends Element {
   }
 
   getSpacingBetweenLines(): number {
-    return this.options.spacing_between_lines_px;
+    return this.options.spacingBetweenLinesPx;
   }
 
   getBoundingBox(): BoundingBox {
@@ -355,22 +355,21 @@ export class Stave extends Element {
 
   getBottomY(): number {
     const options = this.options;
-    const spacing = options.spacing_between_lines_px;
-    const score_bottom = this.getYForLine(options.num_lines) + options.space_below_staff_ln * spacing;
-
-    return score_bottom;
+    const spacing = options.spacingBetweenLinesPx;
+    const scoreBottom = this.getYForLine(options.numLines) + options.spaceBelowStaffLn * spacing;
+    return scoreBottom;
   }
 
   getBottomLineY(): number {
-    return this.getYForLine(this.options.num_lines);
+    return this.getYForLine(this.options.numLines);
   }
 
   // This returns
   /** @returns the y for the *center* of a staff line */
   getYForLine(line: number): number {
     const options = this.options;
-    const spacing = options.spacing_between_lines_px;
-    const headroom = options.space_above_staff_ln;
+    const spacing = options.spacingBetweenLinesPx;
+    const headroom = options.spaceAboveStaffLn;
 
     const y = this.y + line * spacing + headroom * spacing;
 
@@ -382,23 +381,23 @@ export class Stave extends Element {
     // getYForLine until the right value is reaches
 
     const options = this.options;
-    const spacing = options.spacing_between_lines_px;
-    const headroom = options.space_above_staff_ln;
+    const spacing = options.spacingBetweenLinesPx;
+    const headroom = options.spaceAboveStaffLn;
     return (y - this.y) / spacing - headroom;
   }
 
   getYForTopText(line: number = 0): number {
-    return this.getYForLine(-line - this.options.top_text_position);
+    return this.getYForLine(-line - this.options.topTextPosition);
   }
 
   getYForBottomText(line: number = 0): number {
-    return this.getYForLine(this.options.bottom_text_position + line);
+    return this.getYForLine(this.options.bottomTextPosition + line);
   }
 
   getYForNote(line: number): number {
     const options = this.options;
-    const spacing = options.spacing_between_lines_px;
-    const headroom = options.space_above_staff_ln;
+    const spacing = options.spacingBetweenLinesPx;
+    const headroom = options.spaceAboveStaffLn;
     return this.y + headroom * spacing + 5 * spacing - line * spacing;
   }
 
@@ -665,7 +664,7 @@ export class Stave extends Element {
       if (padding + width === 0) offset--;
     }
 
-    this.start_x = x;
+    this.startX = x;
     x = this.x + this.width;
 
     const widths = {
@@ -716,7 +715,7 @@ export class Stave extends Element {
       x -= widths.paddingLeft;
     }
 
-    this.end_x = endModifiers.length === 1 ? this.x + this.width : x;
+    this.endX = endModifiers.length === 1 ? this.x + this.width : x;
     this.formatted = true;
   }
 
@@ -731,16 +730,16 @@ export class Stave extends Element {
     ctx.openGroup('stave', this.getAttribute('id'));
     if (!this.formatted) this.format();
 
-    const num_lines = this.options.num_lines;
+    const numLines = this.options.numLines;
     const width = this.width;
     const x = this.x;
     let y;
 
     // Render lines
-    for (let line = 0; line < num_lines; line++) {
+    for (let line = 0; line < numLines; line++) {
       y = this.getYForLine(line);
 
-      if (this.options.line_config[line].visible) {
+      if (this.options.lineConfig[line].visible) {
         ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.lineTo(x + width, y);
@@ -775,7 +774,7 @@ export class Stave extends Element {
   }
 
   getVerticalBarWidth(): number {
-    return this.options.vertical_bar_width;
+    return this.options.verticalBarWidth;
   }
 
   /**
@@ -783,51 +782,51 @@ export class Stave extends Element {
    * @return {Array} An array of configuration objects.
    */
   getConfigForLines(): StaveLineConfig[] {
-    return this.options.line_config;
+    return this.options.lineConfig;
   }
 
   /**
    * Configure properties of the lines in the Stave
-   * @param line_number The index of the line to configure.
-   * @param line_config An configuration object for the specified line.
+   * @param lineNumber The index of the line to configure.
+   * @param lineConfig An configuration object for the specified line.
    * @throws RuntimeError "StaveConfigError" When the specified line number is out of
    *   range of the number of lines specified in the constructor.
    */
-  setConfigForLine(line_number: number, line_config: StaveLineConfig): this {
-    if (line_number >= this.options.num_lines || line_number < 0) {
+  setConfigForLine(lineNumber: number, lineConfig: StaveLineConfig): this {
+    if (lineNumber >= this.options.numLines || lineNumber < 0) {
       throw new RuntimeError(
         'StaveConfigError',
         'The line number must be within the range of the number of lines in the Stave.'
       );
     }
 
-    if (line_config.visible === undefined) {
+    if (lineConfig.visible === undefined) {
       throw new RuntimeError('StaveConfigError', "The line configuration object is missing the 'visible' property.");
     }
 
-    if (typeof line_config.visible !== 'boolean') {
+    if (typeof lineConfig.visible !== 'boolean') {
       throw new RuntimeError(
         'StaveConfigError',
         "The line configuration objects 'visible' property must be true or false."
       );
     }
 
-    this.options.line_config[line_number] = line_config;
+    this.options.lineConfig[lineNumber] = lineConfig;
 
     return this;
   }
 
   /**
    * Set the staff line configuration array for all of the lines at once.
-   * @param lines_configuration An array of line configuration objects.  These objects
+   * @param linesConfiguration An array of line configuration objects.  These objects
    *   are of the same format as the single one passed in to setLineConfiguration().
    *   The caller can set null for any line config entry if it is desired that the default be used
    * @throws RuntimeError "StaveConfigError" When the lines_configuration array does not have
-   *   exactly the same number of elements as the num_lines configuration object set in
+   *   exactly the same number of elements as the numLines configuration object set in
    *   the constructor.
    */
-  setConfigForLines(lines_configuration: StaveLineConfig[]): this {
-    if (lines_configuration.length !== this.options.num_lines) {
+  setConfigForLines(linesConfiguration: StaveLineConfig[]): this {
+    if (linesConfiguration.length !== this.options.numLines) {
       throw new RuntimeError(
         'StaveConfigError',
         'The length of the lines configuration array must match the number of lines in the Stave'
@@ -837,18 +836,18 @@ export class Stave extends Element {
     // Make sure the defaults are present in case an incomplete set of
     //  configuration options were supplied.
     // eslint-disable-next-line
-    for (const line_config in lines_configuration) {
+    for (const lineConfig in linesConfiguration) {
       // Allow '{}' to be used if the caller just wants the default for a particular node.
-      if (lines_configuration[line_config].visible == undefined) {
-        lines_configuration[line_config] = this.options.line_config[line_config];
+      if (linesConfiguration[lineConfig].visible == undefined) {
+        linesConfiguration[lineConfig] = this.options.lineConfig[lineConfig];
       }
-      this.options.line_config[line_config] = {
-        ...this.options.line_config[line_config],
-        ...lines_configuration[line_config],
+      this.options.lineConfig[lineConfig] = {
+        ...this.options.lineConfig[lineConfig],
+        ...linesConfiguration[lineConfig],
       };
     }
 
-    this.options.line_config = lines_configuration;
+    this.options.lineConfig = linesConfiguration;
 
     return this;
   }

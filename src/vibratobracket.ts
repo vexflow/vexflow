@@ -26,12 +26,13 @@ export class VibratoBracket extends Element {
 
   protected start?: Note;
   protected stop?: Note;
-  public render_options: {
-    vibrato_width: number;
-    wave_height: number;
-    wave_girth: number;
+
+  public renderOptions: {
+    vibratoWidth: number;
+    waveWidth: number;
+    waveHeight: number;
+    waveGirth: number;
     harsh: boolean;
-    wave_width: number;
   };
 
   /**
@@ -39,20 +40,20 @@ export class VibratoBracket extends Element {
    * An undefined value for the start or stop note indicates that the vibrato
    * is drawn from the beginning or until the end of the stave accordingly.
    */
-  constructor(bracket_data: { stop?: Note | null; start?: Note | null }) {
+  constructor(bracketData: { stop?: Note | null; start?: Note | null }) {
     super();
 
-    if (bracket_data.start) this.start = bracket_data.start;
-    if (bracket_data.stop) this.stop = bracket_data.stop;
+    if (bracketData.start) this.start = bracketData.start;
+    if (bracketData.stop) this.stop = bracketData.stop;
 
     this.line = 1;
 
-    this.render_options = {
+    this.renderOptions = {
       harsh: false,
-      wave_height: 6,
-      wave_width: 4,
-      wave_girth: 2,
-      vibrato_width: 0,
+      waveHeight: 6,
+      waveWidth: 4,
+      waveGirth: 2,
+      vibratoWidth: 0,
     };
   }
 
@@ -64,7 +65,7 @@ export class VibratoBracket extends Element {
 
   /** Set harsh vibrato bracket. */
   setHarsh(harsh: boolean): this {
-    this.render_options.harsh = harsh;
+    this.renderOptions.harsh = harsh;
     return this;
   }
 
@@ -78,19 +79,19 @@ export class VibratoBracket extends Element {
       0;
     // If start note is not set then vibrato will be drawn
     // from the beginning of the stave
-    const start_x: number =
+    const startX: number =
       (this.start && this.start.getAbsoluteX()) || (this.stop && this.stop.checkStave().getTieStartX()) || 0;
     // If stop note is not set then vibrato will be drawn
     // until the end of the stave
-    const stop_x: number =
+    const stopX: number =
       (this.stop && this.stop.getAbsoluteX() - this.stop.getWidth() - 5) ||
       (this.start && this.start.checkStave().getTieEndX() - 10) ||
       0;
 
-    this.render_options.vibrato_width = stop_x - start_x;
+    this.renderOptions.vibratoWidth = stopX - startX;
 
-    L('Rendering VibratoBracket: start_x:', start_x, 'stop_x:', stop_x, 'y:', y);
+    L('Rendering VibratoBracket: startX:', startX, 'stopX:', stopX, 'y:', y);
 
-    Vibrato.renderVibrato(ctx, start_x, y, this.render_options);
+    Vibrato.renderVibrato(ctx, startX, y, this.renderOptions);
   }
 }

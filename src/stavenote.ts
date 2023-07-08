@@ -22,25 +22,17 @@ import { Tables } from './tables';
 import { Category } from './typeguard';
 import { defined, log, midLine, RuntimeError } from './util';
 
-function showDeprecationWarningForNoteHeads(): void {
-  // eslint-disable-next-line
-  console.warn(
-    'StaveNote.note_heads is deprecated. Use StaveNote.noteHeads instead.',
-    'This accessor will be removed in VexFlow 5.0.'
-  );
-}
-
 export interface StaveNoteHeadBounds {
-  y_top: number;
-  y_bottom: number;
-  displaced_x?: number;
-  non_displaced_x?: number;
-  highest_line: number;
-  lowest_line: number;
-  highest_displaced_line?: number;
-  lowest_displaced_line?: number;
-  highest_non_displaced_line: number;
-  lowest_non_displaced_line: number;
+  yTop: number;
+  yBottom: number;
+  displacedX?: number;
+  nonDisplacedX?: number;
+  highestLine: number;
+  lowestLine: number;
+  highestDisplacedLine?: number;
+  lowestDisplacedLine?: number;
+  highestNonDisplacedLine: number;
+  lowestNonDisplacedLine: number;
 }
 
 export interface StaveNoteFormatSettings {
@@ -51,20 +43,20 @@ export interface StaveNoteFormatSettings {
   stemDirection?: number;
   stemMax: number;
   stemMin: number;
-  voice_shift: number;
-  is_displaced: boolean;
+  voiceShift: number;
+  isDisplaced: boolean;
   note: StaveNote;
 }
 
 export interface StaveNoteStruct extends NoteStruct {
   /** `Stem.UP` or `Stem.DOWN`. */
-  stem_direction?: number;
-  auto_stem?: boolean;
-  stem_down_x_offset?: number;
-  stem_up_x_offset?: number;
-  stroke_px?: number;
-  glyph_font_scale?: number;
-  octave_shift?: number;
+  stemDirection?: number;
+  autoStem?: boolean;
+  stemDownXOffset?: number;
+  stemUpXOffset?: number;
+  strokePx?: number;
+  glyphFontScale?: number;
+  octaveShift?: number;
   clef?: string;
 }
 
@@ -143,8 +135,8 @@ export class StaveNote extends StemmableNote {
 
       let maxL;
       if (notes[i].isRest()) {
-        maxL = line + notes[i].glyphProps.line_above;
-        minL = line - notes[i].glyphProps.line_below;
+        maxL = line + notes[i].glyphProps.lineAbove;
+        minL = line - notes[i].glyphProps.lineBelow;
       } else {
         maxL =
           stemDirection === 1 ? props[props.length - 1].keyProps.line + stemMax : props[props.length - 1].keyProps.line;
@@ -157,11 +149,11 @@ export class StaveNote extends StemmableNote {
         maxLine: maxL, // note/rest upper bounds line
         minLine: minL, // note/rest lower bounds line
         isrest: notes[i].isRest(),
-        stemDirection: stemDirection,
+        stemDirection,
         stemMax, // Maximum (default) note stem length;
         stemMin, // minimum note stem length
-        voice_shift: notes[i].getVoiceShiftWidth(),
-        is_displaced: notes[i].isDisplaced(), // note manually displaced
+        voiceShift: notes[i].getVoiceShiftWidth(),
+        isDisplaced: notes[i].isDisplaced(), // note manually displaced
         note: notes[i],
       });
     }
@@ -173,7 +165,7 @@ export class StaveNote extends StemmableNote {
     const draw = [false, false, false];
 
     for (let i = 0; i < notesList.length; i++) {
-      draw[i] = notesList[i].note.render_options.draw == false ? false : true;
+      draw[i] = notesList[i].note.renderOptions.draw == false ? false : true;
     }
 
     if (draw[0] && draw[1] && draw[2]) {
@@ -209,7 +201,7 @@ export class StaveNote extends StemmableNote {
       noteL = notesList[0];
     }
 
-    const voiceXShift = Math.max(noteU.voice_shift, noteL.voice_shift);
+    const voiceXShift = Math.max(noteU.voiceShift, noteL.voiceShift);
     let xShift = 0;
 
     // Test for two voice note intersection
@@ -217,7 +209,7 @@ export class StaveNote extends StemmableNote {
       const lineSpacing =
         noteU.note.hasStem() && noteL.note.hasStem() && noteU.stemDirection === noteL.stemDirection ? 0.0 : 0.5;
       if (noteL.isrest && noteU.isrest && noteU.note.duration === noteL.note.duration) {
-        noteL.note.render_options.draw = false;
+        noteL.note.renderOptions.draw = false;
       } else if (noteU.minLine <= noteL.maxLine + lineSpacing) {
         if (noteU.isrest) {
           // shift rest up
@@ -297,7 +289,7 @@ export class StaveNote extends StemmableNote {
       }
 
       // format complete
-      state.right_shift += xShift;
+      state.rightShift += xShift;
       return true;
     }
 
@@ -327,7 +319,7 @@ export class StaveNote extends StemmableNote {
           }
         }
         // format complete
-        state.right_shift += xShift;
+        state.rightShift += xShift;
         return true;
       }
     }
@@ -335,22 +327,22 @@ export class StaveNote extends StemmableNote {
     // Special case 2 :: all voices are rests
     if (noteU.isrest && noteM.isrest && noteL.isrest) {
       // Hide upper voice rest
-      noteU.note.render_options.draw = false;
+      noteU.note.renderOptions.draw = false;
       // Hide lower voice rest
-      noteL.note.render_options.draw = false;
+      noteL.note.renderOptions.draw = false;
       // format complete
-      state.right_shift += xShift;
+      state.rightShift += xShift;
       return true;
     }
 
     // Test if any other rests can be repositioned
     if (noteM.isrest && noteU.isrest && noteM.minLine <= noteL.maxLine) {
       // Hide middle voice rest
-      noteM.note.render_options.draw = false;
+      noteM.note.renderOptions.draw = false;
     }
     if (noteM.isrest && noteL.isrest && noteU.minLine <= noteM.maxLine) {
       // Hide middle voice rest
-      noteM.note.render_options.draw = false;
+      noteM.note.renderOptions.draw = false;
     }
     if (noteU.isrest && noteU.minLine <= noteM.maxLine) {
       // shift upper voice rest up;
@@ -375,7 +367,7 @@ export class StaveNote extends StemmableNote {
       }
     }
 
-    state.right_shift += xShift;
+    state.rightShift += xShift;
     return true;
   }
 
@@ -394,11 +386,11 @@ export class StaveNote extends StemmableNote {
   maxLine: number = 0;
 
   protected readonly clef: string;
-  protected readonly octave_shift?: number;
+  protected readonly octaveShift?: number;
 
   protected displaced: boolean;
-  protected dot_shiftY: number;
-  protected use_default_head_x: boolean;
+  protected dotShiftY: number;
+  protected useDefaultHeadX: boolean;
   protected ledgerLineStyle: ElementStyle;
   private _noteHeads: NoteHead[];
   // Sorted variant of keyProps used internally
@@ -410,7 +402,7 @@ export class StaveNote extends StemmableNote {
     this.ledgerLineStyle = {};
 
     this.clef = noteStruct.clef ?? 'treble';
-    this.octave_shift = noteStruct.octave_shift ?? 0;
+    this.octaveShift = noteStruct.octaveShift ?? 0;
 
     // Pull note rendering properties.
     this.glyphProps = Tables.getGlyphProps(this.duration, this.noteType);
@@ -422,30 +414,30 @@ export class StaveNote extends StemmableNote {
 
     // if true, displace note to right
     this.displaced = false;
-    this.dot_shiftY = 0;
+    this.dotShiftY = 0;
     // for displaced ledger lines
-    this.use_default_head_x = false;
+    this.useDefaultHeadX = false;
 
     // Drawing
     this._noteHeads = [];
     this.modifiers = [];
 
-    this.render_options = {
-      ...this.render_options,
+    this.renderOptions = {
+      ...this.renderOptions,
       // font size for note heads and rests
-      glyph_font_scale: noteStruct.glyph_font_scale || Tables.NOTATION_FONT_SCALE,
+      glyphFontScale: noteStruct.glyphFontScale || Tables.NOTATION_FONT_SCALE,
       // number of stroke px to the left and right of head
-      stroke_px: noteStruct.stroke_px || StaveNote.LEDGER_LINE_OFFSET,
+      strokePx: noteStruct.strokePx || StaveNote.LEDGER_LINE_OFFSET,
     };
 
     this.calculateKeyProps();
     this.buildStem();
 
     // Set the stem direction
-    if (noteStruct.auto_stem) {
+    if (noteStruct.autoStem) {
       this.autoStem();
     } else {
-      this.setStemDirection(noteStruct.stem_direction ?? Stem.UP);
+      this.setStemDirection(noteStruct.stemDirection ?? Stem.UP);
     }
     this.reset();
     this.buildFlag();
@@ -527,21 +519,21 @@ export class StaveNote extends StemmableNote {
           displaced = !displaced;
         } else {
           displaced = false;
-          this.use_default_head_x = true;
+          this.useDefaultHeadX = true;
         }
       }
       lastLine = line;
 
       const notehead = new NoteHead({
         duration: this.duration,
-        note_type: this.noteType,
+        noteType: this.noteType,
         displaced,
-        stem_direction: stemDirection,
-        custom_glyph_code: noteProps.code,
-        glyph_font_scale: this.render_options.glyph_font_scale,
-        x_shift: noteProps.shift_right,
-        stem_up_x_offset: noteProps.stem_up_x_offset,
-        stem_down_x_offset: noteProps.stem_down_x_offset,
+        stemDirection,
+        customGlyphCode: noteProps.code,
+        glyphFontScale: this.renderOptions.glyphFontScale,
+        xShift: noteProps.shiftRight,
+        stemUpXOffset: noteProps.stemUpXOffset,
+        stemDownXOffset: noteProps.stemDownXOffset,
         line: noteProps.line,
       });
 
@@ -578,7 +570,7 @@ export class StaveNote extends StemmableNote {
       // if (this.glyph.rest) key = this.glyph.position;
       if (this.glyphProps.rest) this.glyphProps.position = key;
 
-      const options = { octave_shift: this.octave_shift || 0, duration: this.duration };
+      const options = { octaveShift: this.octaveShift || 0, duration: this.duration };
       const props = Tables.keyProperties(key, this.clef, options);
 
       if (!props) {
@@ -643,8 +635,8 @@ export class StaveNote extends StemmableNote {
         minY = y - halfLineSpacing;
         maxY = y + halfLineSpacing;
       } else {
-        minY = y - this.glyphProps.line_above * lineSpacing;
-        maxY = y + this.glyphProps.line_below * lineSpacing;
+        minY = y - this.glyphProps.lineAbove * lineSpacing;
+        maxY = y + this.glyphProps.lineBelow * lineSpacing;
       }
     } else if (this.glyphProps.stem) {
       const ys = this.getStemExtents();
@@ -721,24 +713,24 @@ export class StaveNote extends StemmableNote {
     } else {
       // We adjust the origin of the stem because we want the stem left-aligned
       // with the notehead if stemmed-down, and right-aligned if stemmed-up
-      return super.getStemX() + (this.stem_direction ? Stem.WIDTH / (2 * -this.stem_direction) : 0);
+      return super.getStemX() + (this.stemDirection ? Stem.WIDTH / (2 * -this.stemDirection) : 0);
     }
   }
 
   // Get the `y` coordinate for text placed on the top/bottom of a
-  // note at a desired `text_line`
+  // note at a desired `textLine`
   getYForTopText(textLine: number): number {
     const extents = this.getStemExtents();
     return Math.min(
       this.checkStave().getYForTopText(textLine),
-      extents.topY - this.render_options.annotation_spacing * (textLine + 1)
+      extents.topY - this.renderOptions.annotationSpacing * (textLine + 1)
     );
   }
   getYForBottomText(textLine: number): number {
     const extents = this.getStemExtents();
     return Math.max(
       this.checkStave().getYForTopText(textLine),
-      extents.baseY + this.render_options.annotation_spacing * textLine
+      extents.baseY + this.renderOptions.annotationSpacing * textLine
     );
   }
 
@@ -755,8 +747,8 @@ export class StaveNote extends StemmableNote {
     this.setYs(ys);
 
     if (this.stem) {
-      const { y_top, y_bottom } = this.getNoteHeadBounds();
-      this.stem.setYBounds(y_top, y_bottom);
+      const { yTop, yBottom } = this.getNoteHeadBounds();
+      this.stem.setYBounds(yTop, yBottom);
     }
 
     return this;
@@ -776,7 +768,7 @@ export class StaveNote extends StemmableNote {
   // Get the starting `x` coordinate for a `StaveTie`
   getTieRightX(): number {
     let tieStartX = this.getAbsoluteX();
-    tieStartX += this.getGlyphWidth() + this.x_shift + this.rightDisplacedHeadPx;
+    tieStartX += this.getGlyphWidth() + this.xShift + this.rightDisplacedHeadPx;
     if (this.modifierContext) tieStartX += this.modifierContext.getRightShift();
     return tieStartX;
   }
@@ -784,7 +776,7 @@ export class StaveNote extends StemmableNote {
   // Get the ending `x` coordinate for a `StaveTie`
   getTieLeftX(): number {
     let tieEndX = this.getAbsoluteX();
-    tieEndX += this.x_shift - this.leftDisplacedHeadPx;
+    tieEndX += this.xShift - this.leftDisplacedHeadPx;
     return tieEndX;
   }
 
@@ -823,10 +815,10 @@ export class StaveNote extends StemmableNote {
       x = -1 * 2;
     } else if (position === RIGHT) {
       // FIXME: Right modifier padding, move to font file
-      x = this.getGlyphWidth() + this.x_shift + 2;
+      x = this.getGlyphWidth() + this.xShift + 2;
 
       if (
-        this.stem_direction === Stem.UP &&
+        this.stemDirection === Stem.UP &&
         this.hasFlag() &&
         (options.forceFlagRight || isInnerNoteIndex(this, index))
       ) {
@@ -901,12 +893,12 @@ export class StaveNote extends StemmableNote {
   // Calculates and sets the extra pixels to the left or right
   // if the note is displaced.
   calcNoteDisplacements(): void {
-    this.setLeftDisplacedHeadPx(this.displaced && this.stem_direction === Stem.DOWN ? this.getGlyphWidth() : 0);
+    this.setLeftDisplacedHeadPx(this.displaced && this.stemDirection === Stem.DOWN ? this.getGlyphWidth() : 0);
 
     // For upstems with flags, the extra space is unnecessary, since it's taken
     // up by the flag.
     this.setRightDisplacedHeadPx(
-      !this.hasFlag() && this.displaced && this.stem_direction === Stem.UP ? this.getGlyphWidth() : 0
+      !this.hasFlag() && this.displaced && this.stemDirection === Stem.UP ? this.getGlyphWidth() : 0
     );
   }
 
@@ -927,7 +919,7 @@ export class StaveNote extends StemmableNote {
     let width = this.getGlyphWidth() + this.leftDisplacedHeadPx + this.rightDisplacedHeadPx + noteHeadPadding;
 
     // For upward flagged notes, the width of the flag needs to be added
-    if (this.shouldDrawFlag() && this.stem_direction === Stem.UP) {
+    if (this.shouldDrawFlag() && this.stemDirection === Stem.UP) {
       width += this.getGlyphWidth();
       // TODO: Add flag width as a separate metric
     }
@@ -938,18 +930,18 @@ export class StaveNote extends StemmableNote {
 
   /**
    * @typedef {Object} noteHeadBounds
-   * @property {number} y_top the highest notehead bound
-   * @property {number} y_bottom the lowest notehead bound
-   * @property {number|Null} displaced_x the starting x for displaced noteheads
-   * @property {number|Null} non_displaced_x the starting x for non-displaced noteheads
-   * @property {number} highest_line the highest notehead line in traditional music line
+   * @property {number} yTop the highest notehead bound
+   * @property {number} yBottom the lowest notehead bound
+   * @property {number|Null} displacedX the starting x for displaced noteheads
+   * @property {number|Null} nonDisplacedX the starting x for non-displaced noteheads
+   * @property {number} highestLine the highest notehead line in traditional music line
    *  numbering (bottom line = 1, top line = 5)
-   * @property {number} lowest_line the lowest notehead line
-   * @property {number|false} highest_displaced_line the highest staff line number
+   * @property {number} lowestLine the lowest notehead line
+   * @property {number|false} highestDisplacedLine the highest staff line number
    *   for a displaced notehead
-   * @property {number|false} lowest_displaced_line
-   * @property {number} highest_non_displaced_line
-   * @property {number} lowest_non_displaced_line
+   * @property {number|false} lowestDisplacedLine
+   * @property {number} highestNonDisplacedLine
+   * @property {number} lowestNonDisplacedLine
    */
 
   /**
@@ -998,22 +990,22 @@ export class StaveNote extends StemmableNote {
     }, this);
 
     return {
-      y_top: yTop,
-      y_bottom: yBottom,
-      displaced_x: displacedX,
-      non_displaced_x: nonDisplacedX,
-      highest_line: highestLine,
-      lowest_line: lowestLine,
-      highest_displaced_line: highestDisplacedLine,
-      lowest_displaced_line: lowestDisplacedLine,
-      highest_non_displaced_line: highestNonDisplacedLine,
-      lowest_non_displaced_line: lowestNonDisplacedLine,
+      yTop,
+      yBottom,
+      displacedX,
+      nonDisplacedX,
+      highestLine,
+      lowestLine,
+      highestDisplacedLine,
+      lowestDisplacedLine,
+      highestNonDisplacedLine,
+      lowestNonDisplacedLine,
     };
   }
 
   // Get the starting `x` coordinate for the noteheads
   getNoteHeadBeginX(): number {
-    return this.getAbsoluteX() + this.x_shift;
+    return this.getAbsoluteX() + this.xShift;
   }
 
   // Get the ending `x` coordinate for the noteheads
@@ -1026,22 +1018,16 @@ export class StaveNote extends StemmableNote {
     return this._noteHeads.slice();
   }
 
-  /** @deprecated use StaveNote.noteHeads instead. */
-  get note_heads(): NoteHead[] {
-    showDeprecationWarningForNoteHeads();
-    return this.noteHeads;
-  }
-
   // Draw the ledger lines between the stave and the highest/lowest keys
   drawLedgerLines(): void {
     const stave = this.checkStave();
     const {
       glyphProps,
-      render_options: { stroke_px },
+      renderOptions: { strokePx },
     } = this;
     const ctx = this.checkContext();
-    const width = glyphProps.getWidth() + stroke_px * 2;
-    const doubleWidth = 2 * (glyphProps.getWidth() + stroke_px) - Stem.WIDTH / 2;
+    const width = glyphProps.getWidth() + strokePx * 2;
+    const doubleWidth = 2 * (glyphProps.getWidth() + strokePx) - Stem.WIDTH / 2;
 
     if (this.isRest()) return;
     if (!ctx) {
@@ -1049,26 +1035,26 @@ export class StaveNote extends StemmableNote {
     }
 
     const {
-      highest_line,
-      lowest_line,
-      highest_displaced_line,
-      highest_non_displaced_line,
-      lowest_displaced_line,
-      lowest_non_displaced_line,
-      displaced_x,
-      non_displaced_x,
+      highestLine,
+      lowestLine,
+      highestDisplacedLine,
+      highestNonDisplacedLine,
+      lowestDisplacedLine,
+      lowestNonDisplacedLine,
+      displacedX,
+      nonDisplacedX,
     } = this.getNoteHeadBounds();
 
     // Early out if there are no ledger lines to draw.
-    if (highest_line < 6 && lowest_line > 0) return;
+    if (highestLine < 6 && lowestLine > 0) return;
 
-    const min_x = Math.min(displaced_x ?? 0, non_displaced_x ?? 0);
+    const minX = Math.min(displacedX ?? 0, nonDisplacedX ?? 0);
 
     const drawLedgerLine = (y: number, normal: boolean, displaced: boolean) => {
       let x;
-      if (displaced && normal) x = min_x - stroke_px;
-      else if (normal) x = (non_displaced_x ?? 0) - stroke_px;
-      else x = (displaced_x ?? 0) - stroke_px;
+      if (displaced && normal) x = minX - strokePx;
+      else if (normal) x = (nonDisplacedX ?? 0) - strokePx;
+      else x = (displacedX ?? 0) - strokePx;
       const ledgerWidth = normal && displaced ? doubleWidth : width;
 
       ctx.beginPath();
@@ -1081,16 +1067,16 @@ export class StaveNote extends StemmableNote {
     this.applyStyle(ctx, style);
 
     // Draw ledger lines below the staff:
-    for (let line = 6; line <= highest_line; ++line) {
-      const normal = non_displaced_x !== undefined && line <= highest_non_displaced_line;
-      const displaced = highest_displaced_line !== undefined && line <= highest_displaced_line;
+    for (let line = 6; line <= highestLine; ++line) {
+      const normal = nonDisplacedX !== undefined && line <= highestNonDisplacedLine;
+      const displaced = highestDisplacedLine !== undefined && line <= highestDisplacedLine;
       drawLedgerLine(stave.getYForNote(line), normal, displaced);
     }
 
     // Draw ledger lines above the staff:
-    for (let line = 0; line >= lowest_line; --line) {
-      const normal = non_displaced_x !== undefined && line >= lowest_non_displaced_line;
-      const displaced = lowest_displaced_line !== undefined && line >= lowest_displaced_line;
+    for (let line = 0; line >= lowestLine; --line) {
+      const normal = nonDisplacedX !== undefined && line >= lowestNonDisplacedLine;
+      const displaced = lowestDisplacedLine !== undefined && line >= lowestDisplacedLine;
       drawLedgerLine(stave.getYForNote(line), normal, displaced);
     }
 
@@ -1129,7 +1115,7 @@ export class StaveNote extends StemmableNote {
     }
 
     if (this.shouldDrawFlag()) {
-      const { y_top, y_bottom } = this.getNoteHeadBounds();
+      const { yTop, yBottom } = this.getNoteHeadBounds();
       // eslint-disable-next-line
       const noteStemHeight = this.stem!.getHeight();
       const flagX = this.getStemX();
@@ -1140,17 +1126,17 @@ export class StaveNote extends StemmableNote {
       const flagY =
         this.getStemDirection() === Stem.DOWN
           ? // Down stems are below the note head and have flags on the right.
-            y_top -
+            yTop -
             noteStemHeight +
             2 -
-            (this.glyphProps ? this.glyphProps.stem_down_extension : 0) * this.getStaveNoteScale() -
-            (this.flag?.getMetrics().y_shift ?? 0) * (1 - this.getStaveNoteScale())
+            (this.glyphProps ? this.glyphProps.stemDownExtension : 0) * this.getStaveNoteScale() -
+            (this.flag?.getMetrics().yShift ?? 0) * (1 - this.getStaveNoteScale())
           : // Up stems are above the note head and have flags on the right.
-            y_bottom -
+            yBottom -
             noteStemHeight -
             2 +
-            (this.glyphProps ? this.glyphProps.stem_up_extension : 0) * this.getStaveNoteScale() -
-            (this.flag?.getMetrics().y_shift ?? 0) * (1 - this.getStaveNoteScale());
+            (this.glyphProps ? this.glyphProps.stemUpExtension : 0) * this.getStaveNoteScale() -
+            (this.flag?.getMetrics().yShift ?? 0) * (1 - this.getStaveNoteScale());
 
       // Draw the Flag
       this.flag?.render(ctx, flagX, flagY);
@@ -1200,18 +1186,18 @@ export class StaveNote extends StemmableNote {
    * Override stemmablenote stem extension to adjust for distance from middle line.
    */
   getStemExtension(): number {
-    const super_stem_extension = super.getStemExtension();
+    const superStemExtension = super.getStemExtension();
     if (!this.glyphProps.stem) {
-      return super_stem_extension;
+      return superStemExtension;
     }
 
-    const stem_direction = this.getStemDirection();
-    if (stem_direction !== this.calculateOptimalStemDirection()) {
-      return super_stem_extension; // no adjustment for manually set stem direction.
+    const stemDirection = this.getStemDirection();
+    if (stemDirection !== this.calculateOptimalStemDirection()) {
+      return superStemExtension; // no adjustment for manually set stem direction.
     }
-    let mid_line_distance;
+    let midLineDistance;
     const MIDDLE_LINE = 3;
-    if (stem_direction === Stem.UP) {
+    if (stemDirection === Stem.UP) {
       // Note that the use of maxLine here instead of minLine might
       // seem counterintuitive, but in the case of (say) treble clef
       // chord(F2, E4) stem up, we do not want to extend the stem because
@@ -1219,27 +1205,27 @@ export class StaveNote extends StemmableNote {
       //
       // maxLine and minLine are set in calculateOptimalStemDirection() so
       // will be known.
-      mid_line_distance = MIDDLE_LINE - this.maxLine;
+      midLineDistance = MIDDLE_LINE - this.maxLine;
     } else {
-      mid_line_distance = this.minLine - MIDDLE_LINE;
+      midLineDistance = this.minLine - MIDDLE_LINE;
     }
 
     // how many lines more than an octave is the relevant notehead?
-    const lines_over_octave_from_mid_line = mid_line_distance - 3.5;
-    if (lines_over_octave_from_mid_line <= 0) {
-      return super_stem_extension;
+    const linesOverOctaveFromMidLine = midLineDistance - 3.5;
+    if (linesOverOctaveFromMidLine <= 0) {
+      return superStemExtension;
     }
     const stave = this.getStave();
-    let spacing_between_lines = 10;
+    let spacingBetweenLines = 10;
     if (stave != undefined) {
-      spacing_between_lines = stave.getSpacingBetweenLines();
+      spacingBetweenLines = stave.getSpacingBetweenLines();
     }
-    return super_stem_extension + lines_over_octave_from_mid_line * spacing_between_lines;
+    return superStemExtension + linesOverOctaveFromMidLine * spacingBetweenLines;
   }
 
   // Draws all the `StaveNote` parts. This is the main drawing method.
   draw(): void {
-    if (this.render_options.draw === false) return;
+    if (this.renderOptions.draw === false) return;
 
     if (this.ys.length === 0) {
       throw new RuntimeError('NoYValues', "Can't draw note without Y values.");

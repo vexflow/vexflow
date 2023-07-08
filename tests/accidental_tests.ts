@@ -35,7 +35,7 @@ const AccidentalTests = {
     run('Accidental Arrangement Special Cases', specialCases);
     run('Multi Voice', multiVoice);
     run('Microtonal', microtonal);
-    run('Microtonal (Iranian)', microtonal_iranian);
+    run('Microtonal (Iranian)', microtonalIranian);
     run('Sagittal', sagittal);
     run('Automatic Accidentals', automaticAccidentals0);
     run('Automatic Accidentals - C major scale in Ab', automaticAccidentals1);
@@ -209,8 +209,8 @@ function formatAccidentalSpaces(options: TestOptions): void {
   Dot.buildAndAttach([notes[0]], { all: true });
   const beams = Beam.generateBeams(notes);
   const voice = new Voice({
-    num_beats: 4,
-    beat_value: 4,
+    numBeats: 4,
+    beatValue: 4,
   });
   voice.addTickables(notes);
   const formatter = new Formatter({ softmaxFactor }).joinVoices([voice]);
@@ -306,7 +306,7 @@ function cautionary(options: TestOptions): void {
     }
     const notes = rowMap.map((accidType: string) =>
       f
-        .StaveNote({ keys: ['a/4'], duration: '4', stem_direction: Stem.UP })
+        .StaveNote({ keys: ['a/4'], duration: '4', stemDirection: Stem.UP })
         .addModifier(f.Accidental({ type: accidType }), 0)
     );
     const voice = score.voice(notes, { time: rowMap.length + '/4' });
@@ -390,12 +390,12 @@ function basicStemDown(options: TestOptions): void {
 
   const notes = [
     f
-      .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], duration: 'w', stem_direction: -1 })
+      .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], duration: 'w', stemDirection: -1 })
       .addModifier(accid('b'), 0)
       .addModifier(accid('#'), 1),
 
     f
-      .StaveNote({ keys: ['d/4', 'e/4', 'f/4', 'a/4', 'c/5', 'e/5', 'g/5'], duration: '2', stem_direction: -1 })
+      .StaveNote({ keys: ['d/4', 'e/4', 'f/4', 'a/4', 'c/5', 'e/5', 'g/5'], duration: '2', stemDirection: -1 })
       .addModifier(accid('##'), 0)
       .addModifier(accid('n'), 1)
       .addModifier(accid('bb'), 2)
@@ -405,7 +405,7 @@ function basicStemDown(options: TestOptions): void {
       .addModifier(accid('bb'), 6),
 
     f
-      .StaveNote({ keys: ['f/4', 'g/4', 'a/4', 'b/4', 'c/5', 'e/5', 'g/5'], duration: '16', stem_direction: -1 })
+      .StaveNote({ keys: ['f/4', 'g/4', 'a/4', 'b/4', 'c/5', 'e/5', 'g/5'], duration: '16', stemDirection: -1 })
       .addModifier(accid('n'), 0)
       .addModifier(accid('#'), 1)
       .addModifier(accid('#'), 2)
@@ -456,14 +456,14 @@ function multiVoice(options: TestOptions): void {
   stave.draw();
 
   let note1 = f
-    .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], duration: '2', stem_direction: -1 })
+    .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], duration: '2', stemDirection: -1 })
     .addModifier(accid('b'), 0)
     .addModifier(accid('n'), 1)
     .addModifier(accid('#'), 2)
     .setStave(stave);
 
   let note2 = f
-    .StaveNote({ keys: ['d/5', 'a/5', 'b/5'], duration: '2', stem_direction: 1 })
+    .StaveNote({ keys: ['d/5', 'a/5', 'b/5'], duration: '2', stemDirection: 1 })
     .addModifier(accid('b'), 0)
     .addModifier(accid('bb'), 1)
     .addModifier(accid('##'), 2)
@@ -472,28 +472,28 @@ function multiVoice(options: TestOptions): void {
   showNotes(note1, note2, stave, ctx, 60);
 
   note1 = f
-    .StaveNote({ keys: ['c/4', 'e/4', 'c/5'], duration: '2', stem_direction: -1 })
+    .StaveNote({ keys: ['c/4', 'e/4', 'c/5'], duration: '2', stemDirection: -1 })
     .addModifier(accid('b'), 0)
     .addModifier(accid('n'), 1)
     .addModifier(accid('#'), 2)
     .setStave(stave);
 
   note2 = f
-    .StaveNote({ keys: ['d/5', 'a/5', 'b/5'], duration: '4', stem_direction: 1 })
+    .StaveNote({ keys: ['d/5', 'a/5', 'b/5'], duration: '4', stemDirection: 1 })
     .addModifier(accid('b'), 0)
     .setStave(stave);
 
   showNotes(note1, note2, stave, ctx, 150);
 
   note1 = f
-    .StaveNote({ keys: ['d/4', 'c/5', 'd/5'], duration: '2', stem_direction: -1 })
+    .StaveNote({ keys: ['d/4', 'c/5', 'd/5'], duration: '2', stemDirection: -1 })
     .addModifier(accid('b'), 0)
     .addModifier(accid('n'), 1)
     .addModifier(accid('#'), 2)
     .setStave(stave);
 
   note2 = f
-    .StaveNote({ keys: ['d/5', 'a/5', 'b/5'], duration: '4', stem_direction: 1 })
+    .StaveNote({ keys: ['d/5', 'a/5', 'b/5'], duration: '4', stemDirection: 1 })
     .addModifier(accid('b'), 0)
     .setStave(stave);
 
@@ -570,7 +570,7 @@ function microtonal(options: TestOptions): void {
   options.assert.ok(true, 'Microtonal Accidental');
 }
 
-function microtonal_iranian(options: TestOptions): void {
+function microtonalIranian(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, 700, 240);
   const accid = makeNewAccid(f);
   const ctx = f.getContext();
@@ -681,15 +681,15 @@ function sagittal(options: TestOptions): void {
   f.StaveTie({
     from: notes[0],
     to: notes[1],
-    first_indices: [0, 1],
-    last_indices: [0, 1],
+    firstIndexes: [0, 1],
+    lastIndexes: [0, 1],
   });
 
   f.StaveTie({
     from: notes[0],
     to: notes[1],
-    first_indices: [3],
-    last_indices: [3],
+    firstIndexes: [3],
+    lastIndexes: [3],
     options: {
       direction: Stem.DOWN,
     },
@@ -698,15 +698,15 @@ function sagittal(options: TestOptions): void {
   f.StaveTie({
     from: notes[4],
     to: notes[5],
-    first_indices: [0, 1],
-    last_indices: [0, 1],
+    firstIndexes: [0, 1],
+    lastIndexes: [0, 1],
   });
 
   f.StaveTie({
     from: notes[4],
     to: notes[5],
-    first_indices: [3],
-    last_indices: [3],
+    firstIndexes: [3],
+    lastIndexes: [3],
     options: {
       direction: Stem.DOWN,
     },
@@ -844,14 +844,14 @@ function automaticAccidentalsMultiVoiceInline(options: TestOptions): void {
   const stave = f.Stave().addKeySignature('Ab');
 
   const notes0 = [
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['d/4'], duration: '4', stem_direction: -1 },
-    { keys: ['e/4'], duration: '4', stem_direction: -1 },
-    { keys: ['f/4'], duration: '4', stem_direction: -1 },
-    { keys: ['g/4'], duration: '4', stem_direction: -1 },
-    { keys: ['a/4'], duration: '4', stem_direction: -1 },
-    { keys: ['b/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['d/4'], duration: '4', stemDirection: -1 },
+    { keys: ['e/4'], duration: '4', stemDirection: -1 },
+    { keys: ['f/4'], duration: '4', stemDirection: -1 },
+    { keys: ['g/4'], duration: '4', stemDirection: -1 },
+    { keys: ['a/4'], duration: '4', stemDirection: -1 },
+    { keys: ['b/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
   ].map(f.StaveNote.bind(f));
 
   const notes1 = [
@@ -902,14 +902,14 @@ function automaticAccidentalsMultiVoiceOffset(options: TestOptions): void {
   const stave = f.Stave().addKeySignature('Cb');
 
   const notes0 = [
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['d/4'], duration: '4', stem_direction: -1 },
-    { keys: ['e/4'], duration: '4', stem_direction: -1 },
-    { keys: ['f/4'], duration: '4', stem_direction: -1 },
-    { keys: ['g/4'], duration: '4', stem_direction: -1 },
-    { keys: ['a/4'], duration: '4', stem_direction: -1 },
-    { keys: ['b/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['d/4'], duration: '4', stemDirection: -1 },
+    { keys: ['e/4'], duration: '4', stemDirection: -1 },
+    { keys: ['f/4'], duration: '4', stemDirection: -1 },
+    { keys: ['g/4'], duration: '4', stemDirection: -1 },
+    { keys: ['a/4'], duration: '4', stemDirection: -1 },
+    { keys: ['b/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
   ].map(f.StaveNote.bind(f));
 
   const notes1 = [
@@ -961,15 +961,15 @@ function automaticAccidentalsCornerCases1(options: TestOptions): void {
   const stave = f.Stave().addKeySignature('C');
 
   const notes0 = [
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/4'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/4'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
   ].map(f.StaveNote.bind(f));
 
   const voice0 = f.Voice().setMode(Voice.Mode.SOFT).addTickables(notes0);
@@ -998,24 +998,24 @@ function automaticAccidentalsCornerCases2(options: TestOptions): void {
   const stave = f.Stave().addKeySignature('C');
 
   const notes0 = [
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/4'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/5'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/4'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/4'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/5'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/4'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
   ].map(f.StaveNote.bind(f));
 
   const voice0 = f.Voice().setMode(Voice.Mode.SOFT).addTickables(notes0);
@@ -1053,15 +1053,15 @@ function automaticAccidentalsCornerCases3(options: TestOptions): void {
   const stave = f.Stave().addKeySignature('C#');
 
   const notes0 = [
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/4'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/4'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
   ].map(f.StaveNote.bind(f));
 
   const voice0 = f.Voice().setMode(Voice.Mode.SOFT).addTickables(notes0);
@@ -1090,24 +1090,24 @@ function automaticAccidentalsCornerCases4(options: TestOptions): void {
   const stave = f.Stave().addKeySignature('C#');
 
   const notes0 = [
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/4'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/5'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/4'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/4'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/5'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/4'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
   ].map(f.StaveNote.bind(f));
 
   const voice0 = f.Voice().setMode(Voice.Mode.SOFT).addTickables(notes0);

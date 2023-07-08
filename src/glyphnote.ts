@@ -29,7 +29,7 @@ export class GlyphNote extends Note {
     };
 
     // Note properties
-    this.ignore_ticks = this.options.ignoreTicks;
+    this.ignoreTicks = this.options.ignoreTicks;
     this.setGlyph(glyph);
   }
 

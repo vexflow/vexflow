@@ -14,12 +14,12 @@ import { Category } from './typeguard';
 import { RuntimeError } from './util';
 
 export interface StaveHairpinRenderOptions {
-  right_shift_ticks?: number;
-  left_shift_ticks?: number;
-  left_shift_px: number;
-  right_shift_px: number;
+  rightShiftTicks?: number;
+  leftShiftTicks?: number;
+  leftShiftPx: number;
+  rightShiftPx: number;
   height: number;
-  y_shift: number;
+  yShift: number;
 }
 
 export class StaveHairpin extends Element {
@@ -30,13 +30,13 @@ export class StaveHairpin extends Element {
   protected hairpin: number;
 
   protected position: number;
-  public render_options: StaveHairpinRenderOptions;
+  public renderOptions: StaveHairpinRenderOptions;
 
   // notes is initialized by the constructor via this.setNotes(notes).
   protected notes!: Record<string, Note>;
 
-  protected first_note?: Note;
-  protected last_note?: Note;
+  protected firstNote?: Note;
+  protected lastNote?: Note;
 
   static readonly type = {
     CRESC: 1,
@@ -51,9 +51,9 @@ export class StaveHairpin extends Element {
    *
    *  {
    *   height: px,
-   *   y_shift: px,         // vertical offset
-   *   left_shift_ticks: 0, // left horizontal offset expressed in ticks
-   *   right_shift_ticks: 0 // right horizontal offset expressed in ticks
+   *   yShift: px,         // vertical offset
+   *   leftShiftTicks: 0, // left horizontal offset expressed in ticks
+   *   rightShiftTicks: 0 // right horizontal offset expressed in ticks
    *  }
    *
    **/
@@ -71,27 +71,27 @@ export class StaveHairpin extends Element {
       throw new RuntimeError('BadArguments', 'A valid Formatter must be provide to draw offsets by ticks.');
     }
 
-    const l_shift_px = ppt * (options.left_shift_ticks ?? 0);
-    const r_shift_px = ppt * (options.right_shift_ticks ?? 0);
+    const leftShiftPx = ppt * (options.leftShiftTicks ?? 0);
+    const rightShiftPx = ppt * (options.rightShiftTicks ?? 0);
 
-    const hairpin_options = {
+    const hairpinOptions = {
       height: options.height,
-      y_shift: options.y_shift,
-      left_shift_px: l_shift_px,
-      right_shift_px: r_shift_px,
-      right_shift_ticks: 0,
-      left_shift_ticks: 0,
+      yShift: options.yShift,
+      leftShiftPx,
+      rightShiftPx,
+      rightShiftTicks: 0,
+      leftShiftTicks: 0,
     };
 
     new StaveHairpin(
       {
-        first_note: notes.first_note,
-        last_note: notes.last_note,
+        firstNote: notes.firstNote,
+        lastNote: notes.lastNote,
       },
       type
     )
       .setContext(ctx)
-      .setRenderOptions(hairpin_options)
+      .setRenderOptions(hairpinOptions)
       .setPosition(position)
       .draw();
   }
@@ -103,8 +103,8 @@ export class StaveHairpin extends Element {
    * Notes is a struct that has:
    *
    *  {
-   *    first_note: Note,
-   *    last_note: Note,
+   *    firstNote: Note,
+   *    lastNote: Note,
    *  }
    * @param {!Object} type The type of hairpin
    */
@@ -114,13 +114,13 @@ export class StaveHairpin extends Element {
     this.hairpin = type;
     this.position = Modifier.Position.BELOW;
 
-    this.render_options = {
+    this.renderOptions = {
       height: 10,
-      y_shift: 0, // vertical offset
-      left_shift_px: 0, // left horizontal offset
-      right_shift_px: 0, // right horizontal offset
-      right_shift_ticks: 0,
-      left_shift_ticks: 0,
+      yShift: 0, // vertical offset
+      leftShiftPx: 0, // left horizontal offset
+      rightShiftPx: 0, // right horizontal offset
+      rightShiftTicks: 0,
+      leftShiftTicks: 0,
     };
   }
 
@@ -134,11 +134,11 @@ export class StaveHairpin extends Element {
   setRenderOptions(options: StaveHairpinRenderOptions): this {
     if (
       options.height != null &&
-      options.y_shift != null &&
-      options.left_shift_px != null &&
-      options.right_shift_px != null
+      options.yShift != null &&
+      options.leftShiftPx != null &&
+      options.rightShiftPx != null
     ) {
-      this.render_options = options;
+      this.renderOptions = options;
     }
     return this;
   }
@@ -149,47 +149,41 @@ export class StaveHairpin extends Element {
    * @param {!Object} notes The start and end notes.
    */
   setNotes(notes: Record<string, Note>): this {
-    if (!notes.first_note && !notes.last_note) {
-      throw new RuntimeError('BadArguments', 'Hairpin needs to have either first_note or last_note set.');
+    if (!notes.firstNote && !notes.lastNote) {
+      throw new RuntimeError('BadArguments', 'Hairpin needs to have either firstNote or lastNote set.');
     }
 
     this.notes = notes;
-    this.first_note = notes.first_note;
-    this.last_note = notes.last_note;
+    this.firstNote = notes.firstNote;
+    this.lastNote = notes.lastNote;
     return this;
   }
 
-  renderHairpin(params: {
-    first_x: number;
-    last_x: number;
-    first_y: number;
-    last_y: number;
-    staff_height: number;
-  }): void {
+  renderHairpin(params: { firstX: number; lastX: number; firstY: number; lastY: number; staffHeight: number }): void {
     const ctx = this.checkContext();
-    let dis = this.render_options.y_shift + 20;
-    let y_shift = params.first_y;
+    let dis = this.renderOptions.yShift + 20;
+    let yShift = params.firstY;
 
     if (this.position === Modifier.Position.ABOVE) {
       dis = -dis + 30;
-      y_shift = params.first_y - params.staff_height;
+      yShift = params.firstY - params.staffHeight;
     }
 
-    const l_shift = this.render_options.left_shift_px;
-    const r_shift = this.render_options.right_shift_px;
+    const leftShiftPx = this.renderOptions.leftShiftPx;
+    const rightShiftPx = this.renderOptions.rightShiftPx;
 
     ctx.beginPath();
 
     switch (this.hairpin) {
       case StaveHairpin.type.CRESC:
-        ctx.moveTo(params.last_x + r_shift, y_shift + dis);
-        ctx.lineTo(params.first_x + l_shift, y_shift + this.render_options.height / 2 + dis);
-        ctx.lineTo(params.last_x + r_shift, y_shift + this.render_options.height + dis);
+        ctx.moveTo(params.lastX + rightShiftPx, yShift + dis);
+        ctx.lineTo(params.firstX + leftShiftPx, yShift + this.renderOptions.height / 2 + dis);
+        ctx.lineTo(params.lastX + rightShiftPx, yShift + this.renderOptions.height + dis);
         break;
       case StaveHairpin.type.DECRESC:
-        ctx.moveTo(params.first_x + l_shift, y_shift + dis);
-        ctx.lineTo(params.last_x + r_shift, y_shift + this.render_options.height / 2 + dis);
-        ctx.lineTo(params.first_x + l_shift, y_shift + this.render_options.height + dis);
+        ctx.moveTo(params.firstX + leftShiftPx, yShift + dis);
+        ctx.lineTo(params.lastX + rightShiftPx, yShift + this.renderOptions.height / 2 + dis);
+        ctx.lineTo(params.firstX + leftShiftPx, yShift + this.renderOptions.height + dis);
         break;
       default:
         // Default is NONE, so nothing to draw
@@ -204,19 +198,19 @@ export class StaveHairpin extends Element {
     this.checkContext();
     this.setRendered();
 
-    const firstNote = this.first_note;
-    const lastNote = this.last_note;
+    const firstNote = this.firstNote;
+    const lastNote = this.lastNote;
     if (!firstNote || !lastNote) throw new RuntimeError('NoNote', 'Notes required to draw');
 
     const start = firstNote.getModifierStartXY(this.position, 0);
     const end = lastNote.getModifierStartXY(this.position, 0);
 
     this.renderHairpin({
-      first_x: start.x,
-      last_x: end.x,
-      first_y: firstNote.checkStave().getY() + firstNote.checkStave().getHeight(),
-      last_y: lastNote.checkStave().getY() + lastNote.checkStave().getHeight(),
-      staff_height: firstNote.checkStave().getHeight(),
+      firstX: start.x,
+      lastX: end.x,
+      firstY: firstNote.checkStave().getY() + firstNote.checkStave().getHeight(),
+      lastY: lastNote.checkStave().getY() + lastNote.checkStave().getHeight(),
+      staffHeight: firstNote.checkStave().getHeight(),
     });
   }
 }

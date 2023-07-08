@@ -49,31 +49,31 @@ export class Beam extends Element {
     return Category.Beam;
   }
 
-  public render_options: {
-    flat_beam_offset?: number;
-    flat_beams: boolean;
-    secondary_break_ticks?: number;
-    show_stemlets: boolean;
-    beam_width: number;
-    max_slope: number;
-    min_slope: number;
-    slope_iterations: number;
-    slope_cost: number;
-    stemlet_extension: number;
-    partial_beam_length: number;
-    min_flat_beam_offset: number;
+  public renderOptions: {
+    flatBeamOffset?: number;
+    flatBeams: boolean;
+    secondaryBreakTicks?: number;
+    showStemlets: boolean;
+    beamWidth: number;
+    maxSlope: number;
+    minSlope: number;
+    slopeIterations: number;
+    slopeCost: number;
+    stemletExtension: number;
+    partialBeamLength: number;
+    minFlatBeamOffset: number;
   };
 
   notes: StemmableNote[];
   postFormatted: boolean;
   slope: number = 0;
 
-  private readonly stem_direction: number;
+  private readonly stemDirection: number;
   private readonly ticks: number;
 
-  private y_shift: number = 0;
-  private break_on_indices: number[];
-  private beam_count: number;
+  private yShift: number = 0;
+  private breakOnIndexes: number[];
+  private beamCount: number;
   private unbeamable?: boolean;
 
   /**
@@ -87,7 +87,7 @@ export class Beam extends Element {
 
   /** Get the direction of the beam */
   getStemDirection(): number {
-    return this.stem_direction;
+    return this.stemDirection;
   }
 
   /**
@@ -95,9 +95,9 @@ export class Beam extends Element {
    * Attempt to guess if the time signature is not found in table.
    * Currently this is fairly naive.
    */
-  static getDefaultBeamGroups(time_sig: string): Fraction[] {
-    if (!time_sig || time_sig === 'c') {
-      time_sig = '4/4';
+  static getDefaultBeamGroups(timeSig: string): Fraction[] {
+    if (!timeSig || timeSig === 'c') {
+      timeSig = '4/4';
     }
 
     const defaults: { [key: string]: [string] } = {
@@ -122,13 +122,13 @@ export class Beam extends Element {
       '4/16': ['2/16'],
     };
 
-    const groups: string[] = defaults[time_sig];
+    const groups: string[] = defaults[timeSig];
 
     if (groups === undefined) {
       // If no beam groups found, naively determine
       // the beam groupings from the time signature
-      const beatTotal = parseInt(time_sig.split('/')[0], 10);
-      const beatValue = parseInt(time_sig.split('/')[1], 10);
+      const beatTotal = parseInt(timeSig.split('/')[0], 10);
+      const beatValue = parseInt(timeSig.split('/')[1], 10);
 
       const tripleMeter = beatTotal % 3 === 0;
 
@@ -150,11 +150,11 @@ export class Beam extends Element {
    * A helper function to automatically build basic beams for a voice. For more
    * complex auto-beaming use `Beam.generateBeams()`.
    * @param voice the voice to generate the beams for
-   * @param stem_direction a stem direction to apply to the entire voice
+   * @param stemDirection a stem direction to apply to the entire voice
    * @param groups an array of `Fraction` representing beat groupings for the beam
    */
-  static applyAndGetBeams(voice: Voice, stem_direction?: number, groups?: Fraction[]): Beam[] {
-    return Beam.generateBeams(voice.getTickables() as StemmableNote[], { groups, stem_direction });
+  static applyAndGetBeams(voice: Voice, stemDirection?: number, groups?: Fraction[]): Beam[] {
+    return Beam.generateBeams(voice.getTickables() as StemmableNote[], { groups, stemDirection });
   }
 
   /**
@@ -166,34 +166,34 @@ export class Beam extends Element {
    * ```
    * config = {
    *   groups: [new Vex.Flow.Fraction(2, 8)],
-   *   stem_direction: -1,
-   *   beam_rests: true,
-   *   beam_middle_only: true,
-   *   show_stemlets: false
+   *   stemDirection: -1,
+   *   beamRests: true,
+   *   beamMiddleOnly: true,
+   *   showStemlets: false
    * };
    * ```
    * @param notes an array of notes to create the beams for
    * @param config the configuration object
-   * @param config.stem_direction set to apply the same direction to all notes
-   * @param config.beam_rests set to `true` to include rests in the beams
-   * @param config.beam_middle_only set to `true` to only beam rests in the middle of the beat
-   * @param config.show_stemlets set to `true` to draw stemlets for rests
-   * @param config.maintain_stem_directions set to `true` to not apply new stem directions
+   * @param config.stemDirection set to apply the same direction to all notes
+   * @param config.beamRests set to `true` to include rests in the beams
+   * @param config.beamMiddleOnly set to `true` to only beam rests in the middle of the beat
+   * @param config.showStemlets set to `true` to draw stemlets for rests
+   * @param config.maintainStemDirections set to `true` to not apply new stem directions
    * @param config.groups array of `Fractions` that represent the beat structure to beam the notes
    *
    */
   static generateBeams(
     notes: StemmableNote[],
     config: {
-      flat_beam_offset?: number;
-      flat_beams?: boolean;
-      secondary_breaks?: string;
-      show_stemlets?: boolean;
-      maintain_stem_directions?: boolean;
-      beam_middle_only?: boolean;
-      beam_rests?: boolean;
+      flatBeamOffset?: number;
+      flatBeams?: boolean;
+      secondaryBreaks?: string;
+      showStemlets?: boolean;
+      maintainStemDirections?: boolean;
+      beamMiddleOnly?: boolean;
+      beamRests?: boolean;
       groups?: Fraction[];
-      stem_direction?: number;
+      stemDirection?: number;
     } = {}
   ): Beam[] {
     if (!config.groups || !config.groups.length) {
@@ -213,8 +213,8 @@ export class Beam extends Element {
     let noteGroups: StemmableNote[][] = [];
     let currentGroup: StemmableNote[] = [];
 
-    function getTotalTicks(vf_notes: Note[]) {
-      return vf_notes.reduce((memo, note) => note.getTicks().clone().add(memo), new Fraction(0, 1));
+    function getTotalTicks(notes: Note[]) {
+      return notes.reduce((memo, note) => note.getTicks().clone().add(memo), new Fraction(0, 1));
     }
 
     function nextTickGroup() {
@@ -302,12 +302,11 @@ export class Beam extends Element {
           const isFirstOrLast = index === 0 || index === group.length - 1;
           const prevNote = group[index - 1];
 
-          const breaksOnEachRest = !config.beam_rests && note.isRest();
-          const breaksOnFirstOrLastRest =
-            config.beam_rests && config.beam_middle_only && note.isRest() && isFirstOrLast;
+          const breaksOnEachRest = !config.beamRests && note.isRest();
+          const breaksOnFirstOrLastRest = config.beamRests && config.beamMiddleOnly && note.isRest() && isFirstOrLast;
 
           let breakOnStemChange = false;
-          if (config.maintain_stem_directions && prevNote && !note.isRest() && !prevNote.isRest()) {
+          if (config.maintainStemDirections && prevNote && !note.isRest() && !prevNote.isRest()) {
             const prevDirection = prevNote.getStemDirection();
             const currentDirection = note.getStemDirection();
             breakOnStemChange = currentDirection !== prevDirection;
@@ -346,12 +345,12 @@ export class Beam extends Element {
     function formatStems() {
       noteGroups.forEach((group) => {
         let stemDirection;
-        if (config.maintain_stem_directions) {
+        if (config.maintainStemDirections) {
           const note = findFirstNote(group);
           stemDirection = note ? note.getStemDirection() : Stem.UP;
         } else {
-          if (config.stem_direction) {
-            stemDirection = config.stem_direction;
+          if (config.stemDirection) {
+            stemDirection = config.stemDirection;
           } else {
             stemDirection = calculateStemDirection(group);
           }
@@ -413,15 +412,15 @@ export class Beam extends Element {
     beamedNoteGroups.forEach((group) => {
       const beam = new Beam(group);
 
-      if (config.show_stemlets) {
-        beam.render_options.show_stemlets = true;
+      if (config.showStemlets) {
+        beam.renderOptions.showStemlets = true;
       }
-      if (config.secondary_breaks) {
-        beam.render_options.secondary_break_ticks = Tables.durationToTicks(config.secondary_breaks);
+      if (config.secondaryBreaks) {
+        beam.renderOptions.secondaryBreakTicks = Tables.durationToTicks(config.secondaryBreaks);
       }
-      if (config.flat_beams === true) {
-        beam.render_options.flat_beams = true;
-        beam.render_options.flat_beam_offset = config.flat_beam_offset;
+      if (config.flatBeams === true) {
+        beam.renderOptions.flatBeams = true;
+        beam.renderOptions.flatBeamOffset = config.flatBeamOffset;
       }
       beams.push(beam);
     });
@@ -430,7 +429,7 @@ export class Beam extends Element {
     allTuplets.forEach((tuplet) => {
       // Set the tuplet location based on the stem direction
       const direction =
-        (tuplet.notes[0] as StemmableNote).stem_direction === Stem.DOWN ? TupletLocation.BOTTOM : TupletLocation.TOP;
+        (tuplet.notes[0] as StemmableNote).stemDirection === Stem.DOWN ? TupletLocation.BOTTOM : TupletLocation.TOP;
       tuplet.setTupletLocation(direction);
 
       // If any of the notes in the tuplet are not beamed, draw a bracket.
@@ -448,7 +447,7 @@ export class Beam extends Element {
     return beams;
   }
 
-  constructor(notes: StemmableNote[], auto_stem: boolean = false) {
+  constructor(notes: StemmableNote[], autoStem: boolean = false) {
     super();
 
     if (!notes || notes.length === 0) {
@@ -469,44 +468,44 @@ export class Beam extends Element {
     let i; // shared iterator
     let note;
 
-    this.stem_direction = notes[0].getStemDirection();
+    this.stemDirection = notes[0].getStemDirection();
 
-    let stem_direction = this.stem_direction;
+    let stemDirection = this.stemDirection;
     // Figure out optimal stem direction based on given notes
 
-    if (auto_stem && isStaveNote(notes[0])) {
-      stem_direction = calculateStemDirection(notes);
-    } else if (auto_stem && isTabNote(notes[0])) {
+    if (autoStem && isStaveNote(notes[0])) {
+      stemDirection = calculateStemDirection(notes);
+    } else if (autoStem && isTabNote(notes[0])) {
       // Auto Stem TabNotes
-      const stem_weight = notes.reduce((memo, note) => memo + note.getStemDirection(), 0);
-      stem_direction = stem_weight > -1 ? Stem.UP : Stem.DOWN;
+      const stemWeight = notes.reduce((memo, note) => memo + note.getStemDirection(), 0);
+      stemDirection = stemWeight > -1 ? Stem.UP : Stem.DOWN;
     }
 
     // Apply stem directions and attach beam to notes
     for (i = 0; i < notes.length; ++i) {
       note = notes[i];
-      if (auto_stem) {
-        note.setStemDirection(stem_direction);
-        this.stem_direction = stem_direction;
+      if (autoStem) {
+        note.setStemDirection(stemDirection);
+        this.stemDirection = stemDirection;
       }
       note.setBeam(this);
     }
 
     this.postFormatted = false;
     this.notes = notes;
-    this.beam_count = this.getBeamCount();
-    this.break_on_indices = [];
-    this.render_options = {
-      beam_width: 5,
-      max_slope: 0.25,
-      min_slope: -0.25,
-      slope_iterations: 20,
-      slope_cost: 100,
-      show_stemlets: false,
-      stemlet_extension: 7,
-      partial_beam_length: 10,
-      flat_beams: false,
-      min_flat_beam_offset: 15,
+    this.beamCount = this.getBeamCount();
+    this.breakOnIndexes = [];
+    this.renderOptions = {
+      beamWidth: 5,
+      maxSlope: 0.25,
+      minSlope: -0.25,
+      slopeIterations: 20,
+      slopeCost: 100,
+      showStemlets: false,
+      stemletExtension: 7,
+      partialBeamLength: 10,
+      flatBeams: false,
+      minFlatBeamOffset: 15,
     };
   }
 
@@ -517,16 +516,16 @@ export class Beam extends Element {
 
   /** Get the max number of beams in the set of notes. */
   getBeamCount(): number {
-    const beamCounts = this.notes.map((note) => note.getGlyphProps().beam_count);
+    const beamCounts = this.notes.map((note) => note.getGlyphProps().beamCount);
 
     const maxBeamCount = beamCounts.reduce((max, beamCount) => (beamCount > max ? beamCount : max));
 
     return maxBeamCount;
   }
 
-  /** Set which note `indices` to break the secondary beam at. */
-  breakSecondaryAt(indices: number[]): this {
-    this.break_on_indices = indices;
+  /** Set which note `indexes` to break the secondary beam at. */
+  breakSecondaryAt(indexes: number[]): this {
+    this.breakOnIndexes = indexes;
     return this;
   }
 
@@ -557,28 +556,33 @@ export class Beam extends Element {
     return this;
   }
 
-  /** Return the y coordinate for linear function. */
-  getSlopeY(x: number, first_x_px: number, first_y_px: number, slope: number): number {
-    return first_y_px + (x - first_x_px) * slope;
+  /**
+   * @param firstX specified in pixels.
+   * @param firstY specified in pixels.
+   *
+   * @return the y coordinate for linear function.
+   */
+  getSlopeY(x: number, firstX: number, firstY: number, slope: number): number {
+    return firstY + (x - firstX) * slope;
   }
 
   /** Calculate the best possible slope for the provided notes. */
   calculateSlope(): void {
     const {
       notes,
-      stem_direction: stemDirection,
-      render_options: { max_slope, min_slope, slope_iterations, slope_cost },
+      stemDirection,
+      renderOptions: { maxSlope, minSlope, slopeIterations, slopeCost },
     } = this;
 
     const firstNote = notes[0];
     const initialSlope = getStemSlope(firstNote, notes[notes.length - 1]);
-    const increment = (max_slope - min_slope) / slope_iterations;
+    const increment = (maxSlope - minSlope) / slopeIterations;
     let minCost = Number.MAX_VALUE;
     let bestSlope = 0;
     let yShift = 0;
 
     // iterate through slope values to find best weighted fit
-    for (let slope = min_slope; slope <= max_slope; slope += increment) {
+    for (let slope = minSlope; slope <= maxSlope; slope += increment) {
       let totalStemExtension = 0;
       let yShiftTemp = 0;
 
@@ -608,8 +612,8 @@ export class Beam extends Element {
       const distanceFromIdeal = Math.abs(idealSlope - slope);
 
       // This tries to align most beams to something closer to the idealSlope, but
-      // doesn't go crazy. To disable, set this.render_options.slope_cost = 0
-      const cost = slope_cost * distanceFromIdeal + Math.abs(totalStemExtension);
+      // doesn't go crazy. To disable, set this.renderOptions.slopeCost = 0
+      const cost = slopeCost * distanceFromIdeal + Math.abs(totalStemExtension);
 
       // update state when a more ideal slope is found
       if (cost < minCost) {
@@ -620,15 +624,15 @@ export class Beam extends Element {
     }
 
     this.slope = bestSlope;
-    this.y_shift = yShift;
+    this.yShift = yShift;
   }
 
   /** Calculate a slope and y-shift for flat beams. */
   calculateFlatSlope(): void {
     const {
       notes,
-      stem_direction,
-      render_options: { beam_width, min_flat_beam_offset, flat_beam_offset },
+      stemDirection,
+      renderOptions: { beamWidth, minFlatBeamOffset, flatBeamOffset },
     } = this;
 
     // If a flat beam offset has not yet been supplied or calculated,
@@ -645,11 +649,11 @@ export class Beam extends Element {
 
       // Store the highest (stems-up) or lowest (stems-down) note so the
       //  offset can be adjusted in case the average isn't enough
-      if (stem_direction === Stem.DOWN && currentExtreme < stemTipY) {
+      if (stemDirection === Stem.DOWN && currentExtreme < stemTipY) {
         currentExtreme = stemTipY;
         extremeY = Math.max(...note.getYs());
         extremeBeamCount = note.getBeamCount();
-      } else if (stem_direction === Stem.UP && (currentExtreme === 0 || currentExtreme > stemTipY)) {
+      } else if (stemDirection === Stem.UP && (currentExtreme === 0 || currentExtreme > stemTipY)) {
         currentExtreme = stemTipY;
         extremeY = Math.min(...note.getYs());
         extremeBeamCount = note.getBeamCount();
@@ -657,34 +661,33 @@ export class Beam extends Element {
     }
 
     // Average the offsets to try and come up with a reasonable one that
-    //  works for all of the notes in the beam group.
+    // works for all of the notes in the beam group.
     let offset = total / notes.length;
 
     // In case the average isn't long enough, add or subtract some more
-    //  based on the highest or lowest note (again, based on the stem
-    //  direction). This also takes into account the added height due to
-    //  the width of the beams.
-    const beamWidth = beam_width * 1.5;
-    const extremeTest = min_flat_beam_offset + extremeBeamCount * beamWidth;
-    const newOffset = extremeY + extremeTest * -stem_direction;
-    if (stem_direction === Stem.DOWN && offset < newOffset) {
+    // based on the highest or lowest note (again, based on the stem
+    // direction). This also takes into account the added height due to
+    // the width of the beams.
+    const extremeTest = minFlatBeamOffset + extremeBeamCount * beamWidth * 1.5;
+    const newOffset = extremeY + extremeTest * -stemDirection;
+    if (stemDirection === Stem.DOWN && offset < newOffset) {
       offset = extremeY + extremeTest;
-    } else if (stem_direction === Stem.UP && offset > newOffset) {
+    } else if (stemDirection === Stem.UP && offset > newOffset) {
       offset = extremeY - extremeTest;
     }
 
-    if (!flat_beam_offset) {
+    if (!flatBeamOffset) {
       // Set the offset for the group based on the calculations above.
-      this.render_options.flat_beam_offset = offset;
-    } else if (stem_direction === Stem.DOWN && offset > flat_beam_offset) {
-      this.render_options.flat_beam_offset = offset;
-    } else if (stem_direction === Stem.UP && offset < flat_beam_offset) {
-      this.render_options.flat_beam_offset = offset;
+      this.renderOptions.flatBeamOffset = offset;
+    } else if (stemDirection === Stem.DOWN && offset > flatBeamOffset) {
+      this.renderOptions.flatBeamOffset = offset;
+    } else if (stemDirection === Stem.UP && offset < flatBeamOffset) {
+      this.renderOptions.flatBeamOffset = offset;
     }
 
-    // for flat beams, the slope and y_shift are simply 0
+    // For flat beams, the slope and yShift are 0.
     this.slope = 0;
-    this.y_shift = 0;
+    this.yShift = 0;
   }
 
   /** Return the Beam y offset. */
@@ -695,8 +698,8 @@ export class Beam extends Element {
 
     // For flat beams, set the first and last Y to the offset, rather than
     //  using the note's stem extents.
-    if (this.render_options.flat_beams && this.render_options.flat_beam_offset) {
-      beamY = this.render_options.flat_beam_offset;
+    if (this.renderOptions.flatBeams && this.renderOptions.flatBeamOffset) {
+      beamY = this.renderOptions.flatBeamOffset;
     }
     return beamY;
   }
@@ -709,9 +712,9 @@ export class Beam extends Element {
     const {
       notes,
       slope,
-      y_shift,
-      beam_count,
-      render_options: { show_stemlets, stemlet_extension, beam_width },
+      yShift,
+      beamCount,
+      renderOptions: { showStemlets, stemletExtension, beamWidth },
     } = this;
 
     const firstNote = notes[0];
@@ -724,21 +727,21 @@ export class Beam extends Element {
       if (stem) {
         const stemX = note.getStemX();
         const { topY: stemTipY } = note.getStemExtents();
-        const beamedStemTipY = this.getSlopeY(stemX, firstStemX, firstStemTipY, slope) + y_shift;
+        const beamedStemTipY = this.getSlopeY(stemX, firstStemX, firstStemTipY, slope) + yShift;
         const preBeamExtension = stem.getExtension();
         const beamExtension =
           note.getStemDirection() === Stem.UP ? stemTipY - beamedStemTipY : beamedStemTipY - stemTipY;
         // Determine necessary extension for cross-stave notes in the beam group
         let crossStemExtension = 0;
-        if (note.getStemDirection() !== this.stem_direction) {
-          const beamCount = note.getGlyphProps().beam_count;
-          crossStemExtension = (1 + (beamCount - 1) * 1.5) * this.render_options.beam_width;
+        if (note.getStemDirection() !== this.stemDirection) {
+          const beamCount = note.getGlyphProps().beamCount;
+          crossStemExtension = (1 + (beamCount - 1) * 1.5) * this.renderOptions.beamWidth;
 
           /* This will be required if the partial beams are moved to the note side.
-          if (i > 0 && note.getGlyph().beam_count > 1) {
-            const prevBeamCount = this.notes[i - 1].getGlyph().beam_count;
+          if (i > 0 && note.getGlyph().beamCount > 1) {
+            const prevBeamCount = this.notes[i - 1].getGlyph().beamCount;
             const beamDiff = Math.abs(prevBeamCount - beamCount);
-            if (beamDiff > 0) crossStemExtension -= beamDiff * (this.render_options.beam_width * 1.5);
+            if (beamDiff > 0) crossStemExtension -= beamDiff * (this.renderOptions.beamWidth * 1.5);
           }
           */
         }
@@ -746,10 +749,9 @@ export class Beam extends Element {
         stem.setExtension(preBeamExtension + beamExtension + crossStemExtension);
         stem.adjustHeightForBeam();
 
-        if (note.isRest() && show_stemlets) {
-          const beamWidth = beam_width;
-          const totalBeamWidth = (beam_count - 1) * beamWidth * 1.5 + beamWidth;
-          stem.setVisibility(true).setStemlet(true, totalBeamWidth + stemlet_extension);
+        if (note.isRest() && showStemlets) {
+          const totalBeamWidth = (beamCount - 1) * beamWidth * 1.5 + beamWidth;
+          stem.setVisibility(true).setStemlet(true, totalBeamWidth + stemletExtension);
         }
       }
     }
@@ -758,9 +760,9 @@ export class Beam extends Element {
   /** Return upper level beam direction. */
   lookupBeamDirection(
     duration: string,
-    prev_tick: number,
+    prevTick: number,
     tick: number,
-    next_tick: number,
+    nextTick: number,
     noteIndex: number
   ): PartialBeamDirection {
     if (duration === '4') {
@@ -770,133 +772,133 @@ export class Beam extends Element {
     const forcedBeamDirection = this.forcedPartialDirections[noteIndex];
     if (forcedBeamDirection) return forcedBeamDirection;
 
-    const lookup_duration = `${Tables.durationToNumber(duration) / 2}`;
-    const prev_note_gets_beam = prev_tick < Tables.durationToTicks(lookup_duration);
-    const next_note_gets_beam = next_tick < Tables.durationToTicks(lookup_duration);
-    const note_gets_beam = tick < Tables.durationToTicks(lookup_duration);
+    const lookupDuration = `${Tables.durationToNumber(duration) / 2}`;
+    const prevNoteGetsBeam = prevTick < Tables.durationToTicks(lookupDuration);
+    const nextNoteGetsBeam = nextTick < Tables.durationToTicks(lookupDuration);
+    const noteGetsBeam = tick < Tables.durationToTicks(lookupDuration);
 
-    if (prev_note_gets_beam && next_note_gets_beam && note_gets_beam) {
+    if (prevNoteGetsBeam && nextNoteGetsBeam && noteGetsBeam) {
       return BEAM_BOTH;
-    } else if (prev_note_gets_beam && !next_note_gets_beam && note_gets_beam) {
+    } else if (prevNoteGetsBeam && !nextNoteGetsBeam && noteGetsBeam) {
       return BEAM_LEFT;
-    } else if (!prev_note_gets_beam && next_note_gets_beam && note_gets_beam) {
+    } else if (!prevNoteGetsBeam && nextNoteGetsBeam && noteGetsBeam) {
       return BEAM_RIGHT;
     }
 
-    return this.lookupBeamDirection(lookup_duration, prev_tick, tick, next_tick, noteIndex);
+    return this.lookupBeamDirection(lookupDuration, prevTick, tick, nextTick, noteIndex);
   }
 
   /** Get the x coordinates for the beam lines of specific `duration`. */
   getBeamLines(duration: string): { start: number; end?: number }[] {
-    const tick_of_duration = Tables.durationToTicks(duration);
-    let beam_started = false;
+    const tickOfDuration = Tables.durationToTicks(duration);
+    let beamStarted = false;
 
     type BeamInfo = { start: number; end?: number };
-    const beam_lines: BeamInfo[] = [];
-    let current_beam: BeamInfo | undefined = undefined;
-    const partial_beam_length = this.render_options.partial_beam_length;
-    let previous_should_break = false;
-    let tick_tally = 0;
+    const beamLines: BeamInfo[] = [];
+    let currentBeam: BeamInfo | undefined = undefined;
+    const partialBeamLength = this.renderOptions.partialBeamLength;
+    let previousShouldBreak = false;
+    let tickTally = 0;
     for (let i = 0; i < this.notes.length; ++i) {
       const note = this.notes[i];
 
       // See if we need to break secondary beams on this note.
       const ticks = note.getTicks().value();
-      tick_tally += ticks;
-      let should_break = false;
+      tickTally += ticks;
+      let shouldBreak = false;
 
       // 8th note beams are always drawn.
       if (parseInt(duration, 10) >= 8) {
-        // First, check to see if any indices were set up through breakSecondaryAt()
-        should_break = this.break_on_indices.indexOf(i) !== -1;
+        // First, check to see if any indexes were set up through breakSecondaryAt()
+        shouldBreak = this.breakOnIndexes.indexOf(i) !== -1;
 
         // If the secondary breaks were auto-configured in the render options,
         //  handle that as well.
-        if (this.render_options.secondary_break_ticks && tick_tally >= this.render_options.secondary_break_ticks) {
-          tick_tally = 0;
-          should_break = true;
+        if (this.renderOptions.secondaryBreakTicks && tickTally >= this.renderOptions.secondaryBreakTicks) {
+          tickTally = 0;
+          shouldBreak = true;
         }
       }
-      const note_gets_beam = note.getIntrinsicTicks() < tick_of_duration;
+      const noteGetsBeam = note.getIntrinsicTicks() < tickOfDuration;
 
-      const stem_x = note.getStemX() - Stem.WIDTH / 2;
+      const stemX = note.getStemX() - Stem.WIDTH / 2;
 
       // Check to see if the next note in the group will get a beam at this
       //  level. This will help to inform the partial beam logic below.
-      const prev_note = this.notes[i - 1];
-      const next_note = this.notes[i + 1];
-      const next_note_gets_beam = next_note && next_note.getIntrinsicTicks() < tick_of_duration;
-      const prev_note_gets_beam = prev_note && prev_note.getIntrinsicTicks() < tick_of_duration;
-      const beam_alone = prev_note && next_note && note_gets_beam && !prev_note_gets_beam && !next_note_gets_beam;
-      // const beam_alone = note_gets_beam && !prev_note_gets_beam && !next_note_gets_beam;
-      if (note_gets_beam) {
+      const prevNote = this.notes[i - 1];
+      const nextNote = this.notes[i + 1];
+      const nextNoteGetsBeam = nextNote && nextNote.getIntrinsicTicks() < tickOfDuration;
+      const prevNoteGetsBeam = prevNote && prevNote.getIntrinsicTicks() < tickOfDuration;
+      const beamAlone = prevNote && nextNote && noteGetsBeam && !prevNoteGetsBeam && !nextNoteGetsBeam;
+      // const beamAlone = noteGetsBeam && !prevNoteGetsBeam && !nextNoteGetsBeam;
+      if (noteGetsBeam) {
         // This note gets a beam at the current level
-        if (beam_started) {
+        if (beamStarted) {
           // We're currently in the middle of a beam. Just continue it on to
           //  the stem X of the current note.
-          current_beam = beam_lines[beam_lines.length - 1];
-          current_beam.end = stem_x;
+          currentBeam = beamLines[beamLines.length - 1];
+          currentBeam.end = stemX;
 
           // If a secondary beam break is set up, end the beam right now.
-          if (should_break) {
-            beam_started = false;
-            if (next_note && !next_note_gets_beam && current_beam.end === undefined) {
+          if (shouldBreak) {
+            beamStarted = false;
+            if (nextNote && !nextNoteGetsBeam && currentBeam.end === undefined) {
               // This note gets a beam,.but the next one does not. This means
               //  we need a partial pointing right.
-              current_beam.end = current_beam.start - partial_beam_length;
+              currentBeam.end = currentBeam.start - partialBeamLength;
             }
           }
         } else {
           // No beam started yet. Start a new one.
-          current_beam = { start: stem_x, end: undefined };
-          beam_started = true;
+          currentBeam = { start: stemX, end: undefined };
+          beamStarted = true;
 
-          if (beam_alone) {
+          if (beamAlone) {
             // previous and next beam exists and does not get a beam but current gets it.
-            const prev_tick = prev_note.getIntrinsicTicks();
-            const next_tick = next_note.getIntrinsicTicks();
+            const prevTick = prevNote.getIntrinsicTicks();
+            const nextTick = nextNote.getIntrinsicTicks();
             const tick = note.getIntrinsicTicks();
-            const beam_direction = this.lookupBeamDirection(duration, prev_tick, tick, next_tick, i);
+            const beamDirection = this.lookupBeamDirection(duration, prevTick, tick, nextTick, i);
 
-            if ([BEAM_LEFT, BEAM_BOTH].includes(beam_direction)) {
-              current_beam.end = current_beam.start - partial_beam_length;
+            if ([BEAM_LEFT, BEAM_BOTH].includes(beamDirection)) {
+              currentBeam.end = currentBeam.start - partialBeamLength;
             } else {
-              current_beam.end = current_beam.start + partial_beam_length;
+              currentBeam.end = currentBeam.start + partialBeamLength;
             }
-          } else if (!next_note_gets_beam) {
+          } else if (!nextNoteGetsBeam) {
             // The next note doesn't get a beam. Draw a partial.
-            if ((previous_should_break || i === 0) && next_note) {
+            if ((previousShouldBreak || i === 0) && nextNote) {
               // This is the first note (but not the last one), or it is
               //  following a secondary break. Draw a partial to the right.
-              current_beam.end = current_beam.start + partial_beam_length;
+              currentBeam.end = currentBeam.start + partialBeamLength;
             } else {
               // By default, draw a partial to the left.
-              current_beam.end = current_beam.start - partial_beam_length;
+              currentBeam.end = currentBeam.start - partialBeamLength;
             }
-          } else if (should_break) {
+          } else if (shouldBreak) {
             // This note should have a secondary break after it. Even though
             //  we just started a beam, it needs to end immediately.
-            current_beam.end = current_beam.start - partial_beam_length;
-            beam_started = false;
+            currentBeam.end = currentBeam.start - partialBeamLength;
+            beamStarted = false;
           }
-          beam_lines.push(current_beam);
+          beamLines.push(currentBeam);
         }
       } else {
         // The current note does not get a beam.
-        beam_started = false;
+        beamStarted = false;
       }
 
       // Store the secondary break flag to inform the partial beam logic in
       //  the next iteration of the loop.
-      previous_should_break = should_break;
+      previousShouldBreak = shouldBreak;
     }
 
     // Add a partial beam pointing left if this is the last note in the group
-    const last_beam = beam_lines[beam_lines.length - 1];
-    if (last_beam && last_beam.end === undefined) {
-      last_beam.end = last_beam.start - partial_beam_length;
+    const lastBeam = beamLines[beamLines.length - 1];
+    if (lastBeam && lastBeam.end === undefined) {
+      lastBeam.end = lastBeam.start - partialBeamLength;
     }
-    return beam_lines;
+    return beamLines;
   }
 
   /** Render the stems for each note. */
@@ -904,8 +906,8 @@ export class Beam extends Element {
     this.notes.forEach((note) => {
       const stem = note.getStem();
       if (stem) {
-        const stem_x = note.getStemX();
-        stem.setNoteHeadXBounds(stem_x, stem_x);
+        const stemX = note.getStemX();
+        stem.setNoteHeadXBounds(stemX, stemX);
         stem.setContext(ctx).draw();
       }
     }, this);
@@ -913,24 +915,24 @@ export class Beam extends Element {
 
   // Render the beam lines
   protected drawBeamLines(ctx: RenderContext): void {
-    const valid_beam_durations = ['4', '8', '16', '32', '64'];
+    const validBeamDurations = ['4', '8', '16', '32', '64'];
 
     const firstNote = this.notes[0];
     let beamY = this.getBeamYToDraw();
     const firstStemX = firstNote.getStemX();
-    const beamThickness = this.render_options.beam_width * this.stem_direction;
+    const beamThickness = this.renderOptions.beamWidth * this.stemDirection;
 
     // Draw the beams.
-    for (let i = 0; i < valid_beam_durations.length; ++i) {
-      const duration = valid_beam_durations[i];
+    for (let i = 0; i < validBeamDurations.length; ++i) {
+      const duration = validBeamDurations[i];
       const beamLines = this.getBeamLines(duration);
 
       for (let j = 0; j < beamLines.length; ++j) {
-        const beam_line = beamLines[j];
-        const startBeamX = beam_line.start;
+        const beamLine = beamLines[j];
+        const startBeamX = beamLine.start;
 
         const startBeamY = this.getSlopeY(startBeamX, firstStemX, beamY, this.slope);
-        const lastBeamX = beam_line.end;
+        const lastBeamX = beamLine.end;
         if (lastBeamX) {
           const lastBeamY = this.getSlopeY(lastBeamX, firstStemX, beamY, this.slope);
 
@@ -964,7 +966,7 @@ export class Beam extends Element {
     if (this.postFormatted) return;
 
     // Calculate a smart slope if we're not forcing the beams to be flat.
-    if (isTabNote(this.notes[0]) || this.render_options.flat_beams) {
+    if (isTabNote(this.notes[0]) || this.renderOptions.flatBeams) {
       this.calculateFlatSlope();
     } else {
       this.calculateSlope();

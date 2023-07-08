@@ -33,19 +33,19 @@ export class Volta extends StaveModifier {
   protected volta: number;
   protected number: string;
 
-  protected y_shift: number;
+  protected yShift: number;
 
-  constructor(type: number, number: string, x: number, y_shift: number) {
+  constructor(type: number, number: string, x: number, yShift: number) {
     super();
     this.volta = type;
     this.x = x;
-    this.y_shift = y_shift;
+    this.yShift = yShift;
     this.number = number;
     this.resetFont();
   }
 
   setShiftY(y: number): this {
-    this.y_shift = y;
+    this.yShift = y;
     return this;
   }
 
@@ -54,20 +54,20 @@ export class Volta extends StaveModifier {
     this.setRendered();
 
     let width = stave.getWidth() - x; // don't include x (offset) for width
-    const top_y = stave.getYForTopText(stave.getNumLines()) + this.y_shift;
-    const vert_height = 1.5 * stave.getSpacingBetweenLines();
+    const topY = stave.getYForTopText(stave.getNumLines()) + this.yShift;
+    const vertHeight = 1.5 * stave.getSpacingBetweenLines();
     switch (this.volta) {
       case VoltaType.BEGIN:
-        ctx.fillRect(this.x + x, top_y, 1, vert_height);
+        ctx.fillRect(this.x + x, topY, 1, vertHeight);
         break;
       case VoltaType.END:
         width -= 5;
-        ctx.fillRect(this.x + x + width, top_y, 1, vert_height);
+        ctx.fillRect(this.x + x + width, topY, 1, vertHeight);
         break;
       case VoltaType.BEGIN_END:
         width -= 3;
-        ctx.fillRect(this.x + x, top_y, 1, vert_height);
-        ctx.fillRect(this.x + x + width, top_y, 1, vert_height);
+        ctx.fillRect(this.x + x, topY, 1, vertHeight);
+        ctx.fillRect(this.x + x + width, topY, 1, vertHeight);
         break;
       default:
         break;
@@ -76,11 +76,11 @@ export class Volta extends StaveModifier {
     if (this.volta === VoltaType.BEGIN || this.volta === VoltaType.BEGIN_END) {
       ctx.save();
       ctx.setFont(this.textFont);
-      ctx.fillText(this.number, this.x + x + 5, top_y + 15);
+      ctx.fillText(this.number, this.x + x + 5, topY + 15);
       ctx.restore();
     }
 
-    ctx.fillRect(this.x + x, top_y, width, 1);
+    ctx.fillRect(this.x + x, topY, width, 1);
     return this;
   }
 }

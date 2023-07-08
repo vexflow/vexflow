@@ -17,16 +17,16 @@ import { defined, RuntimeError } from './util';
 import { Voice } from './voice';
 
 export interface KeyProps {
-  stem_down_x_offset?: number;
-  stem_up_x_offset?: number;
+  stemDownXOffset?: number;
+  stemUpXOffset?: number;
   key: string;
   octave: number;
   line: number;
-  int_value?: number;
+  intValue?: number;
   accidental?: string;
   code?: string;
   stroke: number;
-  shift_right?: number;
+  shiftRight?: number;
   displaced: boolean;
 }
 
@@ -71,8 +71,8 @@ export interface NoteStruct {
   dots?: number;
   /** The note type (e.g., `r` for rest, `s` for slash notes, etc.). */
   type?: string;
-  align_center?: boolean;
-  duration_override?: Fraction;
+  alignCenter?: boolean;
+  durationOverride?: Fraction;
 }
 
 /**
@@ -221,20 +221,20 @@ export abstract class Note extends Tickable {
   keyProps: KeyProps[];
 
   protected stave?: Stave;
-  public render_options: {
-    draw_stem_through_stave?: boolean;
+  public renderOptions: {
+    drawStemThroughStave?: boolean;
     draw?: boolean;
-    draw_dots?: boolean;
-    draw_stem?: boolean;
-    y_shift: number;
-    extend_left?: number;
-    extend_right?: number;
-    glyph_font_scale: number;
-    annotation_spacing: number;
-    glyph_font_size?: number;
+    drawDots?: boolean;
+    drawStem?: boolean;
+    yShift: number;
+    extendLeft?: number;
+    extendRight?: number;
+    glyphFontScale: number;
+    annotationSpacing: number;
+    glyphFontSize?: number;
     scale: number;
     font: string;
-    stroke_px: number;
+    strokePx: number;
   };
   protected duration: string;
   protected leftDisplacedHeadPx: number;
@@ -274,9 +274,9 @@ export abstract class Note extends Tickable {
     this.noteType = parsedNoteStruct.type;
     this.customTypes = parsedNoteStruct.customTypes;
 
-    if (noteStruct.duration_override) {
+    if (noteStruct.durationOverride) {
       // Custom duration
-      this.setDuration(noteStruct.duration_override);
+      this.setDuration(noteStruct.durationOverride);
     } else {
       // Default duration
       this.setIntrinsicTicks(parsedNoteStruct.ticks);
@@ -292,28 +292,28 @@ export abstract class Note extends Tickable {
     this.playNote = undefined;
 
     // Positioning contexts used by the Formatter.
-    this.ignore_ticks = false;
+    this.ignoreTicks = false;
 
     // Positioning variables
     this.width = 0; // Width in pixels calculated after preFormat
     this.leftDisplacedHeadPx = 0; // Extra room on left for displaced note head
     this.rightDisplacedHeadPx = 0; // Extra room on right for displaced note head
-    this.x_shift = 0; // X shift from tick context X
+    this.xShift = 0; // X shift from tick context X
     this.ys = []; // list of y coordinates for each note
     // we need to hold on to these for ties and beams.
 
-    if (noteStruct.align_center) {
-      this.setCenterAlignment(noteStruct.align_center);
+    if (noteStruct.alignCenter) {
+      this.setCenterAlignment(noteStruct.alignCenter);
     }
 
     // The render surface.
-    this.render_options = {
-      annotation_spacing: 5,
-      glyph_font_scale: 1,
-      stroke_px: 1,
+    this.renderOptions = {
+      annotationSpacing: 5,
+      glyphFontScale: 1,
+      strokePx: 1,
       scale: 1,
       font: '',
-      y_shift: 0,
+      yShift: 0,
     };
   }
 
@@ -395,7 +395,7 @@ export abstract class Note extends Tickable {
 
   /** True if this note has no duration (e.g., bar notes, spacers, etc.). */
   shouldIgnoreTicks(): boolean {
-    return this.ignore_ticks;
+    return this.ignoreTicks;
   }
 
   /** Get the stave line number for the note. */
@@ -424,7 +424,7 @@ export abstract class Note extends Tickable {
 
   /** Get the glyph width. */
   getGlyphWidth(): number {
-    return this.glyphProps.getWidth(this.render_options.glyph_font_scale);
+    return this.glyphProps.getWidth(this.renderOptions.glyphFontScale);
   }
 
   /**
@@ -452,8 +452,8 @@ export abstract class Note extends Tickable {
    * Get the Y position of the space above the stave onto which text can
    * be rendered.
    */
-  getYForTopText(text_line: number): number {
-    return this.checkStave().getYForTopText(text_line);
+  getYForTopText(textLine: number): number {
+    return this.checkStave().getYForTopText(textLine);
   }
 
   /** Return the voice that this note belongs in. */
@@ -573,7 +573,7 @@ export abstract class Note extends Tickable {
 
   getLeftParenthesisPx(index: number): number {
     const props = this.getKeyProps()[index];
-    return props.displaced ? this.getLeftDisplacedHeadPx() - this.x_shift : -this.x_shift;
+    return props.displaced ? this.getLeftDisplacedHeadPx() - this.xShift : -this.xShift;
   }
 
   getFirstDotPx(): number {
@@ -590,8 +590,8 @@ export abstract class Note extends Tickable {
       throw new RuntimeError('UnformattedNote', "Can't call getMetrics on an unformatted note.");
     }
 
-    const modLeftPx = this.modifierContext ? this.modifierContext.getState().left_shift : 0;
-    const modRightPx = this.modifierContext ? this.modifierContext.getState().right_shift : 0;
+    const modLeftPx = this.modifierContext ? this.modifierContext.getState().leftShift : 0;
+    const modRightPx = this.modifierContext ? this.modifierContext.getState().rightShift : 0;
     const width = this.getWidth();
     const glyphWidth = this.getGlyphWidth();
     const notePx =
@@ -620,7 +620,7 @@ export abstract class Note extends Tickable {
 
   /**
    * Get the absolute `X` position of this note's tick context. This
-   * excludes x_shift, so you'll need to factor it in if you're
+   * excludes xShift, so you'll need to factor it in if you're
    * looking for the post-formatted x-position.
    */
   getAbsoluteX(): number {
@@ -655,8 +655,8 @@ export abstract class Note extends Tickable {
   /** Get the `x` coordinate to the right of the note. */
   getTieRightX(): number {
     let tieStartX = this.getAbsoluteX();
-    const note_glyph_width = this.glyphProps.getWidth();
-    tieStartX += note_glyph_width / 2;
+    const noteGlyphWidth = this.glyphProps.getWidth();
+    tieStartX += noteGlyphWidth / 2;
     tieStartX += -this.width / 2 + this.width + 2;
 
     return tieStartX;
@@ -665,8 +665,8 @@ export abstract class Note extends Tickable {
   /** Get the `x` coordinate to the left of the note. */
   getTieLeftX(): number {
     let tieEndX = this.getAbsoluteX();
-    const note_glyph_width = this.glyphProps.getWidth();
-    tieEndX += note_glyph_width / 2;
+    const noteGlyphWidth = this.glyphProps.getWidth();
+    tieEndX += noteGlyphWidth / 2;
     tieEndX -= this.width / 2 + 2;
 
     return tieEndX;

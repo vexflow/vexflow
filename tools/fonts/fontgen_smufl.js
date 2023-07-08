@@ -45,10 +45,10 @@ function toVFPath(glyph) {
   const pathStr = ops.join(' ');
 
   return {
-    x_min: Math.round(bb.x1),
-    x_max: Math.round(bb.x2),
-    y_min: Math.round(bb.y1),
-    y_max: Math.round(bb.y2),
+    xMin: Math.round(bb.x1),
+    xMax: Math.round(bb.x2),
+    yMin: Math.round(bb.y1),
+    yMax: Math.round(bb.y2),
     ha: Math.round(bb.y2 - bb.y1),
     o: pathStr,
   };

@@ -25,10 +25,10 @@ function toVFPath(glyph) {
   }
 
   return {
-    x_min: bb.x1,
-    x_max: bb.x2,
-    y_min: bb.y1,
-    y_max: bb.y2,
+    xMin: bb.x1,
+    xMax: bb.x2,
+    yMin: bb.y1,
+    yMax: bb.y2,
     ha: bb.y2 - bb.y1,
     leftSideBearing: glyph.leftSideBearing,
     advanceWidth: glyph.advanceWidth,

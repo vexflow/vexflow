@@ -25,7 +25,7 @@ const TabSlideTests = {
   },
 };
 
-function tieNotes(notes: TabNote[], indices: number[], stave: TabStave, ctx: RenderContext): void {
+function tieNotes(notes: TabNote[], indexes: number[], stave: TabStave, ctx: RenderContext): void {
   const voice = new Voice(Flow.TIME4_4);
   voice.addTickables(notes);
 
@@ -34,10 +34,10 @@ function tieNotes(notes: TabNote[], indices: number[], stave: TabStave, ctx: Ren
 
   const tie = new TabSlide(
     {
-      first_note: notes[0],
-      last_note: notes[1],
-      first_indices: indices,
-      last_indices: indices,
+      firstNote: notes[0],
+      lastNote: notes[1],
+      firstIndexes: indexes,
+      lastIndexes: indexes,
     },
     TabSlide.SLIDE_UP
   );
@@ -125,10 +125,10 @@ function multiTest(options: TestOptions, buildTabSlide: (notes: TieNotes) => Tab
   voice.draw(context, stave);
 
   buildTabSlide({
-    first_note: notes[0],
-    last_note: notes[1],
-    first_indices: [0],
-    last_indices: [0],
+    firstNote: notes[0],
+    lastNote: notes[1],
+    firstIndexes: [0],
+    lastIndexes: [0],
   })
     .setContext(context)
     .draw();
@@ -136,10 +136,10 @@ function multiTest(options: TestOptions, buildTabSlide: (notes: TieNotes) => Tab
   options.assert.ok(true, 'Single note');
 
   buildTabSlide({
-    first_note: notes[2],
-    last_note: notes[3],
-    first_indices: [0, 1],
-    last_indices: [0, 1],
+    firstNote: notes[2],
+    lastNote: notes[3],
+    firstIndexes: [0, 1],
+    lastIndexes: [0, 1],
   })
     .setContext(context)
     .draw();
@@ -147,10 +147,10 @@ function multiTest(options: TestOptions, buildTabSlide: (notes: TieNotes) => Tab
   options.assert.ok(true, 'Chord');
 
   buildTabSlide({
-    first_note: notes[4],
-    last_note: notes[5],
-    first_indices: [0],
-    last_indices: [0],
+    firstNote: notes[4],
+    lastNote: notes[5],
+    firstIndexes: [0],
+    lastIndexes: [0],
   })
     .setContext(context)
     .draw();
@@ -158,10 +158,10 @@ function multiTest(options: TestOptions, buildTabSlide: (notes: TieNotes) => Tab
   options.assert.ok(true, 'Single note high-fret');
 
   buildTabSlide({
-    first_note: notes[6],
-    last_note: notes[7],
-    first_indices: [0, 1],
-    last_indices: [0, 1],
+    firstNote: notes[6],
+    lastNote: notes[7],
+    firstIndexes: [0, 1],
+    lastIndexes: [0, 1],
   })
     .setContext(context)
     .draw();

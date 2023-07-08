@@ -62,7 +62,7 @@ export class TickContext {
 
     this.maxTicks = new Fraction(0, 1);
     this.maxTickable = undefined; // Biggest tickable
-    this.minTicks = undefined; // this can remian null if all tickables have ignore_ticks
+    this.minTicks = undefined; // this can remian null if all tickables have ignoreTicks
     this.minTickable = undefined;
 
     this.padding = 1; // padding on each side (width += padding * 2)

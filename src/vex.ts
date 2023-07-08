@@ -49,13 +49,13 @@ export class Vex {
     return false;
   }
 
-  // Get the 2D Canvas context from DOM element `canvas_sel`.
-  static getCanvasContext(canvasSelector: string): RenderingContext {
-    if (!canvasSelector) {
-      throw new RuntimeError('BadArgument', 'Invalid canvas selector: ' + canvasSelector);
+  // Get the 2D Canvas context from DOM element with id `canvasId`.
+  static getCanvasContext(canvasId: string): RenderingContext {
+    if (!canvasId) {
+      throw new RuntimeError('BadArgument', 'Invalid canvas selector: ' + canvasId);
     }
 
-    const canvas = document.getElementById(canvasSelector) as HTMLCanvasElement;
+    const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
     if (!(canvas && canvas.getContext)) {
       throw new RuntimeError('UnsupportedBrowserError', 'This browser does not support HTML5 Canvas');
     }
@@ -66,9 +66,9 @@ export class Vex {
   /** Benchmark. Run function `f` once and report time elapsed shifted by `s` milliseconds. */
   // eslint-disable-next-line
   static benchmark(s: any, f: any): void {
-    const start_time = new Date().getTime();
+    const startTime = new Date().getTime();
     f();
-    const elapsed = new Date().getTime() - start_time;
+    const elapsed = new Date().getTime() - startTime;
     log(s, elapsed + 'ms');
   }
 

@@ -66,12 +66,12 @@ export class TimeSignature extends StaveModifier {
   protected timeSpec: string = '4/4';
   protected line: number = 0;
   protected glyph!: Glyph;
-  protected is_numeric: boolean = true;
-  protected validate_args: boolean;
+  protected isNumeric: boolean = true;
+  protected validateArgs: boolean;
 
-  constructor(timeSpec: string = '4/4', customPadding = 15, validate_args = true) {
+  constructor(timeSpec: string = '4/4', customPadding = 15, validateArgs = true) {
     super();
-    this.validate_args = validate_args;
+    this.validateArgs = validateArgs;
 
     const padding = customPadding;
 
@@ -102,7 +102,7 @@ export class TimeSignature extends StaveModifier {
       };
     }
 
-    if (this.validate_args) {
+    if (this.validateArgs) {
       assertIsValidTimeSig(timeSpec);
     }
 
@@ -129,8 +129,8 @@ export class TimeSignature extends StaveModifier {
    * but these can also be accessed directly w/ getters and setters.
    */
   getInfo(): TimeSignatureInfo {
-    const { line, is_numeric, glyph } = this;
-    return { line, num: is_numeric, glyph };
+    const { line, isNumeric, glyph } = this;
+    return { line, num: isNumeric, glyph };
   }
 
   /**
@@ -142,7 +142,7 @@ export class TimeSignature extends StaveModifier {
     this.timeSpec = timeSpec;
     const info = this.parseTimeSpec(timeSpec);
     this.setGlyph(info.glyph);
-    this.is_numeric = info.num;
+    this.isNumeric = info.num;
     this.line = info.line;
     return this;
   }
@@ -193,14 +193,14 @@ export class TimeSignature extends StaveModifier {
    * (such as 4/4) or not (as in cut time).
    */
   getIsNumeric(): boolean {
-    return this.is_numeric;
+    return this.isNumeric;
   }
 
   /**
    * Set whether this TimeSignature is drawn with one or more numbers.
    */
   setIsNumeric(isNumeric: boolean) {
-    this.is_numeric = isNumeric;
+    this.isNumeric = isNumeric;
   }
 
   /**

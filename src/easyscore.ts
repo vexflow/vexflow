@@ -358,14 +358,14 @@ export class Builder {
         '/' +
         notePiece.octave
     );
-    const auto_stem = stem === 'auto'; // StaveNoteStruct expects the underscore & lowercase.
+    const autoStem = stem === 'auto'; // StaveNoteStruct expects the underscore & lowercase.
 
     // Build a GhostNote or StaveNote using the information we gathered.
     const note =
       type?.toLowerCase() == 'g'
         ? factory.GhostNote({ duration, dots })
-        : factory.StaveNote({ keys, duration, dots, type, clef, auto_stem });
-    if (!auto_stem) note.setStemDirection(stem === 'up' ? Stem.UP : Stem.DOWN);
+        : factory.StaveNote({ keys, duration, dots, type, clef, autoStem });
+    if (!autoStem) note.setStemDirection(stem === 'up' ? Stem.UP : Stem.DOWN);
 
     // Attach accidentals.
     const accidentals: (Accidental | undefined)[] = [];
