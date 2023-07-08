@@ -149,7 +149,7 @@ total number of ticks in voices.</p>
 so voices are aligned and ready to render onto the stave. This method
 mutates the <code>x</code> positions of all tickables in <code>voices</code>.</p>
 <p>Voices are full justified to fit in <code>justifyWidth</code> pixels.</p>
-<p>Set <code>options.context</code> to the rendering context. Set <code>options.align_rests</code>
+<p>Set <code>options.context</code> to the rendering context. Set <code>options.alignRests</code>
 to true to enable rest alignment.</p>
 </div>
 <div class="tsd-parameters">
@@ -351,19 +351,19 @@ box for the notation.</p>
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">params</span>: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/FormatParams.html" class="tsd-signature-type tsd-kind-interface">FormatParams</a></h5>
 <div class="tsd-comment tsd-typography"><p>one of below:</p>
 <ul>
-<li>Setting <code>autobeam</code> only <code>(context, stave, notes, true)</code> or
-<code>(ctx, stave, notes, {autobeam: true})</code></li>
-<li>Setting <code>align_rests</code> a struct is needed <code>(context, stave, notes, {align_rests: true})</code></li>
-<li>Setting both a struct is needed <code>(context, stave, notes, { autobeam: true, align_rests: true})</code></li>
-<li><code>autobeam</code> automatically generates beams for the notes.</li>
-<li><code>align_rests</code> aligns rests with nearby notes.</li>
+<li>Setting <code>autoBeam</code> only <code>(context, stave, notes, true)</code> or
+<code>(ctx, stave, notes, {autoBeam: true})</code></li>
+<li>Setting <code>alignRests</code> a struct is needed <code>(context, stave, notes, {alignRests: true})</code></li>
+<li>Setting both a struct is needed <code>(context, stave, notes, { autoBeam: true, alignRests: true})</code></li>
+<li><code>autoBeam</code> automatically generates beams for the notes.</li>
+<li><code>alignRests</code> aligns rests with nearby notes.</li>
 </ul>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="BoundingBox.html" class="tsd-signature-type tsd-kind-class">BoundingBox</a></h4></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="FormatAndDrawTab" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>Format<wbr/>And<wbr/>Draw<wbr/>Tab</span><a href="#FormatAndDrawTab" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="FormatAndDrawTab.FormatAndDrawTab-1"><span class="tsd-kind-call-signature">Format<wbr/>And<wbr/>Draw<wbr/>Tab</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">ctx</span>, <span class="tsd-kind-parameter">tabstave</span>, <span class="tsd-kind-parameter">stave</span>, <span class="tsd-kind-parameter">tabnotes</span>, <span class="tsd-kind-parameter">notes</span>, <span class="tsd-kind-parameter">autobeam</span>, <span class="tsd-kind-parameter">params</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#FormatAndDrawTab.FormatAndDrawTab-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="FormatAndDrawTab.FormatAndDrawTab-1"><span class="tsd-kind-call-signature">Format<wbr/>And<wbr/>Draw<wbr/>Tab</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">ctx</span>, <span class="tsd-kind-parameter">tabstave</span>, <span class="tsd-kind-parameter">stave</span>, <span class="tsd-kind-parameter">tabnotes</span>, <span class="tsd-kind-parameter">notes</span>, <span class="tsd-kind-parameter">autoBeam</span>, <span class="tsd-kind-parameter">params</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#FormatAndDrawTab.FormatAndDrawTab-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Helper function to format and draw aligned tab and stave notes in two
 separate staves.</p>
@@ -392,15 +392,15 @@ separate staves.</p>
 <div class="tsd-comment tsd-typography"><p>array of <code>Note</code> instances for the stave (<code>Note</code>, <code>BarNote</code>, etc.)</p>
 </div></li>
 <li>
-<h5><span class="tsd-kind-parameter">autobeam</span>: <span class="tsd-signature-type">boolean</span></h5>
+<h5><span class="tsd-kind-parameter">autoBeam</span>: <span class="tsd-signature-type">boolean</span></h5>
 <div class="tsd-comment tsd-typography"><p>automatically generate beams.</p>
 </div></li>
 <li>
 <h5><span class="tsd-kind-parameter">params</span>: <a href="../interfaces/FormatParams.html" class="tsd-signature-type tsd-kind-interface">FormatParams</a></h5>
 <div class="tsd-comment tsd-typography"><p>a configuration object:</p>
 <ul>
-<li><code>autobeam</code> automatically generates beams for the notes.</li>
-<li><code>align_rests</code> aligns rests with nearby notes.</li>
+<li><code>autoBeam</code> automatically generates beams for the notes.</li>
+<li><code>alignRests</code> aligns rests with nearby notes.</li>
 </ul>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></section>
@@ -739,5 +739,6 @@ regard for proportions. Useful for tests and debugging.</p>
 <li><a href="../functions/normalizeAngle.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-64-path"></use><use href="#icon-64-text"></use></svg><span>normalize<wbr/>Angle</span></a></li>
 <li><a href="../functions/prefix.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-64-path"></use><use href="#icon-64-text"></use></svg><span>prefix</span></a></li>
 <li><a href="../functions/sumArray.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-64-path"></use><use href="#icon-64-text"></use></svg><span>sum<wbr/>Array</span></a></li>
+<li><a href="../functions/upperFirst.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-64-path"></use><use href="#icon-64-text"></use></svg><span>upper<wbr/>First</span></a></li>
 <li><a href="../functions/warn.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-64-path"></use><use href="#icon-64-text"></use></svg><span>warn</span></a></li></ul></nav></div></div></div>
 <div class="overlay"></div></body></html>

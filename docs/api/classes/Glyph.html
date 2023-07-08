@@ -793,14 +793,14 @@ Each Element subclass may specify its own default by overriding the static <code
 <li class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Set the element style used to render.</p>
 <p>Example:</p>
-<pre><code class="language-typescript"><span class="hl-10">element</span><span class="hl-6">.</span><span class="hl-11">setStyle</span><span class="hl-6">({ </span><span class="hl-10">fillStyle:</span><span class="hl-6"> </span><span class="hl-7">&#39;red&#39;</span><span class="hl-6">, </span><span class="hl-10">strokeStyle:</span><span class="hl-6"> </span><span class="hl-7">&#39;red&#39;</span><span class="hl-6"> });</span><br/><span class="hl-10">element</span><span class="hl-6">.</span><span class="hl-11">draw</span><span class="hl-6">();</span>
+<pre><code class="language-typescript"><span class="hl-11">element</span><span class="hl-7">.</span><span class="hl-6">setStyle</span><span class="hl-7">({ </span><span class="hl-11">fillStyle:</span><span class="hl-7"> </span><span class="hl-8">&#39;red&#39;</span><span class="hl-7">, </span><span class="hl-11">strokeStyle:</span><span class="hl-7"> </span><span class="hl-8">&#39;red&#39;</span><span class="hl-7"> });</span><br/><span class="hl-11">element</span><span class="hl-7">.</span><span class="hl-6">draw</span><span class="hl-7">();</span>
 </code><button>Copy</button></pre>
 <p>Note: If the element draws additional sub-elements (ie.: Modifiers in a Stave),
 the style can be applied to all of them by means of the context:</p>
-<pre><code class="language-typescript"><span class="hl-10">element</span><span class="hl-6">.</span><span class="hl-11">setStyle</span><span class="hl-6">({ </span><span class="hl-10">fillStyle:</span><span class="hl-6"> </span><span class="hl-7">&#39;red&#39;</span><span class="hl-6">, </span><span class="hl-10">strokeStyle:</span><span class="hl-6"> </span><span class="hl-7">&#39;red&#39;</span><span class="hl-6"> });</span><br/><span class="hl-10">element</span><span class="hl-6">.</span><span class="hl-11">getContext</span><span class="hl-6">().</span><span class="hl-11">setFillStyle</span><span class="hl-6">(</span><span class="hl-7">&#39;red&#39;</span><span class="hl-6">);</span><br/><span class="hl-10">element</span><span class="hl-6">.</span><span class="hl-11">getContext</span><span class="hl-6">().</span><span class="hl-11">setStrokeStyle</span><span class="hl-6">(</span><span class="hl-7">&#39;red&#39;</span><span class="hl-6">);</span><br/><span class="hl-10">element</span><span class="hl-6">.</span><span class="hl-11">draw</span><span class="hl-6">();</span>
+<pre><code class="language-typescript"><span class="hl-11">element</span><span class="hl-7">.</span><span class="hl-6">setStyle</span><span class="hl-7">({ </span><span class="hl-11">fillStyle:</span><span class="hl-7"> </span><span class="hl-8">&#39;red&#39;</span><span class="hl-7">, </span><span class="hl-11">strokeStyle:</span><span class="hl-7"> </span><span class="hl-8">&#39;red&#39;</span><span class="hl-7"> });</span><br/><span class="hl-11">element</span><span class="hl-7">.</span><span class="hl-6">getContext</span><span class="hl-7">().</span><span class="hl-6">setFillStyle</span><span class="hl-7">(</span><span class="hl-8">&#39;red&#39;</span><span class="hl-7">);</span><br/><span class="hl-11">element</span><span class="hl-7">.</span><span class="hl-6">getContext</span><span class="hl-7">().</span><span class="hl-6">setStrokeStyle</span><span class="hl-7">(</span><span class="hl-8">&#39;red&#39;</span><span class="hl-7">);</span><br/><span class="hl-11">element</span><span class="hl-7">.</span><span class="hl-6">draw</span><span class="hl-7">();</span>
 </code><button>Copy</button></pre>
 <p>or using drawWithStyle:</p>
-<pre><code class="language-typescript"><span class="hl-10">element</span><span class="hl-6">.</span><span class="hl-11">setStyle</span><span class="hl-6">({ </span><span class="hl-10">fillStyle:</span><span class="hl-6"> </span><span class="hl-7">&#39;red&#39;</span><span class="hl-6">, </span><span class="hl-10">strokeStyle:</span><span class="hl-6"> </span><span class="hl-7">&#39;red&#39;</span><span class="hl-6"> });</span><br/><span class="hl-10">element</span><span class="hl-6">.</span><span class="hl-11">drawWithStyle</span><span class="hl-6">();</span>
+<pre><code class="language-typescript"><span class="hl-11">element</span><span class="hl-7">.</span><span class="hl-6">setStyle</span><span class="hl-7">({ </span><span class="hl-11">fillStyle:</span><span class="hl-7"> </span><span class="hl-8">&#39;red&#39;</span><span class="hl-7">, </span><span class="hl-11">strokeStyle:</span><span class="hl-7"> </span><span class="hl-8">&#39;red&#39;</span><span class="hl-7"> });</span><br/><span class="hl-11">element</span><span class="hl-7">.</span><span class="hl-6">drawWithStyle</span><span class="hl-7">();</span>
 </code><button>Copy</button></pre>
 </div>
 <div class="tsd-parameters">
@@ -813,29 +813,29 @@ the style can be applied to all of them by means of the context:</p>
 <section class="tsd-panel tsd-member"><a id="setXShift" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>setXShift</span><a href="#setXShift" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="setXShift.setXShift-1"><span class="tsd-kind-call-signature">setXShift</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">x_shift</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="Glyph.html" class="tsd-signature-type tsd-kind-class">Glyph</a><a href="#setXShift.setXShift-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="setXShift.setXShift-1"><span class="tsd-kind-call-signature">setXShift</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">xShift</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="Glyph.html" class="tsd-signature-type tsd-kind-class">Glyph</a><a href="#setXShift.setXShift-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><span class="tsd-kind-parameter">x_shift</span>: <span class="tsd-signature-type">number</span></h5></li></ul></div>
+<h5><span class="tsd-kind-parameter">xShift</span>: <span class="tsd-signature-type">number</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="Glyph.html" class="tsd-signature-type tsd-kind-class">Glyph</a></h4></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="setYShift" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>setYShift</span><a href="#setYShift" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="setYShift.setYShift-1"><span class="tsd-kind-call-signature">setYShift</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">y_shift</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="Glyph.html" class="tsd-signature-type tsd-kind-class">Glyph</a><a href="#setYShift.setYShift-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="setYShift.setYShift-1"><span class="tsd-kind-call-signature">setYShift</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">yShift</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="Glyph.html" class="tsd-signature-type tsd-kind-class">Glyph</a><a href="#setYShift.setYShift-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><span class="tsd-kind-parameter">y_shift</span>: <span class="tsd-signature-type">number</span></h5></li></ul></div>
+<h5><span class="tsd-kind-parameter">yShift</span>: <span class="tsd-signature-type">number</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="Glyph.html" class="tsd-signature-type tsd-kind-class">Glyph</a></h4></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getOutlineBoundingBox" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>get<wbr/>Outline<wbr/>Bounding<wbr/>Box</span><a href="#getOutlineBoundingBox" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="getOutlineBoundingBox.getOutlineBoundingBox-1"><span class="tsd-kind-call-signature">get<wbr/>Outline<wbr/>Bounding<wbr/>Box</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">outline</span>, <span class="tsd-kind-parameter">scale</span>, <span class="tsd-kind-parameter">x_pos</span>, <span class="tsd-kind-parameter">y_pos</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="BoundingBox.html" class="tsd-signature-type tsd-kind-class">BoundingBox</a><a href="#getOutlineBoundingBox.getOutlineBoundingBox-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="getOutlineBoundingBox.getOutlineBoundingBox-1"><span class="tsd-kind-call-signature">get<wbr/>Outline<wbr/>Bounding<wbr/>Box</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">outline</span>, <span class="tsd-kind-parameter">scale</span>, <span class="tsd-kind-parameter">xPos</span>, <span class="tsd-kind-parameter">yPos</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="BoundingBox.html" class="tsd-signature-type tsd-kind-class">BoundingBox</a><a href="#getOutlineBoundingBox.getOutlineBoundingBox-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
@@ -845,9 +845,9 @@ the style can be applied to all of them by means of the context:</p>
 <li>
 <h5><span class="tsd-kind-parameter">scale</span>: <span class="tsd-signature-type">number</span></h5></li>
 <li>
-<h5><span class="tsd-kind-parameter">x_pos</span>: <span class="tsd-signature-type">number</span></h5></li>
+<h5><span class="tsd-kind-parameter">xPos</span>: <span class="tsd-signature-type">number</span></h5></li>
 <li>
-<h5><span class="tsd-kind-parameter">y_pos</span>: <span class="tsd-signature-type">number</span></h5></li></ul></div>
+<h5><span class="tsd-kind-parameter">yPos</span>: <span class="tsd-signature-type">number</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="BoundingBox.html" class="tsd-signature-type tsd-kind-class">BoundingBox</a></h4></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getWidth" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>get<wbr/>Width</span><a href="#getWidth" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
@@ -924,7 +924,7 @@ try again with the path <code>glyphs.{category}.{key}</code>. If the second look
 <section class="tsd-panel tsd-member"><a id="renderGlyph" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>render<wbr/>Glyph</span><a href="#renderGlyph" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="renderGlyph.renderGlyph-1"><span class="tsd-kind-call-signature">render<wbr/>Glyph</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">ctx</span>, <span class="tsd-kind-parameter">x_pos</span>, <span class="tsd-kind-parameter">y_pos</span>, <span class="tsd-kind-parameter">point</span>, <span class="tsd-kind-parameter">code</span>, <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/GlyphMetrics.html" class="tsd-signature-type tsd-kind-interface">GlyphMetrics</a><a href="#renderGlyph.renderGlyph-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="renderGlyph.renderGlyph-1"><span class="tsd-kind-call-signature">render<wbr/>Glyph</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">ctx</span>, <span class="tsd-kind-parameter">xPos</span>, <span class="tsd-kind-parameter">yPos</span>, <span class="tsd-kind-parameter">point</span>, <span class="tsd-kind-parameter">code</span>, <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/GlyphMetrics.html" class="tsd-signature-type tsd-kind-interface">GlyphMetrics</a><a href="#renderGlyph.renderGlyph-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Renders glyphs from the default font stack.</p>
 </div>
@@ -936,11 +936,11 @@ try again with the path <code>glyphs.{category}.{key}</code>. If the second look
 <div class="tsd-comment tsd-typography"><p>Canvas or SVG context</p>
 </div></li>
 <li>
-<h5><span class="tsd-kind-parameter">x_pos</span>: <span class="tsd-signature-type">number</span></h5>
+<h5><span class="tsd-kind-parameter">xPos</span>: <span class="tsd-signature-type">number</span></h5>
 <div class="tsd-comment tsd-typography"><p>x coordinate</p>
 </div></li>
 <li>
-<h5><span class="tsd-kind-parameter">y_pos</span>: <span class="tsd-signature-type">number</span></h5>
+<h5><span class="tsd-kind-parameter">yPos</span>: <span class="tsd-signature-type">number</span></h5>
 <div class="tsd-comment tsd-typography"><p>y coordinate</p>
 </div></li>
 <li>
@@ -962,7 +962,7 @@ try again with the path <code>glyphs.{category}.{key}</code>. If the second look
 <section class="tsd-panel tsd-member"><a id="renderOutline" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>render<wbr/>Outline</span><a href="#renderOutline" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="renderOutline.renderOutline-1"><span class="tsd-kind-call-signature">render<wbr/>Outline</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">ctx</span>, <span class="tsd-kind-parameter">outline</span>, <span class="tsd-kind-parameter">scale</span>, <span class="tsd-kind-parameter">x_pos</span>, <span class="tsd-kind-parameter">y_pos</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#renderOutline.renderOutline-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="renderOutline.renderOutline-1"><span class="tsd-kind-call-signature">render<wbr/>Outline</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">ctx</span>, <span class="tsd-kind-parameter">outline</span>, <span class="tsd-kind-parameter">scale</span>, <span class="tsd-kind-parameter">xPos</span>, <span class="tsd-kind-parameter">yPos</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#renderOutline.renderOutline-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
@@ -974,9 +974,9 @@ try again with the path <code>glyphs.{category}.{key}</code>. If the second look
 <li>
 <h5><span class="tsd-kind-parameter">scale</span>: <span class="tsd-signature-type">number</span></h5></li>
 <li>
-<h5><span class="tsd-kind-parameter">x_pos</span>: <span class="tsd-signature-type">number</span></h5></li>
+<h5><span class="tsd-kind-parameter">xPos</span>: <span class="tsd-signature-type">number</span></h5></li>
 <li>
-<h5><span class="tsd-kind-parameter">y_pos</span>: <span class="tsd-signature-type">number</span></h5></li></ul></div>
+<h5><span class="tsd-kind-parameter">yPos</span>: <span class="tsd-signature-type">number</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
@@ -1301,5 +1301,6 @@ try again with the path <code>glyphs.{category}.{key}</code>. If the second look
 <li><a href="../functions/normalizeAngle.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-64-path"></use><use href="#icon-64-text"></use></svg><span>normalize<wbr/>Angle</span></a></li>
 <li><a href="../functions/prefix.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-64-path"></use><use href="#icon-64-text"></use></svg><span>prefix</span></a></li>
 <li><a href="../functions/sumArray.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-64-path"></use><use href="#icon-64-text"></use></svg><span>sum<wbr/>Array</span></a></li>
+<li><a href="../functions/upperFirst.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-64-path"></use><use href="#icon-64-text"></use></svg><span>upper<wbr/>First</span></a></li>
 <li><a href="../functions/warn.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-64-path"></use><use href="#icon-64-text"></use></svg><span>warn</span></a></li></ul></nav></div></div></div>
 <div class="overlay"></div></body></html>
