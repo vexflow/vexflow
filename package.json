@@ -62,7 +62,7 @@
   "jsdelivr": "./build/cjs/vexflow.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/0xfe/vexflow.git"
+    "url": "https://github.com/vexflow/vexflow.git"
   },
   "author": {
     "name": "VexFlow Authors",
@@ -83,7 +83,7 @@
     "AUTHORS.md"
   ],
   "bugs": {
-    "url": "https://github.com/0xfe/vexflow/issues"
+    "url": "https://github.com/vexflow/vexflow/issues"
   },
   "devDependencies": {
     "@types/qunit": "^2.19.5",
