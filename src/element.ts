@@ -60,9 +60,15 @@ export interface ElementStyle {
  * Element implements a generic base class for VexFlow, with implementations
  * of general functions and properties that can be inherited by all VexFlow elements.
  *
- * The Element handles style and text-font properties for the Element and any child
- * elements, along with working with the Registry to create unique ids, but does not
- * have any tools for formatting x or y positions or connections to a Stave.
+ * The Element handles style and font properties for the Element and any child
+ * elements, along with working with the Registry to create unique ids.
+ *
+ * The `text` is a series of unicode characters (including SMuFL codes).
+ * The `textFont` property contains information required to style the text (i.e., font family, size, weight, and style). 
+ * This font family is a comma separated list of fonts. 
+ * The method `measureText` calculates the `textMetrics` and `ẃidth` of the `text`.
+ * The methos `renderText` will render the text using the context provided at the coordinates provided 
+ * taking `xShift` and `yShift` into account. 
  */
 export class Element {
   static get CATEGORY(): string {
@@ -86,8 +92,7 @@ export class Element {
   protected registry?: Registry;
 
   /**
-   * The `textFont` property contains information required to style the text (i.e., font family, size, weight, and style).
-   */
+    */
   protected textFont: Required<FontInfo>;
   protected text = '';
   protected textMetrics: TextMetrics = {
@@ -107,7 +112,7 @@ export class Element {
   constructor(category?: string) {
     this.#attrs = {
       id: Element.newID(),
-      type: category ? category : (<typeof Element>this.constructor).CATEGORY,
+      type: category ?? (<typeof Element>this.constructor).CATEGORY,
       class: '',
     };
 
@@ -138,7 +143,7 @@ export class Element {
   }
 
   getCategory(): string {
-    return `${this.#attrs.type}`;
+    return this.#attrs.type;
   }
 
   /**
@@ -495,26 +500,26 @@ export class Element {
     return this;
   }
 
-  /** Shift element down `y` pixels. Negative values shift up. */
-  setYShift(y: number): this {
-    this.yShift = y;
+  /** Shift element down `yShift` pixels. Negative values shift up. */
+  setYShift(yShift: number): this {
+    this.yShift = yShift;
     return this;
   }
 
-  /** Get shift element `y` */
+  /** Get shift element `yShift` */
   getYShift(): number {
     return this.yShift;
   }
 
   /**
-   * Set shift element right `x` pixels. Negative values shift left.
+   * Set shift element right `xShift` pixels. Negative values shift left.
    */
-  setXShift(x: number): this {
-    this.xShift = x;
+  setXShift(xShift: number): this {
+    this.xShift = xShift;
     return this;
   }
 
-  /** Get shift element `x` */
+  /** Get shift element `xShift` */
   getXShift(): number {
     return this.xShift;
   }
@@ -522,8 +527,8 @@ export class Element {
   /**
    * Set element text
    */
-  setText(txt: string): this {
-    this.text = txt;
+  setText(text: string): this {
+    this.text = text;
     return this;
   }
 
@@ -543,15 +548,15 @@ export class Element {
   }
 
   /** Canvas used to measure text */
-  protected static txtCanvas?: HTMLCanvasElement;
+  static #txtCanvas?: HTMLCanvasElement;
 
   measureText(): TextMetrics {
-    let txtCanvas = Element.txtCanvas;
+    let txtCanvas = Element.#txtCanvas;
     if (!txtCanvas) {
       // Create the SVG text element that will be used to measure text in the event
       // of a cache miss.
       txtCanvas = document.createElement('canvas');
-      Element.txtCanvas = txtCanvas;
+      Element.#txtCanvas = txtCanvas;
     }
     const context = txtCanvas.getContext('2d');
     if (!context) throw new RuntimeError('Font', 'No txt context');
