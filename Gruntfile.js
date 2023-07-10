@@ -386,7 +386,7 @@ module.exports = (grunt) => {
       files: ['tests/flow-headless-browser.html'],
       options: {
         puppeteer: {
-          headless: "new",
+          headless: 'new',
           args: ['--no-sandbox', '--disable-setuid-sandbox'],
         },
       },
@@ -734,7 +734,7 @@ module.exports = (grunt) => {
     if (!process.env.GITHUB_TOKEN) {
       console.log(
         'GITHUB_TOKEN environment variable is missing.\n' +
-          'You can manually release to GitHub at https://github.com/0xfe/vexflow/releases/new\n' +
+          'You can manually release to GitHub at https://github.com/vexflow/vexflow/releases/new\n' +
           'Or use the GitHub CLI:\n' +
           'gh release create 4.0.0 --title "Release 4.0.0"\n\n'
       );
@@ -765,7 +765,7 @@ module.exports = (grunt) => {
         commit: true,
         tag: true,
         push: true,
-        pushRepo: 'git@github.com:0xfe/vexflow.git',
+        pushRepo: 'git@github.com:vexflow/vexflow.git',
       },
       github: {
         release: true,
@@ -848,7 +848,7 @@ module.exports = (grunt) => {
 
       const message =
         '\nconsole.warn("Please upgrade to the newest release of VexFlow.\\n' +
-        'See: https://github.com/0xfe/vexflow for more information.\\nThis page uses version 3.0.9, which is no longer supported.");\n\n' +
+        'See: https://github.com/vexflow/vexflow for more information.\\nThis page uses version 3.0.9, which is no longer supported.");\n\n' +
         '// YOU ARE LOOKING AT VEXFLOW LEGACY VERSION 3.0.9.\n' +
         '// SEE THE `build/` FOLDER FOR THE NEWEST RELEASE.\n';
       fs.appendFileSync(minifiedFile, message);
