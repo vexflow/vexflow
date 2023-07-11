@@ -161,7 +161,6 @@ export class StaveTie extends Element {
    * @param lastX specified in pixels
    */
   renderTieText(firstX: number, lastX: number): void {
-    if (!this.text) return;
     const ctx = this.checkContext();
     let centerX = (firstX + lastX) / 2;
     centerX -= ctx.measureText(this.text).width / 2;

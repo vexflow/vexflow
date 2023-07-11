@@ -233,12 +233,7 @@ export class Stroke extends Modifier {
 
     // Draw the rasquedo "R"
     if (this.type === Stroke.Type.RASQUEDO_DOWN || this.type === Stroke.Type.RASQUEDO_UP) {
-      const textFont = {
-        family: Tables.lookupMetric(`Strokes.text.fontFamily`),
-        size: Tables.lookupMetric(`Strokes.text.fontSize`),
-        weight: Tables.lookupMetric(`Strokes.text.fontWeight`),
-        style: Tables.lookupMetric(`Strokes.text.fontStyle`),
-      };
+      const textFont = Tables.lookupMetricFontInfo(`Strokes.text`);
       ctx.save();
       ctx.setFont(textFont);
       ctx.fillText('R', x + textShiftX, textY);

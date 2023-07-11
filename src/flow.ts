@@ -7,7 +7,13 @@ import { Bend } from './bend';
 import { BoundingBox } from './boundingbox';
 import { BoundingBoxComputation } from './boundingboxcomputation';
 import { CanvasContext } from './canvascontext';
-import { ChordSymbol, ChordSymbolHorizontalJustify, ChordSymbolVerticalJustify, SymbolModifiers } from './chordsymbol';
+import {
+  ChordSymbol,
+  ChordSymbolHorizontalJustify,
+  ChordSymbolVerticalJustify,
+  SymbolModifiers,
+  SymbolTypes,
+} from './chordsymbol';
 import { Clef } from './clef';
 import { ClefNote } from './clefnote';
 import { Crescendo } from './crescendo';
@@ -180,6 +186,7 @@ export class Flow {
   static AnnotationVerticalJustify = AnnotationVerticalJustify;
   static ChordSymbolHorizontalJustify = ChordSymbolHorizontalJustify;
   static ChordSymbolVerticalJustify = ChordSymbolVerticalJustify;
+  static SymbolTypes = SymbolTypes;
   static SymbolModifiers = SymbolModifiers;
   static CurvePosition = CurvePosition;
   static FontWeight = FontWeight;

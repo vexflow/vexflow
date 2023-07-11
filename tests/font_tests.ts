@@ -130,7 +130,7 @@ function setTextFontToGeorgia(options: TestOptions): void {
     factory.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stemDirection: -1, duration: 'q' }),
   ]);
 
-  const defaultFont = {
+  const georgiaFont = {
     family: 'Georgia, Courier New, serif',
     size: 14,
     weight: 'bold',
@@ -140,7 +140,8 @@ function setTextFontToGeorgia(options: TestOptions): void {
   const voice2 = score.voice([
     factory
       .TextNote({ text: 'Here are some fun lyrics...', duration: 'w' })
-      .setJustification(TextNote.Justification.LEFT).setFont(defaultFont),
+      .setJustification(TextNote.Justification.LEFT)
+      .setFont(georgiaFont),
   ]);
 
   const formatter = factory.Formatter();

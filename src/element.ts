@@ -18,7 +18,7 @@ export interface ElementAttributes {
   class: string;
 }
 
-/** Element style */
+/** Element style. */
 export interface ElementStyle {
   /**
    * CSS color used for the shadow.
@@ -65,10 +65,10 @@ export interface ElementStyle {
  *
  * The `text` is a series of unicode characters (including SMuFL codes).
  * The `textFont` property contains information required to style the text (i.e., font family, size, weight, and style). 
- * This font family is a comma separated list of fonts. 
- * The method `measureText` calculates the `textMetrics` and `ẃidth` of the `text`.
- * The methos `renderText` will render the text using the context provided at the coordinates provided 
- * taking `xShift` and `yShift` into account. 
+ * This font family is a comma separated list of fonts.
+ * The method `measureText` calculates the `textMetrics`, `boundingBox`, `height` and `width` of the `text`.
+ * The method `renderText(...)` will render the text using the provided context and coordinates,
+ * taking `xShift` and `yShift` into account.
  */
 export class Element {
   static get CATEGORY(): string {
@@ -91,8 +91,6 @@ export class Element {
   protected boundingBox?: BoundingBox;
   protected registry?: Registry;
 
-  /**
-    */
   protected textFont: Required<FontInfo>;
   protected text = '';
   protected textMetrics: TextMetrics = {
@@ -105,9 +103,10 @@ export class Element {
     width: 0,
   };
 
+  protected height: number = 0;
   protected width: number = 0;
-  protected yShift: number = 0;
   protected xShift: number = 0;
+  protected yShift: number = 0;
 
   constructor(category?: string) {
     this.#attrs = {
@@ -117,12 +116,7 @@ export class Element {
     };
 
     this.rendered = false;
-    this.textFont = {
-      family: Tables.lookupMetric(`${this.#attrs.type}.fontFamily`),
-      size: Tables.lookupMetric(`${this.#attrs.type}.fontSize`),
-      weight: Tables.lookupMetric(`${this.#attrs.type}.fontWeight`),
-      style: Tables.lookupMetric(`${this.#attrs.type}.fontStyle`),
-    };
+    this.textFont = Tables.lookupMetricFontInfo(this.#attrs.type);
 
     // If a default registry exist, then register with it right away.
     Registry.getDefaultRegistry()?.register(this);
@@ -229,13 +223,13 @@ export class Element {
     throw new RuntimeError('Element', 'Draw not defined');
   }
 
-  /** Check if it has a class label (An element can have multiple class labels).  */
+  /** Check if it has a class label (An element can have multiple class labels). */
   hasClass(className: string): boolean {
     if (!this.#attrs.class) return false;
     return this.#attrs.class?.split(' ').indexOf(className) != -1;
   }
 
-  /** Add a class label (An element can have multiple class labels).  */
+  /** Add a class label (An element can have multiple class labels). */
   addClass(className: string): this {
     if (this.hasClass(className)) return this;
     if (!this.#attrs.class) this.#attrs.class = `${className}`;
@@ -249,7 +243,7 @@ export class Element {
     return this;
   }
 
-  /** Remove a class label (An element can have multiple class labels).  */
+  /** Remove a class label (An element can have multiple class labels). */
   removeClass(className: string): this {
     if (!this.hasClass(className)) return this;
     const arr = this.#attrs.class?.split(' ');
@@ -364,12 +358,7 @@ export class Element {
    * Each Element subclass may specify its own default by overriding the static `TEXT_FONT` property.
    */
   setFont(font?: string | FontInfo, size?: string | number, weight?: string | number, style?: string): this {
-    const defaultTextFont: Required<FontInfo> = {
-      family: Tables.lookupMetric(`${this.#attrs.type}.fontFamily`),
-      size: Tables.lookupMetric(`${this.#attrs.type}.fontSize`),
-      weight: Tables.lookupMetric(`${this.#attrs.type}.fontWeight`),
-      style: Tables.lookupMetric(`${this.#attrs.type}.fontStyle`),
-    };
+    const defaultTextFont: Required<FontInfo> = Tables.lookupMetricFontInfo(this.#attrs.type);
 
     const fontIsObject = typeof font === 'object';
     const fontIsString = typeof font === 'string';
@@ -412,6 +401,7 @@ export class Element {
     return this.textFont;
   }
 
+  /** Set the current FontInfo object. */
   set fontInfo(fontInfo: FontInfo) {
     this.setFont(fontInfo);
   }
@@ -439,9 +429,7 @@ export class Element {
     this.setFontSize(size);
   }
 
-  /**
-   * @returns a CSS font-size string (e.g., '18pt', '12px', '1em').
-   */
+  /** @returns a CSS font-size string (e.g., '18pt', '12px', '1em'). */
   get fontSize(): string {
     let size = this.fontInfo.size;
     if (typeof size === 'number') {
@@ -450,27 +438,22 @@ export class Element {
     return size;
   }
 
-  /**
-   * @returns the font size in `pt`.
-   */
+  /** @returns the font size in `pt`. */
   get fontSizeInPoints(): number {
     return Font.convertSizeToPointValue(this.fontSize);
   }
 
-  /**
-   * @returns the font size in `px`.
-   */
+  /** @returns the font size in `px`. */
   get fontSizeInPixels(): number {
     return Font.convertSizeToPixelValue(this.fontSize);
   }
 
-  /**
-   * @returns a CSS font-style string (e.g., 'italic').
-   */
+  /** @returns a CSS font-style string (e.g., 'italic'). */
   get fontStyle(): string {
     return this.fontInfo.style;
   }
 
+  //** Set the font style. */
   set fontStyle(style: string) {
     const fontInfo = this.fontInfo;
     this.setFont(fontInfo.family, fontInfo.size, fontInfo.weight, style);
@@ -484,6 +467,7 @@ export class Element {
     return this.fontInfo.weight + '';
   }
 
+  //** Set the font weight. */
   set fontWeight(weight: string | number) {
     const fontInfo = this.fontInfo;
     this.setFont(fontInfo.family, fontInfo.size, weight, fontInfo.style);
@@ -506,40 +490,34 @@ export class Element {
     return this;
   }
 
-  /** Get shift element `yShift` */
+  /** Get shift element `yShift`. */
   getYShift(): number {
     return this.yShift;
   }
 
-  /**
-   * Set shift element right `xShift` pixels. Negative values shift left.
-   */
+  /** Set shift element right `xShift` pixels. Negative values shift left. */
   setXShift(xShift: number): this {
     this.xShift = xShift;
     return this;
   }
 
-  /** Get shift element `xShift` */
+  /** Get shift element `xShift`. */
   getXShift(): number {
     return this.xShift;
   }
 
-  /**
-   * Set element text
-   */
+  /** Set element text. */
   setText(text: string): this {
     this.text = text;
     return this;
   }
 
-  /** Get element text */
+  /** Get element text. */
   getText(): string {
     return this.text;
   }
 
-  /**
-   * Render the element text .
-   */
+  /** Render the element text. */
   renderText(ctx: RenderContext, xPos: number, yPos: number): void {
     ctx.save();
     ctx.setFont(this.textFont);
@@ -547,13 +525,14 @@ export class Element {
     ctx.restore();
   }
 
-  /** Canvas used to measure text */
+  /** Canvas used to measure text. */
   static #txtCanvas?: HTMLCanvasElement;
 
+  //** Measure the text ussing the textFont. */
   measureText(): TextMetrics {
     let txtCanvas = Element.#txtCanvas;
     if (!txtCanvas) {
-      // Create the SVG text element that will be used to measure text in the event
+      // Create the canvas element that will be used to measure text in the event
       // of a cache miss.
       txtCanvas = document.createElement('canvas');
       Element.#txtCanvas = txtCanvas;
@@ -562,21 +541,25 @@ export class Element {
     if (!context) throw new RuntimeError('Font', 'No txt context');
     context.font = Font.toCSSString(Font.validate(this.textFont));
     this.textMetrics = context.measureText(this.text);
+    const ascent = this.textMetrics.actualBoundingBoxAscent;
     this.boundingBox = new BoundingBox(
       0,
-      -this.textMetrics.actualBoundingBoxAscent,
+      -ascent,
       this.textMetrics.width,
-      this.textMetrics.actualBoundingBoxDescent + this.textMetrics.actualBoundingBoxAscent
+      this.textMetrics.actualBoundingBoxDescent + ascent
     );
+    this.height = this.boundingBox.getH();
     this.width = this.textMetrics.width;
     return this.textMetrics;
   }
 
+  //** Get the text metrics. */
   getTextMetrics(): TextMetrics {
     return this.textMetrics;
   }
 
+  //** Get the text height. */
   getHeight() {
-    return this.textMetrics.actualBoundingBoxDescent + this.textMetrics.actualBoundingBoxAscent;
+    return this.height;
   }
 }

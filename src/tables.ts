@@ -1,7 +1,7 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 
 import { ArticulationStruct } from './articulation';
-import { Font } from './font';
+import { Font, FontInfo } from './font';
 import { Fraction } from './fraction';
 import { Glyph, GlyphProps } from './glyph';
 import { KeyProps } from './note';
@@ -718,14 +718,28 @@ export class Tables {
     return clefs[clef];
   }
 
+  /** Use the provided key to look up a FontInfo in CommonMetrics. **/
+  static lookupMetricFontInfo(key: string): Required<FontInfo> {
+    return {
+      family: Tables.lookupMetric(`${key}.fontFamily`),
+      size: Tables.lookupMetric(`${key}.fontSize`),
+      weight: Tables.lookupMetric(`${key}.fontWeight`),
+      style: Tables.lookupMetric(`${key}.fontStyle`),
+    };
+  }
+
   /**
-   * Use the provided key to look up a value in this font's metrics file (e.g., bravuraMetrics.ts, petalumaMetrics.ts).
-   * @param key is a string separated by periods (e.g., stave.endPaddingMax, clef.lineCount.'5'.shiftY).
+   * Use the provided key to look up a value in CommonMetrics.
+   * @param key is a string separated by periods (e.g., Stroke.text.fontFamily).
+   *        The following keys will be tried before using the default value:
+   *          - Stroke.text.fontFamily
+   *          - Stroke.fontFamily
+   *          - fontFamily
    * @param defaultValue is returned if the lookup fails.
    * @returns the retrieved value (or `defaultValue` if the lookup fails).
    */
   // eslint-disable-next-line
-  static lookupMetric(key: string, defaultValue?: Record<string, any> | number): any {
+  static lookupMetric(key: string, defaultValue?: any | number): any {
     const keyParts = key.split('.');
 
     let currObj;
@@ -753,6 +767,7 @@ export class Tables {
     // Return the retrieved or default value
     return currObj ? currObj : defaultValue;
   }
+
   /**
    * @param keyOctaveGlyph a string in the format "key/octave" (e.g., "c/5") or "key/octave/custom-note-head-code" (e.g., "g/5/t3").
    * @param clef
