@@ -4,7 +4,6 @@
 import { BoundingBox, Bounds } from './boundingbox';
 import { Clef } from './clef';
 import { Element, ElementStyle } from './element';
-import { Font, FontInfo, FontStyle, FontWeight } from './font';
 import { KeySignature } from './keysignature';
 import { Barline, BarlineType } from './stavebarline';
 import { StaveModifier, StaveModifierPosition } from './stavemodifier';
@@ -58,13 +57,6 @@ export class Stave extends Element {
     return Category.Stave;
   }
 
-  static TEXT_FONT: Required<FontInfo> = {
-    family: Font.SANS_SERIF,
-    size: 8,
-    weight: FontWeight.NORMAL,
-    style: FontStyle.NORMAL,
-  };
-
   readonly options: Required<StaveOptions>;
 
   protected startX: number;
@@ -111,7 +103,6 @@ export class Stave extends Element {
     this.measure = 0;
     this.clef = 'treble';
     this.endClef = undefined;
-    this.resetFont();
 
     this.options = {
       verticalBarWidth: 10, // Width around vertical bar end-marker
@@ -328,7 +319,7 @@ export class Stave extends Element {
   }
 
   // Text functions
-  setText(
+  setStaveText(
     text: string,
     position: number,
     options: {

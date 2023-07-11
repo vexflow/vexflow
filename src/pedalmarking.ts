@@ -2,7 +2,6 @@
 // MIT License
 
 import { Element } from './element';
-import { Font, FontInfo, FontStyle, FontWeight } from './font';
 import { Glyph } from './glyph';
 import { RenderContext } from './rendercontext';
 import { StaveNote } from './stavenote';
@@ -41,13 +40,6 @@ export class PedalMarking extends Element {
   static get CATEGORY(): string {
     return Category.PedalMarking;
   }
-
-  static TEXT_FONT: Required<FontInfo> = {
-    family: Font.SERIF,
-    size: 12,
-    weight: FontWeight.BOLD,
-    style: FontStyle.ITALIC,
-  };
 
   protected line: number;
   protected type: number;
@@ -121,8 +113,6 @@ export class PedalMarking extends Element {
     // Custom text for the release/depress markings
     this.customDepressText = '';
     this.customReleaseText = '';
-
-    this.resetFont();
 
     this.renderOptions = {
       bracketHeight: 10,

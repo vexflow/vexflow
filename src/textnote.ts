@@ -1,7 +1,7 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 
-import { Font, FontInfo, FontStyle, FontWeight } from './font';
+import { Font, FontInfo } from './font';
 import { Glyph } from './glyph';
 import { Note, NoteStruct } from './note';
 import { Tables } from './tables';
@@ -34,13 +34,6 @@ export class TextNote extends Note {
   static get CATEGORY(): string {
     return Category.TextNote;
   }
-
-  static TEXT_FONT: Required<FontInfo> = {
-    family: Font.SANS_SERIF,
-    size: 12,
-    weight: FontWeight.NORMAL,
-    style: FontStyle.NORMAL,
-  };
 
   static readonly Justification = TextJustification;
 

@@ -8,11 +8,11 @@ import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 import { Accidental } from '../src/accidental';
 import { Bend } from '../src/bend';
 import { CanvasContext } from '../src/canvascontext';
-import { Element } from '../src/element';
 import { Flow } from '../src/flow';
 import { Font, FontStyle, FontWeight } from '../src/font';
 import { PedalMarking } from '../src/pedalmarking';
 import { StaveNote } from '../src/stavenote';
+import { CommonMetrics } from '../src/tables';
 import { TextBracket } from '../src/textbracket';
 import { TextNote } from '../src/textnote';
 import { Voice } from '../src/voice';
@@ -46,29 +46,24 @@ function setFont(assert: Assert): void {
   assert.equal(ctx.font, 'italic 100px PetalumaScript');
 
   const voice = new Voice();
-  // Many elements do not override the default Element.TEXT_FONT.
-  assert.propEqual(voice.fontInfo, Element.TEXT_FONT);
   voice.setFont('bold 32pt Arial');
   const fontInfo = voice.fontInfo;
   assert.equal(fontInfo?.size, '32pt');
 
   const flat = new Accidental('b');
-  // eslint-disable-next-line
-  // @ts-ignore access a protected member for testing purposes.
-  assert.equal(flat.textFont, undefined); // The internal instance variable .textFont is undefined by default.
   // Add italic to the default font as defined in Element.TEXT_FONT (since Accidental does not override TEXT_FONT).
-  flat.setFont(undefined, undefined, undefined, FontStyle.ITALIC);
-  assert.equal(flat.getFont(), 'italic 10pt Arial, sans-serif');
+  flat.setFont(undefined, undefined, undefined, 'italic');
+  assert.equal(flat.getFont(), 'italic 30pt Bravura,Gonville,Custom');
   // Anything that is not set will be reset to the defaults.
-  flat.setFont(undefined, undefined, FontWeight.BOLD, undefined);
-  assert.equal(flat.getFont(), 'bold 10pt Arial, sans-serif');
-  flat.setFont(undefined, undefined, FontWeight.BOLD, FontStyle.ITALIC);
-  assert.equal(flat.getFont(), 'italic bold 10pt Arial, sans-serif');
-  flat.setFont(undefined, undefined, FontWeight.BOLD, 'oblique');
-  assert.equal(flat.getFont(), 'oblique bold 10pt Arial, sans-serif');
+  flat.setFont(undefined, undefined, 'bold', undefined);
+  assert.equal(flat.getFont(), 'bold 30pt Bravura,Gonville,Custom');
+  flat.setFont(undefined, undefined, 'bold', 'italic');
+  assert.equal(flat.getFont(), 'italic bold 30pt Bravura,Gonville,Custom');
+  flat.setFont(undefined, undefined, 'bold', 'oblique');
+  assert.equal(flat.getFont(), 'oblique bold 30pt Bravura,Gonville,Custom');
   // '' is equivalent to 'normal'. Neither will be included in the CSS font string.
   flat.setFont(undefined, undefined, 'normal', '');
-  assert.equal(flat.getFont(), '10pt Arial, sans-serif');
+  assert.equal(flat.getFont(), '30pt Bravura,Gonville,Custom');
 }
 
 function fontParsing(assert: Assert): void {
@@ -135,10 +130,7 @@ function setTextFontToGeorgia(options: TestOptions): void {
     factory.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stemDirection: -1, duration: 'q' }),
   ]);
 
-  const defaultFont = TextNote.TEXT_FONT;
-
-  // Set the default before we instantiate TextNote objects with the factory.
-  TextNote.TEXT_FONT = {
+  const georgiaFont = {
     family: 'Georgia, Courier New, serif',
     size: 14,
     weight: 'bold',
@@ -148,7 +140,8 @@ function setTextFontToGeorgia(options: TestOptions): void {
   const voice2 = score.voice([
     factory
       .TextNote({ text: 'Here are some fun lyrics...', duration: 'w' })
-      .setJustification(TextNote.Justification.LEFT),
+      .setJustification(TextNote.Justification.LEFT)
+      .setFont(georgiaFont),
   ]);
 
   const formatter = factory.Formatter();
@@ -156,8 +149,6 @@ function setTextFontToGeorgia(options: TestOptions): void {
 
   factory.draw();
 
-  // Restore the previous default, or else it will affect the rest of the tests.
-  TextNote.TEXT_FONT = defaultFont;
   options.assert.ok(true);
 }
 function setMusicFontToPetaluma(options: TestOptions): void {

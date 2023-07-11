@@ -418,7 +418,7 @@ function drawCombined(options: TestOptions, contextBuilder: ContextBuilder): voi
   const stave5 = new Stave(150, 370, 300);
   const stave6 = new Stave(150, 460, 300);
   const stave7 = new Stave(150, 560, 300);
-  stave1.setText('Violin', Modifier.Position.LEFT);
+  stave1.setStaveText('Violin', Modifier.Position.LEFT);
   stave1.setContext(ctx);
   stave2.setContext(ctx);
   stave3.setContext(ctx);

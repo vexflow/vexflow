@@ -1,13 +1,145 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 
 import { ArticulationStruct } from './articulation';
-import { Font } from './font';
+import { Font, FontInfo } from './font';
 import { Fraction } from './fraction';
 import { Glyph, GlyphProps } from './glyph';
 import { KeyProps } from './note';
 import { RuntimeError } from './util';
 
 const RESOLUTION = 16384;
+
+export const CommonMetrics = {
+  fontFamily: 'Bravura',
+  fontSize: 30,
+  fontWeight: 'normal',
+  fontStyle: 'normal',
+
+  Accidental: {
+    cautionary: {
+      fontSize: 28,
+    },
+  },
+
+  Annotation: {
+    fontFamily: 'Arial, sans-serif',
+    fontSize: 10,
+  },
+
+  Bend: {
+    fontFamily: 'Arial, sans-serif',
+    fontSize: 10,
+  },
+
+  ChordSymbol: {
+    fontFamily: 'Roboto Slab, Times, serif',
+    fontSize: 12,
+  },
+
+  FretHandFinger: {
+    fontFamily: 'Arial, sans-serif',
+    fontSize: 9,
+    fontWeight: 'bold',
+  },
+
+  PedalMarking: {
+    fontFamily: 'Times New Roman, serif',
+    fontSize: 12,
+    fontWeight: 'bold',
+    fontStyle: 'italic',
+  },
+
+  Repetition: {
+    fontFamily: 'Times New Roman, serif',
+    fontSize: 13,
+    fontWeight: 'bold',
+  },
+
+  Stave: {
+    fontFamily: 'Arial, sans-serif',
+    fontSize: 8,
+  },
+
+  StaveConnector: {
+    fontFamily: 'Times New Roman, serif',
+    fontSize: 16,
+  },
+
+  StaveLine: {
+    fontFamily: 'Arial, sans-serif',
+    fontSize: 10,
+  },
+
+  StaveSection: {
+    fontFamily: 'Arial, sans-serif',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+
+  StaveTempo: {
+    fontFamily: 'Times New Roman, serif',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+
+  StaveText: {
+    fontFamily: 'Times New Roman, serif',
+    fontSize: 16,
+  },
+
+  StaveTie: {
+    fontFamily: 'Arial, sans-serif',
+    fontSize: 10,
+  },
+
+  StringNumber: {
+    fontFamily: 'Arial, sans-serif',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+
+  Strokes: {
+    text: {
+      fontFamily: 'Times New Roman, serif',
+      fontSize: 10,
+      fontStyle: 'italic',
+      fontWeight: 'bold',
+    },
+  },
+
+  TabNote: {
+    fontSize: 9,
+  },
+
+  TabSlide: {
+    fontFamily: 'Times New Roman, serif',
+    fontSize: 10,
+    fontStyle: 'italic',
+    fontWeight: 'bold',
+  },
+
+  TabTie: {
+    fontFamily: 'Arial, sans-serif',
+    fontSize: 10,
+  },
+
+  TextBracket: {
+    fontFamily: 'Times New Roman, serif',
+    fontSize: 15,
+    fontStyle: 'italic',
+  },
+
+  TextNote: {
+    fontFamily: 'Arial, sans-serif',
+    fontSize: 12,
+  },
+
+  Volta: {
+    fontFamily: 'Arial, sans-serif',
+    fontSize: 9,
+    fontWeight: 'bold',
+  },
+};
 
 /**
  * Map duration numbers to 'ticks', the unit of duration used throughout VexFlow.
@@ -584,6 +716,56 @@ export class Tables {
   static clefProperties(clef: string): { lineShift: number } {
     if (!clef || !(clef in clefs)) throw new RuntimeError('BadArgument', 'Invalid clef: ' + clef);
     return clefs[clef];
+  }
+
+  /** Use the provided key to look up a FontInfo in CommonMetrics. **/
+  static lookupMetricFontInfo(key: string): Required<FontInfo> {
+    return {
+      family: Tables.lookupMetric(`${key}.fontFamily`),
+      size: Tables.lookupMetric(`${key}.fontSize`),
+      weight: Tables.lookupMetric(`${key}.fontWeight`),
+      style: Tables.lookupMetric(`${key}.fontStyle`),
+    };
+  }
+
+  /**
+   * Use the provided key to look up a value in CommonMetrics.
+   * @param key is a string separated by periods (e.g., Stroke.text.fontFamily).
+   *        The following keys will be tried before using the default value:
+   *          - Stroke.text.fontFamily
+   *          - Stroke.fontFamily
+   *          - fontFamily
+   * @param defaultValue is returned if the lookup fails.
+   * @returns the retrieved value (or `defaultValue` if the lookup fails).
+   */
+  // eslint-disable-next-line
+  static lookupMetric(key: string, defaultValue?: any | number): any {
+    const keyParts = key.split('.');
+
+    let currObj;
+
+    while (!currObj && keyParts.length) {
+      // Start with the top level font metrics object, and keep looking deeper into the object (via each part of the period-delimited key).
+      currObj = CommonMetrics;
+      for (let i = 0; i < keyParts.length; i++) {
+        const keyPart = keyParts[i];
+        const value = currObj[keyPart] as any;
+        if (value === undefined) {
+          // If the key lookup fails, we fall back to undefined.
+          currObj = undefined;
+          break;
+        }
+        // The most recent lookup succeeded, so we drill deeper into the object.
+        currObj = value;
+      }
+      if (keyParts.length > 1) {
+        keyParts[keyParts.length - 2] = keyParts[keyParts.length - 1];
+      }
+      keyParts.pop();
+    }
+
+    // Return the retrieved or default value
+    return currObj ? currObj : defaultValue;
   }
 
   /**

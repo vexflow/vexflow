@@ -9,7 +9,7 @@
 //
 // See `tests/chordsymbol_tests.ts` for usage examples.
 
-import { Font, FontInfo, FontStyle, FontWeight } from './font';
+import { Font, FontInfo } from './font';
 import { Glyph } from './glyph';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
@@ -409,26 +409,12 @@ export class ChordSymbol extends Modifier {
 
   constructor() {
     super();
-    this.resetFont();
-  }
-
-  /**
-   * Default text font.
-   * Choose a font family that works well with the current music engraving font.
-   * @override `Element.TEXT_FONT`.
-   */
-  static get TEXT_FONT(): Required<FontInfo> {
-    let family = 'Roboto Slab, Times, serif';
     if (Tables.currentMusicFont().getName() === 'Petaluma') {
       // Fixes Issue #1180
-      family = 'PetalumaScript, Arial, sans-serif';
+      this.textFont.family = 'PetalumaScript, Arial, sans-serif';
     }
-    return {
-      family,
-      size: 12,
-      weight: FontWeight.NORMAL,
-      style: FontStyle.NORMAL,
-    };
+
+    this.textFormatter = TextFormatter.create(this.textFont);
   }
 
   /**

@@ -1,7 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
-import { Element } from './element';
-import { FontInfo } from './font';
 import { Modifier, ModifierPosition } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { Stave } from './stave';
@@ -45,8 +43,6 @@ export class Annotation extends Modifier {
   static get CATEGORY(): string {
     return Category.Annotation;
   }
-
-  static TEXT_FONT: Required<FontInfo> = { ...Element.TEXT_FONT };
 
   /** Text annotations can be positioned and justified relative to the note. */
   static HorizontalJustify = AnnotationHorizontalJustify;
@@ -195,7 +191,6 @@ export class Annotation extends Modifier {
     // warning: the default in the constructor is TOP, but in the factory the default is BOTTOM.
     // this is to support legacy application that may expect this.
     this.verticalJustification = AnnotationVerticalJustify.TOP;
-    this.resetFont();
 
     // The default width is calculated from the text.
     this.setWidth(Tables.textWidth(text));

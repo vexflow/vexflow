@@ -67,7 +67,7 @@ import { StringNumber } from './stringnumber';
 import { Stroke } from './strokes';
 import { SVGContext } from './svgcontext';
 import { System } from './system';
-import { Tables } from './tables';
+import { CommonMetrics, Tables } from './tables';
 import { TabNote } from './tabnote';
 import { TabSlide } from './tabslide';
 import { TabStave } from './tabstave';
@@ -229,6 +229,7 @@ export class Flow {
    */
   static setMusicFont(...fontNames: string[]): Font[] {
     // Convert the array of font names into an array of Font objects.
+    CommonMetrics.fontFamily = fontNames.join(',');
     const fonts = fontNames.map((fontName) => Font.load(fontName));
     Tables.MUSIC_FONT_STACK = fonts;
     Glyph.MUSIC_FONT_STACK = fonts.slice();

@@ -63,7 +63,6 @@ export interface FactoryOptions {
     height: number;
     background?: string;
   };
-  font?: FontInfo;
 }
 
 // eslint-disable-next-line
@@ -77,9 +76,6 @@ function L(...args: any[]) {
 export class Factory {
   /** To enable logging for this class. Set `Vex.Flow.Factory.DEBUG` to `true`. */
   static DEBUG: boolean = false;
-
-  /** Default text font. */
-  static TEXT_FONT: Required<FontInfo> = { ...Element.TEXT_FONT };
 
   /**
    * Static simplified function to access constructor without providing FactoryOptions
@@ -122,7 +118,6 @@ export class Factory {
         height: 200,
         background: '#FFF',
       },
-      font: Factory.TEXT_FONT,
     };
 
     this.setOptions(options);

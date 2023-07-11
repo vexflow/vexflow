@@ -1,7 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // @author: Radosaw Eichler 2012
 
-import { Font, FontInfo, FontStyle, FontWeight } from './font';
 import { Glyph } from './glyph';
 import { Stave } from './stave';
 import { StaveModifier, StaveModifierPosition } from './stavemodifier';
@@ -21,13 +20,6 @@ export class StaveTempo extends StaveModifier {
     return Category.StaveTempo;
   }
 
-  static TEXT_FONT: Required<FontInfo> = {
-    family: Font.SERIF,
-    size: 14,
-    weight: FontWeight.BOLD,
-    style: FontStyle.NORMAL,
-  };
-
   protected tempo: StaveTempoOptions;
   protected shiftX: number;
   protected shiftY: number;
@@ -42,7 +34,6 @@ export class StaveTempo extends StaveModifier {
     this.x = x;
     this.shiftX = 10;
     this.shiftY = shiftY;
-    this.resetFont();
   }
 
   setTempo(tempo: StaveTempoOptions): this {

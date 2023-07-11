@@ -4,7 +4,6 @@
 // This file implements the `Stroke` class which renders chord strokes
 // that can be arpeggiated, brushed, rasquedo, etc.
 
-import { Font, FontInfo, FontStyle, FontWeight } from './font';
 import { Glyph } from './glyph';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
@@ -26,13 +25,6 @@ export class Stroke extends Modifier {
     RASQUEDO_DOWN: 5,
     RASQUEDO_UP: 6,
     ARPEGGIO_DIRECTIONLESS: 7, // Arpeggiated chord without upwards or downwards arrow
-  };
-
-  static TEXT_FONT: Required<FontInfo> = {
-    family: Font.SERIF,
-    size: Font.SIZE,
-    weight: FontWeight.BOLD,
-    style: FontStyle.ITALIC,
   };
 
   // Arrange strokes inside `ModifierContext`
@@ -95,8 +87,6 @@ export class Stroke extends Modifier {
     this.renderOptions = {
       fontScale: Tables.NOTATION_FONT_SCALE,
     };
-
-    this.resetFont();
 
     this.setXShift(0);
     this.setWidth(10);
@@ -243,8 +233,9 @@ export class Stroke extends Modifier {
 
     // Draw the rasquedo "R"
     if (this.type === Stroke.Type.RASQUEDO_DOWN || this.type === Stroke.Type.RASQUEDO_UP) {
+      const textFont = Tables.lookupMetricFontInfo(`Strokes.text`);
       ctx.save();
-      ctx.setFont(this.textFont);
+      ctx.setFont(textFont);
       ctx.fillText('R', x + textShiftX, textY);
       ctx.restore();
     }

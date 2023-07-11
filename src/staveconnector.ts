@@ -2,7 +2,6 @@
 // MIT License
 
 import { Element } from './element';
-import { Font, FontInfo, FontStyle, FontWeight } from './font';
 import { Glyph } from './glyph';
 import { RenderContext } from './rendercontext';
 import { Stave } from './stave';
@@ -59,13 +58,6 @@ export class StaveConnector extends Element {
   static get CATEGORY(): string {
     return Category.StaveConnector;
   }
-
-  static TEXT_FONT: Required<FontInfo> = {
-    family: Font.SERIF,
-    size: 16,
-    weight: FontWeight.NORMAL,
-    style: FontStyle.NORMAL,
-  };
 
   /**
    * SINGLE_LEFT and SINGLE are the same value for compatibility
@@ -133,7 +125,6 @@ export class StaveConnector extends Element {
     this.topStave = topStave;
     this.bottomStave = bottomStave;
     this.type = StaveConnector.type.DOUBLE;
-    this.resetFont();
 
     // 1. Offset Bold Double Left to align with offset Repeat Begin bars
     // 2. Offset BRACE type not to overlap with another StaveConnector

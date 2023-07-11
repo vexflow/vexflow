@@ -4,7 +4,6 @@
 // This file implements the `StringNumber` class which renders string
 // number annotations beside notes.
 
-import { Font, FontInfo, FontStyle, FontWeight } from './font';
 import { Modifier, ModifierPosition } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { Note } from './note';
@@ -26,13 +25,6 @@ export class StringNumber extends Modifier {
   static get CATEGORY(): string {
     return Category.StringNumber;
   }
-
-  static TEXT_FONT: Required<FontInfo> = {
-    family: Font.SANS_SERIF,
-    size: Font.SIZE,
-    weight: FontWeight.BOLD,
-    style: FontStyle.NORMAL,
-  };
 
   static get metrics(): StringNumberMetrics {
     return (
@@ -178,7 +170,6 @@ export class StringNumber extends Modifier {
     this.radius = 8;
     this.drawCircle = true;
     this.setWidth(this.radius * 2 + 4);
-    this.resetFont();
   }
 
   setLineEndType(leg: number): this {
