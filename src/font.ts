@@ -363,13 +363,8 @@ export class Font {
   // Support distributions of the typescript compiler that do not yet include the FontFace API declarations.
   // eslint-disable-next-line
   // @ts-ignore
-  static async loadWebFont(fontName: string, woffURL: string, includeWoff2: boolean = true): Promise<FontFace> {
-    const woff2URL = includeWoff2 ? `url(${woffURL}2) format('woff2'), ` : '';
-    const woff1URL = `url(${woffURL}) format('woff')`;
-    const woffURLs = woff2URL + woff1URL;
-    // eslint-disable-next-line
-    // @ts-ignore
-    const fontFace = new FontFace(fontName, woffURLs);
+  static async loadWebFont(fontName: string, woffURL: string): Promise<FontFace> {
+    const fontFace = new FontFace(fontName, `url(${woffURL})`);
     await fontFace.load();
     // eslint-disable-next-line
     // @ts-ignore
