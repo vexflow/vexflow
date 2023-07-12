@@ -89,7 +89,7 @@
       <button id="chooseBravura" onclick="setFont(event, 'Bravura'); return false;">Bravura</button> &nbsp;
       <button id="choosePetaluma" onclick="setFont(event, 'Petaluma'); return false;">Petaluma</button> &nbsp;
       <button id="chooseGonville" onclick="setFont(event, 'Gonville'); return false;">Gonville</button> &nbsp;
-      <button id="chooseRobotoSlab" onclick="setFont(event, 'Roboto Slab'); return false;">Roboto Slab</button>
+      <button id="chooseRobotoSlab" onclick="setFont(event, 'RobotoSlab'); return false;">RobotoSlab</button>
       &nbsp;
       <button id="choosePetalumaScript" onclick="setFont(event, 'PetalumaScript'); return false;">
         PetalumaScript
@@ -214,7 +214,7 @@
         await gonville.load();
         document.fonts.add(gonville);
         const robotoSlabOTF = '../@/robotoslab/RobotoSlab-Medium_2.001.otf';
-        const robotoSlab = new FontFace('Roboto Slab', `url(${robotoSlabOTF}) format('opentype')`);
+        const robotoSlab = new FontFace('RobotoSlab', `url(${robotoSlabOTF}) format('opentype')`);
         await robotoSlab.load();
         document.fonts.add(robotoSlab);
         const petalumaScriptOTF = '../@/petaluma/PetalumaScript_1.10.otf';
@@ -314,7 +314,7 @@
 
         if (currentFont === 'Gonville') {
           addItemsForCodePoints(GonvilleCodePointsToShow);
-        } else if (currentFont === 'PetalumaScript' || currentFont === 'Roboto Slab') {
+        } else if (currentFont === 'PetalumaScript' || currentFont === 'RobotoSlab') {
           // Render ASCII glyphs for text fonts (e.g., 0x21 to 0x7E).
           addItemsForCodePoints(TextFontCodePointsToShow);
         } else {

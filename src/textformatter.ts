@@ -89,8 +89,8 @@ export class TextFormatter {
     const requestedFamilies = requestedFont.family.split(/\s*,\s*/);
     for (const requestedFamily of requestedFamilies) {
       for (const fontFamily in registry) {
-        // Support cases where the registry contains 'Roboto Slab Medium',
-        // but the requestedFont.family is 'Roboto Slab'.
+        // Support cases where the registry contains 'RobotoSlab Medium',
+        // but the requestedFont.family is 'RobotoSlab'.
         if (fontFamily.startsWith(requestedFamily)) {
           candidates.push(registry[fontFamily]);
         }

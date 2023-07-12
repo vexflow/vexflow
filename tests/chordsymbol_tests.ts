@@ -38,9 +38,9 @@ const note = (factory: Factory, keys: string[], duration: string, chordSymbol: C
   factory.StaveNote({ keys, duration }).addModifier(chordSymbol, 0);
 
 /** Calculate the glyph's width in the current music font. */
-function getGlyphWidth(glyphName: string): number {
+function getGlyphWidth(charCode: number): number {
   const el = new Element();
-  el.setText(String.fromCharCode(parseInt(glyphName, 16)));
+  el.setText(String.fromCharCode(charCode));
   el.measureText()
   return el.getWidth();
 }
@@ -61,7 +61,7 @@ function withModifiers(options: TestOptions): void {
     const formatter = f.Formatter();
     formatter.joinVoices([voice]);
     const voiceW = formatter.preCalculateMinTotalWidth([voice]);
-    const staffW = voiceW + Stave.defaultPadding + getGlyphWidth('E050' /*gClef*/);
+    const staffW = voiceW + Stave.defaultPadding + getGlyphWidth(0xe050 /*gClef*/);
     formatter.format([voice], voiceW);
     const staff = f.Stave({ x: 10, y, width: staffW }).addClef('treble').draw();
     voice.draw(ctx, staff);

@@ -343,7 +343,7 @@ export class Font {
     PetalumaScript: 'petaluma/PetalumaScript_1.10_FS.woff2',
     MuseJazz: 'musejazz/MuseJazz_1.0.woff2',
     MuseJazzText: 'musejazz/MuseJazzText_1.0.woff2',
-    'Roboto Slab': 'robotoslab/RobotoSlab-Medium_2.001.woff2',
+    RobotoSlab: 'robotoslab/RobotoSlab-Medium_2.001.woff2',
     FinaleAsh: 'finale/FinaleAsh_1.7.woff2',
     FinaleAshText: 'finale/FinaleAshText_1.3.woff2',
     FinaleJazz: 'finale/FinaleJazz_1.9.woff2',

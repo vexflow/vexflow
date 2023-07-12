@@ -857,7 +857,7 @@ export const RobotoSlabFont = {
       advanceWidth: 1386,
     },
   },
-  fontFamily: 'Roboto Slab',
+  fontFamily: 'RobotoSlab',
   resolution: 2048,
   generatedOn: '2020-06-15T19:12:58.120Z',
 };

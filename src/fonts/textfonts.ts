@@ -76,7 +76,7 @@ export function loadTextFonts() {
       description: 'Generic SERIF font',
     });
   }
-  // Roboto Slab
+  // RobotoSlab
   {
     const fontData = RobotoSlabFont;
     const { fontFamily, resolution, glyphs } = fontData;
