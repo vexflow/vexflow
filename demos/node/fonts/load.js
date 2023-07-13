@@ -12,8 +12,8 @@ const { JSDOM } = require('jsdom');
 const fontsDir = '../../../tools/fonts/@/';
 registerFont(fontsDir + 'bravura/Bravura_1.392.woff', { family: 'Bravura' });
 registerFont(fontsDir + 'petaluma/Petaluma_1.065.woff', { family: 'Petaluma' });
-registerFont(fontsDir + 'petaluma/PetalumaScript_1.10.woff', { family: 'PetalumaScript' });
-registerFont(fontsDir + 'robotoslab/RobotoSlab-Medium_2.001.otf', { family: 'RobotoSlab' });
+registerFont(fontsDir + 'petaluma/PetalumaScript_1.10.woff', { family: 'Petaluma Script' });
+registerFont(fontsDir + 'robotoslab/RobotoSlab-Medium_2.001.otf', { family: 'Roboto Slab' });
 
 // Unicode code points.
 const fClef = 0xe062;

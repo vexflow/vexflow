@@ -224,16 +224,16 @@ export class Flow {
     // HACK during review to introduce the correct stacks step by step
     switch (fontNames[0]) {
       case 'Bravura':
-        CommonMetrics.fontFamily = 'Bravura,RobotoSlab';
+        CommonMetrics.fontFamily = 'Bravura,Roboto Slab';
         break;
       case 'Gonville':
-        CommonMetrics.fontFamily = 'GonvilleSmufl,Bravura,RobotoSlab';
+        CommonMetrics.fontFamily = 'GonvilleSmufl,Bravura,Roboto Slab';
         break;
       case 'Leland':
-        CommonMetrics.fontFamily = 'Leland,Bravura,RobotoSlab';
+        CommonMetrics.fontFamily = 'Leland,Bravura,Roboto Slab';
         break;
       case 'Petaluma':
-        CommonMetrics.fontFamily = 'Petaluma,Bravura,PetalumaScript';
+        CommonMetrics.fontFamily = 'Petaluma,Bravura,Petaluma Script';
         break;
       default:
         CommonMetrics.fontFamily = fontNames.join(',');

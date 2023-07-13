@@ -84,7 +84,7 @@ function lyrics(options: TestOptions): void {
       const verse = Math.floor(ix / 3);
       const noteGroupID = 'n' + (ix % 3);
       const noteGroup = registry.getElementById(noteGroupID) as Tickable;
-      const lyricsAnnotation = f.Annotation({ text }).setFont('RobotoSlab', fontSize);
+      const lyricsAnnotation = f.Annotation({ text }).setFont('Roboto Slab', fontSize);
       lyricsAnnotation.setPosition(ModifierPosition.BELOW);
       noteGroup.addModifier(lyricsAnnotation, verse);
     });

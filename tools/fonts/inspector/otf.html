@@ -89,9 +89,9 @@
       <button id="chooseBravura" onclick="setFont(event, 'Bravura'); return false;">Bravura</button> &nbsp;
       <button id="choosePetaluma" onclick="setFont(event, 'Petaluma'); return false;">Petaluma</button> &nbsp;
       <button id="chooseGonville" onclick="setFont(event, 'Gonville'); return false;">Gonville</button> &nbsp;
-      <button id="chooseRobotoSlab" onclick="setFont(event, 'RobotoSlab'); return false;">RobotoSlab</button>
+      <button id="chooseRobotoSlab" onclick="setFont(event, 'Roboto Slab'); return false;">Roboto Slab</button>
       &nbsp;
-      <button id="choosePetalumaScript" onclick="setFont(event, 'PetalumaScript'); return false;">
+      <button id="choosePetalumaScript" onclick="setFont(event, 'Petaluma Script'); return false;">
         PetalumaScript
       </button>
     </div>
@@ -314,7 +314,7 @@
 
         if (currentFont === 'Gonville') {
           addItemsForCodePoints(GonvilleCodePointsToShow);
-        } else if (currentFont === 'PetalumaScript' || currentFont === 'RobotoSlab') {
+        } else if (currentFont === 'Petaluma Script' || currentFont === 'Roboto Slab') {
           // Render ASCII glyphs for text fonts (e.g., 0x21 to 0x7E).
           addItemsForCodePoints(TextFontCodePointsToShow);
         } else {

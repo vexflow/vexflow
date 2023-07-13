@@ -3,7 +3,7 @@ We currently only include the latin woff/woff2 from: https://fonts.googleapis.co
 ```css
 /* latin */
 @font-face {
-  font-family: 'RobotoSlab';
+  font-family: 'Roboto Slab';
   font-style: normal;
   font-weight: 500;
   font-display: swap;
