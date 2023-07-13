@@ -453,7 +453,7 @@ export class Element {
     return this.fontInfo.style;
   }
 
-  //** Set the font style. */
+  /** Set the font style. */
   set fontStyle(style: string) {
     const fontInfo = this.fontInfo;
     this.setFont(fontInfo.family, fontInfo.size, fontInfo.weight, style);
@@ -467,7 +467,7 @@ export class Element {
     return this.fontInfo.weight + '';
   }
 
-  //** Set the font weight. */
+  /** Set the font weight. */
   set fontWeight(weight: string | number) {
     const fontInfo = this.fontInfo;
     this.setFont(fontInfo.family, fontInfo.size, weight, fontInfo.style);
@@ -528,7 +528,7 @@ export class Element {
   /** Canvas used to measure text. */
   static #txtCanvas?: HTMLCanvasElement;
 
-  //** Measure the text ussing the textFont. */
+  /** Measure the text using the textFont. */
   measureText(): TextMetrics {
     let txtCanvas = Element.#txtCanvas;
     if (!txtCanvas) {
@@ -553,12 +553,12 @@ export class Element {
     return this.textMetrics;
   }
 
-  //** Get the text metrics. */
+  /** Get the text metrics. */
   getTextMetrics(): TextMetrics {
     return this.textMetrics;
   }
 
-  //** Get the text height. */
+  /** Get the text height. */
   getHeight() {
     return this.height;
   }
