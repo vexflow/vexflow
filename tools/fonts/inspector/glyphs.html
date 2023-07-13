@@ -133,6 +133,11 @@
     <script>
       let ctx;
 
+      function codepoint2decimal(codepoint) {
+        // Return the decimal value of 'XXXX' of codepoint, which has a string format 'U+XXXX'
+        return parseInt(codepoint.substring(2), 16)
+      }
+
       function chooseFont(fontName) {
         document.getElementById('title').innerText = 'Glyph Inspector – ' + fontName;
         
@@ -162,14 +167,15 @@
         var y = 250;
 
         const arr = Object.keys(SMuFLGlyphInfo).sort(function(a,b) { 
-          return parseInt(SMuFLGlyphInfo[a].codepoint.substring(2), 16) - parseInt(SMuFLGlyphInfo[b].codepoint.substring(2), 16); 
+          return codepoint2decimal(SMuFLGlyphInfo[a].codepoint) - codepoint2decimal(SMuFLGlyphInfo[b].codepoint); 
         } );
         arr.forEach((glyphName, index) => {
           // Show the glyph name.
-          const code = parseInt(SMuFLGlyphInfo[glyphName].codepoint.substring(2), 16);
+          const code = codepoint2decimal(SMuFLGlyphInfo[glyphName].codepoint);
           ctx.fillStyle = '#222';
           ctx.strokeStyle = '#222';
           ctx.font = '8pt Arial';
+          // if the name has more than 25 characters, break it up into two lines.
           if (glyphName.length > 25) {
             ctx.fillText(glyphName.slice(0,22)+'...', x, y + 50);
             ctx.fillText(glyphName.slice(22 - glyphName.length), x, y + 60);
