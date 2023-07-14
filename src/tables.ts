@@ -34,8 +34,8 @@ export const CommonMetrics = {
   ChordSymbol: {
     fontSize: 12,
     spacing: 0.05,
-    subscriptOffset: 0.1,
-    superscriptOffset: -0.5,
+    subscriptOffset: 0.2,
+    superscriptOffset: -0.4,
     superSubRatio: 0.6,
   },
 
