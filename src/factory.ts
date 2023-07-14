@@ -1,6 +1,7 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 // @author Mohit Cheppudira
+// MIT License
 
 import { Accidental } from './accidental';
 import { Annotation, AnnotationHorizontalJustify, AnnotationVerticalJustify } from './annotation';
@@ -589,7 +590,7 @@ export class Factory {
     from: Note | null;
     to: Note | null;
     options: {
-      harsh?: boolean;
+      code?: number;
       line?: number;
     };
   }): VibratoBracket {
@@ -599,7 +600,7 @@ export class Factory {
     });
 
     if (params.options.line) vibratoBracket.setLine(params.options.line);
-    if (params.options.harsh) vibratoBracket.setHarsh(params.options.harsh);
+    if (params.options.code) vibratoBracket.setVibratoCode(params.options.code);
 
     vibratoBracket.setContext(this.context);
     this.renderQ.push(vibratoBracket);

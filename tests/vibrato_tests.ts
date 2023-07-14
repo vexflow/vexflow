@@ -67,11 +67,11 @@ function harsh(options: TestOptions, contextBuilder: ContextBuilder): void {
         { str: 4, fret: 9 },
       ],
       duration: 'h',
-    }).addModifier(new Vibrato().setHarsh(true), 0),
+    }).addModifier(new Vibrato().setVibratoCode(0xeae2), 0),
     tabNote({
       positions: [{ str: 2, fret: 10 }],
       duration: 'h',
-    }).addModifier(new Vibrato().setHarsh(true), 0),
+    }).addModifier(new Vibrato().setVibratoCode(0xeac0), 0),
   ];
 
   Formatter.FormatAndDraw(ctx, stave, notes);
@@ -105,7 +105,7 @@ function withBend(options: TestOptions, contextBuilder: ContextBuilder): void {
     tabNote({
       positions: [{ str: 2, fret: 10 }],
       duration: 'h',
-    }).addModifier(new Vibrato().setVibratoWidth(120).setHarsh(true), 0),
+    }).addModifier(new Vibrato().setVibratoWidth(120).setVibratoCode(0xeae2), 0),
   ];
 
   Formatter.FormatAndDraw(ctx, stave, notes);
