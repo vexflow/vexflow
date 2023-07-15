@@ -2,6 +2,7 @@
 // MIT License
 // @author Mohit Cheppudira
 
+import { BEAM_BOTH } from './beam';
 import { BoundingBox } from './boundingbox';
 import { Font, FontInfo } from './font';
 import { Registry } from './registry';
@@ -561,5 +562,24 @@ export class Element {
   /** Get the text height. */
   getHeight() {
     return this.height;
+  }
+
+  setOriginX(x: number): void {
+    const bbox = defined(this.boundingBox);
+    const originX = Math.abs(bbox.getX() / bbox.getW());
+    const xShift = (x - originX) * bbox.getW();
+    this.xShift = -xShift;
+  }
+
+  setOriginY(y: number): void {
+    const bbox = defined(this.boundingBox);
+    const originY = Math.abs(bbox.getY() / bbox.getH());
+    const yShift = (y - originY) * bbox.getH();
+    this.yShift = -yShift;
+  }
+
+  setOrigin(x: number, y: number): void {
+    this.setOriginX(x);
+    this.setOriginY(y);
   }
 }
