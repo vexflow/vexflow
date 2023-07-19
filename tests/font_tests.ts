@@ -74,7 +74,7 @@ function fontParsing(assert: Assert): void {
   assert.equal(bFont?.weight, FontWeight.NORMAL);
   assert.equal(bFont?.style, FontStyle.NORMAL);
 
-  const f1 = 'RobotoSlab, serif';
+  const f1 = 'Roboto Slab, serif';
   const t = new TextNote({ duration: '4', font: { family: f1 } });
   assert.equal(f1, t.fontInfo.family);
 

@@ -356,7 +356,7 @@ export class ChordSymbol extends Modifier {
       symbolModifier: SymbolModifiers;
     }> = {}
   ): this {
-    return this.addText(String.fromCharCode(0xe874, 0xe874), params);
+    return this.addText(String.fromCharCode(0xe874 /*csymMinor*/, 0xe874 /*csymMinor*/), params);
   }
 
   /** Set vertical position of text (above or below stave). */

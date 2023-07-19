@@ -2,7 +2,7 @@
 //
 // This demo shows how to use node-canvas to load a font (woff / otf).
 // It does not currently use VexFlow.
-// TODO: Check if the text fonts (PetalumaScript & RobotoSlab) are automatically
+// TODO: Check if the text fonts (Petaluma Script & Roboto Slab) are automatically
 // picked up by VexFlow's ChordSymbol.
 // Note: JSDOM uses node-canvas internally. https://www.npmjs.com/package/canvas
 
