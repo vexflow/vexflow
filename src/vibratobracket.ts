@@ -23,17 +23,10 @@ export class VibratoBracket extends Element {
   }
 
   protected line: number;
+  protected vibrato = new Vibrato();
 
   protected start?: Note;
   protected stop?: Note;
-
-  public renderOptions: {
-    vibratoWidth: number;
-    waveWidth: number;
-    waveHeight: number;
-    waveGirth: number;
-    harsh: boolean;
-  };
 
   /**
    * Either the stop or start note must be set, or both of them.
@@ -47,14 +40,6 @@ export class VibratoBracket extends Element {
     if (bracketData.stop) this.stop = bracketData.stop;
 
     this.line = 1;
-
-    this.renderOptions = {
-      harsh: false,
-      waveHeight: 6,
-      waveWidth: 4,
-      waveGirth: 2,
-      vibratoWidth: 0,
-    };
   }
 
   /** Set line position of the vibrato bracket. */
@@ -63,9 +48,9 @@ export class VibratoBracket extends Element {
     return this;
   }
 
-  /** Set harsh vibrato bracket. */
-  setHarsh(harsh: boolean): this {
-    this.renderOptions.harsh = harsh;
+  /** Set vibrato code. */
+  setVibratoCode(code: number): this {
+    this.vibrato.setVibratoCode(code);
     return this;
   }
 
@@ -88,10 +73,9 @@ export class VibratoBracket extends Element {
       (this.start && this.start.checkStave().getTieEndX() - 10) ||
       0;
 
-    this.renderOptions.vibratoWidth = stopX - startX;
+    this.vibrato.setVibratoWidth(stopX - startX);
 
     L('Rendering VibratoBracket: startX:', startX, 'stopX:', stopX, 'y:', y);
-
-    Vibrato.renderVibrato(ctx, startX, y, this.renderOptions);
+    this.vibrato.renderText(ctx, startX, y);
   }
 }

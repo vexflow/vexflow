@@ -9,11 +9,8 @@ import { Tables } from './tables';
 import { Category } from './typeguard';
 
 export interface VibratoRenderOptions {
-  vibratoWidth: number;
-  waveWidth: number;
-  waveHeight: number;
-  waveGirth: number;
-  harsh: boolean;
+  code: number;
+  width: number;
 }
 
 /** `Vibrato` implements diverse vibratos. */
@@ -22,7 +19,7 @@ export class Vibrato extends Modifier {
     return Category.Vibrato;
   }
 
-  public renderOptions: VibratoRenderOptions;
+  protected renderOptions: VibratoRenderOptions;
 
   /** Arrange vibratos inside a `ModifierContext`. */
   static format(vibratos: Vibrato[], state: ModifierContextState, context: ModifierContext): boolean {
@@ -61,27 +58,32 @@ export class Vibrato extends Modifier {
 
     this.position = Modifier.Position.RIGHT;
     this.renderOptions = {
-      harsh: false,
-      vibratoWidth: 20,
-      waveHeight: 6,
-      waveWidth: 4,
-      waveGirth: 2,
+      code: 0xeab0,
+      width: 20,
     };
 
-    this.setVibratoWidth(this.renderOptions.vibratoWidth);
-  }
-
-  /** Set harsh vibrato. */
-  setHarsh(harsh: boolean): this {
-    this.renderOptions.harsh = harsh;
-    return this;
+    this.setVibratoWidth(this.renderOptions.width);
   }
 
   /** Set vibrato width in pixels. */
   setVibratoWidth(width: number): this {
-    this.renderOptions.vibratoWidth = width;
-    this.setWidth(width);
+    this.renderOptions.width = width;
+    this.text = String.fromCodePoint(this.renderOptions.code);
+    this.measureText();
+
+    const items = Math.round(this.renderOptions.width / this.getWidth());
+    for (let i = 1; i < items; i++) {
+      this.text += String.fromCodePoint(this.renderOptions.code);
+    }
+    this.measureText();
+
     return this;
+  }
+
+  /** Set vibrato code. */
+  setVibratoCode(code: number): this {
+    this.renderOptions.code = code;
+    return this.setVibratoWidth(this.renderOptions.width);
   }
 
   /** Draw the vibrato on the rendering context. */
@@ -92,54 +94,9 @@ export class Vibrato extends Modifier {
 
     const start = note.getModifierStartXY(Modifier.Position.RIGHT, this.index);
 
-    const vx = start.x + this.xShift;
-    const vy = note.getYForTopText(this.textLine) + 2;
+    const vx = start.x;
+    const vy = note.getYForTopText(this.textLine) + 5;
 
-    Vibrato.renderVibrato(ctx, vx, vy, this.renderOptions);
-  }
-
-  /**
-   * Static rendering method that can be called from
-   * other classes (e.g. VibratoBracket).
-   */
-  static renderVibrato(ctx: RenderContext, x: number, y: number, opts: VibratoRenderOptions): void {
-    const { vibratoWidth, waveWidth, waveHeight, waveGirth, harsh } = opts;
-    const numWaves = vibratoWidth / waveWidth;
-
-    ctx.beginPath();
-
-    let i;
-    if (harsh) {
-      ctx.moveTo(x, y + waveGirth + 1);
-      for (i = 0; i < numWaves / 2; ++i) {
-        ctx.lineTo(x + waveWidth, y - waveHeight / 2);
-        x += waveWidth;
-        ctx.lineTo(x + waveWidth, y + waveHeight / 2);
-        x += waveWidth;
-      }
-      for (i = 0; i < numWaves / 2; ++i) {
-        ctx.lineTo(x - waveWidth, y - waveHeight / 2 + waveGirth + 1);
-        x -= waveWidth;
-        ctx.lineTo(x - waveWidth, y + waveHeight / 2 + waveGirth + 1);
-        x -= waveWidth;
-      }
-      ctx.fill();
-    } else {
-      ctx.moveTo(x, y + waveGirth);
-      for (i = 0; i < numWaves / 2; ++i) {
-        ctx.quadraticCurveTo(x + waveWidth / 2, y - waveHeight / 2, x + waveWidth, y);
-        x += waveWidth;
-        ctx.quadraticCurveTo(x + waveWidth / 2, y + waveHeight / 2, x + waveWidth, y);
-        x += waveWidth;
-      }
-
-      for (i = 0; i < numWaves / 2; ++i) {
-        ctx.quadraticCurveTo(x - waveWidth / 2, y + waveHeight / 2 + waveGirth, x - waveWidth, y + waveGirth);
-        x -= waveWidth;
-        ctx.quadraticCurveTo(x - waveWidth / 2, y - waveHeight / 2 + waveGirth, x - waveWidth, y + waveGirth);
-        x -= waveWidth;
-      }
-      ctx.fill();
-    }
+    this.renderText(ctx, vx, vy);
   }
 }
