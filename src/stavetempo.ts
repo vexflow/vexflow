@@ -1,11 +1,9 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // @author: Radosaw Eichler 2012
 
-import { Glyph } from './glyph';
 import { Stave } from './stave';
 import { StaveModifier, StaveModifierPosition } from './stavemodifier';
 import { Tables } from './tables';
-import { TextFormatter } from './textformatter';
 import { Category } from './typeguard';
 
 export interface StaveTempoOptions {
@@ -20,107 +18,52 @@ export class StaveTempo extends StaveModifier {
     return Category.StaveTempo;
   }
 
-  protected tempo: StaveTempoOptions;
-  protected shiftX: number;
-  protected shiftY: number;
-  /** Font size for note. */
-  public renderOptions = { glyphFontScale: 30 };
-
   constructor(tempo: StaveTempoOptions, x: number, shiftY: number) {
     super();
 
-    this.tempo = tempo;
+    this.setTempo(tempo);
     this.position = StaveModifierPosition.ABOVE;
     this.x = x;
-    this.shiftX = 10;
-    this.shiftY = shiftY;
+    this.setXShift(10);
+    this.setYShift(shiftY);
   }
+
+  private durationToCode: Record<string, number> = {
+    '1/2': 0xe1d0 /*noteDoubleWhole*/,
+    1: 0xe1d2 /*noteWhole*/,
+    2: 0xe1d3 /*noteHalfUp*/,
+    4: 0xe1d5 /*noteQuarterUp*/,
+    8: 0xe1d7 /*note8thUp*/,
+    16: 0xe1d9 /*note16thUp*/,
+    32: 0xe1db /*note32ndUp*/,
+    64: 0xe1dd /*note64thUp*/,
+    128: 0xe1df /*note128thUp*/,
+    256: 0xe1e1 /*note256thUp*/,
+    512: 0xe1e3 /*note512thUp*/,
+    1024: 0xe1e5 /*note1024thUp*/,
+  };
 
   setTempo(tempo: StaveTempoOptions): this {
-    this.tempo = tempo;
-    return this;
-  }
-
-  setShiftX(x: number): this {
-    this.shiftX = x;
-    return this;
-  }
-
-  setShiftY(y: number): this {
-    this.shiftY = y;
+    const { duration, dots, bpm, name } = tempo;
+    let txt = '';
+    if (name) txt += name;
+    if (duration && bpm) {
+      txt += (name ? ' (' : '') + String.fromCharCode(this.durationToCode[Tables.sanitizeDuration(duration)]);
+      // Draw dots
+      for (let i = 0; i < (dots ?? 0); i++) {
+        txt += ' ' + String.fromCharCode(0xe1e7 /*augmentationDot*/);
+      }
+      txt += ' = ' + bpm + (name ? ')' : '');
+    }
+    this.text = txt;
+    this.measureText();
     return this;
   }
 
   draw(stave: Stave, shiftX: number): this {
     const ctx = stave.checkContext();
     this.setRendered();
-
-    const options = this.renderOptions;
-    const scale = options.glyphFontScale / Tables.NOTATION_FONT_SCALE;
-    const name = this.tempo.name;
-    const duration = this.tempo.duration;
-    const dots = this.tempo.dots || 0;
-    const bpm = this.tempo.bpm;
-    let x = this.x + this.shiftX + shiftX;
-    const y = stave.getYForTopText(1) + this.shiftY;
-
-    ctx.save();
-    const textFormatter = TextFormatter.create(this.textFont);
-
-    if (name) {
-      ctx.setFont(this.textFont);
-      ctx.fillText(name, x, y);
-      x += textFormatter.getWidthForTextInPx(name);
-    }
-
-    if (duration && bpm) {
-      // Override the weight and style.
-      const noteTextFont = { ...this.textFont, weight: 'normal', style: 'normal' };
-      ctx.setFont(noteTextFont);
-      const noteTextFormatter = TextFormatter.create(noteTextFont);
-
-      if (name) {
-        x += noteTextFormatter.getWidthForTextInPx('|');
-        ctx.fillText('(', x, y);
-        x += noteTextFormatter.getWidthForTextInPx('(');
-      }
-
-      const glyphProps = Tables.getGlyphProps(duration);
-
-      x += 3 * scale;
-      Glyph.renderGlyph(ctx, x, y, options.glyphFontScale, glyphProps.codeHead);
-      x += Glyph.getWidth(glyphProps.codeHead, options.glyphFontScale);
-
-      // Draw stem and flags
-      if (glyphProps.stem) {
-        let stemHeight = 30;
-
-        if (glyphProps.beamCount) stemHeight += 3 * (glyphProps.beamCount - 1);
-
-        stemHeight *= scale;
-
-        const yTop = y - stemHeight;
-        ctx.fillRect(x - scale, yTop, scale, stemHeight);
-
-        if (glyphProps.code && glyphProps.codeFlagUpstem) {
-          const flagMetrics = Glyph.renderGlyph(ctx, x, yTop, options.glyphFontScale, glyphProps.codeFlagUpstem, {
-            category: 'flag.staveTempo',
-          });
-          x += (flagMetrics.width * Tables.NOTATION_FONT_SCALE) / flagMetrics.font.getData().resolution;
-        }
-      }
-
-      // Draw dot
-      for (let i = 0; i < dots; i++) {
-        x += 6 * scale;
-        ctx.beginPath();
-        ctx.arc(x, y + 2 * scale, 2 * scale, 0, Math.PI * 2, false);
-        ctx.fill();
-      }
-      ctx.fillText(' = ' + bpm + (name ? ')' : ''), x + 3 * scale, y);
-    }
-
-    ctx.restore();
+    this.renderText(ctx, this.x + shiftX, stave.getYForTopText(1));
     return this;
   }
 }
