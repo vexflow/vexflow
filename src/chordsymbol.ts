@@ -14,6 +14,7 @@ import { Font } from './font';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { Note } from './note';
+import { SMuFLGlyph } from './smufl';
 import { StemmableNote } from './stemmablenote';
 import { Tables } from './tables';
 import { Category, isStemmableNote } from './typeguard';
@@ -360,7 +361,7 @@ export class ChordSymbol extends Modifier {
       symbolModifier: SymbolModifiers;
     }> = {}
   ): this {
-    return this.addText(String.fromCharCode(0xe874 /*csymMinor*/, 0xe874 /*csymMinor*/), params);
+    return this.addText(SMuFLGlyph.csymMinor + SMuFLGlyph.csymMinor, params);
   }
 
   /** Set vertical position of text (above or below stave). */

@@ -7,6 +7,8 @@ import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Bend, ContextBuilder, Font, Formatter, TabNote, TabNoteStruct, TabStave, Vibrato } from '../src/index';
 
+import { SMuFLCodePoint } from '../src/smufl';
+
 const VibratoTests = {
   Start(): void {
     QUnit.module('Vibrato');
@@ -67,11 +69,11 @@ function harsh(options: TestOptions, contextBuilder: ContextBuilder): void {
         { str: 4, fret: 9 },
       ],
       duration: 'h',
-    }).addModifier(new Vibrato().setVibratoCode(0xeae2), 0),
+    }).addModifier(new Vibrato().setVibratoCode(SMuFLCodePoint.wiggleVibratoLargeFastest /* 0xeae2 */), 0),
     tabNote({
       positions: [{ str: 2, fret: 10 }],
       duration: 'h',
-    }).addModifier(new Vibrato().setVibratoCode(0xeac0), 0),
+    }).addModifier(new Vibrato().setVibratoCode(SMuFLCodePoint.wiggleCircularConstant /* 0xeac0 */), 0),
   ];
 
   Formatter.FormatAndDraw(ctx, stave, notes);
@@ -105,7 +107,10 @@ function withBend(options: TestOptions, contextBuilder: ContextBuilder): void {
     tabNote({
       positions: [{ str: 2, fret: 10 }],
       duration: 'h',
-    }).addModifier(new Vibrato().setVibratoWidth(120).setVibratoCode(0xeae2), 0),
+    }).addModifier(
+      new Vibrato().setVibratoWidth(120).setVibratoCode(SMuFLCodePoint.wiggleVibratoLargeFastest /*0xeae2*/),
+      0
+    ),
   ];
 
   Formatter.FormatAndDraw(ctx, stave, notes);

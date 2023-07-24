@@ -8,7 +8,7 @@ import { Dot } from './dot';
 import { GraceNote } from './gracenote';
 import { GraceNoteGroup } from './gracenotegroup';
 import { Note } from './note';
-import { RenderContext } from './rendercontext.js';
+import { RenderContext } from './rendercontext';
 import { Barline } from './stavebarline';
 import { StaveNote } from './stavenote';
 import { StemmableNote } from './stemmablenote';
