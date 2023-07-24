@@ -39,11 +39,11 @@ export class ChordSymbolBlock extends Element {
   }
 
   isSuperscript(): boolean {
-    return this.symbolModifier !== undefined && this.symbolModifier === SymbolModifiers.SUPERSCRIPT;
+    return this.symbolModifier === SymbolModifiers.SUPERSCRIPT;
   }
 
   isSubscript(): boolean {
-    return this.symbolModifier !== undefined && this.symbolModifier === SymbolModifiers.SUBSCRIPT;
+    return this.symbolModifier === SymbolModifiers.SUBSCRIPT;
   }
 }
 
@@ -140,6 +140,7 @@ export class ChordSymbol extends Modifier {
   static get minPadding(): number {
     return Tables.lookupMetric('NoteHead.minPadding');
   }
+
   /**
    * Estimate the width of the whole chord symbol, based on the sum of the widths of the individual blocks.
    * Estimate how many lines above/below the staff we need.
@@ -169,7 +170,7 @@ export class ChordSymbol extends Modifier {
           lineSpaces = 2;
         }
 
-        // If a subscript immediately  follows a superscript block, try to
+        // If a subscript immediately follows a superscript block, try to
         // overlay them.
         if (sub && j > 0) {
           const prev = symbol.symbolBlocks[j - 1];
@@ -234,11 +235,11 @@ export class ChordSymbol extends Modifier {
    * The offset is specified in `em`. Scale this value by the font size in pixels.
    */
   get superscriptOffset(): number {
-    return ChordSymbol.superscriptOffset * Font.convertSizeToPixelValue(this.textFont?.size);
+    return ChordSymbol.superscriptOffset * Font.convertSizeToPixelValue(this.textFont.size);
   }
 
   get subscriptOffset(): number {
-    return ChordSymbol.subscriptOffset * Font.convertSizeToPixelValue(this.textFont?.size);
+    return ChordSymbol.subscriptOffset * Font.convertSizeToPixelValue(this.textFont.size);
   }
 
   /**
@@ -259,9 +260,12 @@ export class ChordSymbol extends Modifier {
       false
     );
 
-    if (symbolBlock.isSubscript()) symbolBlock.setYShift(this.subscriptOffset);
-    if (symbolBlock.isSuperscript()) symbolBlock.setYShift(this.superscriptOffset);
-
+    if (symbolBlock.isSubscript()) {
+      symbolBlock.setYShift(this.subscriptOffset);
+    }
+    if (symbolBlock.isSuperscript()) {
+      symbolBlock.setYShift(this.superscriptOffset);
+    }
     if (symbolBlock.isSubscript() || symbolBlock.isSuperscript()) {
       const { family, size, weight, style } = this.textFont;
       const smallerFontSize = Font.scaleSize(size, ChordSymbol.superSubRatio);
