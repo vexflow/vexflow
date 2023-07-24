@@ -462,7 +462,7 @@ module.exports = (grunt) => {
     'webpack:prodAndDebug',
     'build:esm',
     'build:types',
-    'build:docs',
+    // 'build:docs',
   ]);
 
   // grunt test
