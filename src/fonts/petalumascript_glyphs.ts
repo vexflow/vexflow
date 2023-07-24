@@ -857,7 +857,7 @@ export const PetalumaScriptFont = {
       advanceWidth: 308,
     },
   },
-  fontFamily: 'PetalumaScript',
+  fontFamily: 'Petaluma Script',
   resolution: 1000,
   generatedOn: '2020-06-14T18:33:25.407Z',
 };

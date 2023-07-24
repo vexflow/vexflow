@@ -25,20 +25,20 @@ function basic(assert: Assert): void {
   assert.equal(
     registeredFamilies.length,
     5,
-    `There are five registered font families: 'Roboto Slab' & 'PetalumaScript' and default 'Serif', 'Serif-Bold' and 'Sans'`
+    `There are five registered font families: 'Roboto Slab' & 'Petaluma Script' and default 'Serif', 'Serif-Bold' and 'Sans'`
   );
 
   // Verify the advanceWidth and other metrics by opening the font file with a glyph inspector:
   // https://fontdrop.info/
   // https://opentype.js.org/glyph-inspector.html
-  const petalumaFormatterInfo = TextFormatter.getInfo('PetalumaScript');
+  const petalumaFormatterInfo = TextFormatter.getInfo('Petaluma Script');
   assert.equal(
     petalumaFormatterInfo?.glyphs?.C.advanceWidth,
     623,
-    'PetalumaScript advanceWidth of C character is 623.'
+    'Petaluma Script advanceWidth of C character is 623.'
   );
 
-  const formatterForPetalumaScript = TextFormatter.create({ family: 'PetalumaScript', size: '100px' });
+  const formatterForPetalumaScript = TextFormatter.create({ family: 'Petaluma Script', size: '100px' });
   const metricsPetalumaScriptH = formatterForPetalumaScript.getGlyphMetrics('H');
   assert.equal(metricsPetalumaScriptH.leftSideBearing, 37);
 

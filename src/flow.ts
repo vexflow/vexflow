@@ -7,13 +7,7 @@ import { Bend } from './bend';
 import { BoundingBox } from './boundingbox';
 import { BoundingBoxComputation } from './boundingboxcomputation';
 import { CanvasContext } from './canvascontext';
-import {
-  ChordSymbol,
-  ChordSymbolHorizontalJustify,
-  ChordSymbolVerticalJustify,
-  SymbolModifiers,
-  SymbolTypes,
-} from './chordsymbol';
+import { ChordSymbol, ChordSymbolHorizontalJustify, ChordSymbolVerticalJustify, SymbolModifiers } from './chordsymbol';
 import { Clef } from './clef';
 import { ClefNote } from './clefnote';
 import { Crescendo } from './crescendo';
@@ -186,7 +180,6 @@ export class Flow {
   static AnnotationVerticalJustify = AnnotationVerticalJustify;
   static ChordSymbolHorizontalJustify = ChordSymbolHorizontalJustify;
   static ChordSymbolVerticalJustify = ChordSymbolVerticalJustify;
-  static SymbolTypes = SymbolTypes;
   static SymbolModifiers = SymbolModifiers;
   static CurvePosition = CurvePosition;
   static FontWeight = FontWeight;
@@ -228,8 +221,24 @@ export class Flow {
    * @returns an array of Font objects corresponding to the provided `fontNames`.
    */
   static setMusicFont(...fontNames: string[]): Font[] {
+    // HACK during review to introduce the correct stacks step by step
+    switch (fontNames[0]) {
+      case 'Bravura':
+        CommonMetrics.fontFamily = 'Bravura,Roboto Slab';
+        break;
+      case 'Gonville':
+        CommonMetrics.fontFamily = 'GonvilleSmufl,Bravura,Roboto Slab';
+        break;
+      case 'Leland':
+        CommonMetrics.fontFamily = 'Leland,Bravura,Roboto Slab';
+        break;
+      case 'Petaluma':
+        CommonMetrics.fontFamily = 'Petaluma,Bravura,Petaluma Script';
+        break;
+      default:
+        CommonMetrics.fontFamily = fontNames.join(',');
+    }
     // Convert the array of font names into an array of Font objects.
-    CommonMetrics.fontFamily = fontNames.join(',');
     const fonts = fontNames.map((fontName) => Font.load(fontName));
     Tables.MUSIC_FONT_STACK = fonts;
     Glyph.MUSIC_FONT_STACK = fonts.slice();

@@ -44,7 +44,7 @@ function chordChanges(options: TestOptions): void {
     f.GlyphNote(new Glyph('repeatBarSlash', 40), { duration: 'q' }),
   ];
   const chord1 = f
-    .ChordSymbol({ reportWidth: false })
+    .ChordSymbol()
     .addText('F7')
     .setHorizontal('left')
     .addGlyphOrText('(#11b9)', { symbolModifier: ChordSymbol.symbolModifiers.SUPERSCRIPT });

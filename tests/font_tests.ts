@@ -12,7 +12,6 @@ import { Flow } from '../src/flow';
 import { Font, FontStyle, FontWeight } from '../src/font';
 import { PedalMarking } from '../src/pedalmarking';
 import { StaveNote } from '../src/stavenote';
-import { CommonMetrics } from '../src/tables';
 import { TextBracket } from '../src/textbracket';
 import { TextNote } from '../src/textnote';
 import { Voice } from '../src/voice';
@@ -53,17 +52,17 @@ function setFont(assert: Assert): void {
   const flat = new Accidental('b');
   // Add italic to the default font as defined in Element.TEXT_FONT (since Accidental does not override TEXT_FONT).
   flat.setFont(undefined, undefined, undefined, 'italic');
-  assert.equal(flat.getFont(), 'italic 30pt Bravura,Gonville,Custom');
+  assert.equal(flat.getFont(), 'italic 30pt Bravura,Roboto Slab');
   // Anything that is not set will be reset to the defaults.
   flat.setFont(undefined, undefined, 'bold', undefined);
-  assert.equal(flat.getFont(), 'bold 30pt Bravura,Gonville,Custom');
+  assert.equal(flat.getFont(), 'bold 30pt Bravura,Roboto Slab');
   flat.setFont(undefined, undefined, 'bold', 'italic');
-  assert.equal(flat.getFont(), 'italic bold 30pt Bravura,Gonville,Custom');
+  assert.equal(flat.getFont(), 'italic bold 30pt Bravura,Roboto Slab');
   flat.setFont(undefined, undefined, 'bold', 'oblique');
-  assert.equal(flat.getFont(), 'oblique bold 30pt Bravura,Gonville,Custom');
+  assert.equal(flat.getFont(), 'oblique bold 30pt Bravura,Roboto Slab');
   // '' is equivalent to 'normal'. Neither will be included in the CSS font string.
   flat.setFont(undefined, undefined, 'normal', '');
-  assert.equal(flat.getFont(), '30pt Bravura,Gonville,Custom');
+  assert.equal(flat.getFont(), '30pt Bravura,Roboto Slab');
 }
 
 function fontParsing(assert: Assert): void {

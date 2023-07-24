@@ -356,8 +356,6 @@ export class Factory {
   ChordSymbol(params?: {
     vJustify?: string;
     hJustify?: string;
-    kerning?: boolean;
-    reportWidth?: boolean;
     fontFamily?: string;
     fontSize?: number;
     fontWeight?: string;
@@ -365,16 +363,12 @@ export class Factory {
     const p = {
       vJustify: 'top',
       hJustify: 'center',
-      kerning: true,
-      reportWidth: true,
       ...params,
     };
 
     const chordSymbol = new ChordSymbol();
     chordSymbol.setHorizontal(p.hJustify);
     chordSymbol.setVertical(p.vJustify);
-    chordSymbol.setEnableKerning(p.kerning);
-    chordSymbol.setReportWidth(p.reportWidth);
     // There is a default font based on the engraving font.  Only set then
     // font if it is specific, else use the default
     if (typeof p.fontFamily === 'string' && typeof p.fontSize === 'number') {
