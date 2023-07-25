@@ -28,19 +28,19 @@ export class StaveTempo extends StaveModifier {
     this.setYShift(shiftY);
   }
 
-  private durationToCode: Record<string, number> = {
-    '1/2': 0xe1d0 /*noteDoubleWhole*/,
-    1: 0xe1d2 /*noteWhole*/,
-    2: 0xe1d3 /*noteHalfUp*/,
-    4: 0xe1d5 /*noteQuarterUp*/,
-    8: 0xe1d7 /*note8thUp*/,
-    16: 0xe1d9 /*note16thUp*/,
-    32: 0xe1db /*note32ndUp*/,
-    64: 0xe1dd /*note64thUp*/,
-    128: 0xe1df /*note128thUp*/,
-    256: 0xe1e1 /*note256thUp*/,
-    512: 0xe1e3 /*note512thUp*/,
-    1024: 0xe1e5 /*note1024thUp*/,
+  private durationToCode: Record<string, string> = {
+    '1/2': '\ue1d0' /*metNoteDoubleWhole*/,
+    1: '\ueca2' /*metNoteWhole*/,
+    2: '\ueca3' /*metNoteHalfUp*/,
+    4: '\ueca5' /*metNoteQuarterUp*/,
+    8: '\ueca7' /*metNote8thUp*/,
+    16: '\ueca9' /*metNote16thUp*/,
+    32: '\uecab' /*metNote32ndUp*/,
+    64: '\uecad' /*metNote64thUp*/,
+    128: '\uecaf' /*metNote128thUp*/,
+    256: '\uecb1' /*metNote256thUp*/,
+    512: '\uecb3' /*metNote512thUp*/,
+    1024: '\uecb5' /*metNote1024thUp*/,
   };
 
   setTempo(tempo: StaveTempoOptions): this {
@@ -48,10 +48,10 @@ export class StaveTempo extends StaveModifier {
     let txt = '';
     if (name) txt += name;
     if (duration && bpm) {
-      txt += (name ? ' (' : '') + String.fromCharCode(this.durationToCode[Tables.sanitizeDuration(duration)]);
+      txt += (name ? ' (' : '') + this.durationToCode[Tables.sanitizeDuration(duration)];
       // Draw dots
       for (let i = 0; i < (dots ?? 0); i++) {
-        txt += ' ' + String.fromCharCode(0xe1e7 /*augmentationDot*/);
+        txt += ' ' + '\uecb7' /*metAugmentationDot*/;
       }
       txt += ' = ' + bpm + (name ? ')' : '');
     }
