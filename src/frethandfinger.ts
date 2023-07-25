@@ -129,7 +129,6 @@ export class FretHandFinger extends Modifier {
     this.position = Modifier.Position.LEFT; // Default position above stem or note head
     this.xOffset = 0; // Horizontal offset from default
     this.yOffset = 0; // Vertical offset from default
-    
   }
 
   setFretHandFinger(finger: string): this {

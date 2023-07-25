@@ -41,9 +41,10 @@ const note = (factory: Factory, keys: string[], duration: string, chordSymbol: C
 function getGlyphWidth(charCode: number): number {
   const el = new Element();
   el.setText(String.fromCharCode(charCode));
-  el.measureText()
+  el.measureText();
   return el.getWidth();
 }
+
 function withModifiers(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, 750, 580);
   const ctx = f.getContext();
