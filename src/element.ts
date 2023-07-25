@@ -64,7 +64,7 @@ export interface ElementStyle {
  * elements, along with working with the Registry to create unique ids.
  *
  * The `text` is a series of unicode characters (including SMuFL codes).
- * The `textFont` property contains information required to style the text (i.e., font family, size, weight, and style). 
+ * The `textFont` property contains information required to style the text (i.e., font family, size, weight, and style).
  * This font family is a comma separated list of fonts.
  * The method `measureText` calculates the `textMetrics`, `boundingBox`, `height` and `width` of the `text`.
  * The method `renderText(...)` will render the text using the provided context and coordinates,
@@ -370,7 +370,7 @@ export class Element {
     } else if (fontIsString && sizeWeightStyleAreUndefined) {
       // `font` is case 2) CSS font shorthand.
       this.textFont = Font.fromCSSString(font);
-     } else {
+    } else {
       // `font` is case 3) a font family string (e.g., 'Times New Roman').
       // The other parameters represent the size, weight, and style.
       // It is okay for `font` to be undefined while one or more of the other arguments is provided.
