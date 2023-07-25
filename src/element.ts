@@ -2,7 +2,6 @@
 // MIT License
 // @author Mohit Cheppudira
 
-import { BEAM_BOTH } from './beam';
 import { BoundingBox } from './boundingbox';
 import { Font, FontInfo } from './font';
 import { Registry } from './registry';

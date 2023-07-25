@@ -291,7 +291,7 @@ export class Articulation extends Modifier {
    * Create a new articulation.
    * @param type entry in `Vex.Flow.articulationCodes` in `tables.ts` or Glyph code.
    *
-   * Notes (by default):
+   * Notes default positions (see https://w3c.github.io/smufl/latest/tables/articulation.html):
    * - Even codes will be positioned ABOVE
    * - Odd codes will be positioned BELOW
    */
@@ -301,7 +301,7 @@ export class Articulation extends Modifier {
     this.type = type;
     this.position = ABOVE;
     if (!Tables.articulationCodes(this.type)) {
-      if (this.type.charCodeAt(0) % 2 == 0) this.position = ABOVE;
+      if ((this.type.codePointAt(0) ?? 0) % 2 == 0) this.position = ABOVE;
       else this.position = BELOW;
     }
 
