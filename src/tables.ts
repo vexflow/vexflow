@@ -605,53 +605,53 @@ const accidentalColumns: Record<number, { [name: string]: number[] }> = {
 };
 
 const articulations: Record<string, ArticulationStruct> = {
-  'a.': { code: 0xe1e7 /*augmentationDot*/, betweenLines: true }, // Staccato
+  'a.': { code: '\ue1e7' /*augmentationDot*/, betweenLines: true }, // Staccato
   av: {
-    aboveCode: 0xe4a6 /*articStaccatissimoAbove*/,
-    belowCode: 0xe4a7 /*articStaccatissimoBelow*/,
+    aboveCode: '\ue4a6' /*articStaccatissimoAbove*/,
+    belowCode: '\ue4a7' /*articStaccatissimoBelow*/,
     betweenLines: true,
   }, // Staccatissimo
   'a>': {
-    aboveCode: 0xe4a0 /*articAccentAbove*/,
-    belowCode: 0xe4a1 /*articAccentBelow*/,
+    aboveCode: '\ue4a0' /*articAccentAbove*/,
+    belowCode: '\ue4a1' /*articAccentBelow*/,
     betweenLines: true,
   }, // Accent
   'a-': {
-    aboveCode: 0xe4a4 /*articTenutoAbove*/,
-    belowCode: 0xe4a5 /*articTenutoBelow*/,
+    aboveCode: '\ue4a4' /*articTenutoAbove*/,
+    belowCode: '\ue4a5' /*articTenutoBelow*/,
     betweenLines: true,
   }, // Tenuto
   'a^': {
-    aboveCode: 0xe4ac /*articMarcatoAbove*/,
-    belowCode: 0xe4ad /*articMarcatoBelow*/,
+    aboveCode: '\ue4ac' /*articMarcatoAbove*/,
+    belowCode: '\ue4ad' /*articMarcatoBelow*/,
     betweenLines: false,
   }, // Marcato
-  'a+': { code: 0xe633 /*pluckedLeftHandPizzicato*/, betweenLines: false }, // Left hand pizzicato
+  'a+': { code: '\ue633' /*pluckedLeftHandPizzicato*/, betweenLines: false }, // Left hand pizzicato
   ao: {
-    aboveCode: 0xe631 /*pluckedSnapPizzicatoAbove*/,
-    belowCode: 0xe630 /*pluckedSnapPizzicatoBelow*/,
+    aboveCode: '\ue631' /*pluckedSnapPizzicatoAbove*/,
+    belowCode: '\ue630' /*pluckedSnapPizzicatoBelow*/,
     betweenLines: false,
   }, // Snap pizzicato
-  ah: { code: 0xe614 /*stringsHarmonic*/, betweenLines: false }, // Natural harmonic or open note
-  'a@': { aboveCode: 0xe4c0 /*fermataAbove*/, belowCode: 0xe4c1 /*fermataBelow*/, betweenLines: false }, // Fermata
-  'a@a': { code: 0xe4c0 /*fermataAbove*/, betweenLines: false }, // Fermata above staff
-  'a@u': { code: 0xe4c1 /*fermataBelow*/, betweenLines: false }, // Fermata below staff
-  'a@s': { aboveCode: 0xe4c4 /*fermataShortAbove*/, belowCode: 0xe4c5 /*fermataShortBelow*/, betweenLines: false }, // Fermata short
-  'a@as': { code: 0xe4c4 /*fermataShortAbove*/, betweenLines: false }, // Fermata short above staff
-  'a@us': { code: 0xe4c5 /*fermataShortBelow*/, betweenLines: false }, // Fermata short below staff
-  'a@l': { aboveCode: 0xe4c6 /*fermataLongAbove*/, belowCode: 0xe4c7 /*fermataLongBelow*/, betweenLines: false }, // Fermata long
-  'a@al': { code: 0xe4c6 /*fermataLongAbove*/, betweenLines: false }, // Fermata long above staff
-  'a@ul': { code: 0xe4c7 /*fermataLongBelow*/, betweenLines: false }, // Fermata long below staff
+  ah: { code: '\ue614' /*stringsHarmonic*/, betweenLines: false }, // Natural harmonic or open note
+  'a@': { aboveCode: '\ue4c0' /*fermataAbove*/, belowCode: '\ue4c1' /*fermataBelow*/, betweenLines: false }, // Fermata
+  'a@a': { code: '\ue4c0' /*fermataAbove*/, betweenLines: false }, // Fermata above staff
+  'a@u': { code: '\ue4c1' /*fermataBelow*/, betweenLines: false }, // Fermata below staff
+  'a@s': { aboveCode: '\ue4c4' /*fermataShortAbove*/, belowCode: '\ue4c5' /*fermataShortBelow*/, betweenLines: false }, // Fermata short
+  'a@as': { code: '\ue4c4' /*fermataShortAbove*/, betweenLines: false }, // Fermata short above staff
+  'a@us': { code: '\ue4c5' /*fermataShortBelow*/, betweenLines: false }, // Fermata short below staff
+  'a@l': { aboveCode: '\ue4c6' /*fermataLongAbove*/, belowCode: '\ue4c7' /*fermataLongBelow*/, betweenLines: false }, // Fermata long
+  'a@al': { code: '\ue4c6' /*fermataLongAbove*/, betweenLines: false }, // Fermata long above staff
+  'a@ul': { code: '\ue4c7' /*fermataLongBelow*/, betweenLines: false }, // Fermata long below staff
   'a@vl': {
-    aboveCode: 0xe4c8 /*fermataVeryLongAbove*/,
-    belowCode: 0xe4c9 /*fermataVeryLongBelow*/,
+    aboveCode: '\ue4c8' /*fermataVeryLongAbove*/,
+    belowCode: '\ue4c9' /*fermataVeryLongBelow*/,
     betweenLines: false,
   }, // Fermata very long
-  'a@avl': { code: 0xe4c8 /*fermataVeryLongAbove*/, betweenLines: false }, // Fermata very long above staff
-  'a@uvl': { code: 0xe4c9 /*fermataVeryLongBelow*/, betweenLines: false }, // Fermata very long below staff
-  'a|': { code: 0xe612 /*stringsUpBow*/, betweenLines: false }, // Bow up - up stroke
-  am: { code: 0xe610 /*stringsDownBow*/, betweenLines: false }, // Bow down - down stroke
-  'a,': { code: 0xe805 /*pictChokeCymbal*/, betweenLines: false }, // Choked
+  'a@avl': { code: '\ue4c8' /*fermataVeryLongAbove*/, betweenLines: false }, // Fermata very long above staff
+  'a@uvl': { code: '\ue4c9' /*fermataVeryLongBelow*/, betweenLines: false }, // Fermata very long below staff
+  'a|': { code: '\ue612' /*stringsUpBow*/, betweenLines: false }, // Bow up - up stroke
+  am: { code: '\ue610' /*stringsDownBow*/, betweenLines: false }, // Bow down - down stroke
+  'a,': { code: '\ue805' /*pictChokeCymbal*/, betweenLines: false }, // Choked
 };
 
 const ornaments: Record<string, { code: string }> = {

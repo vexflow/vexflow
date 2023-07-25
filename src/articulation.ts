@@ -14,9 +14,9 @@ import { Category, isGraceNote, isStaveNote, isStemmableNote, isTabNote } from '
 import { log, RuntimeError } from './util';
 
 export interface ArticulationStruct {
-  code?: number;
-  aboveCode?: number;
-  belowCode?: number;
+  code?: string;
+  aboveCode?: string;
+  belowCode?: string;
   betweenLines: boolean;
 }
 
@@ -174,7 +174,7 @@ export class Articulation extends Modifier {
   protected static readonly INITIAL_OFFSET: number = -0.5;
 
   /** Articulation code provided to the constructor. */
-  readonly type: string | number;
+  readonly type: string;
 
   protected articulation: ArticulationStruct;
 
@@ -295,13 +295,13 @@ export class Articulation extends Modifier {
    * - Even codes will be positioned ABOVE
    * - Odd codes will be positioned BELOW
    */
-  constructor(type: string | number) {
+  constructor(type: string) {
     super();
 
     this.type = type;
     this.position = ABOVE;
-    if (typeof this.type == 'number') {
-      if (this.type % 2 == 0) this.position = ABOVE;
+    if (!Tables.articulationCodes(this.type)) {
+      if (this.type.charCodeAt(0) % 2 == 0) this.position = ABOVE;
       else this.position = BELOW;
     }
 
@@ -310,16 +310,16 @@ export class Articulation extends Modifier {
   }
 
   protected reset(): void {
-    if (typeof this.type == 'string') this.articulation = Tables.articulationCodes(this.type);
+    this.articulation = Tables.articulationCodes(this.type);
     // Use type as glyph code, if not defined as articulation code
-    if (typeof this.type == 'number') {
+    if (!this.articulation) {
       this.articulation = { code: this.type, betweenLines: false };
     }
     const code =
       (this.position === ABOVE ? this.articulation.aboveCode : this.articulation.belowCode) ||
       this.articulation.code ||
-      0x0000;
-    this.text = String.fromCharCode(code);
+      '\u0000';
+    this.text = code;
     this.measureText();
   }
 
