@@ -562,4 +562,23 @@ export class Element {
   getHeight() {
     return this.height;
   }
+
+  setOriginX(x: number): void {
+    const bbox = defined(this.boundingBox);
+    const originX = Math.abs(bbox.getX() / bbox.getW());
+    const xShift = (x - originX) * bbox.getW();
+    this.xShift = -xShift;
+  }
+
+  setOriginY(y: number): void {
+    const bbox = defined(this.boundingBox);
+    const originY = Math.abs(bbox.getY() / bbox.getH());
+    const yShift = (y - originY) * bbox.getH();
+    this.yShift = -yShift;
+  }
+
+  setOrigin(x: number, y: number): void {
+    this.setOriginX(x);
+    this.setOriginY(y);
+  }
 }

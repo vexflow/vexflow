@@ -605,49 +605,53 @@ const accidentalColumns: Record<number, { [name: string]: number[] }> = {
 };
 
 const articulations: Record<string, ArticulationStruct> = {
-  'a.': { code: 'augmentationDot', betweenLines: true }, // Staccato
+  'a.': { code: '\ue1e7' /*augmentationDot*/, betweenLines: true }, // Staccato
   av: {
-    aboveCode: 'articStaccatissimoAbove',
-    belowCode: 'articStaccatissimoBelow',
+    aboveCode: '\ue4a6' /*articStaccatissimoAbove*/,
+    belowCode: '\ue4a7' /*articStaccatissimoBelow*/,
     betweenLines: true,
   }, // Staccatissimo
   'a>': {
-    aboveCode: 'articAccentAbove',
-    belowCode: 'articAccentBelow',
+    aboveCode: '\ue4a0' /*articAccentAbove*/,
+    belowCode: '\ue4a1' /*articAccentBelow*/,
     betweenLines: true,
   }, // Accent
   'a-': {
-    aboveCode: 'articTenutoAbove',
-    belowCode: 'articTenutoBelow',
+    aboveCode: '\ue4a4' /*articTenutoAbove*/,
+    belowCode: '\ue4a5' /*articTenutoBelow*/,
     betweenLines: true,
   }, // Tenuto
   'a^': {
-    aboveCode: 'articMarcatoAbove',
-    belowCode: 'articMarcatoBelow',
+    aboveCode: '\ue4ac' /*articMarcatoAbove*/,
+    belowCode: '\ue4ad' /*articMarcatoBelow*/,
     betweenLines: false,
   }, // Marcato
-  'a+': { code: 'pluckedLeftHandPizzicato', betweenLines: false }, // Left hand pizzicato
+  'a+': { code: '\ue633' /*pluckedLeftHandPizzicato*/, betweenLines: false }, // Left hand pizzicato
   ao: {
-    aboveCode: 'pluckedSnapPizzicatoAbove',
-    belowCode: 'pluckedSnapPizzicatoBelow',
+    aboveCode: '\ue631' /*pluckedSnapPizzicatoAbove*/,
+    belowCode: '\ue630' /*pluckedSnapPizzicatoBelow*/,
     betweenLines: false,
   }, // Snap pizzicato
-  ah: { code: 'stringsHarmonic', betweenLines: false }, // Natural harmonic or open note
-  'a@': { aboveCode: 'fermataAbove', belowCode: 'fermataBelow', betweenLines: false }, // Fermata
-  'a@a': { code: 'fermataAbove', betweenLines: false }, // Fermata above staff
-  'a@u': { code: 'fermataBelow', betweenLines: false }, // Fermata below staff
-  'a@s': { aboveCode: 'fermataShortAbove', belowCode: 'fermataShortBelow', betweenLines: false }, // Fermata short
-  'a@as': { code: 'fermataShortAbove', betweenLines: false }, // Fermata short above staff
-  'a@us': { code: 'fermataShortBelow', betweenLines: false }, // Fermata short below staff
-  'a@l': { aboveCode: 'fermataLongAbove', belowCode: 'fermataLongBelow', betweenLines: false }, // Fermata long
-  'a@al': { code: 'fermataLongAbove', betweenLines: false }, // Fermata long above staff
-  'a@ul': { code: 'fermataLongBelow', betweenLines: false }, // Fermata long below staff
-  'a@vl': { aboveCode: 'fermataVeryLongAbove', belowCode: 'fermataVeryLongBelow', betweenLines: false }, // Fermata very long
-  'a@avl': { code: 'fermataVeryLongAbove', betweenLines: false }, // Fermata very long above staff
-  'a@uvl': { code: 'fermataVeryLongBelow', betweenLines: false }, // Fermata very long below staff
-  'a|': { code: 'stringsUpBow', betweenLines: false }, // Bow up - up stroke
-  am: { code: 'stringsDownBow', betweenLines: false }, // Bow down - down stroke
-  'a,': { code: 'pictChokeCymbal', betweenLines: false }, // Choked
+  ah: { code: '\ue614' /*stringsHarmonic*/, betweenLines: false }, // Natural harmonic or open note
+  'a@': { aboveCode: '\ue4c0' /*fermataAbove*/, belowCode: '\ue4c1' /*fermataBelow*/, betweenLines: false }, // Fermata
+  'a@a': { code: '\ue4c0' /*fermataAbove*/, betweenLines: false }, // Fermata above staff
+  'a@u': { code: '\ue4c1' /*fermataBelow*/, betweenLines: false }, // Fermata below staff
+  'a@s': { aboveCode: '\ue4c4' /*fermataShortAbove*/, belowCode: '\ue4c5' /*fermataShortBelow*/, betweenLines: false }, // Fermata short
+  'a@as': { code: '\ue4c4' /*fermataShortAbove*/, betweenLines: false }, // Fermata short above staff
+  'a@us': { code: '\ue4c5' /*fermataShortBelow*/, betweenLines: false }, // Fermata short below staff
+  'a@l': { aboveCode: '\ue4c6' /*fermataLongAbove*/, belowCode: '\ue4c7' /*fermataLongBelow*/, betweenLines: false }, // Fermata long
+  'a@al': { code: '\ue4c6' /*fermataLongAbove*/, betweenLines: false }, // Fermata long above staff
+  'a@ul': { code: '\ue4c7' /*fermataLongBelow*/, betweenLines: false }, // Fermata long below staff
+  'a@vl': {
+    aboveCode: '\ue4c8' /*fermataVeryLongAbove*/,
+    belowCode: '\ue4c9' /*fermataVeryLongBelow*/,
+    betweenLines: false,
+  }, // Fermata very long
+  'a@avl': { code: '\ue4c8' /*fermataVeryLongAbove*/, betweenLines: false }, // Fermata very long above staff
+  'a@uvl': { code: '\ue4c9' /*fermataVeryLongBelow*/, betweenLines: false }, // Fermata very long below staff
+  'a|': { code: '\ue612' /*stringsUpBow*/, betweenLines: false }, // Bow up - up stroke
+  am: { code: '\ue610' /*stringsDownBow*/, betweenLines: false }, // Bow down - down stroke
+  'a,': { code: '\ue805' /*pictChokeCymbal*/, betweenLines: false }, // Choked
 };
 
 const ornaments: Record<string, { code: string }> = {

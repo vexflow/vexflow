@@ -3,7 +3,6 @@
 // MIT License
 
 import { Builder } from './easyscore';
-import { Glyph } from './glyph';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { Note } from './note';
@@ -12,7 +11,7 @@ import { Stem } from './stem';
 import { StemmableNote } from './stemmablenote';
 import { Tables } from './tables';
 import { Category, isGraceNote, isStaveNote, isStemmableNote, isTabNote } from './typeguard';
-import { defined, log, RuntimeError } from './util';
+import { log, RuntimeError } from './util';
 
 export interface ArticulationStruct {
   code?: string;
@@ -177,12 +176,10 @@ export class Articulation extends Modifier {
   /** Articulation code provided to the constructor. */
   readonly type: string;
 
-  public renderOptions: { fontScale: number };
-  // articulation defined calling reset in constructor
-  protected articulation!: ArticulationStruct;
-  // glyph defined calling reset in constructor
-  protected glyph!: Glyph;
+  protected articulation: ArticulationStruct;
 
+  protected heightShift = 0;
+  protected height = 0;
   /**
    * FIXME:
    * Most of the complex formatting logic (ie: snapping to space) is
@@ -208,14 +205,11 @@ export class Articulation extends Modifier {
     let maxGlyphWidth = 0;
 
     const getIncrement = (articulation: Articulation, line: number, position: number) =>
-      roundToNearestHalf(
-        getRoundingFunction(line, position),
-        defined(articulation.glyph.getMetrics().height) / 10 + margin
-      );
+      roundToNearestHalf(getRoundingFunction(line, position), articulation.height / 10 + margin);
 
     articulations.forEach((articulation) => {
       const note = articulation.checkAttachedNote();
-      maxGlyphWidth = Math.max(note.getGlyphProps().getWidth(), maxGlyphWidth);
+      maxGlyphWidth = Math.max(note.getGlyphWidth(), maxGlyphWidth);
       let lines = 5;
       const stemDirection = note.hasStem() ? note.getStemDirection() : Stem.UP;
       let stemHeight = 0;
@@ -297,19 +291,21 @@ export class Articulation extends Modifier {
    * Create a new articulation.
    * @param type entry in `Vex.Flow.articulationCodes` in `tables.ts` or Glyph code.
    *
-   * Notes (by default):
-   * - Glyph codes ending with 'Above' will be positioned ABOVE
-   * - Glyph codes ending with 'Below' will be positioned BELOW
+   * Notes default positions (see https://w3c.github.io/smufl/latest/tables/articulation.html):
+   * - Even codes will be positioned ABOVE
+   * - Odd codes will be positioned BELOW
    */
   constructor(type: string) {
     super();
 
     this.type = type;
     this.position = ABOVE;
-    this.renderOptions = {
-      fontScale: Tables.NOTATION_FONT_SCALE,
-    };
+    if (!Tables.articulationCodes(this.type)) {
+      if ((this.type.codePointAt(0) ?? 0) % 2 == 0) this.position = ABOVE;
+      else this.position = BELOW;
+    }
 
+    this.articulation = { betweenLines: false };
     this.reset();
   }
 
@@ -318,15 +314,13 @@ export class Articulation extends Modifier {
     // Use type as glyph code, if not defined as articulation code
     if (!this.articulation) {
       this.articulation = { code: this.type, betweenLines: false };
-      if (this.type.endsWith('Above')) this.position = ABOVE;
-      if (this.type.endsWith('Below')) this.position = BELOW;
     }
     const code =
-      (this.position === ABOVE ? this.articulation.aboveCode : this.articulation.belowCode) || this.articulation.code;
-    this.glyph = new Glyph(code ?? '', this.renderOptions.fontScale);
-    defined(this.glyph, 'ArgumentError', `Articulation not found: ${this.type}`);
-
-    this.setWidth(defined(this.glyph.getMetrics().width));
+      (this.position === ABOVE ? this.articulation.aboveCode : this.articulation.belowCode) ||
+      this.articulation.code ||
+      '\u0000';
+    this.text = code;
+    this.measureText();
   }
 
   /** Set if articulation should be rendered between lines. */
@@ -342,7 +336,7 @@ export class Articulation extends Modifier {
     this.setRendered();
 
     const index = this.checkIndex();
-    const { position, glyph, textLine } = this;
+    const { position, textLine } = this;
     const canSitBetweenLines = this.articulation.betweenLines;
 
     const stave = note.checkStave();
@@ -355,17 +349,15 @@ export class Articulation extends Modifier {
 
     const initialOffset = getInitialOffset(note, position);
 
-    const padding = Tables.currentMusicFont().lookupMetric(`articulation.${glyph.getCode()}.padding`, 0);
-
     let y = (
       {
         [ABOVE]: () => {
-          glyph.setOrigin(0.5, 1);
+          this.setOrigin(0.5, 1);
           const y = getTopY(note, textLine) - (textLine + initialOffset) * staffSpace;
           return shouldSitOutsideStaff ? Math.min(stave.getYForTopText(Articulation.INITIAL_OFFSET), y) : y;
         },
         [BELOW]: () => {
-          glyph.setOrigin(0.5, 0);
+          this.setOrigin(0.5, 0);
           const y = getBottomY(note, textLine) + (textLine + initialOffset) * staffSpace;
           return shouldSitOutsideStaff ? Math.max(stave.getYForBottomText(Articulation.INITIAL_OFFSET), y) : y;
         },
@@ -379,13 +371,13 @@ export class Articulation extends Modifier {
       const articLine = distanceFromNote + Number(noteLine);
       const snappedLine = snapLineToStaff(canSitBetweenLines, articLine, position, offsetDirection);
 
-      if (isWithinLines(snappedLine, position)) glyph.setOrigin(0.5, 0.5);
+      if (isWithinLines(snappedLine, position)) this.setOrigin(0.5, 0.5);
 
-      y += Math.abs(snappedLine - articLine) * staffSpace * offsetDirection + padding * offsetDirection;
+      y += Math.abs(snappedLine - articLine) * staffSpace * offsetDirection;
     }
 
     L(`Rendering articulation at (x: ${x}, y: ${y})`);
 
-    glyph.render(ctx, x, y);
+    this.renderText(ctx, x, y);
   }
 }
