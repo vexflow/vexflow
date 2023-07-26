@@ -4,7 +4,6 @@
 // @author Greg Ristow (modifications)
 
 import { Fraction } from './fraction';
-import { Glyph } from './glyph';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { Music } from './music';
@@ -50,20 +49,8 @@ export class Accidental extends Modifier {
   readonly type: string;
   /** To enable logging for this class. Set `Vex.Flow.Accidental.DEBUG` to `true`. */
   static DEBUG: boolean = false;
-  protected accidental: {
-    code: string;
-    parenRightPaddingAdjustment: number;
-  };
-  public renderOptions: {
-    parenLeftPadding: number;
-    fontScale: number;
-    parenRightPadding: number;
-  };
+  protected accidental: string;
   protected cautionary: boolean;
-  // initialised in reset which is called by the constructor
-  protected glyph!: Glyph;
-  protected parenRight?: Glyph;
-  protected parenLeft?: Glyph;
 
   /** Accidentals category string. */
   static get CATEGORY(): string {
@@ -75,11 +62,10 @@ export class Accidental extends Modifier {
     // If there are no accidentals, no need to format their positions.
     if (!accidentals || accidentals.length === 0) return;
 
-    const musicFont = Tables.currentMusicFont();
-    const noteheadAccidentalPadding = musicFont.lookupMetric('accidental.noteheadAccidentalPadding');
+    const noteheadAccidentalPadding = Tables.lookupMetric('Accidental.noteheadAccidentalPadding');
     const leftShift = state.leftShift + noteheadAccidentalPadding;
-    const accidentalSpacing = musicFont.lookupMetric('accidental.accidentalSpacing');
-    const additionalPadding = musicFont.lookupMetric('accidental.leftPadding'); // padding to the left of all accidentals
+    const accidentalSpacing = Tables.lookupMetric('Accidental.accidentalSpacing');
+    const additionalPadding = Tables.lookupMetric('Accidental.leftPadding'); // padding to the left of all accidentals
 
     // A type used just in this formatting function.
     type AccidentalLinePositionsAndXSpaceNeeds = {
@@ -526,16 +512,7 @@ export class Accidental extends Modifier {
     this.type = type;
     this.position = Modifier.Position.LEFT;
 
-    this.renderOptions = {
-      // Font size for glyphs
-      fontScale: Tables.NOTATION_FONT_SCALE,
-
-      // Padding between accidental and parentheses on each side
-      parenLeftPadding: 2,
-      parenRightPadding: 2,
-    };
-
-    this.accidental = Tables.accidentalCodesOld(this.type);
+    this.accidental = Tables.accidentalCodes(this.type);
     defined(this.accidental, 'ArgumentError', `Unknown accidental type: ${type}`);
 
     // Cautionary accidentals have parentheses around them
@@ -545,32 +522,22 @@ export class Accidental extends Modifier {
   }
 
   protected reset(): void {
-    const fontScale = this.renderOptions.fontScale;
-    this.glyph = new Glyph(this.accidental.code, fontScale);
-    this.glyph.setOriginX(1.0);
+    this.text = '';
 
-    if (this.cautionary) {
-      this.parenLeft = new Glyph(Tables.accidentalCodesOld('{').code, fontScale);
-      this.parenRight = new Glyph(Tables.accidentalCodesOld('}').code, fontScale);
-      this.parenLeft.setOriginX(1.0);
-      this.parenRight.setOriginX(1.0);
-    }
-  }
-
-  /** Get width in pixels. */
-  getWidth(): number {
-    if (this.cautionary) {
-      const parenLeft = defined(this.parenLeft);
-      const parenRight = defined(this.parenRight);
-      const parenWidth =
-        parenLeft.getMetrics().width +
-        parenRight.getMetrics().width +
-        this.renderOptions.parenLeftPadding +
-        this.renderOptions.parenRightPadding;
-      return this.glyph.getMetrics().width + parenWidth;
+    if (!this.cautionary) {
+      this.text += this.accidental;
+      this.textFont.size = Tables.lookupMetric('Accidental.fontSize');
     } else {
-      return this.glyph.getMetrics().width;
+      this.text += Tables.accidentalCodes('{');
+      this.text += this.accidental;
+      this.text += Tables.accidentalCodes('}');
+      this.textFont.size = Tables.lookupMetric('Accidental.cautionary.fontSize');
     }
+    // Accidentals attached to grace notes are rendered smaller.
+    if (isGraceNote(this.note)) {
+      this.textFont.size = 25;
+    }
+    this.measureText();
   }
 
   /** Attach this accidental to `note`, which must be a `StaveNote`. */
@@ -578,35 +545,20 @@ export class Accidental extends Modifier {
     defined(note, 'ArgumentError', `Bad note value: ${note}`);
 
     this.note = note;
-
-    // Accidentals attached to grace notes are rendered smaller.
-    if (isGraceNote(note)) {
-      this.renderOptions.fontScale = 25;
-      this.reset();
-    }
+    this.reset();
     return this;
   }
 
   /** If called, draws parenthesis around accidental. */
   setAsCautionary(): this {
     this.cautionary = true;
-    this.renderOptions.fontScale = 28;
     this.reset();
     return this;
   }
 
   /** Render accidental onto canvas. */
   draw(): void {
-    const {
-      type,
-      position,
-      index,
-      cautionary,
-      xShift,
-      yShift,
-      glyph,
-      renderOptions: { parenLeftPadding, parenRightPadding },
-    } = this;
+    const { type, position, index } = this;
 
     const ctx = this.checkContext();
     const note = this.checkAttachedNote();
@@ -614,25 +566,9 @@ export class Accidental extends Modifier {
 
     // Figure out the start `x` and `y` coordinates for note and index.
     const start = note.getModifierStartXY(position, index);
-    let accX = start.x + xShift;
-    const accY = start.y + yShift;
+    const accX = start.x;
+    const accY = start.y;
     L('Rendering: ', type, accX, accY);
-
-    if (!cautionary) {
-      glyph.render(ctx, accX, accY);
-    } else {
-      const parenLeft = defined(this.parenLeft);
-      const parenRight = defined(this.parenRight);
-
-      // Render the accidental in parentheses.
-      parenRight.render(ctx, accX, accY);
-      accX -= parenRight.getMetrics().width;
-      accX -= parenRightPadding;
-      accX -= this.accidental.parenRightPaddingAdjustment;
-      glyph.render(ctx, accX, accY);
-      accX -= glyph.getMetrics().width;
-      accX -= parenLeftPadding;
-      parenLeft.render(ctx, accX, accY);
-    }
+    this.renderText(ctx, accX - this.width, accY);
   }
 }

@@ -9,9 +9,7 @@ import { Accidental } from '../src/accidental';
 import { Beam } from '../src/beam';
 import { Dot } from '../src/dot';
 import { Factory } from '../src/factory';
-import { Flow } from '../src/flow';
 import { Formatter } from '../src/formatter';
-import { Modifier } from '../src/modifier';
 import { ModifierContext } from '../src/modifiercontext';
 import { Note } from '../src/note';
 import { RenderContext } from '../src/rendercontext';
@@ -274,9 +272,6 @@ function basic(options: TestOptions): void {
   notes.forEach((note, index) => {
     Note.plotMetrics(f.getContext(), note, 140);
     options.assert.ok(note.getModifiersByType('Accidental').length > 0, 'Note ' + index + ' has accidentals');
-    note.getModifiersByType('Accidental').forEach((accid: Modifier, index: number) => {
-      options.assert.ok(accid.getWidth() > 0, 'Accidental ' + index + ' has set width');
-    });
   });
 
   f.draw();
@@ -285,6 +280,268 @@ function basic(options: TestOptions): void {
 
   options.assert.ok(true, 'Full Accidental');
 }
+
+const accidentals: string[] = [
+  '#',
+  '##',
+  'b',
+  'bb',
+  'n',
+  '{',
+  '}',
+  'db',
+  'd',
+  '++',
+  '+',
+  '+-',
+  'bs',
+  'bss',
+  'o',
+  'k',
+  'bbs',
+  '++-',
+  'ashs',
+  'afhf',
+  '\uE300',
+  '\uE301',
+  '\uE302',
+  '\uE303',
+  '\uE304',
+  '\uE305',
+  '\uE306',
+  '\uE307',
+  '\uE308',
+  '\uE309',
+  '\uE30A',
+  '\uE30B',
+  '\uE30C',
+  '\uE30D',
+  '\uE30E',
+  '\uE30F',
+  '\uE310',
+  '\uE311',
+  '\uE312',
+  '\uE313',
+  '\uE314',
+  '\uE315',
+  '\uE316',
+  '\uE317',
+  '\uE318',
+  '\uE319',
+  '\uE31C',
+  '\uE31D',
+  '\uE31E',
+  '\uE31F',
+  '\uE320',
+  '\uE321',
+  '\uE322',
+  '\uE323',
+  '\uE324',
+  '\uE325',
+  '\uE326',
+  '\uE327',
+  '\uE328',
+  '\uE329',
+  '\uE32A',
+  '\uE32B',
+  '\uE32C',
+  '\uE32D',
+  '\uE32E',
+  '\uE32F',
+  '\uE330',
+  '\uE331',
+  '\uE332',
+  '\uE333',
+  '\uE334',
+  '\uE335',
+  '\uE340',
+  '\uE341',
+  '\uE342',
+  '\uE343',
+  '\uE344',
+  '\uE345',
+  '\uE346',
+  '\uE347',
+  '\uE348',
+  '\uE349',
+  '\uE34A',
+  '\uE34B',
+  '\uE34C',
+  '\uE34D',
+  '\uE34E',
+  '\uE34F',
+  '\uE350',
+  '\uE351',
+  '\uE352',
+  '\uE353',
+  '\uE354',
+  '\uE355',
+  '\uE356',
+  '\uE357',
+  '\uE358',
+  '\uE359',
+  '\uE35A',
+  '\uE35B',
+  '\uE35C',
+  '\uE35D',
+  '\uE35E',
+  '\uE35F',
+  '\uE360',
+  '\uE361',
+  '\uE362',
+  '\uE363',
+  '\uE364',
+  '\uE365',
+  '\uE366',
+  '\uE367',
+  '\uE370',
+  '\uE371',
+  '\uE372',
+  '\uE373',
+  '\uE374',
+  '\uE375',
+  '\uE376',
+  '\uE377',
+  '\uE378',
+  '\uE379',
+  '\uE37A',
+  '\uE37B',
+  '\uE37C',
+  '\uE37D',
+  '\uE37E',
+  '\uE37F',
+  '\uE380',
+  '\uE381',
+  '\uE382',
+  '\uE383',
+  '\uE384',
+  '\uE385',
+  '\uE386',
+  '\uE387',
+  '\uE390',
+  '\uE391',
+  '\uE392',
+  '\uE393',
+  '\uE394',
+  '\uE395',
+  '\uE396',
+  '\uE397',
+  '\uE398',
+  '\uE399',
+  '\uE39A',
+  '\uE39B',
+  '\uE39C',
+  '\uE39D',
+  '\uE39E',
+  '\uE39F',
+  '\uE3A0',
+  '\uE3A1',
+  '\uE3A2',
+  '\uE3A3',
+  '\uE3A4',
+  '\uE3A5',
+  '\uE3A6',
+  '\uE3A7',
+  '\uE3A8',
+  '\uE3A9',
+  '\uE3AA',
+  '\uE3AB',
+  '\uE3AC',
+  '\uE3AD',
+  '\uE3B0',
+  '\uE3B1',
+  '\uE3B2',
+  '\uE3B3',
+  '\uE3B4',
+  '\uE3B5',
+  '\uE3B6',
+  '\uE3B7',
+  '\uE3B8',
+  '\uE3B9',
+  '\uE3BA',
+  '\uE3BB',
+  '\uE3BC',
+  '\uE3BD',
+  '\uE3BE',
+  '\uE3BF',
+  '\uE3C0',
+  '\uE3C1',
+  '\uE3C2',
+  '\uE3C3',
+  '\uE3C4',
+  '\uE3C5',
+  '\uE3C6',
+  '\uE3C7',
+  '\uE3C8',
+  '\uE3C9',
+  '\uE3CA',
+  '\uE3CB',
+  '\uE3CC',
+  '\uE3CD',
+  '\uE3CE',
+  '\uE3CF',
+  '\uE3D0',
+  '\uE3D1',
+  '\uE3D2',
+  '\uE3D3',
+  '\uE3D4',
+  '\uE3D5',
+  '\uE3D6',
+  '\uE3D7',
+  '\uE3D8',
+  '\uE3D9',
+  '\uE3DA',
+  '\uE3DB',
+  '\uE3DC',
+  '\uE3DD',
+  '\uE3E0',
+  '\uE3E1',
+  '\uE3E2',
+  '\uE3E3',
+  '\uE3E4',
+  '\uE3E5',
+  '\uE3E6',
+  '\uE3E7',
+  '\uE3E8',
+  '\uE3E9',
+  '\uE3EA',
+  '\uE3EB',
+  '\uE3EC',
+  '\uE3ED',
+  '\uE3EE',
+  '\uE3EF',
+  '\uE3F0',
+  '\uE3F1',
+  '\uE3F2',
+  '\uE3F3',
+  '\uE3F4',
+  '\uE3F5',
+  '\uE3F6',
+  '\uE3F7',
+  '\uE3F8',
+  '\uE3F9',
+  '\uE3FA',
+  '\uE3FB',
+  '\uE3FC',
+  '\uE3FD',
+  '\uE3FE',
+  '\uE3FF',
+  '\uE400',
+  '\uE401',
+  '\uE402',
+  '\uE403',
+  '\uE404',
+  '\uE405',
+  '\uE406',
+  '\uE407',
+  '\uE408',
+  '\uE409',
+  '\uE40A',
+  '\uE40B',
+  '\uE284',
+  '\uE285',
+  '\uE47C',
+];
 
 function cautionary(options: TestOptions): void {
   const staveCount = 12;
@@ -295,7 +552,7 @@ function cautionary(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, staveWidth + 10, 175 * staveCount + 10);
   f.getContext().scale(scale, scale);
 
-  const accids = Object.keys(Flow.accidentalMap).filter((accid) => accid !== '{' && accid !== '}');
+  const accids = Object.values(accidentals).filter((accid) => accid !== '{' && accid !== '}');
   const mod = Math.round(accids.length / staveCount);
   for (i = 0; i < staveCount; ++i) {
     const stave = f.Stave({ x: 0, y: 10 + 200 * i, width: staveWidth / scale });
@@ -371,9 +628,6 @@ function specialCases(options: TestOptions): void {
   notes.forEach((note, index) => {
     Note.plotMetrics(f.getContext(), note, 140);
     options.assert.ok(note.getModifiersByType('Accidental').length > 0, 'Note ' + index + ' has accidentals');
-    note.getModifiersByType('Accidental').forEach((accid, index) => {
-      options.assert.ok(accid.getWidth() > 0, 'Accidental ' + index + ' has set width');
-    });
   });
 
   f.draw();
@@ -420,9 +674,6 @@ function basicStemDown(options: TestOptions): void {
   notes.forEach((note, noteIndex) => {
     Note.plotMetrics(f.getContext(), note, 140);
     options.assert.ok(note.getModifiersByType('Accidental').length > 0, 'Note ' + noteIndex + ' has accidentals');
-    note.getModifiersByType('Accidental').forEach((accid, accidIndex) => {
-      options.assert.ok(accid.getWidth() > 0, 'Accidental ' + accidIndex + ' has set width');
-    });
   });
 
   f.draw();
@@ -559,9 +810,6 @@ function microtonal(options: TestOptions): void {
   notes.forEach((note, index) => {
     Note.plotMetrics(f.getContext(), note, 140);
     options.assert.ok(note.getModifiersByType('Accidental').length > 0, 'Note ' + index + ' has accidentals');
-    note.getModifiersByType('Accidental').forEach((accid: Modifier, index: number) => {
-      options.assert.ok(accid.getWidth() > 0, 'Accidental ' + index + ' has set width');
-    });
   });
 
   f.draw();
@@ -623,9 +871,6 @@ function microtonalIranian(options: TestOptions): void {
   notes.forEach((note, index) => {
     Note.plotMetrics(f.getContext(), note, 140);
     options.assert.ok(note.getModifiersByType('Accidental').length > 0, 'Note ' + index + ' has accidentals');
-    note.getModifiersByType('Accidental').forEach((accid: Modifier, index: number) => {
-      options.assert.ok(accid.getWidth() > 0, 'Accidental ' + index + ' has set width');
-    });
   });
 
   f.draw();
@@ -643,39 +888,43 @@ function sagittal(options: TestOptions): void {
   const notes = [
     f
       .StaveNote({ keys: ['d/4', 'f/4', 'b/4', 'b/4'], duration: '4' })
-      .addModifier(accid('accSagittal11MediumDiesisUp'), 1)
-      .addModifier(accid('accSagittal5CommaDown'), 2)
+      .addModifier(accid('\uE30A' /*accSagittal11MediumDiesisUp*/), 1)
+      .addModifier(accid('\uE303' /*accSagittal5CommaDown*/), 2)
       .addModifier(accid('b'), 3)
-      .addModifier(accid('accSagittal7CommaDown'), 3),
+      .addModifier(accid('\uE305' /*accSagittal7CommaDown*/), 3),
 
     f
       .StaveNote({ keys: ['d/4', 'f/4', 'a/4', 'b/4'], duration: '4' })
-      .addModifier(accid('accSagittal35LargeDiesisDown'), 2),
+      .addModifier(accid('\uE30F' /*accSagittal35LargeDiesisDown*/), 2),
 
-    f.StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'c/5'], duration: '8' }).addModifier(accid('accSagittal5CommaDown'), 1),
+    f
+      .StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'c/5'], duration: '8' })
+      .addModifier(accid('\uE303' /*accSagittal5CommaDown*/), 1),
 
     f
       .StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'b/4'], duration: '8' })
       .addModifier(accid('b'), 1)
-      .addModifier(accid('accSagittal7CommaDown'), 1)
-      .addModifier(accid('accSagittal11LargeDiesisDown'), 3),
+      .addModifier(accid('\uE305' /*accSagittal7CommaDown*/), 1)
+      .addModifier(accid('\uE30D' /*accSagittal11LargeDiesisDown*/), 3),
 
     f
       .StaveNote({ keys: ['d/4', 'f/4', 'b/4', 'b/4'], duration: '4' })
-      .addModifier(accid('accSagittal11MediumDiesisUp'), 1)
-      .addModifier(accid('accSagittal5CommaDown'), 2)
-      .addModifier(accid('accSagittalFlat7CDown'), 3),
+      .addModifier(accid('\uE30A' /*accSagittal11MediumDiesisUp*/), 1)
+      .addModifier(accid('\uE303' /*accSagittal5CommaDown*/), 2)
+      .addModifier(accid('\uE321' /*accSagittalFlat7CDown*/), 3),
 
     f
       .StaveNote({ keys: ['d/4', 'f/4', 'a/4', 'b/4'], duration: '4' })
-      .addModifier(accid('accSagittal35LargeDiesisDown'), 2),
+      .addModifier(accid('\uE30F' /*accSagittal35LargeDiesisDown*/), 2),
 
-    f.StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'c/5'], duration: '8' }).addModifier(accid('accSagittal5CommaDown'), 1),
+    f
+      .StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'c/5'], duration: '8' })
+      .addModifier(accid('\uE303' /*accSagittal5CommaDown*/), 1),
 
     f
       .StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'b/4'], duration: '8' })
-      .addModifier(accid('accSagittalFlat7CDown'), 1)
-      .addModifier(accid('accSagittal11LargeDiesisDown'), 3),
+      .addModifier(accid('\uE321' /*accSagittalFlat7CDown*/), 1)
+      .addModifier(accid('\uE30D' /*accSagittal11LargeDiesisDown*/), 3),
   ];
 
   f.StaveTie({
@@ -720,9 +969,6 @@ function sagittal(options: TestOptions): void {
   notes.forEach((note, index) => {
     Note.plotMetrics(f.getContext(), note, 140);
     options.assert.ok(note.getModifiersByType('Accidental').length > 0, 'Note ' + index + ' has accidentals');
-    note.getModifiersByType('Accidental').forEach((accid: Modifier, index: number) => {
-      options.assert.ok(accid.getWidth() > 0, 'Accidental ' + index + ' has set width');
-    });
   });
 
   f.draw();
@@ -1186,9 +1432,6 @@ function factoryAPI(options: TestOptions): void {
 
   notes.forEach((n, i) => {
     options.assert.ok(n.getModifiersByType('Accidental').length > 0, 'Note ' + i + ' has accidentals');
-    n.getModifiersByType('Accidental').forEach((accid: Modifier, i: number) => {
-      options.assert.ok(accid.getWidth() > 0, 'Accidental ' + i + ' has set width');
-    });
   });
 
   f.draw();

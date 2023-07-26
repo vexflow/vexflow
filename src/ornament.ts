@@ -2,6 +2,7 @@
 // @author Cyril Silverman
 // MIT License
 
+import { Element } from './element';
 import { Glyph } from './glyph';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
@@ -59,8 +60,8 @@ export class Ornament extends Modifier {
     fontScale: number;
   };
   protected glyph: Glyph;
-  protected accidentalUpper?: Glyph;
-  protected accidentalLower?: Glyph;
+  protected accidentalUpper?: Element;
+  protected accidentalLower?: Element;
   protected delayXShift?: number;
 
   /** Arrange ornaments inside `ModifierContext` */
@@ -234,19 +235,20 @@ export class Ornament extends Modifier {
 
   /** Set the upper accidental for the ornament. */
   setUpperAccidental(accid: string): this {
-    const scale = this.renderOptions.fontScale / 1.3;
-    this.accidentalUpper = new Glyph(Tables.accidentalCodesOld(accid).code, scale);
-    this.accidentalUpper.setOrigin(0.5, 1.0);
+    this.accidentalUpper = new Element();
+    this.accidentalUpper.setText(Tables.accidentalCodes(accid));
+    this.accidentalUpper.measureText();
     return this;
   }
 
   /** Set the lower accidental for the ornament. */
   setLowerAccidental(accid: string): this {
-    const scale = this.renderOptions.fontScale / 1.3;
-    this.accidentalLower = new Glyph(Tables.accidentalCodesOld(accid).code, scale);
-    this.accidentalLower.setOrigin(0.5, 1.0);
+    this.accidentalLower = new Element();
+    this.accidentalLower.setText(Tables.accidentalCodes(accid));
+    this.accidentalLower.measureText();
     return this;
   }
+
 
   /** Render ornament in position next to note. */
   draw(): void {
@@ -321,9 +323,12 @@ export class Ornament extends Modifier {
     L('Rendering ornament: ', this.ornament, glyphX, glyphY);
 
     if (this.accidentalLower) {
-      this.accidentalLower.render(ctx, glyphX, glyphY);
-      glyphY -= this.accidentalLower.getMetrics().height;
-      glyphY -= this.renderOptions.accidentalLowerPadding;
+      this.accidentalLower.renderText(
+        ctx,
+        glyphX - this.accidentalLower.getWidth() * 0.5,
+        glyphY - this.accidentalLower.getTextMetrics().actualBoundingBoxDescent
+      );
+      glyphY -= this.accidentalLower.getHeight() + this.renderOptions.accidentalLowerPadding;
     }
 
     if (this.stemUpYOffset && note.hasStem() && note.getStemDirection() === 1) {
@@ -336,8 +341,12 @@ export class Ornament extends Modifier {
     this.glyph.render(ctx, glyphX + this.xShift, glyphY);
 
     if (this.accidentalUpper) {
-      glyphY -= this.glyph.getMetrics().height + this.renderOptions.accidentalUpperPadding;
-      this.accidentalUpper.render(ctx, glyphX, glyphY);
+      glyphY -= this.getTextMetrics().actualBoundingBoxAscent + this.renderOptions.accidentalUpperPadding;
+      this.accidentalUpper.renderText(
+        ctx,
+        glyphX - this.accidentalUpper.getWidth() * 0.5,
+        glyphY - this.accidentalUpper.getTextMetrics().actualBoundingBoxDescent
+      );
     }
     ctx.closeGroup();
     this.restoreStyle();
