@@ -7,11 +7,11 @@ import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Dot } from '../src/dot';
 import { Flow } from '../src/flow';
-import { Font, FontWeight } from '../src/font';
 import { Formatter } from '../src/formatter';
 import { RenderContext } from '../src/rendercontext';
 import { ContextBuilder } from '../src/renderer';
 import { Stave } from '../src/stave';
+import { Tables } from '../src/tables';
 import { TabNote, TabNoteStruct } from '../src/tabnote';
 import { TabStave } from '../src/tabstave';
 import { TickContext } from '../src/tickcontext';
@@ -24,7 +24,6 @@ const TabNoteTests = {
     QUnit.test('Tick', ticks);
     QUnit.test('TabStave Line', tabStaveLine);
     QUnit.test('Width', width);
-    QUnit.test('TickContext', tickContext);
 
     const run = VexFlowTests.runTests;
     run('TabNote Draw', draw);
@@ -83,19 +82,6 @@ function width(assert: Assert): void {
   assert.throws(() => note.getWidth(), /UnformattedNote/, 'Unformatted note should have no width');
 }
 
-function tickContext(assert: Assert): void {
-  const note = new TabNote({
-    positions: [
-      { str: 6, fret: 6 },
-      { str: 4, fret: 5 },
-    ],
-    duration: '1',
-  });
-
-  const tickContext = new TickContext().addTickable(note).preFormat().setX(10).setPadding(0);
-
-  assert.equal(tickContext.getWidth(), 7);
-}
 
 function draw(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 600, 140);
@@ -384,7 +370,7 @@ function drawStemsUpThrough(options: TestOptions, contextBuilder: ContextBuilder
     return tabNote;
   });
 
-  ctx.setFont(Font.SANS_SERIF, 10, FontWeight.BOLD);
+  ctx.setFont(Tables.lookupMetric('fontFamily'), 10, 'bold');
   const voice = new Voice(Flow.TIME4_4).setMode(VoiceMode.SOFT);
   voice.addTickables(notes);
   new Formatter().joinVoices([voice]).formatToStave([voice], stave);

@@ -155,19 +155,16 @@ export class Voice extends Element {
 
   /** Get the bounding box for the voice. */
   getBoundingBox(): BoundingBox | undefined {
-    if (!this.boundingBox) {
-      const stave = this.checkStave();
-      let boundingBox = undefined;
-      for (let i = 0; i < this.tickables.length; ++i) {
-        const tickable = this.tickables[i];
-        if (!tickable.getStave()) tickable.setStave(stave);
-        const bb = tickable.getBoundingBox();
-        if (bb) {
-          boundingBox = boundingBox ? boundingBox.mergeWith(bb) : bb;
-        }
+    let boundingBox = undefined;
+    for (let i = 0; i < this.tickables.length; ++i) {
+      const tickable = this.tickables[i];
+      if (!tickable.getStave() && this.stave) tickable.setStave(this.stave);
+      const bb = tickable.getBoundingBox();
+      if (bb) {
+        boundingBox = boundingBox ? boundingBox.mergeWith(bb) : bb;
       }
-      this.boundingBox = boundingBox;
     }
+    this.boundingBox = boundingBox;
     return this.boundingBox;
   }
 
