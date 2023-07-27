@@ -41,7 +41,6 @@ export const CommonMetrics: Record<string, any> = {
   },
 
   FretHandFinger: {
-    fontFamily: 'Arial, sans-serif',
     fontSize: 9,
     fontWeight: 'bold',
   },
