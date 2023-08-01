@@ -84,9 +84,13 @@ export const CommonMetrics = {
   },
 
   StaveTempo: {
-    fontFamily: 'Times New Roman, serif',
     fontSize: 14,
-    fontWeight: 'bold',
+    glyph: {
+      fontSize: 25,
+    },
+    name: {
+      fontWeight: 'bold',
+    },
   },
 
   StaveText: {
