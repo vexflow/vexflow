@@ -112,27 +112,27 @@ export class ChordSymbol extends Modifier {
   }
 
   // Glyph data
-  static readonly glyphs: Record<string, number> = {
-    diminished: 0xe870 /*csymDiminished*/,
-    dim: 0xe870 /*csymDiminished*/,
-    halfDiminished: 0xe871 /*csymHalfDiminished*/,
-    '+': 0xe872 /*csymAugmented*/,
-    augmented: 0xe872 /*csymAugmented*/,
-    majorSeventh: 0xe873 /*csymMajorSeventh*/,
-    minor: 0xe874 /*csymMinor*/,
-    '-': 0xe874 /*csymMinor*/,
-    '(': 0x0028 /*csymParensLeftTall*/,
-    leftParen: 0x0028 /*csymParensLeftTall*/,
-    ')': 0x0029 /*csymParensRightTall*/,
-    rightParen: 0x0029 /*csymParensRightTall*/,
-    leftBracket: 0xe877 /*csymBracketLeftTall*/,
-    rightBracket: 0xe878 /*csymBracketRightTall*/,
-    leftParenTall: 0x0028 /*csymParensLeftVeryTall*/,
-    rightParenTall: 0x0029 /*csymParensRightVeryTall*/,
-    '/': 0xe87c /*csymDiagonalArrangementSlash*/,
-    over: 0xe87c /*csymDiagonalArrangementSlash*/,
-    '#': 0xed62 /*csimAccidentalSharp*/,
-    b: 0xed60 /*csymAccidentalFlat*/,
+  static readonly glyphs: Record<string, string> = {
+    diminished: '\ue870' /*csymDiminished*/,
+    dim: '\ue870' /*csymDiminished*/,
+    halfDiminished: '\ue871' /*csymHalfDiminished*/,
+    '+': '\ue872' /*csymAugmented*/,
+    augmented: '\ue872' /*csymAugmented*/,
+    majorSeventh: '\ue873' /*csymMajorSeventh*/,
+    minor: '\ue874' /*csymMinor*/,
+    '-': '\ue874' /*csymMinor*/,
+    '(': '\u0028' /*csymParensLeftTall*/,
+    leftParen: '\u0028' /*csymParensLeftTall*/,
+    ')': '\u0029' /*csymParensRightTall*/,
+    rightParen: '\u0029' /*csymParensRightTall*/,
+    leftBracket: '\ue877' /*csymBracketLeftTall*/,
+    rightBracket: '\ue878' /*csymBracketRightTall*/,
+    leftParenTall: '\u0028' /*csymParensLeftVeryTall*/,
+    rightParenTall: '\u0029' /*csymParensRightVeryTall*/,
+    '/': '\ue87c' /*csymDiagonalArrangementSlash*/,
+    over: '\ue87c' /*csymDiagonalArrangementSlash*/,
+    '#': '\ued62' /*csymAccidentalSharp*/,
+    b: '\ued60' /*csymAccidentalFlat*/,
   };
 
   static readonly symbolModifiers = SymbolModifiers;
@@ -315,7 +315,7 @@ export class ChordSymbol extends Modifier {
 
   /** Add a glyph block with superscript modifier. */
   addGlyphSuperscript(glyph: string): this {
-    return this.addTextSuperscript(String.fromCharCode(ChordSymbol.glyphs[glyph]));
+    return this.addTextSuperscript(ChordSymbol.glyphs[glyph]);
   }
 
   /** Add a glyph block. */
@@ -325,7 +325,7 @@ export class ChordSymbol extends Modifier {
       symbolModifier: SymbolModifiers;
     }> = {}
   ): this {
-    return this.addText(String.fromCharCode(ChordSymbol.glyphs[glyph]), params);
+    return this.addText(ChordSymbol.glyphs[glyph], params);
   }
 
   /**
@@ -341,8 +341,9 @@ export class ChordSymbol extends Modifier {
     let str = '';
     for (let i = 0; i < text.length; ++i) {
       const char = text[i];
-      if (ChordSymbol.glyphs[char]) {
-        str += String.fromCharCode(ChordSymbol.glyphs[char]);
+      const glyph = ChordSymbol.glyphs[char];
+      if (glyph) {
+        str += glyph;
       } else {
         // Collect consecutive characters with no glyphs.
         str += char;
@@ -360,7 +361,8 @@ export class ChordSymbol extends Modifier {
       symbolModifier: SymbolModifiers;
     }> = {}
   ): this {
-    return this.addText(String.fromCharCode(0xe874 /*csymMinor*/, 0xe874 /*csymMinor*/), params);
+    // Two csymMinor glyphs next to each other.
+    return this.addText('\ue874\ue874' /*{csymMinor}{csymMinor}*/, params);
   }
 
   /** Set vertical position of text (above or below stave). */

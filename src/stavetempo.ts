@@ -90,7 +90,7 @@ export class StaveTempo extends StaveModifier {
       ctx.setFont(Tables.lookupMetricFontInfo('StaveTempo.glyph'));
       for (let i = 0; i < dots; i++) {
         x += 6;
-        ctx.fillText('\uecb7' /*metAugmentationDot*/, x+ this.xShift, y + 2 + this.yShift);
+        ctx.fillText('\uecb7' /*metAugmentationDot*/, x + this.xShift, y + 2 + this.yShift);
       }
       ctx.setFont(Tables.lookupMetricFontInfo('StaveTempo'));
       ctx.fillText(' = ' + bpm + (name ? ')' : ''), x + 3 + this.xShift, y + this.yShift);
