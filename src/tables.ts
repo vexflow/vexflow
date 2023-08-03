@@ -9,7 +9,8 @@ import { RuntimeError } from './util';
 
 const RESOLUTION = 16384;
 
-export const CommonMetrics = {
+// eslint-disable-next-line
+export const CommonMetrics: Record<string, any> = {
   fontFamily: 'Bravura',
   fontSize: 30,
   fontWeight: 'normal',
@@ -745,42 +746,38 @@ export class Tables {
 
   /**
    * Use the provided key to look up a value in CommonMetrics.
-   * @param key is a string separated by periods (e.g., Stroke.text.fontFamily).
-   *        The following keys will be tried before using the default value:
-   *          - Stroke.text.fontFamily
-   *          - Stroke.fontFamily
-   *          - fontFamily
+   *
+   * @param key is a string separated by periods (e.g., `Stroke.text.fontFamily`).
    * @param defaultValue is returned if the lookup fails.
    * @returns the retrieved value (or `defaultValue` if the lookup fails).
+   *
+   * For the key `Stroke.text.fontFamily`, check all of the following in order:
+   *   1) CommonMetrics.fontFamily
+   *   2) CommonMetrics.Stroke.fontFamily
+   *   3) CommonMetrics.Stroke.text.fontFamily
+   * Retrieve the value from the most specific key (i.e., prefer #3 over #2 over #1 in the above example).
    */
   // eslint-disable-next-line
-  static lookupMetric(key: string, defaultValue?: any | number): any {
+  static lookupMetric(key: string, defaultValue?: any): any {
     const keyParts = key.split('.');
+    const lastKeyPart = keyParts.pop()!; // Use ! because keyParts is not empty, since ''.split('.') still returns [''].
 
-    let currObj;
+    // Start from root of CommonMetrics and go down as far as possible.
+    let curr = CommonMetrics;
+    let retVal = defaultValue;
 
-    while (!currObj && keyParts.length) {
-      // Start with the top level font metrics object, and keep looking deeper into the object (via each part of the period-delimited key).
-      currObj = CommonMetrics;
-      for (let i = 0; i < keyParts.length; i++) {
-        const keyPart = keyParts[i];
-        const value = currObj[keyPart] as any;
-        if (value === undefined) {
-          // If the key lookup fails, we fall back to undefined.
-          currObj = undefined;
-          break;
-        }
-        // The most recent lookup succeeded, so we drill deeper into the object.
-        currObj = value;
+    while (curr) {
+      // Update retVal whenever we find a value assigned to a more specific key.
+      retVal = curr[lastKeyPart] ?? retVal;
+      const keyPart = keyParts.shift();
+      if (keyPart) {
+        curr = curr[keyPart]; // Go down one level.
+      } else {
+        break;
       }
-      if (keyParts.length > 1) {
-        keyParts[keyParts.length - 2] = keyParts[keyParts.length - 1];
-      }
-      keyParts.pop();
     }
 
-    // Return the retrieved or default value
-    return currObj ? currObj : defaultValue;
+    return retVal;
   }
 
   /**
@@ -960,19 +957,19 @@ export class Tables {
 
   static unicode = {
     // ♯ accidental sharp
-    sharp: String.fromCharCode(0x266f),
+    sharp: '\u266f',
     // ♭ accidental flat
-    flat: String.fromCharCode(0x266d),
+    flat: '\u266d',
     // ♮ accidental natural
-    natural: String.fromCharCode(0x266e),
+    natural: '\u266e',
     // △ major seventh
-    triangle: String.fromCharCode(0x25b3),
+    triangle: '\u25b3',
     // ø half-diminished
-    'o-with-slash': String.fromCharCode(0x00f8),
+    'o-with-slash': '\u00f8',
     // ° diminished
-    degrees: String.fromCharCode(0x00b0),
+    degrees: '\u00b0',
     // ○ diminished
-    circle: String.fromCharCode(0x25cb),
+    circle: '\u25cb',
   };
 
   /**

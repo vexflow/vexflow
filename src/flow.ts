@@ -221,7 +221,9 @@ export class Flow {
    * @returns an array of Font objects corresponding to the provided `fontNames`.
    */
   static setMusicFont(...fontNames: string[]): Font[] {
-    // HACK during review to introduce the correct stacks step by step
+    // #FIXME: HACK to facilitate the VexFlow 5 migration.
+    // HACK-BEGIN
+    // Introduce the correct font stacks step by step.
     switch (fontNames[0]) {
       case 'Bravura':
         CommonMetrics.fontFamily = 'Bravura,Roboto Slab';
@@ -238,6 +240,8 @@ export class Flow {
       default:
         CommonMetrics.fontFamily = fontNames.join(',');
     }
+    // HACK-END
+
     // Convert the array of font names into an array of Font objects.
     const fonts = fontNames.map((fontName) => Font.load(fontName));
     Tables.MUSIC_FONT_STACK = fonts;
