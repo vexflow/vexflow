@@ -321,10 +321,12 @@ export class Font {
 
   /**
    * Customize this field to specify a different CDN for delivering web fonts.
-   * Alternative: https://cdn.jsdelivr.net/npm/vexflow-fonts@1.0.3/
-   * Or you can use your own host.
+   * Discussion on GDPR concerns:
+   * https://www.jsdelivr.com/blog/how-the-german-courts-ruling-on-google-fonts-affects-jsdelivr-and-why-it-is-safe-to-use/
+   *
+   * You can also self host, and specify your own server URL here.
    */
-  static WEB_FONT_HOST = 'https://unpkg.com/vexflow-fonts@1.0.5/';
+  static WEB_FONT_HOST = 'https://cdn.jsdelivr.net/npm/vexflow-fonts@1.0.6/';
 
   /**
    * These font files will be loaded from the CDN specified by `Font.WEB_FONT_HOST` when
@@ -332,6 +334,7 @@ export class Font {
    * set of fonts to load. See: `Font.loadWebFonts()`.
    */
   static WEB_FONT_FILES: Record<string /* fontName */, string /* fontPath */> = {
+    Academico: 'academico/Academico_0.902.woff2',
     Bravura: 'bravura/Bravura_1.392.woff2',
     BravuraText: 'bravura/BravuraText_1.393.woff2',
     GonvilleSmufl: 'gonvillesmufl/GonvilleSmufl_1.100.woff2',
