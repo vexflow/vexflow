@@ -2,11 +2,9 @@
 // @author: Taehoon Moon 2014
 // MIT License
 
-import { Clef, ClefAnnotatiomType, ClefType } from './clef';
-import { Glyph } from './glyph';
+import { Clef } from './clef';
 import { Note } from './note';
 import { Category } from './typeguard';
-import { upperFirst } from './util';
 
 /** ClefNote implements clef annotations in measures. */
 export class ClefNote extends Note {
@@ -14,12 +12,7 @@ export class ClefNote extends Note {
     return Category.ClefNote;
   }
 
-  protected clef!: ClefType;
-  protected annotation?: ClefAnnotatiomType;
-  protected type!: string;
-  protected size!: string;
-
-  #glyphCategory!: string;
+  protected clef!: Clef;
 
   constructor(type: string, size: string = 'default', annotation?: string) {
     super({ duration: 'b' });
@@ -28,22 +21,15 @@ export class ClefNote extends Note {
   }
 
   /** Set clef type, size and annotation. */
-  setType(type: string, size: string = 'default', annotation?: string): this {
-    this.type = type;
-    this.size = size;
-    const clef = new Clef(type, size, annotation);
-    this.clef = clef.clef;
-    this.annotation = clef.annotation;
+  setType(type: string, size: string, annotation?: string): this {
+    this.clef = new Clef(type, size, annotation);
+    this.setWidth(this.clef.getWidth());
 
-    const category = 'clefNote' + upperFirst(this.size);
-    this.#glyphCategory = category;
-
-    this.setWidth(Glyph.getWidth(this.clef.code, Clef.getPoint(this.size), category));
     return this;
   }
 
   /** Get associated clef. */
-  getClef(): ClefType {
+  getClef(): Clef {
     return this.clef;
   }
 
@@ -58,20 +44,7 @@ export class ClefNote extends Note {
     const ctx = this.checkContext();
 
     this.setRendered();
-    const absoluteX = this.getAbsoluteX();
 
-    const x = absoluteX;
-    const y = stave.getYForLine(this.clef.line);
-    Glyph.renderGlyph(ctx, x, y, Clef.getPoint(this.size), this.clef.code, { category: this.#glyphCategory });
-
-    // If the Vex.Flow.Clef has an annotation, such as 8va, draw it.
-    if (this.annotation !== undefined) {
-      const attachment = new Glyph(this.annotation.code, this.annotation.point);
-      attachment.setContext(ctx);
-      attachment.setStave(stave);
-      attachment.setYShift(stave.getYForLine(this.annotation.line) - stave.getYForGlyphs());
-      attachment.setXShift(this.annotation.xShift);
-      attachment.renderToStave(absoluteX);
-    }
+    this.clef.renderText(ctx, this.getAbsoluteX(), stave.getYForLine(this.clef.line));
   }
 }

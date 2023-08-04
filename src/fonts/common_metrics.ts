@@ -14,50 +14,6 @@ export const CommonMetrics = {
     accidentalSpacing: 3,
   },
 
-  clefDefault: {
-    width: 26,
-    annotations: {
-      '8va': {
-        treble: {
-          line: -2,
-          shiftX: 12,
-        },
-      },
-      '8vb': {
-        treble: {
-          line: 6.5,
-          shiftX: 10,
-        },
-        bass: {
-          line: 4,
-          shiftX: 1,
-        },
-      },
-    },
-  },
-
-  clefSmall: {
-    width: 20,
-    annotations: {
-      '8va': {
-        treble: {
-          line: -0.2,
-          shiftX: 8,
-        },
-      },
-      '8vb': {
-        treble: {
-          line: 5.3,
-          shiftX: 6,
-        },
-        bass: {
-          line: 3.1,
-          shiftX: 0.5,
-        },
-      },
-    },
-  },
-
   ornament: {
     brassScoop: {
       xOffset: -12,
@@ -272,14 +228,6 @@ export const CommonMetrics = {
         shiftX: -1,
       },
     },
-    clefDefault: {},
-    clefSmall: {
-      gClef: {
-        shiftY: 1.5,
-      },
-    },
-    clefNoteDefault: {},
-    clefNoteSmall: {},
     strokeStraight: {
       arrowheadBlackDown: {
         shiftX: -4.5,
