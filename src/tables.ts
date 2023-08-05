@@ -309,7 +309,7 @@ const validNoteTypes: Record<string, { name: string }> = {
   td: { name: 'triangle down' },
 };
 
-const accidentals: Record<string, { code: string; parenRightPaddingAdjustment: number }> = {
+const accidentalsOld: Record<string, { code: string; parenRightPaddingAdjustment: number }> = {
   '#': { code: 'accidentalSharp', parenRightPaddingAdjustment: -1 },
   '##': { code: 'accidentalDoubleSharp', parenRightPaddingAdjustment: -1 },
   b: { code: 'accidentalFlat', parenRightPaddingAdjustment: -2 },
@@ -573,6 +573,29 @@ const accidentals: Record<string, { code: string; parenRightPaddingAdjustment: n
   },
   accidentalWilsonPlus: { code: 'accidentalWilsonPlus', parenRightPaddingAdjustment: -1 },
   accidentalWilsonMinus: { code: 'accidentalWilsonMinus', parenRightPaddingAdjustment: -1 },
+};
+
+const accidentals: Record<string, string> = {
+  '#': '\ue262' /*accidentalSharp*/,
+  '##': '\ue263' /*accidentalDoubleSharp*/,
+  b: '\ue260' /*accidentalFlat*/,
+  bb: '\ue264' /*accidentalDoubleFlat*/,
+  n: '\ue261' /*accidentalNatural*/,
+  '{': '\ue26a' /*accidentalParensLeft*/,
+  '}': '\ue26b' /*accidentalParensRight*/,
+  db: '\ue281' /*accidentalThreeQuarterTonesFlatZimmermann*/,
+  d: '\ue280' /*accidentalQuarterToneFlatStein*/,
+  '++': '\ue283' /*accidentalThreeQuarterTonesSharpStein*/,
+  '+': '\ue282' /*accidentalQuarterToneSharpStein*/,
+  '+-': '\ue446' /*accidentalKucukMucennebSharp*/,
+  bs: '\ue442' /*accidentalBakiyeFlat*/,
+  bss: '\ue440' /*accidentalBuyukMucennebFlat*/,
+  o: '\ue461' /*accidentalSori*/,
+  k: '\ue460' /*accidentalKoron*/,
+  bbs: '\ue447' /*accidentalBuyukMucennebSharp*/,
+  '++-': '\ue447' /*accidentalBuyukMucennebSharp*/,
+  ashs: '\ue447' /*accidentalBuyukMucennebSharp*/,
+  afhf: '\ue447' /*accidentalBuyukMucennebSharp*/,
 };
 
 // Helps determine the layout of accidentals.
@@ -909,10 +932,14 @@ export class Tables {
     return articulations[artic];
   }
 
-  static accidentalMap = accidentals;
+  static accidentalMap = accidentalsOld;
 
-  static accidentalCodes(acc: string): { code: string; parenRightPaddingAdjustment: number } {
-    return accidentals[acc];
+  static accidentalCodesOld(acc: string): { code: string; parenRightPaddingAdjustment: number } {
+    return accidentalsOld[acc];
+  }
+
+  static accidentalCodes(acc: string): string {
+    return accidentals[acc] != undefined ? accidentals[acc] : acc;
   }
 
   static accidentalColumnsTable = accidentalColumns;

@@ -236,7 +236,7 @@ export class Ornament extends Modifier {
   /** Set the upper accidental for the ornament. */
   setUpperAccidental(accid: string): this {
     const scale = this.renderOptions.fontScale / 1.3;
-    this.accidentalUpper = new Glyph(Tables.accidentalCodes(accid).code, scale);
+    this.accidentalUpper = new Glyph(Tables.accidentalCodesOld(accid).code, scale);
     this.accidentalUpper.setOrigin(0.5, 1.0);
     return this;
   }
@@ -244,7 +244,7 @@ export class Ornament extends Modifier {
   /** Set the lower accidental for the ornament. */
   setLowerAccidental(accid: string): this {
     const scale = this.renderOptions.fontScale / 1.3;
-    this.accidentalLower = new Glyph(Tables.accidentalCodes(accid).code, scale);
+    this.accidentalLower = new Glyph(Tables.accidentalCodesOld(accid).code, scale);
     this.accidentalLower.setOrigin(0.5, 1.0);
     return this;
   }

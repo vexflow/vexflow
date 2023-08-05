@@ -538,7 +538,7 @@ export class Accidental extends Modifier {
       parenRightPadding: 2,
     };
 
-    this.accidental = Tables.accidentalCodes(this.type);
+    this.accidental = Tables.accidentalCodesOld(this.type);
     defined(this.accidental, 'ArgumentError', `Unknown accidental type: ${type}`);
 
     // Cautionary accidentals have parentheses around them
@@ -553,8 +553,8 @@ export class Accidental extends Modifier {
     this.glyph.setOriginX(1.0);
 
     if (this.cautionary) {
-      this.parenLeft = new Glyph(Tables.accidentalCodes('{').code, fontScale);
-      this.parenRight = new Glyph(Tables.accidentalCodes('}').code, fontScale);
+      this.parenLeft = new Glyph(Tables.accidentalCodesOld('{').code, fontScale);
+      this.parenRight = new Glyph(Tables.accidentalCodesOld('}').code, fontScale);
       this.parenLeft.setOriginX(1.0);
       this.parenRight.setOriginX(1.0);
     }
