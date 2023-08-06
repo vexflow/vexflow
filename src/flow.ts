@@ -237,6 +237,9 @@ export class Flow {
       case 'Petaluma':
         CommonMetrics.fontFamily = 'Petaluma,Bravura,Petaluma Script';
         break;
+      case 'MuseJazz':
+        CommonMetrics.fontFamily = 'MuseJazz,Bravura,Academico';
+        break;
       default:
         CommonMetrics.fontFamily = fontNames.join(',');
     }
