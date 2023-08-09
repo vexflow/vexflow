@@ -109,11 +109,6 @@ const releaseItDynamicImport = import('release-it');
 // A module entry file `entry/xxxx.ts` will be mapped to a build output file in build/cjs/ or /build/esm/entry/.
 // Also see the package.json `exports` field, which is one way for projects to specify which entry file to import.
 const VEX = 'vexflow';
-const VEX_BRAVURA = 'vexflow-bravura';
-const VEX_GONVILLE = 'vexflow-gonville';
-const VEX_LELAND = 'vexflow-leland';
-const VEX_PETALUMA = 'vexflow-petaluma';
-const VEX_CORE = 'vexflow-core'; // Supports dynamic import of the font modules below.
 const VEX_DEBUG = 'vexflow-debug';
 const VEX_DEBUG_TESTS = 'vexflow-debug-with-tests';
 
@@ -327,30 +322,12 @@ function webpackConfigs() {
 
   function prodConfig(watch = false) {
     return getConfig(
-      [VEX, VEX_BRAVURA, VEX_GONVILLE, VEX_LELAND, VEX_PETALUMA, VEX_CORE],
+      [VEX],
       PRODUCTION_MODE,
       BANNER,
       'Vex',
       watch
     );
-  }
-
-  // The font modules need to have different webpack configs because they have a different
-  // exported library name (e.g., VexFlowFont.Bravura instead of Vex).
-  function fontConfigs(watch = false) {
-    return [
-      getConfig('vexflow-font-bravura', PRODUCTION_MODE, !BANNER, ['VexFlowFont', 'Bravura'], watch),
-      getConfig('vexflow-font-leland', PRODUCTION_MODE, !BANNER, ['VexFlowFont', 'Leland'], watch),
-      getConfig('vexflow-font-petaluma', PRODUCTION_MODE, !BANNER, ['VexFlowFont', 'Petaluma'], watch),
-      getConfig('vexflow-font-gonville', PRODUCTION_MODE, !BANNER, ['VexFlowFont', 'Gonville'], watch),
-      getConfig('vexflow-font-custom', PRODUCTION_MODE, !BANNER, ['VexFlowFont', 'Custom'], watch),
-      // ADD_MUSIC_FONT
-      // Add a webpack config for exporting your font module.
-      // Provide the base name of your font entry file.
-      // For an entry file at `entry/vexflow-font-xxx.ts`, use the string 'vexflow-font-xxx'.
-      // Webpack will use this config to generate a CJS font module at `build/cjs/vexflow-font-xxx.js`.
-      // getConfig('vexflow-font-xxx', PRODUCTION_MODE, !BANNER, ['VexFlowFont', 'XXX'], watch),
-    ];
   }
 
   function debugConfig(watch = false) {
@@ -359,13 +336,13 @@ function webpackConfigs() {
 
   return {
     // grunt webpack:prodAndDebug
-    prodAndDebug: () => [prodConfig(), ...fontConfigs(), debugConfig()],
+    prodAndDebug: () => [prodConfig(), debugConfig()],
     // grunt webpack:prod
-    prod: () => [prodConfig(), ...fontConfigs()],
+    prod: () => prodConfig(),
     // grunt webpack:debug
     debug: () => debugConfig(),
     // grunt webpack:watchProd
-    watchProd: () => [prodConfig(WATCH), ...fontConfigs(WATCH)],
+    watchProd: () => prodConfig(WATCH),
     // grunt webpack:watchDebug
     watchDebug: () => debugConfig(WATCH),
   };
