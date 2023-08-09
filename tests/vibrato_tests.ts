@@ -93,14 +93,26 @@ function withBend(options: TestOptions, contextBuilder: ContextBuilder): void {
       ],
       duration: 'q',
     })
-      .addModifier(new Bend('1/2', true), 0)
-      .addModifier(new Bend('1/2', true), 1)
+      .addModifier(
+        new Bend([
+          { type: Bend.UP, text: '1/2' },
+          { type: Bend.DOWN, text: '' },
+        ]),
+        0
+      )
+      .addModifier(
+        new Bend([
+          { type: Bend.UP, text: '1/2' },
+          { type: Bend.DOWN, text: '' },
+        ]),
+        1
+      )
       .addModifier(new Vibrato(), 0),
     tabNote({
       positions: [{ str: 2, fret: 10 }],
       duration: 'q',
     })
-      .addModifier(new Bend('Full', false), 0)
+      .addModifier(new Bend([{ type: Bend.UP, text: 'Full' }]), 0)
       .addModifier(new Vibrato().setVibratoWidth(60), 0),
     tabNote({
       positions: [{ str: 2, fret: 10 }],

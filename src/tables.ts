@@ -28,7 +28,6 @@ export const CommonMetrics: Record<string, any> = {
   },
 
   Bend: {
-    fontFamily: 'Arial, sans-serif',
     fontSize: 10,
   },
 
