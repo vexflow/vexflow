@@ -23,7 +23,6 @@ export const CommonMetrics: Record<string, any> = {
   },
 
   Annotation: {
-    fontFamily: 'Arial, sans-serif',
     fontSize: 10,
   },
 

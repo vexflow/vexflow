@@ -1,12 +1,12 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
+import { Font } from './font';
 import { Modifier, ModifierPosition } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { Stave } from './stave';
 import { Stem } from './stem';
 import { StemmableNote } from './stemmablenote';
 import { Tables } from './tables';
-import { TextFormatter } from './textformatter';
 import { Category, isStemmableNote, isTabNote } from './typeguard';
 import { log } from './util';
 
@@ -68,8 +68,7 @@ export class Annotation extends Modifier {
   // Use the same padding for annotations as note head so the
   // words don't run into each other.
   static get minAnnotationPadding(): number {
-    const musicFont = Tables.currentMusicFont();
-    return musicFont.lookupMetric('noteHead.minPadding');
+    return Tables.lookupMetric('NoteHead.minPadding');
   }
   /** Arrange annotations within a `ModifierContext` */
   static format(annotations: Annotation[], state: ModifierContextState): boolean {
@@ -80,15 +79,14 @@ export class Annotation extends Modifier {
     let maxRightGlyphWidth = 0;
     for (let i = 0; i < annotations.length; ++i) {
       const annotation = annotations[i];
-      const textFormatter = TextFormatter.create(annotation.textFont);
       // Text height is expressed in fractional stave spaces.
-      const textLines = (2 + textFormatter.getYForStringInPx(annotation.text).height) / Tables.STAVE_LINE_DISTANCE;
+      const textLines = (2 + Font.convertSizeToPixelValue(annotation.textFont.size)) / Tables.STAVE_LINE_DISTANCE;
       let verticalSpaceNeeded = textLines;
 
       const note = annotation.checkAttachedNote();
-      const glyphWidth = note.getGlyphProps().getWidth();
+      const glyphWidth = note.getGlyphWidth();
       // Get the text width from the font metrics.
-      const textWidth = textFormatter.getWidthForTextInPx(annotation.text);
+      const textWidth = annotation.getWidth();
       if (annotation.horizontalJustification === AnnotationHorizontalJustify.LEFT) {
         maxLeftGlyphWidth = Math.max(glyphWidth, maxLeftGlyphWidth);
         leftWidth = Math.max(leftWidth, textWidth) + Annotation.minAnnotationPadding;
@@ -176,7 +174,6 @@ export class Annotation extends Modifier {
 
   protected horizontalJustification: AnnotationHorizontalJustify;
   protected verticalJustification: AnnotationVerticalJustify;
-  protected text: string;
 
   /**
    * Annotations inherit from `Modifier` and is positioned correctly when
@@ -192,9 +189,9 @@ export class Annotation extends Modifier {
     // this is to support legacy application that may expect this.
     this.verticalJustification = AnnotationVerticalJustify.TOP;
 
-    // The default width is calculated from the text.
-    this.setWidth(Tables.textWidth(text));
+    this.measureText();
   }
+
   /**
    * Set vertical position of text (above or below stave).
    * @param just value in `AnnotationVerticalJustify`.
@@ -225,22 +222,18 @@ export class Annotation extends Modifier {
     const ctx = this.checkContext();
     const note = this.checkAttachedNote();
     const stemDirection = note.hasStem() ? note.getStemDirection() : Stem.UP;
-    const textFormatter = TextFormatter.create(this.textFont);
     const start = note.getModifierStartXY(ModifierPosition.ABOVE, this.index);
 
     this.setRendered();
 
-    // We're changing context parameters. Save current state.
-    ctx.save();
     // Apply style might not save context, if this.style is undefined, so we
     // still need to save context state just before this, since we will be
     // changing ctx parameters below.
     this.applyStyle();
     ctx.openGroup('annotation', this.getAttribute('id'));
-    ctx.setFont(this.textFont);
 
-    const textWidth = textFormatter.getWidthForTextInPx(this.text);
-    const textHeight = textFormatter.getYForStringInPx(this.text).height;
+    const textWidth = this.getWidth();
+    const textHeight = Font.convertSizeToPixelValue(this.textFont.size);
     let x;
     let y;
 
@@ -293,9 +286,8 @@ export class Annotation extends Modifier {
     }
 
     L('Rendering annotation: ', this.text, x, y);
-    ctx.fillText(this.text, x, y);
+    this.renderText(ctx, x, y);
     ctx.closeGroup();
     this.restoreStyle();
-    ctx.restore();
   }
 }
