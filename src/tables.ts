@@ -662,8 +662,10 @@ const articulations: Record<string, ArticulationStruct> = {
 const ornaments: Record<string, { code: string }> = {
   mordent: { code: 'ornamentShortTrill' },
   mordentInverted: { code: 'ornamentMordent' },
+  mordent_inverted: { code: 'ornamentMordent' }, // backwards-compatible to 4.x
   turn: { code: 'ornamentTurn' },
   turnInverted: { code: 'ornamentTurnSlash' },
+  turn_inverted: { code: 'ornamentTurnSlash' }, // backwards-compatible to 4.x
   tr: { code: 'ornamentTrill' },
   upprall: { code: 'ornamentPrecompSlideTrillDAnglebert' },
   downprall: { code: 'ornamentPrecompDoubleCadenceUpperPrefix' },
