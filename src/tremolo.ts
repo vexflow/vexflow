@@ -2,10 +2,8 @@
 // @author Mike Corrigan <corrigan@gmail.com>
 // MIT License
 
-import { Glyph } from './glyph';
 import { GraceNote } from './gracenote';
 import { Modifier } from './modifier';
-import { Note } from './note';
 import { Stem } from './stem';
 import { Tables } from './tables';
 import { Category, isGraceNote } from './typeguard';
@@ -16,12 +14,7 @@ export class Tremolo extends Modifier {
     return Category.Tremolo;
   }
 
-  protected readonly code: string;
   protected readonly num: number;
-  /** Extra spacing required for big strokes. */
-  public ySpacingScale: number;
-  /** Font scaling for big strokes. */
-  public extraStrokeScale: number;
 
   /**
    * @param num number of bars
@@ -31,10 +24,8 @@ export class Tremolo extends Modifier {
 
     this.num = num;
     this.position = Modifier.Position.CENTER;
-    this.code = 'tremolo1';
-    // big strokes scales initialised to 1 (no scale)
-    this.ySpacingScale = 1;
-    this.extraStrokeScale = 1;
+    this.text = '\uE220' /*tremolo1*/;
+    this.measureText();
   }
 
   /** Draw the tremolo on the rendering context. */
@@ -44,32 +35,16 @@ export class Tremolo extends Modifier {
     this.setRendered();
 
     const stemDirection = note.getStemDirection();
+    const scale = isGraceNote(note) ? GraceNote.SCALE : 1;
+    const ySpacing = Tables.lookupMetric(`Tremolo.spacing`) * stemDirection * scale;
 
-    const start = note.getModifierStartXY(this.position, this.index);
-    let x = start.x;
+    const x = note.getAbsoluteX() + (stemDirection === Stem.UP ? note.getGlyphWidth() - Stem.WIDTH / 2 : Stem.WIDTH / 2);
+    let y = note.getStemExtents().topY + (this.num <= 3 ? ySpacing : 0);
 
-    const gn = isGraceNote(note);
-    const scale = gn ? GraceNote.SCALE : 1;
-    const category = `tremolo.${gn ? 'grace' : 'default'}`;
+    this.textFont.size = Tables.lookupMetric(`Tremolo.fontSize`) * scale;
 
-    const musicFont = Tables.currentMusicFont();
-    let ySpacing = musicFont.lookupMetric(`${category}.spacing`) * stemDirection;
-    // add ySpacingScale for big strokes (#1258)
-    ySpacing *= this.ySpacingScale;
-    const height = this.num * ySpacing;
-    let y = note.getStemExtents().baseY - height;
-
-    if (stemDirection < 0) {
-      y += musicFont.lookupMetric(`${category}.offsetYStemDown`) * scale;
-    } else {
-      y += musicFont.lookupMetric(`${category}.offsetYStemUp`) * scale;
-    }
-
-    const fontScale = musicFont.lookupMetric(`${category}.point`) ?? Note.getPoint(gn ? 'grace' : 'default');
-
-    x += musicFont.lookupMetric(`${category}.offsetXStem${stemDirection === Stem.UP ? 'Up' : 'Down'}`);
     for (let i = 0; i < this.num; ++i) {
-      Glyph.renderGlyph(ctx, x, y, fontScale, this.code, { category, scale: this.extraStrokeScale });
+      this.renderText(ctx, x, y);
       y += ySpacing;
     }
   }
