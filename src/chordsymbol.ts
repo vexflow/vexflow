@@ -194,22 +194,24 @@ export class ChordSymbol extends Modifier {
         symbol.setTextLine(state.textLine + 1);
         state.textLine += lineSpaces + 1;
       }
-      if (isStemmableNote(note)) {
-        const glyphWidth = note.getGlyphWidth();
-        if (symbol.getHorizontal() === ChordSymbolHorizontalJustify.LEFT) {
-          maxLeftGlyphWidth = Math.max(glyphWidth, maxLeftGlyphWidth);
-          leftWidth = Math.max(leftWidth, width) + ChordSymbol.minPadding;
-        } else if (symbol.getHorizontal() === ChordSymbolHorizontalJustify.RIGHT) {
-          maxRightGlyphWidth = Math.max(glyphWidth, maxRightGlyphWidth);
-          rightWidth = Math.max(rightWidth, width);
-        } else {
-          leftWidth = Math.max(leftWidth, width / 2) + ChordSymbol.minPadding;
-          rightWidth = Math.max(rightWidth, width / 2);
-          maxLeftGlyphWidth = Math.max(glyphWidth / 2, maxLeftGlyphWidth);
-          maxRightGlyphWidth = Math.max(glyphWidth / 2, maxRightGlyphWidth);
+      if (symbol.getReportWidth()) {
+        if (isStemmableNote(note)) {
+          const glyphWidth = note.getGlyphWidth();
+          if (symbol.getHorizontal() === ChordSymbolHorizontalJustify.LEFT) {
+            maxLeftGlyphWidth = Math.max(glyphWidth, maxLeftGlyphWidth);
+            leftWidth = Math.max(leftWidth, width) + ChordSymbol.minPadding;
+          } else if (symbol.getHorizontal() === ChordSymbolHorizontalJustify.RIGHT) {
+            maxRightGlyphWidth = Math.max(glyphWidth, maxRightGlyphWidth);
+            rightWidth = Math.max(rightWidth, width);
+          } else {
+            leftWidth = Math.max(leftWidth, width / 2) + ChordSymbol.minPadding;
+            rightWidth = Math.max(rightWidth, width / 2);
+            maxLeftGlyphWidth = Math.max(glyphWidth / 2, maxLeftGlyphWidth);
+            maxRightGlyphWidth = Math.max(glyphWidth / 2, maxRightGlyphWidth);
+          }
         }
+        symbol.width = width;
       }
-      symbol.width = width;
       width = 0; // reset symbol width
     }
     const rightOverlap = Math.min(
@@ -226,6 +228,7 @@ export class ChordSymbol extends Modifier {
   protected symbolBlocks: ChordSymbolBlock[] = [];
   protected horizontal: number = ChordSymbolHorizontalJustify.LEFT;
   protected vertical: number = ChordSymbolVerticalJustify.TOP;
+  protected reportWidth: boolean = true;
 
   constructor() {
     super();
@@ -241,7 +244,14 @@ export class ChordSymbol extends Modifier {
   get subscriptOffset(): number {
     return ChordSymbol.subscriptOffset * Font.convertSizeToPixelValue(this.textFont.size);
   }
+  setReportWidth(value: boolean): this {
+    this.reportWidth = value;
+    return this;
+  }
 
+  getReportWidth(): boolean {
+    return this.reportWidth;
+  }
   /**
    * ChordSymbol allows multiple blocks so we can mix glyphs and font text.
    * Each block can have its own vertical orientation.
