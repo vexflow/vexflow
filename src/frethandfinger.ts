@@ -7,7 +7,6 @@ import { Modifier, ModifierPosition } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { StemmableNote } from './stemmablenote';
 import { Tables } from './tables';
-import { TextFormatter } from './textformatter';
 import { Category } from './typeguard';
 import { RuntimeError } from './util';
 
@@ -34,8 +33,7 @@ export class FretHandFinger extends Modifier {
       const pos = num.getPosition();
       const index = num.checkIndex();
       const props = note.getKeyProps()[index];
-      const textFormatter = TextFormatter.create(num.textFont);
-      const textHeight = textFormatter.maxHeight;
+      const textHeight = Tables.lookupMetric('FretHandFinger.fontSize');
       if (num.position === ModifierPosition.ABOVE) {
         state.topTextLine += textHeight / Tables.STAVE_LINE_DISTANCE + 0.5;
       }
@@ -117,27 +115,26 @@ export class FretHandFinger extends Modifier {
       .map((fingering: Modifier, index: number) => note.addModifier(fingering, index));
   }
 
-  protected finger: string;
   protected xOffset: number;
   protected yOffset: number;
 
   constructor(finger: string) {
     super();
 
-    this.finger = finger;
-    this.width = 7;
+    this.setFretHandFinger(finger);
     this.position = Modifier.Position.LEFT; // Default position above stem or note head
     this.xOffset = 0; // Horizontal offset from default
     this.yOffset = 0; // Vertical offset from default
   }
 
   setFretHandFinger(finger: string): this {
-    this.finger = finger;
+    this.text = finger;
+    this.measureText();
     return this;
   }
 
   getFretHandFinger(): string {
-    return this.finger;
+    return this.text;
   }
 
   setOffsetX(x: number): this {
@@ -156,8 +153,8 @@ export class FretHandFinger extends Modifier {
     this.setRendered();
 
     const start = note.getModifierStartXY(this.position, this.index);
-    let dotX = start.x + this.xShift + this.xOffset;
-    let dotY = start.y + this.yShift + this.yOffset + 5;
+    let dotX = start.x + this.xOffset;
+    let dotY = start.y + this.yOffset + 5;
 
     switch (this.position) {
       case Modifier.Position.ABOVE:
@@ -178,9 +175,6 @@ export class FretHandFinger extends Modifier {
         throw new RuntimeError('InvalidPosition', `The position ${this.position} does not exist`);
     }
 
-    ctx.save();
-    ctx.setFont(this.textFont);
-    ctx.fillText('' + this.finger, dotX, dotY);
-    ctx.restore();
+    this.renderText(ctx, dotX, dotY);
   }
 }
