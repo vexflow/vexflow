@@ -1,4 +1,3 @@
-import { ClefMetrics } from './clef';
 import { NoteHeadMetrics } from './notehead';
 import { OrnamentMetrics } from './ornament';
 import { StringNumberMetrics } from './stringnumber';
@@ -37,8 +36,6 @@ export interface FontMetrics extends Record<string, any> {
   smufl: boolean;
   stave?: Record<string, number>;
   accidental?: Record<string, number>;
-  clefDefault?: ClefMetrics;
-  clefSmall?: ClefMetrics;
   pedalMarking?: Record<string, Record<string, number>>;
   digits?: Record<string, number>;
   articulation?: Record<string, Record<string, number>>;
