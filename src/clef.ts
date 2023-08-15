@@ -105,11 +105,7 @@ export class Clef extends StaveModifier {
     this.type = type;
     this.code = Clef.types[type].code;
     this.line = Clef.types[type].line;
-    if (size === undefined) {
-      this.size = 'default';
-    } else {
-      this.size = size;
-    }
+    this.size = size ?? 'default';
 
     // If an annotation, such as 8va, is specified, add it to the Clef object.
     if (annotation == '8va') {
