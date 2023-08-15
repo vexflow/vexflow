@@ -171,6 +171,7 @@ export class VexFlowTests {
     const { jobs, job } = VexFlowTests.parseJobOptions(runOptions);
     VexFlowTests.tests.forEach((test, idx: number) => {
       if (jobs === 1 || idx % jobs === job) {
+        console.log('Start Test ', test, idx);
         test.Start();
       }
     });
@@ -233,8 +234,7 @@ export class VexFlowTests {
   }
 
   /**
-   * Append a <div/> which contains the test case title and rendered output.
-   * See flow.html and flow.css.
+   * Append a <div/> which contains the test case title and rendered output. See tests/flow.html.
    * @param elementId
    * @param testTitle
    * @param tagName

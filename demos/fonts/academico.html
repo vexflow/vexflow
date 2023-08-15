@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      html {
+        font:
+          16px 'Helvetica Neue',
+          Arial,
+          sans-serif;
+      }
+      body {
+        margin: 20px;
+      }
+      .text {
+        font-family: 'Academico', 'Courier New', monospace;
+        font-size: 32px;
+        width: 80vw;
+        line-height: 1.6;
+        margin: auto;
+      }
+    </style>
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/academico/index.css" />
+  </head>
+  <body>
+    <div class="text">
+      This text uses the <strong>Academico</strong> font. <br /><br />
+      VexFlow is a music engraving library written in javascript. Build scores quickly, like a whiz.... The quick brown
+      fox jumps over the lazy dog.<br /><br />If there is an error loading the font, this text will be displayed in
+      Courier New or monospace. Since the default @font-face rule uses font-display: swap, you should consider using a
+      fallback font that is more similar to Academico, such as Georgia, to minimize the brief flash before the font is
+      fully loaded. Or, you can use font-display: block in your own @font-face rule to avoid the font change.
+    </div>
+    <script type="module">
+      console.log('Hello');
+    </script>
+  </body>
+</html>

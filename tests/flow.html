@@ -7,12 +7,60 @@
    -->
   <head>
     <title>VexFlow Tests</title>
-    <link rel="stylesheet" href="flow.css" type="text/css" media="screen" />
+    <!-- fonts.css defines the music fonts via @font-face rules. -->
+    <link rel="stylesheet" href="fonts.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="qunit/qunit.css" />
     <script src="qunit/qunit.js"></script>
     <meta charset="UTF-8" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        color: black;
+        margin: 0px;
+        padding: 0px;
+        height: 80%;
+      }
+
+      a.button {
+        color: green;
+        background: #bfb;
+        text-decoration: none;
+        padding: 5px;
+        margin: 2px;
+        border: 5px solid #aea;
+      }
+
+      div#error {
+        width: 60%;
+        padding: 10px;
+        color: red;
+        background: #faa;
+        border: 15px solid #d99;
+      }
+
+      div.testcanvas {
+        font-size: 18px;
+        color: #554;
+      }
+
+      div.testcanvas .vex-tabdiv {
+        background: white;
+      }
+
+      div.testcanvas .name {
+        font-size: 18px;
+        color: #447;
+      }
+
+      p.vf-footer {
+        font-size: 14px;
+      }
+    </style>
   </head>
   <body>
+    <span style="font-family: Academico"></span>
+    <span style="font-family: Bravura"></span>
     <div style="text-align: center">
       <div id="qunit"></div>
       <div id="qunit-fixture"></div>
@@ -109,20 +157,29 @@
         loadVexFlow = () => loadScript(vexPlusTestsURL);
       }
 
+      document.fonts.ready.then((fontFaceSet) => {
+        const fontFaces = [...fontFaceSet];
+        for (const fontFace of fontFaces) {
+          if (fontFace.status === 'loaded') {
+            console.log(fontFace.family + ' loaded!');
+          } else if (fontFace.status === 'unloaded') {
+            console.warn(fontFace.family + ' IS NOT LOADED!');
+          } else if (fontFace.status === 'error') {
+            console.error(fontFace.family + ' ERROR');
+          } else {
+            console.log(fontFace.family + ' status: ' + fontFace.status);
+          }
+        }
+      });
+
       await loadVexFlow();
 
       const VF = Vex.Flow;
 
       // Versions 4.0.0 and newer have support for preloading web fonts.
       // Versions 3.0.9 and older do not support this feature.
-      await VF.Font.loadWebFonts(); // All Fonts
+      // await VF.Font.loadWebFonts(); // All Fonts
       // await VF.Font.loadWebFonts(['Bravura']);
-
-      document.fonts.ready.then((fontFaceSet) => {
-        // Any operation that needs to be done only after all used fonts
-        // have finished loading can go here.
-        console.log([...fontFaceSet]);
-      });
 
       // Optionally specify the QUnit module or filter in the fragment identifier.
       if (hashParams) {

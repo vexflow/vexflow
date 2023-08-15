@@ -1,0 +1,41 @@
+/* Academico */
+@font-face {
+  font-family: 'Academico';
+  font-style: normal;
+  font-display: swap;
+  src:
+    local('Academico'),
+    url(../node_modules/@vexflow-fonts/academico/academico.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'Academico';
+  font-style: normal;
+  font-display: swap;
+  font-weight: bold;
+  src:
+    local('Academico'),
+    url(../node_modules/@vexflow-fonts/academico/academico-bold.otf) format('woff2');
+}
+
+/* Bravura */
+@font-face {
+  font-family: 'Bravura';
+  font-style: normal;
+  font-display: block;
+  font-weight: 400;
+  src:
+    local('Bravura'),
+    url(../node_modules/@vexflow-fonts/bravura/bravura.woff2) format('woff2');
+}
+
+/* Petaluma */
+@font-face {
+  font-family: 'Petaluma';
+  font-style: normal;
+  font-display: block;
+  font-weight: 400;
+  src:
+    local('Petaluma'),
+    url(../node_modules/@vexflow-fonts/petaluma/petaluma.woff2) format('woff2');
+}
