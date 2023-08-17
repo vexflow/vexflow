@@ -85,7 +85,7 @@ export class Tuplet extends Element {
   protected numNotes: number;
 
   protected bracketed: boolean;
-  protected txtElement: Element;
+  protected textElement: Element;
   // location is initialized by the constructor via setTupletLocation(...).
   protected location!: number;
 
@@ -122,7 +122,7 @@ export class Tuplet extends Element {
 
     this.ratioed =
       this.options.ratioed != undefined ? this.options.ratioed : Math.abs(this.notesOccupied - this.numNotes) > 1;
-    this.txtElement = new Element('Tuplet');
+    this.textElement = new Element('Tuplet');
 
     this.setTupletLocation(this.options.location || Tuplet.LOCATION_TOP);
 
@@ -210,8 +210,8 @@ export class Tuplet extends Element {
       }
       denominator = '\uE88A' /* tupletColon */ + denominator;
     }
-    this.txtElement.setText(numerator + denominator);
-    this.txtElement.measureText();
+    this.textElement.setText(numerator + denominator);
+    this.textElement.measureText();
   }
 
   // determine how many tuplets are nested within this tuplet
@@ -323,16 +323,16 @@ export class Tuplet extends Element {
     yPos = this.getYPosition();
 
     const notationCenterX = xPos + this.width / 2;
-    const notationStartX = notationCenterX - this.txtElement.getWidth() / 2;
+    const notationStartX = notationCenterX - this.textElement.getWidth() / 2;
 
     // draw bracket if the tuplet is not beamed
     if (this.bracketed) {
-      const lineWidth = this.width / 2 - this.txtElement.getWidth() / 2 - 5;
+      const lineWidth = this.width / 2 - this.textElement.getWidth() / 2 - 5;
 
       // only draw the bracket if it has positive length
       if (lineWidth > 0) {
         ctx.fillRect(xPos, yPos, lineWidth, 1);
-        ctx.fillRect(xPos + this.width / 2 + this.txtElement.getWidth() / 2 + 5, yPos, lineWidth, 1);
+        ctx.fillRect(xPos + this.width / 2 + this.textElement.getWidth() / 2 + 5, yPos, lineWidth, 1);
         ctx.fillRect(xPos, yPos + (this.location === Tuplet.LOCATION_BOTTOM ? 1 : 0), 1, this.location * 10);
         ctx.fillRect(
           xPos + this.width,
@@ -344,6 +344,6 @@ export class Tuplet extends Element {
     }
 
     // draw text
-    this.txtElement.renderText(ctx, notationStartX, yPos + this.txtElement.getHeight() / 2);
+    this.textElement.renderText(ctx, notationStartX, yPos + this.textElement.getHeight() / 2);
   }
 }
