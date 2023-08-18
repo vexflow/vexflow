@@ -2,8 +2,6 @@
 //
 // Any glyph that is set to appear on a Stave and take up musical time and graphical space.
 
-import { BoundingBox } from './boundingbox';
-import { Glyph } from './glyph';
 import { Note, NoteStruct } from './note';
 import { Category } from './typeguard';
 
@@ -18,9 +16,8 @@ export class GlyphNote extends Note {
   }
 
   protected options: Required<GlyphNoteOptions>;
-  protected glyph!: Glyph;
 
-  constructor(glyph: Glyph, noteStruct: NoteStruct, options?: GlyphNoteOptions) {
+  constructor(glyph: string, noteStruct: NoteStruct, options?: GlyphNoteOptions) {
     super(noteStruct);
     this.options = {
       ignoreTicks: false,
@@ -33,14 +30,10 @@ export class GlyphNote extends Note {
     this.setGlyph(glyph);
   }
 
-  setGlyph(glyph: Glyph): this {
-    this.glyph = glyph;
-    this.setWidth(this.glyph.getMetrics().width);
+  setGlyph(glyph: string): this {
+    this.text = glyph;
+    this.measureText();
     return this;
-  }
-
-  getBoundingBox(): BoundingBox | undefined {
-    return this.glyph.getBoundingBox();
   }
 
   preFormat(): this {
@@ -60,11 +53,6 @@ export class GlyphNote extends Note {
     }
   }
 
-  /** Get the glyph width. */
-  getGlyphWidth(): number {
-    return this.glyph.getMetrics().width;
-  }
-
   draw(): void {
     const stave = this.checkStave();
     const ctx = stave.checkContext();
@@ -72,17 +60,8 @@ export class GlyphNote extends Note {
     this.applyStyle(ctx);
     ctx.openGroup('glyphNote', this.getAttribute('id'));
 
-    // Context is set when setStave is called on Note
-    const glyph = this.glyph;
-    if (!glyph.getContext()) {
-      glyph.setContext(ctx);
-    }
-
-    glyph.setStave(stave);
-    glyph.setYShift(stave.getYForLine(this.options.line) - stave.getYForGlyphs());
-
     const x = this.isCenterAligned() ? this.getAbsoluteX() - this.getWidth() / 2 : this.getAbsoluteX();
-    glyph.renderToStave(x);
+    this.renderText(ctx, x, stave.getYForLine(this.options.line));
     this.drawModifiers();
     ctx.closeGroup();
     this.restoreStyle(ctx);
