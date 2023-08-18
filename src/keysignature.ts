@@ -51,11 +51,10 @@ export class KeySignature extends StaveModifier {
     const extraWidth = 1;
     // Place the glyph on the stave
     glyph.setYShift(stave.getYForLine(acc.line));
-    glyph.setXShift(
-      (this.glyphs.length > 0
-        ? this.glyphs[this.glyphs.length - 1].getXShift() + this.glyphs[this.glyphs.length - 1].getWidth() + extraWidth
-        : 0)
-    );
+    if (this.glyphs.length > 0) {
+      const prevGlyph = this.glyphs[this.glyphs.length - 1];
+      glyph.setXShift(prevGlyph.getXShift() + prevGlyph.getWidth() + extraWidth);
+    }
     this.glyphs.push(glyph);
 
     // Expand size of key signature

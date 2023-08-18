@@ -309,6 +309,9 @@ const validNoteTypes: Record<string, { name: string }> = {
   td: { name: 'triangle down' },
 };
 
+// #FIXME: HACK to facilitate the VexFlow 5 migration.
+// HACK-BEGIN
+// .... will be deleted once all the classes use  accidentalCodes...
 const accidentalsOld: Record<string, { code: string; parenRightPaddingAdjustment: number }> = {
   '#': { code: 'accidentalSharp', parenRightPaddingAdjustment: -1 },
   '##': { code: 'accidentalDoubleSharp', parenRightPaddingAdjustment: -1 },
@@ -574,6 +577,7 @@ const accidentalsOld: Record<string, { code: string; parenRightPaddingAdjustment
   accidentalWilsonPlus: { code: 'accidentalWilsonPlus', parenRightPaddingAdjustment: -1 },
   accidentalWilsonMinus: { code: 'accidentalWilsonMinus', parenRightPaddingAdjustment: -1 },
 };
+// HACK-END
 
 const accidentals: Record<string, string> = {
   '#': '\ue262' /*accidentalSharp*/,
@@ -939,7 +943,7 @@ export class Tables {
   }
 
   static accidentalCodes(acc: string): string {
-    return accidentals[acc] != undefined ? accidentals[acc] : acc;
+    return accidentals[acc] ?? acc;
   }
 
   static accidentalColumnsTable = accidentalColumns;
