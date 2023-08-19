@@ -6,7 +6,7 @@
 // This file implements key signatures. A key signature sits on a stave
 // and indicates the notes with implicit accidentals.
 
-import { Glyph } from './glyph';
+import { Element } from './element';
 import { Stave } from './stave';
 import { StaveModifier, StaveModifierPosition } from './stavemodifier';
 import { Tables } from './tables';
@@ -19,8 +19,7 @@ export class KeySignature extends StaveModifier {
   }
 
   protected glyphFontScale: number;
-  protected glyphs: Glyph[];
-  protected xPositions: number[];
+  protected glyphs: Element[];
   protected paddingForced: boolean;
   protected formatted?: boolean;
   protected cancelKeySpec?: string;
@@ -28,106 +27,38 @@ export class KeySignature extends StaveModifier {
   protected keySpec?: string;
   protected alterKeySpec?: string[];
 
-  // Space between natural and following accidental depending
-  // on vertical position
-  static accidentalSpacing: Record<string, { above: number; below: number }> = {
-    '#': {
-      above: 6,
-      below: 4,
-    },
-    b: {
-      above: 4,
-      below: 7,
-    },
-    n: {
-      above: 4,
-      below: 1,
-    },
-    '##': {
-      above: 6,
-      below: 4,
-    },
-    bb: {
-      above: 4,
-      below: 7,
-    },
-    db: {
-      above: 4,
-      below: 7,
-    },
-    d: {
-      above: 4,
-      below: 7,
-    },
-    bbs: {
-      above: 4,
-      below: 7,
-    },
-    '++': {
-      above: 6,
-      below: 4,
-    },
-    '+': {
-      above: 6,
-      below: 4,
-    },
-    '+-': {
-      above: 6,
-      below: 4,
-    },
-    '++-': {
-      above: 6,
-      below: 4,
-    },
-    bs: {
-      above: 4,
-      below: 10,
-    },
-    bss: {
-      above: 4,
-      below: 10,
-    },
-  };
-
   // Create a new Key Signature based on a `keySpec`
   constructor(keySpec: string, cancelKeySpec?: string, alterKeySpec?: string[]) {
     super();
 
     this.setKeySig(keySpec, cancelKeySpec, alterKeySpec);
     this.setPosition(StaveModifierPosition.BEGIN);
-    this.glyphFontScale = Tables.NOTATION_FONT_SCALE;
+    this.glyphFontScale = Tables.lookupMetric('fontSize');
     this.glyphs = [];
-    this.xPositions = []; // relative to this.x
     this.paddingForced = false;
   }
 
   // Add an accidental glyph to the `KeySignature` instance which represents
   // the provided `acc`. If `nextAcc` is also provided, the appropriate
   // spacing will be included in the glyph's position
-  convertToGlyph(acc: { type: string; line: number }, nextAcc: { type: string; line: number }): void {
-    const accGlyphData = Tables.accidentalCodes(acc.type);
-    const glyph = new Glyph(accGlyphData.code, this.glyphFontScale);
+  convertToGlyph(acc: { type: string; line: number }, nextAcc: { type: string; line: number }, stave: Stave): void {
+    const code = Tables.accidentalCodes(acc.type);
+    const glyph = new Element(Category.KeySignature);
+    glyph.setText(code);
+    glyph.measureText();
 
     // Determine spacing between current accidental and the next accidental
-    let extraWidth = 1;
-    if (acc.type === 'n' && nextAcc) {
-      const spacing = KeySignature.accidentalSpacing[nextAcc.type];
-      if (spacing) {
-        const isAbove = nextAcc.line >= acc.line;
-        extraWidth = isAbove ? spacing.above : spacing.below;
-      }
-    }
-
+    const extraWidth = 1;
     // Place the glyph on the stave
-    this.placeGlyphOnLine(glyph, this.checkStave(), acc.line);
+    glyph.setYShift(stave.getYForLine(acc.line));
+    if (this.glyphs.length > 0) {
+      const prevGlyph = this.glyphs[this.glyphs.length - 1];
+      glyph.setXShift(prevGlyph.getXShift() + prevGlyph.getWidth() + extraWidth);
+    }
     this.glyphs.push(glyph);
 
-    const xPosition = this.xPositions[this.xPositions.length - 1];
-    const glyphWidth = glyph.getMetrics().width + extraWidth;
-    // Store the next accidental's x position
-    this.xPositions.push(xPosition + glyphWidth);
     // Expand size of key signature
-    this.width += glyphWidth;
+    this.width += glyph.getWidth() + extraWidth;
   }
 
   // Cancel out a key signature provided in the `spec` parameter. This will
@@ -174,7 +105,6 @@ export class KeySignature extends StaveModifier {
     };
   }
 
-  // Deprecated
   addToStave(stave: Stave): this {
     this.paddingForced = true;
     stave.addModifier(this);
@@ -276,7 +206,6 @@ export class KeySignature extends StaveModifier {
 
     this.width = 0;
     this.glyphs = [];
-    this.xPositions = [0]; // initialize with initial x position
     this.accList = Tables.keySignature(defined(this.keySpec));
     const accList = this.accList;
     const firstAccidentalType = accList.length > 0 ? accList[0].type : undefined;
@@ -296,19 +225,11 @@ export class KeySignature extends StaveModifier {
       }
       this.convertAccLines(clef, firstAccidentalType, accList);
       for (let i = 0; i < this.accList.length; ++i) {
-        this.convertToGlyph(this.accList[i], this.accList[i + 1]);
+        this.convertToGlyph(this.accList[i], this.accList[i + 1], stave);
       }
     }
 
     this.formatted = true;
-  }
-
-  /**
-   * Return the Glyph objects making up this KeySignature.
-   */
-  getGlyphs(): Glyph[] {
-    if (!this.formatted) this.format();
-    return this.glyphs;
   }
 
   draw(): void {
@@ -322,10 +243,7 @@ export class KeySignature extends StaveModifier {
     ctx.openGroup('keysignature', this.getAttribute('id'));
     for (let i = 0; i < this.glyphs.length; i++) {
       const glyph = this.glyphs[i];
-      const x = this.x + this.xPositions[i];
-      glyph.setStave(stave);
-      glyph.setContext(ctx);
-      glyph.renderToStave(x);
+      glyph.renderText(ctx, this.x, 0);
     }
     ctx.closeGroup();
     this.restoreStyle(ctx);
