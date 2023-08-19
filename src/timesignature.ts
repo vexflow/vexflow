@@ -96,7 +96,7 @@ export class TimeSignature extends StaveModifier {
         code = smallSig ? '\ue093' /*timeSigParensRightSmall*/ : '\ue095' /*timeSigParensRight*/;
         break;
       default:
-        code = String.fromCodePoint(0xe080 + key.charCodeAt(0) - '0'.charCodeAt(0)) /*timeSigN*/;
+        code = String.fromCodePoint(0xe080 + Number(key[0])) /*timeSigN*/;
         break;
     }
     return code;

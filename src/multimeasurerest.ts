@@ -79,9 +79,10 @@ export class MultiMeasureRest extends Element {
 
     this.numberOfMeasures = numberOfMeasures;
     this.text = '';
-    const text = `${this.numberOfMeasures}`;
-    for (let i = 0; i < text.length; i++) {
-      this.text += String.fromCodePoint(0xe080 + text.charCodeAt(i) - '0'.charCodeAt(0)) /*timeSigN*/;
+    const t = `${this.numberOfMeasures}`;
+    for (const digit of t) {
+      // 0xe080 is timeSig0. We calculate the code point for timeSigN to assemble the digits via SMuFL glyphs.
+      this.text += String.fromCodePoint(0xe080 + Number(digit));
     }
     this.measureText();
 
@@ -136,6 +137,7 @@ export class MultiMeasureRest extends Element {
     const el = new Element();
     el.setText(txt);
     el.measureText();
+    // Add middle bars until the right padding is reached
     for (let i = 1; (i + 2) * el.getWidth() + left <= right; i++) {
       txt += '\ue4f0'; /*restHBarMiddle*/
     }
@@ -144,7 +146,6 @@ export class MultiMeasureRest extends Element {
     el.setText(txt);
     el.measureText();
     el.renderText(ctx, left + (right - left) * 0.5 - el.getWidth() * 0.5, y);
-
   }
 
   drawSymbols(stave: Stave, ctx: RenderContext, left: number, right: number, spacingBetweenLines: number): void {
@@ -154,8 +155,6 @@ export class MultiMeasureRest extends Element {
     const n1 = n % 2;
 
     const options = this.renderOptions;
-
-
 
     const elMiddle = new Element();
     let txt = '';
@@ -185,7 +184,6 @@ export class MultiMeasureRest extends Element {
     x += elMiddle.getWidth();
     elTop.renderText(ctx, x, yTop);
     x += elTop.getWidth();
-
   }
 
   draw(): void {
