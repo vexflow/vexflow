@@ -106,13 +106,13 @@ function fontSizes(assert: Assert): void {
 
   {
     const pedal = new PedalMarking([]);
-    assert.equal(pedal.getFont(), 'italic bold 12pt Times New Roman, serif');
-    assert.equal(pedal.fontSizeInPoints, 12);
-    assert.equal(pedal.fontSizeInPixels, 16);
+    assert.equal(pedal.getFont(), '30pt Bravura,Roboto Slab');
+    assert.equal(pedal.fontSizeInPoints, 30);
+    assert.equal(pedal.fontSizeInPixels, 40);
     const doubledSizePx = pedal.fontSizeInPixels * 2; // Double the font size.
-    assert.equal(doubledSizePx, 32);
+    assert.equal(doubledSizePx, 80);
     const doubledSizePt = Font.scaleSize(pedal.fontSizeInPoints, 2); // Double the font size.
-    assert.equal(doubledSizePt, 24);
+    assert.equal(doubledSizePt, 60);
 
     assert.equal(Font.scaleSize('1.5em', 3), '4.5em');
   }

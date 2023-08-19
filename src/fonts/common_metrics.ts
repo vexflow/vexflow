@@ -92,8 +92,6 @@ export const CommonMetrics = {
     },
   },
 
-  pedalMarking: {},
-
   // These are for numeric digits, such as in time signatures
   digits: {
     // used by TimeSignature objects
