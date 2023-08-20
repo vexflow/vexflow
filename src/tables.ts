@@ -145,6 +145,10 @@ export const CommonMetrics: Record<string, any> = {
     fontSize: 12,
   },
 
+  Tremolo: {
+    spacing: 7,
+  },
+
   Volta: {
     fontFamily: 'Arial, sans-serif',
     fontSize: 9,
