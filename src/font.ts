@@ -373,22 +373,29 @@ export class Font {
   }
 
   /**
-   * Load the web fonts that are used by ChordSymbol. For example, `flow.html` calls:
+   * Load the web fonts that are used by your app.
+   * If fontNames is undefined, all fonts in Font.WEB_FONT_FILES will be loaded.
+   *
+   * For example, `flow.html` calls:
    *   `await Vex.Flow.Font.loadWebFonts();`
    * Alternatively, you may load web fonts with a stylesheet link (e.g., from Google Fonts),
    * and a @font-face { font-family: ... } rule in your CSS.
-   * If you do not load either of these fonts, ChordSymbol will fall back to Times or Arial,
-   * depending on the current music engraving font.
    *
    * You can customize `Font.WEB_FONT_HOST` and `Font.WEB_FONT_FILES` to load different fonts
    * for your app.
    */
-  static async loadWebFonts(): Promise<void> {
+  static async loadWebFonts(fontNames?: string[]): Promise<void> {
+    const allFiles = Font.WEB_FONT_FILES;
+    if (!fontNames) {
+      fontNames = Object.keys(allFiles);
+    }
+
     const host = Font.WEB_FONT_HOST;
-    const files = Font.WEB_FONT_FILES;
-    for (const fontName in files) {
-      const fontPath = files[fontName];
-      Font.loadWebFont(fontName, host + fontPath);
+    for (const fontName of fontNames) {
+      const fontPath = allFiles[fontName];
+      if (fontPath) {
+        Font.loadWebFont(fontName, host + fontPath);
+      }
     }
   }
 
