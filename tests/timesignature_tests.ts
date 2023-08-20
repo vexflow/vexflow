@@ -33,11 +33,11 @@ function parser(assert: Assert): void {
 
   const mustFail = ['asdf', '123/', '/10', '/', '4567', 'C+', '1+', '+1', '(3+', '+3)', '()', '(+)'];
   mustFail.forEach((invalidString) => {
-    assert.throws(() => timeSig.parseTimeSpec(invalidString), /BadTimeSignature/);
+    assert.throws(() => new TimeSignature(invalidString), /BadTimeSignature/);
   });
 
   const mustPass = ['4/4', '10/12', '1/8', '1234567890/1234567890', 'C', 'C|', '+'];
-  mustPass.forEach((validString) => timeSig.parseTimeSpec(validString));
+  mustPass.forEach((validString) => new TimeSignature(validString));
 
   timeSig.setTimeSig('4/4');
   assert.equal(timeSig.getIsNumeric(), true, '4/4 is numeric');

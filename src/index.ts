@@ -79,7 +79,6 @@ export * from './textformatter';
 export * from './textnote';
 export * from './tickable';
 export * from './tickcontext';
-export * from './timesigglyph';
 export * from './timesignature';
 export * from './timesignote';
 export * from './tremolo';

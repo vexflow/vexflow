@@ -5,15 +5,15 @@
 // See tables.js for the internal time signatures
 // representation
 
-import { Glyph } from './glyph';
+import { Element } from './element';
+import { RenderContext } from './rendercontext';
+import { Stave } from './stave';
 import { StaveModifier, StaveModifierPosition } from './stavemodifier';
-import { Tables } from './tables';
-import { TimeSignatureGlyph } from './timesigglyph';
 import { Category } from './typeguard';
-import { defined, RuntimeError } from './util';
+import { RuntimeError } from './util';
 
 export interface TimeSignatureInfo {
-  glyph: Glyph;
+  glyph: string;
   line: number;
   num: boolean;
 }
@@ -46,91 +46,98 @@ export class TimeSignature extends StaveModifier {
     return Category.TimeSignature;
   }
 
-  static get glyphs(): Record<string, { code: string; line: number }> {
-    return {
-      C: {
-        code: 'timeSigCommon',
-        line: 2,
-      },
-      'C|': {
-        code: 'timeSigCutCommon',
-        line: 2,
-      },
-    };
-  }
-
-  point: number;
   bottomLine: number; // bottomLine and topLine are used to calculate the position of the
   topLine: number; // top row of digits in a numeric TimeSignature.
 
   protected timeSpec: string = '4/4';
   protected line: number = 0;
-  protected glyph!: Glyph;
+  protected topText: Element;
+  protected botText: Element;
   protected isNumeric: boolean = true;
   protected validateArgs: boolean;
+  protected topStartX: number = 0;
+  protected botStartX: number = 0;
+  protected lineShift: number = 0;
 
   constructor(timeSpec: string = '4/4', customPadding = 15, validateArgs = true) {
     super();
+    this.topText = new Element();
+    this.botText = new Element();
     this.validateArgs = validateArgs;
 
     const padding = customPadding;
 
-    // point must be defined before parsing spec.
-    const musicFont = Tables.currentMusicFont();
-    this.point = musicFont.lookupMetric('digits.point') || Tables.NOTATION_FONT_SCALE;
-
-    const fontLineShift = musicFont.lookupMetric('digits.shiftLine', 0);
-    this.topLine = 2 + fontLineShift;
-    this.bottomLine = 4 + fontLineShift;
+    this.topLine = 1;
+    this.bottomLine = 3;
     this.setPosition(StaveModifierPosition.BEGIN);
     this.setTimeSig(timeSpec);
     this.setPadding(padding);
   }
 
-  /**
-   * Return TimeSignatureInfo given a string, consisting of line (number),
-   * num (boolean: same as TimeSignature.getIsNumeric()), and glyph (a Glyph or
-   * TimeSignatureGlyph object).
-   */
-  parseTimeSpec(timeSpec: string): TimeSignatureInfo {
-    if (timeSpec === 'C' || timeSpec === 'C|') {
-      const { line, code } = TimeSignature.glyphs[timeSpec];
-      return {
-        line,
-        num: false,
-        glyph: new Glyph(code, Tables.NOTATION_FONT_SCALE),
-      };
+  static getTimeSigCode(key: string, smallSig = false): string {
+    let code = '\u00000';
+    switch (key) {
+      case 'C':
+        code = '\ue08a' /*timeSigCommon*/;
+        break;
+      case 'C|':
+        code = '\ue08b' /*timeSigCutCommon*/;
+        break;
+      case '+':
+        code = smallSig ? '\ue08d' /*timeSigPlusSmall*/ : '\ue08c' /*timeSigPlus*/;
+        break;
+      case '-':
+        code = '\ue090' /*timeSigMinus*/;
+        break;
+      case '(':
+        code = smallSig ? '\ue092' /*timeSigParensLeftSmall*/ : '\ue094' /*timeSigParensLeft*/;
+        break;
+      case ')':
+        code = smallSig ? '\ue093' /*timeSigParensRightSmall*/ : '\ue095' /*timeSigParensRight*/;
+        break;
+      default:
+        code = String.fromCodePoint(0xe080 + Number(key[0])) /*timeSigN*/;
+        break;
     }
-
-    if (this.validateArgs) {
-      assertIsValidTimeSig(timeSpec);
-    }
-
-    const parts = timeSpec.split('/');
-
-    return {
-      line: 0,
-      num: true,
-      glyph: this.makeTimeSignatureGlyph(parts[0] ?? '', parts[1] ?? ''),
-    };
+    return code;
   }
 
   /**
    * Returns a new TimeSignatureGlyph (a Glyph subclass that knows how to draw both
    * top and bottom digits along with plus signs etc.)
    */
-  makeTimeSignatureGlyph(topDigits: string, botDigits: string): TimeSignatureGlyph {
+  makeTimeSignatureGlyph(topDigits: string, botDigits: string): void {
     // note that 'code' is ignored by TimeSignatureGlyph when rendering.
-    return new TimeSignatureGlyph(this, topDigits, botDigits, 'timeSig0', this.point);
-  }
+    let txt = '';
+    let topWidth = 0;
+    let height = 0;
+    for (let i = 0; i < topDigits.length; ++i) {
+      const code = TimeSignature.getTimeSigCode(topDigits[i], botDigits.length > 0);
+      txt += code;
+    }
+    this.topText.setText(txt);
+    this.topText.measureText();
+    topWidth = this.topText.getWidth();
+    height = this.topText.getHeight();
 
-  /**
-   * Returns {line, num (=getIsNumeric), glyph} --
-   * but these can also be accessed directly w/ getters and setters.
-   */
-  getInfo(): TimeSignatureInfo {
-    const { line, isNumeric, glyph } = this;
-    return { line, num: isNumeric, glyph };
+    let botWidth = 0;
+    txt = '';
+    for (let i = 0; i < botDigits.length; ++i) {
+      const code = TimeSignature.getTimeSigCode(botDigits[i], true);
+      txt += code;
+    }
+    this.botText.setText(txt);
+    this.botText.measureText();
+    botWidth = this.botText.getWidth();
+    height = Math.max(height, this.botText.getHeight());
+
+    // If the height of the digits is more than two staff spaces (20), shift to the next line
+    // in order to center the digits on lines 1 and 5 rather than 2 and 4.
+    this.lineShift = height > 22 ? 1 : 0;
+
+    this.width = Math.max(topWidth, botWidth);
+    this.topStartX = (this.width - topWidth) / 2.0;
+    this.botStartX = (this.width - botWidth) / 2.0;
   }
 
   /**
@@ -140,10 +147,21 @@ export class TimeSignature extends StaveModifier {
    */
   setTimeSig(timeSpec: string): this {
     this.timeSpec = timeSpec;
-    const info = this.parseTimeSpec(timeSpec);
-    this.setGlyph(info.glyph);
-    this.isNumeric = info.num;
-    this.line = info.line;
+    if (timeSpec === 'C' || timeSpec === 'C|') {
+      const code = TimeSignature.getTimeSigCode(timeSpec);
+      this.line = 2;
+      this.text = code;
+      this.measureText();
+      this.isNumeric = false;
+    } else {
+      if (this.validateArgs) {
+        assertIsValidTimeSig(timeSpec);
+      }
+      const parts = timeSpec.split('/');
+      this.line = 0;
+      this.isNumeric = true;
+      this.makeTimeSignatureGlyph(parts[0] ?? '', parts[1] ?? '');
+    }
     return this;
   }
 
@@ -172,23 +190,6 @@ export class TimeSignature extends StaveModifier {
   }
 
   /**
-   * Get the Glyph object used to create the time signature.  Numeric time signatures
-   * such as 3/8 have a composite Glyph stored as a single Glyph object.
-   */
-  getGlyph(): Glyph {
-    return this.glyph;
-  }
-
-  /**
-   * Set the Glyph object used to draw the time signature, and update the width of the
-   * TimeSignature to match.  The Glyph must define width in its metrics.
-   */
-  setGlyph(glyph: Glyph) {
-    this.glyph = glyph;
-    this.setWidth(defined(this.glyph.getMetrics().width));
-  }
-
-  /**
    * Return a boolean on whether this TimeSignature is drawn with one or more numbers
    * (such as 4/4) or not (as in cut time).
    */
@@ -211,13 +212,26 @@ export class TimeSignature extends StaveModifier {
     const stave = this.checkStave();
     const ctx = stave.checkContext();
     this.setRendered();
+    this.drawAt(ctx, stave, this.x);
+  }
+
+  drawAt(ctx: RenderContext, stave: Stave, x: number): void {
+    this.setRendered();
 
     this.applyStyle(ctx);
     ctx.openGroup('timesignature', this.getAttribute('id'));
-    this.glyph.setStave(stave);
-    this.glyph.setContext(ctx);
-    this.placeGlyphOnLine(this.glyph, stave, this.line);
-    this.glyph.renderToStave(this.x);
+    if (this.isNumeric) {
+      let startX = x + this.topStartX;
+      let y = 0;
+      if (this.botText.getText().length > 0) y = stave.getYForLine(this.topLine - this.lineShift);
+      else y = (stave.getYForLine(this.topLine) + stave.getYForLine(this.bottomLine)) / 2;
+      this.topText.renderText(ctx, startX, y);
+      startX = x + this.botStartX;
+      y = stave.getYForLine(this.bottomLine + this.lineShift);
+      this.botText.renderText(ctx, startX, y);
+    } else {
+      this.renderText(ctx, x, stave.getYForLine(this.line));
+    }
     ctx.closeGroup();
     this.restoreStyle(ctx);
   }

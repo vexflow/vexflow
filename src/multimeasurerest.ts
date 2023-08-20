@@ -3,13 +3,10 @@
 // This class implements multiple measure rests.
 
 import { Element } from './element';
-import { Glyph } from './glyph';
-import { NoteHead } from './notehead';
 import { RenderContext } from './rendercontext';
 import { Stave } from './stave';
 import { StaveModifierPosition } from './stavemodifier';
 import { Tables } from './tables';
-import { TimeSignature } from './timesignature';
 import { Category, isBarline } from './typeguard';
 import { defined } from './util';
 
@@ -54,20 +51,6 @@ export interface MultimeasureRestRenderOptions {
   serifThickness?: number;
 }
 
-let semibreveRest: { glyphFontScale: number; glyphCode: string; width: number } | undefined;
-
-function getSemibreveRest() {
-  if (!semibreveRest) {
-    const noteHead = new NoteHead({ duration: 'w', noteType: 'r' });
-    semibreveRest = {
-      glyphFontScale: noteHead.renderOptions.glyphFontScale,
-      glyphCode: noteHead.glyphCode,
-      width: noteHead.getWidth(),
-    };
-  }
-  return semibreveRest;
-}
-
 export class MultiMeasureRest extends Element {
   static get CATEGORY(): string {
     return Category.MultiMeasureRest;
@@ -91,8 +74,17 @@ export class MultiMeasureRest extends Element {
    */
   constructor(numberOfMeasures: number, options: MultimeasureRestRenderOptions) {
     super();
+    const fontSize = options.numberGlyphPoint ?? Tables.lookupMetric('MultiMeasureRest.fontSize'); // same as TimeSignature.
+    this.textFont.size = fontSize;
 
     this.numberOfMeasures = numberOfMeasures;
+    this.text = '';
+    const t = `${this.numberOfMeasures}`;
+    for (const digit of t) {
+      // 0xe080 is timeSig0. We calculate the code point for timeSigN to assemble the digits via SMuFL glyphs.
+      this.text += String.fromCodePoint(0xe080 + Number(digit));
+    }
+    this.measureText();
 
     // Keep track of whether these four options were provided.
     this.#hasPaddingLeft = typeof options.paddingLeft === 'number';
@@ -100,25 +92,21 @@ export class MultiMeasureRest extends Element {
     this.#hasLineThickness = typeof options.lineThickness === 'number';
     this.#hasSymbolSpacing = typeof options.symbolSpacing === 'number';
 
-    const musicFont = Tables.currentMusicFont();
     this.renderOptions = {
       useSymbols: false,
       showNumber: true,
       numberLine: -0.5,
-      numberGlyphPoint: musicFont.lookupMetric('digits.point') ?? Tables.NOTATION_FONT_SCALE, // same as TimeSignature.
+      numberGlyphPoint: fontSize,
       line: 2,
       spacingBetweenLinesPx: Tables.STAVE_LINE_DISTANCE, // same as Stave.
       serifThickness: 2,
-      semibreveRestGlyphScale: Tables.NOTATION_FONT_SCALE, // same as NoteHead.
+      semibreveRestGlyphScale: Tables.lookupMetric('fontSize'), // same as NoteHead.
       paddingLeft: 0,
       paddingRight: 0,
       lineThickness: 5,
       symbolSpacing: 0,
       ...options,
     };
-
-    const fontLineShift = musicFont.lookupMetric('digits.shiftLine', 0);
-    this.renderOptions.numberLine += fontLineShift;
   }
 
   getXs(): { left: number; right: number } {
@@ -145,36 +133,19 @@ export class MultiMeasureRest extends Element {
     const padding = (right - left) * 0.1;
     left += padding;
     right -= padding;
-
-    let lineThicknessHalf;
-    if (this.#hasLineThickness) {
-      lineThicknessHalf = options.lineThickness * 0.5;
-    } else {
-      lineThicknessHalf = spacingBetweenLines * 0.25;
+    let txt = '\ue4ef'; /*restHBarLeft*/
+    const el = new Element();
+    el.setText(txt);
+    el.measureText();
+    // Add middle bars until the right padding is reached
+    for (let i = 1; (i + 2) * el.getWidth() + left <= right; i++) {
+      txt += '\ue4f0'; /*restHBarMiddle*/
     }
-    const serifThickness = options.serifThickness;
-    const top = y - spacingBetweenLines;
-    const bot = y + spacingBetweenLines;
-    const leftIndented = left + serifThickness;
-    const rightIndented = right - serifThickness;
-    const lineTop = y - lineThicknessHalf;
-    const lineBottom = y + lineThicknessHalf;
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(left, top);
-    ctx.lineTo(leftIndented, top);
-    ctx.lineTo(leftIndented, lineTop);
-    ctx.lineTo(rightIndented, lineTop);
-    ctx.lineTo(rightIndented, top);
-    ctx.lineTo(right, top);
-    ctx.lineTo(right, bot);
-    ctx.lineTo(rightIndented, bot);
-    ctx.lineTo(rightIndented, lineBottom);
-    ctx.lineTo(leftIndented, lineBottom);
-    ctx.lineTo(leftIndented, bot);
-    ctx.lineTo(left, bot);
-    ctx.closePath();
-    ctx.fill();
+    txt += '\ue4f1'; /*restHBarRight*/
+
+    el.setText(txt);
+    el.measureText();
+    el.renderText(ctx, left + (right - left) * 0.5 - el.getWidth() * 0.5, y);
   }
 
   drawSymbols(stave: Stave, ctx: RenderContext, left: number, right: number, spacingBetweenLines: number): void {
@@ -185,52 +156,34 @@ export class MultiMeasureRest extends Element {
 
     const options = this.renderOptions;
 
-    // FIXME: TODO: invalidate semibreveRest at the appropriate time
-    // (e.g., if the system font settings are changed).
-    semibreveRest = undefined;
+    const elMiddle = new Element();
+    let txt = '';
+    for (let i = 0; i < n4; ++i) {
+      txt += '\ue4e1' /*restLonga*/ + ' ';
+    }
+    for (let i = 0; i < n2; ++i) {
+      txt += '\ue4e2' /*restDoubleWhole*/ + ' ';
+    }
+    elMiddle.setText(txt);
+    elMiddle.measureText();
+    const elTop = new Element();
+    txt = '';
+    for (let i = 0; i < n1; ++i) {
+      txt += '\ue4e3' /*restWhole*/ + ' ';
+    }
+    elTop.setText(txt);
+    elTop.measureText();
 
-    const rest = getSemibreveRest();
-    const restScale = options.semibreveRestGlyphScale;
-    const restWidth = rest.width * (restScale / rest.glyphFontScale);
-    const glyphs = {
-      2: {
-        width: restWidth * 0.5,
-        height: spacingBetweenLines,
-      },
-      1: {
-        width: restWidth,
-      },
-    };
-
-    /* 10: normal spacingBetweenLines */
-    const spacing = this.#hasSymbolSpacing ? options.symbolSpacing : 10;
-
-    const width = n4 * glyphs[2].width + n2 * glyphs[2].width + n1 * glyphs[1].width + (n4 + n2 + n1 - 1) * spacing;
+    const width = elMiddle.getWidth() + elTop.getWidth();
     let x = left + (right - left) * 0.5 - width * 0.5;
     const line = options.line;
     const yTop = stave.getYForLine(line - 1);
     const yMiddle = stave.getYForLine(line);
-    const yBottom = stave.getYForLine(line + 1);
 
-    ctx.save();
-    ctx.setStrokeStyle('none');
-    ctx.setLineWidth(0);
-
-    for (let i = 0; i < n4; ++i) {
-      ctx.fillRect(x, yMiddle - glyphs[2].height, glyphs[2].width, glyphs[2].height);
-      ctx.fillRect(x, yBottom - glyphs[2].height, glyphs[2].width, glyphs[2].height);
-      x += glyphs[2].width + spacing;
-    }
-    for (let i = 0; i < n2; ++i) {
-      ctx.fillRect(x, yMiddle - glyphs[2].height, glyphs[2].width, glyphs[2].height);
-      x += glyphs[2].width + spacing;
-    }
-    for (let i = 0; i < n1; ++i) {
-      Glyph.renderGlyph(ctx, x, yTop, restScale, rest.glyphCode);
-      x += glyphs[1].width + spacing;
-    }
-
-    ctx.restore();
+    elMiddle.renderText(ctx, x, yMiddle);
+    x += elMiddle.getWidth();
+    elTop.renderText(ctx, x, yTop);
+    x += elTop.getWidth();
   }
 
   draw(): void {
@@ -270,14 +223,11 @@ export class MultiMeasureRest extends Element {
     }
 
     if (options.showNumber) {
-      const timeSpec = '/' + this.numberOfMeasures;
-      const timeSig = new TimeSignature(timeSpec, 0, false);
-      timeSig.point = options.numberGlyphPoint;
-      timeSig.setTimeSig(timeSpec);
-      timeSig.setStave(stave);
-      timeSig.setX(left + (right - left) * 0.5 - timeSig.getInfo().glyph.getMetrics().width * 0.5);
-      timeSig.bottomLine = options.numberLine;
-      timeSig.setContext(ctx).draw();
+      this.renderText(
+        ctx,
+        left + (right - left) * 0.5 - this.width * 0.5,
+        stave.getYForLine(options.numberLine) - this.height * 0.5
+      );
     }
   }
 }
