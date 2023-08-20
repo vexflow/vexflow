@@ -4,7 +4,6 @@
 // A base class for stave modifiers (e.g. clefs, key signatures)
 
 import { Element } from './element';
-import { Glyph } from './glyph';
 import { Stave } from './stave';
 import { Category } from './typeguard';
 import { defined } from './util';
@@ -35,7 +34,6 @@ export class StaveModifier extends Element {
     return StaveModifierPosition;
   }
 
-  protected width: number = 0;
   protected x: number = 0;
 
   protected padding: number;
@@ -72,15 +70,6 @@ export class StaveModifier extends Element {
     return this;
   }
 
-  getWidth(): number {
-    return this.width;
-  }
-
-  setWidth(width: number): this {
-    this.width = width;
-    return this;
-  }
-
   getX(): number {
     return this.x;
   }
@@ -88,19 +77,6 @@ export class StaveModifier extends Element {
   setX(x: number): this {
     this.x = x;
     return this;
-  }
-
-  /**
-   * Runs setYShift() for the Glyph object so that it matches the position of line for
-   * the Stave provided.  A `customShift` can also be given (measured in the same units
-   * as `setYShift` not in lines) and this will be added after all other positions are
-   * calculated from the Stave.
-   *
-   * Note that this routine only sets the yShift; it does not actually "place" (meaning
-   * draw) the Glyph on the Stave.  Call .draw() afterwards to do that.
-   */
-  placeGlyphOnLine(glyph: Glyph, stave: Stave, line?: number, customShift = 0): void {
-    glyph.setYShift(stave.getYForLine(line ?? 0) - stave.getYForGlyphs() + customShift);
   }
 
   getPadding(index: number): number {
