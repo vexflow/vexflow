@@ -45,6 +45,6 @@ export class ClefNote extends Note {
 
     this.setRendered();
 
-    this.clef.renderText(ctx, this.getAbsoluteX(), stave.getYForLine(this.clef.line));
+    this.clef.renderText(ctx, this.getAbsoluteX() - this.x, stave.getYForLine(this.clef.line));
   }
 }

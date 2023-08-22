@@ -48,7 +48,7 @@ export class StaveSection extends StaveModifier {
       ctx.rect(x, y - height + headroom, width, height);
       ctx.stroke();
     }
-    this.renderText(ctx, x + padding, y - padding);
+    this.renderText(ctx, xShift + padding, y - padding);
     ctx.restore();
     return this;
   }

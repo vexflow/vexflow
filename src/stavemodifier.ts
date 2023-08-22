@@ -34,8 +34,6 @@ export class StaveModifier extends Element {
     return StaveModifierPosition;
   }
 
-  protected x: number = 0;
-
   protected padding: number;
   protected position: StaveModifierPosition;
   protected stave?: Stave;
@@ -67,15 +65,6 @@ export class StaveModifier extends Element {
 
   setStave(stave: Stave): this {
     this.stave = stave;
-    return this;
-  }
-
-  getX(): number {
-    return this.x;
-  }
-
-  setX(x: number): this {
-    this.x = x;
     return this;
   }
 

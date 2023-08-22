@@ -67,7 +67,7 @@ export class StaveTempo extends StaveModifier {
       this.text = name;
       this.textFont = Tables.lookupMetricFontInfo('StaveTempo.name');
       this.measureText();
-      this.renderText(ctx, x, y);
+      this.renderText(ctx, shiftX, y);
       x += this.getWidth();
     }
 

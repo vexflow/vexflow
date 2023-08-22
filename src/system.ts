@@ -128,11 +128,12 @@ export class System extends Element {
   }
 
   /** Set origin X. */
-  setX(x: number) {
+  setX(x: number): this {
     this.options.x = x;
     this.partStaves.forEach((s) => {
       s.setX(x);
     });
+    return this;
   }
 
   /** Get origin y. */
@@ -141,11 +142,12 @@ export class System extends Element {
   }
 
   /** Set origin y. */
-  setY(y: number) {
+  setY(y: number): this {
     this.options.y = y;
     this.partStaves.forEach((s) => {
       s.setY(y);
     });
+    return this;
   }
 
   /** Get associated staves. */

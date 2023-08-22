@@ -115,8 +115,6 @@ export class NoteHead extends Note {
   protected displaced: boolean;
   protected stemDirection: number;
 
-  protected x: number;
-  protected y: number;
   protected line: number;
   protected index?: number;
   protected slashed: boolean;
@@ -177,23 +175,6 @@ export class NoteHead extends Note {
   /** Determine if the notehead is displaced. */
   isDisplaced(): boolean {
     return this.displaced === true;
-  }
-
-  /** Set the X coordinate. */
-  setX(x: number): this {
-    this.x = x;
-    return this;
-  }
-
-  /** Get the Y coordinate. */
-  getY(): number {
-    return this.y;
-  }
-
-  /** Set the Y coordinate. */
-  setY(y: number): this {
-    this.y = y;
-    return this;
   }
 
   /** Get the stave line the notehead is placed on. */
