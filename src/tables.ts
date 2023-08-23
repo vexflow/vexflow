@@ -50,10 +50,10 @@ export const CommonMetrics: Record<string, any> = {
   },
 
   PedalMarking: {
-    fontFamily: 'Times New Roman, serif',
-    fontSize: 12,
-    fontWeight: 'bold',
-    fontStyle: 'italic',
+    text: {
+      fontSize: 12,
+      fontStyle: 'italic',
+    },
   },
 
   Repetition: {
