@@ -230,7 +230,7 @@ export class TimeSignature extends StaveModifier {
       y = stave.getYForLine(this.bottomLine + this.lineShift);
       this.botText.renderText(ctx, startX, y);
     } else {
-      this.renderText(ctx, x, stave.getYForLine(this.line));
+      this.renderText(ctx, x - this.x, stave.getYForLine(this.line));
     }
     ctx.closeGroup();
     this.restoreStyle(ctx);

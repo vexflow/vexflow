@@ -144,7 +144,7 @@ export class Clef extends StaveModifier {
     this.applyStyle(ctx);
     ctx.openGroup('clef', this.getAttribute('id'));
 
-    this.renderText(ctx, this.x, stave.getYForLine(this.line));
+    this.renderText(ctx, 0, stave.getYForLine(this.line));
     ctx.closeGroup();
     this.restoreStyle(ctx);
   }

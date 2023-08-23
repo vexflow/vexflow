@@ -75,8 +75,8 @@ export class Element {
     return Category.Element;
   }
 
-  // all Element objects keep a list of children that they are responsible and which
-  // inherit the style of their parents.
+  // Element objects keep a list of children that they are responsible for.
+  // Children inherit the style from their parents (see: setGroupStyle(s)).
   protected children: Element[] = [];
   protected static ID: number = 1000;
   protected static newID(): string {
@@ -107,6 +107,8 @@ export class Element {
   protected width: number = 0;
   protected xShift: number = 0;
   protected yShift: number = 0;
+  protected x: number = 0;
+  protected y: number = 0;
 
   constructor(category?: string) {
     this.#attrs = {
@@ -484,6 +486,27 @@ export class Element {
     return this;
   }
 
+  /** Set the X coordinate. */
+  setX(x: number): this {
+    this.x = x;
+    return this;
+  }
+
+  /** Get the X coordinate. */
+  getX(): number {
+    return this.x;
+  }
+  /** Get the Y coordinate. */
+  getY(): number {
+    return this.y;
+  }
+
+  /** Set the Y coordinate. */
+  setY(y: number): this {
+    this.y = y;
+    return this;
+  }
+
   /** Shift element down `yShift` pixels. Negative values shift up. */
   setYShift(yShift: number): this {
     this.yShift = yShift;
@@ -521,7 +544,11 @@ export class Element {
   renderText(ctx: RenderContext, xPos: number, yPos: number): void {
     ctx.save();
     ctx.setFont(this.textFont);
-    ctx.fillText(this.text, xPos + this.xShift, yPos + this.yShift);
+    ctx.fillText(this.text, xPos + this.x + this.xShift, yPos + this.y + this.yShift);
+    this.children.forEach((child) => {
+      ctx.setFont(child.textFont);
+      ctx.fillText(child.text, xPos + child.x + child.xShift, yPos + child.y + child.yShift);
+    });
     ctx.restore();
   }
 
