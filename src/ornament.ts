@@ -40,8 +40,7 @@ export class Ornament extends Modifier {
     return Category.Ornament;
   }
   static get minPadding(): number {
-    const musicFont = Tables.currentMusicFont();
-    return musicFont.lookupMetric('noteHead.minPadding');
+    return Tables.lookupMetric('NoteHead.minPadding');
   }
 
   protected ornament: {

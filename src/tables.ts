@@ -65,6 +65,10 @@ export const CommonMetrics: Record<string, any> = {
   Stave: {
     fontFamily: 'Arial, sans-serif',
     fontSize: 8,
+    padding: 12,
+    endPaddingMax: 10,
+    endPaddingMin: 5,
+    unalignedNotePadding: 10,
   },
 
   StaveConnector: {

@@ -68,8 +68,7 @@ export class Annotation extends Modifier {
   // Use the same padding for annotations as note head so the
   // words don't run into each other.
   static get minAnnotationPadding(): number {
-    const musicFont = Tables.currentMusicFont();
-    return musicFont.lookupMetric('noteHead.minPadding');
+    return Tables.lookupMetric('NoteHead.minPadding');
   }
   /** Arrange annotations within a `ModifierContext` */
   static format(annotations: Annotation[], state: ModifierContextState): boolean {
@@ -86,7 +85,7 @@ export class Annotation extends Modifier {
       let verticalSpaceNeeded = textLines;
 
       const note = annotation.checkAttachedNote();
-      const glyphWidth = note.getGlyphProps().getWidth();
+      const glyphWidth = note.getGlyphWidth();
       // Get the text width from the font metrics.
       const textWidth = textFormatter.getWidthForTextInPx(annotation.text);
       if (annotation.horizontalJustification === AnnotationHorizontalJustify.LEFT) {
