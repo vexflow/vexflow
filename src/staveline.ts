@@ -303,7 +303,7 @@ export class StaveLine extends Element {
       endPosition.x -= lastNote.getMetrics().modLeftPx + renderOptions.paddingRight;
 
       // Adjust first `x` coordinates for displacements
-      const noteheadWidth = firstNote.getGlyphProps().getWidth();
+      const noteheadWidth = firstNote.getGlyphWidth();
       const firstDisplaced = firstNote.getKeyProps()[firstIndex].displaced;
       if (firstDisplaced && firstNote.getStemDirection() === 1) {
         startPosition.x += noteheadWidth + renderOptions.paddingLeft;

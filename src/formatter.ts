@@ -216,7 +216,7 @@ export class Formatter {
     options?: { stavePadding: number }
   ): void {
     options = {
-      stavePadding: Tables.currentMusicFont().lookupMetric('stave.padding'),
+      stavePadding: Tables.lookupMetric('Stave.padding'),
       ...options,
     };
 
@@ -373,8 +373,8 @@ export class Formatter {
         }
 
         // If activated rests not on default can be rendered as specified.
-        const position = currTickable.getGlyphProps().position.toUpperCase();
-        if (position !== 'R/4' && position !== 'B/4') {
+        const line = currTickable.getLineForRest();
+        if (line !== 3) {
           return;
         }
 
@@ -476,7 +476,7 @@ export class Formatter {
    * @returns the estimated width in pixels
    */
   preCalculateMinTotalWidth(voices: Voice[]): number {
-    const unalignedPadding = Tables.currentMusicFont().lookupMetric('stave.unalignedNotePadding');
+    const unalignedPadding = Tables.lookupMetric('Stave.unalignedNotePadding');
     // Calculate additional padding based on 3 methods:
     // 1) unaligned beats in voices, 2) variance of width, 3) variance of durations
     let unalignedCtxCount = 0;
@@ -828,10 +828,9 @@ export class Formatter {
       lastContext.getMetrics().notePx -
       lastContext.getMetrics().totalRightPx -
       firstContext.getMetrics().totalLeftPx;
-    const musicFont = Tables.currentMusicFont();
-    const configMinPadding = musicFont.lookupMetric('stave.endPaddingMin');
-    const configMaxPadding = musicFont.lookupMetric('stave.endPaddingMax');
-    const leftPadding = musicFont.lookupMetric('stave.padding');
+    const configMinPadding = Tables.lookupMetric('Stave.endPaddingMin');
+    const configMaxPadding = Tables.lookupMetric('Stave.endPaddingMax');
+    const leftPadding = Tables.lookupMetric('Stave.padding');
     let targetWidth = adjustedJustifyWidth;
     const distances = calculateIdealDistances(targetWidth);
     let actualWidth = shiftToIdealDistances(distances);
