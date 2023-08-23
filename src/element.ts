@@ -75,8 +75,8 @@ export class Element {
     return Category.Element;
   }
 
-  // all Element objects keep a list of children that they are responsible and which
-  // inherit the style of their parents.
+  // Element objects keep a list of children that they are responsible for.
+  // Children inherit the style from their parents (see: setGroupStyle(s)).
   protected children: Element[] = [];
   protected static ID: number = 1000;
   protected static newID(): string {
