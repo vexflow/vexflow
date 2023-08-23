@@ -52,7 +52,6 @@ export const CommonMetrics: Record<string, any> = {
   PedalMarking: {
     text: {
       fontSize: 12,
-      fontWeight: 'bold',
       fontStyle: 'italic',
     },
   },
