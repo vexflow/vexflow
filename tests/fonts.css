@@ -29,6 +29,135 @@
     url(../node_modules/@vexflow-fonts/bravura/bravura.woff2) format('woff2');
 }
 
+/* Edwin */
+@font-face {
+  font-family: 'Edwin';
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src:
+    local('Edwin'),
+    url(../node_modules/@vexflow-fonts/edwin/edwin-roman.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'Edwin';
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+  src:
+    local('Edwin'),
+    url(../node_modules/@vexflow-fonts/edwin/edwin-bold.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'Edwin';
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+  src:
+    local('Edwin'),
+    url(../node_modules/@vexflow-fonts/edwin/edwin-italic.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'Edwin';
+  font-weight: bold;
+  font-style: italic;
+  font-display: swap;
+  src:
+    local('Edwin'),
+    url(../node_modules/@vexflow-fonts/edwin/edwin-bold-italic.woff2) format('woff2');
+}
+
+/* Finale Ash */
+@font-face {
+  font-family: 'Finale Ash';
+  font-style: normal;
+  font-display: block;
+  font-weight: 400;
+  src:
+    local('Finale Ash'),
+    url(../node_modules/@vexflow-fonts/finaleash/finaleash.woff2) format('woff2');
+}
+
+/* Finale Broadway */
+@font-face {
+  font-family: 'Finale Broadway';
+  font-style: normal;
+  font-display: block;
+  font-weight: 400;
+  src:
+    local('Finale Broadway'),
+    url(../node_modules/@vexflow-fonts/finalebroadway/finalebroadway.woff2) format('woff2');
+}
+
+/* Finale Maestro */
+@font-face {
+  font-family: 'Finale Maestro';
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src:
+    local('Finale Maestro'),
+    url(../node_modules/@vexflow-fonts/finalemaestro/finalemaestro.woff2) format('woff2');
+}
+
+/* Finale Jazz */
+@font-face {
+  font-family: 'Finale Jazz';
+  font-style: normal;
+  font-display: block;
+  font-weight: 400;
+  src:
+    local('Finale Jazz'),
+    url(../node_modules/@vexflow-fonts/finalejazz/finalejazz.woff2) format('woff2');
+}
+
+/* GonvilleSmufl */
+@font-face {
+  font-family: 'GonvilleSmufl';
+  font-style: normal;
+  font-display: block;
+  font-weight: 400;
+  src:
+    local('GonvilleSmufl'),
+    url(../node_modules/@vexflow-fonts/gonvillesmufl/gonvillesmufl.woff2) format('woff2');
+}
+
+/* Gootville */
+@font-face {
+  font-family: 'Gootville';
+  font-style: normal;
+  font-display: block;
+  font-weight: 400;
+  src:
+    local('Gootville'),
+    url(../node_modules/@vexflow-fonts/gootville/gootville.woff2) format('woff2');
+}
+
+/* Leland */
+@font-face {
+  font-family: 'Leland';
+  font-style: normal;
+  font-display: block;
+  font-weight: 400;
+  src:
+    local('Leland'),
+    url(../node_modules/@vexflow-fonts/leland/leland.woff2) format('woff2');
+}
+
+/* MuseJazz */
+@font-face {
+  font-family: 'MuseJazz';
+  font-style: normal;
+  font-display: block;
+  font-weight: 400;
+  src:
+    local('MuseJazz'),
+    url(../node_modules/@vexflow-fonts/musejazz/musejazz.woff2) format('woff2');
+}
+
 /* Petaluma */
 @font-face {
   font-family: 'Petaluma';
@@ -38,4 +167,44 @@
   src:
     local('Petaluma'),
     url(../node_modules/@vexflow-fonts/petaluma/petaluma.woff2) format('woff2');
+}
+
+/* Petaluma Script */
+@font-face {
+  font-family: 'Petaluma Script';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(../node_modules/@vexflow-fonts/petalumascript/petalumascript.woff2) format('woff2');
+}
+
+/* Roboto Slab */
+@font-face {
+  font-family: 'Roboto Slab';
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src:
+    local('Roboto Slab'),
+    url(../node_modules/@vexflow-fonts/robotoslab/robotoslab-regular-400.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'Roboto Slab';
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src:
+    local('Roboto Slab'),
+    url(../node_modules/@vexflow-fonts/robotoslab/robotoslab-medium-500.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'Roboto Slab';
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src:
+    local('Roboto Slab'),
+    url(../node_modules/@vexflow-fonts/robotoslab/robotoslab-bold-700.woff2) format('woff2');
 }

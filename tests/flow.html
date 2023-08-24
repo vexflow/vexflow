@@ -59,8 +59,6 @@
     </style>
   </head>
   <body>
-    <span style="font-family: Academico"></span>
-    <span style="font-family: Bravura"></span>
     <div style="text-align: center">
       <div id="qunit"></div>
       <div id="qunit-fixture"></div>
@@ -77,7 +75,30 @@
         [ <a href="https://vexflow.com">Home</a> ] [ <a href="https://github.com/vexflow/vexflow">GitHub</a> ]
       </p>
     </div>
+    <div id="font-preload">
+      <!-- Preload all fonts and styles for testing. The empty bold and italic tags below are for loading the different font weights/styles. -->
+      <span style="font-family: Academico"><b></b></span>
+      <span style="font-family: Bravura"></span>
+      <span style="font-family: Edwin"
+        ><b></b><i></i><b><i></i></b
+      ></span>
+      <span style="font-family: Finale Ash"></span>
+      <span style="font-family: Finale Broadway"></span>
+      <span style="font-family: Finale Jazz"></span>
+      <span style="font-family: Finale Maestro"></span>
+      <span style="font-family: GonvilleSmufl"></span>
+      <span style="font-family: Gootville"></span>
+      <span style="font-family: Leland"></span>
+      <span style="font-family: MuseJazz"></span>
+      <span style="font-family: Petaluma"></span>
+      <span style="font-family: Petaluma Script"></span>
+      <span style="font-family: Roboto Slab"
+        ><span style="font-weight: 500"></span><span style="font-weight: 700"></span
+      ></span>
+    </div>
     <script type="module">
+      QUnit.config.autostart = false;
+
       function loadScript(url) {
         return new Promise((resolve, reject) => {
           const script = document.createElement('script');
@@ -107,7 +128,6 @@
       const useESM = queryParams.get('esm') === 'true' || hashParams?.get('esm') === 'true';
 
       let vexURL;
-      let testsURL;
       let vexPlusTestsURL;
 
       // Determine if we are loading VexFlow from a CDN.
@@ -129,7 +149,6 @@
         const path = ver;
         // TODO RONYEH: We need to consider the cjs/ and esm/ directories.
         vexURL = '../' + path + '/vexflow-debug.js';
-        testsURL = '../' + path + '/vexflow-tests.js';
         vexPlusTestsURL = '../' + path + '/vexflow-debug-with-tests.js';
       }
 
@@ -141,45 +160,52 @@
       let loadVexFlow;
       const isFileProtocol = location.protocol === 'file:';
       if (useESM && isFileProtocol) {
-        console.warn('ES modules require a web server for testing!');
+        prompt(
+          'ES modules require a web server for testing!\n\nTry `npx http-server` and browse to http://127.0.0.1:8080/tests/flow.html?esm=true\n\nWe will fall back to CJS for now.',
+          'npx http-server'
+        );
       }
       if (useESM && !isFileProtocol) {
-        console.log('LOADING ESM: VexFlow >= 4.0.0');
-        // This ESM branch only works if flow.html is accessed from a web server
+        console.log('LOADING ESM');
+        // ESM version only works if flow.html is accessed from a web server
         // (e.g., `npx http-server` and browse to http://127.0.0.1:8080/tests/flow.html).
         loadVexFlow = async () => {
           const module = await import('../build/esm/entry/vexflow-debug-with-tests.js');
           window.Vex = module.Vex;
+          return Vex.Flow;
         };
       } else {
-        console.log('LOADING CJS: VexFlow >= 4.0.0');
+        console.log('LOADING CJS');
         // When loading version >= 4.0.0, only load vexflow-debug-with-tests.js
-        loadVexFlow = () => loadScript(vexPlusTestsURL);
+        loadVexFlow = async () => {
+          await loadScript(vexPlusTestsURL);
+          return Vex.Flow;
+        };
       }
 
-      document.fonts.ready.then((fontFaceSet) => {
-        const fontFaces = [...fontFaceSet];
-        for (const fontFace of fontFaces) {
-          if (fontFace.status === 'loaded') {
-            console.log(fontFace.family + ' loaded!');
-          } else if (fontFace.status === 'unloaded') {
-            console.warn(fontFace.family + ' IS NOT LOADED!');
-          } else if (fontFace.status === 'error') {
-            console.error(fontFace.family + ' ERROR');
-          } else {
-            console.log(fontFace.family + ' status: ' + fontFace.status);
-          }
+      // Only proceed after all fonts have loaded.
+      let fontFaceSet = await document.fonts.ready;
+
+      // Show font loading status in the console.
+      const fontFaces = [...fontFaceSet];
+      for (const fontFace of fontFaces) {
+        const fontInfo = fontFace.family + ' / ' + fontFace.weight + ' / ' + fontFace.style;
+        if (fontFace.status === 'loaded') {
+          console.log(fontInfo + ' loaded!');
+        } else if (fontFace.status === 'unloaded') {
+          console.warn('*** ' + fontInfo + ' IS NOT LOADED! ***');
+        } else if (fontFace.status === 'error') {
+          console.error(fontInfo + ' ERROR');
+        } else {
+          console.log(fontInfo + ' has status: ' + fontFace.status);
         }
-      });
+      }
 
-      await loadVexFlow();
+      const VF = await loadVexFlow();
 
-      const VF = Vex.Flow;
-
-      // Versions 4.0.0 and newer have support for preloading web fonts.
-      // Versions 3.0.9 and older do not support this feature.
-      // await VF.Font.loadWebFonts(); // All Fonts
-      // await VF.Font.loadWebFonts(['Bravura']);
+      // If you did not load the fonts via the div#font-preload above, you can load them with this API.
+      // await VF.Font.loadWebFonts(); // Load all web fonts.
+      // await VF.Font.loadWebFonts(['Bravura']); // Load only the specified fonts.
 
       // Optionally specify the QUnit module or filter in the fragment identifier.
       if (hashParams) {
@@ -195,6 +221,7 @@
       QUnit.config.hidepassed = true;
       QUnit.config.noglobals = true;
       VF.Test.run();
+      QUnit.start();
     </script>
   </body>
 </html>
