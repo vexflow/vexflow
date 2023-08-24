@@ -1,9 +1,9 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 
+import { Element } from './element';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
-import { TextFormatter } from './textformatter';
 import { Category, isTabNote } from './typeguard';
 import { RuntimeError } from './util';
 
@@ -55,9 +55,7 @@ export class Bend extends Modifier {
     return true;
   }
 
-  protected text: string;
   protected tap: string;
-  protected release: boolean;
   protected phrase: BendPhrase[];
 
   public renderOptions: {
@@ -96,17 +94,12 @@ export class Bend extends Modifier {
    *     width: 8;
    *   }]
    * ```
-   * @param text text for bend ("Full", "Half", etc.) (DEPRECATED)
-   * @param release if true, render a release. (DEPRECATED)
-   * @param phrase if set, ignore "text" and "release", and use the more sophisticated phrase specified
    */
-  constructor(text: string, release: boolean = false, phrase?: BendPhrase[]) {
+  constructor(phrase: BendPhrase[]) {
     super();
 
-    this.text = text;
-    this.release = release;
+    this.xShift = 0;
     this.tap = '';
-
     this.renderOptions = {
       lineWidth: 1.5,
       lineStyle: '#777777',
@@ -114,13 +107,7 @@ export class Bend extends Modifier {
       releaseWidth: 8,
     };
 
-    if (phrase) {
-      this.phrase = phrase;
-    } else {
-      // Backward compatibility
-      this.phrase = [{ type: Bend.UP, text: this.text }];
-      if (this.release) this.phrase.push({ type: Bend.DOWN, text: '' });
-    }
+    this.phrase = phrase;
 
     this.updateWidth();
   }
@@ -137,20 +124,20 @@ export class Bend extends Modifier {
     return this;
   }
 
-  /** Get text provided in the constructor. */
-  getText(): string {
-    return this.text;
-  }
   getTextHeight(): number {
-    const textFormatter = TextFormatter.create(this.textFont);
-    return textFormatter.maxHeight;
+    const element = new Element(Category.Bend);
+    element.setText(this.phrase[0].text);
+    element.measureText();
+    return element.getHeight();
   }
 
   /** Recalculate width. */
   protected updateWidth(): this {
-    const textFormatter = TextFormatter.create(this.textFont);
     const measureText = (text: string) => {
-      return textFormatter.getWidthForTextInPx(text);
+      const element = new Element(Category.Bend);
+      element.setText(text);
+      element.measureText();
+      return element.getWidth();
     };
 
     let totalWidth = 0;
@@ -185,7 +172,6 @@ export class Bend extends Modifier {
     const stave = note.checkStave();
     const spacing = stave.getSpacingBetweenLines();
     const lowestY = note.getYs().reduce((a, b) => (a < b ? a : b));
-
     // this.textLine is relative to top string in the group.
     const bendHeight = start.y - ((this.textLine + 1) * spacing + start.y - lowestY) + 3;
     const annotationY = start.y - ((this.textLine + 1) * spacing + start.y - lowestY) - 1;

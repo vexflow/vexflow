@@ -66,10 +66,13 @@ function setFont(assert: Assert): void {
 }
 
 function fontParsing(assert: Assert): void {
-  const b = new Bend('1/2', true);
+  const b = new Bend([
+    { type: Bend.UP, text: '1/2' },
+    { type: Bend.DOWN, text: '' },
+  ]);
   const bFont = b.fontInfo;
   // Check the default font.
-  assert.equal(bFont?.family, Font.SANS_SERIF);
+  assert.equal(bFont?.family, 'Bravura,Roboto Slab');
   assert.equal(bFont?.size, Font.SIZE);
   assert.equal(bFont?.weight, FontWeight.NORMAL);
   assert.equal(bFont?.style, FontStyle.NORMAL);

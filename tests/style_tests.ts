@@ -133,7 +133,7 @@ function tab(options: TestOptions, contextBuilder: ContextBuilder): void {
       ],
       duration: 'h',
     })
-      .addModifier(new Bend('Full').setStyle(FS('brown')), 0)
+      .addModifier(new Bend([{ type: Bend.UP, text: 'Full' }]).setStyle(FS('brown')), 0)
       .addStroke(0, new Stroke(1, { allVoices: false }).setStyle(FS('blue'))),
   ];
 

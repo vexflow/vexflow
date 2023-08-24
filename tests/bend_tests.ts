@@ -6,11 +6,11 @@
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Bend, BendPhrase } from '../src/bend';
-import { Font } from '../src/font';
 import { Formatter } from '../src/formatter';
 import { ModifierContext } from '../src/modifiercontext';
 import { Note } from '../src/note';
 import { ContextBuilder } from '../src/renderer';
+import { Tables } from '../src/tables';
 import { TabNote, TabNoteStruct } from '../src/tabnote';
 import { TabStave } from '../src/tabstave';
 import { TickContext } from '../src/tickcontext';
@@ -30,8 +30,7 @@ const BendTests = {
 
 // Helper functions for creating TabNote and Bend objects.
 const note = (noteStruct: TabNoteStruct) => new TabNote(noteStruct);
-const bendWithText = (text: string, release = false) => new Bend(text, release);
-const bendWithPhrase = (phrase: BendPhrase[]) => new Bend('', false, phrase);
+const bendWithPhrase = (phrase: BendPhrase[]) => new Bend(phrase);
 
 /**
  * Bend two strings at a time.
@@ -41,7 +40,7 @@ function doubleBends(options: TestOptions, contextBuilder: ContextBuilder): void
   ctx.scale(1.5, 1.5);
 
   ctx.font = '10pt Arial';
-  const stave = new TabStave(10, 10, 450).addTabGlyph().setContext(ctx).draw();
+  const stave = new TabStave(10, 10, 450).addClef('tab').setContext(ctx).draw();
 
   const notes = [
     note({
@@ -51,8 +50,8 @@ function doubleBends(options: TestOptions, contextBuilder: ContextBuilder): void
       ],
       duration: 'q',
     })
-      .addModifier(bendWithText('Full'), 0)
-      .addModifier(bendWithText('1/2'), 1),
+      .addModifier(bendWithPhrase([{ type: Bend.UP, text: 'Full' }]), 0)
+      .addModifier(bendWithPhrase([{ type: Bend.UP, text: '1/2' }]), 1),
 
     note({
       positions: [
@@ -61,8 +60,8 @@ function doubleBends(options: TestOptions, contextBuilder: ContextBuilder): void
       ],
       duration: 'q',
     })
-      .addModifier(bendWithText('1/4'), 0)
-      .addModifier(bendWithText('1/4'), 1),
+      .addModifier(bendWithPhrase([{ type: Bend.UP, text: '1/4' }]), 0)
+      .addModifier(bendWithPhrase([{ type: Bend.UP, text: '1/4' }]), 1),
 
     // This note is not visible because it is pushed off to the right by the ctx.scale(1.5, 1.5) at the top.
     note({
@@ -82,7 +81,7 @@ function doubleBendsWithRelease(options: TestOptions, contextBuilder: ContextBui
   ctx.scale(1.0, 1.0);
   ctx.setBackgroundFillStyle('#FFF');
   ctx.setFont('Arial', VexFlowTests.Font.size);
-  const stave = new TabStave(10, 10, 550).addTabGlyph().setContext(ctx).draw();
+  const stave = new TabStave(10, 10, 550).addClef('tab').setContext(ctx).draw();
 
   const notes = [
     note({
@@ -92,8 +91,20 @@ function doubleBendsWithRelease(options: TestOptions, contextBuilder: ContextBui
       ],
       duration: 'q',
     })
-      .addModifier(bendWithText('1/2', true), 0)
-      .addModifier(bendWithText('Full', true), 1),
+      .addModifier(
+        bendWithPhrase([
+          { type: Bend.UP, text: '1/2' },
+          { type: Bend.DOWN, text: '' },
+        ]),
+        0
+      )
+      .addModifier(
+        bendWithPhrase([
+          { type: Bend.UP, text: 'Full' },
+          { type: Bend.DOWN, text: '' },
+        ]),
+        1
+      ),
 
     note({
       positions: [
@@ -103,9 +114,27 @@ function doubleBendsWithRelease(options: TestOptions, contextBuilder: ContextBui
       ],
       duration: 'q',
     })
-      .addModifier(bendWithText('1/4', true), 0)
-      .addModifier(bendWithText('Monstrous', true), 1)
-      .addModifier(bendWithText('1/4', true), 2),
+      .addModifier(
+        bendWithPhrase([
+          { type: Bend.UP, text: '1/4' },
+          { type: Bend.DOWN, text: '' },
+        ]),
+        0
+      )
+      .addModifier(
+        bendWithPhrase([
+          { type: Bend.UP, text: 'Monstrous' },
+          { type: Bend.DOWN, text: '' },
+        ]),
+        1
+      )
+      .addModifier(
+        bendWithPhrase([
+          { type: Bend.UP, text: '1/4' },
+          { type: Bend.DOWN, text: '' },
+        ]),
+        2
+      ),
 
     note({
       positions: [{ str: 4, fret: 7 }],
@@ -134,7 +163,7 @@ function reverseBends(options: TestOptions, contextBuilder: ContextBuilder): voi
 
   ctx.setFont('10pt Arial');
 
-  const stave = new TabStave(10, 10, 450).addTabGlyph().setContext(ctx).draw();
+  const stave = new TabStave(10, 10, 450).addClef('tab').setContext(ctx).draw();
 
   const notes = [
     note({
@@ -144,8 +173,8 @@ function reverseBends(options: TestOptions, contextBuilder: ContextBuilder): voi
       ],
       duration: 'w',
     })
-      .addModifier(bendWithText('Full'), 1)
-      .addModifier(bendWithText('1/2'), 0),
+      .addModifier(bendWithPhrase([{ type: Bend.UP, text: 'Full' }]), 1)
+      .addModifier(bendWithPhrase([{ type: Bend.UP, text: '1/2' }]), 0),
 
     note({
       positions: [
@@ -154,8 +183,8 @@ function reverseBends(options: TestOptions, contextBuilder: ContextBuilder): voi
       ],
       duration: 'w',
     })
-      .addModifier(bendWithText('1/4'), 1)
-      .addModifier(bendWithText('1/4'), 0),
+      .addModifier(bendWithPhrase([{ type: Bend.UP, text: '1/4' }]), 1)
+      .addModifier(bendWithPhrase([{ type: Bend.UP, text: '1/4' }]), 0),
 
     note({
       positions: [{ str: 4, fret: 7 }],
@@ -184,8 +213,8 @@ function bendPhrase(options: TestOptions, contextBuilder: ContextBuilder): void 
   const ctx = contextBuilder(options.elementId, 500, 240);
   ctx.scale(1.5, 1.5);
 
-  ctx.font = Font.SIZE + 'pt ' + Font.SANS_SERIF; // Optionally use constants defined in Font.
-  const stave = new TabStave(10, 10, 450).addTabGlyph().setContext(ctx).draw();
+  ctx.font = Tables.lookupMetric('Bend.fontSize') + Tables.lookupMetric('Bend.fontFamily'); // Optionally use constants defined in Font.
+  const stave = new TabStave(10, 10, 450).addClef('tab').setContext(ctx).draw();
 
   const phrase1 = [
     { type: Bend.UP, text: 'Full' },
@@ -223,7 +252,7 @@ function whackoBends(options: TestOptions, contextBuilder: ContextBuilder): void
   ctx.scale(1.0, 1.0);
   ctx.setBackgroundFillStyle('#FFF');
   ctx.setFont('Arial', VexFlowTests.Font.size);
-  const stave = new TabStave(10, 10, 350).addTabGlyph().setContext(ctx).draw();
+  const stave = new TabStave(10, 10, 350).addClef('tab').setContext(ctx).draw();
 
   const phrase1 = [
     { type: Bend.UP, text: 'Full' },

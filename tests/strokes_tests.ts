@@ -344,7 +344,7 @@ function notesWithTab(options: TestOptions): void {
         ],
         duration: '4',
       })
-      .addModifier(new Bend('Full'), 0),
+      .addModifier(new Bend([{ type: Bend.UP, text: 'Full' }]), 0),
     f
       .TabNote({
         positions: [
@@ -353,7 +353,7 @@ function notesWithTab(options: TestOptions): void {
         ],
         duration: '4',
       })
-      .addModifier(new Bend('Unison'), 1),
+      .addModifier(new Bend([{ type: Bend.UP, text: 'Unison' }]), 1),
     f.TabNote({
       positions: [
         { str: 3, fret: 7 },
