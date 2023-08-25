@@ -150,21 +150,23 @@
     <span style="font-family: MuseJazz"></span>
     <span style="font-family: Petaluma"></span>
     <span style="font-family: Petaluma Text"></span>
-    <script>
-      document.fonts.ready.then((fontFaceSet) => {
-        const fontFaces = [...fontFaceSet];
-        for (const fontFace of fontFaces) {
-          if (fontFace.status === 'loaded') {
-            console.log(fontFace.family + ' loaded!');
-          } else if (fontFace.status === 'unloaded') {
-            console.warn(fontFace.family + ' IS NOT LOADED!');
-          } else if (fontFace.status === 'error') {
-            console.error(fontFace.family + ' ERROR');
-          } else {
-            console.log(fontFace.family + ' status: ' + fontFace.status);
-          }
+    <script type="module">
+      // Only proceed after all fonts have loaded.
+      const fontFaceSet = await document.fonts.ready;
+      // Show font loading status in the console.
+      const fontFaces = [...fontFaceSet];
+      for (const fontFace of fontFaces) {
+        const fontInfo = fontFace.family + ' / ' + fontFace.weight + ' / ' + fontFace.style;
+        if (fontFace.status === 'loaded') {
+          console.log(fontInfo + ' loaded!');
+        } else if (fontFace.status === 'unloaded') {
+          console.warn('*** ' + fontInfo + ' IS NOT LOADED! ***');
+        } else if (fontFace.status === 'error') {
+          console.error(fontInfo + ' ERROR');
+        } else {
+          console.log(fontInfo + ' has status: ' + fontFace.status);
         }
-      });
+      }
 
       let ctx;
 
@@ -173,7 +175,8 @@
         return parseInt(codepoint.substring(2), 16);
       }
 
-      function chooseFont(fontName) {
+      // Make this function available to the <a onclick="chooseFont(...)">...</a> links.
+      window.chooseFont = function chooseFont(fontName) {
         document.getElementById('title').innerText = 'Glyph Inspector – ' + fontName;
 
         // Calculate the canvas height programmatically based on the number of glyphs.
@@ -253,7 +256,7 @@
             y += ROW_HEIGHT;
           }
         });
-      }
+      };
     </script>
   </body>
 </html>

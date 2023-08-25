@@ -184,7 +184,7 @@
       }
 
       // Only proceed after all fonts have loaded.
-      let fontFaceSet = await document.fonts.ready;
+      const fontFaceSet = await document.fonts.ready;
 
       // Show font loading status in the console.
       const fontFaces = [...fontFaceSet];
