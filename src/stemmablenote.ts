@@ -4,6 +4,7 @@
 // `StemmableNote` is an abstract interface for notes with optional stems.
 // Examples of stemmable notes are `StaveNote` and `TabNote`
 
+import { Element, ElementStyle } from './element';
 import { Glyph, GlyphProps } from './glyph';
 import { Note, NoteStruct } from './note';
 import { Stem, StemOptions } from './stem';
@@ -19,7 +20,8 @@ export abstract class StemmableNote extends Note {
   stemDirection?: number;
   stem?: Stem;
 
-  protected flag?: Glyph;
+  protected flag = new Element();
+  protected flagStyle: ElementStyle = {};
   protected stemExtensionOverride?: number;
 
   constructor(noteStruct: NoteStruct) {
@@ -51,13 +53,19 @@ export abstract class StemmableNote extends Note {
     return this;
   }
 
-  buildFlag(category = 'flag'): void {
+  buildFlag(): void {
     const { glyphProps } = this;
 
     if (this.hasFlag()) {
-      const flagCode = this.getStemDirection() === Stem.DOWN ? glyphProps.codeFlagDownstem : glyphProps.codeFlagUpstem;
+      const flagCode =
+        this.getStemDirection() === Stem.DOWN ? glyphProps.codeFlagDownstem ?? '' : glyphProps.codeFlagUpstem ?? '';
 
-      if (flagCode) this.flag = new Glyph(flagCode, this.renderOptions.glyphFontScale, { category });
+      this.flag.setText(flagCode);
+      // #FIXME: HACK to use 30 as fontSize default rather than 39 used with glyphs.
+      // HACK-BEGIN
+      this.flag.fontSize = (this.renderOptions.glyphFontScale / 39) * 30;
+      // HACK-END
+      this.flag.measureText();
     }
   }
 
@@ -179,6 +187,11 @@ export abstract class StemmableNote extends Note {
     return this.getAbsoluteX() + this.xShift + this.getGlyphWidth() / 2;
   }
 
+  /** Primarily used as the scaling factor for grace notes, GraceNote will return the required scale. */
+  getStaveNoteScale(): number {
+    return 1.0;
+  }
+
   // Get the stem extension for the current duration
   getStemExtension(): number {
     const glyphProps = this.getGlyphProps();
@@ -189,14 +202,12 @@ export abstract class StemmableNote extends Note {
 
     // Use stemBeamExtension with beams
     if (this.beam) {
-      return glyphProps.stemBeamExtension;
+      return glyphProps.stemBeamExtension * this.getStaveNoteScale();
     }
 
-    if (glyphProps) {
-      return this.getStemDirection() === Stem.UP ? glyphProps.stemUpExtension : glyphProps.stemDownExtension;
-    }
-
-    return 0;
+    return this.flag.getHeight() > Stem.HEIGHT * this.getStaveNoteScale()
+      ? this.flag.getHeight() - Stem.HEIGHT * this.getStaveNoteScale()
+      : 0;
   }
 
   // Set the stem length to a specific. Will override the default length.

@@ -28,7 +28,7 @@ export class GraceNote extends StaveNote {
 
   constructor(noteStruct: GraceNoteStruct) {
     super({
-      glyphFontScale: Tables.NOTATION_FONT_SCALE * GraceNote.SCALE,
+      glyphFontScale: Tables.lookupMetric('fontSize') * GraceNote.SCALE,
       strokePx: GraceNote.LEDGER_LINE_OFFSET,
       ...noteStruct,
     });
@@ -46,21 +46,13 @@ export class GraceNote extends StaveNote {
       return this.stemExtensionOverride;
     }
 
-    const glyphProps = this.getGlyphProps();
-    if (glyphProps) {
-      let ret = super.getStemExtension();
-      if (glyphProps.stem) {
-        const staveNoteScale = this.getStaveNoteScale();
-        ret = (Stem.HEIGHT + ret) * staveNoteScale - Stem.HEIGHT;
-      }
-      return ret;
-    }
-
-    return 0;
+    let ret = super.getStemExtension();
+    ret = Stem.HEIGHT * this.getStaveNoteScale() - Stem.HEIGHT + ret;
+    return ret;
   }
 
   getStaveNoteScale(): number {
-    return this.renderOptions.glyphFontScale / Tables.NOTATION_FONT_SCALE;
+    return 2 / 3;
   }
 
   draw(): void {
@@ -68,10 +60,8 @@ export class GraceNote extends StaveNote {
     this.setRendered();
     const stem = this.stem;
     if (this.slash && stem) {
-      const staveNoteScale = this.getStaveNoteScale();
+      const scale = this.getStaveNoteScale();
 
-      // some magic numbers are based on the staveNoteScale 0.66.
-      const offsetScale = staveNoteScale / 0.66;
       let slashBBox = undefined;
       const beam = this.beam;
       if (beam) {
@@ -80,56 +70,40 @@ export class GraceNote extends StaveNote {
           beam.postFormat();
         }
 
-        slashBBox = this.calcBeamedNotesSlashBBox(8 * offsetScale, 8 * offsetScale, {
-          stem: 6 * offsetScale,
-          beam: 5 * offsetScale,
+        slashBBox = this.calcBeamedNotesSlashBBox(8 * scale, 8 * scale, {
+          stem: 6 * scale,
+          beam: 5 * scale,
         });
       } else {
         const stemDirection = this.getStemDirection();
         const noteHeadBounds = this.getNoteHeadBounds();
-        const noteStemHeight = stem.getHeight();
-        let x = this.getAbsoluteX();
-        let y =
-          stemDirection === Stem.DOWN ? noteHeadBounds.yTop - noteStemHeight : noteHeadBounds.yBottom - noteStemHeight;
+        const noteHeadWidth = this.noteHeads[0].getWidth();
+        const x = stemDirection === Stem.DOWN ? this.getAbsoluteX() : this.getAbsoluteX() + noteHeadWidth;
+        const defaultOffsetY = (Tables.STEM_HEIGHT * scale) / 2;
+        const y =
+          stemDirection === Stem.DOWN ? noteHeadBounds.yBottom + defaultOffsetY : noteHeadBounds.yTop - defaultOffsetY;
 
-        const defaultStemExtention =
-          stemDirection === Stem.DOWN ? this.glyphProps.stemDownExtension : this.glyphProps.stemUpExtension;
-
-        let defaultOffsetY = Tables.STEM_HEIGHT;
-        defaultOffsetY -= defaultOffsetY / 2.8;
-        defaultOffsetY += defaultStemExtention;
-        y += defaultOffsetY * staveNoteScale * stemDirection;
-
-        const offsets =
-          stemDirection === Stem.UP
-            ? {
-                x1: 1,
-                y1: 0,
-                x2: 13,
-                y2: -9,
-              }
-            : {
-                x1: -4,
-                y1: 1,
-                x2: 13,
-                y2: 9,
-              };
-
-        x += offsets.x1 * offsetScale;
-        y += offsets.y1 * offsetScale;
-        slashBBox = {
-          x1: x,
-          y1: y,
-          x2: x + offsets.x2 * offsetScale,
-          y2: y + offsets.y2 * offsetScale,
-        };
+        if (stemDirection === Stem.DOWN)
+          slashBBox = {
+            x1: x - noteHeadWidth,
+            y1: y - noteHeadWidth,
+            x2: x + noteHeadWidth,
+            y2: y + noteHeadWidth,
+          };
+        else
+          slashBBox = {
+            x1: x - noteHeadWidth,
+            y1: y + noteHeadWidth,
+            x2: x + noteHeadWidth,
+            y2: y - noteHeadWidth,
+          };
       }
 
       // FIXME: avoid staff lines, ledger lines or others.
 
       const ctx = this.checkContext();
       ctx.save();
-      ctx.setLineWidth(1 * offsetScale); // FIXME: use more appropriate value.
+      ctx.setLineWidth(1 * scale); // FIXME: use more appropriate value.
       ctx.beginPath();
       ctx.moveTo(slashBBox.x1, slashBBox.y1);
       ctx.lineTo(slashBBox.x2, slashBBox.y2);
