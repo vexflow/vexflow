@@ -9,7 +9,6 @@ import { Crescendo } from '../src/crescendo';
 import { Flow } from '../src/flow';
 import { Note } from '../src/note';
 import { Stave } from '../src/stave';
-import { Tables } from '../src/tables';
 import { TextNote } from '../src/textnote';
 
 const TextNoteTests = {
@@ -140,7 +139,7 @@ function superscriptAndSubscript(options: TestOptions): void {
   const voice2 = score.voice(notes2);
   voice2.getTickables().forEach((note) => {
     const textNote = note as TextNote;
-    textNote.setFont({ family: Tables.lookupMetric('fontFamily'), size: 15 });
+    textNote.setFontSize(15);
     textNote.setLine(13);
     textNote.setJustification(TextNote.Justification.LEFT);
   });

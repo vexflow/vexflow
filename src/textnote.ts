@@ -74,9 +74,13 @@ export class TextNote extends Note {
     if (noteStruct.glyph) {
       this.text += TextNote.GLYPHS[noteStruct.glyph] || noteStruct.glyph;
     }
-    if (noteStruct.font) this.setFont(noteStruct.font);
-    else if (noteStruct.glyph == undefined) this.setFont(Tables.lookupMetricFontInfo('TextNote.text.fontSize'));
-    else this.measureText();
+    if (noteStruct.font) {
+      this.setFont(noteStruct.font);
+    } else if (noteStruct.glyph === undefined) {
+      this.setFont(Tables.lookupMetricFontInfo('TextNote.text.fontSize'));
+    } else {
+      this.measureText();
+    }
     // Scale the font size by 1/1.3.
     const smallerFontSize = Font.convertSizeToPointValue(this.textFont.size) * 0.769231;
     if (noteStruct.superscript) {
