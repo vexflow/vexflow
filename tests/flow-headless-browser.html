@@ -1,16 +1,41 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <meta charset="UTF-8" />
+    <!-- fonts.css defines the music fonts via @font-face rules. -->
+    <link rel="stylesheet" href="fonts.css" type="text/css" media="screen" />
   </head>
   <body>
+    <div id="font-preload">
+      <!-- Preload all fonts and styles for testing. The empty bold and italic tags below are for loading the different font weights/styles. -->
+      <span style="font-family: Academico"><b></b></span>
+      <span style="font-family: Bravura"></span>
+      <span style="font-family: Edwin"
+        ><b></b><i></i><b><i></i></b
+      ></span>
+      <span style="font-family: Finale Ash"></span>
+      <span style="font-family: Finale Broadway"></span>
+      <span style="font-family: Finale Jazz"></span>
+      <span style="font-family: Finale Maestro"></span>
+      <span style="font-family: GonvilleSmufl"></span>
+      <span style="font-family: Gootville"></span>
+      <span style="font-family: Leland"></span>
+      <span style="font-family: MuseJazz"></span>
+      <span style="font-family: Petaluma"></span>
+      <span style="font-family: Petaluma Script"></span>
+      <span style="font-family: Roboto Slab"
+        ><span style="font-weight: 500"></span><span style="font-weight: 700"></span
+      ></span>
+    </div>
+
     <div id="qunit-tests"></div>
     <script src="qunit/qunit.js"></script>
     <script src="../build/cjs/vexflow-debug-with-tests.js"></script>
     <script>
+      QUnit.config.autostart = false;
       QUnit.config.noglobals = true;
-      QUnit.start();
       Vex.Flow.Test.run();
+      QUnit.start();
     </script>
   </body>
 </html>

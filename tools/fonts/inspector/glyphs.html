@@ -1,80 +1,90 @@
-<!DOCTYPE html>
+<!doctype html>
 <!-- 
-  Build VexFlow by running `grunt`.
-  Once `vexflow-debug.js` has been created, open this file locally in your browser.
-  This inspector uses `Vex.Flow.Glyph.render(ctx, x, y)` to draw the glyph outlines that are
-  included with the VexFlow distribution.
+  Open this file locally in your browser.
 -->
 <html>
   <head>
     <title>Glyph Inspector</title>
     <meta charset="utf-8" />
-    <style type="text/css">
+    <style>
       @font-face {
         font-family: Bravura;
-        src: url(https://unpkg.com/vexflow-fonts@1.0.5/bravura/Bravura_1.392.woff2);
+        src: url(../../../node_modules/@vexflow-fonts/bravura/bravura.woff2);
       }
       @font-face {
-        font-family: GonvilleSmufl;
-        src: url(https://unpkg.com/vexflow-fonts@1.0.5/gonvillesmufl/GonvilleSmufl_1.100.woff2);
-      }
-      @font-face {
-        font-family: Gootville;
-        src: url(https://unpkg.com/vexflow-fonts@1.0.5/gootville/Gootville_1.3.woff2);
-      }
-      @font-face {
-        font-family: Leland;
-        src: url(https://unpkg.com/vexflow-fonts@1.0.5/leland/Leland_0.75.woff2);
-      }
-      @font-face {
-        font-family: Petaluma;
-        src: url(https://unpkg.com/vexflow-fonts@1.0.5/petaluma/Petaluma_1.065.woff2);
-      }
-      @font-face {
-        font-family: MuseJazz;
-        src: url(https://unpkg.com/vexflow-fonts@1.0.5/musejazz/MuseJazz_1.0.woff2);
+        font-family: 'Bravura Text';
+        src: url(../../../node_modules/@vexflow-fonts/bravuratext/bravuratext.woff2);
       }
       @font-face {
         font-family: FinaleAsh;
-        src: url(https://unpkg.com/vexflow-fonts@1.0.5/finale/FinaleAsh_1.7.woff2);
+        src: url(../../../node_modules/@vexflow-fonts/finaleash/finaleash.woff2);
       }
       @font-face {
         font-family: FinaleJazz;
-        src: url(https://unpkg.com/vexflow-fonts@1.0.5/finale/FinaleJazz_1.9.woff2);
+        src: url(../../../node_modules/@vexflow-fonts/finalejazz/finalejazz.woff2);
       }
       @font-face {
         font-family: FinaleBroadway;
-        src: url(https://unpkg.com/vexflow-fonts@1.0.5/finale/FinaleBroadway_1.4.woff2);
+        src: url(../../../node_modules/@vexflow-fonts/finalebroadway/finalebroadway.woff2);
       }
       @font-face {
         font-family: FinaleMaestro;
-        src: url(https://unpkg.com/vexflow-fonts@1.0.5/finale/FinaleMaestro_2.7.woff2);
+        src: url(../../../node_modules/@vexflow-fonts/finalemaestro/finalemaestro.woff2);
       }
-    
+      @font-face {
+        font-family: GonvilleSmufl;
+        src: url(../../../node_modules/@vexflow-fonts/gonvillesmufl/gonvillesmufl.woff2);
+      }
+      @font-face {
+        font-family: Gootville;
+        src: url(../../../node_modules/@vexflow-fonts/gootville/gootville.woff2);
+      }
+      @font-face {
+        font-family: 'Gootville Text';
+        src: url(../../../node_modules/@vexflow-fonts/gootvilletext/gootvilletext.woff2);
+      }
+      @font-face {
+        font-family: Leland;
+        src: url(../../../node_modules/@vexflow-fonts/leland/leland.woff2);
+      }
+      @font-face {
+        font-family: 'Leland Text';
+        src: url(../../../node_modules/@vexflow-fonts/lelandtext/lelandtext.woff2);
+      }
+      @font-face {
+        font-family: MuseJazz;
+        src: url(../../../node_modules/@vexflow-fonts/musejazz/musejazz.woff2);
+      }
+      @font-face {
+        font-family: Petaluma;
+        src: url(../../../node_modules/@vexflow-fonts/petaluma/petaluma.woff2);
+      }
+      @font-face {
+        font-family: 'Petaluma Text';
+        src: url(../../../node_modules/@vexflow-fonts/petalumatext/petalumatext.woff2);
+      }
+    </style>
+    <style>
       body {
         background: white;
-        font-family: Helvetica Neue, Arial, sans-serif;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
         font-size: 18px;
         color: black;
         margin: 0px;
       }
       canvas {
         background: white;
-        font-family: Helvetica Neue, Arial, sans-serif;
         font-size: 18px;
         color: black;
         margin: 40px 40px 80px 40px;
       }
-      
-
       a {
-        color: green;
+        color: #264;
         text-decoration: none;
         border-bottom: dotted 2px;
-        font-size: 20px;
+        font-size: 22px;
+        cursor: pointer;
       }
-
-
       div#error {
         width: 60%;
         padding: 10px;
@@ -84,14 +94,15 @@
       }
       div {
         padding: 10px;
-        color: blue;
         background: #aaf;
-        border: 15px solid #99d;
+        border: 15px solid #99e;
+        box-sizing: border-box;
+        width: 100vw;
         position: fixed;
       }
       p {
         margin: 10px;
-        font-size: 10px;
+        font-size: 13px;
       }
       h1 {
         margin: 10px;
@@ -106,41 +117,68 @@
     <div>
       <h1 id="title">Glyph Inspector</h1>
       <p>
-      <a onclick="chooseFont('Bravura')">Bravura</a> &nbsp;
-      <a onclick="chooseFont('FinaleAsh')">FinaleAsh</a> &nbsp;
-      <a onclick="chooseFont('FinaleBroadway')">FinaleBroadway</a> &nbsp;
-      <a onclick="chooseFont('FinaleJazz')">FinaleJazz</a> &nbsp;
-      <a onclick="chooseFont('FinaleMaestro')">FinaleMaestro</a> &nbsp;
-      <a onclick="chooseFont('GonvilleSmufl')">Gonville</a> &nbsp;
-      <a onclick="chooseFont('Gootville')">Gootville</a> &nbsp;
-      <a onclick="chooseFont('MuseJazz')">MuseJazz</a> &nbsp;
-      <a onclick="chooseFont('Petaluma')">Petaluma</a> &nbsp;
-      <a onclick="chooseFont('Leland')">Leland</a> &nbsp;
+        <a onclick="chooseFont('Bravura')">Bravura</a> &nbsp;
+        <a onclick="chooseFont('Bravura Text')">Bravura Text</a> &nbsp;
+        <a onclick="chooseFont('FinaleAsh')">FinaleAsh</a> &nbsp;
+        <a onclick="chooseFont('FinaleBroadway')">FinaleBroadway</a> &nbsp;
+        <a onclick="chooseFont('FinaleJazz')">FinaleJazz</a> &nbsp;
+        <a onclick="chooseFont('FinaleMaestro')">FinaleMaestro</a> &nbsp;
+        <a onclick="chooseFont('GonvilleSmufl')">GonvilleSmufl</a> &nbsp;
+        <a onclick="chooseFont('Gootville')">Gootville</a> &nbsp;
+        <a onclick="chooseFont('Gootville Text')">Gootville Text</a> &nbsp;
+        <a onclick="chooseFont('Leland')">Leland</a> &nbsp;
+        <a onclick="chooseFont('Leland Text')">Leland Text</a> &nbsp;
+        <a onclick="chooseFont('MuseJazz')">MuseJazz</a> &nbsp;<!-- FORMAT CODE LINE BREAK -->
+        <a onclick="chooseFont('Petaluma')">Petaluma</a> &nbsp;
+        <a onclick="chooseFont('Petaluma Text')">Petaluma Text</a> &nbsp;
       </p>
       <p>note: Cross indicates render coordinates.</p>
     </div>
     <canvas id="glyphs"></canvas>
-    <span style="font-family: Bravura";"></span>
-    <span style="font-family: FinaleAsh";"></span>
-    <span style="font-family: FinaleBroadway";"></span>
-    <span style="font-family: FinaleJazz";"></span>
-    <span style="font-family: FinaleMaestro";"></span>
-    <span style="font-family: GonvilleSmufl";"></span>
-    <span style="font-family: Gootville";"></span>
-    <span style="font-family: MuseJazz";"></span>
-    <span style="font-family: Petaluma";"></span>
-    <span style="font-family: Leland";"></span>
-    <script>
+    <!-- PRELOAD ALL FONT FILES using empty <span> tags. -->
+    <span style="font-family: Bravura"></span>
+    <span style="font-family: Bravura Text"></span>
+    <span style="font-family: FinaleAsh"></span>
+    <span style="font-family: FinaleBroadway"></span>
+    <span style="font-family: FinaleJazz"></span>
+    <span style="font-family: FinaleMaestro"></span>
+    <span style="font-family: GonvilleSmufl"></span>
+    <span style="font-family: Gootville"></span>
+    <span style="font-family: Gootville Text"></span>
+    <span style="font-family: Leland"></span>
+    <span style="font-family: Leland Text"></span>
+    <span style="font-family: MuseJazz"></span>
+    <span style="font-family: Petaluma"></span>
+    <span style="font-family: Petaluma Text"></span>
+    <script type="module">
+      // Only proceed after all fonts have loaded.
+      const fontFaceSet = await document.fonts.ready;
+      // Show font loading status in the console.
+      const fontFaces = [...fontFaceSet];
+      for (const fontFace of fontFaces) {
+        const fontInfo = fontFace.family + ' / ' + fontFace.weight + ' / ' + fontFace.style;
+        if (fontFace.status === 'loaded') {
+          console.log(fontInfo + ' loaded!');
+        } else if (fontFace.status === 'unloaded') {
+          console.warn('*** ' + fontInfo + ' IS NOT LOADED! ***');
+        } else if (fontFace.status === 'error') {
+          console.error(fontInfo + ' ERROR');
+        } else {
+          console.log(fontInfo + ' has status: ' + fontFace.status);
+        }
+      }
+
       let ctx;
 
       function codepoint2decimal(codepoint) {
         // Return the decimal value of 'XXXX' of codepoint, which has a string format 'U+XXXX'
-        return parseInt(codepoint.substring(2), 16)
+        return parseInt(codepoint.substring(2), 16);
       }
 
-      function chooseFont(fontName) {
+      // Make this function available to the <a onclick="chooseFont(...)">...</a> links.
+      window.chooseFont = function chooseFont(fontName) {
         document.getElementById('title').innerText = 'Glyph Inspector – ' + fontName;
-        
+
         // Calculate the canvas height programmatically based on the number of glyphs.
         const canvasWidth = 3000;
         const ROW_HEIGHT = 100;
@@ -166,21 +204,20 @@
         var x = 0;
         var y = 250;
 
-        const arr = Object.keys(SMuFLGlyphInfo).sort(function(a,b) { 
-          return codepoint2decimal(SMuFLGlyphInfo[a].codepoint) - codepoint2decimal(SMuFLGlyphInfo[b].codepoint); 
-        } );
+        const arr = Object.keys(SMuFLGlyphInfo).sort(function (a, b) {
+          return codepoint2decimal(SMuFLGlyphInfo[a].codepoint) - codepoint2decimal(SMuFLGlyphInfo[b].codepoint);
+        });
         arr.forEach((glyphName, index) => {
           // Show the glyph name.
           const code = codepoint2decimal(SMuFLGlyphInfo[glyphName].codepoint);
           ctx.fillStyle = '#222';
           ctx.strokeStyle = '#222';
-          ctx.font = '8pt Arial';
+          ctx.font = '9pt sans-serif';
           // if the name has more than 25 characters, break it up into two lines.
           if (glyphName.length > 25) {
-            ctx.fillText(glyphName.slice(0,22)+'...', x, y + 50);
+            ctx.fillText(glyphName.slice(0, 22) + '...', x, y + 50);
             ctx.fillText(glyphName.slice(22 - glyphName.length), x, y + 60);
-          } else
-          ctx.fillText(glyphName, x, y + 50);
+          } else ctx.fillText(glyphName, x, y + 50);
           console.log(glyphName);
 
           const originX = x + 75;
@@ -188,17 +225,13 @@
 
           // Show the glyph outline.
           ctx.fillStyle = '#006400';
-          ctx.font = "30pt "+fontName;
-          ctx.fillText(
-              String.fromCharCode(code),
-              originX,
-              originY
-          );
+          ctx.font = '30pt ' + fontName;
+          ctx.fillText(String.fromCharCode(code), originX, originY);
           // See the GlyphMetrics interface in glyph.ts.
           const metrics = ctx.measureText(String.fromCharCode(code));
           ctx.save();
-          ctx.font = '8pt monospace';
-          const height = metrics.actualBoundingBoxDescent + metrics.actualBoundingBoxAscent
+          ctx.font = '9pt monospace';
+          const height = metrics.actualBoundingBoxDescent + metrics.actualBoundingBoxAscent;
           ctx.fillText('code: ' + SMuFLGlyphInfo[glyphName].codepoint.substring(2), x, y + 18);
           ctx.fillText('w: ' + Math.round(metrics.width), x, y - 6);
           ctx.fillText('h: ' + Math.round(height), x, y + 6);
@@ -216,14 +249,14 @@
           x += COL_WIDTH;
 
           // Wrap around to the next line.
-          if (x > canvasWidth - COL_WIDTH ) {
+          if (x > canvasWidth - COL_WIDTH) {
             x = 0;
 
             // Each row is 150px high.
             y += ROW_HEIGHT;
           }
         });
-      }
+      };
     </script>
   </body>
 </html>

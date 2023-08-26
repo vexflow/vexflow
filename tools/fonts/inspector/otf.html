@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <!-- 
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
@@ -22,7 +22,15 @@
       color: #ccc;
       background-color: #222;
       margin: 20px 20px 100px 20px;
-      font: 16px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Ubuntu, 'Helvetica Neue', Arial,
+      font:
+        16px system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        Ubuntu,
+        'Helvetica Neue',
+        Arial,
         sans-serif;
     }
 
@@ -36,7 +44,15 @@
       cursor: pointer;
       border: 0px;
       color: #8ac4f8;
-      font: 20px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Ubuntu, 'Helvetica Neue', Arial,
+      font:
+        20px system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        Ubuntu,
+        'Helvetica Neue',
+        Arial,
         sans-serif;
       padding: 8px 10px;
     }
@@ -64,11 +80,6 @@
       color: #000;
     }
 
-    #help {
-      margin-bottom: 12px;
-      margin-left: 10px;
-    }
-
     #info {
       float: left;
       margin-left: 10px;
@@ -78,6 +89,7 @@
       position: fixed;
       background-color: rgba(20, 20, 20, 0.8);
       padding: 8px;
+      display: none;
     }
 
     .clear {
@@ -85,17 +97,7 @@
     }
   </style>
   <body>
-    <div class="choose-font">
-      <button id="chooseBravura" onclick="setFont(event, 'Bravura'); return false;">Bravura</button> &nbsp;
-      <button id="choosePetaluma" onclick="setFont(event, 'Petaluma'); return false;">Petaluma</button> &nbsp;
-      <button id="chooseGonville" onclick="setFont(event, 'Gonville'); return false;">Gonville</button> &nbsp;
-      <button id="chooseRobotoSlab" onclick="setFont(event, 'Roboto Slab'); return false;">Roboto Slab</button>
-      &nbsp;
-      <button id="choosePetalumaScript" onclick="setFont(event, 'Petaluma Script'); return false;">
-        PetalumaScript
-      </button>
-    </div>
-    <div id="help">Click a glyph to log information to the developer console.</div>
+    <div class="choose-font"></div>
     <div id="info">&nbsp;</div>
     <div id="curr-glyph-info"></div>
     <div class="clear">&nbsp;</div>
@@ -118,12 +120,51 @@
         });
       }
 
+      // We can derive the OTF file path automatically from the font name.
+      const musicFonts = [
+        'Bravura',
+        'Finale Ash',
+        'Finale Broadway',
+        'Finale Jazz',
+        'Finale Maestro',
+        'GonvilleSmufl',
+        'Gootville',
+        'Leland',
+        'MuseJazz',
+        'Petaluma',
+      ];
+
+      // The OTF files have weird names, so we need to map them to the font names.
+      const textFonts = {
+        Academico: 'academico/academico.otf',
+        'Roboto Slab': 'robotoslab/robotoslab-regular-400.otf',
+        Edwin: 'edwin/edwin-roman.otf',
+        'Finale Maestro Text': 'finalemaestrotext/finalemaestrotext-regular.otf',
+        'MuseJazz Text': 'musejazztext/musejazztext.otf',
+        'Petaluma Script': 'petalumascript/petalumascript.otf',
+      };
+
+      function addButtons() {
+        // Add buttons at the top.
+        let buttonsHTML = '';
+        for (const fontName of musicFonts) {
+          const fontNameNoSpaces = fontName.replace(/\s/g, '');
+          buttonsHTML += `<button id="btn_${fontNameNoSpaces}" onclick="setFont(event, '${fontName}');">${fontName}</button>`;
+        }
+        buttonsHTML += '<br />';
+        for (const fontName in textFonts) {
+          const fontNameNoSpaces = fontName.replace(/\s/g, '');
+          buttonsHTML += `<button id="btn_${fontNameNoSpaces}" onclick="setFont(event, '${fontName}');">${fontName}</button>`;
+        }
+        document.querySelector('.choose-font').innerHTML = buttonsHTML;
+      }
+
       // Some state for this page.
       let currentFont = '';
       let numGlyphs = 0;
 
       // Which glyphs should we show?
-      let SMuFLGlyphNamesToShow, GonvilleCodePointsToShow, TextFontCodePointsToShow;
+      let SMuFLGlyphNamesToShow, TextFontCodePointsToShow;
 
       async function determineWhichGlyphsToShow() {
         SMuFLGlyphNamesToShow = {};
@@ -137,52 +178,7 @@
         SMuFLGlyphNamesToShow = window.module.exports; // extract the exported object.
         delete window.module;
 
-        GonvilleCodePointsToShow = [
-          { name: 'brackettips.up', cp: 0xe10d },
-          { name: 'brackettips.down', cp: 0xe10c },
-          // Use spaces as placeholders for glyphs we yet haven't matched up with SMuFL equivalents.
-          { name: 'space', cp: 0x0020 },
-          { name: 'space', cp: 0x0020 },
-          { name: 'scripts.segno', cp: 0xe17e },
-          { name: 'scripts.coda', cp: 0xe129 },
-
-          { name: 'clefs.G', cp: 0xe11a },
-          { name: 'clefs.C', cp: 0xe117 },
-          { name: 'clefs.F', cp: 0xe119 },
-          { name: 'clefs.percussion', cp: 0xe11e },
-          { name: 'clefs.tab', cp: 0xe11d },
-          [0x30, 0x39], // numbers 0 to 9
-          //
-
-          { name: 'timesig.C44', cp: 0xe1a7 }, // common time
-          { name: 'timesig.C22', cp: 0xe1a6 }, // cut time
-
-          { name: 'noteheads.sM1', cp: 0xe116 }, // double whole note
-          { name: 'noteheads.s0', cp: 0xe180 }, // whole note
-          { name: 'noteheads.s1', cp: 0xe150 }, // half note
-          { name: 'noteheads.s2', cp: 0xe14f }, // black note head
-
-          // cross note heads
-          { name: 'noteheads.s0cross', cp: 0xe1cf }, //
-          { name: 'noteheads.s1cross', cp: 0xe1d0 }, //
-          { name: 'noteheads.s2cross', cp: 0xe1d1 }, //
-          { name: 'noteheads.s2xcircle', cp: 0xe1d2 }, //
-          //
-          [0x2b, 0x2e], // + , - .
-          { name: 'f', cp: 0x66 },
-          [0x6d, 0x6e],
-          { name: 'p', cp: 0x70 },
-          [0x72, 0x73],
-          { name: 'z', cp: 0x7a }, // z
-          [0xe100, 0xe10b],
-          [0xe10e, 0xe16a],
-          [0xe16b, 0xe17d], // rests (rests.M3 to rests.0o)
-          [0xe17e, 0xe195], // scripts.segno to scripts.stopped
-          [0xe196, 0xe1a5], // flags for notes (flags.d3 to flags.u10)
-          [0xe1a8, 0xe1ce],
-          [0xe1d3, 0xe1d7], // timesig.C22 to ties.lyric.short
-        ];
-
+        // Code Point Range from 0x21 to 0x7E.
         TextFontCodePointsToShow = [[0x21, 0x7e]];
       }
 
@@ -200,27 +196,24 @@
         await loadScript('../config/glyphnames.js'); // assigns global `SMuFLGlyphInfo`
       }
 
-      async function loadFontFiles() {
-        const bravuraOTF = '../@/bravura/Bravura_1.392.otf';
-        const bravura = new FontFace('Bravura', `url(${bravuraOTF}) format('opentype')`);
-        await bravura.load();
-        document.fonts.add(bravura);
-        const petalumaOTF = '../@/petaluma/Petaluma_1.065.otf';
-        const petaluma = new FontFace('Petaluma', `url(${petalumaOTF}) format('opentype')`);
-        await petaluma.load();
-        document.fonts.add(petaluma);
-        const gonvilleOTF = '../@/gonville/Gonville-18_20200703.otf';
-        const gonville = new FontFace('Gonville', `url(${gonvilleOTF}) format('opentype')`);
-        await gonville.load();
-        document.fonts.add(gonville);
-        const robotoSlabOTF = '../@/robotoslab/RobotoSlab-Medium_2.001.otf';
-        const robotoSlab = new FontFace('Roboto Slab', `url(${robotoSlabOTF}) format('opentype')`);
-        await robotoSlab.load();
-        document.fonts.add(robotoSlab);
-        const petalumaScriptOTF = '../@/petaluma/PetalumaScript_1.10.otf';
-        const petalumaScript = new FontFace('Petaluma Script', `url(${petalumaScriptOTF}) format('opentype')`);
-        await petalumaScript.load();
-        document.fonts.add(petalumaScript);
+      // Load the fonts using the FontFace API.
+      async function loadFonts() {
+        const fontPath = '../../../node_modules/@vexflow-fonts/';
+
+        // Derive the OTF file path from the font name.
+        musicFonts.forEach(async (fontName) => {
+          const lowerCaseNoSpaces = fontName.toLowerCase().replace(/\s/g, '');
+          const fontFace = new FontFace(fontName, `url(${fontPath + lowerCaseNoSpaces}/${lowerCaseNoSpaces}.otf)`);
+          await fontFace.load();
+          document.fonts.add(fontFace);
+        });
+
+        // Text font OTFs may have special file names, so we read them from the textFonts mapping.
+        for (const fontName in textFonts) {
+          const fontFace = new FontFace(fontName, `url(${fontPath + textFonts[fontName]})`);
+          await fontFace.load();
+          document.fonts.add(fontFace);
+        }
       }
 
       // Draw a tooltip showing some information below the mouse pointer.
@@ -231,8 +224,15 @@
             infoBox.style.display = 'none';
           } else {
             infoBox.style.display = '';
+            const unicodeStringValue = '\\u' + glyphInfo.codePointHexString.substring(2);
             infoBox.innerText =
-              glyphInfo.glyphName + '\n\n' + glyphInfo.codePointHexString + '\n\n' + glyphInfo.description;
+              glyphInfo.glyphName +
+              ' | ' +
+              glyphInfo.codePointHexString +
+              ' or "' +
+              unicodeStringValue +
+              '" | ' +
+              glyphInfo.description;
             console.log(infoBox.innerText);
             infoBox.style.left = event.clientX - 40 + 'px';
             infoBox.style.top = event.clientY + 40 + 'px';
@@ -252,9 +252,7 @@
         const item = document.createElement('div');
         item.classList.add('item');
         item.innerText = String.fromCodePoint(glyphInfo.codePointValue);
-        item.addEventListener('click', () => {
-          console.log(glyphInfo);
-        });
+        item.addEventListener('click', () => console.log(glyphInfo));
         item.addEventListener('mousemove', getMouseMoveHandler(glyphInfo));
         container.appendChild(item);
         numGlyphs++;
@@ -312,18 +310,21 @@
         // Reset the glyph count.
         numGlyphs = 0;
 
-        if (currentFont === 'Gonville') {
-          addItemsForCodePoints(GonvilleCodePointsToShow);
-        } else if (currentFont === 'Petaluma Script' || currentFont === 'Roboto Slab') {
+        if (currentFont in textFonts) {
           // Render ASCII glyphs for text fonts (e.g., 0x21 to 0x7E).
           addItemsForCodePoints(TextFontCodePointsToShow);
         } else {
           addItemsForSMuFLGlyphs();
         }
 
-        const numGlyphsRenderedInfo = 'Rendered ' + numGlyphs + ' ' + currentFont + ' glyphs.';
+        const numGlyphsRenderedInfo =
+          'Rendered ' +
+          numGlyphs +
+          ' <b>' +
+          currentFont +
+          '</b> glyphs. Click a glyph to log information to the developer console.';
         console.log(numGlyphsRenderedInfo);
-        document.getElementById('info').innerText = numGlyphsRenderedInfo;
+        document.getElementById('info').innerHTML = numGlyphsRenderedInfo;
       }
 
       function setFont(event, fontName) {
@@ -335,17 +336,20 @@
           button.style.backgroundColor = '';
         });
 
-        const buttonID = 'choose' + fontName.replace(/\s/g, '');
-        document.getElementById(buttonID).style.color = '#222';
-        document.getElementById(buttonID).style.backgroundColor = '#34568B';
+        // Highlight the selected font's button.
+        const buttonID = 'btn_' + fontName.replace(/\s/g, '');
+        const buttonStyle = document.getElementById(buttonID).style;
+        buttonStyle.color = '#222';
+        buttonStyle.backgroundColor = '#34568B';
 
         updateGlyphTable();
       }
 
       window.setFont = setFont;
+      addButtons();
       await determineWhichGlyphsToShow();
       await loadSMuFLGlyphInfo();
-      await loadFontFiles();
+      await loadFonts();
 
       const previouslySavedFont = localStorage.getItem('font');
       if (previouslySavedFont) {

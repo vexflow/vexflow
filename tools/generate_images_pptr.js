@@ -96,16 +96,22 @@ const savePNGData = (filename, pngDataURL) => {
 };
 
 const launch = async (query, jobInfo) => {
-  const browser = await puppeteer.launch({ headless: "new", devtools: false });
+  const browser = await puppeteer.launch({ headless: 'new', devtools: false });
   const page = await browser.newPage();
-  page.on('error', (msg) => {
-    jobLog(msg, 'error', jobInfo);
-    process.exit(2);
-  });
-  page.on('pageerror', (msg) => {
-    jobLog(msg.toString(), 'pageerror', jobInfo);
-    process.exit(1);
-  });
+  page
+    .on('error', (msg) => {
+      jobLog(msg, 'error', jobInfo);
+      process.exit(2);
+    })
+    .on('pageerror', (msg) => {
+      jobLog(msg.toString(), 'pageerror', jobInfo);
+      process.exit(1);
+    });
+  // This is useful during development.
+  // page.on('console', (message) => {
+  //   console.log(`  >> ${message.text()}`);
+  // });
+
   await page.goto('file://' + path.join(process.cwd(), `tests/flow.html${query ? query : ''}`)).catch((error) => {
     log(error);
     process.exit(3);
@@ -196,7 +202,7 @@ const launchTestPage = async (jobs, job) => {
 
     const doIt = async (elmDef) => {
       result = 'error';
-      const filename = `${options.IMAGE_OUTPUT_DIR}/pptr-${elmDef.nameStr}`;
+      const filename = `${options.IMAGE_OUTPUT_DIR}/${elmDef.nameStr}`;
       try {
         let data;
         const { type } = elmDef;

@@ -86,10 +86,28 @@
     "url": "https://github.com/vexflow/vexflow/issues"
   },
   "devDependencies": {
-    "@types/qunit": "^2.19.6",
     "@types/node": "^20.4.8",
+    "@types/qunit": "^2.19.6",
     "@typescript-eslint/eslint-plugin": "^6.2.1",
     "@typescript-eslint/parser": "^6.2.1",
+    "@vexflow-fonts/academico": "^1.0.1",
+    "@vexflow-fonts/bravura": "^1.0.2",
+    "@vexflow-fonts/bravuratext": "^1.0.0",
+    "@vexflow-fonts/finaleash": "^1.0.1",
+    "@vexflow-fonts/finalebroadway": "^1.0.0",
+    "@vexflow-fonts/finalejazz": "^1.0.0",
+    "@vexflow-fonts/finalemaestro": "^1.0.0",
+    "@vexflow-fonts/gonvillesmufl": "^1.0.1",
+    "@vexflow-fonts/gootville": "^1.0.1",
+    "@vexflow-fonts/gootvilletext": "^1.0.1",
+    "@vexflow-fonts/leland": "^1.0.1",
+    "@vexflow-fonts/lelandtext": "^1.0.1",
+    "@vexflow-fonts/musejazz": "^1.0.1",
+    "@vexflow-fonts/musejazztext": "^1.0.1",
+    "@vexflow-fonts/petaluma": "^1.0.1",
+    "@vexflow-fonts/petalumascript": "^1.0.0",
+    "@vexflow-fonts/petalumatext": "^1.0.1",
+    "@vexflow-fonts/robotoslab": "^1.0.0",
     "canvas": "^2.11.2",
     "circular-dependency-plugin": "^5.2.2",
     "concurrently": "^8.2.0",
@@ -144,5 +162,9 @@
     "piano",
     "guitar",
     "tablature"
-  ]
+  ],
+  "dependencies": {
+    "@vexflow-fonts/edwin": "^1.0.1",
+    "@vexflow-fonts/finalemaestrotext": "^1.0.0"
+  }
 }

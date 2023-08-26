@@ -144,7 +144,7 @@ export class VexFlowTests {
     VexFlowTests.tests.push(test);
   }
 
-  static parseJobOptions(runOptions: RunOptions | undefined): RunOptions {
+  static parseJobOptions(runOptions?: RunOptions): RunOptions {
     let { jobs, job } = runOptions || { jobs: 1, job: 0 };
     if (window) {
       const { location } = window;
@@ -167,7 +167,7 @@ export class VexFlowTests {
   }
 
   // flow.html calls this to invoke all the tests.
-  static run(runOptions: RunOptions | undefined): void {
+  static run(runOptions?: RunOptions): void {
     const { jobs, job } = VexFlowTests.parseJobOptions(runOptions);
     VexFlowTests.tests.forEach((test, idx: number) => {
       if (jobs === 1 || idx % jobs === job) {
@@ -233,8 +233,7 @@ export class VexFlowTests {
   }
 
   /**
-   * Append a <div/> which contains the test case title and rendered output.
-   * See flow.html and flow.css.
+   * Append a <div/> which contains the test case title and rendered output. See tests/flow.html.
    * @param elementId
    * @param testTitle
    * @param tagName
