@@ -5,7 +5,7 @@
 // Examples of stemmable notes are `StaveNote` and `TabNote`
 
 import { Element, ElementStyle } from './element';
-import { Glyph, GlyphProps } from './glyph';
+import { GlyphProps } from './glyph';
 import { Note, NoteStruct } from './note';
 import { Stem, StemOptions } from './stem';
 import { Tables } from './tables';
@@ -195,6 +195,8 @@ export abstract class StemmableNote extends Note {
   // Get the stem extension for the current duration
   getStemExtension(): number {
     const glyphProps = this.getGlyphProps();
+    const flagHeight = this.flag.getHeight();
+    const scale = this.getStaveNoteScale();
 
     if (this.stemExtensionOverride != undefined) {
       return this.stemExtensionOverride;
@@ -202,12 +204,11 @@ export abstract class StemmableNote extends Note {
 
     // Use stemBeamExtension with beams
     if (this.beam) {
-      return glyphProps.stemBeamExtension * this.getStaveNoteScale();
+      return glyphProps.stemBeamExtension * scale;
     }
 
-    return this.flag.getHeight() > Stem.HEIGHT * this.getStaveNoteScale()
-      ? this.flag.getHeight() - Stem.HEIGHT * this.getStaveNoteScale()
-      : 0;
+    // If the flag is longer than the stem, extend the stem by the difference.
+    return flagHeight > Stem.HEIGHT * scale ? flagHeight - Stem.HEIGHT * scale : 0;
   }
 
   // Set the stem length to a specific. Will override the default length.

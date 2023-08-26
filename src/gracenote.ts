@@ -83,20 +83,21 @@ export class GraceNote extends StaveNote {
         const y =
           stemDirection === Stem.DOWN ? noteHeadBounds.yBottom + defaultOffsetY : noteHeadBounds.yTop - defaultOffsetY;
 
-        if (stemDirection === Stem.DOWN)
+        if (stemDirection === Stem.DOWN) {
           slashBBox = {
             x1: x - noteHeadWidth,
             y1: y - noteHeadWidth,
             x2: x + noteHeadWidth,
             y2: y + noteHeadWidth,
           };
-        else
+        } else {
           slashBBox = {
             x1: x - noteHeadWidth,
             y1: y + noteHeadWidth,
             x2: x + noteHeadWidth,
             y2: y - noteHeadWidth,
           };
+        }
       }
 
       // FIXME: avoid staff lines, ledger lines or others.

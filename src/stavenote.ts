@@ -1121,10 +1121,6 @@ export class StaveNote extends StemmableNote {
       // eslint-disable-next-line
       const noteStemHeight = this.stem!.getHeight();
       const flagX = this.getStemX() - Tables.STEM_WIDTH / 2;
-      // What's with the magic +/- 2
-      // ANSWER: a corner of the note stem pokes out beyond the tip of the flag.
-      // The extra +/- 2 pushes the flag glyph outward so it covers the stem entirely.
-      // Alternatively, we could shorten the stem.
       const flagY =
         this.getStemDirection() === Stem.DOWN
           ? // Down stems are below the note head and have flags on the right.
