@@ -7,7 +7,6 @@ import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Crescendo } from '../src/crescendo';
 import { Flow } from '../src/flow';
-import { Font } from '../src/font';
 import { Note } from '../src/note';
 import { Stave } from '../src/stave';
 import { TextNote } from '../src/textnote';
@@ -140,7 +139,7 @@ function superscriptAndSubscript(options: TestOptions): void {
   const voice2 = score.voice(notes2);
   voice2.getTickables().forEach((note) => {
     const textNote = note as TextNote;
-    textNote.setFont({ family: Font.SERIF, size: 15 });
+    textNote.setFontSize(15);
     textNote.setLine(13);
     textNote.setJustification(TextNote.Justification.LEFT);
   });

@@ -143,8 +143,9 @@ export const CommonMetrics: Record<string, any> = {
   },
 
   TextNote: {
-    fontFamily: 'Arial, sans-serif',
-    fontSize: 12,
+    text: {
+      fontSize: 12,
+    },
   },
 
   Tremolo: {
