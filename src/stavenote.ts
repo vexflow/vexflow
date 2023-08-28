@@ -824,7 +824,7 @@ export class StaveNote extends StemmableNote {
         this.hasFlag() &&
         (options.forceFlagRight || isInnerNoteIndex(this, index))
       ) {
-        x += this?.flag?.getMetrics().width ?? 0;
+        x += this.flag.getWidth();
       }
     } else if (position === BELOW || position === ABOVE) {
       x = this.getGlyphWidth() / 2;
@@ -1120,28 +1120,18 @@ export class StaveNote extends StemmableNote {
       const { yTop, yBottom } = this.getNoteHeadBounds();
       // eslint-disable-next-line
       const noteStemHeight = this.stem!.getHeight();
-      const flagX = this.getStemX();
-      // What's with the magic +/- 2
-      // ANSWER: a corner of the note stem pokes out beyond the tip of the flag.
-      // The extra +/- 2 pushes the flag glyph outward so it covers the stem entirely.
-      // Alternatively, we could shorten the stem.
+      const flagX = this.getStemX() - Tables.STEM_WIDTH / 2;
       const flagY =
         this.getStemDirection() === Stem.DOWN
           ? // Down stems are below the note head and have flags on the right.
-            yTop -
-            noteStemHeight +
-            2 -
-            (this.glyphProps ? this.glyphProps.stemDownExtension : 0) * this.getStaveNoteScale() -
-            (this.flag?.getMetrics().yShift ?? 0) * (1 - this.getStaveNoteScale())
+            yTop - noteStemHeight - this.flag.getTextMetrics().actualBoundingBoxDescent
           : // Up stems are above the note head and have flags on the right.
-            yBottom -
-            noteStemHeight -
-            2 +
-            (this.glyphProps ? this.glyphProps.stemUpExtension : 0) * this.getStaveNoteScale() -
-            (this.flag?.getMetrics().yShift ?? 0) * (1 - this.getStaveNoteScale());
+            yBottom - noteStemHeight + this.flag.getTextMetrics().actualBoundingBoxAscent;
 
       // Draw the Flag
-      this.flag?.render(ctx, flagX, flagY);
+      this.applyStyle(ctx, this.flagStyle);
+      this.flag.renderText(ctx, flagX, flagY);
+      this.restoreStyle(ctx, this.flagStyle);
     }
   }
 
