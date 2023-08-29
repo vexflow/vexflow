@@ -188,37 +188,37 @@ const durationAliases: Record<string, string> = {
   b: '256',
 };
 
-const keySignatures: Record<string, { acc?: string; num: number }> = {
+const keySignatures: Record<string, { accidental?: string; num: number }> = {
   C: { num: 0 },
   Am: { num: 0 },
-  F: { acc: 'b', num: 1 },
-  Dm: { acc: 'b', num: 1 },
-  Bb: { acc: 'b', num: 2 },
-  Gm: { acc: 'b', num: 2 },
-  Eb: { acc: 'b', num: 3 },
-  Cm: { acc: 'b', num: 3 },
-  Ab: { acc: 'b', num: 4 },
-  Fm: { acc: 'b', num: 4 },
-  Db: { acc: 'b', num: 5 },
-  Bbm: { acc: 'b', num: 5 },
-  Gb: { acc: 'b', num: 6 },
-  Ebm: { acc: 'b', num: 6 },
-  Cb: { acc: 'b', num: 7 },
-  Abm: { acc: 'b', num: 7 },
-  G: { acc: '#', num: 1 },
-  Em: { acc: '#', num: 1 },
-  D: { acc: '#', num: 2 },
-  Bm: { acc: '#', num: 2 },
-  A: { acc: '#', num: 3 },
-  'F#m': { acc: '#', num: 3 },
-  E: { acc: '#', num: 4 },
-  'C#m': { acc: '#', num: 4 },
-  B: { acc: '#', num: 5 },
-  'G#m': { acc: '#', num: 5 },
-  'F#': { acc: '#', num: 6 },
-  'D#m': { acc: '#', num: 6 },
-  'C#': { acc: '#', num: 7 },
-  'A#m': { acc: '#', num: 7 },
+  F: { accidental: 'b', num: 1 },
+  Dm: { accidental: 'b', num: 1 },
+  Bb: { accidental: 'b', num: 2 },
+  Gm: { accidental: 'b', num: 2 },
+  Eb: { accidental: 'b', num: 3 },
+  Cm: { accidental: 'b', num: 3 },
+  Ab: { accidental: 'b', num: 4 },
+  Fm: { accidental: 'b', num: 4 },
+  Db: { accidental: 'b', num: 5 },
+  Bbm: { accidental: 'b', num: 5 },
+  Gb: { accidental: 'b', num: 6 },
+  Ebm: { accidental: 'b', num: 6 },
+  Cb: { accidental: 'b', num: 7 },
+  Abm: { accidental: 'b', num: 7 },
+  G: { accidental: '#', num: 1 },
+  Em: { accidental: '#', num: 1 },
+  D: { accidental: '#', num: 2 },
+  Bm: { accidental: '#', num: 2 },
+  A: { accidental: '#', num: 3 },
+  'F#m': { accidental: '#', num: 3 },
+  E: { accidental: '#', num: 4 },
+  'C#m': { accidental: '#', num: 4 },
+  B: { accidental: '#', num: 5 },
+  'G#m': { accidental: '#', num: 5 },
+  'F#': { accidental: '#', num: 6 },
+  'D#m': { accidental: '#', num: 6 },
+  'C#': { accidental: '#', num: 7 },
+  'A#m': { accidental: '#', num: 7 },
 };
 
 const clefs: Record<string, { lineShift: number }> = {
@@ -967,18 +967,18 @@ export class Tables {
 
   static accidentalMap = accidentalsOld;
 
-  static accidentalCodesOld(acc: string): { code: string; parenRightPaddingAdjustment: number } {
-    return accidentalsOld[acc];
+  static accidentalCodesOld(accidental: string): { code: string; parenRightPaddingAdjustment: number } {
+    return accidentalsOld[accidental];
   }
 
-  static accidentalCodes(acc: string): string {
-    return accidentals[acc] ?? acc;
+  static accidentalCodes(accidental: string): string {
+    return accidentals[accidental] ?? accidental;
   }
 
   static accidentalColumnsTable = accidentalColumns;
 
-  static ornamentCodes(acc: string): { code: string } {
-    return ornaments[acc];
+  static ornamentCodes(accidental: string): { code: string } {
+    return ornaments[accidental];
   }
 
   static keySignature(spec: string): { type: string; line: number }[] {
@@ -988,7 +988,7 @@ export class Tables {
       throw new RuntimeError('BadKeySignature', `Bad key signature spec: '${spec}'`);
     }
 
-    if (!keySpec.acc) {
+    if (!keySpec.accidental) {
       return [];
     }
 
@@ -997,18 +997,18 @@ export class Tables {
       '#': [0, 1.5, -0.5, 1, 2.5, 0.5, 2],
     };
 
-    const notes = accidentalList[keySpec.acc];
+    const notes = accidentalList[keySpec.accidental];
 
     const accList = [];
     for (let i = 0; i < keySpec.num; ++i) {
       const line = notes[i];
-      accList.push({ type: keySpec.acc, line });
+      accList.push({ type: keySpec.accidental, line });
     }
 
     return accList;
   }
 
-  static getKeySignatures(): Record<string, { acc?: string; num: number }> {
+  static getKeySignatures(): Record<string, { accidental?: string; num: number }> {
     return keySignatures;
   }
 

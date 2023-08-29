@@ -55,11 +55,12 @@ export abstract class StemmableNote extends Note {
   buildFlag(): void {
     const { glyphProps } = this;
 
-    if (glyphProps.codeFlagUp && !this.beam && !this.isRest()) {
+    if (this.hasFlag()) {
       const flagCode =
+        // codeFlagDown = codeFlagUp + 1,, if not defined, code should be 0
         this.getStemDirection() === Stem.DOWN
-          ? String.fromCodePoint((glyphProps.codeFlagUp.codePointAt(0) ?? -1) + 1)
-          : glyphProps.codeFlagUp;
+          ? String.fromCodePoint((glyphProps.codeFlagUp?.codePointAt(0) ?? -1) + 1)
+          : glyphProps.codeFlagUp ?? '\u0000';
 
       this.flag.setText(flagCode);
       this.flag.fontSize = this.renderOptions.glyphFontScale;
@@ -231,7 +232,7 @@ export abstract class StemmableNote extends Note {
   }
 
   hasFlag(): boolean {
-    return this.glyphProps.codeFlagUp != undefined && !this.beam;
+    return this.glyphProps.codeFlagUp != undefined && !this.beam && !this.isRest();
   }
 
   /** Post formats the note. */

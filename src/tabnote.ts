@@ -130,7 +130,7 @@ export class TabNote extends StemmableNote {
   }
 
   protected ghost: boolean;
-  protected fretEl: Element[] = [];
+  protected fretElement: Element[] = [];
   protected positions: TabNotePosition[];
 
   // Initialize the TabNote with a `noteStruct` full of properties
@@ -148,7 +148,7 @@ export class TabNote extends StemmableNote {
     this.renderOptions = {
       ...this.renderOptions,
       // font size for note heads and rests
-      glyphFontScale: Tables.lookupMetric('tabNote.fontSize'),
+      glyphFontScale: Tables.lookupMetric('TabNote.fontSize'),
       // Flag to draw a stem
       drawStem,
       // Flag to draw dot modifiers
@@ -225,7 +225,7 @@ export class TabNote extends StemmableNote {
 
     if (fret.toUpperCase() === 'X') {
       el = new Element('TabNote');
-      el.setText(String.fromCodePoint(0xe263 /*accidentalDoubleSharp*/));
+      el.setText('\ue263' /*accidentalDoubleSharp*/);
       el.measureText();
     } else {
       el = new Element('TabNote.text');
@@ -239,13 +239,13 @@ export class TabNote extends StemmableNote {
 
   // Calculate and store the width of the note
   updateWidth(): void {
-    this.fretEl = [];
+    this.fretElement = [];
     this.width = 0;
     for (let i = 0; i < this.positions.length; ++i) {
       let fret = this.positions[i].fret;
       if (this.ghost) fret = '(' + fret + ')';
       const el = TabNote.tabToElement(fret.toString(), this.renderOptions.scale);
-      this.fretEl.push(el);
+      this.fretElement.push(el);
       this.width = Math.max(el.getWidth(), this.width);
     }
   }
@@ -415,7 +415,7 @@ export class TabNote extends StemmableNote {
     const ys = this.ys;
     for (let i = 0; i < this.positions.length; ++i) {
       const y = ys[i] + this.renderOptions.yShift;
-      const el = this.fretEl[i];
+      const el = this.fretElement[i];
 
       // Center the fret text beneath the stem
       const tabX = x - el.getWidth() / 2;

@@ -90,7 +90,7 @@ export class Accidental extends Modifier {
        * to accomodate its presence.
        */
       extraXSpaceNeeded: number;
-      acc: Accidental;
+      accidental: Accidental;
       spacingBetweenStaveLines?: number;
     };
 
@@ -100,11 +100,11 @@ export class Accidental extends Modifier {
 
     // First determine the accidentals' Y positions from the note.keys
     for (let i = 0; i < accidentals.length; ++i) {
-      const acc: Accidental = accidentals[i];
+      const accidental: Accidental = accidentals[i];
 
-      const note = acc.getNote();
+      const note = accidental.getNote();
       const stave = note.getStave();
-      const index = acc.checkIndex();
+      const index = accidental.checkIndex();
       const props = note.getKeyProps()[index];
 
       if (note !== prevNote) {
@@ -127,14 +127,14 @@ export class Accidental extends Modifier {
           y,
           line: accLine,
           extraXSpaceNeeded: extraXSpaceNeededForLeftDisplacedNotehead,
-          acc,
+          accidental: accidental,
           spacingBetweenStaveLines: lineSpace,
         });
       } else {
         accidentalLinePositionsAndSpaceNeeds.push({
           line: props.line,
           extraXSpaceNeeded: extraXSpaceNeededForLeftDisplacedNotehead,
-          acc,
+          accidental: accidental,
         });
       }
     }
@@ -152,7 +152,7 @@ export class Accidental extends Modifier {
     // from accidentalLinePositionsAndSpaceNeeds
     for (let i = 0; i < accidentalLinePositionsAndSpaceNeeds.length; i++) {
       const accidentalLinePositionAndSpaceNeeds = accidentalLinePositionsAndSpaceNeeds[i];
-
+      const accidentalType = accidentalLinePositionAndSpaceNeeds.accidental.type;
       const priorLineMetric = staveLineAccidentalLayoutMetrics[staveLineAccidentalLayoutMetrics.length - 1];
       let currentLineMetric: StaveLineAccidentalLayoutMetrics;
 
@@ -173,15 +173,12 @@ export class Accidental extends Modifier {
 
       // if this accidental is not a flat, the accidental needs 3.0 lines lower
       // clearance instead of 2.5 lines for b or bb.
-      if (
-        accidentalLinePositionAndSpaceNeeds.acc.type !== 'b' &&
-        accidentalLinePositionAndSpaceNeeds.acc.type !== 'bb'
-      ) {
+      if (accidentalType !== 'b' && accidentalType !== 'bb') {
         currentLineMetric.flatLine = false;
       }
 
       // if this accidental is not a double sharp, the accidental needs 3.0 lines above
-      if (accidentalLinePositionAndSpaceNeeds.acc.type !== '##') {
+      if (accidentalType !== '##') {
         currentLineMetric.dblSharpLine = false;
       }
 
@@ -192,7 +189,7 @@ export class Accidental extends Modifier {
       // for formatting lines w/ multiple accidentals:
 
       // width = accidental width + universal spacing between accidentals
-      currentLineMetric.width += accidentalLinePositionAndSpaceNeeds.acc.getWidth() + accidentalSpacing;
+      currentLineMetric.width += accidentalLinePositionAndSpaceNeeds.accidental.getWidth() + accidentalSpacing;
 
       // if this extraXSpaceNeeded is the largest so far, use it as the starting point for
       // all accidental columns.
@@ -380,10 +377,10 @@ export class Accidental extends Modifier {
       // handle all of the accidentals on a given line:
       for (accCount; accCount < lastAccOnLine; accCount++) {
         const xShift = columnXOffsets[line.column - 1] + lineWidth + maxExtraXSpaceNeeded;
-        accidentalLinePositionsAndSpaceNeeds[accCount].acc.setXShift(xShift);
+        accidentalLinePositionsAndSpaceNeeds[accCount].accidental.setXShift(xShift);
         // keep track of the width of accidentals we've added so far, so that when
         // we loop, we add space for them.
-        lineWidth += accidentalLinePositionsAndSpaceNeeds[accCount].acc.getWidth() + accidentalSpacing;
+        lineWidth += accidentalLinePositionsAndSpaceNeeds[accCount].accidental.getWidth() + accidentalSpacing;
         L('Line, accCount, shift: ', line.line, accCount, xShift);
       }
     });

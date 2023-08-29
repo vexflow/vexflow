@@ -528,7 +528,7 @@ export abstract class Note extends Tickable {
 
   /** Check it has a beam. */
   hasBeam(): boolean {
-    return this.beam != undefined;
+    return this.beam !== undefined;
   }
 
   /** Set the beam. */
@@ -593,9 +593,12 @@ export abstract class Note extends Tickable {
 
   getFirstDotPx(): number {
     let px = this.getRightDisplacedHeadPx();
+    const parentheses = this.checkModifierContext().getMembers('Parenthesis');
 
-    if (this.checkModifierContext().getMembers('Parenthesis').length !== 0)
-      px += this.checkModifierContext().getMembers('Parenthesis')[0].getWidth() + 1;
+    // consider parentheses on noteheads, dots should be to the right of them
+    if (parentheses.length !== 0) {
+      px += parentheses[0].getWidth() + 1;
+    }
     return px;
   }
 
@@ -653,8 +656,9 @@ export abstract class Note extends Tickable {
 
   /** Get point for notes. */
   static getPoint(size?: string): number {
+    const fontSize = Tables.lookupMetric('fontSize');
     // for sizes other than 'default', note is 2/3 of the default value
-    return size == 'default' ? Tables.lookupMetric('fontSize') : (Tables.lookupMetric('fontSize') / 5) * 3;
+    return size === 'default' ? fontSize : (fontSize * 3) / 5;
   }
 
   /** Get the direction of the stem. */

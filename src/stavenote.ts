@@ -1080,7 +1080,7 @@ export class StaveNote extends StemmableNote {
 
   shouldDrawFlag(): boolean {
     const hasStem = this.stem !== undefined;
-    const hasFlag = this.glyphProps.codeFlagUp != undefined;
+    const hasFlag = this.glyphProps.codeFlagUp !== undefined;
     const hasNoBeam = this.beam === undefined;
     return hasStem && hasFlag && hasNoBeam && !this.isRest();
   }
@@ -1185,7 +1185,7 @@ export class StaveNote extends StemmableNote {
     }
     const stave = this.getStave();
     let spacingBetweenLines = 10;
-    if (stave != undefined) {
+    if (stave !== undefined) {
       spacingBetweenLines = stave.getSpacingBetweenLines();
     }
     return superStemExtension + linesOverOctaveFromMidLine * spacingBetweenLines;
