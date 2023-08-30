@@ -532,10 +532,10 @@ export class StaveNote extends StemmableNote {
         displaced,
         stemDirection,
         customGlyphCode: noteProps.code,
-        glyphFontScale: this.renderOptions.glyphFontScale,
-        xShift: noteProps.shiftRight,
-        stemUpXOffset: noteProps.stemUpXOffset,
-        stemDownXOffset: noteProps.stemDownXOffset,
+        // #FIXME: HACK to use 30 as fontSize default rather than 39 used with glyphs.
+        // HACK-BEGIN
+        glyphFontScale: (this.renderOptions.glyphFontScale / 39) * 30,
+        // HACK-END
         line: noteProps.line,
       });
 
@@ -573,7 +573,7 @@ export class StaveNote extends StemmableNote {
       if (this.glyphProps.rest) this.glyphProps.position = key;
 
       const options = { octaveShift: this.octaveShift || 0, duration: this.duration };
-      const props = Tables.keyProperties(key, this.clef, options);
+      const props = Tables.keyProperties(key, this.clef, this.noteType, options);
 
       if (!props) {
         throw new RuntimeError('BadArguments', `Invalid key for note properties: ${key}`);
@@ -866,6 +866,11 @@ export class StaveNote extends StemmableNote {
     return this.flag?.getStyle();
   }
 
+  /** Get the glyph width. */
+  getGlyphWidth(): number {
+    return this.noteHeads[0].getWidth();
+  }
+
   // Sets the notehead at `index` to the provided coloring `style`.
   //
   // `style` is an `object` with the following properties: `shadowColor`,
@@ -1024,12 +1029,11 @@ export class StaveNote extends StemmableNote {
   drawLedgerLines(): void {
     const stave = this.checkStave();
     const {
-      glyphProps,
       renderOptions: { strokePx },
     } = this;
     const ctx = this.checkContext();
-    const width = glyphProps.getWidth() + strokePx * 2;
-    const doubleWidth = 2 * (glyphProps.getWidth() + strokePx) - Stem.WIDTH / 2;
+    const width = this.getGlyphWidth() + strokePx * 2;
+    const doubleWidth = 2 * (this.getGlyphWidth() + strokePx) - Stem.WIDTH / 2;
 
     if (this.isRest()) return;
     if (!ctx) {

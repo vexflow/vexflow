@@ -16,17 +16,21 @@ import { Category } from './typeguard';
 import { defined, RuntimeError } from './util';
 import { Voice } from './voice';
 
+export interface GlyphPropsNew {
+  codeHead: string;
+  stemBeamExtension: number;
+  stem: boolean;
+  codeFlagUp?: string;
+  beamCount: number;
+}
+
 export interface KeyProps {
-  stemDownXOffset?: number;
-  stemUpXOffset?: number;
   key: string;
   octave: number;
   line: number;
   intValue?: number;
-  accidental?: string;
+  accidental?: number;
   code?: string;
-  stroke: number;
-  shiftRight?: number;
   displaced: boolean;
 }
 
@@ -90,6 +94,25 @@ export abstract class Note extends Tickable {
 
   static get CATEGORY(): string {
     return Category.Note;
+  }
+
+  // Return a glyph given duration and type. The type can be a custom glyph code from customNoteHeads.
+  // The default type is a regular note ('n').
+  static getGlyphPropsNew(duration: string, type: string = 'n'): GlyphPropsNew {
+    duration = Tables.sanitizeDuration(duration);
+
+    // Lookup duration for default glyph head code
+    let code = Tables.durationCodes[duration];
+    if (code === undefined) {
+      code = Tables.durationCodes['4'];
+    }
+
+    // Try and get the note head
+    const codeNoteHead = Tables.codeNoteHead(type.toUpperCase(), duration);
+    // Merge duration props for 'duration' with the note head properties.
+    if (codeNoteHead !== '\u0000') code = { ...code, codeHead: codeNoteHead };
+
+    return code as GlyphPropsNew;
   }
 
   /** Debug helper. Displays various note metrics for the given note. */
@@ -217,6 +240,7 @@ export abstract class Note extends Tickable {
   // INSTANCE MEMBERS
 
   glyphProps: GlyphProps;
+  glyphPropsNew: GlyphPropsNew;
   keys: string[];
   keyProps: KeyProps[];
 
@@ -286,6 +310,7 @@ export abstract class Note extends Tickable {
 
     // Get the glyph code for this note from the font.
     this.glyphProps = Tables.getGlyphProps(this.duration, this.noteType);
+    this.glyphPropsNew = Note.getGlyphPropsNew(this.duration, this.noteType);
     this.customGlyphs = this.customTypes.map((t) => Tables.getGlyphProps(this.duration, t));
 
     // Note to play for audio players.
@@ -424,7 +449,7 @@ export abstract class Note extends Tickable {
 
   /** Get the glyph width. */
   getGlyphWidth(): number {
-    return this.glyphProps.getWidth(this.renderOptions.glyphFontScale);
+    return 0;
   }
 
   /**
