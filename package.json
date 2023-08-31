@@ -93,10 +93,12 @@
     "@vexflow-fonts/academico": "^1.0.1",
     "@vexflow-fonts/bravura": "^1.0.2",
     "@vexflow-fonts/bravuratext": "^1.0.0",
+    "@vexflow-fonts/edwin": "^1.0.1",
     "@vexflow-fonts/finaleash": "^1.0.1",
     "@vexflow-fonts/finalebroadway": "^1.0.0",
     "@vexflow-fonts/finalejazz": "^1.0.0",
     "@vexflow-fonts/finalemaestro": "^1.0.0",
+    "@vexflow-fonts/finalemaestrotext": "^1.0.0",
     "@vexflow-fonts/gonvillesmufl": "^1.0.1",
     "@vexflow-fonts/gootville": "^1.0.1",
     "@vexflow-fonts/gootvilletext": "^1.0.1",
@@ -162,9 +164,5 @@
     "piano",
     "guitar",
     "tablature"
-  ],
-  "dependencies": {
-    "@vexflow-fonts/edwin": "^1.0.1",
-    "@vexflow-fonts/finalemaestrotext": "^1.0.0"
-  }
+  ]
 }
