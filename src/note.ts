@@ -110,7 +110,9 @@ export abstract class Note extends Tickable {
     // Try and get the note head
     const codeNoteHead = Tables.codeNoteHead(type.toUpperCase(), duration);
     // Merge duration props for 'duration' with the note head properties.
-    if (codeNoteHead !== '\u0000') code = { ...code, codeHead: codeNoteHead };
+    if (codeNoteHead !== '\u0000') {
+      code = { ...code, codeHead: codeNoteHead };
+    }
 
     return code as GlyphPropsNew;
   }

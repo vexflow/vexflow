@@ -719,7 +719,8 @@ export class Tables {
   static STAVE_LINE_THICKNESS = 1;
   static RENDER_PRECISION_PLACES = 3;
   static RESOLUTION = RESOLUTION;
-// 1/2, 1, 2, 4, 8, 16, 32, 64, 128
+
+  // 1/2, 1, 2, 4, 8, 16, 32, 64, 128
   // NOTE: There is no 256 here! However, there are other mentions of 256 in this file.
   // For example, in durations has a 256 key, and sanitizeDuration() can return 256.
   // The sanitizeDuration() bit may need to be removed by 0xfe.
@@ -1153,8 +1154,7 @@ export class Tables {
       case 'TI':
         return '\ue0cd' /*noteheadTriangleRoundDownBlack*/;
 
-      /* Diamond */
-      case 'DI':
+      case 'DI': // Diamond
       case 'H': // Harmonics
         switch (duration) {
           case '1/2':

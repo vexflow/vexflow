@@ -51,7 +51,7 @@ export class NoteHead extends Note {
   protected index?: number;
   protected slashed: boolean;
 
-  // map to correspoding glyph with ledger line
+  // map notehead SMuFL codes to the corresponding SMuFL code with ledger line
   protected ledger: Record<string, string> = {
     '\ue4e3' /*restWhole*/: '\ue4f4' /*restWholeLegerLine*/,
     '\ue4e4' /*restHalf*/: '\ue4f5' /*restHalfLegerLine*/,
