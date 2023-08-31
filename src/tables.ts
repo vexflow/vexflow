@@ -4,7 +4,7 @@ import { ArticulationStruct } from './articulation';
 import { Font, FontInfo } from './font';
 import { Fraction } from './fraction';
 import { Glyph, GlyphProps } from './glyph';
-import { KeyProps } from './note';
+import { GlyphPropsNew, KeyProps } from './note';
 import { RuntimeError } from './util';
 
 const RESOLUTION = 16384;
@@ -239,63 +239,53 @@ const notesInfo: Record<
   {
     index: number;
     intVal?: number;
-    accidental?: string;
-    rest?: boolean;
-    octave?: number;
-    code?: string;
-    shiftRight?: number;
+    accidental?: number;
   }
 > = {
   C: { index: 0, intVal: 0 },
-  CN: { index: 0, intVal: 0, accidental: 'n' },
-  'C#': { index: 0, intVal: 1, accidental: '#' },
-  'C##': { index: 0, intVal: 2, accidental: '##' },
-  CB: { index: 0, intVal: 11, accidental: 'b' },
-  CBB: { index: 0, intVal: 10, accidental: 'bb' },
+  CN: { index: 0, intVal: 0, accidental: 0xe261 /*accidentalNatural*/ },
+  'C#': { index: 0, intVal: 1, accidental: 0xe262 /*accidentalSharp*/ },
+  'C##': { index: 0, intVal: 2, accidental: 0xe263 /*accidentalDoubleSharp*/ },
+  CB: { index: 0, intVal: 11, accidental: 0xe260 /*accidentalFlat*/ },
+  CBB: { index: 0, intVal: 10, accidental: 0xe264 /*accidentalDoubleFlat*/ },
   D: { index: 1, intVal: 2 },
-  DN: { index: 1, intVal: 2, accidental: 'n' },
-  'D#': { index: 1, intVal: 3, accidental: '#' },
-  'D##': { index: 1, intVal: 4, accidental: '##' },
-  DB: { index: 1, intVal: 1, accidental: 'b' },
-  DBB: { index: 1, intVal: 0, accidental: 'bb' },
+  DN: { index: 1, intVal: 2, accidental: 0xe261 /*accidentalNatural*/ },
+  'D#': { index: 1, intVal: 3, accidental: 0xe262 /*accidentalSharp*/ },
+  'D##': { index: 1, intVal: 4, accidental: 0xe263 /*accidentalDoubleSharp*/ },
+  DB: { index: 1, intVal: 1, accidental: 0xe260 /*accidentalFlat*/ },
+  DBB: { index: 1, intVal: 0, accidental: 0xe264 /*accidentalDoubleFlat*/ },
   E: { index: 2, intVal: 4 },
-  EN: { index: 2, intVal: 4, accidental: 'n' },
-  'E#': { index: 2, intVal: 5, accidental: '#' },
-  'E##': { index: 2, intVal: 6, accidental: '##' },
-  EB: { index: 2, intVal: 3, accidental: 'b' },
-  EBB: { index: 2, intVal: 2, accidental: 'bb' },
+  EN: { index: 2, intVal: 4, accidental: 0xe261 /*accidentalNatural*/ },
+  'E#': { index: 2, intVal: 5, accidental: 0xe262 /*accidentalSharp*/ },
+  'E##': { index: 2, intVal: 6, accidental: 0xe263 /*accidentalDoubleSharp*/ },
+  EB: { index: 2, intVal: 3, accidental: 0xe260 /*accidentalFlat*/ },
+  EBB: { index: 2, intVal: 2, accidental: 0xe264 /*accidentalDoubleFlat*/ },
   F: { index: 3, intVal: 5 },
-  FN: { index: 3, intVal: 5, accidental: 'n' },
-  'F#': { index: 3, intVal: 6, accidental: '#' },
-  'F##': { index: 3, intVal: 7, accidental: '##' },
-  FB: { index: 3, intVal: 4, accidental: 'b' },
-  FBB: { index: 3, intVal: 3, accidental: 'bb' },
+  FN: { index: 3, intVal: 5, accidental: 0xe261 /*accidentalNatural*/ },
+  'F#': { index: 3, intVal: 6, accidental: 0xe262 /*accidentalSharp*/ },
+  'F##': { index: 3, intVal: 7, accidental: 0xe263 /*accidentalDoubleSharp*/ },
+  FB: { index: 3, intVal: 4, accidental: 0xe260 /*accidentalFlat*/ },
+  FBB: { index: 3, intVal: 3, accidental: 0xe264 /*accidentalDoubleFlat*/ },
   G: { index: 4, intVal: 7 },
-  GN: { index: 4, intVal: 7, accidental: 'n' },
-  'G#': { index: 4, intVal: 8, accidental: '#' },
-  'G##': { index: 4, intVal: 9, accidental: '##' },
-  GB: { index: 4, intVal: 6, accidental: 'b' },
-  GBB: { index: 4, intVal: 5, accidental: 'bb' },
+  GN: { index: 4, intVal: 7, accidental: 0xe261 /*accidentalNatural*/ },
+  'G#': { index: 4, intVal: 8, accidental: 0xe262 /*accidentalSharp*/ },
+  'G##': { index: 4, intVal: 9, accidental: 0xe263 /*accidentalDoubleSharp*/ },
+  GB: { index: 4, intVal: 6, accidental: 0xe260 /*accidentalFlat*/ },
+  GBB: { index: 4, intVal: 5, accidental: 0xe264 /*accidentalDoubleFlat*/ },
   A: { index: 5, intVal: 9 },
-  AN: { index: 5, intVal: 9, accidental: 'n' },
-  'A#': { index: 5, intVal: 10, accidental: '#' },
-  'A##': { index: 5, intVal: 11, accidental: '##' },
-  AB: { index: 5, intVal: 8, accidental: 'b' },
-  ABB: { index: 5, intVal: 7, accidental: 'bb' },
+  AN: { index: 5, intVal: 9, accidental: 0xe261 /*accidentalNatural*/ },
+  'A#': { index: 5, intVal: 10, accidental: 0xe262 /*accidentalSharp*/ },
+  'A##': { index: 5, intVal: 11, accidental: 0xe263 /*accidentalDoubleSharp*/ },
+  AB: { index: 5, intVal: 8, accidental: 0xe260 /*accidentalFlat*/ },
+  ABB: { index: 5, intVal: 7, accidental: 0xe264 /*accidentalDoubleFlat*/ },
   B: { index: 6, intVal: 11 },
-  BN: { index: 6, intVal: 11, accidental: 'n' },
-  'B#': { index: 6, intVal: 12, accidental: '#' },
-  'B##': { index: 6, intVal: 13, accidental: '##' },
-  BB: { index: 6, intVal: 10, accidental: 'b' },
-  BBB: { index: 6, intVal: 9, accidental: 'bb' },
-  R: { index: 6, rest: true }, // Rest
-  X: {
-    index: 6,
-    accidental: '',
-    octave: 4,
-    code: 'noteheadXBlack',
-    shiftRight: 5.5,
-  },
+  BN: { index: 6, intVal: 11, accidental: 0xe261 /*accidentalNatural*/ },
+  'B#': { index: 6, intVal: 12, accidental: 0xe262 /*accidentalSharp*/ },
+  'B##': { index: 6, intVal: 13, accidental: 0xe263 /*accidentalDoubleSharp*/ },
+  BB: { index: 6, intVal: 10, accidental: 0xe260 /*accidentalFlat*/ },
+  BBB: { index: 6, intVal: 9, accidental: 0xe264 /*accidentalDoubleFlat*/ },
+  R: { index: 6 }, // Rest
+  X: { index: 6 },
 };
 
 const validNoteTypes: Record<string, { name: string }> = {
@@ -730,6 +720,63 @@ export class Tables {
   static RENDER_PRECISION_PLACES = 3;
   static RESOLUTION = RESOLUTION;
 
+  // 1/2, 1, 2, 4, 8, 16, 32, 64, 128
+  // NOTE: There is no 256 here! However, there are other mentions of 256 in this file.
+  // For example, in durations has a 256 key, and sanitizeDuration() can return 256.
+  // The sanitizeDuration() bit may need to be removed by 0xfe.
+  static durationCodes: Record<string, Partial<GlyphPropsNew>> = {
+    '1/2': {
+      stem: false,
+    },
+
+    1: {
+      stem: false,
+    },
+
+    2: {
+      stem: true,
+    },
+
+    4: {
+      stem: true,
+    },
+
+    8: {
+      stem: true,
+      beamCount: 1,
+      stemBeamExtension: 0,
+      codeFlagUp: '\ue240' /*flag8thUp*/,
+    },
+
+    16: {
+      beamCount: 2,
+      stemBeamExtension: 0,
+      stem: true,
+      codeFlagUp: '\ue242' /*flag16thUp*/,
+    },
+
+    32: {
+      beamCount: 3,
+      stemBeamExtension: 7.5,
+      stem: true,
+      codeFlagUp: '\ue244' /*flag32ndUp*/,
+    },
+
+    64: {
+      beamCount: 4,
+      stemBeamExtension: 15,
+      stem: true,
+      codeFlagUp: '\ue246' /*flag64thUp*/,
+    },
+
+    128: {
+      beamCount: 5,
+      stemBeamExtension: 22.5,
+      stem: true,
+      codeFlagUp: '\ue248' /*flag128thUp*/,
+    },
+  };
+
   /**
    * Customize this by calling Flow.setMusicFont(...fontNames);
    */
@@ -821,7 +868,13 @@ export class Tables {
    * @param params a struct with one option, `octaveShift` for clef ottavation (0 = default; 1 = 8va; -1 = 8vb, etc.).
    * @returns properties for the specified note.
    */
-  static keyProperties(keyOctaveGlyph: string, clef: string = 'treble', params?: { octaveShift?: number }): KeyProps {
+
+  static keyProperties(
+    keyOctaveGlyph: string,
+    clef: string = 'treble',
+    type: string = 'N',
+    params?: { octaveShift?: number }
+  ): KeyProps {
     let options = { octaveShift: 0, duration: '4' };
     if (typeof params === 'object') {
       options = { ...options, ...params };
@@ -837,10 +890,9 @@ export class Tables {
     }
 
     const key = pieces[0].toUpperCase();
+    type = type.toUpperCase();
     const value = notesInfo[key];
     if (!value) throw new RuntimeError('BadArguments', 'Invalid key name: ' + key);
-    if (value.octave) pieces[1] = value.octave.toString();
-
     let octave = parseInt(pieces[1], 10);
 
     // .octaveShift is the shift to compensate for clef 8va/8vb.
@@ -850,22 +902,18 @@ export class Tables {
     let line = (baseIndex + value.index) / 2;
     line += Tables.clefProperties(clef).lineShift;
 
-    let stroke = 0;
-
-    if (line <= 0 && (line * 2) % 2 === 0) stroke = 1; // stroke up
-    if (line >= 6 && (line * 2) % 2 === 0) stroke = -1; // stroke down
-
     // Integer value for note arithmetic.
     const intValue = typeof value.intVal !== 'undefined' ? octave * 12 + value.intVal : undefined;
 
     // If the user specified a glyph, overwrite the glyph code.
-    const code = value.code;
-    const shiftRight = value.shiftRight;
-    let customNoteHeadProps = {};
+    let code = '';
+    let glyphName = 'N';
     if (pieces.length > 2 && pieces[2]) {
-      const glyphName = pieces[2].toUpperCase();
-      customNoteHeadProps = { code: this.codeNoteHead(glyphName, duration) } || {};
-    }
+      glyphName = pieces[2].toUpperCase();
+    } else if (type != 'N') {
+      glyphName = type;
+    } else glyphName = key;
+    code = this.codeNoteHead(glyphName, duration);
 
     return {
       key,
@@ -874,10 +922,7 @@ export class Tables {
       intValue,
       accidental: value.accidental,
       code,
-      stroke,
-      shiftRight,
       displaced: false,
-      ...customNoteHeadProps,
     };
   }
 
@@ -1049,254 +1094,213 @@ export class Tables {
   }
 
   static codeNoteHead(type: string, duration: string): string {
-    let code = '';
     switch (type) {
       /* Diamond */
       case 'D0':
-        code = 'noteheadDiamondWhole';
-        break;
+        return '\ue0d8' /*noteheadDiamondWhole*/;
       case 'D1':
-        code = 'noteheadDiamondHalf';
-        break;
+        return '\ue0d9' /*noteheadDiamondHalf*/;
       case 'D2':
-        code = 'noteheadDiamondBlack';
-        break;
+        return '\ue0db' /*noteheadDiamondBlack*/;
       case 'D3':
-        code = 'noteheadDiamondBlack';
-        break;
+        return '\ue0db' /*noteheadDiamondBlack*/;
 
       /* Triangle */
       case 'T0':
-        code = 'noteheadTriangleUpWhole';
-        break;
+        return '\ue0bb' /*noteheadTriangleUpWhole*/;
       case 'T1':
-        code = 'noteheadTriangleUpHalf';
-        break;
+        return '\ue0bc' /*noteheadTriangleUpHalf*/;
       case 'T2':
-        code = 'noteheadTriangleUpBlack';
-        break;
+        return '\ue0be' /*noteheadTriangleUpBlack*/;
       case 'T3':
-        code = 'noteheadTriangleUpBlack';
-        break;
+        return '\ue0be' /*noteheadTriangleUpBlack*/;
 
       /* Cross */
       case 'X0':
-        code = 'noteheadXWhole';
-        break;
+        return '\ue0a7' /*noteheadXWhole*/;
       case 'X1':
-        code = 'noteheadXHalf';
-        break;
+        return '\ue0a8' /*noteheadXHalf*/;
       case 'X2':
-        code = 'noteheadXBlack';
-        break;
+        return '\ue0a9' /*noteheadXBlack*/;
       case 'X3':
-        code = 'noteheadCircleX';
-        break;
+        return '\ue0b3' /*noteheadCircleX*/;
 
       /* Square */
       case 'S1':
-        code = 'noteheadSquareWhite';
-        break;
+        return '\ue0b8' /*noteheadSquareWhite*/;
       case 'S2':
-        code = 'noteheadSquareBlack';
-        break;
+        return '\ue0b9' /*noteheadSquareBlack*/;
 
       /* Rectangle */
       case 'R1':
-        code = 'vexNoteHeadRectWhite'; // no smufl code
-        break;
+        return '\ue0b8' /*noteheadSquareWhite*/; // no smufl code
       case 'R2':
-        code = 'vexNoteHeadRectBlack'; // no smufl code
-        break;
+        return '\ue0b8' /*noteheadSquareWhite*/; // no smufl code
 
       case 'DO':
-        code = 'noteheadTriangleUpBlack';
-        break;
+        return '\ue0be' /*noteheadTriangleUpBlack*/;
       case 'RE':
-        code = 'noteheadMoonBlack';
-        break;
+        return '\ue0cb' /*noteheadMoonBlack*/;
       case 'MI':
-        code = 'noteheadDiamondBlack';
-        break;
+        return '\ue0db' /*noteheadDiamondBlack*/;
       case 'FA':
-        code = 'noteheadTriangleLeftBlack';
-        break;
+        return '\ue0c0' /*noteheadTriangleLeftBlack*/;
       case 'FAUP':
-        code = 'noteheadTriangleRightBlack';
-        break;
+        return '\ue0c2' /*noteheadTriangleRightBlack*/;
       case 'SO':
-        code = 'noteheadBlack';
-        break;
+        return '\ue0a4' /*noteheadBlack*/;
       case 'LA':
-        code = 'noteheadSquareBlack';
-        break;
+        return '\ue0b9' /*noteheadSquareBlack*/;
       case 'TI':
-        code = 'noteheadTriangleRoundDownBlack';
-        break;
+        return '\ue0cd' /*noteheadTriangleRoundDownBlack*/;
 
-      case 'D':
-      case 'H': // left for backwards compatibility
+      case 'DI': // Diamond
+      case 'H': // Harmonics
         switch (duration) {
           case '1/2':
-            code = 'noteheadDiamondDoubleWhole';
-            break;
+            return '\ue0d7' /*noteheadDiamondDoubleWhole*/;
           case '1':
-            code = 'noteheadDiamondWhole';
-            break;
+            return '\ue0d8' /*noteheadDiamondWhole*/;
           case '2':
-            code = 'noteheadDiamondHalf';
-            break;
+            return '\ue0d9' /*noteheadDiamondHalf*/;
           default:
-            code = 'noteheadDiamondBlack';
-            break;
+            return '\ue0db' /*noteheadDiamondBlack*/;
         }
-        break;
-      case 'N':
-      case 'G':
-        switch (duration) {
-          case '1/2':
-            code = 'noteheadDoubleWhole';
-            break;
-          case '1':
-            code = 'noteheadWhole';
-            break;
-          case '2':
-            code = 'noteheadHalf';
-            break;
-          default:
-            code = 'noteheadBlack';
-            break;
-        }
-        break;
-      case 'M': // left for backwards compatibility
       case 'X':
+      case 'M': // Muted
         switch (duration) {
           case '1/2':
-            code = 'noteheadXDoubleWhole';
-            break;
+            return '\ue0a6' /*noteheadXDoubleWhole*/;
           case '1':
-            code = 'noteheadXWhole';
-            break;
+            return '\ue0a7' /*noteheadXWhole*/;
           case '2':
-            code = 'noteheadXHalf';
-            break;
+            return '\ue0a8' /*noteheadXHalf*/;
           default:
-            code = 'noteheadXBlack';
-            break;
+            return '\ue0a9' /*noteheadXBlack*/;
         }
-        break;
       case 'CX':
         switch (duration) {
           case '1/2':
-            code = 'noteheadCircleXDoubleWhole';
-            break;
+            return '\ue0b0' /*noteheadCircleXDoubleWhole*/;
           case '1':
-            code = 'noteheadCircleXWhole';
-            break;
+            return '\ue0b1' /*noteheadCircleXWhole*/;
           case '2':
-            code = 'noteheadCircleXHalf';
-            break;
+            return '\ue0b2' /*noteheadCircleXHalf*/;
           default:
-            code = 'noteheadCircleX';
-            break;
+            return '\ue0b3' /*noteheadCircleX*/;
         }
-        break;
       case 'CI':
         switch (duration) {
           case '1/2':
-            code = 'noteheadCircledDoubleWhole';
-            break;
+            return '\ue0e7' /*noteheadCircledDoubleWhole*/;
           case '1':
-            code = 'noteheadCircledWhole';
-            break;
+            return '\ue0e6' /*noteheadCircledWhole*/;
           case '2':
-            code = 'noteheadCircledHalf';
-            break;
+            return '\ue0e5' /*noteheadCircledHalf*/;
           default:
-            code = 'noteheadCircledBlack';
-            break;
+            return '\ue0e4' /*noteheadCircledBlack*/;
         }
-        break;
       case 'SQ':
         switch (duration) {
           case '1/2':
-            code = 'noteheadDoubleWholeSquare';
-            break;
+            return '\ue0a1' /*noteheadDoubleWholeSquare*/;
           case '1':
-            code = 'noteheadSquareWhite';
-            break;
+            return '\ue0b8' /*noteheadSquareWhite*/;
           case '2':
-            code = 'noteheadSquareWhite';
-            break;
+            return '\ue0b8' /*noteheadSquareWhite*/;
           default:
-            code = 'noteheadSquareBlack';
-            break;
+            return '\ue0b9' /*noteheadSquareBlack*/;
         }
-        break;
       case 'TU':
         switch (duration) {
           case '1/2':
-            code = 'noteheadTriangleUpDoubleWhole';
-            break;
+            return '\ue0ba' /*noteheadTriangleUpDoubleWhole*/;
           case '1':
-            code = 'noteheadTriangleUpWhole';
-            break;
+            return '\ue0bb' /*noteheadTriangleUpWhole*/;
           case '2':
-            code = 'noteheadTriangleUpHalf';
-            break;
+            return '\ue0bc' /*noteheadTriangleUpHalf*/;
           default:
-            code = 'noteheadTriangleUpBlack';
-            break;
+            return '\ue0be' /*noteheadTriangleUpBlack*/;
         }
-        break;
       case 'TD':
         switch (duration) {
           case '1/2':
-            code = 'noteheadTriangleDownDoubleWhole';
-            break;
+            return '\ue0c3' /*noteheadTriangleDownDoubleWhole*/;
           case '1':
-            code = 'noteheadTriangleDownWhole';
-            break;
+            return '\ue0c4' /*noteheadTriangleDownWhole*/;
           case '2':
-            code = 'noteheadTriangleDownHalf';
-            break;
+            return '\ue0c5' /*noteheadTriangleDownHalf*/;
           default:
-            code = 'noteheadTriangleDownBlack';
-            break;
+            return '\ue0c7' /*noteheadTriangleDownBlack*/;
         }
-        break;
       case 'SF':
         switch (duration) {
           case '1/2':
-            code = 'noteheadSlashedDoubleWhole1';
-            break;
+            return '\ue0d5' /*noteheadSlashedDoubleWhole1*/;
           case '1':
-            code = 'noteheadSlashedWhole1';
-            break;
+            return '\ue0d3' /*noteheadSlashedWhole1*/;
           case '2':
-            code = 'noteheadSlashedHalf1';
-            break;
+            return '\ue0d1' /*noteheadSlashedHalf1*/;
           default:
-            code = 'noteheadSlashedBlack1';
+            return '\ue0cf' /*noteheadSlashedBlack1*/;
         }
-        break;
       case 'SB':
         switch (duration) {
           case '1/2':
-            code = 'noteheadSlashedDoubleWhole2';
-            break;
+            return '\ue0d6' /*noteheadSlashedDoubleWhole2*/;
           case '1':
-            code = 'noteheadSlashedWhole2';
-            break;
+            return '\ue0d4' /*noteheadSlashedWhole2*/;
           case '2':
-            code = 'noteheadSlashedHalf2';
-            break;
+            return '\ue0d2' /*noteheadSlashedHalf2*/;
           default:
-            code = 'noteheadSlashedBlack2';
+            return '\ue0d0' /*noteheadSlashedBlack2*/;
+        }
+      case 'R':
+        switch (duration) {
+          case '1/2':
+            return '\ue4e2' /*restDoubleWhole*/;
+          case '1':
+            return '\ue4e3' /*restWhole*/;
+          case '2':
+            return '\ue4e4' /*restHalf*/;
+          case '4':
+            return '\ue4e5' /*restQuarter*/;
+          case '8':
+            return '\ue4e6' /*rest8th*/;
+          case '16':
+            return '\ue4e7' /*rest16th*/;
+          case '32':
+            return '\ue4e8' /*rest32nd*/;
+          case '64':
+            return '\ue4e9' /*rest64th*/;
+          case '128':
+            return '\ue4ea' /*rest128th*/;
         }
         break;
+      case 'S':
+        switch (duration) {
+          case '1/2':
+            return '\ue10a' /*noteheadSlashWhiteDoubleWhole*/;
+          case '1':
+            return '\ue102' /*noteheadSlashWhiteWhole*/;
+          case '2':
+            return '\ue103' /*noteheadSlashWhiteHalf*/;
+          default:
+            return '\ue100' /*noteheadSlashVerticalEnds*/;
+        }
+      default:
+        switch (duration) {
+          case '1/2':
+            return '\ue0a0' /*noteheadDoubleWhole*/;
+          case '1':
+            return '\ue0a2' /*noteheadWhole*/;
+          case '2':
+            return '\ue0a3' /*noteheadHalf*/;
+          default:
+            return '\ue0a4' /*noteheadBlack*/;
+        }
     }
-    return code;
+    return '\u0000';
   }
 
   // Return a glyph given duration and type. The type can be a custom glyph code from customNoteHeads.

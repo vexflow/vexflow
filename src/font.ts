@@ -1,4 +1,3 @@
-import { NoteHeadMetrics } from './notehead';
 import { OrnamentMetrics } from './ornament';
 import { StringNumberMetrics } from './stringnumber';
 import { TupletMetrics } from './tuplet';
@@ -41,7 +40,6 @@ export interface FontMetrics extends Record<string, any> {
   articulation?: Record<string, Record<string, number>>;
   tremolo?: Record<string, Record<string, number>>;
   ornament?: Record<string, OrnamentMetrics>;
-  noteHead?: NoteHeadMetrics;
   stringNumber?: StringNumberMetrics;
   tuplet?: TupletMetrics;
   glyphs: Record<
