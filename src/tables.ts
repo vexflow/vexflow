@@ -3,8 +3,7 @@
 import { ArticulationStruct } from './articulation';
 import { Font, FontInfo } from './font';
 import { Fraction } from './fraction';
-import { Glyph, GlyphProps } from './glyph';
-import { GlyphPropsNew, KeyProps } from './note';
+import { GlyphProps, KeyProps } from './note';
 import { RuntimeError } from './util';
 
 const RESOLUTION = 16384;
@@ -121,7 +120,9 @@ export const CommonMetrics: Record<string, any> = {
   },
 
   TabNote: {
-    fontSize: 9,
+    text: {
+      fontSize: 9,
+    },
   },
 
   TabSlide: {
@@ -187,37 +188,37 @@ const durationAliases: Record<string, string> = {
   b: '256',
 };
 
-const keySignatures: Record<string, { acc?: string; num: number }> = {
+const keySignatures: Record<string, { accidental?: string; num: number }> = {
   C: { num: 0 },
   Am: { num: 0 },
-  F: { acc: 'b', num: 1 },
-  Dm: { acc: 'b', num: 1 },
-  Bb: { acc: 'b', num: 2 },
-  Gm: { acc: 'b', num: 2 },
-  Eb: { acc: 'b', num: 3 },
-  Cm: { acc: 'b', num: 3 },
-  Ab: { acc: 'b', num: 4 },
-  Fm: { acc: 'b', num: 4 },
-  Db: { acc: 'b', num: 5 },
-  Bbm: { acc: 'b', num: 5 },
-  Gb: { acc: 'b', num: 6 },
-  Ebm: { acc: 'b', num: 6 },
-  Cb: { acc: 'b', num: 7 },
-  Abm: { acc: 'b', num: 7 },
-  G: { acc: '#', num: 1 },
-  Em: { acc: '#', num: 1 },
-  D: { acc: '#', num: 2 },
-  Bm: { acc: '#', num: 2 },
-  A: { acc: '#', num: 3 },
-  'F#m': { acc: '#', num: 3 },
-  E: { acc: '#', num: 4 },
-  'C#m': { acc: '#', num: 4 },
-  B: { acc: '#', num: 5 },
-  'G#m': { acc: '#', num: 5 },
-  'F#': { acc: '#', num: 6 },
-  'D#m': { acc: '#', num: 6 },
-  'C#': { acc: '#', num: 7 },
-  'A#m': { acc: '#', num: 7 },
+  F: { accidental: 'b', num: 1 },
+  Dm: { accidental: 'b', num: 1 },
+  Bb: { accidental: 'b', num: 2 },
+  Gm: { accidental: 'b', num: 2 },
+  Eb: { accidental: 'b', num: 3 },
+  Cm: { accidental: 'b', num: 3 },
+  Ab: { accidental: 'b', num: 4 },
+  Fm: { accidental: 'b', num: 4 },
+  Db: { accidental: 'b', num: 5 },
+  Bbm: { accidental: 'b', num: 5 },
+  Gb: { accidental: 'b', num: 6 },
+  Ebm: { accidental: 'b', num: 6 },
+  Cb: { accidental: 'b', num: 7 },
+  Abm: { accidental: 'b', num: 7 },
+  G: { accidental: '#', num: 1 },
+  Em: { accidental: '#', num: 1 },
+  D: { accidental: '#', num: 2 },
+  Bm: { accidental: '#', num: 2 },
+  A: { accidental: '#', num: 3 },
+  'F#m': { accidental: '#', num: 3 },
+  E: { accidental: '#', num: 4 },
+  'C#m': { accidental: '#', num: 4 },
+  B: { accidental: '#', num: 5 },
+  'G#m': { accidental: '#', num: 5 },
+  'F#': { accidental: '#', num: 6 },
+  'D#m': { accidental: '#', num: 6 },
+  'C#': { accidental: '#', num: 7 },
+  'A#m': { accidental: '#', num: 7 },
 };
 
 const clefs: Record<string, { lineShift: number }> = {
@@ -724,7 +725,7 @@ export class Tables {
   // NOTE: There is no 256 here! However, there are other mentions of 256 in this file.
   // For example, in durations has a 256 key, and sanitizeDuration() can return 256.
   // The sanitizeDuration() bit may need to be removed by 0xfe.
-  static durationCodes: Record<string, Partial<GlyphPropsNew>> = {
+  static durationCodes: Record<string, Partial<GlyphProps>> = {
     '1/2': {
       stem: false,
     },
@@ -954,30 +955,6 @@ export class Tables {
     return noteValue;
   }
 
-  static tabToGlyphProps(fret: string, scale: number = 1.0): GlyphProps {
-    let glyph = undefined;
-    let width = 0;
-    let shiftY = 0;
-
-    if (fret.toUpperCase() === 'X') {
-      const glyphMetrics = new Glyph('accidentalDoubleSharp', Tables.TABLATURE_FONT_SCALE).getMetrics();
-      glyph = 'accidentalDoubleSharp';
-      if (glyphMetrics.width == undefined || glyphMetrics.height == undefined)
-        throw new RuntimeError('InvalidMetrics', 'Width and height required');
-      width = glyphMetrics.width;
-      shiftY = -glyphMetrics.height / 2;
-    } else {
-      width = Tables.textWidth(fret);
-    }
-
-    return {
-      text: fret,
-      code: glyph,
-      getWidth: () => width * scale,
-      shiftY,
-    } as GlyphProps;
-  }
-
   // Used by annotation.ts and bend.ts. Clearly this implementation only works for the default font size.
   // TODO: The actual width depends on the font family, size, weight, style.
   static textWidth(text: string): number {
@@ -990,18 +967,18 @@ export class Tables {
 
   static accidentalMap = accidentalsOld;
 
-  static accidentalCodesOld(acc: string): { code: string; parenRightPaddingAdjustment: number } {
-    return accidentalsOld[acc];
+  static accidentalCodesOld(accidental: string): { code: string; parenRightPaddingAdjustment: number } {
+    return accidentalsOld[accidental];
   }
 
-  static accidentalCodes(acc: string): string {
-    return accidentals[acc] ?? acc;
+  static accidentalCodes(accidental: string): string {
+    return accidentals[accidental] ?? accidental;
   }
 
   static accidentalColumnsTable = accidentalColumns;
 
-  static ornamentCodes(acc: string): { code: string } {
-    return ornaments[acc];
+  static ornamentCodes(accidental: string): { code: string } {
+    return ornaments[accidental];
   }
 
   static keySignature(spec: string): { type: string; line: number }[] {
@@ -1011,7 +988,7 @@ export class Tables {
       throw new RuntimeError('BadKeySignature', `Bad key signature spec: '${spec}'`);
     }
 
-    if (!keySpec.acc) {
+    if (!keySpec.accidental) {
       return [];
     }
 
@@ -1020,18 +997,18 @@ export class Tables {
       '#': [0, 1.5, -0.5, 1, 2.5, 0.5, 2],
     };
 
-    const notes = accidentalList[keySpec.acc];
+    const notes = accidentalList[keySpec.accidental];
 
     const accList = [];
     for (let i = 0; i < keySpec.num; ++i) {
       const line = notes[i];
-      accList.push({ type: keySpec.acc, line });
+      accList.push({ type: keySpec.accidental, line });
     }
 
     return accList;
   }
 
-  static getKeySignatures(): Record<string, { acc?: string; num: number }> {
+  static getKeySignatures(): Record<string, { accidental?: string; num: number }> {
     return keySignatures;
   }
 
@@ -1303,35 +1280,6 @@ export class Tables {
     return '\u0000';
   }
 
-  // Return a glyph given duration and type. The type can be a custom glyph code from customNoteHeads.
-  // The default type is a regular note ('n').
-  static getGlyphProps(duration: string, type: string = 'n'): GlyphProps {
-    duration = Tables.sanitizeDuration(duration);
-
-    // Lookup duration for default glyph head code
-    let code = durationCodes[duration];
-    if (code === undefined) {
-      code = durationCodes['4'];
-    }
-
-    // Get glyph properties for 'type' from duration string (note, rest, harmonic, muted, slash)
-    let glyphTypeProperties = code[type];
-
-    // Try and get it from the custom list of note heads
-    const codeNoteHead = Tables.codeNoteHead(type.toUpperCase(), duration);
-    if (codeNoteHead != '')
-      glyphTypeProperties = { ...glyphTypeProperties, ...{ codeHead: codeNoteHead, code: codeNoteHead } };
-
-    const codeHead = glyphTypeProperties.codeHead as string;
-
-    // The default implementation of getWidth() calls Glyph.getWidth(codeHead, scale).
-    // This can be overridden by an individual glyph type (see slash noteheads below: Tables.SLASH_NOTEHEAD_WIDTH).
-    const getWidth = (scale = Tables.NOTATION_FONT_SCALE): number => Glyph.getWidth(codeHead, scale);
-
-    // Merge duration props for 'duration' with the note head properties.
-    return { ...code.common, getWidth: getWidth, ...glyphTypeProperties } as GlyphProps;
-  }
-
   /* The list of valid note types. Used by note.ts during parseNoteStruct(). */
   static validTypes = validNoteTypes;
 
@@ -1342,307 +1290,3 @@ export class Tables {
     resolution: RESOLUTION,
   };
 }
-
-// 1/2, 1, 2, 4, 8, 16, 32, 64, 128
-// NOTE: There is no 256 here! However, there are other mentions of 256 in this file.
-// For example, in durations has a 256 key, and sanitizeDuration() can return 256.
-// The sanitizeDuration() bit may need to be removed by 0xfe.
-const durationCodes: Record<string, Record<string, Partial<GlyphProps>>> = {
-  '1/2': {
-    common: {
-      codeHead: '',
-      stem: false,
-      flag: false,
-      stemUpExtension: -Tables.STEM_HEIGHT,
-      stemDownExtension: -Tables.STEM_HEIGHT,
-      tabnoteStemUpExtension: -Tables.STEM_HEIGHT,
-      tabnoteStemDownExtension: -Tables.STEM_HEIGHT,
-      dotShiftY: 0,
-      lineAbove: 0,
-      lineBelow: 0,
-    },
-    r: {
-      // Breve rest
-      codeHead: 'restDoubleWhole',
-      rest: true,
-      position: 'B/5',
-      dotShiftY: 0.5,
-    },
-    s: {
-      // Breve note slash -
-      // Drawn with canvas primitives
-      getWidth: () => Tables.SLASH_NOTEHEAD_WIDTH,
-      position: 'B/4',
-    },
-  },
-
-  1: {
-    common: {
-      codeHead: '',
-      stem: false,
-      flag: false,
-      stemUpExtension: -Tables.STEM_HEIGHT,
-      stemDownExtension: -Tables.STEM_HEIGHT,
-      tabnoteStemUpExtension: -Tables.STEM_HEIGHT,
-      tabnoteStemDownExtension: -Tables.STEM_HEIGHT,
-      dotShiftY: 0,
-      lineAbove: 0,
-      lineBelow: 0,
-    },
-    r: {
-      // Whole rest
-      codeHead: 'restWhole',
-      ledgerCodeHead: 'restWholeLegerLine',
-      rest: true,
-      position: 'D/5',
-      dotShiftY: 0.5,
-    },
-    s: {
-      // Whole note slash
-      // Drawn with canvas primitives
-      getWidth: () => Tables.SLASH_NOTEHEAD_WIDTH,
-      position: 'B/4',
-    },
-  },
-
-  2: {
-    common: {
-      codeHead: '',
-      stem: true,
-      flag: false,
-      stemUpExtension: 0,
-      stemDownExtension: 0,
-      tabnoteStemUpExtension: 0,
-      tabnoteStemDownExtension: 0,
-      dotShiftY: 0,
-      lineAbove: 0,
-      lineBelow: 0,
-    },
-    r: {
-      // Half rest
-      codeHead: 'restHalf',
-      ledgerCodeHead: 'restHalfLegerLine',
-      stem: false,
-      rest: true,
-      position: 'B/4',
-      dotShiftY: -0.5,
-    },
-    s: {
-      // Half note slash
-      // Drawn with canvas primitives
-      getWidth: () => Tables.SLASH_NOTEHEAD_WIDTH,
-      position: 'B/4',
-    },
-  },
-
-  4: {
-    common: {
-      codeHead: '',
-      stem: true,
-      flag: false,
-      stemUpExtension: 0,
-      stemDownExtension: 0,
-      tabnoteStemUpExtension: 0,
-      tabnoteStemDownExtension: 0,
-      dotShiftY: 0,
-      lineAbove: 0,
-      lineBelow: 0,
-    },
-    r: {
-      // Quarter rest
-      codeHead: 'restQuarter',
-      stem: false,
-      rest: true,
-      position: 'B/4',
-      dotShiftY: -0.5,
-      lineAbove: 1.5,
-      lineBelow: 1.5,
-    },
-    s: {
-      // Quarter slash
-      // Drawn with canvas primitives
-      getWidth: () => Tables.SLASH_NOTEHEAD_WIDTH,
-      position: 'B/4',
-    },
-  },
-
-  8: {
-    common: {
-      codeHead: '',
-      stem: true,
-      flag: true,
-      beamCount: 1,
-      stemBeamExtension: 0,
-      codeFlagUpstem: '\ue240' /*flag8thUp*/,
-      codeFlagDownstem: '\ue241' /*flag8thDown*/,
-      stemUpExtension: 0,
-      stemDownExtension: 0,
-      tabnoteStemUpExtension: 0,
-      tabnoteStemDownExtension: 0,
-      dotShiftY: 0,
-      lineAbove: 0,
-      lineBelow: 0,
-    },
-    r: {
-      // Eighth rest
-      codeHead: 'rest8th',
-      stem: false,
-      flag: false,
-      rest: true,
-      position: 'B/4',
-      dotShiftY: -0.5,
-      lineAbove: 1.0,
-      lineBelow: 1.0,
-    },
-    s: {
-      // Eighth slash
-      // Drawn with canvas primitives
-      getWidth: () => Tables.SLASH_NOTEHEAD_WIDTH,
-      position: 'B/4',
-    },
-  },
-
-  16: {
-    common: {
-      codeHead: '',
-      beamCount: 2,
-      stemBeamExtension: 0,
-      stem: true,
-      flag: true,
-      codeFlagUpstem: '\ue242' /*flag16thUp*/,
-      codeFlagDownstem: '\ue243' /*flag16thDown*/,
-      stemUpExtension: 0,
-      stemDownExtension: 0,
-      tabnoteStemUpExtension: 0,
-      tabnoteStemDownExtension: 0,
-      dotShiftY: 0,
-      lineAbove: 0,
-      lineBelow: 0,
-    },
-    r: {
-      // Sixteenth rest
-      codeHead: 'rest16th',
-      stem: false,
-      flag: false,
-      rest: true,
-      position: 'B/4',
-      dotShiftY: -0.5,
-      lineAbove: 1.0,
-      lineBelow: 2.0,
-    },
-    s: {
-      // Sixteenth slash
-      // Drawn with canvas primitives
-      getWidth: () => Tables.SLASH_NOTEHEAD_WIDTH,
-      position: 'B/4',
-    },
-  },
-
-  32: {
-    common: {
-      codeHead: '',
-      beamCount: 3,
-      stemBeamExtension: 7.5,
-      stem: true,
-      flag: true,
-      codeFlagUpstem: '\ue244' /*flag32ndUp*/,
-      codeFlagDownstem: '\ue245' /*flag32ndDown*/,
-      stemUpExtension: 9,
-      stemDownExtension: 9,
-      tabnoteStemUpExtension: 9,
-      tabnoteStemDownExtension: 9,
-      dotShiftY: 0,
-      lineAbove: 0,
-      lineBelow: 0,
-    },
-    r: {
-      // Thirty-second rest
-      codeHead: 'rest32nd',
-      stem: false,
-      flag: false,
-      rest: true,
-      position: 'B/4',
-      dotShiftY: -1.5,
-      lineAbove: 2.0,
-      lineBelow: 2.0,
-    },
-    s: {
-      // Thirty-second slash
-      // Drawn with canvas primitives
-      getWidth: () => Tables.SLASH_NOTEHEAD_WIDTH,
-      position: 'B/4',
-    },
-  },
-
-  64: {
-    common: {
-      codeHead: '',
-      beamCount: 4,
-      stemBeamExtension: 15,
-      stem: true,
-      flag: true,
-      codeFlagUpstem: '\ue246' /*flag64thUp*/,
-      codeFlagDownstem: '\ue247' /*flag64thDown*/,
-      stemUpExtension: 13,
-      stemDownExtension: 13,
-      tabnoteStemUpExtension: 13,
-      tabnoteStemDownExtension: 13,
-      dotShiftY: 0,
-      lineAbove: 0,
-      lineBelow: 0,
-    },
-    r: {
-      // Sixty-fourth rest
-      codeHead: 'rest64th',
-      stem: false,
-      flag: false,
-      rest: true,
-      position: 'B/4',
-      dotShiftY: -1.5,
-      lineAbove: 2.0,
-      lineBelow: 3.0,
-    },
-    s: {
-      // Sixty-fourth slash
-      // Drawn with canvas primitives
-      getWidth: () => Tables.SLASH_NOTEHEAD_WIDTH,
-      position: 'B/4',
-    },
-  },
-
-  128: {
-    common: {
-      codeHead: '',
-      beamCount: 5,
-      stemBeamExtension: 22.5,
-      stem: true,
-      flag: true,
-      codeFlagUpstem: '\ue248' /*flag128thUp*/,
-      codeFlagDownstem: '\ue249' /*flag128thDown*/,
-      stemUpExtension: 22,
-      stemDownExtension: 22,
-      tabnoteStemUpExtension: 22,
-      tabnoteStemDownExtension: 22,
-      dotShiftY: 0,
-      lineAbove: 0,
-      lineBelow: 0,
-    },
-    r: {
-      // Hundred-twenty-eight rest
-      codeHead: 'rest128th',
-      stem: false,
-      flag: false,
-      rest: true,
-      position: 'B/4',
-      dotShiftY: -2.5,
-      lineAbove: 3.0,
-      lineBelow: 3.0,
-    },
-    s: {
-      // Hundred-twenty-eight slash
-      // Drawn with canvas primitives
-      getWidth: () => Tables.SLASH_NOTEHEAD_WIDTH,
-      position: 'B/4',
-    },
-  },
-};

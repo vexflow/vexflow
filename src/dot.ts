@@ -27,16 +27,13 @@ export class Dot extends Modifier {
       if (options?.all) {
         for (let i = 0; i < note.keys.length; i++) {
           const dot = new Dot();
-          dot.setDotShiftY(note.glyphProps.dotShiftY);
           note.addModifier(dot, i);
         }
       } else if (options?.index != undefined) {
         const dot = new Dot();
-        dot.setDotShiftY(note.glyphProps.dotShiftY);
         note.addModifier(dot, options?.index);
       } else {
         const dot = new Dot();
-        dot.setDotShiftY(note.glyphProps.dotShiftY);
         note.addModifier(dot, 0);
       }
     }

@@ -5,8 +5,7 @@
 // Examples of stemmable notes are `StaveNote` and `TabNote`
 
 import { Element, ElementStyle } from './element';
-import { GlyphProps } from './glyph';
-import { Note, NoteStruct } from './note';
+import { GlyphProps, Note, NoteStruct } from './note';
 import { Stem, StemOptions } from './stem';
 import { Tables } from './tables';
 import { Category } from './typeguard';
@@ -58,13 +57,13 @@ export abstract class StemmableNote extends Note {
 
     if (this.hasFlag()) {
       const flagCode =
-        this.getStemDirection() === Stem.DOWN ? glyphProps.codeFlagDownstem ?? '' : glyphProps.codeFlagUpstem ?? '';
+        // codeFlagDown = codeFlagUp + 1,, if not defined, code should be 0
+        this.getStemDirection() === Stem.DOWN
+          ? String.fromCodePoint((glyphProps.codeFlagUp?.codePointAt(0) ?? -1) + 1)
+          : glyphProps.codeFlagUp ?? '\u0000';
 
       this.flag.setText(flagCode);
-      // #FIXME: HACK to use 30 as fontSize default rather than 39 used with glyphs.
-      // HACK-BEGIN
-      this.flag.fontSize = (this.renderOptions.glyphFontScale / 39) * 30;
-      // HACK-END
+      this.flag.fontSize = this.renderOptions.glyphFontScale;
       this.flag.measureText();
     }
   }
@@ -145,26 +144,6 @@ export abstract class StemmableNote extends Note {
     if (this.stem) {
       this.stem.setDirection(direction);
       this.stem.setExtension(this.getStemExtension());
-
-      // Lookup the base custom notehead (closest to the base of the stem) to extend or shorten
-      // the stem appropriately. If there's no custom note head, lookup the standard notehead.
-      const glyphProps = this.getBaseCustomNoteHeadGlyphProps() || this.getGlyphProps();
-
-      // Get the font-specific customizations for the note heads.
-      const offsets = Tables.currentMusicFont().lookupMetric(`stem.noteHead.${glyphProps.codeHead}`, {
-        offsetYBaseStemUp: 0,
-        offsetYTopStemUp: 0,
-        offsetYBaseStemDown: 0,
-        offsetYTopStemDown: 0,
-      });
-
-      // Configure the stem to use these offsets.
-      this.stem.setOptions({
-        stemUpYOffset: offsets.offsetYTopStemUp, // glyph.stemUpYOffset,
-        stemDownYOffset: offsets.offsetYTopStemDown, // glyph.stemDownYOffset,
-        stemUpYBaseOffset: offsets.offsetYBaseStemUp, // glyph.stemUpYBaseOffset,
-        stemDownYBaseOffset: offsets.offsetYBaseStemDown, // glyph.stemDownYBaseOffset,
-      });
     }
 
     if (this.preFormatted) {
@@ -253,7 +232,7 @@ export abstract class StemmableNote extends Note {
   }
 
   hasFlag(): boolean {
-    return Tables.getGlyphProps(this.duration).flag == true && !this.beam;
+    return this.glyphProps.codeFlagUp != undefined && !this.beam && !this.isRest();
   }
 
   /** Post formats the note. */

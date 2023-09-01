@@ -70,18 +70,18 @@ export class NoteHead extends Note {
 
     // Get glyph code based on duration and note type. This could be
     // regular notes, rests, or other custom codes.
-    this.glyphPropsNew = Note.getGlyphPropsNew(this.duration, this.noteType);
+    this.glyphProps = Note.getGlyphProps(this.duration, this.noteType);
     defined(
-      this.glyphPropsNew,
+      this.glyphProps,
       'BadArguments',
       `No glyph found for duration '${this.duration}' and type '${this.noteType}'`
     );
 
     // Swap out the glyph with ledger lines
-    if ((this.line > 5 || this.line < 0) && this.ledger[this.glyphPropsNew.codeHead]) {
-      this.glyphPropsNew.codeHead = this.ledger[this.glyphPropsNew.codeHead];
+    if ((this.line > 5 || this.line < 0) && this.ledger[this.glyphProps.codeHead]) {
+      this.glyphProps.codeHead = this.ledger[this.glyphProps.codeHead];
     }
-    this.text = this.glyphPropsNew.codeHead;
+    this.text = this.glyphProps.codeHead;
     if (noteStruct.customGlyphCode) {
       this.customGlyph = true;
       this.text = noteStruct.customGlyphCode;

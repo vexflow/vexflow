@@ -1,13 +1,6 @@
 export const CommonMetrics = {
   smufl: true,
 
-  stave: {
-    padding: 12,
-    endPaddingMax: 10,
-    endPaddingMin: 5,
-    unalignedNotePadding: 10,
-  },
-
   accidental: {
     noteheadAccidentalPadding: 1,
     leftPadding: 2,
@@ -124,54 +117,6 @@ export const CommonMetrics = {
     },
   },
 
-  noteHead: {
-    minPadding: 2,
-  },
-
-  stem: {
-    heightAdjustmentForFlag: -3,
-    // These are stem (Y) offsets to the note heads. To shift the
-    // noteheads (x-position) themselves, see glyphs.notehead.custom.
-    noteHead: {
-      noteheadTriangleUpHalf: {
-        offsetYBaseStemUp: 5,
-        offsetYBaseStemDown: 4,
-      },
-      noteheadTriangleUpBlack: {
-        offsetYBaseStemUp: 5,
-        offsetYBaseStemDown: 4,
-      },
-      noteheadTriangleUpWhole: {
-        offsetYBaseStemUp: 5,
-        offsetYBaseStemDown: 4,
-      },
-      noteheadXHalf: {
-        offsetYBaseStemUp: -4,
-        offsetYBaseStemDown: 4,
-      },
-      noteheadXBlack: {
-        offsetYBaseStemUp: -4,
-        offsetYBaseStemDown: 4,
-      },
-      noteheadXWhole: {
-        offsetYBaseStemUp: -4,
-        offsetYBaseStemDown: 4,
-      },
-      noteheadHalf: {
-        offsetYBaseStemUp: -2.55,
-        offsetYBaseStemDown: 2.65,
-      },
-      noteheadBlack: {
-        offsetYBaseStemUp: -2,
-        offsetYBaseStemDown: 2,
-      },
-      noteheadSquareWhite: {
-        offsetYBaseStemDown: -5,
-        offsetYBaseStemUp: 5,
-      },
-    },
-  },
-
   stringNumber: {
     verticalPadding: 8,
     stemPadding: 2,
@@ -253,7 +198,6 @@ export const CommonMetrics = {
         shiftX: -8,
       },
     },
-    noteHead: {},
     chordSymbol: {
       scale: 0.8,
     },
