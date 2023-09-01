@@ -54,9 +54,19 @@ export const CommonMetrics: Record<string, any> = {
   },
 
   Repetition: {
-    fontFamily: 'Times New Roman, serif',
-    fontSize: 13,
-    fontWeight: 'bold',
+    text: {
+      fontSize: 12,
+      fontWeight: 'bold',
+      offsetX: 12,
+      offsetY: 25,
+      spacing: 5,
+    },
+    coda: {
+      offsetY: 25,
+    },
+    segno: {
+      offsetY: 10,
+    },
   },
 
   Stave: {
