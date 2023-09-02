@@ -67,7 +67,7 @@ export class StaveHairpin extends Element {
   ): void {
     const ppt = formatter.pixelsPerTick;
 
-    if (ppt == null) {
+    if (ppt === null) {
       throw new RuntimeError('BadArguments', 'A valid Formatter must be provide to draw offsets by ticks.');
     }
 
@@ -132,14 +132,7 @@ export class StaveHairpin extends Element {
   }
 
   setRenderOptions(options: StaveHairpinRenderOptions): this {
-    if (
-      options.height != null &&
-      options.yShift != null &&
-      options.leftShiftPx != null &&
-      options.rightShiftPx != null
-    ) {
-      this.renderOptions = options;
-    }
+    this.renderOptions = options;
     return this;
   }
 

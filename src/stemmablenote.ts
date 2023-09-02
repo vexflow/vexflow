@@ -60,7 +60,7 @@ export abstract class StemmableNote extends Note {
         // codeFlagDown = codeFlagUp + 1,, if not defined, code should be 0
         this.getStemDirection() === Stem.DOWN
           ? String.fromCodePoint((glyphProps.codeFlagUp?.codePointAt(0) ?? -1) + 1)
-          : glyphProps.codeFlagUp ?? '\u0000';
+          : glyphProps.codeFlagUp  || '\u0000';
 
       this.flag.setText(flagCode);
       this.flag.fontSize = this.renderOptions.glyphFontScale;
@@ -100,19 +100,19 @@ export abstract class StemmableNote extends Note {
     // if note is flagged, cannot shorten beam
     switch (this.duration) {
       case '8':
-        if (this.beam == undefined) length = 35;
+        if (this.beam === undefined) length = 35;
         break;
       case '16':
-        length = this.beam == undefined ? 35 : 25;
+        length = this.beam === undefined ? 35 : 25;
         break;
       case '32':
-        length = this.beam == undefined ? 45 : 35;
+        length = this.beam === undefined ? 45 : 35;
         break;
       case '64':
-        length = this.beam == undefined ? 50 : 40;
+        length = this.beam === undefined ? 50 : 40;
         break;
       case '128':
-        length = this.beam == undefined ? 55 : 45;
+        length = this.beam === undefined ? 55 : 45;
         break;
       default:
         break;
@@ -177,7 +177,7 @@ export abstract class StemmableNote extends Note {
     const flagHeight = this.flag.getHeight();
     const scale = this.getStaveNoteScale();
 
-    if (this.stemExtensionOverride != undefined) {
+    if (this.stemExtensionOverride !== undefined) {
       return this.stemExtensionOverride;
     }
 
@@ -232,7 +232,7 @@ export abstract class StemmableNote extends Note {
   }
 
   hasFlag(): boolean {
-    return this.glyphProps.codeFlagUp != undefined && !this.beam && !this.isRest();
+    return this.glyphProps.codeFlagUp !== undefined && !this.beam && !this.isRest();
   }
 
   /** Post formats the note. */

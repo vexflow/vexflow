@@ -228,7 +228,7 @@ export class Element {
   /** Check if it has a class label (An element can have multiple class labels). */
   hasClass(className: string): boolean {
     if (!this.#attrs.class) return false;
-    return this.#attrs.class?.split(' ').indexOf(className) != -1;
+    return this.#attrs.class?.split(' ').indexOf(className) !== -1;
   }
 
   /** Add a class label (An element can have multiple class labels). */

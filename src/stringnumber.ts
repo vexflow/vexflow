@@ -228,7 +228,7 @@ export class StringNumber extends Modifier {
         {
           const ys = note.getYs();
           dotY = ys.reduce((a, b) => (a < b ? a : b));
-          if (note.hasStem() && stemDirection == Stem.UP) {
+          if (note.hasStem() && stemDirection === Stem.UP) {
             dotY = stemExt.topY + StringNumber.metrics.stemPadding;
           }
           dotY -= this.radius + StringNumber.metrics.verticalPadding + this.textLine * Tables.STAVE_LINE_DISTANCE;
@@ -238,7 +238,7 @@ export class StringNumber extends Modifier {
         {
           const ys: number[] = note.getYs();
           dotY = ys.reduce((a, b) => (a > b ? a : b));
-          if (note.hasStem() && stemDirection == Stem.DOWN) {
+          if (note.hasStem() && stemDirection === Stem.DOWN) {
             dotY = stemExt.topY - StringNumber.metrics.stemPadding;
           }
           dotY += this.radius + StringNumber.metrics.verticalPadding + this.textLine * Tables.STAVE_LINE_DISTANCE;

@@ -140,11 +140,11 @@ export class Factory {
 
   initRenderer(): void {
     const { elementId, width, height, background } = this.options.renderer;
-    if (elementId == null) {
+    if (elementId === null) {
       return;
     }
 
-    if (elementId == '') {
+    if (elementId === '') {
       L(this);
       throw new RuntimeError('renderer.elementId not set in FactoryOptions');
     }
@@ -384,8 +384,8 @@ export class Factory {
   Articulation(params?: { betweenLines?: boolean; type?: string; position?: string | number }): Articulation {
     const articulation = new Articulation(params?.type ?? 'a.');
 
-    if (params?.position != undefined) articulation.setPosition(params.position);
-    if (params?.betweenLines != undefined) articulation.setBetweenLines(params.betweenLines);
+    if (params?.position !== undefined) articulation.setPosition(params.position);
+    if (params?.betweenLines !== undefined) articulation.setBetweenLines(params.betweenLines);
     articulation.setContext(this.context);
     return articulation;
   }

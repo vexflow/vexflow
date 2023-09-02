@@ -32,7 +32,7 @@ function simpleTest(assert: Assert): void {
   // eslint-disable-next-line
   // @ts-ignore
   const offscreenCtx: OffscreenCanvasRenderingContext2D = offscreenCanvas.getContext('2d');
-  if (offscreenCtx == null) {
+  if (offscreenCtx === null) {
     throw new Error("Couldn't create offscreen context");
   }
   const ctx = new CanvasContext(offscreenCtx);
@@ -55,7 +55,7 @@ function simpleTest(assert: Assert): void {
   canvas.width = offscreenCanvas.width;
   canvas.height = offscreenCanvas.height;
   const canvasCtx = canvas.getContext('2d');
-  if (canvasCtx == null) {
+  if (canvasCtx === null) {
     throw new Error("Couldn't create canvas context");
   }
   canvasCtx.drawImage(imgBmp, 0, 0);

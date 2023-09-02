@@ -85,18 +85,18 @@ function withOtherFractions(assert: Assert): void {
   // They do not return new objects.
   // Use clone() if you don't want to modify the original object.
   const a = f_1_2.clone().multiply(f_1_2);
-  assert.ok(a.equals(f_1_4), '1/2 x 1/2 == 1/4');
+  assert.ok(a.equals(f_1_4), '1/2 x 1/2 === 1/4');
 
   const b = f_1_2.clone().divide(f_1_4);
-  assert.ok(b.equals(f_2), '1/2 / 1/4 == 2');
+  assert.ok(b.equals(f_2), '1/2 / 1/4 === 2');
 
   const c = f_2.clone().subtract(f_1_2).subtract(f_1_2).subtract(f_1_4); // 3/4
   const d = f_1_8.clone().add(f_1_8).add(f_1_8).multiply(f_2);
-  assert.ok(c.equals(d), '2-1/2-1/2-1/4 == (1/8+1/8+1/8)*(2/1)');
-  assert.equal(c.value(), 0.75, '3/4 == 0.75');
+  assert.ok(c.equals(d), '2-1/2-1/2-1/4 === (1/8+1/8+1/8)*(2/1)');
+  assert.equal(c.value(), 0.75, '3/4 === 0.75');
 
   const e = f_1_8.clone().add(f_1_4).add(f_1_8);
-  assert.ok(e.equals(f_1_2), '1/8 + 1/4 + 1/8 == 1/2');
+  assert.ok(e.equals(f_1_2), '1/8 + 1/4 + 1/8 === 1/2');
 }
 
 VexFlowTests.register(FractionTests);

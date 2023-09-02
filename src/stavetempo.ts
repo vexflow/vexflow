@@ -56,7 +56,7 @@ export class StaveTempo extends StaveModifier {
 
     const name = this.tempo.name;
     const duration = this.tempo.duration;
-    const dots = this.tempo.dots || 0;
+    const dots = this.tempo.dots ?? 0;
     const bpm = this.tempo.bpm;
     let x = this.x + shiftX;
     const y = stave.getYForTopText(1);

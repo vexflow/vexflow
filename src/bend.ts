@@ -269,7 +269,7 @@ export class Bend extends Modifier {
       start.x += lastDrawnWidth;
     }
 
-    if (!lastBend || lastBend.x == undefined) {
+    if (!lastBend || lastBend.x === undefined) {
       throw new RuntimeError('NoLastBendForBend', 'Internal error.');
     }
 

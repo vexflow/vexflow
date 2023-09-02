@@ -70,7 +70,7 @@ export class TextNote extends Note {
   constructor(noteStruct: TextNoteStruct) {
     super(noteStruct);
 
-    this.text = noteStruct.text || '';
+    this.text = noteStruct.text ?? '';
     if (noteStruct.glyph) {
       this.text += TextNote.GLYPHS[noteStruct.glyph] || noteStruct.glyph;
     }
@@ -94,7 +94,7 @@ export class TextNote extends Note {
       this.subscript.setFontSize(smallerFontSize);
     }
 
-    this.line = noteStruct.line || 0;
+    this.line = noteStruct.line ?? 0;
     this.smooth = noteStruct.smooth || false;
     this.ignoreTicks = noteStruct.ignoreTicks || false;
     this.justification = TextJustification.LEFT;

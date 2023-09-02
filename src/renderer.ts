@@ -124,7 +124,7 @@ export class Renderer {
       const backend: number = arg1;
 
       let element: HTMLElement;
-      if (typeof arg0 == 'string') {
+      if (typeof arg0 === 'string') {
         const maybeElement = document.getElementById(arg0);
         if (!maybeElement) {
           throw new RuntimeError('BadElementId', `Can't find element with ID "${maybeElement}"`);

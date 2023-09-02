@@ -29,7 +29,7 @@ export class Dot extends Modifier {
           const dot = new Dot();
           note.addModifier(dot, i);
         }
-      } else if (options?.index != undefined) {
+      } else if (options?.index !== undefined) {
         const dot = new Dot();
         note.addModifier(dot, options?.index);
       } else {
@@ -98,7 +98,7 @@ export class Dot extends Modifier {
         } else {
           // note is on a line, so shift dot to space above the line
           halfShiftY = 0.5;
-          if (lastNote != null && !lastNote.isRest() && lastLine != null && lastLine - line === 0.5) {
+          if (lastNote !== null && !lastNote.isRest() && lastLine !== null && lastLine - line === 0.5) {
             // previous note on a space, so shift dot to space below the line
             halfShiftY = -0.5;
           } else if (line + halfShiftY === prevDottedSpace) {

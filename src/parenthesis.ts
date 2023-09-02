@@ -93,11 +93,11 @@ export class Parenthesis extends Modifier {
     const start = note.getModifierStartXY(this.position, this.index, { forceFlagRight: true });
     const x = start.x + this.xShift;
     const y = start.y + this.yShift;
-    if (this.position == Modifier.Position.RIGHT) {
+    if (this.position === Modifier.Position.RIGHT) {
       Glyph.renderGlyph(ctx, x + 1, y, this.point, 'noteheadParenthesisRight', {
         category: `noteHead.standard.noteheadParenthesisRight`,
       });
-    } else if (this.position == Modifier.Position.LEFT) {
+    } else if (this.position === Modifier.Position.LEFT) {
       Glyph.renderGlyph(ctx, x - 2, y, this.point, 'noteheadParenthesisLeft', {
         category: `noteHead.standard.noteheadParenthesisLeft`,
       });
