@@ -62,10 +62,10 @@ export class Repetition extends StaveModifier {
         this.drawSymbolText(stave, x, 'Coda', true);
         break;
       case Repetition.type.SEGNO_LEFT:
-        this.drawSignoFixed(stave, x);
+        this.drawSegnoFixed(stave, x);
         break;
       case Repetition.type.SEGNO_RIGHT:
-        this.drawSignoFixed(stave, x + stave.getWidth());
+        this.drawSegnoFixed(stave, x + stave.getWidth());
         break;
       case Repetition.type.DC:
         this.drawSymbolText(stave, x, 'D.C.', false);
@@ -105,7 +105,7 @@ export class Repetition extends StaveModifier {
     return this;
   }
 
-  drawSignoFixed(stave: Stave, x: number): this {
+  drawSegnoFixed(stave: Stave, x: number): this {
     const y = stave.getYForTopText(stave.getNumLines());
     this.text = '\ue047' /*segno*/;
     this.renderText(stave.checkContext(), x, y + Tables.lookupMetric('Repetition.segno.offsetY'));
