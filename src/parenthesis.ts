@@ -63,23 +63,17 @@ export class Parenthesis extends Modifier {
     super();
 
     this.position = position ?? Modifier.Position.LEFT;
-    if (this.position == Modifier.Position.RIGHT) {
+    if (this.position === Modifier.Position.RIGHT) {
       this.text = '\uE0F6'; /*noteheadParenthesisRight*/
-    } else if (this.position == Modifier.Position.LEFT) {
+    } else if (this.position === Modifier.Position.LEFT) {
       this.text = '\uE0F5'; /*noteheadParenthesisLeft*/
     }
-
-    this.setFontSize(Note.getPoint('default'));
   }
 
   /** Set the associated note. */
   setNote(note: Note): this {
     this.note = note;
-    if (isGraceNote(note)) {
-      this.setFontSize(Note.getPoint('gracenote'));
-    } else {
-      this.setFontSize(Note.getPoint('default'));
-    }
+    this.setFont(note.getFont());
     return this;
   }
 
