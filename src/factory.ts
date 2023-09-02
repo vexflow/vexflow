@@ -17,7 +17,6 @@ import { FontInfo } from './font';
 import { Formatter, FormatterOptions } from './formatter';
 import { FretHandFinger } from './frethandfinger';
 import { GhostNote } from './ghostnote';
-import { Glyph } from './glyph';
 import { GlyphNote, GlyphNoteOptions } from './glyphnote';
 import { GraceNote, GraceNoteStruct } from './gracenote';
 import { GraceNoteGroup } from './gracenotegroup';

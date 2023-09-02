@@ -6,8 +6,8 @@
 
 import { MAJOR_KEYS, MINOR_KEYS, TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
+import { Element } from '../src/element';
 import { Flow } from '../src/flow';
-import { Glyph } from '../src/glyph';
 import { KeySignature } from '../src/keysignature';
 import { ContextBuilder } from '../src/renderer';
 import { Stave } from '../src/stave';
@@ -29,12 +29,18 @@ const KeySignatureTests = {
   },
 };
 
+function getWidth(code: number) {
+  const el = new Element();
+  el.setText(String.fromCharCode(code));
+  el.measureText();
+  return el.getWidth();
+}
+
 const fontWidths = () => {
-  const glyphScale = 39; // default font scale
-  const sharpWidth = Glyph.getWidth('accidentalSharp', glyphScale) + 1;
-  const flatWidth = Glyph.getWidth('accidentalFlat', glyphScale) + 1;
-  const naturalWidth = Glyph.getWidth('accidentalNatural', glyphScale) + 2;
-  const clefWidth = Glyph.getWidth('gClef', glyphScale) * 2; // widest clef
+  const sharpWidth = getWidth(0xe262 /*accidentalSharp*/) + 1;
+  const flatWidth = getWidth(0xe260 /*accidentalFlat*/) + 1;
+  const naturalWidth = getWidth(0xe261 /*accidentalNatural*/) + 2;
+  const clefWidth = getWidth(0xe050 /*gClef*/) * 2;
   return { sharpWidth, flatWidth, naturalWidth, clefWidth };
 };
 
