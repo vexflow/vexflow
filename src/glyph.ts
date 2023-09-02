@@ -186,7 +186,15 @@ export class Glyph extends Element {
     let font: Font;
 
     // HACK to see porting progress
-    if (fontStack[0].getName() === 'MuseJazz') code = 'timeSigMinus';
+    if (
+      fontStack[0].getName() === 'MuseJazz' ||
+      fontStack[0].getName() === 'Gootville' ||
+      fontStack[0].getName() === 'Finale Ash' ||
+      fontStack[0].getName() === 'Finale Broadway' ||
+      fontStack[0].getName() === 'Finale Maestro'
+    ) {
+      code = 'timeSigMinus';
+    }
     for (let i = 0; i < fontStack.length; i++) {
       font = fontStack[i];
       glyph = font.getGlyphs()[code];

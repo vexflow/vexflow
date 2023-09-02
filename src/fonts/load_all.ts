@@ -5,7 +5,11 @@
 
 import { loadBravura } from './load_bravura';
 import { loadCustom } from './load_custom';
+import { loadFinaleAsh } from './load_finaleash';
+import { loadFinaleBroadway } from './load_finalebroadway';
+import { loadFinaleMaestro } from './load_finalemaestro';
 import { loadGonville } from './load_gonville';
+import { loadGootville } from './load_gootville';
 import { loadLeland } from './load_leland';
 import { loadMuseJazz } from './load_musejazz';
 import { loadPetaluma } from './load_petaluma';
@@ -15,7 +19,11 @@ import { loadPetaluma } from './load_petaluma';
 // Populate our font "database" with all our music fonts.
 export function loadAllMusicFonts(): void {
   loadBravura();
+  loadFinaleAsh();
+  loadFinaleBroadway();
+  loadFinaleMaestro();
   loadGonville();
+  loadGootville();
   loadPetaluma();
   loadCustom();
   loadLeland();
