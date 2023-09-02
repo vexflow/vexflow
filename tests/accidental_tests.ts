@@ -281,270 +281,96 @@ function basic(options: TestOptions): void {
   options.assert.ok(true, 'Full Accidental');
 }
 
-const accidentals: string[] = [
-  '#',
-  '##',
-  'b',
-  'bb',
-  'n',
-  '{',
-  '}',
-  'db',
-  'd',
-  '++',
-  '+',
-  '+-',
-  'bs',
-  'bss',
-  'o',
-  'k',
-  'bbs',
-  '++-',
-  'ashs',
-  'afhf',
-  '\uE300',
-  '\uE301',
-  '\uE302',
-  '\uE303',
-  '\uE304',
-  '\uE305',
-  '\uE306',
-  '\uE307',
-  '\uE308',
-  '\uE309',
-  '\uE30A',
-  '\uE30B',
-  '\uE30C',
-  '\uE30D',
-  '\uE30E',
-  '\uE30F',
-  '\uE310',
-  '\uE311',
-  '\uE312',
-  '\uE313',
-  '\uE314',
-  '\uE315',
-  '\uE316',
-  '\uE317',
-  '\uE318',
-  '\uE319',
-  '\uE31C',
-  '\uE31D',
-  '\uE31E',
-  '\uE31F',
-  '\uE320',
-  '\uE321',
-  '\uE322',
-  '\uE323',
-  '\uE324',
-  '\uE325',
-  '\uE326',
-  '\uE327',
-  '\uE328',
-  '\uE329',
-  '\uE32A',
-  '\uE32B',
-  '\uE32C',
-  '\uE32D',
-  '\uE32E',
-  '\uE32F',
-  '\uE330',
-  '\uE331',
-  '\uE332',
-  '\uE333',
-  '\uE334',
-  '\uE335',
-  '\uE340',
-  '\uE341',
-  '\uE342',
-  '\uE343',
-  '\uE344',
-  '\uE345',
-  '\uE346',
-  '\uE347',
-  '\uE348',
-  '\uE349',
-  '\uE34A',
-  '\uE34B',
-  '\uE34C',
-  '\uE34D',
-  '\uE34E',
-  '\uE34F',
-  '\uE350',
-  '\uE351',
-  '\uE352',
-  '\uE353',
-  '\uE354',
-  '\uE355',
-  '\uE356',
-  '\uE357',
-  '\uE358',
-  '\uE359',
-  '\uE35A',
-  '\uE35B',
-  '\uE35C',
-  '\uE35D',
-  '\uE35E',
-  '\uE35F',
-  '\uE360',
-  '\uE361',
-  '\uE362',
-  '\uE363',
-  '\uE364',
-  '\uE365',
-  '\uE366',
-  '\uE367',
-  '\uE370',
-  '\uE371',
-  '\uE372',
-  '\uE373',
-  '\uE374',
-  '\uE375',
-  '\uE376',
-  '\uE377',
-  '\uE378',
-  '\uE379',
-  '\uE37A',
-  '\uE37B',
-  '\uE37C',
-  '\uE37D',
-  '\uE37E',
-  '\uE37F',
-  '\uE380',
-  '\uE381',
-  '\uE382',
-  '\uE383',
-  '\uE384',
-  '\uE385',
-  '\uE386',
-  '\uE387',
-  '\uE390',
-  '\uE391',
-  '\uE392',
-  '\uE393',
-  '\uE394',
-  '\uE395',
-  '\uE396',
-  '\uE397',
-  '\uE398',
-  '\uE399',
-  '\uE39A',
-  '\uE39B',
-  '\uE39C',
-  '\uE39D',
-  '\uE39E',
-  '\uE39F',
-  '\uE3A0',
-  '\uE3A1',
-  '\uE3A2',
-  '\uE3A3',
-  '\uE3A4',
-  '\uE3A5',
-  '\uE3A6',
-  '\uE3A7',
-  '\uE3A8',
-  '\uE3A9',
-  '\uE3AA',
-  '\uE3AB',
-  '\uE3AC',
-  '\uE3AD',
-  '\uE3B0',
-  '\uE3B1',
-  '\uE3B2',
-  '\uE3B3',
-  '\uE3B4',
-  '\uE3B5',
-  '\uE3B6',
-  '\uE3B7',
-  '\uE3B8',
-  '\uE3B9',
-  '\uE3BA',
-  '\uE3BB',
-  '\uE3BC',
-  '\uE3BD',
-  '\uE3BE',
-  '\uE3BF',
-  '\uE3C0',
-  '\uE3C1',
-  '\uE3C2',
-  '\uE3C3',
-  '\uE3C4',
-  '\uE3C5',
-  '\uE3C6',
-  '\uE3C7',
-  '\uE3C8',
-  '\uE3C9',
-  '\uE3CA',
-  '\uE3CB',
-  '\uE3CC',
-  '\uE3CD',
-  '\uE3CE',
-  '\uE3CF',
-  '\uE3D0',
-  '\uE3D1',
-  '\uE3D2',
-  '\uE3D3',
-  '\uE3D4',
-  '\uE3D5',
-  '\uE3D6',
-  '\uE3D7',
-  '\uE3D8',
-  '\uE3D9',
-  '\uE3DA',
-  '\uE3DB',
-  '\uE3DC',
-  '\uE3DD',
-  '\uE3E0',
-  '\uE3E1',
-  '\uE3E2',
-  '\uE3E3',
-  '\uE3E4',
-  '\uE3E5',
-  '\uE3E6',
-  '\uE3E7',
-  '\uE3E8',
-  '\uE3E9',
-  '\uE3EA',
-  '\uE3EB',
-  '\uE3EC',
-  '\uE3ED',
-  '\uE3EE',
-  '\uE3EF',
-  '\uE3F0',
-  '\uE3F1',
-  '\uE3F2',
-  '\uE3F3',
-  '\uE3F4',
-  '\uE3F5',
-  '\uE3F6',
-  '\uE3F7',
-  '\uE3F8',
-  '\uE3F9',
-  '\uE3FA',
-  '\uE3FB',
-  '\uE3FC',
-  '\uE3FD',
-  '\uE3FE',
-  '\uE3FF',
-  '\uE400',
-  '\uE401',
-  '\uE402',
-  '\uE403',
-  '\uE404',
-  '\uE405',
-  '\uE406',
-  '\uE407',
-  '\uE408',
-  '\uE409',
-  '\uE40A',
-  '\uE40B',
-  '\uE284',
-  '\uE285',
-  '\uE47C',
-];
+function genAccidentals(): string[] {
+  const accs = [ '#', '##', 'b', 'bb', 'n', '{', '}', 'db', 'd', '++', '+', '+-'];
+  accs.push('bs', 'bss', 'o', 'k', 'bbs', '++-', 'ashs', 'afhf');
+  // Standard accidentals (12-EDO)
+  for (let u = 0xe260; u <= 0xe269; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Gould arrow quartertone accidentals (24-EDO)
+  for (let u = 0xe270; u <= 0xe27b; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Stein-Zimmermann accidentals (24-EDO)
+  for (let u = 0xe280; u <= 0xe285; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Extended Stein-Zimmermann accidentals
+  for (let u = 0xe290; u <= 0xe29c; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Sims accidentals (72-EDO)
+  for (let u = 0xe2a0; u <= 0xe2a5; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Johnston accidentals (just intonation)
+  for (let u = 0xe2b0; u <= 0xe2b7; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Extended Helmholtz-Ellis accidentals (just intonation)
+  for (let u = 0xe2c0; u <= 0xe2fb; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Spartan Sagittal single-shaft accidentals
+  for (let u = 0xe300; u <= 0xe30f; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Spartan Sagittal multi-shaft accidentals
+  for (let u = 0xe310; u <= 0xe335; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Athenian Sagittal extension (medium precision) accidentals
+  for (let u = 0xe340; u <= 0xe367; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Trojan Sagittal extension (12-EDO relative) accidentals
+  for (let u = 0xe370; u <= 0xe387; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Promethean Sagittal extension (high precision) single-shaft accidentals
+  for (let u = 0xe390; u <= 0xe3ad; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Promethean Sagittal extension (high precision) multi-shaft accidentals
+  for (let u = 0xe3b0; u <= 0xe3ef; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Herculean Sagittal extension (very high precision) accidental diacritics
+  for (let u = 0xe3f0; u <= 0xe3f3; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Olympian Sagittal extension (extreme precision) accidental diacritics 
+  for (let u = 0xe3f4; u <= 0xe3f7; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Wyschnegradsky accidentals (72-EDO)
+  for (let u = 0xe420; u <= 0xe435; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Arel-Ezgi-Uzdilek (AEU) accidentals
+  for (let u = 0xe440; u <= 0xe447; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Turkish folk music accidentals
+  for (let u = 0xe450; u <= 0xe457; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Persian accidentals
+  for (let u = 0xe460; u <= 0xe461; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Other accidentals
+  for (let u = 0xe470; u <= 0xe48f; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  return accs;
+}
+
+const accidentals: string[] = genAccidentals();
 
 function cautionary(options: TestOptions): void {
-  const staveCount = 12;
+  const staveCount = 21;
   const scale = 0.85;
   const staveWidth = 840;
   let i = 0;
@@ -555,7 +381,7 @@ function cautionary(options: TestOptions): void {
   const accids = Object.values(accidentals).filter((accid) => accid !== '{' && accid !== '}');
   const mod = Math.round(accids.length / staveCount);
   for (i = 0; i < staveCount; ++i) {
-    const stave = f.Stave({ x: 0, y: 10 + 200 * i, width: staveWidth / scale });
+    const stave = f.Stave({ x: 0, y: 10 + 100 * i, width: staveWidth / scale });
     const score = f.EasyScore();
     const rowMap = [];
     for (j = 0; j < mod && j + i * staveCount < accids.length; ++j) {
