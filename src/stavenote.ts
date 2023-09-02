@@ -152,7 +152,8 @@ export class StaveNote extends StemmableNote {
     const draw = [false, false, false];
 
     for (let i = 0; i < notesList.length; i++) {
-      draw[i] = notesList[i].note.renderOptions.draw === false ? false : true;
+      // If .draw is true or undefined, we set draw[i] = true
+      draw[i] = notesList[i].note.renderOptions.draw !== false;
     }
 
     if (draw[0] && draw[1] && draw[2]) {

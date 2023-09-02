@@ -57,10 +57,11 @@ export abstract class StemmableNote extends Note {
 
     if (this.hasFlag()) {
       const flagCode =
-        // codeFlagDown = codeFlagUp + 1,, if not defined, code should be 0
+        // codeFlagDown = codeFlagUp + 1
+        // if codeFlagUp is undefined, codePoint will be 0
         this.getStemDirection() === Stem.DOWN
           ? String.fromCodePoint((glyphProps.codeFlagUp?.codePointAt(0) ?? -1) + 1)
-          : glyphProps.codeFlagUp  || '\u0000';
+          : glyphProps.codeFlagUp ?? '\u0000';
 
       this.flag.setText(flagCode);
       this.flag.fontSize = this.renderOptions.glyphFontScale;
@@ -96,23 +97,22 @@ export abstract class StemmableNote extends Note {
   // Get the minimum length of stem
   getStemMinimumLength(): number {
     const frac = Tables.durationToFraction(this.duration);
+    const beamIsUndefined = this.beam === undefined;
     let length = frac.value() <= 1 ? 0 : 20;
     // if note is flagged, cannot shorten beam
     switch (this.duration) {
       case '8':
-        if (this.beam === undefined) length = 35;
-        break;
       case '16':
-        length = this.beam === undefined ? 35 : 25;
+        length = beamIsUndefined ? 35 : 25;
         break;
       case '32':
-        length = this.beam === undefined ? 45 : 35;
+        length = beamIsUndefined ? 45 : 35;
         break;
       case '64':
-        length = this.beam === undefined ? 50 : 40;
+        length = beamIsUndefined ? 50 : 40;
         break;
       case '128':
-        length = this.beam === undefined ? 55 : 45;
+        length = beamIsUndefined ? 55 : 45;
         break;
       default:
         break;
