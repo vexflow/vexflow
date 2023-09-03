@@ -29,18 +29,18 @@ const KeySignatureTests = {
   },
 };
 
-function getWidth(code: number) {
+function getWidth(code: string) {
   const el = new Element();
-  el.setText(String.fromCharCode(code));
+  el.setText(code);
   el.measureText();
   return el.getWidth();
 }
 
 const fontWidths = () => {
-  const sharpWidth = getWidth(0xe262 /*accidentalSharp*/) + 1;
-  const flatWidth = getWidth(0xe260 /*accidentalFlat*/) + 1;
-  const naturalWidth = getWidth(0xe261 /*accidentalNatural*/) + 2;
-  const clefWidth = getWidth(0xe050 /*gClef*/) * 2;
+  const sharpWidth = getWidth('\ue262' /*accidentalSharp*/) + 1;
+  const flatWidth = getWidth('\ue260' /*accidentalFlat*/) + 1;
+  const naturalWidth = getWidth('\ue261' /*accidentalNatural*/) + 2;
+  const clefWidth = getWidth('\ue050' /*gClef*/) * 2; // widest clef
   return { sharpWidth, flatWidth, naturalWidth, clefWidth };
 };
 
