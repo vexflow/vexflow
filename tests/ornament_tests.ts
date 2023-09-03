@@ -11,9 +11,9 @@ import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 import { Accidental } from '../src/accidental';
 import { Beam } from '../src/beam';
 import { Dot } from '../src/dot';
+import { Element } from '../src/element';
 import { Factory } from '../src/factory';
 import { Formatter } from '../src/formatter';
-import { Glyph } from '../src/glyph';
 import { Ornament } from '../src/ornament';
 import { ContextBuilder } from '../src/renderer';
 import { Stave } from '../src/stave';
@@ -237,7 +237,10 @@ function drawOrnamentsWithAccidentals(options: TestOptions): void {
 }
 
 function jazzOrnaments(options: TestOptions): void {
-  const clefWidth = Glyph.getWidth('gClef', 38); // widest clef
+  const el = new Element();
+  el.setText('\ue050' /* gClef */); // widest clef
+  el.measureText();
+  const clefWidth = el.getWidth();
 
   // Helper function.
   function draw(modifiers: Ornament[], keys: string[], x: number, width: number, y: number, stemDirection?: number) {
