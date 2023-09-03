@@ -104,7 +104,7 @@ export class KeyManager {
 
     // Then search for a note of equivalent value in our altered scale
     const valueNote = this.scaleMapByValue[this.music.getNoteValue(note)];
-    if (valueNote != null) {
+    if (valueNote !== undefined) {
       return {
         note: valueNote,
         accidental: this.music.getNoteParts(valueNote).accidental,
@@ -114,7 +114,7 @@ export class KeyManager {
 
     // Then search for a note of equivalent value in the original scale
     const originalValueNote = this.originalScaleMapByValue[this.music.getNoteValue(note)];
-    if (originalValueNote != null) {
+    if (originalValueNote !== undefined) {
       this.scaleMap[modparts.root] = originalValueNote;
       delete this.scaleMapByValue[this.music.getNoteValue(scaleNote)];
       this.scaleMapByValue[this.music.getNoteValue(note)] = originalValueNote;

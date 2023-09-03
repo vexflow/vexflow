@@ -219,7 +219,7 @@ export class TickContext {
         this.maxTickable = tickable;
       }
 
-      if (this.minTicks == null) {
+      if (this.minTicks === undefined) {
         this.minTicks = ticks.clone();
         this.minTickable = tickable;
       } else if (ticks.lessThan(this.minTicks)) {
@@ -230,7 +230,7 @@ export class TickContext {
 
     tickable.setTickContext(this);
     this.tickables.push(tickable);
-    this.tickablesByVoice[voiceIndex || 0] = tickable;
+    this.tickablesByVoice[voiceIndex ?? 0] = tickable;
     this.preFormatted = false;
     return this;
   }
@@ -251,7 +251,7 @@ export class TickContext {
       this.notePx = Math.max(this.notePx, metrics.notePx);
 
       // Maintain the widest note head
-      this.glyphPx = Math.max(this.glyphPx, metrics.glyphWidth || 0);
+      this.glyphPx = Math.max(this.glyphPx, metrics.glyphWidth ?? 0);
 
       // Total modifier shift
       this.modLeftPx = Math.max(this.modLeftPx, metrics.modLeftPx);

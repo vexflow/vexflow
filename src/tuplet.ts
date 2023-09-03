@@ -111,17 +111,17 @@ export class Tuplet extends Element {
 
     this.options = options;
     this.notes = notes;
-    this.numNotes = this.options.numNotes != undefined ? this.options.numNotes : notes.length;
+    this.numNotes = this.options.numNotes !== undefined ? this.options.numNotes : notes.length;
 
     this.notesOccupied = this.options.notesOccupied || 2;
-    if (this.options.bracketed != undefined) {
+    if (this.options.bracketed !== undefined) {
       this.bracketed = this.options.bracketed;
     } else {
       this.bracketed = notes.some((note) => !note.hasBeam());
     }
 
     this.ratioed =
-      this.options.ratioed != undefined ? this.options.ratioed : Math.abs(this.notesOccupied - this.numNotes) > 1;
+      this.options.ratioed !== undefined ? this.options.ratioed : Math.abs(this.notesOccupied - this.numNotes) > 1;
     this.textElement = new Element('Tuplet');
 
     this.setTupletLocation(this.options.location || Tuplet.LOCATION_TOP);
@@ -245,7 +245,7 @@ export class Tuplet extends Element {
     const nestedTupletYOffset = this.getNestedTupletCount() * Tuplet.NESTING_OFFSET * -this.location;
 
     // offset the tuplet for any manual yOffset:
-    const yOffset = this.options.yOffset || 0;
+    const yOffset = this.options.yOffset ?? 0;
 
     // now iterate through the notes and find our highest
     // or lowest locations, to form a base yPosition

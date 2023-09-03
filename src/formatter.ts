@@ -70,7 +70,7 @@ function createContexts<T>(
   makeContext: makeContextFn<T>,
   addToContext: addToContextFn<T>
 ): AlignmentContexts<T> {
-  if (voices.length == 0)
+  if (voices.length === 0)
     return {
       map: {},
       array: [],
@@ -242,7 +242,7 @@ export class Formatter {
 
     ctx.setFillStyle('red');
     ctx.fillText(
-      `Loss: ${(formatter.totalCost || 0).toFixed(2)} Shift: ${(formatter.totalShift || 0).toFixed(
+      `Loss: ${(formatter.totalCost ?? 0).toFixed(2)} Shift: ${(formatter.totalShift ?? 0).toFixed(
         2
       )} Gap: ${contextGaps.total.toFixed(2)}`,
       x - 20,
@@ -574,7 +574,7 @@ export class Formatter {
 
   /** Create a `ModifierContext` for each tick in `voices`. */
   createModifierContexts(voices: Voice[]) {
-    if (voices.length == 0) return;
+    if (voices.length === 0) return;
     const resolutionMultiplier = Formatter.getResolutionMultiplier(voices);
 
     // Initialize tick maps.

@@ -152,7 +152,8 @@ export class StaveNote extends StemmableNote {
     const draw = [false, false, false];
 
     for (let i = 0; i < notesList.length; i++) {
-      draw[i] = notesList[i].note.renderOptions.draw == false ? false : true;
+      // If .draw is true or undefined, we set draw[i] = true
+      draw[i] = notesList[i].note.renderOptions.draw !== false;
     }
 
     if (draw[0] && draw[1] && draw[2]) {
@@ -238,7 +239,7 @@ export class StaveNote extends StemmableNote {
             } else if (noteU.note.voice !== noteL.note.voice) {
               //If we are not in the same voice
               if (noteU.stemDirection === noteL.stemDirection) {
-                if (noteU.line != noteL.line) {
+                if (noteU.line !== noteL.line) {
                   xShift = voiceXShift + 2;
                   noteU.note.setXShift(xShift);
                 } else {
@@ -546,7 +547,7 @@ export class StaveNote extends StemmableNote {
     for (let i = 0; i < this.keys.length; ++i) {
       const key = this.keys[i];
 
-      const options = { octaveShift: this.octaveShift || 0, duration: this.duration };
+      const options = { octaveShift: this.octaveShift ?? 0, duration: this.duration };
       const props = Tables.keyProperties(key, this.clef, this.noteType, options);
 
       if (!props) {
@@ -564,7 +565,7 @@ export class StaveNote extends StemmableNote {
 
       // Calculate displacement of this note
       const line = props.line;
-      if (lastLine == undefined) {
+      if (lastLine === undefined) {
         lastLine = line;
       } else {
         if (Math.abs(lastLine - line) === 0.5) {
@@ -1068,7 +1069,7 @@ export class StaveNote extends StemmableNote {
       const modifier = this.modifiers[i];
       const index = modifier.checkIndex();
       const notehead = this.#noteHeads[index];
-      if (notehead == noteheadParam) {
+      if (notehead === noteheadParam) {
         const noteheadStyle = notehead.getStyle();
         notehead.applyStyle(ctx, noteheadStyle);
         modifier.setContext(ctx);

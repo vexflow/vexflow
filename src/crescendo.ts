@@ -76,7 +76,7 @@ export class Crescendo extends Note {
     this.decrescendo = false;
 
     // The staff line to be placed on
-    this.line = noteStruct.line || 0;
+    this.line = noteStruct.line ?? 0;
 
     // The height at the open end of the cresc/decresc
     this.height = 15;

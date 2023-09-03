@@ -911,7 +911,7 @@ export class Tables {
     let glyphName = 'N';
     if (pieces.length > 2 && pieces[2]) {
       glyphName = pieces[2].toUpperCase();
-    } else if (type != 'N') {
+    } else if (type !== 'N') {
       glyphName = type;
     } else glyphName = key;
     code = this.codeNoteHead(glyphName, duration);

@@ -301,7 +301,7 @@ export class Articulation extends Modifier {
     this.type = type;
     this.position = ABOVE;
     if (!Tables.articulationCodes(this.type)) {
-      if ((this.type.codePointAt(0) ?? 0) % 2 == 0) this.position = ABOVE;
+      if ((this.type.codePointAt(0) ?? 0) % 2 === 0) this.position = ABOVE;
       else this.position = BELOW;
     }
 

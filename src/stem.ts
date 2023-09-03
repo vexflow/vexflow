@@ -74,24 +74,24 @@ export class Stem extends Element {
     super();
 
     // Default notehead x bounds
-    this.xBegin = options?.xBegin || 0;
-    this.xEnd = options?.xEnd || 0;
+    this.xBegin = options?.xBegin ?? 0;
+    this.xEnd = options?.xEnd ?? 0;
 
     // Y bounds for top/bottom most notehead
-    this.yTop = options?.yTop || 0;
-    this.yBottom = options?.yBottom || 0;
+    this.yTop = options?.yTop ?? 0;
+    this.yBottom = options?.yBottom ?? 0;
 
     // Stem top extension
-    this.stemExtension = options?.stemExtension || 0;
+    this.stemExtension = options?.stemExtension ?? 0;
 
     // Direction of the stem
-    this.stemDirection = options?.stemDirection || 0;
+    this.stemDirection = options?.stemDirection ?? 0;
 
     // Flag to override all draw calls
     this.hide = options?.hide || false;
 
     this.isStemlet = options?.isStemlet || false;
-    this.stemletHeight = options?.stemletHeight || 0;
+    this.stemletHeight = options?.stemletHeight ?? 0;
 
     // Use to adjust the rendered height without affecting
     // the results of `.getExtents()`
@@ -101,10 +101,10 @@ export class Stem extends Element {
 
   setOptions(options?: StemOptions): void {
     // Changing where the stem meets the head
-    this.stemUpYOffset = options?.stemUpYOffset || 0;
-    this.stemDownYOffset = options?.stemDownYOffset || 0;
-    this.stemUpYBaseOffset = options?.stemUpYBaseOffset || 0;
-    this.stemDownYBaseOffset = options?.stemDownYBaseOffset || 0;
+    this.stemUpYOffset = options?.stemUpYOffset ?? 0;
+    this.stemDownYOffset = options?.stemDownYOffset ?? 0;
+    this.stemUpYBaseOffset = options?.stemUpYBaseOffset ?? 0;
+    this.stemDownYBaseOffset = options?.stemDownYBaseOffset ?? 0;
   }
 
   // Set the x bounds for the default notehead

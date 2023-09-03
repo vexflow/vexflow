@@ -108,13 +108,13 @@ export class Clef extends StaveModifier {
     this.size = size ?? 'default';
 
     // If an annotation, such as 8va, is specified, add it to the Clef object.
-    if (annotation == '8va') {
-      if (this.code == '\uE050' /*gClef*/) this.code = '\uE053' /*gClef8va*/;
-      if (this.code == '\uE062' /*fClef*/) this.code = '\uE065' /*fClef8va*/;
+    if (annotation === '8va') {
+      if (this.code === '\uE050' /*gClef*/) this.code = '\uE053' /*gClef8va*/;
+      if (this.code === '\uE062' /*fClef*/) this.code = '\uE065' /*fClef8va*/;
     }
-    if (annotation == '8vb') {
-      if (this.code == '\uE050' /*gClef*/) this.code = '\uE052' /*gClef8vb*/;
-      if (this.code == '\uE062' /*fClef*/) this.code = '\uE064' /*fClef8vb*/;
+    if (annotation === '8vb') {
+      if (this.code === '\uE050' /*gClef*/) this.code = '\uE052' /*gClef8vb*/;
+      if (this.code === '\uE062' /*fClef*/) this.code = '\uE064' /*fClef8vb*/;
     }
     this.text = this.code;
     this.textFont.size = Math.floor(Clef.getPoint(this.size));
@@ -126,7 +126,7 @@ export class Clef extends StaveModifier {
   /** Get point for clefs. */
   static getPoint(size?: string): number {
     // for sizes other than 'default', clef is 2/3 of the default value
-    return size == 'default' ? Tables.lookupMetric('fontSize') : (Tables.lookupMetric('fontSize') / 3) * 2;
+    return size === 'default' ? Tables.lookupMetric('fontSize') : (Tables.lookupMetric('fontSize') * 2) / 3;
   }
 
   /** Set associated stave. */

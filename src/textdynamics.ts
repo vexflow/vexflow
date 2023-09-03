@@ -55,8 +55,8 @@ export class TextDynamics extends Note {
   constructor(noteStruct: TextNoteStruct) {
     super(noteStruct);
 
-    this.sequence = (noteStruct.text || '').toLowerCase();
-    this.line = noteStruct.line || 0;
+    this.sequence = (noteStruct.text ?? '').toLowerCase();
+    this.line = noteStruct.line ?? 0;
     this.text = '';
 
     this.renderOptions = { glyphFontSize: Tables.lookupMetric('fontSize'), ...this.renderOptions };
