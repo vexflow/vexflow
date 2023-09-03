@@ -68,7 +68,6 @@ import { TabStave } from './tabstave';
 import { TabTie } from './tabtie';
 import { TextBracket, TextBracketPosition } from './textbracket';
 import { TextDynamics } from './textdynamics';
-import { TextFormatter } from './textformatter';
 import { TextJustification, TextNote } from './textnote';
 import { TickContext } from './tickcontext';
 import { TimeSignature } from './timesignature';
@@ -161,7 +160,6 @@ export class Flow {
   static TabTie = TabTie;
   static TextBracket = TextBracket;
   static TextDynamics = TextDynamics;
-  static TextFormatter = TextFormatter;
   static TextNote = TextNote;
   static TickContext = TickContext;
   static TimeSignature = TimeSignature;
