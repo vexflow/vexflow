@@ -22,22 +22,14 @@ export class Volta extends StaveModifier {
     return VoltaType;
   }
 
-  protected volta: number;
-  protected number: string;
+  protected type: number;
 
-  protected yShift: number;
-
-  constructor(type: number, number: string, x: number, yShift: number) {
+  constructor(type: number, label: string, x: number, yShift: number) {
     super();
-    this.volta = type;
+    this.type = type;
     this.x = x;
     this.yShift = yShift;
-    this.number = number;
-  }
-
-  setShiftY(y: number): this {
-    this.yShift = y;
-    return this;
+    this.text = label;
   }
 
   draw(stave: Stave, x: number): this {
@@ -47,7 +39,7 @@ export class Volta extends StaveModifier {
     let width = stave.getWidth() - x; // don't include x (offset) for width
     const topY = stave.getYForTopText(stave.getNumLines()) + this.yShift;
     const vertHeight = 1.5 * stave.getSpacingBetweenLines();
-    switch (this.volta) {
+    switch (this.type) {
       case VoltaType.BEGIN:
         ctx.fillRect(this.x + x, topY, 1, vertHeight);
         break;
@@ -64,11 +56,8 @@ export class Volta extends StaveModifier {
         break;
     }
     // If the beginning of a volta, draw measure number
-    if (this.volta === VoltaType.BEGIN || this.volta === VoltaType.BEGIN_END) {
-      ctx.save();
-      ctx.setFont(this.textFont);
-      ctx.fillText(this.number, this.x + x + 5, topY + 15);
-      ctx.restore();
+    if (this.type === VoltaType.BEGIN || this.type === VoltaType.BEGIN_END) {
+      this.renderText(ctx, x + 5, topY - this.yShift + 15);
     }
 
     ctx.fillRect(this.x + x, topY, width, 1);
