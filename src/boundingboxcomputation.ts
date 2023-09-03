@@ -62,7 +62,7 @@ export class BoundingBoxComputation {
     const p01x = p1x - p0x;
     const p12x = p2x - p1x;
     let denom = p01x - p12x;
-    if (denom != 0) {
+    if (denom !== 0) {
       const t = p01x / denom;
       if (t > 0 && t < 1) {
         const it = 1 - t;
@@ -73,7 +73,7 @@ export class BoundingBoxComputation {
     const p01y = p1y - p0y;
     const p12y = p2y - p1y;
     denom = p01y - p12y;
-    if (denom != 0) {
+    if (denom !== 0) {
       const t = p01y / denom;
       if (t > 0 && t < 1) {
         const it = 1 - t;

@@ -124,7 +124,7 @@ export abstract class Note extends Tickable {
     const xPost1 = note.getAbsoluteX() + metrics.notePx;
     const xPost2 = note.getAbsoluteX() + metrics.notePx + metrics.rightDisplacedHeadPx;
     const xEnd = note.getAbsoluteX() + metrics.notePx + metrics.rightDisplacedHeadPx + metrics.modRightPx;
-    const xFreedomRight = xEnd + (note.getFormatterMetrics().freedom.right || 0);
+    const xFreedomRight = xEnd + (note.getFormatterMetrics().freedom.right ?? 0);
 
     const xWidth = xEnd - xStart;
     ctx.save();

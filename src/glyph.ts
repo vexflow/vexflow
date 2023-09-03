@@ -186,7 +186,7 @@ export class Glyph extends Element {
     let font: Font;
 
     // HACK to see porting progress
-    if (fontStack[0].getName() == 'MuseJazz') code = 'timeSigMinus';
+    if (fontStack[0].getName() === 'MuseJazz') code = 'timeSigMinus';
     for (let i = 0; i < fontStack.length; i++) {
       font = fontStack[i];
       glyph = font.getGlyphs()[code];
@@ -253,7 +253,7 @@ export class Glyph extends Element {
   ): GlyphMetrics {
     const data = Glyph.cache.lookup(code, options?.category);
     const metrics = data.metrics;
-    if (data.point != -1) {
+    if (data.point !== -1) {
       point = data.point;
     }
 
@@ -341,7 +341,7 @@ export class Glyph extends Element {
 
   static getWidth(code: string, point: number, category?: string): number {
     const data = Glyph.cache.lookup(code, category);
-    if (data.point != -1) {
+    if (data.point !== -1) {
       point = data.point;
     }
     const scale = (point * 72) / (data.metrics.font.getResolution() * 100);
@@ -436,7 +436,7 @@ export class Glyph extends Element {
     const data = Glyph.cache.lookup(this.code, this.options.category);
     this.metrics = data.metrics;
     // Override point from metrics file
-    if (data.point != -1) {
+    if (data.point !== -1) {
       this.point = data.point;
     }
 

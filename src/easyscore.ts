@@ -362,7 +362,7 @@ export class Builder {
 
     // Build a GhostNote or StaveNote using the information we gathered.
     const note =
-      type?.toLowerCase() == 'g'
+      type?.toLowerCase() === 'g'
         ? factory.GhostNote({ duration, dots })
         : factory.StaveNote({ keys, duration, dots, type, clef, autoStem });
     if (!autoStem) note.setStemDirection(stem === 'up' ? Stem.UP : Stem.DOWN);

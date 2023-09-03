@@ -213,7 +213,7 @@ export class TabNote extends StemmableNote {
 
   // Get the default stem extension for the note
   getStemExtension(): number {
-    if (this.stemExtensionOverride != null) {
+    if (this.stemExtensionOverride !== undefined) {
       return this.stemExtensionOverride;
     }
 
@@ -346,7 +346,7 @@ export class TabNote extends StemmableNote {
     } = this;
     const context = this.checkContext();
 
-    const shouldDrawFlag = beam == undefined && drawStem;
+    const shouldDrawFlag = beam === undefined && drawStem;
 
     // Now it's the flag's turn.
     if (glyphProps.codeFlagUp && shouldDrawFlag) {
@@ -436,7 +436,7 @@ export class TabNote extends StemmableNote {
     }
 
     this.setRendered();
-    const renderStem = this.beam == undefined && this.renderOptions.drawStem;
+    const renderStem = this.beam === undefined && this.renderOptions.drawStem;
 
     this.applyStyle();
     ctx.openGroup('tabnote', this.getAttribute('id'), { pointerBBox: true });

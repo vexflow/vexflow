@@ -30,7 +30,7 @@ const assertIsValidTimeSig = (timeSpec: string) => {
 
   numbers.forEach((number) => {
     // Characters consisting in number 0..9, '+', '-', '(' or ')'
-    if (/^[0-9+\-()]+$/.test(number) == false) {
+    if (/^[0-9+\-()]+$/.test(number) === false) {
       throw new RuntimeError('BadTimeSignature', `Invalid time spec: ${timeSpec}. Must contain valid signatures.`);
     }
   });

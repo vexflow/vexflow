@@ -654,11 +654,11 @@ export class Stave extends Element {
 
       if (layoutMetrics) {
         if (i !== 0) {
-          widths.right = layoutMetrics.xMax || 0;
-          widths.paddingRight = layoutMetrics.paddingRight || 0;
+          widths.right = layoutMetrics.xMax ?? 0;
+          widths.paddingRight = layoutMetrics.paddingRight ?? 0;
         }
-        widths.left = -layoutMetrics.xMin || 0;
-        widths.paddingLeft = layoutMetrics.paddingLeft || 0;
+        widths.left = -layoutMetrics.xMin ?? 0;
+        widths.paddingLeft = layoutMetrics.paddingLeft ?? 0;
 
         if (i === endModifiers.length - 1) {
           widths.paddingLeft = 0;
@@ -804,7 +804,7 @@ export class Stave extends Element {
     // eslint-disable-next-line
     for (const lineConfig in linesConfiguration) {
       // Allow '{}' to be used if the caller just wants the default for a particular node.
-      if (linesConfiguration[lineConfig].visible == undefined) {
+      if (linesConfiguration[lineConfig].visible === undefined) {
         linesConfiguration[lineConfig] = this.options.lineConfig[lineConfig];
       }
       this.options.lineConfig[lineConfig] = {
@@ -872,14 +872,14 @@ export class Stave extends Element {
     staves.forEach((stave) => {
       const modifiers = stave.getModifiers(StaveModifierPosition.BEGIN, Category.Barline);
       modifiers.forEach((modifier) => {
-        if ((modifier as Barline).getType() == BarlineType.REPEAT_BEGIN)
+        if ((modifier as Barline).getType() === BarlineType.REPEAT_BEGIN)
           if (modifier.getX() > maxX) maxX = modifier.getX();
       });
     });
     staves.forEach((stave) => {
       const modifiers = stave.getModifiers(StaveModifierPosition.BEGIN, Category.Barline);
       modifiers.forEach((modifier) => {
-        if ((modifier as Barline).getType() == BarlineType.REPEAT_BEGIN) modifier.setX(maxX);
+        if ((modifier as Barline).getType() === BarlineType.REPEAT_BEGIN) modifier.setX(maxX);
       });
     });
   }

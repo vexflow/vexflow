@@ -371,7 +371,7 @@ export class SVGContext extends RenderContext {
       }
       if (
         attributes[attrName] &&
-        (this.groupAttributes.length == 0 ||
+        (this.groupAttributes.length === 0 ||
           attributes[attrName] != this.groupAttributes[this.groupAttributes.length - 1][attrName])
       )
         element.setAttributeNS(null, attrName, attributes[attrName] as string);
