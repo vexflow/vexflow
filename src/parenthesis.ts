@@ -2,11 +2,9 @@
 // @author Rodrigo Vilar
 // MIT License
 
-import { Glyph } from './glyph';
 import { Modifier, ModifierPosition } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { Note } from './note';
-import { Tables } from './tables';
 import { Category, isGraceNote } from './typeguard';
 
 /** Parenthesis implements parenthesis modifiers for notes. */
@@ -14,8 +12,6 @@ export class Parenthesis extends Modifier {
   static get CATEGORY(): string {
     return Category.Parenthesis;
   }
-
-  protected point: number;
 
   /** Add parentheses to the notes. */
   static buildAndAttach(notes: Note[]): void {
@@ -47,7 +43,7 @@ export class Parenthesis extends Modifier {
         xWidthR = xWidthR > shift + parenthesis.width ? xWidthR : shift + parenthesis.width;
       }
       if (pos === ModifierPosition.LEFT) {
-        shift = note.getLeftParenthesisPx(index);
+        shift = note.getLeftParenthesisPx(index) + parenthesis.width;
         xWidthL = xWidthL > shift + parenthesis.width ? xWidthL : shift + parenthesis.width;
       }
       parenthesis.setXShift(shift);
@@ -67,20 +63,17 @@ export class Parenthesis extends Modifier {
     super();
 
     this.position = position ?? Modifier.Position.LEFT;
-
-    this.point = Tables.currentMusicFont().lookupMetric('parenthesis.default.point') ?? Note.getPoint('default');
-    this.setWidth(Tables.currentMusicFont().lookupMetric('parenthesis.default.width'));
+    if (this.position === Modifier.Position.RIGHT) {
+      this.text = '\uE0F6'; /*noteheadParenthesisRight*/
+    } else if (this.position === Modifier.Position.LEFT) {
+      this.text = '\uE0F5'; /*noteheadParenthesisLeft*/
+    }
   }
 
   /** Set the associated note. */
   setNote(note: Note): this {
     this.note = note;
-    this.point = Tables.currentMusicFont().lookupMetric('parenthesis.default.point') ?? Note.getPoint('default');
-    this.setWidth(Tables.currentMusicFont().lookupMetric('parenthesis.default.width'));
-    if (isGraceNote(note)) {
-      this.point = Tables.currentMusicFont().lookupMetric('parenthesis.gracenote.point') ?? Note.getPoint('gracenote');
-      this.setWidth(Tables.currentMusicFont().lookupMetric('parenthesis.gracenote.width'));
-    }
+    this.setFont(note.getFont());
     return this;
   }
 
@@ -91,16 +84,6 @@ export class Parenthesis extends Modifier {
     this.setRendered();
 
     const start = note.getModifierStartXY(this.position, this.index, { forceFlagRight: true });
-    const x = start.x + this.xShift;
-    const y = start.y + this.yShift;
-    if (this.position === Modifier.Position.RIGHT) {
-      Glyph.renderGlyph(ctx, x + 1, y, this.point, 'noteheadParenthesisRight', {
-        category: `noteHead.standard.noteheadParenthesisRight`,
-      });
-    } else if (this.position === Modifier.Position.LEFT) {
-      Glyph.renderGlyph(ctx, x - 2, y, this.point, 'noteheadParenthesisLeft', {
-        category: `noteHead.standard.noteheadParenthesisLeft`,
-      });
-    }
+    this.renderText(ctx, start.x, start.y);
   }
 }

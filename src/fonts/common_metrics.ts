@@ -76,15 +76,6 @@ export const CommonMetrics = {
     },
   },
 
-  parenthesis: {
-    default: {
-      width: 7,
-    },
-    gracenote: {
-      width: 3,
-    },
-  },
-
   // These are for numeric digits, such as in time signatures
   digits: {
     // used by TimeSignature objects

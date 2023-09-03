@@ -654,13 +654,6 @@ export abstract class Note extends Tickable {
     return x;
   }
 
-  /** Get point for notes. */
-  static getPoint(size?: string): number {
-    const fontSize = Tables.lookupMetric('fontSize');
-    // for sizes other than 'default', note is 2/3 of the default value
-    return size === 'default' ? fontSize : (fontSize * 3) / 5;
-  }
-
   /** Get the direction of the stem. */
   getStemDirection(): number {
     throw new RuntimeError('NoStem', 'No stem attached to this note.');
