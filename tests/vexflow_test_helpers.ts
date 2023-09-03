@@ -117,9 +117,9 @@ const SVG_TEST_CONFIG = {
   testType: 'SVG',
   fontStacks: [
     'Bravura',
-    'FinaleAsh',
-    'FinaleBroadway',
-    'FinaleMaestro',
+    'Finale Ash',
+    'Finale Broadway',
+    'Finale Maestro',
     'Gonville',
     'Gootville',
     'Leland',
@@ -211,9 +211,9 @@ export class VexFlowTests {
     Leland: ['Leland', 'Bravura', 'Custom'],
     MuseJazz: ['MuseJazz'],
     Gootville: ['Gootville'],
-    FinaleAsh: ['Finale Ash'],
-    FinaleBroadway: ['Finale Broadway'],
-    FinaleMaestro: ['Finale Maestro'],
+    'Finale Ash': ['Finale Ash'],
+    'Finale Broadway': ['Finale Broadway'],
+    'Finale Maestro': ['Finale Maestro'],
   };
 
   static set NODE_FONT_STACKS(fontStacks: string[]) {
