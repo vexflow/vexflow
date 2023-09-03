@@ -115,7 +115,17 @@ const SVG_TEST_CONFIG = {
   backend: Renderer.Backends.SVG,
   tagName: 'div',
   testType: 'SVG',
-  fontStacks: ['Bravura', 'Gonville', 'Petaluma', 'Leland', 'MuseJazz'],
+  fontStacks: [
+    'Bravura',
+    'Finale Ash',
+    'Finale Broadway',
+    'Finale Maestro',
+    'Gonville',
+    'Gootville',
+    'Leland',
+    'MuseJazz',
+    'Petaluma',
+  ],
 };
 
 const SVG_TEXT_CONFIG = {
@@ -200,6 +210,10 @@ export class VexFlowTests {
     Petaluma: ['Petaluma', 'Gonville', 'Bravura', 'Custom'],
     Leland: ['Leland', 'Bravura', 'Custom'],
     MuseJazz: ['MuseJazz'],
+    Gootville: ['Gootville'],
+    'Finale Ash': ['Finale Ash'],
+    'Finale Broadway': ['Finale Broadway'],
+    'Finale Maestro': ['Finale Maestro'],
   };
 
   static set NODE_FONT_STACKS(fontStacks: string[]) {

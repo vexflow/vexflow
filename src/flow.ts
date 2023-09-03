@@ -240,6 +240,18 @@ export class Flow {
       case 'MuseJazz':
         CommonMetrics.fontFamily = 'MuseJazz,Bravura,Academico';
         break;
+      case 'Gootville':
+        CommonMetrics.fontFamily = 'Gootville,Bravura,Academico';
+        break;
+      case 'Finale Ash':
+        CommonMetrics.fontFamily = 'Finale Ash,Bravura,Academico';
+        break;
+      case 'Finale Maestro':
+        CommonMetrics.fontFamily = 'Finale Maestro,Bravura,Academico';
+        break;
+      case 'Finale Broadway':
+        CommonMetrics.fontFamily = 'Finale Broadway,Bravura,Academico';
+        break;
       default:
         CommonMetrics.fontFamily = fontNames.join(',');
     }
