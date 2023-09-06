@@ -427,33 +427,31 @@ const articulations: Record<string, ArticulationStruct> = {
   'a,': { code: '\ue805' /*pictChokeCymbal*/, betweenLines: false }, // Choked
 };
 
-const ornaments: Record<string, { code: string }> = {
-  mordent: { code: 'ornamentShortTrill' },
-  mordentInverted: { code: 'ornamentMordent' },
-  mordent_inverted: { code: 'ornamentMordent' }, // backwards-compatible to 4.x
-  turn: { code: 'ornamentTurn' },
-  turnInverted: { code: 'ornamentTurnSlash' },
-  turn_inverted: { code: 'ornamentTurnSlash' }, // backwards-compatible to 4.x
-  tr: { code: 'ornamentTrill' },
-  upprall: { code: 'ornamentPrecompSlideTrillDAnglebert' },
-  downprall: { code: 'ornamentPrecompDoubleCadenceUpperPrefix' },
-  prallup: { code: 'ornamentPrecompTrillSuffixDandrieu' },
-  pralldown: { code: 'ornamentPrecompTrillLowerSuffix' },
-  upmordent: { code: 'ornamentPrecompSlideTrillBach' },
-  downmordent: { code: 'ornamentPrecompDoubleCadenceUpperPrefixTurn' },
-  lineprall: { code: 'ornamentPrecompAppoggTrill' },
-  prallprall: { code: 'ornamentTremblement' },
-  scoop: { code: 'brassScoop' },
-  doit: { code: 'brassDoitMedium' },
-  fall: { code: 'brassFallLipShort' },
-  doitLong: { code: 'brassLiftMedium' },
-  fallLong: { code: 'brassFallRoughMedium' },
-  bend: { code: 'brassBend' },
-  plungerClosed: { code: 'brassMuteClosed' },
-  plungerOpen: { code: 'brassMuteOpen' },
-  flip: { code: 'brassFlip' },
-  jazzTurn: { code: 'brassJazzTurn' },
-  smear: { code: 'brassSmear' },
+const ornaments: Record<string, string> = {
+  mordent: '\ue56c' /*ornamentShortTrill*/,
+  mordentInverted: '\ue56d' /*ornamentMordent*/,
+  turn: '\ue567' /*ornamentTurn*/,
+  turnInverted: '\ue569' /*ornamentTurnSlash*/,
+  tr: '\ue566' /*ornamentTrill*/,
+  upprall: '\ue5b5' /*ornamentPrecompSlideTrillDAnglebert*/,
+  downprall: '\ue5c3' /*ornamentPrecompDoubleCadenceUpperPrefix*/,
+  prallup: '\ue5bb' /*ornamentPrecompTrillSuffixDandrieu*/,
+  pralldown: '\ue5c8' /*ornamentPrecompTrillLowerSuffix*/,
+  upmordent: '\ue5b8' /*ornamentPrecompSlideTrillBach*/,
+  downmordent: '\ue5c4' /*ornamentPrecompDoubleCadenceUpperPrefixTurn*/,
+  lineprall: '\ue5b2' /*ornamentPrecompAppoggTrill*/,
+  prallprall: '\ue56e' /*ornamentTremblement*/,
+  scoop: '\ue5d0' /*brassScoop*/,
+  doit: '\ue5d5' /*brassDoitMedium*/,
+  fall: '\ue5d7' /*brassFallLipShort*/,
+  doitLong: '\ue5d2' /*brassLiftMedium*/,
+  fallLong: '\ue5de' /*brassFallRoughMedium*/,
+  bend: '\ue5e3' /*brassBend*/,
+  plungerClosed: '\ue5e5' /*brassMuteClosed*/,
+  plungerOpen: '\ue5e7' /*brassMuteOpen*/,
+  flip: '\ue5e1' /*brassFlip*/,
+  jazzTurn: '\ue5e4' /*brassJazzTurn*/,
+  smear: '\ue5e2' /*brassSmear*/,
 };
 
 export class Tables {
@@ -715,8 +713,8 @@ export class Tables {
 
   static accidentalColumnsTable = accidentalColumns;
 
-  static ornamentCodes(accidental: string): { code: string } {
-    return ornaments[accidental];
+  static ornamentCodes(ornament: string): string {
+    return ornaments[ornament] ?? ornament;
   }
 
   static keySignature(spec: string): { type: string; line: number }[] {

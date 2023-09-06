@@ -395,12 +395,13 @@ export class Factory {
   ) {
     const options = {
       type,
-      position: 0,
       accidental: '',
       ...params,
     };
     const ornament = new Ornament(type);
-    ornament.setPosition(options.position);
+    if (params?.position !== undefined) {
+      ornament.setPosition(params.position);
+    }
     if (options.upperAccidental) {
       ornament.setUpperAccidental(options.upperAccidental);
     }
