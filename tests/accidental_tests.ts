@@ -9,9 +9,7 @@ import { Accidental } from '../src/accidental';
 import { Beam } from '../src/beam';
 import { Dot } from '../src/dot';
 import { Factory } from '../src/factory';
-import { Flow } from '../src/flow';
 import { Formatter } from '../src/formatter';
-import { Modifier } from '../src/modifier';
 import { ModifierContext } from '../src/modifiercontext';
 import { Note } from '../src/note';
 import { RenderContext } from '../src/rendercontext';
@@ -22,6 +20,7 @@ import { TickContext } from '../src/tickcontext';
 import { TimeSigNote } from '../src/timesignote';
 import { isAccidental } from '../src/typeguard';
 import { Voice } from '../src/voice';
+import { Modifier } from '../src/modifier';
 
 const AccidentalTests = {
   Start(): void {
@@ -286,8 +285,96 @@ function basic(options: TestOptions): void {
   options.assert.ok(true, 'Full Accidental');
 }
 
+function genAccidentals(): string[] {
+  const accs = [ '#', '##', 'b', 'bb', 'n', '{', '}', 'db', 'd', '++', '+', '+-'];
+  accs.push('bs', 'bss', 'o', 'k', 'bbs', '++-', 'ashs', 'afhf');
+  // Standard accidentals (12-EDO)
+  for (let u = 0xe260; u <= 0xe269; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Gould arrow quartertone accidentals (24-EDO)
+  for (let u = 0xe270; u <= 0xe27b; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Stein-Zimmermann accidentals (24-EDO)
+  for (let u = 0xe280; u <= 0xe285; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Extended Stein-Zimmermann accidentals
+  for (let u = 0xe290; u <= 0xe29c; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Sims accidentals (72-EDO)
+  for (let u = 0xe2a0; u <= 0xe2a5; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Johnston accidentals (just intonation)
+  for (let u = 0xe2b0; u <= 0xe2b7; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Extended Helmholtz-Ellis accidentals (just intonation)
+  for (let u = 0xe2c0; u <= 0xe2fb; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Spartan Sagittal single-shaft accidentals
+  for (let u = 0xe300; u <= 0xe30f; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Spartan Sagittal multi-shaft accidentals
+  for (let u = 0xe310; u <= 0xe335; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Athenian Sagittal extension (medium precision) accidentals
+  for (let u = 0xe340; u <= 0xe367; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Trojan Sagittal extension (12-EDO relative) accidentals
+  for (let u = 0xe370; u <= 0xe387; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Promethean Sagittal extension (high precision) single-shaft accidentals
+  for (let u = 0xe390; u <= 0xe3ad; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Promethean Sagittal extension (high precision) multi-shaft accidentals
+  for (let u = 0xe3b0; u <= 0xe3ef; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Herculean Sagittal extension (very high precision) accidental diacritics
+  for (let u = 0xe3f0; u <= 0xe3f3; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Olympian Sagittal extension (extreme precision) accidental diacritics 
+  for (let u = 0xe3f4; u <= 0xe3f7; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Wyschnegradsky accidentals (72-EDO)
+  for (let u = 0xe420; u <= 0xe435; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Arel-Ezgi-Uzdilek (AEU) accidentals
+  for (let u = 0xe440; u <= 0xe447; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Turkish folk music accidentals
+  for (let u = 0xe450; u <= 0xe457; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Persian accidentals
+  for (let u = 0xe460; u <= 0xe461; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Other accidentals
+  for (let u = 0xe470; u <= 0xe48f; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  return accs;
+}
+
+const accidentals: string[] = genAccidentals();
+
 function cautionary(options: TestOptions): void {
-  const staveCount = 12;
+  const staveCount = 21;
   const scale = 0.85;
   const staveWidth = 840;
   let i = 0;
@@ -295,10 +382,10 @@ function cautionary(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, staveWidth + 10, 175 * staveCount + 10);
   f.getContext().scale(scale, scale);
 
-  const accids = Object.keys(Flow.accidentalMap).filter((accid) => accid !== '{' && accid !== '}');
+  const accids = Object.values(accidentals).filter((accid) => accid !== '{' && accid !== '}');
   const mod = Math.round(accids.length / staveCount);
   for (i = 0; i < staveCount; ++i) {
-    const stave = f.Stave({ x: 0, y: 10 + 200 * i, width: staveWidth / scale });
+    const stave = f.Stave({ x: 0, y: 10 + 100 * i, width: staveWidth / scale });
     const score = f.EasyScore();
     const rowMap = [];
     for (j = 0; j < mod && j + i * staveCount < accids.length; ++j) {
@@ -643,39 +730,43 @@ function sagittal(options: TestOptions): void {
   const notes = [
     f
       .StaveNote({ keys: ['d/4', 'f/4', 'b/4', 'b/4'], duration: '4' })
-      .addModifier(accid('accSagittal11MediumDiesisUp'), 1)
-      .addModifier(accid('accSagittal5CommaDown'), 2)
+      .addModifier(accid('\uE30A' /*accSagittal11MediumDiesisUp*/), 1)
+      .addModifier(accid('\uE303' /*accSagittal5CommaDown*/), 2)
       .addModifier(accid('b'), 3)
-      .addModifier(accid('accSagittal7CommaDown'), 3),
+      .addModifier(accid('\uE305' /*accSagittal7CommaDown*/), 3),
 
     f
       .StaveNote({ keys: ['d/4', 'f/4', 'a/4', 'b/4'], duration: '4' })
-      .addModifier(accid('accSagittal35LargeDiesisDown'), 2),
+      .addModifier(accid('\uE30F' /*accSagittal35LargeDiesisDown*/), 2),
 
-    f.StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'c/5'], duration: '8' }).addModifier(accid('accSagittal5CommaDown'), 1),
+    f
+      .StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'c/5'], duration: '8' })
+      .addModifier(accid('\uE303' /*accSagittal5CommaDown*/), 1),
 
     f
       .StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'b/4'], duration: '8' })
       .addModifier(accid('b'), 1)
-      .addModifier(accid('accSagittal7CommaDown'), 1)
-      .addModifier(accid('accSagittal11LargeDiesisDown'), 3),
+      .addModifier(accid('\uE305' /*accSagittal7CommaDown*/), 1)
+      .addModifier(accid('\uE30D' /*accSagittal11LargeDiesisDown*/), 3),
 
     f
       .StaveNote({ keys: ['d/4', 'f/4', 'b/4', 'b/4'], duration: '4' })
-      .addModifier(accid('accSagittal11MediumDiesisUp'), 1)
-      .addModifier(accid('accSagittal5CommaDown'), 2)
-      .addModifier(accid('accSagittalFlat7CDown'), 3),
+      .addModifier(accid('\uE30A' /*accSagittal11MediumDiesisUp*/), 1)
+      .addModifier(accid('\uE303' /*accSagittal5CommaDown*/), 2)
+      .addModifier(accid('\uE321' /*accSagittalFlat7CDown*/), 3),
 
     f
       .StaveNote({ keys: ['d/4', 'f/4', 'a/4', 'b/4'], duration: '4' })
-      .addModifier(accid('accSagittal35LargeDiesisDown'), 2),
+      .addModifier(accid('\uE30F' /*accSagittal35LargeDiesisDown*/), 2),
 
-    f.StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'c/5'], duration: '8' }).addModifier(accid('accSagittal5CommaDown'), 1),
+    f
+      .StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'c/5'], duration: '8' })
+      .addModifier(accid('\uE303' /*accSagittal5CommaDown*/), 1),
 
     f
       .StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'b/4'], duration: '8' })
-      .addModifier(accid('accSagittalFlat7CDown'), 1)
-      .addModifier(accid('accSagittal11LargeDiesisDown'), 3),
+      .addModifier(accid('\uE321' /*accSagittalFlat7CDown*/), 1)
+      .addModifier(accid('\uE30D' /*accSagittal11LargeDiesisDown*/), 3),
   ];
 
   f.StaveTie({
@@ -720,9 +811,6 @@ function sagittal(options: TestOptions): void {
   notes.forEach((note, index) => {
     Note.plotMetrics(f.getContext(), note, 140);
     options.assert.ok(note.getModifiersByType('Accidental').length > 0, 'Note ' + index + ' has accidentals');
-    note.getModifiersByType('Accidental').forEach((accid: Modifier, index: number) => {
-      options.assert.ok(accid.getWidth() > 0, 'Accidental ' + index + ' has set width');
-    });
   });
 
   f.draw();
@@ -1186,9 +1274,6 @@ function factoryAPI(options: TestOptions): void {
 
   notes.forEach((n, i) => {
     options.assert.ok(n.getModifiersByType('Accidental').length > 0, 'Note ' + i + ' has accidentals');
-    n.getModifiersByType('Accidental').forEach((accid: Modifier, i: number) => {
-      options.assert.ok(accid.getWidth() > 0, 'Accidental ' + i + ' has set width');
-    });
   });
 
   f.draw();

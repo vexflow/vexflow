@@ -350,9 +350,6 @@ export class Flow {
   static get TIME4_4(): VoiceTime {
     return Tables.TIME4_4;
   }
-  static get accidentalMap(): Record<string, { code: string; parenRightPaddingAdjustment: number }> {
-    return Tables.accidentalMap;
-  }
   static get unicode(): Record<string, string> {
     return Tables.unicode;
   }

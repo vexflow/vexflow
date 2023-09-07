@@ -1,12 +1,6 @@
 export const CommonMetrics = {
   smufl: true,
 
-  accidental: {
-    noteheadAccidentalPadding: 1,
-    leftPadding: 2,
-    accidentalSpacing: 3,
-  },
-
   ornament: {
     brassScoop: {
       xOffset: -12,
