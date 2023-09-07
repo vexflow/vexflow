@@ -2,7 +2,6 @@
 // MIT License
 
 import { Element } from './element';
-import { Glyph } from './glyph';
 import { RenderContext } from './rendercontext';
 import { Stave } from './stave';
 import { Tables } from './tables';
@@ -103,11 +102,7 @@ export class StaveConnector extends Element {
     none: StaveConnector.type.NONE,
   } as const;
 
-  protected width: number;
-  protected texts: {
-    content: string;
-    options: { shiftX: number; shiftY: number };
-  }[];
+  protected texts: Element[];
 
   protected type: (typeof StaveConnector)['type'][keyof (typeof StaveConnector)['type']];
 
@@ -115,13 +110,10 @@ export class StaveConnector extends Element {
   readonly bottomStave: Stave;
   readonly thickness: number;
 
-  protected xShift: number;
-
   constructor(topStave: Stave, bottomStave: Stave) {
     super();
 
     this.thickness = Tables.STAVE_LINE_THICKNESS;
-    this.width = 3;
     this.topStave = topStave;
     this.bottomStave = bottomStave;
     this.type = StaveConnector.type.DOUBLE;
@@ -157,28 +149,13 @@ export class StaveConnector extends Element {
 
   /** Set optional associated Text. */
   setText(text: string, options: { shiftX?: number; shiftY?: number } = {}): this {
-    this.texts.push({
-      content: text,
-      options: {
-        shiftX: 0,
-        shiftY: 0,
-        ...options,
-      },
-    });
+    const textElement = new Element('StaveConnector.text');
+    textElement.setText(text);
+    textElement.setXShift(options.shiftX ?? 0);
+    textElement.setYShift(options.shiftY ?? 0);
+    textElement.measureText();
+    this.texts.push(textElement);
     return this;
-  }
-
-  setXShift(xShift: number): this {
-    if (typeof xShift !== 'number') {
-      throw new RuntimeError('InvalidType', 'xShift must be a Number');
-    }
-
-    this.xShift = xShift;
-    return this;
-  }
-
-  getXShift(): number {
-    return this.xShift;
   }
 
   /** Render connector and associated text. */
@@ -188,7 +165,7 @@ export class StaveConnector extends Element {
 
     let topY = this.topStave.getYForLine(0);
     let botY = this.bottomStave.getYForLine(this.bottomStave.getNumLines() - 1) + this.thickness;
-    let width = this.width;
+    let width = 3;
     let topX = this.topStave.getX();
 
     const isRightSidedConnector =
@@ -201,6 +178,7 @@ export class StaveConnector extends Element {
     }
 
     let attachmentHeight = botY - topY;
+    const element = new Element();
     switch (this.type) {
       case StaveConnector.type.SINGLE:
         width = 1;
@@ -212,7 +190,7 @@ export class StaveConnector extends Element {
         width = 1;
         break;
       case StaveConnector.type.DOUBLE:
-        topX -= this.width + 2;
+        topX -= 5;
         topY -= this.thickness;
         attachmentHeight += 0.5;
         break;
@@ -255,9 +233,11 @@ export class StaveConnector extends Element {
         topY -= 6;
         botY += 6;
         attachmentHeight = botY - topY;
-        Glyph.renderGlyph(ctx, topX - 5, topY, 40, 'bracketTop');
-        Glyph.renderGlyph(ctx, topX - 5, botY, 40, 'bracketBottom');
-        topX -= this.width + 2;
+        element.setText('\ue003' /* bracketTop */);
+        element.renderText(ctx, topX - 5, topY);
+        element.setText('\ue004' /* bracketBottom */);
+        element.renderText(ctx, topX - 5, botY);
+        topX -= 5;
         break;
       case StaveConnector.type.BOLD_DOUBLE_LEFT:
         drawBoldDoubleLine(ctx, this.type, topX + this.xShift, topY, botY - this.thickness);
@@ -289,19 +269,13 @@ export class StaveConnector extends Element {
       ctx.fillRect(topX - 3, topY, width, attachmentHeight);
     }
 
-    ctx.save();
-    ctx.setLineWidth(2);
-    ctx.setFont(this.textFont);
-
     // Add stave connector text
     for (let i = 0; i < this.texts.length; i++) {
-      const text = this.texts[i];
-      const textWidth = ctx.measureText('' + text.content).width;
-      const x = this.topStave.getX() - textWidth - 24 + text.options.shiftX;
-      const y = (this.topStave.getYForLine(0) + this.bottomStave.getBottomLineY()) / 2 + text.options.shiftY;
+      const textElement = this.texts[i];
+      const x = this.topStave.getX() - textElement.getWidth() - 24;
+      const y = (this.topStave.getYForLine(0) + this.bottomStave.getBottomLineY()) / 2;
 
-      ctx.fillText('' + text.content, x, y + 4);
+      textElement.renderText(ctx, x, y + 4);
     }
-    ctx.restore();
   }
 }

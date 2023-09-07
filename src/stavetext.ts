@@ -12,15 +12,7 @@ export class StaveText extends StaveModifier {
     return Category.StaveText;
   }
 
-  protected options: {
-    shiftX: number;
-    shiftY: number;
-    justification: number;
-  };
-
-  protected text: string;
-  protected shiftX?: number;
-  protected shiftY?: number;
+  protected justification: number;
 
   constructor(
     text: string,
@@ -29,79 +21,50 @@ export class StaveText extends StaveModifier {
   ) {
     super();
 
-    this.setWidth(16);
-    this.text = text;
+    this.setText(text);
+    this.setXShift(options.shiftX ?? 0);
+    this.setYShift(options.shiftY ?? 0);
     this.position = position;
-    this.options = {
-      shiftX: 0,
-      shiftY: 0,
-      justification: TextNote.Justification.CENTER,
-      ...options,
-    };
-  }
-
-  setStaveText(text: string): this {
-    this.text = text;
-    return this;
-  }
-
-  setShiftX(x: number): this {
-    this.shiftX = x;
-    return this;
-  }
-
-  setShiftY(y: number): this {
-    this.shiftY = y;
-    return this;
-  }
-
-  setText(text: string): this {
-    this.text = text;
-    return this;
+    this.justification = options.justification ?? TextNote.Justification.CENTER;
+    this.measureText();
   }
 
   draw(stave: Stave): this {
     const ctx = stave.checkContext();
     this.setRendered();
 
-    ctx.save();
-    ctx.setLineWidth(2);
-    ctx.setFont(this.textFont);
-    const textWidth = ctx.measureText('' + this.text).width;
-
     let x;
     let y;
     switch (this.position) {
       case StaveModifierPosition.LEFT:
       case StaveModifierPosition.RIGHT:
-        y = (stave.getYForLine(0) + stave.getBottomLineY()) / 2 + this.options.shiftY;
+        y = (stave.getYForLine(0) + stave.getBottomLineY()) / 2;
         if (this.position === StaveModifierPosition.LEFT) {
-          x = stave.getX() - textWidth - 24 + this.options.shiftX;
+          x = stave.getX() - this.width - 24;
         } else {
-          x = stave.getX() + stave.getWidth() + 24 + this.options.shiftX;
+          x = stave.getX() + stave.getWidth() + 24;
         }
         break;
       case StaveModifierPosition.ABOVE:
       case StaveModifierPosition.BELOW:
-        x = stave.getX() + this.options.shiftX;
-        if (this.options.justification === TextJustification.CENTER) {
-          x += stave.getWidth() / 2 - textWidth / 2;
-        } else if (this.options.justification === TextJustification.RIGHT) {
-          x += stave.getWidth() - textWidth;
+        x = stave.getX();
+        if (this.justification === TextJustification.CENTER) {
+          x += stave.getWidth() / 2 - this.width / 2;
+        } else if (this.justification === TextJustification.RIGHT) {
+          x += stave.getWidth() - this.width;
         }
 
         if (this.position === StaveModifierPosition.ABOVE) {
-          y = stave.getYForTopText(2) + this.options.shiftY;
+          y = stave.getYForTopText(2);
         } else {
-          y = stave.getYForBottomText(2) + this.options.shiftY;
+          y = stave.getYForBottomText(2);
         }
         break;
       default:
         throw new RuntimeError('InvalidPosition', 'Value Must be in Modifier.Position.');
     }
 
-    ctx.fillText('' + this.text, x, y + 4);
-    ctx.restore();
+    this.renderText(ctx, x, y + 4);
     return this;
   }
 }

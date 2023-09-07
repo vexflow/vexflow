@@ -85,8 +85,9 @@ export const CommonMetrics: Record<string, any> = {
   },
 
   StaveConnector: {
-    fontFamily: 'Times New Roman, serif',
-    fontSize: 16,
+    text: {
+      fontSize: 16,
+    },
   },
 
   StaveLine: {
@@ -111,7 +112,6 @@ export const CommonMetrics: Record<string, any> = {
   },
 
   StaveText: {
-    fontFamily: 'Times New Roman, serif',
     fontSize: 16,
   },
 
