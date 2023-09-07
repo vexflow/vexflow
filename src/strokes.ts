@@ -161,12 +161,13 @@ export class Stroke extends Modifier {
     if (this.type === Stroke.Type.BRUSH_DOWN || this.type === Stroke.Type.BRUSH_UP) {
       ctx.fillRect(x + this.xShift, topY, 1, botY - topY);
     } else {
+      // Select the wiggle glyph depending on the arrow direction
       const lineGlyph =
-        arrow === '\ueb7c' /*arrowheadBlackDown*/ ? '\ueaa9' /*wiggleArpeggiatoUp*/ : '\ueaaa'; /*wiggleArpeggiatoDown*/
+        arrow === '\ueb7c' /*arrowheadBlackDown*/ ? '\ueaaa' /*wiggleArpeggiatoDown*/ : '\ueaa9'; /*wiggleArpeggiatoUp*/
       let txt = '';
       const el = new Element();
-      // 2 pixels overlap of arpeggiato glyphs
-      for (; el.getWidth() < botY - topY; ) {
+      // add glyphs until the required length is achieved
+      while (el.getWidth() < botY - topY) {
         txt += lineGlyph;
         el.setText(txt);
         el.measureText();

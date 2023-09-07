@@ -113,10 +113,10 @@ export class CanvasContext extends RenderContext {
     // Containers not implemented.
   }
 
-  openRotation(angle: number, x: number, y: number) {
+  openRotation(angleDegrees: number, x: number, y: number) {
     this.curTransfrom = this.context2D.getTransform();
     this.context2D.translate(x,y);
-    this.context2D.rotate((angle * Math.PI) / 180);
+    this.context2D.rotate((angleDegrees * Math.PI) / 180);
     this.context2D.translate(-x, -y);
   }
 
