@@ -3,6 +3,7 @@
 import { ArticulationStruct } from './articulation';
 import { Font, FontInfo } from './font';
 import { Fraction } from './fraction';
+import { Glyphs } from './glyphs';
 import { GlyphProps, KeyProps } from './note';
 import { RuntimeError } from './util';
 
@@ -1015,7 +1016,7 @@ export class Tables {
             return '\ue0a4' /*noteheadBlack*/;
         }
     }
-    return '\u0000';
+    return Glyphs.null;
   }
 
   /* The list of valid note types. Used by note.ts during parseNoteStruct(). */

@@ -23,6 +23,7 @@ import { FretHandFinger } from './frethandfinger';
 import { GhostNote } from './ghostnote';
 import { Glyph } from './glyph';
 import { GlyphNote } from './glyphnote';
+import { Glyphs } from './glyphs';
 import { GraceNote } from './gracenote';
 import { GraceNoteGroup } from './gracenotegroup';
 import { GraceTabNote } from './gracetabnote';
@@ -118,6 +119,7 @@ export class Flow {
   static GhostNote = GhostNote;
   static Glyph = Glyph;
   static GlyphNote = GlyphNote;
+  static Glyphs = Glyphs;
   static GraceNote = GraceNote;
   static GraceNoteGroup = GraceNoteGroup;
   static GraceTabNote = GraceTabNote;

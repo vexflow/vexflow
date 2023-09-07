@@ -3,6 +3,7 @@
 
 import { Beam } from './beam';
 import { Fraction } from './fraction';
+import { Glyphs } from './glyphs';
 import { Modifier } from './modifier';
 import { drawDot, RenderContext } from './rendercontext';
 import { Stave } from './stave';
@@ -108,7 +109,7 @@ export abstract class Note extends Tickable {
     // Try and get the note head
     const codeNoteHead = Tables.codeNoteHead(type.toUpperCase(), duration);
     // Merge duration props for 'duration' with the note head properties.
-    if (codeNoteHead !== '\u0000') {
+    if (codeNoteHead !== Glyphs.null) {
       code = { ...code, codeHead: codeNoteHead };
     }
 

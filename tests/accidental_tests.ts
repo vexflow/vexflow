@@ -10,6 +10,8 @@ import { Beam } from '../src/beam';
 import { Dot } from '../src/dot';
 import { Factory } from '../src/factory';
 import { Formatter } from '../src/formatter';
+import { Glyphs } from '../src/glyphs';
+import { Modifier } from '../src/modifier';
 import { ModifierContext } from '../src/modifiercontext';
 import { Note } from '../src/note';
 import { RenderContext } from '../src/rendercontext';
@@ -20,7 +22,6 @@ import { TickContext } from '../src/tickcontext';
 import { TimeSigNote } from '../src/timesignote';
 import { isAccidental } from '../src/typeguard';
 import { Voice } from '../src/voice';
-import { Modifier } from '../src/modifier';
 
 const AccidentalTests = {
   Start(): void {
@@ -286,7 +287,7 @@ function basic(options: TestOptions): void {
 }
 
 function genAccidentals(): string[] {
-  const accs = [ '#', '##', 'b', 'bb', 'n', '{', '}', 'db', 'd', '++', '+', '+-'];
+  const accs = ['#', '##', 'b', 'bb', 'n', '{', '}', 'db', 'd', '++', '+', '+-'];
   accs.push('bs', 'bss', 'o', 'k', 'bbs', '++-', 'ashs', 'afhf');
   // Standard accidentals (12-EDO)
   for (let u = 0xe260; u <= 0xe269; u++) {
@@ -344,7 +345,7 @@ function genAccidentals(): string[] {
   for (let u = 0xe3f0; u <= 0xe3f3; u++) {
     accs.push(String.fromCodePoint(u));
   }
-  // Olympian Sagittal extension (extreme precision) accidental diacritics 
+  // Olympian Sagittal extension (extreme precision) accidental diacritics
   for (let u = 0xe3f4; u <= 0xe3f7; u++) {
     accs.push(String.fromCodePoint(u));
   }
@@ -727,46 +728,52 @@ function sagittal(options: TestOptions): void {
   const ctx = f.getContext();
   f.Stave({ x: 10, y: 10, width: 650 });
 
+  // Use these SMUFL glyphs.
+  const {
+    accSagittal11LargeDiesisDown,
+    accSagittal11MediumDiesisUp,
+    accSagittal35LargeDiesisDown,
+    accSagittal5CommaDown,
+    accSagittal7CommaDown,
+    accSagittalFlat7CDown,
+  } = Glyphs;
+
   const notes = [
     f
       .StaveNote({ keys: ['d/4', 'f/4', 'b/4', 'b/4'], duration: '4' })
-      .addModifier(accid('\uE30A' /*accSagittal11MediumDiesisUp*/), 1)
-      .addModifier(accid('\uE303' /*accSagittal5CommaDown*/), 2)
+      .addModifier(accid(accSagittal11MediumDiesisUp), 1)
+      .addModifier(accid(accSagittal5CommaDown), 2)
       .addModifier(accid('b'), 3)
-      .addModifier(accid('\uE305' /*accSagittal7CommaDown*/), 3),
+      .addModifier(accid(accSagittal7CommaDown), 3),
 
     f
       .StaveNote({ keys: ['d/4', 'f/4', 'a/4', 'b/4'], duration: '4' })
-      .addModifier(accid('\uE30F' /*accSagittal35LargeDiesisDown*/), 2),
+      .addModifier(accid(accSagittal35LargeDiesisDown), 2),
 
-    f
-      .StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'c/5'], duration: '8' })
-      .addModifier(accid('\uE303' /*accSagittal5CommaDown*/), 1),
+    f.StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'c/5'], duration: '8' }).addModifier(accid(accSagittal5CommaDown), 1),
 
     f
       .StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'b/4'], duration: '8' })
       .addModifier(accid('b'), 1)
-      .addModifier(accid('\uE305' /*accSagittal7CommaDown*/), 1)
-      .addModifier(accid('\uE30D' /*accSagittal11LargeDiesisDown*/), 3),
+      .addModifier(accid(accSagittal7CommaDown), 1)
+      .addModifier(accid(accSagittal11LargeDiesisDown), 3),
 
     f
       .StaveNote({ keys: ['d/4', 'f/4', 'b/4', 'b/4'], duration: '4' })
-      .addModifier(accid('\uE30A' /*accSagittal11MediumDiesisUp*/), 1)
-      .addModifier(accid('\uE303' /*accSagittal5CommaDown*/), 2)
-      .addModifier(accid('\uE321' /*accSagittalFlat7CDown*/), 3),
+      .addModifier(accid(accSagittal11MediumDiesisUp), 1)
+      .addModifier(accid(accSagittal5CommaDown), 2)
+      .addModifier(accid(accSagittalFlat7CDown), 3),
 
     f
       .StaveNote({ keys: ['d/4', 'f/4', 'a/4', 'b/4'], duration: '4' })
-      .addModifier(accid('\uE30F' /*accSagittal35LargeDiesisDown*/), 2),
+      .addModifier(accid(accSagittal35LargeDiesisDown), 2),
 
-    f
-      .StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'c/5'], duration: '8' })
-      .addModifier(accid('\uE303' /*accSagittal5CommaDown*/), 1),
+    f.StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'c/5'], duration: '8' }).addModifier(accid(accSagittal5CommaDown), 1),
 
     f
       .StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'b/4'], duration: '8' })
-      .addModifier(accid('\uE321' /*accSagittalFlat7CDown*/), 1)
-      .addModifier(accid('\uE30D' /*accSagittal11LargeDiesisDown*/), 3),
+      .addModifier(accid(accSagittalFlat7CDown), 1)
+      .addModifier(accid(accSagittal11LargeDiesisDown), 3),
   ];
 
   f.StaveTie({

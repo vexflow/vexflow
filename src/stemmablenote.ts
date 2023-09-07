@@ -5,6 +5,7 @@
 // Examples of stemmable notes are `StaveNote` and `TabNote`
 
 import { Element, ElementStyle } from './element';
+import { Glyphs } from './glyphs';
 import { GlyphProps, Note, NoteStruct } from './note';
 import { Stem, StemOptions } from './stem';
 import { Tables } from './tables';
@@ -61,7 +62,7 @@ export abstract class StemmableNote extends Note {
         // if codeFlagUp is undefined, codePoint will be 0
         this.getStemDirection() === Stem.DOWN
           ? String.fromCodePoint((glyphProps.codeFlagUp?.codePointAt(0) ?? -1) + 1)
-          : glyphProps.codeFlagUp ?? '\u0000';
+          : glyphProps.codeFlagUp ?? Glyphs.null;
 
       this.flag.setText(flagCode);
       this.flag.fontSize = this.renderOptions.glyphFontScale;

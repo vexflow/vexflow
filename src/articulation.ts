@@ -3,6 +3,7 @@
 // MIT License
 
 import { Builder } from './easyscore';
+import { Glyphs } from './glyphs';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { Note } from './note';
@@ -318,7 +319,7 @@ export class Articulation extends Modifier {
     const code =
       (this.position === ABOVE ? this.articulation.aboveCode : this.articulation.belowCode) ||
       this.articulation.code ||
-      '\u0000';
+      Glyphs.null;
     this.text = code;
     this.measureText();
   }
