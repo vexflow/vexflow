@@ -164,7 +164,6 @@ export const CommonMetrics: Record<string, any> = {
   },
 
   Volta: {
-    fontFamily: 'Arial, sans-serif',
     fontSize: 9,
     fontWeight: 'bold',
   },
