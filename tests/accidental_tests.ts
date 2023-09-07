@@ -20,6 +20,7 @@ import { TickContext } from '../src/tickcontext';
 import { TimeSigNote } from '../src/timesignote';
 import { isAccidental } from '../src/typeguard';
 import { Voice } from '../src/voice';
+import { Modifier } from '../src/modifier';
 
 const AccidentalTests = {
   Start(): void {
@@ -272,6 +273,9 @@ function basic(options: TestOptions): void {
   notes.forEach((note, index) => {
     Note.plotMetrics(f.getContext(), note, 140);
     options.assert.ok(note.getModifiersByType('Accidental').length > 0, 'Note ' + index + ' has accidentals');
+    note.getModifiersByType('Accidental').forEach((accid: Modifier, index: number) => {
+      options.assert.ok(accid.getWidth() > 0, 'Accidental ' + index + ' has set width');
+    });
   });
 
   f.draw();
@@ -454,6 +458,9 @@ function specialCases(options: TestOptions): void {
   notes.forEach((note, index) => {
     Note.plotMetrics(f.getContext(), note, 140);
     options.assert.ok(note.getModifiersByType('Accidental').length > 0, 'Note ' + index + ' has accidentals');
+    note.getModifiersByType('Accidental').forEach((accid, index) => {
+      options.assert.ok(accid.getWidth() > 0, 'Accidental ' + index + ' has set width');
+    });
   });
 
   f.draw();
@@ -500,6 +507,9 @@ function basicStemDown(options: TestOptions): void {
   notes.forEach((note, noteIndex) => {
     Note.plotMetrics(f.getContext(), note, 140);
     options.assert.ok(note.getModifiersByType('Accidental').length > 0, 'Note ' + noteIndex + ' has accidentals');
+    note.getModifiersByType('Accidental').forEach((accid, accidIndex) => {
+      options.assert.ok(accid.getWidth() > 0, 'Accidental ' + accidIndex + ' has set width');
+    });
   });
 
   f.draw();
@@ -636,6 +646,9 @@ function microtonal(options: TestOptions): void {
   notes.forEach((note, index) => {
     Note.plotMetrics(f.getContext(), note, 140);
     options.assert.ok(note.getModifiersByType('Accidental').length > 0, 'Note ' + index + ' has accidentals');
+    note.getModifiersByType('Accidental').forEach((accid: Modifier, index: number) => {
+      options.assert.ok(accid.getWidth() > 0, 'Accidental ' + index + ' has set width');
+    });
   });
 
   f.draw();
@@ -697,6 +710,9 @@ function microtonalIranian(options: TestOptions): void {
   notes.forEach((note, index) => {
     Note.plotMetrics(f.getContext(), note, 140);
     options.assert.ok(note.getModifiersByType('Accidental').length > 0, 'Note ' + index + ' has accidentals');
+    note.getModifiersByType('Accidental').forEach((accid: Modifier, index: number) => {
+      options.assert.ok(accid.getWidth() > 0, 'Accidental ' + index + ' has set width');
+    });
   });
 
   f.draw();

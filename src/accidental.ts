@@ -49,7 +49,6 @@ export class Accidental extends Modifier {
   readonly type: string;
   /** To enable logging for this class. Set `Vex.Flow.Accidental.DEBUG` to `true`. */
   static DEBUG: boolean = false;
-  protected accidental: string;
   protected cautionary: boolean;
 
   /** Accidentals category string. */
@@ -512,9 +511,6 @@ export class Accidental extends Modifier {
     this.type = type;
     this.position = Modifier.Position.LEFT;
 
-    this.accidental = Tables.accidentalCodes(this.type);
-    defined(this.accidental, 'ArgumentError', `Unknown accidental type: ${type}`);
-
     // Cautionary accidentals have parentheses around them
     this.cautionary = false;
 
@@ -525,17 +521,17 @@ export class Accidental extends Modifier {
     this.text = '';
 
     if (!this.cautionary) {
-      this.text += this.accidental;
+      this.text += Tables.accidentalCodes(this.type);
       this.textFont.size = Tables.lookupMetric('Accidental.fontSize');
     } else {
       this.text += Tables.accidentalCodes('{');
-      this.text += this.accidental;
+      this.text += Tables.accidentalCodes(this.type);
       this.text += Tables.accidentalCodes('}');
       this.textFont.size = Tables.lookupMetric('Accidental.cautionary.fontSize');
     }
     // Accidentals attached to grace notes are rendered smaller.
     if (isGraceNote(this.note)) {
-      this.textFont.size = 25;
+      this.textFont.size = Tables.lookupMetric('Accidental.grace.fontSize');
     }
     this.measureText();
   }

@@ -19,6 +19,9 @@ export const CommonMetrics: Record<string, any> = {
     cautionary: {
       fontSize: 20,
     },
+    grace: {
+      fontSize: 25,
+    },
     noteheadAccidentalPadding: 1,
     leftPadding: 2,
     accidentalSpacing: 3,
