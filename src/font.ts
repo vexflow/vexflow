@@ -1,4 +1,3 @@
-import { StringNumberMetrics } from './stringnumber';
 import { TupletMetrics } from './tuplet';
 import { defined } from './util';
 
@@ -38,7 +37,6 @@ export interface FontMetrics extends Record<string, any> {
   digits?: Record<string, number>;
   articulation?: Record<string, Record<string, number>>;
   tremolo?: Record<string, Record<string, number>>;
-  stringNumber?: StringNumberMetrics;
   tuplet?: TupletMetrics;
   glyphs: Record<
     string,

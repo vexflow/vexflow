@@ -14,25 +14,9 @@ import { Tables } from './tables';
 import { Category, isStaveNote, isStemmableNote } from './typeguard';
 import { RuntimeError } from './util';
 
-export interface StringNumberMetrics {
-  verticalPadding: number;
-  stemPadding: number;
-  leftPadding: number;
-  rightPadding: number;
-}
-
 export class StringNumber extends Modifier {
   static get CATEGORY(): string {
     return Category.StringNumber;
-  }
-
-  static get metrics(): StringNumberMetrics {
-    return Tables.lookupMetric('StringNumber', {
-      verticalPadding: 0,
-      stemPadding: 0,
-      leftPadding: 0,
-      rightPadding: 0,
-    });
   }
 
   // ## Static Methods
@@ -227,9 +211,12 @@ export class StringNumber extends Modifier {
           const ys = note.getYs();
           dotY = ys.reduce((a, b) => (a < b ? a : b));
           if (note.hasStem() && stemDirection === Stem.UP) {
-            dotY = stemExt.topY + StringNumber.metrics.stemPadding;
+            dotY = stemExt.topY + Tables.lookupMetric('StringNumber.stemPadding');
           }
-          dotY -= this.radius + StringNumber.metrics.verticalPadding + this.textLine * Tables.STAVE_LINE_DISTANCE;
+          dotY -=
+            this.radius +
+            Tables.lookupMetric('StringNumber.verticalPadding') +
+            this.textLine * Tables.STAVE_LINE_DISTANCE;
         }
         break;
       case Modifier.Position.BELOW:
@@ -237,16 +224,19 @@ export class StringNumber extends Modifier {
           const ys: number[] = note.getYs();
           dotY = ys.reduce((a, b) => (a > b ? a : b));
           if (note.hasStem() && stemDirection === Stem.DOWN) {
-            dotY = stemExt.topY - StringNumber.metrics.stemPadding;
+            dotY = stemExt.topY - Tables.lookupMetric('StringNumber.stemPadding');
           }
-          dotY += this.radius + StringNumber.metrics.verticalPadding + this.textLine * Tables.STAVE_LINE_DISTANCE;
+          dotY +=
+            this.radius +
+            Tables.lookupMetric('StringNumber.verticalPadding') +
+            this.textLine * Tables.STAVE_LINE_DISTANCE;
         }
         break;
       case Modifier.Position.LEFT:
-        dotX -= this.radius / 2 + StringNumber.metrics.leftPadding;
+        dotX -= this.radius / 2 + Tables.lookupMetric('StringNumber.leftPadding');
         break;
       case Modifier.Position.RIGHT:
-        dotX += this.radius / 2 + StringNumber.metrics.rightPadding;
+        dotX += this.radius / 2 + Tables.lookupMetric('StringNumber.rightPadding');
         break;
       default:
         throw new RuntimeError('InvalidPosition', `The position ${this.position} is invalid`);

@@ -60,11 +60,10 @@ const FormatterTests = {
 };
 
 /** Calculate the glyph's width in the current music font. */
-// How is this different from Glyph.getWidth()? The numbers don't match up.
-function getGlyphWidth(glyphName: string): number {
+function getGlyphWidth(glyph: string): number {
   const el = new Element();
-  el.setText(String.fromCharCode(parseInt(glyphName, 16)));
-  el.measureText()
+  el.setText(glyph);
+  el.measureText();
   return el.getWidth();
 }
 
@@ -454,7 +453,7 @@ function justifyStaveNotes(options: TestOptions): void {
 
     f.Formatter()
       .joinVoices(voices)
-      .format(voices, width - (Stave.defaultPadding + getGlyphWidth('E050' /*gClef*/)));
+      .format(voices, width - (Stave.defaultPadding + getGlyphWidth('\uE050' /*gClef*/)));
 
     // Show the the width of notes via a horizontal line with red, green, yellow, blue, gray indicators.
     voices[0].getTickables().forEach((note) => Note.plotMetrics(ctx, note, y + 140)); // Bottom line.
@@ -550,7 +549,8 @@ function multiStaves(options: TestOptions): void {
   ];
 
   const staveYs = [20, 130, 250];
-  let staveWidth = width + getGlyphWidth('E050' /*gClef*/) + getGlyphWidth('E088' /*timeSig8*/) + Stave.defaultPadding;
+  let staveWidth =
+    width + getGlyphWidth('\uE050' /*gClef*/) + getGlyphWidth('\uE088' /*timeSig8*/) + Stave.defaultPadding;
   let staves = [
     f.Stave({ y: staveYs[0], width: staveWidth }).addClef('treble').addTimeSignature('6/8'),
     f.Stave({ y: staveYs[1], width: staveWidth }).addClef('treble').addTimeSignature('6/8'),
