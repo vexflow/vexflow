@@ -171,7 +171,7 @@ export class Stem extends Element {
   }
 
   adjustHeightForFlag(): void {
-    this.renderHeightAdjustment = Tables.currentMusicFont().lookupMetric('stem.heightAdjustmentForFlag', -3);
+    this.renderHeightAdjustment = Tables.lookupMetric('Stem.heightAdjustmentForFlag', -3);
   }
 
   adjustHeightForBeam(): void {

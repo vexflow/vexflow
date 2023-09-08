@@ -27,14 +27,12 @@ export class StringNumber extends Modifier {
   }
 
   static get metrics(): StringNumberMetrics {
-    return (
-      Tables.currentMusicFont().getMetrics().stringNumber ?? {
-        verticalPadding: 0,
-        stemPadding: 0,
-        leftPadding: 0,
-        rightPadding: 0,
-      }
-    );
+    return Tables.lookupMetric('StringNumber', {
+      verticalPadding: 0,
+      stemPadding: 0,
+      leftPadding: 0,
+      rightPadding: 0,
+    });
   }
 
   // ## Static Methods
