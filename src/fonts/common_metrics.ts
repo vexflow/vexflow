@@ -125,24 +125,6 @@ export const CommonMetrics = {
         shiftX: -1,
       },
     },
-    strokeStraight: {
-      arrowheadBlackDown: {
-        shiftX: -4.5,
-      },
-      arrowheadBlackUp: {
-        shiftX: -0.85,
-      },
-    },
-    strokeWiggly: {
-      arrowheadBlackDown: {
-        shiftX: -1,
-        shiftY: 1,
-      },
-      arrowheadBlackUp: {
-        shiftX: -1,
-        shiftY: 1,
-      },
-    },
     textNote: {
       breathMarkTick: {
         shiftY: 9,

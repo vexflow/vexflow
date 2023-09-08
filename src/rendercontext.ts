@@ -57,6 +57,9 @@ export abstract class RenderContext {
   // eslint-disable-next-line
   abstract openGroup(cls?: string, id?: string, attrs?: GroupAttributes): any;
   abstract closeGroup(): void;
+  abstract openRotation(angleDegrees: number, x: number, y: number): void;
+  abstract closeRotation(): void;
+
   // eslint-disable-next-line
   abstract add(child: any): void;
   abstract measureText(text: string): TextMeasure;
@@ -77,14 +80,6 @@ export abstract class RenderContext {
     return this.getFont();
   }
 
-  /**
-   * This is kept for backwards compatibility with 3.0.9.
-   * @deprecated use `setFont(...)` instead since it now supports CSS font shorthand.
-   */
-  setRawFont(f: string): this {
-    this.setFont(f);
-    return this;
-  }
 }
 
 /**

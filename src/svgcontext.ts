@@ -230,6 +230,14 @@ export class SVGContext extends RenderContext {
     this.parent = this.groups[this.groups.length - 1];
   }
 
+  openRotation(angleDegrees: number, x: number, y: number) {
+    this.openGroup().setAttribute('transform', `translate(${x},${y}) rotate(${angleDegrees}) translate(-${x},-${y})`);
+  }
+
+  closeRotation() {
+    this.closeGroup();
+  }
+
   add(elem: SVGElement): void {
     this.parent.appendChild(elem);
   }
