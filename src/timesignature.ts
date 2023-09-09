@@ -6,6 +6,7 @@
 // representation
 
 import { Element } from './element';
+import { Glyphs } from './glyphs';
 import { RenderContext } from './rendercontext';
 import { Stave } from './stave';
 import { StaveModifier, StaveModifierPosition } from './stavemodifier';
@@ -75,28 +76,28 @@ export class TimeSignature extends StaveModifier {
   }
 
   static getTimeSigCode(key: string, smallSig = false): string {
-    let code = '\u00000';
+    let code: string = Glyphs.null;
     switch (key) {
       case 'C':
-        code = '\ue08a' /*timeSigCommon*/;
+        code = Glyphs.timeSigCommon;
         break;
       case 'C|':
-        code = '\ue08b' /*timeSigCutCommon*/;
+        code = Glyphs.timeSigCutCommon;
         break;
       case '+':
-        code = smallSig ? '\ue08d' /*timeSigPlusSmall*/ : '\ue08c' /*timeSigPlus*/;
+        code = smallSig ? Glyphs.timeSigPlusSmall : Glyphs.timeSigPlus;
         break;
       case '-':
-        code = '\ue090' /*timeSigMinus*/;
+        code = Glyphs.timeSigMinus;
         break;
       case '(':
-        code = smallSig ? '\ue092' /*timeSigParensLeftSmall*/ : '\ue094' /*timeSigParensLeft*/;
+        code = smallSig ? Glyphs.timeSigParensLeftSmall : Glyphs.timeSigParensLeft;
         break;
       case ')':
-        code = smallSig ? '\ue093' /*timeSigParensRightSmall*/ : '\ue095' /*timeSigParensRight*/;
+        code = smallSig ? Glyphs.timeSigParensRightSmall : Glyphs.timeSigParensRight;
         break;
       default:
-        code = String.fromCodePoint(0xe080 + Number(key[0])) /*timeSigN*/;
+        code = String.fromCodePoint(0xe080 + Number(key[0])) /* timeSigN = Glyphs.timeSig0 + N */;
         break;
     }
     return code;
