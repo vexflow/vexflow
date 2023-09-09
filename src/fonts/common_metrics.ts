@@ -19,13 +19,6 @@ export const CommonMetrics = {
     },
   },
 
-  stringNumber: {
-    verticalPadding: 8,
-    stemPadding: 2,
-    leftPadding: 5,
-    rightPadding: 6,
-  },
-
   tuplet: {
     noteHeadOffset: 20,
     stemOffset: 10,
