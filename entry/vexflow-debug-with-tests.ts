@@ -9,10 +9,8 @@ import * as VexSrc from '../src/index';
 import * as VexTests from '../tests/index';
 
 import { Flow } from '../src/flow';
-import { loadAllMusicFonts } from '../src/fonts/load_all';
 
-loadAllMusicFonts();
-Flow.setMusicFont('Bravura', 'Gonville', 'Custom');
+Flow.setMusicFont('Bravura', 'Roboto Slab');
 
 // Re-export all exports from src/index.ts and tests/index.ts.
 export * from '../src/index';

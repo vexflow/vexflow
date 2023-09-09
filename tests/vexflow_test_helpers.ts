@@ -205,15 +205,15 @@ export class VexFlowTests {
    * Each font stack is a prioritized list of font names.
    */
   static FONT_STACKS: Record<string, string[]> = {
-    Bravura: ['Bravura', 'Custom'],
-    Gonville: ['Gonville', 'Bravura', 'Custom'],
-    Petaluma: ['Petaluma', 'Gonville', 'Bravura', 'Custom'],
-    Leland: ['Leland', 'Bravura', 'Custom'],
-    MuseJazz: ['MuseJazz'],
-    Gootville: ['Gootville'],
-    'Finale Ash': ['Finale Ash'],
-    'Finale Broadway': ['Finale Broadway'],
-    'Finale Maestro': ['Finale Maestro'],
+    Bravura: ['Bravura', 'Roboto Slab'],
+    Gonville: ['GonvilleSmufl', 'Bravura', 'Roboto Slab'],
+    Petaluma: ['Petaluma', 'Bravura', 'Petaluma Script'],
+    Leland: ['Leland', 'Bravura', 'Roboto Slab'],
+    MuseJazz: ['MuseJazz', 'Bravura', 'Academico'],
+    Gootville: ['Gootville', 'Bravura', 'Academico'],
+    'Finale Ash': ['Finale Ash', 'Bravura', 'Academico'],
+    'Finale Broadway': ['Finale Broadway', 'Bravura', 'Academico'],
+    'Finale Maestro': ['Finale Maestro', 'Bravura', 'Academico'],
   };
 
   static set NODE_FONT_STACKS(fontStacks: string[]) {
