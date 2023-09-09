@@ -66,7 +66,7 @@ function snapLineToStaff(canSitBetweenLines: boolean, line: number, position: nu
 // Helper function for checking if a Note object is either a StaveNote or a GraceNote.
 const isStaveOrGraceNote = (note: Note) => isStaveNote(note) || isGraceNote(note);
 
-function getTopY(note: Note, textLine: number): number {
+export function getTopY(note: Note, textLine: number): number {
   const stemDirection = note.getStemDirection();
   const { topY: stemTipY, baseY: stemBaseY } = note.getStemExtents();
 
@@ -95,7 +95,7 @@ function getTopY(note: Note, textLine: number): number {
   }
 }
 
-function getBottomY(note: Note, textLine: number): number {
+export function getBottomY(note: Note, textLine: number): number {
   const stemDirection = note.getStemDirection();
   const { topY: stemTipY, baseY: stemBaseY } = note.getStemExtents();
 
@@ -134,7 +134,7 @@ function getBottomY(note: Note, textLine: number): number {
  * @param position
  * @returns
  */
-function getInitialOffset(note: Note, position: number): number {
+export function getInitialOffset(note: Note, position: number): number {
   const isOnStemTip =
     (position === ABOVE && note.getStemDirection() === Stem.UP) ||
     (position === BELOW && note.getStemDirection() === Stem.DOWN);
