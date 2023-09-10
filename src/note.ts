@@ -28,7 +28,6 @@ export interface KeyProps {
   octave: number;
   line: number;
   intValue?: number;
-  accidental?: number;
   code?: string;
   displaced: boolean;
 }
