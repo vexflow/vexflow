@@ -16,7 +16,6 @@ import {
   Beam,
   Bend,
   BoundingBox,
-  BoundingBoxComputation,
   ChordSymbol,
   Clef,
   ClefNote,
@@ -32,7 +31,6 @@ import {
   Fraction,
   FretHandFinger,
   GhostNote,
-  Glyph,
   GlyphNote,
   GraceNote,
   GraceNoteGroup,
@@ -111,7 +109,6 @@ function VFPrefix(assert: Assert): void {
   assert.equal(Beam, VF.Beam);
   assert.equal(Bend, VF.Bend);
   assert.equal(BoundingBox, VF.BoundingBox);
-  assert.equal(BoundingBoxComputation, VF.BoundingBoxComputation);
   assert.equal(ChordSymbol, VF.ChordSymbol);
   assert.equal(Clef, VF.Clef);
   assert.equal(ClefNote, VF.ClefNote);
@@ -128,7 +125,6 @@ function VFPrefix(assert: Assert): void {
   assert.equal(Fraction, VF.Fraction);
   assert.equal(FretHandFinger, VF.FretHandFinger);
   assert.equal(GhostNote, VF.GhostNote);
-  assert.equal(Glyph, VF.Glyph);
   assert.equal(GlyphNote, VF.GlyphNote);
   assert.equal(GraceNote, VF.GraceNote);
   assert.equal(GraceNoteGroup, VF.GraceNoteGroup);

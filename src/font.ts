@@ -18,53 +18,6 @@ export interface FontInfo {
   style?: string;
 }
 
-export type FontModule = { data: FontData; metrics: FontMetrics };
-
-export interface FontData {
-  glyphs: Record<string, FontGlyph>;
-  fontFamily?: string;
-  resolution: number;
-  generatedOn?: string;
-}
-
-/** Specified in the `xxx_metrics.ts` files. */
-// eslint-disable-next-line
-export interface FontMetrics extends Record<string, any> {
-  smufl: boolean;
-  stave?: Record<string, number>;
-  accidental?: Record<string, number>;
-  pedalMarking?: Record<string, Record<string, number>>;
-  digits?: Record<string, number>;
-  articulation?: Record<string, Record<string, number>>;
-  tremolo?: Record<string, Record<string, number>>;
-  tuplet?: TupletMetrics;
-  glyphs: Record<
-    string,
-    {
-      point?: number;
-      shiftX?: number;
-      shiftY?: number;
-      scale?: number;
-      [key: string]: { point?: number; shiftX?: number; shiftY?: number; scale?: number } | number | undefined;
-    }
-  >;
-}
-
-export interface FontGlyph {
-  xMin: number;
-  xMax: number;
-  yMin?: number;
-  yMax?: number;
-  ha: number;
-  leftSideBearing?: number;
-  advanceWidth?: number;
-
-  // The o (outline) field is optional, because robotoslab_glyphs.ts & petalumascript_glyphs.ts
-  // do not include glyph outlines. We rely on *.woff files to provide the glyph outlines.
-  o?: string;
-  cachedOutline?: number[];
-}
-
 export enum FontWeight {
   NORMAL = 'normal',
   BOLD = 'bold',
@@ -77,8 +30,6 @@ export enum FontStyle {
 
 // Internal <span></span> element for parsing CSS font shorthand strings.
 let fontParser: HTMLSpanElement;
-
-const Fonts: Record<string, Font> = {};
 
 export class Font {
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -391,108 +342,5 @@ export class Font {
         Font.loadWebFont(fontName, host + fontPath);
       }
     }
-  }
-
-  /**
-   * @param fontName
-   * @param data optionally set the Font object's `.data` property.
-   *   This is usually done when setting up a font for the first time.
-   * @param metrics optionally set the Font object's `.metrics` property.
-   *   This is usually done when setting up a font for the first time.
-   * @returns a Font object with the given `fontName`.
-   *   Reuse an existing Font object if a matching one is found.
-   */
-  static load(fontName: string, data?: FontData, metrics?: FontMetrics): Font {
-    let font = Fonts[fontName];
-    if (!font) {
-      font = new Font(fontName);
-      Fonts[fontName] = font;
-    }
-    if (data) {
-      font.setData(data);
-    }
-    if (metrics) {
-      font.setMetrics(metrics);
-    }
-    return font;
-  }
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  // INSTANCE MEMBERS
-
-  protected name: string;
-  protected data?: FontData;
-  protected metrics?: FontMetrics;
-
-  /**
-   * Use `Font.load(fontName)` to get a Font object.
-   * Do not call this constructor directly.
-   */
-  private constructor(fontName: string) {
-    this.name = fontName;
-  }
-
-  getName(): string {
-    return this.name;
-  }
-
-  getData(): FontData {
-    return defined(this.data, 'FontError', 'Missing font data');
-  }
-
-  getMetrics(): FontMetrics {
-    return defined(this.metrics, 'FontError', 'Missing metrics');
-  }
-
-  setData(data: FontData): void {
-    this.data = data;
-  }
-
-  setMetrics(metrics: FontMetrics): void {
-    this.metrics = metrics;
-  }
-
-  hasData(): boolean {
-    return this.data !== undefined;
-  }
-
-  getResolution(): number {
-    return this.getData().resolution;
-  }
-
-  getGlyphs(): Record<string, FontGlyph> {
-    return this.getData().glyphs;
-  }
-
-  /**
-   * Use the provided key to look up a value in this font's metrics file (e.g., bravura_metrics.ts, petaluma_metrics.ts).
-   * @param key is a string separated by periods (e.g., stave.endPaddingMax, clef.lineCount.'5'.shiftY).
-   * @param defaultValue is returned if the lookup fails.
-   * @returns the retrieved value (or `defaultValue` if the lookup fails).
-   */
-  // eslint-disable-next-line
-  lookupMetric(key: string, defaultValue?: Record<string, any> | number): any {
-    const keyParts = key.split('.');
-
-    // Start with the top level font metrics object, and keep looking deeper into the object (via each part of the period-delimited key).
-    let currObj = this.getMetrics();
-    for (let i = 0; i < keyParts.length; i++) {
-      const keyPart = keyParts[i];
-      const value = currObj[keyPart];
-      if (value === undefined) {
-        // If the key lookup fails, we fall back to the defaultValue.
-        return defaultValue;
-      }
-      // The most recent lookup succeeded, so we drill deeper into the object.
-      currObj = value;
-    }
-
-    // After checking every part of the key (i.e., the loop completed), return the most recently retrieved value.
-    return currObj;
-  }
-
-  /** For debugging. */
-  toString(): string {
-    return '[' + this.name + ' Font]';
   }
 }
