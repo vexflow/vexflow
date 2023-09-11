@@ -158,7 +158,6 @@ export const CommonMetrics: Record<string, any> = {
   },
 
   TextBracket: {
-    fontFamily: 'Times New Roman, serif',
     fontSize: 15,
     fontStyle: 'italic',
   },
