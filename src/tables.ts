@@ -77,7 +77,6 @@ export const CommonMetrics: Record<string, any> = {
   },
 
   Stave: {
-    fontFamily: 'Arial, sans-serif',
     fontSize: 8,
     padding: 12,
     endPaddingMax: 10,
@@ -92,12 +91,10 @@ export const CommonMetrics: Record<string, any> = {
   },
 
   StaveLine: {
-    fontFamily: 'Arial, sans-serif',
     fontSize: 10,
   },
 
   StaveSection: {
-    fontFamily: 'Arial, sans-serif',
     fontSize: 10,
     fontWeight: 'bold',
   },
@@ -117,12 +114,10 @@ export const CommonMetrics: Record<string, any> = {
   },
 
   StaveTie: {
-    fontFamily: 'Arial, sans-serif',
     fontSize: 10,
   },
 
   StringNumber: {
-    fontFamily: 'Arial, sans-serif',
     fontSize: 10,
     fontWeight: 'bold',
     verticalPadding: 8,
@@ -146,14 +141,12 @@ export const CommonMetrics: Record<string, any> = {
   },
 
   TabSlide: {
-    fontFamily: 'Times New Roman, serif',
     fontSize: 10,
     fontStyle: 'italic',
     fontWeight: 'bold',
   },
 
   TabTie: {
-    fontFamily: 'Arial, sans-serif',
     fontSize: 10,
   },
 

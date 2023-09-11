@@ -155,8 +155,8 @@ export class SVGContext extends RenderContext {
     this.lineWidth = 1.0;
 
     const defaultFontAttributes = {
-      'font-family': Font.SANS_SERIF,
-      'font-size': Font.SIZE + 'pt',
+      'font-family': Tables.lookupMetric('fontFamily'),
+      'font-size': '10pt',
       'font-weight': FontWeight.NORMAL,
       'font-style': FontStyle.NORMAL,
     };

@@ -13,7 +13,7 @@ import { Bend } from '../src/bend';
 import { Dot } from '../src/dot';
 import { Element } from '../src/element';
 import { Flow } from '../src/flow';
-import { Font, FontWeight } from '../src/font';
+import { FontWeight } from '../src/font';
 import { Formatter } from '../src/formatter';
 import { FretHandFinger } from '../src/frethandfinger';
 import { ModifierPosition } from '../src/modifier';
@@ -26,6 +26,7 @@ import { Stem } from '../src/stem';
 import { StemmableNote } from '../src/stemmablenote';
 import { StringNumber } from '../src/stringnumber';
 import { System } from '../src/system';
+import { Tables } from '../src/tables';
 import { Tuplet } from '../src/tuplet';
 import { Voice, VoiceTime } from '../src/voice';
 import { MockTickable } from './mocks';
@@ -841,7 +842,7 @@ function annotations(options: TestOptions): void {
         note.addModifier(
           new Annotation(sm.lyrics[iii])
             .setVerticalJustification(Annotation.VerticalJustify.BOTTOM)
-            .setFont(Font.SERIF, 12, FontWeight.NORMAL)
+            .setFont(Tables.lookupMetric('fontFamily'), 12, FontWeight.NORMAL)
         );
       }
       notes.push(note);

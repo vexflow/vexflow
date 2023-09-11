@@ -12,7 +12,6 @@ import {
   ContextBuilder,
   Dot,
   Factory,
-  Font,
   FontStyle,
   FontWeight,
   RenderContext,
@@ -23,6 +22,8 @@ import {
   TickContext,
   Tremolo,
 } from '../src/index';
+
+import { Tables } from '../src/tables';
 
 const PercussionTests = {
   Start(): void {
@@ -187,7 +188,7 @@ const basic2 = createSingleMeasureTest((f) => {
 
 const snare0 = createSingleMeasureTest((f) => {
   const font = {
-    family: Font.SERIF,
+    family: Tables.lookupMetric('fontFamily'),
     size: 14,
     weight: FontWeight.BOLD,
     style: FontStyle.ITALIC,

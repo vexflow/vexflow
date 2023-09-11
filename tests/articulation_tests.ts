@@ -8,7 +8,6 @@ import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 import { Articulation } from '../src/articulation';
 import { Beam } from '../src/beam';
 import { Flow } from '../src/flow';
-import { Font } from '../src/font';
 import { Formatter } from '../src/formatter';
 import { ModifierPosition } from '../src/modifier';
 import { ContextBuilder } from '../src/renderer';
@@ -16,6 +15,7 @@ import { Stave } from '../src/stave';
 import { Barline } from '../src/stavebarline';
 import { StaveNote, StaveNoteStruct } from '../src/stavenote';
 import { Stem } from '../src/stem';
+import { Tables } from '../src/tables';
 import { TabNote } from '../src/tabnote';
 import { TabStave } from '../src/tabstave';
 import { Voice } from '../src/voice';
@@ -419,7 +419,7 @@ function drawArticulations2(options: TestOptions): void {
 
 function tabNotes(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 600, 200);
-  ctx.font = '10pt ' + Font.SANS_SERIF;
+  ctx.font = '10pt ' + Tables.lookupMetric('fontFamily');
   const stave = new TabStave(10, 10, 550);
   stave.setContext(ctx);
   stave.draw();

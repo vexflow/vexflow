@@ -3,8 +3,9 @@
 //
 // VexFlow Test Support Library
 
-import { ContextBuilder, Factory, Flow, Font, RenderContext, Renderer } from '../src/index';
+import { ContextBuilder, Factory, Flow, RenderContext, Renderer } from '../src/index';
 
+import { Tables } from '../src/tables';
 import { globalObject } from '../src/util';
 
 // eslint-disable-next-line
@@ -376,7 +377,7 @@ export class VexFlowTests {
    */
   static plotLegendForNoteWidth(ctx: RenderContext, x: number, y: number): void {
     ctx.save();
-    ctx.setFont(Font.SANS_SERIF, 8);
+    ctx.setFont(Tables.lookupMetric('fontFamily'), 8);
 
     const spacing = 12;
     let lastY = y;
