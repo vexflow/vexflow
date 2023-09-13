@@ -68,13 +68,11 @@ export class Vibrato extends Modifier {
   setVibratoWidth(width: number): this {
     this.renderOptions.width = width;
     this.text = String.fromCodePoint(this.renderOptions.code);
-    this.measureText();
 
     const items = Math.round(this.renderOptions.width / this.getWidth());
     for (let i = 1; i < items; i++) {
       this.text += String.fromCodePoint(this.renderOptions.code);
     }
-    this.measureText();
 
     return this;
   }

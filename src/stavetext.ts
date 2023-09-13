@@ -26,7 +26,6 @@ export class StaveText extends StaveModifier {
     this.setYShift(options.shiftY ?? 0);
     this.position = position;
     this.justification = options.justification ?? TextNote.Justification.CENTER;
-    this.measureText();
   }
 
   draw(stave: Stave): this {

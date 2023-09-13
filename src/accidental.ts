@@ -522,18 +522,17 @@ export class Accidental extends Modifier {
 
     if (!this.cautionary) {
       this.text += Tables.accidentalCodes(this.type);
-      this.textFont.size = Tables.lookupMetric('Accidental.fontSize');
+      this.fontInfo.size = Tables.lookupMetric('Accidental.fontSize');
     } else {
       this.text += Tables.accidentalCodes('{');
       this.text += Tables.accidentalCodes(this.type);
       this.text += Tables.accidentalCodes('}');
-      this.textFont.size = Tables.lookupMetric('Accidental.cautionary.fontSize');
+      this.fontInfo.size = Tables.lookupMetric('Accidental.cautionary.fontSize');
     }
     // Accidentals attached to grace notes are rendered smaller.
     if (isGraceNote(this.note)) {
-      this.textFont.size = Tables.lookupMetric('Accidental.grace.fontSize');
+      this.fontInfo.size = Tables.lookupMetric('Accidental.grace.fontSize');
     }
-    this.measureText();
   }
 
   /** Attach this accidental to `note`, which must be a `StaveNote`. */

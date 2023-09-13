@@ -593,9 +593,9 @@ export class StaveNote extends StemmableNote {
 
   // Get the `BoundingBox` for the entire note
   getBoundingBox(): BoundingBox {
-    this.boundingBox = new BoundingBox(this.getAbsoluteX(), this.ys[0], 0, 0);
+    const boundingBox = new BoundingBox(this.getAbsoluteX(), this.ys[0], 0, 0);
     this.#noteHeads.forEach((notehead) => {
-      this.boundingBox?.mergeWith(notehead.getBoundingBox());
+      boundingBox.mergeWith(notehead.getBoundingBox());
     });
     const { yTop, yBottom } = this.getNoteHeadBounds();
     // eslint-disable-next-line
@@ -607,13 +607,13 @@ export class StaveNote extends StemmableNote {
         : yBottom - noteStemHeight + this.flag.getTextMetrics().actualBoundingBoxAscent;
 
     if (!this.isRest() && this.hasStem()) {
-      this.boundingBox?.mergeWith(new BoundingBox(this.getAbsoluteX(), flagY, 0, 0));
+      boundingBox.mergeWith(new BoundingBox(this.getAbsoluteX(), flagY, 0, 0));
     }
-    const bbFlag = this.flag.getBoundingBox();
-    if (!this.isRest() && bbFlag) {
-      this.boundingBox?.mergeWith(bbFlag.move(flagX, flagY));
+    if (this.hasFlag()) {
+      const bbFlag = this.flag.getBoundingBox();
+      boundingBox.mergeWith(bbFlag.move(flagX, flagY));
     }
-    return this.boundingBox;
+    return boundingBox;
   }
 
   // Gets the line number of the bottom note in the chord.

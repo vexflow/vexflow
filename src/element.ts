@@ -88,12 +88,12 @@ export class Element {
 
   protected rendered: boolean;
   protected style?: ElementStyle;
-  protected boundingBox?: BoundingBox;
   protected registry?: Registry;
 
-  protected textFont: Required<FontInfo>;
-  protected text = '';
-  protected textMetrics: TextMetrics = {
+  #textFont: Required<FontInfo>;
+  #text = '';
+  #metricsValid = false;
+  #textMetrics: TextMetrics = {
     fontBoundingBoxAscent: 0,
     fontBoundingBoxDescent: 0,
     actualBoundingBoxAscent: 0,
@@ -103,8 +103,8 @@ export class Element {
     width: 0,
   };
 
-  protected height: number = 0;
-  protected width: number = 0;
+  #height: number = 0;
+  #width: number = 0;
   protected xShift: number = 0;
   protected yShift: number = 0;
   protected x: number = 0;
@@ -118,7 +118,7 @@ export class Element {
     };
 
     this.rendered = false;
-    this.textFont = Tables.lookupMetricFontInfo(this.#attrs.type);
+    this.#textFont = Tables.lookupMetricFontInfo(this.#attrs.type);
 
     // If a default registry exist, then register with it right away.
     Registry.getDefaultRegistry()?.register(this);
@@ -308,8 +308,8 @@ export class Element {
   }
 
   /** Get the boundingBox. */
-  getBoundingBox(): BoundingBox | undefined {
-    return this.boundingBox;
+  getBoundingBox(): BoundingBox {
+    return new BoundingBox(0, -this.textMetrics.actualBoundingBoxAscent, this.width, this.height);
   }
 
   /** Return the context, such as an SVGContext or CanvasContext object. */
@@ -341,7 +341,7 @@ export class Element {
 
   /** Returns the CSS compatible font string for the text font. */
   get font(): string {
-    return Font.toCSSString(this.textFont);
+    return Font.toCSSString(this.#textFont);
   }
 
   /**
@@ -366,25 +366,25 @@ export class Element {
     const fontIsString = typeof font === 'string';
     const sizeWeightStyleAreUndefined = size === undefined && weight === undefined && style === undefined;
 
+    this.#metricsValid = false;
     if (fontIsObject) {
       // `font` is case 1) a FontInfo object
-      this.textFont = { ...defaultTextFont, ...font };
+      this.#textFont = { ...defaultTextFont, ...font };
     } else if (fontIsString && sizeWeightStyleAreUndefined) {
       // `font` is case 2) CSS font shorthand.
-      this.textFont = Font.fromCSSString(font);
+      this.#textFont = Font.fromCSSString(font);
     } else {
       // `font` is case 3) a font family string (e.g., 'Times New Roman').
       // The other parameters represent the size, weight, and style.
       // It is okay for `font` to be undefined while one or more of the other arguments is provided.
       // Following CSS conventions, unspecified params are reset to the default.
-      this.textFont = Font.validate(
+      this.#textFont = Font.validate(
         font ?? defaultTextFont.family,
         size ?? defaultTextFont.size,
         weight ?? defaultTextFont.weight,
         style ?? defaultTextFont.style
       );
     }
-    this.measureText();
     return this;
   }
 
@@ -393,14 +393,14 @@ export class Element {
    * 'bold 10pt Arial'.
    */
   getFont(): string {
-    return Font.toCSSString(this.textFont);
+    return Font.toCSSString(this.#textFont);
   }
 
   /** Return a copy of the current FontInfo object. */
   get fontInfo(): Required<FontInfo> {
     // We can cast to Required<FontInfo> here, because
-    // we just called resetFont() above to ensure this.textFont is set.
-    return this.textFont;
+    // we just called resetFont() above to ensure this.fontInfo is set.
+    return this.#textFont;
   }
 
   /** Set the current FontInfo object. */
@@ -480,10 +480,20 @@ export class Element {
     return this.width;
   }
 
+  get width(): number {
+    if (!this.#metricsValid) this.measureText();
+    return this.#width;
+  }
+
   /** Set element width. */
   setWidth(width: number): this {
     this.width = width;
     return this;
+  }
+
+  set width(width: number) {
+    if (!this.#metricsValid) this.measureText();
+    this.#width = width;
   }
 
   /** Set the X coordinate. */
@@ -535,19 +545,28 @@ export class Element {
     return this;
   }
 
+  set text(text: string) {
+    this.#metricsValid = false;
+    this.#text = text;
+  }
+
   /** Get element text. */
   getText(): string {
-    return this.text;
+    return this.#text;
+  }
+
+  get text(): string {
+    return this.#text;
   }
 
   /** Render the element text. */
   renderText(ctx: RenderContext, xPos: number, yPos: number): void {
     ctx.save();
-    ctx.setFont(this.textFont);
-    ctx.fillText(this.text, xPos + this.x + this.xShift, yPos + this.y + this.yShift);
+    ctx.setFont(this.#textFont);
+    ctx.fillText(this.#text, xPos + this.x + this.xShift, yPos + this.y + this.yShift);
     this.children.forEach((child) => {
-      ctx.setFont(child.textFont);
-      ctx.fillText(child.text, xPos + child.x + child.xShift, yPos + child.y + child.yShift);
+      ctx.setFont(child.#textFont);
+      ctx.fillText(child.#text, xPos + child.x + child.xShift, yPos + child.y + child.yShift);
     });
     ctx.restore();
   }
@@ -566,18 +585,12 @@ export class Element {
     }
     const context = txtCanvas.getContext('2d');
     if (!context) throw new RuntimeError('Font', 'No txt context');
-    context.font = Font.toCSSString(Font.validate(this.textFont));
-    this.textMetrics = context.measureText(this.text);
-    const ascent = this.textMetrics.actualBoundingBoxAscent;
-    this.boundingBox = new BoundingBox(
-      0,
-      -ascent,
-      this.textMetrics.width,
-      this.textMetrics.actualBoundingBoxDescent + ascent
-    );
-    this.height = this.boundingBox.getH();
-    this.width = this.textMetrics.width;
-    return this.textMetrics;
+    context.font = Font.toCSSString(Font.validate(this.#textFont));
+    this.#textMetrics = context.measureText(this.#text);
+    this.#height = this.#textMetrics.actualBoundingBoxAscent + this.#textMetrics.actualBoundingBoxDescent;
+    this.#width = this.#textMetrics.width;
+    this.#metricsValid = true;
+    return this.#textMetrics;
   }
 
   /** Get the text metrics. */
@@ -585,20 +598,35 @@ export class Element {
     return this.textMetrics;
   }
 
+  get textMetrics(): TextMetrics {
+    if (!this.#metricsValid) this.measureText();
+    return this.#textMetrics;
+  }
+
   /** Get the text height. */
   getHeight() {
     return this.height;
   }
 
+  get height() {
+    if (!this.#metricsValid) this.measureText();
+    return this.#height;
+  }
+
+  set height(height: number) {
+    if (!this.#metricsValid) this.measureText();
+    this.#height = height;
+  }
+
   setOriginX(x: number): void {
-    const bbox = defined(this.boundingBox);
+    const bbox = this.getBoundingBox();
     const originX = Math.abs(bbox.getX() / bbox.getW());
     const xShift = (x - originX) * bbox.getW();
     this.xShift = -xShift;
   }
 
   setOriginY(y: number): void {
-    const bbox = defined(this.boundingBox);
+    const bbox = this.getBoundingBox();
     const originY = Math.abs(bbox.getY() / bbox.getH());
     const yShift = (y - originY) * bbox.getH();
     this.yShift = -yShift;

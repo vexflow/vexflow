@@ -167,7 +167,7 @@ export class StaveTie extends Element {
     const stave = this.notes.firstNote?.checkStave() ?? this.notes.lastNote?.checkStave();
     if (stave) {
       ctx.save();
-      ctx.setFont(this.textFont);
+      ctx.setFont(this.fontInfo);
       ctx.fillText(this.text, centerX + this.renderOptions.textShiftX, stave.getYForTopText() - 1);
       ctx.restore();
     }

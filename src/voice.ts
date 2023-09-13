@@ -144,8 +144,6 @@ export class Voice extends Element {
   /** Set the voice's stave. */
   setStave(stave: Stave): this {
     this.stave = stave;
-    // Reset the bounding box so we can reformat.
-    this.boundingBox = undefined;
     return this;
   }
 
@@ -154,18 +152,15 @@ export class Voice extends Element {
   }
 
   /** Get the bounding box for the voice. */
-  getBoundingBox(): BoundingBox | undefined {
-    let boundingBox = undefined;
-    for (let i = 0; i < this.tickables.length; ++i) {
+  getBoundingBox(): BoundingBox {
+    const boundingBox = this.tickables[0].getBoundingBox();
+    for (let i = 1; i < this.tickables.length; ++i) {
       const tickable = this.tickables[i];
       if (!tickable.getStave() && this.stave) tickable.setStave(this.stave);
       const bb = tickable.getBoundingBox();
-      if (bb) {
-        boundingBox = boundingBox ? boundingBox.mergeWith(bb) : bb;
-      }
+      boundingBox.mergeWith(bb);
     }
-    this.boundingBox = boundingBox;
-    return this.boundingBox;
+    return boundingBox;
   }
 
   /** Set the voice mode to strict or soft. */
@@ -292,7 +287,6 @@ export class Voice extends Element {
   draw(context: RenderContext = this.checkContext(), stave?: Stave): void {
     stave = stave ?? this.stave;
     this.setRendered();
-    let boundingBox = undefined;
     for (let i = 0; i < this.tickables.length; ++i) {
       const tickable = this.tickables[i];
       // Set the stave if provided.
@@ -300,15 +294,9 @@ export class Voice extends Element {
         tickable.setStave(stave);
       }
       defined(tickable.getStave(), 'MissingStave', 'The voice cannot draw tickables without staves.');
-      const bb = tickable.getBoundingBox();
-      if (bb) {
-        boundingBox = boundingBox ? boundingBox.mergeWith(bb) : bb;
-      }
 
       tickable.setContext(context);
       tickable.drawWithStyle();
     }
-
-    this.boundingBox = boundingBox;
   }
 }

@@ -238,11 +238,11 @@ export class ChordSymbol extends Modifier {
    * The offset is specified in `em`. Scale this value by the font size in pixels.
    */
   get superscriptOffset(): number {
-    return ChordSymbol.superscriptOffset * Font.convertSizeToPixelValue(this.textFont.size);
+    return ChordSymbol.superscriptOffset * Font.convertSizeToPixelValue(this.fontInfo.size);
   }
 
   get subscriptOffset(): number {
-    return ChordSymbol.subscriptOffset * Font.convertSizeToPixelValue(this.textFont.size);
+    return ChordSymbol.subscriptOffset * Font.convertSizeToPixelValue(this.fontInfo.size);
   }
   setReportWidth(value: boolean): this {
     this.reportWidth = value;
@@ -277,7 +277,7 @@ export class ChordSymbol extends Modifier {
       symbolBlock.setYShift(this.superscriptOffset);
     }
     if (symbolBlock.isSubscript() || symbolBlock.isSuperscript()) {
-      const { family, size, weight, style } = this.textFont;
+      const { family, size, weight, style } = this.fontInfo;
       const smallerFontSize = Font.scaleSize(size, ChordSymbol.superSubRatio);
       symbolBlock.setFont(family, smallerFontSize, weight, style);
     } else {
@@ -407,7 +407,7 @@ export class ChordSymbol extends Modifier {
     ctx.openGroup('chordsymbol', this.getAttribute('id'));
 
     const start = note.getModifierStartXY(Modifier.Position.ABOVE, this.index);
-    ctx.setFont(this.textFont);
+    ctx.setFont(this.fontInfo);
 
     let y: number;
 

@@ -130,8 +130,7 @@ export class Clef extends StaveModifier {
       }
     }
     this.text = this.code;
-    this.textFont.size = Math.floor(Clef.getPoint(this.size));
-    this.measureText();
+    this.fontInfo.size = Math.floor(Clef.getPoint(this.size));
 
     return this;
   }

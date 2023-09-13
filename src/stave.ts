@@ -283,6 +283,8 @@ export class Stave extends Element {
   setSection(section: string, y: number, xOffset = 0, fontSize?: number, drawRect = true) {
     const staveSection = new StaveSection(section, this.x + xOffset, y, drawRect);
     if (fontSize) staveSection.setFontSize(fontSize);
+    staveSection.measureText();
+
     this.modifiers.push(staveSection);
     return this;
   }
@@ -305,10 +307,6 @@ export class Stave extends Element {
   ): this {
     this.modifiers.push(new StaveText(text, position, options));
     return this;
-  }
-
-  getHeight(): number {
-    return this.height;
   }
 
   getSpacingBetweenLines(): number {
@@ -730,7 +728,7 @@ export class Stave extends Element {
     // Render measure numbers
     if (this.measure > 0) {
       ctx.save();
-      ctx.setFont(this.textFont);
+      ctx.setFont(this.fontInfo);
       const textWidth = ctx.measureText('' + this.measure).width;
       y = this.getYForTopText(0) + 3;
       ctx.fillText('' + this.measure, this.x - textWidth / 2, y);

@@ -15,7 +15,6 @@ class MockTickable extends Tickable {
   ticks: Fraction = new Fraction(1, 1);
   voice?: Voice;
   stave?: Stave;
-  width: number = 0;
   ignoreTicks: boolean = false;
 
   init(): void {

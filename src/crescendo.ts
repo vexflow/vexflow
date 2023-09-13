@@ -58,7 +58,6 @@ export class Crescendo extends Note {
   }
 
   protected decrescendo: boolean;
-  protected height: number;
   protected line: number;
   protected options = {
     // Extensions to the length of the crescendo on either side

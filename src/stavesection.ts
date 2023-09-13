@@ -23,7 +23,6 @@ export class StaveSection extends StaveModifier {
 
   setStaveSection(section: string): this {
     this.text = section;
-    this.measureText();
     return this;
   }
 

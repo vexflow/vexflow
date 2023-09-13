@@ -80,7 +80,7 @@ export class Annotation extends Modifier {
     for (let i = 0; i < annotations.length; ++i) {
       const annotation = annotations[i];
       // Text height is expressed in fractional stave spaces.
-      const textLines = (2 + Font.convertSizeToPixelValue(annotation.textFont.size)) / Tables.STAVE_LINE_DISTANCE;
+      const textLines = (2 + Font.convertSizeToPixelValue(annotation.fontInfo.size)) / Tables.STAVE_LINE_DISTANCE;
       let verticalSpaceNeeded = textLines;
 
       const note = annotation.checkAttachedNote();
@@ -188,8 +188,6 @@ export class Annotation extends Modifier {
     // warning: the default in the constructor is TOP, but in the factory the default is BOTTOM.
     // this is to support legacy application that may expect this.
     this.verticalJustification = AnnotationVerticalJustify.TOP;
-
-    this.measureText();
   }
 
   /**
@@ -233,7 +231,7 @@ export class Annotation extends Modifier {
     ctx.openGroup('annotation', this.getAttribute('id'));
 
     const textWidth = this.getWidth();
-    const textHeight = Font.convertSizeToPixelValue(this.textFont.size);
+    const textHeight = Font.convertSizeToPixelValue(this.fontInfo.size);
     let x;
     let y;
 

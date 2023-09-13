@@ -25,7 +25,6 @@ export class Tremolo extends Modifier {
     this.num = num;
     this.position = Modifier.Position.CENTER;
     this.text = '\uE220' /*tremolo1*/;
-    this.measureText();
   }
 
   /** Draw the tremolo on the rendering context. */
@@ -41,7 +40,7 @@ export class Tremolo extends Modifier {
     const x = note.getAbsoluteX() + (stemDirection === Stem.UP ? note.getGlyphWidth() - Stem.WIDTH / 2 : Stem.WIDTH / 2);
     let y = note.getStemExtents().topY + (this.num <= 3 ? ySpacing : 0);
 
-    this.textFont.size = Tables.lookupMetric(`Tremolo.fontSize`) * scale;
+    this.fontInfo.size = Tables.lookupMetric(`Tremolo.fontSize`) * scale;
 
     for (let i = 0; i < this.num; ++i) {
       this.renderText(ctx, x, y);
