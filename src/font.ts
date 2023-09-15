@@ -1,3 +1,5 @@
+import { Tables } from "./tables";
+
 export interface FontInfo {
   /** CSS font-family, e.g., 'Arial', 'Helvetica Neue, Arial, sans-serif', 'Times, serif' */
   family?: string;
@@ -117,8 +119,8 @@ export class Font {
       family = f;
     }
 
-    family = family ?? '';
-    size = size ?? '';
+    family = family ?? Tables.lookupMetric('fontFamily') as string;
+    size = size ?? Tables.lookupMetric('fontSize')+'pt';
     weight = weight ?? FontWeight.NORMAL;
     style = style ?? FontStyle.NORMAL;
 
@@ -187,7 +189,7 @@ export class Font {
     let size: string;
     const sz = fontInfo.size;
     if (sz === undefined) {
-      size = '';
+      size = Tables.lookupMetric('fontSize')+'pt';
     } else if (typeof sz === 'number') {
       size = sz + 'pt ';
     } else {
@@ -195,7 +197,7 @@ export class Font {
       size = sz.trim() + ' ';
     }
 
-    const family: string = fontInfo.family ?? '';
+    const family: string = fontInfo.family ?? Tables.lookupMetric('fontFamily');
 
     return `${style}${weight}${size}${family}`;
   }
