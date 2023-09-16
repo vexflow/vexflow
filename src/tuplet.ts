@@ -211,7 +211,6 @@ export class Tuplet extends Element {
       denominator = '\uE88A' /* tupletColon */ + denominator;
     }
     this.textElement.setText(numerator + denominator);
-    this.textElement.measureText();
   }
 
   // determine how many tuplets are nested within this tuplet

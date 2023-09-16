@@ -170,7 +170,6 @@ export class Stroke extends Modifier {
       while (el.getWidth() < botY - topY) {
         txt += lineGlyph;
         el.setText(txt);
-        el.measureText();
       }
       if (
         this.type === Stroke.Type.RASQUEDO_DOWN ||
@@ -193,7 +192,6 @@ export class Stroke extends Modifier {
     if (arrowY !== 0) {
       const el = new Element();
       el.setText(arrow);
-      el.measureText();
       el.renderText(
         ctx,
         // Center the arrow head substracting its width / 2
@@ -206,7 +204,6 @@ export class Stroke extends Modifier {
     if (this.type === Stroke.Type.RASQUEDO_DOWN || this.type === Stroke.Type.RASQUEDO_UP) {
       const el = new Element('Stroke.text');
       el.setText('R');
-      el.measureText();
       el.renderText(
         ctx,
         x + this.xShift - el.getWidth() / 2,

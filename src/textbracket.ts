@@ -78,7 +78,6 @@ export class TextBracket extends Element {
 
     this.textElement = new Element('TextBracket');
     this.textElement.setText(text);
-    this.textElement.measureText();
     this.superscriptElement = new Element('TextBracket');
     this.superscriptElement.setText(superscript);
     const smallerFontSize = Font.scaleSize(this.fontInfo.size, 0.714286);

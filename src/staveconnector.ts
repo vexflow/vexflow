@@ -153,7 +153,6 @@ export class StaveConnector extends Element {
     textElement.setText(text);
     textElement.setXShift(options.shiftX ?? 0);
     textElement.setYShift(options.shiftY ?? 0);
-    textElement.measureText();
     this.texts.push(textElement);
     return this;
   }

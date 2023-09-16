@@ -283,7 +283,6 @@ export class ChordSymbol extends Modifier {
     } else {
       symbolBlock.setFont(this.fontInfo);
     }
-    symbolBlock.measureText();
 
     return symbolBlock;
   }

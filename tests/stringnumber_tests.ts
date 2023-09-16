@@ -277,7 +277,6 @@ function drawAccidentals(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, 750);
   const el = new Element();
   el.setText(String.fromCharCode(0xe050));
-  el.measureText();
   const clefWidth = el.getWidth(); // widest clef
 
   const notes = [

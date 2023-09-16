@@ -21,7 +21,6 @@ function L(...args: any[]) {
 function drawPedalGlyph(name: string, ctx: RenderContext, x: number, y: number): void {
   const glyph = new Element(PedalMarking.CATEGORY);
   glyph.setText(PedalMarking.GLYPHS[name] ?? name);
-  glyph.measureText();
   glyph.renderText(ctx, x - (glyph.getWidth() - Tables.STAVE_LINE_DISTANCE) / 2, y);
 }
 

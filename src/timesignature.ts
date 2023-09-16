@@ -117,7 +117,6 @@ export class TimeSignature extends StaveModifier {
       txt += code;
     }
     this.topText.setText(txt);
-    this.topText.measureText();
     topWidth = this.topText.getWidth();
     height = this.topText.getHeight();
 
@@ -128,7 +127,6 @@ export class TimeSignature extends StaveModifier {
       txt += code;
     }
     this.botText.setText(txt);
-    this.botText.measureText();
     botWidth = this.botText.getWidth();
     height = Math.max(height, this.botText.getHeight());
 

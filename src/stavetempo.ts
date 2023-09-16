@@ -81,7 +81,6 @@ export class StaveTempo extends StaveModifier {
       x += 3;
       const el = new Element('StaveTempo.glyph');
       el.setText(this.#durationToCode[Tables.sanitizeDuration(duration)]);
-      el.measureText();
       el.renderText(ctx, x + this.xShift, y + this.yShift);
       x += el.getWidth();
 

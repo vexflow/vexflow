@@ -226,11 +226,9 @@ export class TabNote extends StemmableNote {
     if (fret.toUpperCase() === 'X') {
       el = new Element('TabNote');
       el.setText('\ue263' /*accidentalDoubleSharp*/);
-      el.measureText();
     } else {
       el = new Element('TabNote.text');
       el.setText(fret);
-      el.measureText();
       el.setYShift(el.getHeight() / 2);
     }
 

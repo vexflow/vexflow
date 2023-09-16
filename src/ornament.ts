@@ -197,7 +197,6 @@ export class Ornament extends Modifier {
   setUpperAccidental(accid: string): this {
     this.accidentalUpper = new Element();
     this.accidentalUpper.setText(Tables.accidentalCodes(accid));
-    this.accidentalUpper.measureText();
     return this;
   }
 
@@ -205,7 +204,6 @@ export class Ornament extends Modifier {
   setLowerAccidental(accid: string): this {
     this.accidentalLower = new Element();
     this.accidentalLower.setText(Tables.accidentalCodes(accid));
-    this.accidentalLower.measureText();
     return this;
   }
 

@@ -64,7 +64,6 @@ const FormatterTests = {
 function getGlyphWidth(glyph: string): number {
   const el = new Element();
   el.setText(glyph);
-  el.measureText();
   return el.getWidth();
 }
 
