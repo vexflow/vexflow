@@ -180,7 +180,6 @@ export class Articulation extends Modifier {
   protected articulation: ArticulationStruct;
 
   protected heightShift = 0;
-  protected height = 0;
   /**
    * FIXME:
    * Most of the complex formatting logic (ie: snapping to space) is
@@ -321,7 +320,6 @@ export class Articulation extends Modifier {
       this.articulation.code ||
       Glyphs.null;
     this.text = code;
-    this.measureText();
   }
 
   /** Set if articulation should be rendered between lines. */

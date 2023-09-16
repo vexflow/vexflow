@@ -60,7 +60,7 @@ export class TextDynamics extends Note {
     this.text = '';
 
     this.renderOptions = { glyphFontSize: Tables.lookupMetric('fontSize'), ...this.renderOptions };
-    this.textFont.size = defined(this.renderOptions.glyphFontSize) * this.renderOptions.glyphFontScale;
+    this.fontInfo.size = defined(this.renderOptions.glyphFontSize) * this.renderOptions.glyphFontScale;
     L('New Dynamics Text: ', this.sequence);
   }
 
@@ -86,8 +86,6 @@ export class TextDynamics extends Note {
       this.text += glyph;
     });
 
-    // Store the width of the text
-    this.measureText();
     this.preFormatted = true;
     return this;
   }

@@ -129,7 +129,6 @@ export class FretHandFinger extends Modifier {
 
   setFretHandFinger(finger: string): this {
     this.text = finger;
-    this.measureText();
     return this;
   }
 

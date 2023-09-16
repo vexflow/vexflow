@@ -78,20 +78,21 @@ export class TextNote extends Note {
       this.setFont(noteStruct.font);
     } else if (noteStruct.glyph === undefined) {
       this.setFont(Tables.lookupMetricFontInfo('TextNote.text.fontSize'));
-    } else {
-      this.measureText();
     }
+
     // Scale the font size by 1/1.3.
-    const smallerFontSize = Font.convertSizeToPointValue(this.textFont.size) * 0.769231;
+    const smallerFontSize = Font.convertSizeToPointValue(this.fontInfo.size) * 0.769231;
     if (noteStruct.superscript) {
       this.superscript = new Element('TexNote.subSuper');
       this.superscript.setText(noteStruct.superscript);
       this.superscript.setFontSize(smallerFontSize);
+      this.superscript.measureText();
     }
     if (noteStruct.subscript) {
       this.subscript = new Element('TexNote.subSuper');
       this.subscript.setText(noteStruct.subscript);
       this.subscript.setFontSize(smallerFontSize);
+      this.subscript.measureText();
     }
 
     this.line = noteStruct.line ?? 0;

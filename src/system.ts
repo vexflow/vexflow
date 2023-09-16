@@ -295,8 +295,12 @@ export class System extends Element {
     this.startX = startX;
     this.debugNoteMetricsYs = debugNoteMetricsYs;
     this.lastY = y;
-    this.boundingBox = new BoundingBox(this.options.x, this.options.y, this.options.width, this.lastY - this.options.y);
     Stave.formatBegModifiers(this.partStaves);
+  }
+
+  /** Get the boundingBox. */
+  getBoundingBox(): BoundingBox {
+    return new BoundingBox(this.options.x, this.options.y, this.options.width, (this.lastY ?? 0) - this.options.y);
   }
 
   /** Render the system. */

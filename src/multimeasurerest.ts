@@ -75,7 +75,7 @@ export class MultiMeasureRest extends Element {
   constructor(numberOfMeasures: number, options: MultimeasureRestRenderOptions) {
     super();
     const fontSize = options.numberGlyphPoint ?? Tables.lookupMetric('MultiMeasureRest.fontSize'); // same as TimeSignature.
-    this.textFont.size = fontSize;
+    this.fontInfo.size = fontSize;
 
     this.numberOfMeasures = numberOfMeasures;
     this.text = '';
@@ -84,7 +84,6 @@ export class MultiMeasureRest extends Element {
       // 0xe080 is timeSig0. We calculate the code point for timeSigN to assemble the digits via SMuFL glyphs.
       this.text += String.fromCodePoint(0xe080 + Number(digit));
     }
-    this.measureText();
 
     // Keep track of whether these four options were provided.
     this.#hasPaddingLeft = typeof options.paddingLeft === 'number';

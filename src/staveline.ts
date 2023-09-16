@@ -76,8 +76,6 @@ export class StaveLine extends Element {
     textJustification: number;
   };
 
-  protected text: string;
-
   // These five instance variables are all initialized by the constructor via this.setNotes(notes).
   protected notes!: StaveLineNotes;
   protected firstNote!: StaveNote;
@@ -183,7 +181,7 @@ export class StaveLine extends Element {
   // Apply the text styling to the context
   applyFontStyle(): void {
     const ctx = this.checkContext();
-    ctx.setFont(this.textFont);
+    ctx.setFont(this.fontInfo);
 
     const renderOptions = this.renderOptions;
     const color = renderOptions.color;

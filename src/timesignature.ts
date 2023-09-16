@@ -152,7 +152,6 @@ export class TimeSignature extends StaveModifier {
       const code = TimeSignature.getTimeSigCode(timeSpec);
       this.line = 2;
       this.text = code;
-      this.measureText();
       this.isNumeric = false;
     } else {
       if (this.validateArgs) {

@@ -81,7 +81,7 @@ export class TextBracket extends Element {
     this.textElement.measureText();
     this.superscriptElement = new Element('TextBracket');
     this.superscriptElement.setText(superscript);
-    const smallerFontSize = Font.scaleSize(this.textFont.size, 0.714286);
+    const smallerFontSize = Font.scaleSize(this.fontInfo.size, 0.714286);
     this.superscriptElement.setFontSize(smallerFontSize);
 
     this.position = typeof position === 'string' ? TextBracket.PositionString[position] : position;
@@ -108,9 +108,9 @@ export class TextBracket extends Element {
    * @returns this
    */
   applyStyle(ctx: RenderContext): this {
-    this.textElement.setFont(this.textFont);
+    this.textElement.setFont(this.fontInfo);
     // We called this.resetFont() in the constructor, so we know this.textFont is available.
-    const { family, size, weight, style } = this.textFont;
+    const { family, size, weight, style } = this.fontInfo;
     // To draw the superscript, we scale the font size by 1/1.4.
     const smallerFontSize = Font.scaleSize(size, 0.714286);
     this.superscriptElement.setFont(family, smallerFontSize, weight, style);

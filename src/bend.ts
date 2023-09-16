@@ -217,7 +217,7 @@ export class Bend extends Modifier {
 
     const renderText = (x: number, text: string) => {
       ctx.save();
-      ctx.setFont(this.textFont);
+      ctx.setFont(this.fontInfo);
       const renderX = x - ctx.measureText(text).width / 2;
       ctx.fillText(text, renderX, annotationY);
       ctx.restore();

@@ -249,7 +249,7 @@ export class StringNumber extends Modifier {
       ctx.setLineWidth(1.5);
       ctx.stroke();
     }
-    ctx.setFont(this.textFont);
+    ctx.setFont(this.fontInfo);
     const x = dotX - ctx.measureText(this.stringNumber).width / 2;
     ctx.fillText('' + this.stringNumber, x, dotY + 4.5);
 

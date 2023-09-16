@@ -96,8 +96,7 @@ export class NoteHead extends Note {
       glyphFontScale: noteStruct.glyphFontScale || Tables.lookupMetric('fontSize'),
     };
 
-    this.textFont.size = this.renderOptions.glyphFontScale;
-    this.measureText();
+    this.fontInfo.size = this.renderOptions.glyphFontScale;
   }
   /** Get the width of the notehead. */
   getWidth(): number {
@@ -160,7 +159,6 @@ export class NoteHead extends Note {
   preFormat(): this {
     if (this.preFormatted) return this;
 
-    this.measureText();
     this.preFormatted = true;
     return this;
   }

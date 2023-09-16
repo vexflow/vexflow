@@ -169,7 +169,6 @@ export class Ornament extends Modifier {
     }
 
     this.text = Tables.ornamentCodes(this.type);
-    this.measureText();
   }
 
   /** Set note attached to ornament. */

@@ -32,7 +32,6 @@ export class GlyphNote extends Note {
 
   setGlyph(glyph: string): this {
     this.text = glyph;
-    this.measureText();
     return this;
   }
 
