@@ -135,7 +135,6 @@ export class MultiMeasureRest extends Element {
     let txt = '\ue4ef'; /*restHBarLeft*/
     const el = new Element();
     el.setText(txt);
-    el.measureText();
     // Add middle bars until the right padding is reached
     for (let i = 1; (i + 2) * el.getWidth() + left <= right; i++) {
       txt += '\ue4f0'; /*restHBarMiddle*/
@@ -143,7 +142,6 @@ export class MultiMeasureRest extends Element {
     txt += '\ue4f1'; /*restHBarRight*/
 
     el.setText(txt);
-    el.measureText();
     el.renderText(ctx, left + (right - left) * 0.5 - el.getWidth() * 0.5, y);
   }
 
@@ -164,14 +162,12 @@ export class MultiMeasureRest extends Element {
       txt += '\ue4e2' /*restDoubleWhole*/ + ' ';
     }
     elMiddle.setText(txt);
-    elMiddle.measureText();
     const elTop = new Element();
     txt = '';
     for (let i = 0; i < n1; ++i) {
       txt += '\ue4e3' /*restWhole*/ + ' ';
     }
     elTop.setText(txt);
-    elTop.measureText();
 
     const width = elMiddle.getWidth() + elTop.getWidth();
     let x = left + (right - left) * 0.5 - width * 0.5;

@@ -66,7 +66,6 @@ export abstract class StemmableNote extends Note {
 
       this.flag.setText(flagCode);
       this.flag.fontSize = this.renderOptions.glyphFontScale;
-      this.flag.measureText();
     }
   }
 

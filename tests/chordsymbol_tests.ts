@@ -41,7 +41,6 @@ const note = (factory: Factory, keys: string[], duration: string, chordSymbol: C
 function getGlyphWidth(charCode: number): number {
   const el = new Element();
   el.setText(String.fromCharCode(charCode));
-  el.measureText();
   return el.getWidth();
 }
 

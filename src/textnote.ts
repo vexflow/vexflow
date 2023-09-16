@@ -86,13 +86,11 @@ export class TextNote extends Note {
       this.superscript = new Element('TexNote.subSuper');
       this.superscript.setText(noteStruct.superscript);
       this.superscript.setFontSize(smallerFontSize);
-      this.superscript.measureText();
     }
     if (noteStruct.subscript) {
       this.subscript = new Element('TexNote.subSuper');
       this.subscript.setText(noteStruct.subscript);
       this.subscript.setFontSize(smallerFontSize);
-      this.subscript.measureText();
     }
 
     this.line = noteStruct.line ?? 0;

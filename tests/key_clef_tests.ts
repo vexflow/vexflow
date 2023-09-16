@@ -25,7 +25,6 @@ const ClefKeySignatureTests = {
 function getWidth(code: string) {
   const el = new Element();
   el.setText(code);
-  el.measureText();
   return el.getWidth();
 }
 

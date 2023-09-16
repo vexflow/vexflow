@@ -239,7 +239,6 @@ function drawOrnamentsWithAccidentals(options: TestOptions): void {
 function jazzOrnaments(options: TestOptions): void {
   const el = new Element();
   el.setText('\ue050' /* gClef */); // widest clef
-  el.measureText();
   const clefWidth = el.getWidth();
 
   // Helper function.
