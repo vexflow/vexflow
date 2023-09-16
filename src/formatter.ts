@@ -3,7 +3,6 @@
 
 import { Beam } from './beam';
 import { BoundingBox } from './boundingbox';
-import { Font } from './font';
 import { Fraction } from './fraction';
 import { ModifierContext } from './modifiercontext';
 import { RenderContext } from './rendercontext';
@@ -232,7 +231,7 @@ export class Formatter {
     }
 
     ctx.save();
-    ctx.setFont(Font.SANS_SERIF, 8);
+    ctx.setFont(Tables.lookupMetric('fontFamily'), 8);
 
     contextGaps.gaps.forEach((gap) => {
       stroke(x + gap.x1, x + gap.x2, 'rgba(100,200,100,0.4)');

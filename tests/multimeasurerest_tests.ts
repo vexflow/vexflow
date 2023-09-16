@@ -5,9 +5,10 @@
 
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
+import { Element } from '../src/element';
 import { Flow } from '../src/flow';
-import { Font } from '../src/font';
 import { MultimeasureRestRenderOptions } from '../src/multimeasurerest';
+import { Tables } from '../src/tables';
 
 const MultiMeasureRestTests = {
   Start(): void {
@@ -95,11 +96,10 @@ function simple(options: TestOptions): void {
   const strY = mmRests[0].getStave()!.getYForLine(-0.5);
   const str = 'TACET';
   const context = f.getContext();
-  context.save();
-  context.setFont(Font.SERIF, 16, 'bold');
-  const metrics = context.measureText(str);
-  context.fillText(str, xs.left + (xs.right - xs.left) * 0.5 - metrics.width * 0.5, strY);
-  context.restore();
+  const element = new Element();
+  element.setText(str);
+  element.setFont(Tables.lookupMetric('fontFamily'), 16, 'bold');
+  element.renderText(context, xs.left + (xs.right - xs.left) * 0.5 - element.getWidth() * 0.5, strY);
 
   options.assert.ok(true, 'Simple Test');
 }

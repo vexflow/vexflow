@@ -1,5 +1,4 @@
-import { TupletMetrics } from './tuplet';
-import { defined } from './util';
+import { Tables } from "./tables";
 
 export interface FontInfo {
   /** CSS font-family, e.g., 'Arial', 'Helvetica Neue, Arial, sans-serif', 'Times, serif' */
@@ -35,15 +34,6 @@ export class Font {
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // STATIC MEMBERS
 
-  /** Default sans-serif font family. */
-  static SANS_SERIF: string = 'Arial, sans-serif';
-
-  /** Default serif font family. */
-  static SERIF: string = 'Times New Roman, serif';
-
-  /** Default font size in `pt`. */
-  static SIZE: number = 10;
-
   // CSS Font Sizes: 36pt == 48px == 3em == 300% == 0.5in
   /** Given a length (for units: pt, px, em, %, in, mm, cm) what is the scale factor to convert it to px? */
   static scaleToPxFrom: Record<string, number> = {
@@ -62,7 +52,7 @@ export class Font {
    * units (e.g., pt, em, %).
    * @returns the number of pixels that is equivalent to `fontSize`
    */
-  static convertSizeToPixelValue(fontSize: string | number = Font.SIZE): number {
+  static convertSizeToPixelValue(fontSize: string | number): number {
     if (typeof fontSize === 'number') {
       // Assume the numeric fontSize is specified in pt.
       return fontSize * Font.scaleToPxFrom.pt;
@@ -83,7 +73,7 @@ export class Font {
    * units (e.g., pt, em, %).
    * @returns the number of points that is equivalent to `fontSize`
    */
-  static convertSizeToPointValue(fontSize: string | number = Font.SIZE): number {
+  static convertSizeToPointValue(fontSize: string | number): number {
     if (typeof fontSize === 'number') {
       // Assume the numeric fontSize is specified in pt.
       return fontSize;
@@ -129,8 +119,8 @@ export class Font {
       family = f;
     }
 
-    family = family ?? Font.SANS_SERIF;
-    size = size ?? Font.SIZE + 'pt';
+    family = family ?? Tables.lookupMetric('fontFamily') as string;
+    size = size ?? Tables.lookupMetric('fontSize')+'pt';
     weight = weight ?? FontWeight.NORMAL;
     style = style ?? FontStyle.NORMAL;
 
@@ -199,7 +189,7 @@ export class Font {
     let size: string;
     const sz = fontInfo.size;
     if (sz === undefined) {
-      size = Font.SIZE + 'pt ';
+      size = Tables.lookupMetric('fontSize')+'pt';
     } else if (typeof sz === 'number') {
       size = sz + 'pt ';
     } else {
@@ -207,7 +197,7 @@ export class Font {
       size = sz.trim() + ' ';
     }
 
-    const family: string = fontInfo.family ?? Font.SANS_SERIF;
+    const family: string = fontInfo.family ?? Tables.lookupMetric('fontFamily');
 
     return `${style}${weight}${size}${family}`;
   }

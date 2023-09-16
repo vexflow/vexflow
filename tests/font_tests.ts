@@ -73,7 +73,7 @@ function fontParsing(assert: Assert): void {
   const bFont = b.fontInfo;
   // Check the default font.
   assert.equal(bFont?.family, 'Bravura,Roboto Slab');
-  assert.equal(bFont?.size, Font.SIZE);
+  assert.equal(bFont?.size, 10);
   assert.equal(bFont?.weight, FontWeight.NORMAL);
   assert.equal(bFont?.style, FontStyle.NORMAL);
 

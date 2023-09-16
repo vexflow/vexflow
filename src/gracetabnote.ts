@@ -8,7 +8,6 @@
 //
 // See `tests/gracetabnote_tests.ts` for usage examples.
 
-import { Font } from './font';
 import { TabNote, TabNoteStruct } from './tabnote';
 import { Category } from './typeguard';
 
@@ -26,8 +25,6 @@ export class GraceTabNote extends TabNote {
       yShift: 0.3,
       // grace glyph scale
       scale: 0.6,
-      // grace tablature font
-      font: `7.5pt ${Font.SANS_SERIF}`,
     };
 
     this.updateWidth();
