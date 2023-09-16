@@ -2,6 +2,7 @@
 // MIT License
 // @author Gregory Ristow (2015)
 
+import { Element } from './element';
 import { Font, FontInfo, FontStyle, FontWeight } from './font';
 import { GroupAttributes, RenderContext, TextMeasure } from './rendercontext';
 import { Tables } from './tables';
@@ -53,61 +54,11 @@ export interface State {
   lineWidth: number;
 }
 
-class MeasureTextCache {
-  protected txt?: SVGTextElement;
-
-  // The cache is keyed first by the text string, then by the font attributes
-  // joined together.
-  protected cache: Record<string, Record<string, TextMeasure>> = {};
-
-  lookup(text: string, svg: SVGSVGElement, attributes: Attributes): TextMeasure {
-    let entries = this.cache[text];
-    if (entries === undefined) {
-      entries = {};
-      this.cache[text] = entries;
-    }
-
-    const family = attributes['font-family'];
-    const size = attributes['font-size'];
-    const weight = attributes['font-weight'];
-    const style = attributes['font-style'];
-
-    const key = `${family}%${size}%${weight}%${style}`;
-    let entry = entries[key];
-    if (entry === undefined) {
-      entry = this.measureImpl(text, svg, attributes);
-      entries[key] = entry;
-    }
-    return entry;
-  }
-
-  measureImpl(text: string, svg: SVGSVGElement, attributes: Attributes): TextMeasure {
-    let txt = this.txt;
-    if (!txt) {
-      // Create the SVG text element that will be used to measure text in the event
-      // of a cache miss.
-      txt = document.createElementNS(SVG_NS, 'text');
-      this.txt = txt;
-    }
-
-    txt.textContent = text;
-    if (attributes['font-family']) txt.setAttributeNS(null, 'font-family', attributes['font-family']);
-    if (attributes['font-size']) txt.setAttributeNS(null, 'font-size', `${attributes['font-size']}`);
-    if (attributes['font-style']) txt.setAttributeNS(null, 'font-style', attributes['font-style']);
-    if (attributes['font-weight']) txt.setAttributeNS(null, 'font-weight', `${attributes['font-weight']}`);
-    svg.appendChild(txt);
-    const bbox = txt.getBBox();
-    svg.removeChild(txt);
-
-    return { x: bbox.x, y: bbox.y, width: bbox.width, height: bbox.height };
-  }
-}
-
 /**
  * SVG rendering context with an API similar to CanvasRenderingContext2D.
  */
 export class SVGContext extends RenderContext {
-  protected static measureTextCache = new MeasureTextCache();
+  protected static measureTextElement = new Element();
 
   element: HTMLElement; // the parent DOM object
   svg: SVGSVGElement;
@@ -598,7 +549,15 @@ export class SVGContext extends RenderContext {
 
   // ## Text Methods:
   measureText(text: string): TextMeasure {
-    return SVGContext.measureTextCache.lookup(text, this.svg, this.attributes);
+    SVGContext.measureTextElement.setText(text);
+    SVGContext.measureTextElement.setFont(
+      this.attributes['font-family'],
+      this.attributes['font-size'],
+      this.attributes['font-weight'],
+      this.attributes['font-style']
+    );
+    const bb = SVGContext.measureTextElement.getBoundingBox();
+    return { x: bb.x, y: bb.y, width: bb.w, height: bb.h };
   }
 
   fillText(text: string, x: number, y: number): this {
