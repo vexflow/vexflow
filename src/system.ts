@@ -300,7 +300,7 @@ export class System extends Element {
 
   /** Get the boundingBox. */
   getBoundingBox(): BoundingBox {
-    return new BoundingBox(this.options.x, this.options.y, this.options.width, this.lastY ?? 0 - this.options.y);
+    return new BoundingBox(this.options.x, this.options.y, this.options.width, (this.lastY ?? 0) - this.options.y);
   }
 
   /** Render the system. */

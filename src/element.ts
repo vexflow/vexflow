@@ -90,7 +90,7 @@ export class Element {
   protected style?: ElementStyle;
   protected registry?: Registry;
 
-  #textFont: Required<FontInfo>;
+  #fontInfo: Required<FontInfo>;
   #text = '';
   #metricsValid = false;
   #textMetrics: TextMetrics = {
@@ -118,7 +118,7 @@ export class Element {
     };
 
     this.rendered = false;
-    this.#textFont = Tables.lookupMetricFontInfo(this.#attrs.type);
+    this.#fontInfo = Tables.lookupMetricFontInfo(this.#attrs.type);
 
     // If a default registry exist, then register with it right away.
     Registry.getDefaultRegistry()?.register(this);
@@ -341,7 +341,7 @@ export class Element {
 
   /** Returns the CSS compatible font string for the text font. */
   get font(): string {
-    return Font.toCSSString(this.#textFont);
+    return Font.toCSSString(this.#fontInfo);
   }
 
   /**
@@ -369,16 +369,16 @@ export class Element {
     this.#metricsValid = false;
     if (fontIsObject) {
       // `font` is case 1) a FontInfo object
-      this.#textFont = { ...defaultTextFont, ...font };
+      this.#fontInfo = { ...defaultTextFont, ...font };
     } else if (fontIsString && sizeWeightStyleAreUndefined) {
       // `font` is case 2) CSS font shorthand.
-      this.#textFont = Font.fromCSSString(font);
+      this.#fontInfo = Font.fromCSSString(font);
     } else {
       // `font` is case 3) a font family string (e.g., 'Times New Roman').
       // The other parameters represent the size, weight, and style.
       // It is okay for `font` to be undefined while one or more of the other arguments is provided.
       // Following CSS conventions, unspecified params are reset to the default.
-      this.#textFont = Font.validate(
+      this.#fontInfo = Font.validate(
         font ?? defaultTextFont.family,
         size ?? defaultTextFont.size,
         weight ?? defaultTextFont.weight,
@@ -393,14 +393,14 @@ export class Element {
    * 'bold 10pt Arial'.
    */
   getFont(): string {
-    return Font.toCSSString(this.#textFont);
+    return Font.toCSSString(this.#fontInfo);
   }
 
   /** Return a copy of the current FontInfo object. */
   get fontInfo(): Required<FontInfo> {
     // We can cast to Required<FontInfo> here, because
     // we just called resetFont() above to ensure this.fontInfo is set.
-    return this.#textFont;
+    return this.#fontInfo;
   }
 
   /** Set the current FontInfo object. */
@@ -562,10 +562,10 @@ export class Element {
   /** Render the element text. */
   renderText(ctx: RenderContext, xPos: number, yPos: number): void {
     ctx.save();
-    ctx.setFont(this.#textFont);
+    ctx.setFont(this.#fontInfo);
     ctx.fillText(this.#text, xPos + this.x + this.xShift, yPos + this.y + this.yShift);
     this.children.forEach((child) => {
-      ctx.setFont(child.#textFont);
+      ctx.setFont(child.#fontInfo);
       ctx.fillText(child.#text, xPos + child.x + child.xShift, yPos + child.y + child.yShift);
     });
     ctx.restore();
@@ -585,7 +585,7 @@ export class Element {
     }
     const context = txtCanvas.getContext('2d');
     if (!context) throw new RuntimeError('Font', 'No txt context');
-    context.font = Font.toCSSString(Font.validate(this.#textFont));
+    context.font = Font.toCSSString(Font.validate(this.#fontInfo));
     this.#textMetrics = context.measureText(this.#text);
     this.#height = this.#textMetrics.actualBoundingBoxAscent + this.#textMetrics.actualBoundingBoxDescent;
     this.#width = this.#textMetrics.width;
