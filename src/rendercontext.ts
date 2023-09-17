@@ -79,7 +79,6 @@ export abstract class RenderContext {
   get font(): string {
     return this.getFont();
   }
-
 }
 
 /**

@@ -1,4 +1,4 @@
-import { Tables } from "./tables";
+import { Tables } from './tables';
 
 export interface FontInfo {
   /** CSS font-family, e.g., 'Arial', 'Helvetica Neue, Arial, sans-serif', 'Times, serif' */
@@ -119,8 +119,8 @@ export class Font {
       family = f;
     }
 
-    family = family ?? Tables.lookupMetric('fontFamily') as string;
-    size = size ?? Tables.lookupMetric('fontSize')+'pt';
+    family = family ?? (Tables.lookupMetric('fontFamily') as string);
+    size = size ?? Tables.lookupMetric('fontSize') + 'pt';
     weight = weight ?? FontWeight.NORMAL;
     style = style ?? FontStyle.NORMAL;
 
@@ -189,7 +189,7 @@ export class Font {
     let size: string;
     const sz = fontInfo.size;
     if (sz === undefined) {
-      size = Tables.lookupMetric('fontSize')+'pt';
+      size = Tables.lookupMetric('fontSize') + 'pt';
     } else if (typeof sz === 'number') {
       size = sz + 'pt ';
     } else {

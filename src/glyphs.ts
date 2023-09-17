@@ -75,7 +75,7 @@ export enum Glyphs {
   accSagittal23SmallDiesisUp = '\ue39e',
   // U+E307  25 small diesis down, 2° down [53 EDO]
   accSagittal25SmallDiesisDown = '\ue307',
-  // U+E306  25 small diesis up, (25S, ~5:13S, ~37S, 5C plus 5C), 2° up [53 EDO]
+  // U+E306  25 small diesis up, (25S, ~5:13S, ~37S, 5C plus 5C), 2° up [53 EDO]
   accSagittal25SmallDiesisUp = '\ue306',
   // U+E3F7  2 minas down, 65/77-schismina down, 0.83 cents down
   accSagittal2MinasDown = '\ue3f7',
@@ -91,7 +91,7 @@ export enum Glyphs {
   accSagittal35LargeDiesisUp = '\ue30e',
   // U+E309  35 medium diesis down, 1°[50] 2°[27] down, 2/9-tone down
   accSagittal35MediumDiesisDown = '\ue309',
-  // U+E308  35 medium diesis up, (35M, ~13M, ~125M, 5C plus 7C), 2/9-tone up
+  // U+E308  35 medium diesis up, (35M, ~13M, ~125M, 5C plus 7C), 2/9-tone up
   accSagittal35MediumDiesisUp = '\ue308',
   // U+E3FD  3 tinas down, 1 mina down, 1/(5⋅7⋅13)-schismina down, 0.42 cents down
   accSagittal3TinasDown = '\ue3fd',
@@ -151,7 +151,7 @@ export enum Glyphs {
   accSagittal5v49MediumDiesisUp = '\ue3a6',
   // U+E301  5:7 kleisma down
   accSagittal5v7KleismaDown = '\ue301',
-  // U+E300  5:7 kleisma up, (5:7k, ~11:13k, 7C less 5C)
+  // U+E300  5:7 kleisma up, (5:7k, ~11:13k, 7C less 5C)
   accSagittal5v7KleismaUp = '\ue300',
   // U+E403  6 tinas down, 2 minas down, 65/77-schismina down, 0.83 cents down
   accSagittal6TinasDown = '\ue403',

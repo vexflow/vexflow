@@ -125,7 +125,7 @@ export class MultiMeasureRest extends Element {
     return defined(this.stave, 'NoStave', 'No stave attached to instance.');
   }
 
-  drawLine(stave: Stave, ctx: RenderContext, left: number, right: number, spacingBetweenLines: number): void {
+  drawLine(stave: Stave, ctx: RenderContext, left: number, right: number): void {
     const options = this.renderOptions;
 
     const y = stave.getYForLine(options.line);
@@ -145,7 +145,7 @@ export class MultiMeasureRest extends Element {
     el.renderText(ctx, left + (right - left) * 0.5 - el.getWidth() * 0.5, y);
   }
 
-  drawSymbols(stave: Stave, ctx: RenderContext, left: number, right: number, spacingBetweenLines: number): void {
+  drawSymbols(stave: Stave, ctx: RenderContext, left: number, right: number): void {
     const n4 = Math.floor(this.numberOfMeasures / 4);
     const n = this.numberOfMeasures % 4;
     const n2 = Math.floor(n / 2);
@@ -210,11 +210,10 @@ export class MultiMeasureRest extends Element {
     this.xs.left = left;
     this.xs.right = right;
 
-    const spacingBetweenLines = options.spacingBetweenLinesPx;
     if (options.useSymbols) {
-      this.drawSymbols(stave, ctx, left, right, spacingBetweenLines);
+      this.drawSymbols(stave, ctx, left, right);
     } else {
-      this.drawLine(stave, ctx, left, right, spacingBetweenLines);
+      this.drawLine(stave, ctx, left, right);
     }
 
     if (options.showNumber) {

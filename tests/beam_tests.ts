@@ -11,7 +11,6 @@ import {
   AnnotationVerticalJustify,
   Beam,
   Dot,
-  Font,
   FontStyle,
   FontWeight,
   StaveNoteStruct,
@@ -20,6 +19,7 @@ import {
   TabNoteStruct,
   Voice,
 } from '../src/index';
+
 import { Tables } from '../src/tables';
 
 const BeamTests = {
