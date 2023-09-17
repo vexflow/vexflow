@@ -5,7 +5,7 @@
 import { Modifier, ModifierPosition } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { Note } from './note';
-import { Category, isGraceNote } from './typeguard';
+import { Category } from './typeguard';
 
 /** Parenthesis implements parenthesis modifiers for notes. */
 export class Parenthesis extends Modifier {

@@ -82,7 +82,6 @@ function width(assert: Assert): void {
   assert.throws(() => note.getWidth(), /UnformattedNote/, 'Unformatted note should have no width');
 }
 
-
 function draw(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 600, 140);
   ctx.font = '10pt Arial';

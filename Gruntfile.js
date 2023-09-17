@@ -321,13 +321,7 @@ function webpackConfigs() {
   const WATCH = true;
 
   function prodConfig(watch = false) {
-    return getConfig(
-      [VEX],
-      PRODUCTION_MODE,
-      BANNER,
-      'Vex',
-      watch
-    );
+    return getConfig([VEX], PRODUCTION_MODE, BANNER, 'Vex', watch);
   }
 
   function debugConfig(watch = false) {
@@ -354,6 +348,11 @@ module.exports = (grunt) => {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     webpack: webpackConfigs(),
+
+    eslint: {
+      target: ['src/**/*.ts', 'tests/**/*.ts', 'src/**/*.js', 'tests/**/*.js', 'entry/**/*.ts'],
+      options: {},
+    },
 
     // grunt qunit
     // Run unit tests on the command line by loading tests/flow-headless-browser.html.
@@ -427,6 +426,7 @@ module.exports = (grunt) => {
     },
   });
 
+  grunt.loadNpmTasks('grunt-eslint');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-qunit');
@@ -441,6 +441,8 @@ module.exports = (grunt) => {
     'build:types',
     // 'build:docs',
   ]);
+
+  grunt.registerTask('lint', 'eslint', ['eslint']);
 
   // grunt test
   // Run command line qunit tests.

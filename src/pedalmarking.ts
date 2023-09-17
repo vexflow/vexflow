@@ -53,7 +53,7 @@ export class PedalMarking extends Element {
   protected notes: StaveNote[];
 
   /** Glyph data */
-  static readonly GLYPHS: Record<string, string > = {
+  static readonly GLYPHS: Record<string, string> = {
     pedalDepress: '\uE650' /*keyboardPedalPed*/,
     pedalRelease: '\uE655' /*keyboardPedalUp*/,
   };

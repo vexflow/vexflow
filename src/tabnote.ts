@@ -220,7 +220,7 @@ export class TabNote extends StemmableNote {
     return this.flag.getHeight() > Stem.HEIGHT ? this.flag.getHeight() - Stem.HEIGHT : 0;
   }
 
-  static tabToElement(fret: string, scale: number = 1.0): Element {
+  static tabToElement(fret: string): Element {
     let el: Element;
 
     if (fret.toUpperCase() === 'X') {
@@ -242,7 +242,7 @@ export class TabNote extends StemmableNote {
     for (let i = 0; i < this.positions.length; ++i) {
       let fret = this.positions[i].fret;
       if (this.ghost) fret = '(' + fret + ')';
-      const el = TabNote.tabToElement(fret.toString(), this.renderOptions.scale);
+      const el = TabNote.tabToElement(fret.toString());
       this.fretElement.push(el);
       this.width = Math.max(el.getWidth(), this.width);
     }

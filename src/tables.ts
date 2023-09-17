@@ -251,7 +251,6 @@ const notesInfo: Record<
   {
     index: number;
     intVal?: number;
-
   }
 > = {
   C: { index: 0, intVal: 0 },
