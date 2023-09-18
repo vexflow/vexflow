@@ -4,9 +4,9 @@
 
 import { BoundingBox } from './boundingbox';
 import { Font, FontInfo } from './font';
+import { Metrics } from './metrics';
 import { Registry } from './registry';
 import { RenderContext } from './rendercontext';
-import { Tables } from './tables';
 import { Category } from './typeguard';
 import { defined, prefix, RuntimeError } from './util';
 
@@ -118,7 +118,7 @@ export class Element {
     };
 
     this.rendered = false;
-    this.#fontInfo = Tables.lookupMetricFontInfo(this.#attrs.type);
+    this.#fontInfo = Metrics.lookupMetricFontInfo(this.#attrs.type);
 
     // If a default registry exist, then register with it right away.
     Registry.getDefaultRegistry()?.register(this);
@@ -360,7 +360,7 @@ export class Element {
    * Each Element subclass may specify its own default by overriding the static `TEXT_FONT` property.
    */
   setFont(font?: string | FontInfo, size?: string | number, weight?: string | number, style?: string): this {
-    const defaultTextFont: Required<FontInfo> = Tables.lookupMetricFontInfo(this.#attrs.type);
+    const defaultTextFont: Required<FontInfo> = Metrics.lookupMetricFontInfo(this.#attrs.type);
 
     const fontIsObject = typeof font === 'object';
     const fontIsString = typeof font === 'string';

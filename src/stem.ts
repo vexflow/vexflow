@@ -6,6 +6,7 @@
 
 import { BoundingBox } from './boundingbox';
 import { Element } from './element';
+import { Metrics } from './metrics';
 import { Tables } from './tables';
 import { Category } from './typeguard';
 import { log, RuntimeError } from './util';
@@ -171,7 +172,7 @@ export class Stem extends Element {
   }
 
   adjustHeightForFlag(): void {
-    this.renderHeightAdjustment = Tables.lookupMetric('Stem.heightAdjustmentForFlag', -3);
+    this.renderHeightAdjustment = Metrics.lookupMetric('Stem.heightAdjustmentForFlag', -3);
   }
 
   adjustHeightForBeam(): void {

@@ -4,6 +4,7 @@
 // @author Greg Ristow (modifications)
 
 import { Fraction } from './fraction';
+import { Metrics } from './metrics';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { Music } from './music';
@@ -61,10 +62,10 @@ export class Accidental extends Modifier {
     // If there are no accidentals, no need to format their positions.
     if (!accidentals || accidentals.length === 0) return;
 
-    const noteheadAccidentalPadding = Tables.lookupMetric('Accidental.noteheadAccidentalPadding');
+    const noteheadAccidentalPadding = Metrics.lookupMetric('Accidental.noteheadAccidentalPadding');
     const leftShift = state.leftShift + noteheadAccidentalPadding;
-    const accidentalSpacing = Tables.lookupMetric('Accidental.accidentalSpacing');
-    const additionalPadding = Tables.lookupMetric('Accidental.leftPadding'); // padding to the left of all accidentals
+    const accidentalSpacing = Metrics.lookupMetric('Accidental.accidentalSpacing');
+    const additionalPadding = Metrics.lookupMetric('Accidental.leftPadding'); // padding to the left of all accidentals
 
     // A type used just in this formatting function.
     type AccidentalLinePositionsAndXSpaceNeeds = {
@@ -522,16 +523,16 @@ export class Accidental extends Modifier {
 
     if (!this.cautionary) {
       this.text += Tables.accidentalCodes(this.type);
-      this.fontInfo.size = Tables.lookupMetric('Accidental.fontSize');
+      this.fontInfo.size = Metrics.lookupMetric('Accidental.fontSize');
     } else {
       this.text += Tables.accidentalCodes('{');
       this.text += Tables.accidentalCodes(this.type);
       this.text += Tables.accidentalCodes('}');
-      this.fontInfo.size = Tables.lookupMetric('Accidental.cautionary.fontSize');
+      this.fontInfo.size = Metrics.lookupMetric('Accidental.cautionary.fontSize');
     }
     // Accidentals attached to grace notes are rendered smaller.
     if (isGraceNote(this.note)) {
-      this.fontInfo.size = Tables.lookupMetric('Accidental.grace.fontSize');
+      this.fontInfo.size = Metrics.lookupMetric('Accidental.grace.fontSize');
     }
   }
 

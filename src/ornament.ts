@@ -4,6 +4,7 @@
 
 import { getBottomY, getInitialOffset, getTopY } from './articulation';
 import { Element } from './element';
+import { Metrics } from './metrics';
 import { Modifier, ModifierPosition } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { Note } from './note';
@@ -34,7 +35,7 @@ export class Ornament extends Modifier {
     return Category.Ornament;
   }
   static get minPadding(): number {
-    return Tables.lookupMetric('NoteHead.minPadding');
+    return Metrics.lookupMetric('NoteHead.minPadding');
   }
 
   protected ornamentAlignWithNoteHead: string[] | boolean;

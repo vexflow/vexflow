@@ -7,8 +7,8 @@ import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Element } from '../src/element';
 import { Flow } from '../src/flow';
+import { Metrics } from '../src/metrics';
 import { MultimeasureRestRenderOptions } from '../src/multimeasurerest';
-import { Tables } from '../src/tables';
 
 const MultiMeasureRestTests = {
   Start(): void {
@@ -98,7 +98,7 @@ function simple(options: TestOptions): void {
   const context = f.getContext();
   const element = new Element();
   element.setText(str);
-  element.setFont(Tables.lookupMetric('fontFamily'), 16, 'bold');
+  element.setFont(Metrics.lookupMetric('fontFamily'), 16, 'bold');
   element.renderText(context, xs.left + (xs.right - xs.left) * 0.5 - element.getWidth() * 0.5, strY);
 
   options.assert.ok(true, 'Simple Test');

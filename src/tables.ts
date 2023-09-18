@@ -555,52 +555,6 @@ export class Tables {
     return clefs[clef];
   }
 
-  /** Use the provided key to look up a FontInfo in CommonMetrics. **/
-  static lookupMetricFontInfo(key: string): Required<FontInfo> {
-    return {
-      family: Tables.lookupMetric(`${key}.fontFamily`),
-      size: Tables.lookupMetric(`${key}.fontSize`),
-      weight: Tables.lookupMetric(`${key}.fontWeight`),
-      style: Tables.lookupMetric(`${key}.fontStyle`),
-    };
-  }
-
-  /**
-   * Use the provided key to look up a value in CommonMetrics.
-   *
-   * @param key is a string separated by periods (e.g., `Stroke.text.fontFamily`).
-   * @param defaultValue is returned if the lookup fails.
-   * @returns the retrieved value (or `defaultValue` if the lookup fails).
-   *
-   * For the key `Stroke.text.fontFamily`, check all of the following in order:
-   *   1) CommonMetrics.fontFamily
-   *   2) CommonMetrics.Stroke.fontFamily
-   *   3) CommonMetrics.Stroke.text.fontFamily
-   * Retrieve the value from the most specific key (i.e., prefer #3 over #2 over #1 in the above example).
-   */
-  // eslint-disable-next-line
-  static lookupMetric(key: string, defaultValue?: any): any {
-    const keyParts = key.split('.');
-    const lastKeyPart = keyParts.pop()!; // Use ! because keyParts is not empty, since ''.split('.') still returns [''].
-
-    // Start from root of CommonMetrics and go down as far as possible.
-    let curr = CommonMetrics;
-    let retVal = defaultValue;
-
-    while (curr) {
-      // Update retVal whenever we find a value assigned to a more specific key.
-      retVal = curr[lastKeyPart] ?? retVal;
-      const keyPart = keyParts.shift();
-      if (keyPart) {
-        curr = curr[keyPart]; // Go down one level.
-      } else {
-        break;
-      }
-    }
-
-    return retVal;
-  }
-
   /**
    * @param keyOctaveGlyph a string in the format "key/octave" (e.g., "c/5") or "key/octave/custom-note-head-code" (e.g., "g/5/t3").
    * @param clef

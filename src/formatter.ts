@@ -4,6 +4,7 @@
 import { Beam } from './beam';
 import { BoundingBox } from './boundingbox';
 import { Fraction } from './fraction';
+import { Metrics } from './metrics';
 import { ModifierContext } from './modifiercontext';
 import { RenderContext } from './rendercontext';
 import { Stave } from './stave';
@@ -215,7 +216,7 @@ export class Formatter {
     options?: { stavePadding: number }
   ): void {
     options = {
-      stavePadding: Tables.lookupMetric('Stave.padding'),
+      stavePadding: Metrics.lookupMetric('Stave.padding'),
       ...options,
     };
 
@@ -231,7 +232,7 @@ export class Formatter {
     }
 
     ctx.save();
-    ctx.setFont(Tables.lookupMetric('fontFamily'), 8);
+    ctx.setFont(Metrics.lookupMetric('fontFamily'), 8);
 
     contextGaps.gaps.forEach((gap) => {
       stroke(x + gap.x1, x + gap.x2, 'rgba(100,200,100,0.4)');
@@ -475,7 +476,7 @@ export class Formatter {
    * @returns the estimated width in pixels
    */
   preCalculateMinTotalWidth(voices: Voice[]): number {
-    const unalignedPadding = Tables.lookupMetric('Stave.unalignedNotePadding');
+    const unalignedPadding = Metrics.lookupMetric('Stave.unalignedNotePadding');
     // Calculate additional padding based on 3 methods:
     // 1) unaligned beats in voices, 2) variance of width, 3) variance of durations
     let unalignedCtxCount = 0;
@@ -827,9 +828,9 @@ export class Formatter {
       lastContext.getMetrics().notePx -
       lastContext.getMetrics().totalRightPx -
       firstContext.getMetrics().totalLeftPx;
-    const configMinPadding = Tables.lookupMetric('Stave.endPaddingMin');
-    const configMaxPadding = Tables.lookupMetric('Stave.endPaddingMax');
-    const leftPadding = Tables.lookupMetric('Stave.padding');
+    const configMinPadding = Metrics.lookupMetric('Stave.endPaddingMin');
+    const configMaxPadding = Metrics.lookupMetric('Stave.endPaddingMax');
+    const leftPadding = Metrics.lookupMetric('Stave.padding');
     let targetWidth = adjustedJustifyWidth;
     const distances = calculateIdealDistances(targetWidth);
     let actualWidth = shiftToIdealDistances(distances);

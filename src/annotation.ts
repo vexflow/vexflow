@@ -1,6 +1,7 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 import { Font } from './font';
+import { Metrics } from './metrics';
 import { Modifier, ModifierPosition } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { Stave } from './stave';
@@ -68,7 +69,7 @@ export class Annotation extends Modifier {
   // Use the same padding for annotations as note head so the
   // words don't run into each other.
   static get minAnnotationPadding(): number {
-    return Tables.lookupMetric('NoteHead.minPadding');
+    return Metrics.lookupMetric('NoteHead.minPadding');
   }
   /** Arrange annotations within a `ModifierContext` */
   static format(annotations: Annotation[], state: ModifierContextState): boolean {

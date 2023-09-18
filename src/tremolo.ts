@@ -3,9 +3,9 @@
 // MIT License
 
 import { GraceNote } from './gracenote';
+import { Metrics } from './metrics';
 import { Modifier } from './modifier';
 import { Stem } from './stem';
-import { Tables } from './tables';
 import { Category, isGraceNote } from './typeguard';
 
 /** Tremolo implements tremolo notation. */
@@ -35,13 +35,13 @@ export class Tremolo extends Modifier {
 
     const stemDirection = note.getStemDirection();
     const scale = isGraceNote(note) ? GraceNote.SCALE : 1;
-    const ySpacing = Tables.lookupMetric(`Tremolo.spacing`) * stemDirection * scale;
+    const ySpacing = Metrics.lookupMetric(`Tremolo.spacing`) * stemDirection * scale;
 
     const x =
       note.getAbsoluteX() + (stemDirection === Stem.UP ? note.getGlyphWidth() - Stem.WIDTH / 2 : Stem.WIDTH / 2);
     let y = note.getStemExtents().topY + (this.num <= 3 ? ySpacing : 0);
 
-    this.fontInfo.size = Tables.lookupMetric(`Tremolo.fontSize`) * scale;
+    this.fontInfo.size = Metrics.lookupMetric(`Tremolo.fontSize`) * scale;
 
     for (let i = 0; i < this.num; ++i) {
       this.renderText(ctx, x, y);

@@ -7,6 +7,7 @@
 // and indicates the notes with implicit accidentals.
 
 import { Element } from './element';
+import { Metrics } from './metrics';
 import { Stave } from './stave';
 import { StaveModifier, StaveModifierPosition } from './stavemodifier';
 import { Tables } from './tables';
@@ -33,7 +34,7 @@ export class KeySignature extends StaveModifier {
 
     this.setKeySig(keySpec, cancelKeySpec, alterKeySpec);
     this.setPosition(StaveModifierPosition.BEGIN);
-    this.glyphFontScale = Tables.lookupMetric('fontSize');
+    this.glyphFontScale = Metrics.lookupMetric('fontSize');
     this.glyphs = [];
     this.paddingForced = false;
   }

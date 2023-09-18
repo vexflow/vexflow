@@ -1,6 +1,7 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // @author: Larry Kuhns 2011
 
+import { Metrics } from './metrics';
 import { Stave } from './stave';
 import { StaveModifier } from './stavemodifier';
 import { Tables } from './tables';
@@ -101,14 +102,14 @@ export class Repetition extends StaveModifier {
   drawCodaFixed(stave: Stave, x: number): this {
     const y = stave.getYForTopText(stave.getNumLines());
     this.text = '\ue048' /*coda*/;
-    this.renderText(stave.checkContext(), x, y + Tables.lookupMetric('Repetition.coda.offsetY'));
+    this.renderText(stave.checkContext(), x, y + Metrics.lookupMetric('Repetition.coda.offsetY'));
     return this;
   }
 
   drawSegnoFixed(stave: Stave, x: number): this {
     const y = stave.getYForTopText(stave.getNumLines());
     this.text = '\ue047' /*segno*/;
-    this.renderText(stave.checkContext(), x, y + Tables.lookupMetric('Repetition.segno.offsetY'));
+    this.renderText(stave.checkContext(), x, y + Metrics.lookupMetric('Repetition.segno.offsetY'));
     return this;
   }
 
@@ -120,7 +121,7 @@ export class Repetition extends StaveModifier {
     if (drawCoda) {
       this.text += ' \ue048' /*coda*/;
     }
-    this.setFont(Tables.lookupMetricFontInfo('Repetition.text'));
+    this.setFont(Metrics.lookupMetricFontInfo('Repetition.text'));
     switch (this.symbolType) {
       // To the left
       case Repetition.type.CODA_LEFT:
@@ -139,10 +140,10 @@ export class Repetition extends StaveModifier {
           (stave.getNoteStartX() - this.x) +
           stave.getWidth() -
           this.width -
-          Tables.lookupMetric('Repetition.text.offsetX');
+          Metrics.lookupMetric('Repetition.text.offsetX');
     }
 
-    const y = stave.getYForTopText(stave.getNumLines()) + Tables.lookupMetric('Repetition.text.offsetY');
+    const y = stave.getYForTopText(stave.getNumLines()) + Metrics.lookupMetric('Repetition.text.offsetY');
 
     this.renderText(ctx, textX, y);
 

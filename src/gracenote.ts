@@ -1,5 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 
+import { Metrics } from './metrics';
 import { StaveNote, StaveNoteStruct } from './stavenote';
 import { Stem } from './stem';
 import { Tables } from './tables';
@@ -28,7 +29,7 @@ export class GraceNote extends StaveNote {
 
   constructor(noteStruct: GraceNoteStruct) {
     super({
-      glyphFontScale: Tables.lookupMetric('fontSize') * GraceNote.SCALE,
+      glyphFontScale: Metrics.lookupMetric('fontSize') * GraceNote.SCALE,
       strokePx: GraceNote.LEDGER_LINE_OFFSET,
       ...noteStruct,
     });

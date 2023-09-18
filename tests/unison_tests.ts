@@ -4,7 +4,7 @@
 // Unison Tests
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
-import { Tables } from '../src/tables';
+import { Flow } from '../src/flow';
 
 const UnisonTests = {
   Start(): void {
@@ -32,7 +32,7 @@ const UnisonTests = {
 };
 
 function simple(options: TestOptions): void {
-  Tables.UNISON = options.params.unison;
+  Flow.UNISON = options.params.unison;
   const vf = VexFlowTests.makeFactory(options, 500, 200);
   const score = vf.EasyScore();
 
@@ -48,7 +48,7 @@ function simple(options: TestOptions): void {
 }
 
 function style(options: TestOptions): void {
-  Tables.UNISON = options.params.unison;
+  Flow.UNISON = options.params.unison;
   const vf = VexFlowTests.makeFactory(options, 500, 200);
   const score = vf.EasyScore();
 
@@ -68,7 +68,7 @@ function style(options: TestOptions): void {
 }
 
 function breve(options: TestOptions): void {
-  Tables.UNISON = options.params.unison;
+  Flow.UNISON = options.params.unison;
   const vf = VexFlowTests.makeFactory(options, 500, 200);
   const score = vf.EasyScore();
 

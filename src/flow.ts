@@ -28,6 +28,7 @@ import { GraceTabNote } from './gracetabnote';
 import { KeyManager } from './keymanager';
 import { KeySignature } from './keysignature';
 import { KeySigNote } from './keysignote';
+import { Metrics, MetricsDefaults } from './metrics';
 import { Modifier, ModifierPosition } from './modifier';
 import { ModifierContext } from './modifiercontext';
 import { MultiMeasureRest } from './multimeasurerest';
@@ -60,7 +61,7 @@ import { StringNumber } from './stringnumber';
 import { Stroke } from './strokes';
 import { SVGContext } from './svgcontext';
 import { System } from './system';
-import { CommonMetrics, Tables } from './tables';
+import { Tables } from './tables';
 import { TabNote } from './tabnote';
 import { TabSlide } from './tabslide';
 import { TabStave } from './tabstave';
@@ -218,11 +219,11 @@ export class Flow {
    */
   static setMusicFont(...fontNames: string[]): void {
     // Convert the array of font names into an array of Font objects.
-    CommonMetrics.fontFamily = fontNames.join(',');
+    MetricsDefaults.fontFamily = fontNames.join(',');
   }
 
   static getMusicFont(): string[] {
-    return Tables.lookupMetric('fontFamily').split(',');
+    return Metrics.lookupMetric('fontFamily').split(',');
   }
 
   static get RENDER_PRECISION_PLACES(): number {
@@ -239,6 +240,14 @@ export class Flow {
 
   static set SOFTMAX_FACTOR(factor: number) {
     Tables.SOFTMAX_FACTOR = factor;
+  }
+
+  static get UNISON(): boolean {
+    return Tables.UNISON;
+  }
+
+  static set UNISON(unison: boolean) {
+    Tables.UNISON = unison;
   }
 
   static get NOTATION_FONT_SCALE(): number {

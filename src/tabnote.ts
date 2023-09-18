@@ -8,13 +8,13 @@
 // See `tests/tabnote_tests.ts` for usage examples.
 
 import { Element } from './element';
+import { Metrics } from './metrics';
 import { Modifier } from './modifier';
 import { Note } from './note';
 import { Stave } from './stave';
 import { StaveNoteStruct } from './stavenote';
 import { Stem } from './stem';
 import { StemmableNote } from './stemmablenote';
-import { Tables } from './tables';
 import { Category, isDot } from './typeguard';
 import { defined, RuntimeError } from './util';
 
@@ -148,7 +148,7 @@ export class TabNote extends StemmableNote {
     this.renderOptions = {
       ...this.renderOptions,
       // font size for note heads and rests
-      glyphFontScale: Tables.lookupMetric('TabNote.fontSize'),
+      glyphFontScale: Metrics.lookupMetric('TabNote.fontSize'),
       // Flag to draw a stem
       drawStem,
       // Flag to draw dot modifiers
@@ -160,7 +160,7 @@ export class TabNote extends StemmableNote {
       // normal glyph scale
       scale: 1.0,
       // default tablature font
-      font: Tables.lookupMetric('fontFamily'),
+      font: Metrics.lookupMetric('fontFamily'),
     };
 
     this.glyphProps = Note.getGlyphProps(this.duration, this.noteType);
