@@ -20,7 +20,7 @@ import {
   Voice,
 } from '../src/index';
 
-import { Tables } from '../src/tables';
+import { Metrics } from '../src/metrics';
 
 const BeamTests = {
   Start(): void {
@@ -772,7 +772,7 @@ function complexWithAnnotation(options: TestOptions): void {
   ];
 
   const font = {
-    family: Tables.lookupMetric('Annotation.fontFamily'),
+    family: Metrics.get('Annotation.fontFamily'),
     size: 14,
     weight: FontWeight.BOLD,
     style: FontStyle.ITALIC,

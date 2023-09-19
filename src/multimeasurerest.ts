@@ -3,6 +3,7 @@
 // This class implements multiple measure rests.
 
 import { Element } from './element';
+import { Metrics } from './metrics';
 import { RenderContext } from './rendercontext';
 import { Stave } from './stave';
 import { StaveModifierPosition } from './stavemodifier';
@@ -74,7 +75,7 @@ export class MultiMeasureRest extends Element {
    */
   constructor(numberOfMeasures: number, options: MultimeasureRestRenderOptions) {
     super();
-    const fontSize = options.numberGlyphPoint ?? Tables.lookupMetric('MultiMeasureRest.fontSize'); // same as TimeSignature.
+    const fontSize = options.numberGlyphPoint ?? Metrics.get('MultiMeasureRest.fontSize'); // same as TimeSignature.
     this.fontInfo.size = fontSize;
 
     this.numberOfMeasures = numberOfMeasures;
@@ -99,7 +100,7 @@ export class MultiMeasureRest extends Element {
       line: 2,
       spacingBetweenLinesPx: Tables.STAVE_LINE_DISTANCE, // same as Stave.
       serifThickness: 2,
-      semibreveRestGlyphScale: Tables.lookupMetric('fontSize'), // same as NoteHead.
+      semibreveRestGlyphScale: Metrics.get('fontSize'), // same as NoteHead.
       paddingLeft: 0,
       paddingRight: 0,
       lineThickness: 5,

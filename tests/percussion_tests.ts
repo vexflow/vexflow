@@ -23,7 +23,7 @@ import {
   Tremolo,
 } from '../src/index';
 
-import { Tables } from '../src/tables';
+import { Metrics } from '../src/metrics';
 
 const PercussionTests = {
   Start(): void {
@@ -188,7 +188,7 @@ const basic2 = createSingleMeasureTest((f) => {
 
 const snare0 = createSingleMeasureTest((f) => {
   const font = {
-    family: Tables.lookupMetric('fontFamily'),
+    family: Metrics.get('fontFamily'),
     size: 14,
     weight: FontWeight.BOLD,
     style: FontStyle.ITALIC,

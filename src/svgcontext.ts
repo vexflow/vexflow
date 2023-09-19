@@ -4,6 +4,7 @@
 
 import { Element } from './element';
 import { Font, FontInfo, FontStyle, FontWeight } from './font';
+import { Metrics } from './metrics';
 import { GroupAttributes, RenderContext, TextMeasure } from './rendercontext';
 import { Tables } from './tables';
 import { normalizeAngle, prefix, RuntimeError } from './util';
@@ -106,7 +107,7 @@ export class SVGContext extends RenderContext {
     this.lineWidth = 1.0;
 
     const defaultFontAttributes = {
-      'font-family': Tables.lookupMetric('fontFamily'),
+      'font-family': Metrics.get('fontFamily'),
       'font-size': '10pt',
       'font-weight': FontWeight.NORMAL,
       'font-style': FontStyle.NORMAL,

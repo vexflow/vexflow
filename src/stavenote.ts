@@ -11,6 +11,7 @@
 import { Beam } from './beam';
 import { BoundingBox } from './boundingbox';
 import { ElementStyle } from './element';
+import { Metrics } from './metrics';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { KeyProps, Note, NoteStruct } from './note';
@@ -98,7 +99,7 @@ export class StaveNote extends StemmableNote {
   }
 
   static get minNoteheadPadding(): number {
-    return Tables.lookupMetric('NoteHead.minPadding');
+    return Metrics.get('NoteHead.minPadding');
   }
 
   /** Format notes inside a ModifierContext. */
@@ -409,7 +410,7 @@ export class StaveNote extends StemmableNote {
     this.renderOptions = {
       ...this.renderOptions,
       // font size for note heads and rests
-      glyphFontScale: noteStruct.glyphFontScale || Tables.lookupMetric('fontSize'),
+      glyphFontScale: noteStruct.glyphFontScale || Metrics.get('fontSize'),
       // number of stroke px to the left and right of head
       strokePx: noteStruct.strokePx || StaveNote.LEDGER_LINE_OFFSET,
     };

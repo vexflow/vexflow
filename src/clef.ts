@@ -3,9 +3,9 @@
 // Co-author: Benjamin W. Bohl
 
 import { Glyphs } from './glyphs';
+import { Metrics } from './metrics';
 import { Stave } from './stave';
 import { StaveModifier, StaveModifierPosition } from './stavemodifier';
-import { Tables } from './tables';
 import { Category } from './typeguard';
 import { log } from './util';
 
@@ -138,7 +138,7 @@ export class Clef extends StaveModifier {
   /** Get point for clefs. */
   static getPoint(size?: string): number {
     // for sizes other than 'default', clef is 2/3 of the default value
-    return size === 'default' ? Tables.lookupMetric('fontSize') : (Tables.lookupMetric('fontSize') * 2) / 3;
+    return size === 'default' ? Metrics.get('fontSize') : (Metrics.get('fontSize') * 2) / 3;
   }
 
   /** Set associated stave. */

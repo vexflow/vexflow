@@ -3,6 +3,7 @@
 // Class to draws string numbers into the notation.
 
 import { Builder } from './easyscore';
+import { Metrics } from './metrics';
 import { Modifier, ModifierPosition } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { StemmableNote } from './stemmablenote';
@@ -33,7 +34,7 @@ export class FretHandFinger extends Modifier {
       const pos = num.getPosition();
       const index = num.checkIndex();
       const props = note.getKeyProps()[index];
-      const textHeight = Tables.lookupMetric('FretHandFinger.fontSize');
+      const textHeight = Metrics.get('FretHandFinger.fontSize');
       if (num.position === ModifierPosition.ABOVE) {
         state.topTextLine += textHeight / Tables.STAVE_LINE_DISTANCE + 0.5;
       }

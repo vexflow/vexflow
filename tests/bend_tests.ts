@@ -7,10 +7,10 @@ import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Bend, BendPhrase } from '../src/bend';
 import { Formatter } from '../src/formatter';
+import { Metrics } from '../src/metrics';
 import { ModifierContext } from '../src/modifiercontext';
 import { Note } from '../src/note';
 import { ContextBuilder } from '../src/renderer';
-import { Tables } from '../src/tables';
 import { TabNote, TabNoteStruct } from '../src/tabnote';
 import { TabStave } from '../src/tabstave';
 import { TickContext } from '../src/tickcontext';
@@ -213,7 +213,7 @@ function bendPhrase(options: TestOptions, contextBuilder: ContextBuilder): void 
   const ctx = contextBuilder(options.elementId, 500, 240);
   ctx.scale(1.5, 1.5);
 
-  ctx.font = Tables.lookupMetric('Bend.fontSize') + Tables.lookupMetric('Bend.fontFamily'); // Optionally use constants defined in Font.
+  ctx.font = Metrics.get('Bend.fontSize') + Metrics.get('Bend.fontFamily'); // Optionally use constants defined in Font.
   const stave = new TabStave(10, 10, 450).addClef('tab').setContext(ctx).draw();
 
   const phrase1 = [

@@ -16,6 +16,7 @@ import { Flow } from '../src/flow';
 import { FontWeight } from '../src/font';
 import { Formatter } from '../src/formatter';
 import { FretHandFinger } from '../src/frethandfinger';
+import { Metrics } from '../src/metrics';
 import { ModifierPosition } from '../src/modifier';
 import { Note } from '../src/note';
 import { Registry } from '../src/registry';
@@ -26,7 +27,6 @@ import { Stem } from '../src/stem';
 import { StemmableNote } from '../src/stemmablenote';
 import { StringNumber } from '../src/stringnumber';
 import { System } from '../src/system';
-import { Tables } from '../src/tables';
 import { Tuplet } from '../src/tuplet';
 import { Voice, VoiceTime } from '../src/voice';
 import { MockTickable } from './mocks';
@@ -841,7 +841,7 @@ function annotations(options: TestOptions): void {
         note.addModifier(
           new Annotation(sm.lyrics[iii])
             .setVerticalJustification(Annotation.VerticalJustify.BOTTOM)
-            .setFont(Tables.lookupMetric('fontFamily'), 12, FontWeight.NORMAL)
+            .setFont(Metrics.get('fontFamily'), 12, FontWeight.NORMAL)
         );
       }
       notes.push(note);

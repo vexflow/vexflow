@@ -3,10 +3,10 @@
 
 import { BoundingBox } from './boundingbox';
 import { ElementStyle } from './element';
+import { Metrics } from './metrics';
 import { Note, NoteStruct } from './note';
 import { Stave } from './stave';
 import { Stem } from './stem';
-import { Tables } from './tables';
 import { Category } from './typeguard';
 import { defined, log } from './util';
 
@@ -93,7 +93,7 @@ export class NoteHead extends Note {
     this.renderOptions = {
       ...this.renderOptions,
       // font size for note heads
-      glyphFontScale: noteStruct.glyphFontScale || Tables.lookupMetric('fontSize'),
+      glyphFontScale: noteStruct.glyphFontScale || Metrics.get('fontSize'),
     };
 
     this.fontInfo.size = this.renderOptions.glyphFontScale;

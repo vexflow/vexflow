@@ -5,10 +5,10 @@
 // that can be arpeggiated, brushed, rasquedo, etc.
 
 import { Element } from './element';
+import { Metrics } from './metrics';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { Note } from './note';
-import { Tables } from './tables';
 import { Category, isNote, isStaveNote, isTabNote } from './typeguard';
 import { RuntimeError } from './util';
 
@@ -85,7 +85,7 @@ export class Stroke extends Modifier {
     this.position = Modifier.Position.LEFT;
 
     this.renderOptions = {
-      fontScale: Tables.lookupMetric('Stroke.fontSize'),
+      fontScale: Metrics.get('Stroke.fontSize'),
     };
 
     this.setXShift(0);

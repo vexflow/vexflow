@@ -1,8 +1,8 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 
+import { Metrics } from './metrics';
 import { Note } from './note';
-import { Tables } from './tables';
 import { TextNoteStruct } from './textnote';
 import { Category } from './typeguard';
 import { defined, log, RuntimeError } from './util';
@@ -59,7 +59,7 @@ export class TextDynamics extends Note {
     this.line = noteStruct.line ?? 0;
     this.text = '';
 
-    this.renderOptions = { glyphFontSize: Tables.lookupMetric('fontSize'), ...this.renderOptions };
+    this.renderOptions = { glyphFontSize: Metrics.get('fontSize'), ...this.renderOptions };
     this.fontInfo.size = defined(this.renderOptions.glyphFontSize) * this.renderOptions.glyphFontScale;
     L('New Dynamics Text: ', this.sequence);
   }

@@ -7,7 +7,7 @@ import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Bend, ContextBuilder, Formatter, TabNote, TabNoteStruct, TabStave, Vibrato } from '../src/index';
 
-import { Tables } from '../src/tables';
+import { Metrics } from '../src/metrics';
 
 const VibratoTests = {
   Start(): void {
@@ -84,7 +84,7 @@ function withBend(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 500, 240);
   ctx.scale(1.3, 1.3);
 
-  ctx.setFont(Tables.lookupMetric('fontFamily'), VexFlowTests.Font.size);
+  ctx.setFont(Metrics.get('fontFamily'), VexFlowTests.Font.size);
   const stave = new TabStave(10, 10, 450).addTabGlyph().setContext(ctx).draw();
 
   const notes = [

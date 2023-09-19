@@ -16,13 +16,13 @@ import { Bend } from '../src/bend';
 import { ElementStyle } from '../src/element';
 import { Flow } from '../src/flow';
 import { Formatter } from '../src/formatter';
+import { Metrics } from '../src/metrics';
 import { ModifierPosition } from '../src/modifier';
 import { Registry } from '../src/registry';
 import { ContextBuilder } from '../src/renderer';
 import { Stave } from '../src/stave';
 import { StaveNote, StaveNoteStruct } from '../src/stavenote';
 import { Stem } from '../src/stem';
-import { Tables } from '../src/tables';
 import { TabNote, TabNoteStruct } from '../src/tabnote';
 import { TabStave } from '../src/tabstave';
 import { Tickable } from '../src/tickable';
@@ -135,7 +135,7 @@ function standard(options: TestOptions, contextBuilder: ContextBuilder): void {
   const stave = new Stave(10, 10, 450).addClef('treble').setContext(ctx).draw();
 
   const annotation = (text: string) =>
-    new Annotation(text).setFont(Tables.lookupMetric('Annotation.fontFamily'), FONT_SIZE, 'normal', 'italic');
+    new Annotation(text).setFont(Metrics.get('Annotation.fontFamily'), FONT_SIZE, 'normal', 'italic');
 
   const notes = [
     staveNote({ keys: ['c/4', 'e/4'], duration: 'h' }).addModifier(annotation('quiet'), 0),
@@ -153,7 +153,7 @@ function styling(options: TestOptions, contextBuilder: ContextBuilder): void {
 
   const annotation = (text: string, style: ElementStyle) =>
     new Annotation(text)
-      .setFont(Tables.lookupMetric('Annotation.fontFamily'), FONT_SIZE, 'normal', 'italic')
+      .setFont(Metrics.get('Annotation.fontFamily'), FONT_SIZE, 'normal', 'italic')
       .setStyle(style);
 
   const notes = [
@@ -188,7 +188,7 @@ function harmonic(options: TestOptions, contextBuilder: ContextBuilder): void {
       duration: 'h',
     })
       .addModifier(
-        new Annotation('(8va)').setFont(Tables.lookupMetric('Annotation.fontFamily'), FONT_SIZE, 'normal', 'italic'),
+        new Annotation('(8va)').setFont(Metrics.get('Annotation.fontFamily'), FONT_SIZE, 'normal', 'italic'),
         0
       )
       .addModifier(new Annotation('A.H.'), 0),
@@ -201,11 +201,11 @@ function harmonic(options: TestOptions, contextBuilder: ContextBuilder): void {
 function picking(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 500, 240);
 
-  ctx.setFont(Tables.lookupMetric('fontFamily'), FONT_SIZE);
+  ctx.setFont(Metrics.get('fontFamily'), FONT_SIZE);
   const stave = new TabStave(10, 10, 450).addClef('tab').setContext(ctx).draw();
 
   const annotation = (text: string) =>
-    new Annotation(text).setFont(Tables.lookupMetric('Annotation.fontFamily'), FONT_SIZE, 'normal', 'italic');
+    new Annotation(text).setFont(Metrics.get('Annotation.fontFamily'), FONT_SIZE, 'normal', 'italic');
 
   const notes = [
     tabNote({

@@ -5,6 +5,7 @@ import { BoundingBox, Bounds } from './boundingbox';
 import { Clef } from './clef';
 import { Element, ElementStyle } from './element';
 import { KeySignature } from './keysignature';
+import { Metrics } from './metrics';
 import { Barline, BarlineType } from './stavebarline';
 import { StaveModifier, StaveModifierPosition } from './stavemodifier';
 import { Repetition } from './staverepetition';
@@ -74,12 +75,12 @@ export class Stave extends Element {
   // This is the sum of the padding that normally goes on left + right of a stave during
   // drawing. Used to size staves correctly with content width.
   static get defaultPadding(): number {
-    return Tables.lookupMetric('Stave.padding') + Tables.lookupMetric('Stave.endPaddingMax');
+    return Metrics.get('Stave.padding') + Metrics.get('Stave.endPaddingMax');
   }
 
   // Right padding, used by system if startX is already determined.
   static get rightPadding(): number {
-    return Tables.lookupMetric('Stave.endPaddingMax');
+    return Metrics.get('Stave.endPaddingMax');
   }
 
   constructor(x: number, y: number, width: number, options?: StaveOptions) {

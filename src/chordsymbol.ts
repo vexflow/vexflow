@@ -11,6 +11,7 @@
 
 import { Element } from './element';
 import { Font } from './font';
+import { Metrics } from './metrics';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { Note } from './note';
@@ -96,19 +97,19 @@ export class ChordSymbol extends Modifier {
   };
 
   static get superSubRatio(): number {
-    return Tables.lookupMetric('ChordSymbol.superSubRatio');
+    return Metrics.get('ChordSymbol.superSubRatio');
   }
 
   static get spacingBetweenBlocks(): number {
-    return Tables.lookupMetric('ChordSymbol.spacing');
+    return Metrics.get('ChordSymbol.spacing');
   }
 
   static get superscriptOffset(): number {
-    return Tables.lookupMetric('ChordSymbol.superscriptOffset');
+    return Metrics.get('ChordSymbol.superscriptOffset');
   }
 
   static get subscriptOffset(): number {
-    return Tables.lookupMetric('ChordSymbol.subscriptOffset');
+    return Metrics.get('ChordSymbol.subscriptOffset');
   }
 
   // Glyph data
@@ -138,7 +139,7 @@ export class ChordSymbol extends Modifier {
   static readonly symbolModifiers = SymbolModifiers;
 
   static get minPadding(): number {
-    return Tables.lookupMetric('NoteHead.minPadding');
+    return Metrics.get('NoteHead.minPadding');
   }
 
   /**

@@ -8,10 +8,10 @@ import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 import { Dot } from '../src/dot';
 import { Flow } from '../src/flow';
 import { Formatter } from '../src/formatter';
+import { Metrics } from '../src/metrics';
 import { RenderContext } from '../src/rendercontext';
 import { ContextBuilder } from '../src/renderer';
 import { Stave } from '../src/stave';
-import { Tables } from '../src/tables';
 import { TabNote, TabNoteStruct } from '../src/tabnote';
 import { TabStave } from '../src/tabstave';
 import { TickContext } from '../src/tickcontext';
@@ -369,7 +369,7 @@ function drawStemsUpThrough(options: TestOptions, contextBuilder: ContextBuilder
     return tabNote;
   });
 
-  ctx.setFont(Tables.lookupMetric('fontFamily'), 10, 'bold');
+  ctx.setFont(Metrics.get('fontFamily'), 10, 'bold');
   const voice = new Voice(Flow.TIME4_4).setMode(VoiceMode.SOFT);
   voice.addTickables(notes);
   new Formatter().joinVoices([voice]).formatToStave([voice], stave);

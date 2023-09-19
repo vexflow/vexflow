@@ -2,6 +2,7 @@
 // MIT License
 
 import { Element } from './element';
+import { Metrics } from './metrics';
 import { RenderContext } from './rendercontext';
 import { StaveNote } from './stavenote';
 import { Tables } from './tables';
@@ -256,7 +257,7 @@ export class PedalMarking extends Element {
     ctx.save();
     ctx.setStrokeStyle(this.renderOptions.color);
     ctx.setFillStyle(this.renderOptions.color);
-    ctx.setFont(Tables.lookupMetricFontInfo('PedalMarking.text'));
+    ctx.setFont(Metrics.getFontInfo('PedalMarking.text'));
     L('Rendering Pedal Marking');
 
     if (this.type === PedalMarking.type.BRACKET || this.type === PedalMarking.type.MIXED) {

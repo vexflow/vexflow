@@ -2,6 +2,7 @@
 // @author: Radosaw Eichler 2012
 
 import { Element } from './element';
+import { Metrics } from './metrics';
 import { Stave } from './stave';
 import { StaveModifier, StaveModifierPosition } from './stavemodifier';
 import { Tables } from './tables';
@@ -65,7 +66,7 @@ export class StaveTempo extends StaveModifier {
 
     if (name) {
       this.text = name;
-      this.fontInfo = Tables.lookupMetricFontInfo('StaveTempo.name');
+      this.fontInfo = Metrics.getFontInfo('StaveTempo.name');
       this.renderText(ctx, shiftX, y);
       x += this.getWidth();
     }
@@ -73,7 +74,7 @@ export class StaveTempo extends StaveModifier {
     if (duration && bpm) {
       if (name) {
         x += 2;
-        ctx.setFont(Tables.lookupMetricFontInfo('StaveTempo'));
+        ctx.setFont(Metrics.getFontInfo('StaveTempo'));
         ctx.fillText('(', x + this.xShift, y + this.yShift);
         x += 5;
       }
@@ -85,12 +86,12 @@ export class StaveTempo extends StaveModifier {
       x += el.getWidth();
 
       // Draw dot
-      ctx.setFont(Tables.lookupMetricFontInfo('StaveTempo.glyph'));
+      ctx.setFont(Metrics.getFontInfo('StaveTempo.glyph'));
       for (let i = 0; i < dots; i++) {
         x += 6;
         ctx.fillText('\uecb7' /*metAugmentationDot*/, x + this.xShift, y + 2 + this.yShift);
       }
-      ctx.setFont(Tables.lookupMetricFontInfo('StaveTempo'));
+      ctx.setFont(Metrics.getFontInfo('StaveTempo'));
       ctx.fillText(' = ' + bpm + (name ? ')' : ''), x + 3 + this.xShift, y + this.yShift);
     }
 

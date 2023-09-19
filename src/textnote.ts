@@ -3,8 +3,8 @@
 
 import { Element } from './element';
 import { Font, FontInfo } from './font';
+import { Metrics } from './metrics';
 import { Note, NoteStruct } from './note';
-import { Tables } from './tables';
 import { Category } from './typeguard';
 
 export enum TextJustification {
@@ -77,7 +77,7 @@ export class TextNote extends Note {
     if (noteStruct.font) {
       this.setFont(noteStruct.font);
     } else if (noteStruct.glyph === undefined) {
-      this.setFont(Tables.lookupMetricFontInfo('TextNote.text.fontSize'));
+      this.setFont(Metrics.getFontInfo('TextNote.text.fontSize'));
     }
 
     // Scale the font size by 1/1.3.
