@@ -216,7 +216,7 @@ export class Formatter {
     options?: { stavePadding: number }
   ): void {
     options = {
-      stavePadding: Metrics.lookupMetric('Stave.padding'),
+      stavePadding: Metrics.get('Stave.padding'),
       ...options,
     };
 
@@ -232,7 +232,7 @@ export class Formatter {
     }
 
     ctx.save();
-    ctx.setFont(Metrics.lookupMetric('fontFamily'), 8);
+    ctx.setFont(Metrics.get('fontFamily'), 8);
 
     contextGaps.gaps.forEach((gap) => {
       stroke(x + gap.x1, x + gap.x2, 'rgba(100,200,100,0.4)');
@@ -476,7 +476,7 @@ export class Formatter {
    * @returns the estimated width in pixels
    */
   preCalculateMinTotalWidth(voices: Voice[]): number {
-    const unalignedPadding = Metrics.lookupMetric('Stave.unalignedNotePadding');
+    const unalignedPadding = Metrics.get('Stave.unalignedNotePadding');
     // Calculate additional padding based on 3 methods:
     // 1) unaligned beats in voices, 2) variance of width, 3) variance of durations
     let unalignedCtxCount = 0;
@@ -828,9 +828,9 @@ export class Formatter {
       lastContext.getMetrics().notePx -
       lastContext.getMetrics().totalRightPx -
       firstContext.getMetrics().totalLeftPx;
-    const configMinPadding = Metrics.lookupMetric('Stave.endPaddingMin');
-    const configMaxPadding = Metrics.lookupMetric('Stave.endPaddingMax');
-    const leftPadding = Metrics.lookupMetric('Stave.padding');
+    const configMinPadding = Metrics.get('Stave.endPaddingMin');
+    const configMaxPadding = Metrics.get('Stave.endPaddingMax');
+    const leftPadding = Metrics.get('Stave.padding');
     let targetWidth = adjustedJustifyWidth;
     const distances = calculateIdealDistances(targetWidth);
     let actualWidth = shiftToIdealDistances(distances);

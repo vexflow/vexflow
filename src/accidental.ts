@@ -62,10 +62,10 @@ export class Accidental extends Modifier {
     // If there are no accidentals, no need to format their positions.
     if (!accidentals || accidentals.length === 0) return;
 
-    const noteheadAccidentalPadding = Metrics.lookupMetric('Accidental.noteheadAccidentalPadding');
+    const noteheadAccidentalPadding = Metrics.get('Accidental.noteheadAccidentalPadding');
     const leftShift = state.leftShift + noteheadAccidentalPadding;
-    const accidentalSpacing = Metrics.lookupMetric('Accidental.accidentalSpacing');
-    const additionalPadding = Metrics.lookupMetric('Accidental.leftPadding'); // padding to the left of all accidentals
+    const accidentalSpacing = Metrics.get('Accidental.accidentalSpacing');
+    const additionalPadding = Metrics.get('Accidental.leftPadding'); // padding to the left of all accidentals
 
     // A type used just in this formatting function.
     type AccidentalLinePositionsAndXSpaceNeeds = {
@@ -523,16 +523,16 @@ export class Accidental extends Modifier {
 
     if (!this.cautionary) {
       this.text += Tables.accidentalCodes(this.type);
-      this.fontInfo.size = Metrics.lookupMetric('Accidental.fontSize');
+      this.fontInfo.size = Metrics.get('Accidental.fontSize');
     } else {
       this.text += Tables.accidentalCodes('{');
       this.text += Tables.accidentalCodes(this.type);
       this.text += Tables.accidentalCodes('}');
-      this.fontInfo.size = Metrics.lookupMetric('Accidental.cautionary.fontSize');
+      this.fontInfo.size = Metrics.get('Accidental.cautionary.fontSize');
     }
     // Accidentals attached to grace notes are rendered smaller.
     if (isGraceNote(this.note)) {
-      this.fontInfo.size = Metrics.lookupMetric('Accidental.grace.fontSize');
+      this.fontInfo.size = Metrics.get('Accidental.grace.fontSize');
     }
   }
 

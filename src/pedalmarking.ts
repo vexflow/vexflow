@@ -257,7 +257,7 @@ export class PedalMarking extends Element {
     ctx.save();
     ctx.setStrokeStyle(this.renderOptions.color);
     ctx.setFillStyle(this.renderOptions.color);
-    ctx.setFont(Metrics.lookupMetricFontInfo('PedalMarking.text'));
+    ctx.setFont(Metrics.getFontInfo('PedalMarking.text'));
     L('Rendering Pedal Marking');
 
     if (this.type === PedalMarking.type.BRACKET || this.type === PedalMarking.type.MIXED) {

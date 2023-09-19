@@ -77,7 +77,7 @@ export class TextNote extends Note {
     if (noteStruct.font) {
       this.setFont(noteStruct.font);
     } else if (noteStruct.glyph === undefined) {
-      this.setFont(Metrics.lookupMetricFontInfo('TextNote.text.fontSize'));
+      this.setFont(Metrics.getFontInfo('TextNote.text.fontSize'));
     }
 
     // Scale the font size by 1/1.3.

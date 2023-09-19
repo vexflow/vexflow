@@ -223,7 +223,7 @@ export class Flow {
   }
 
   static getMusicFont(): string[] {
-    return Metrics.lookupMetric('fontFamily').split(',');
+    return Metrics.get('fontFamily').split(',');
   }
 
   static get RENDER_PRECISION_PLACES(): number {

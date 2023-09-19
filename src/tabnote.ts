@@ -148,7 +148,7 @@ export class TabNote extends StemmableNote {
     this.renderOptions = {
       ...this.renderOptions,
       // font size for note heads and rests
-      glyphFontScale: Metrics.lookupMetric('TabNote.fontSize'),
+      glyphFontScale: Metrics.get('TabNote.fontSize'),
       // Flag to draw a stem
       drawStem,
       // Flag to draw dot modifiers
@@ -160,7 +160,7 @@ export class TabNote extends StemmableNote {
       // normal glyph scale
       scale: 1.0,
       // default tablature font
-      font: Metrics.lookupMetric('fontFamily'),
+      font: Metrics.get('fontFamily'),
     };
 
     this.glyphProps = Note.getGlyphProps(this.duration, this.noteType);

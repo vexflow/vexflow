@@ -119,8 +119,8 @@ export class Font {
       family = f;
     }
 
-    family = family ?? (Metrics.lookupMetric('fontFamily') as string);
-    size = size ?? Metrics.lookupMetric('fontSize') + 'pt';
+    family = family ?? (Metrics.get('fontFamily') as string);
+    size = size ?? Metrics.get('fontSize') + 'pt';
     weight = weight ?? FontWeight.NORMAL;
     style = style ?? FontStyle.NORMAL;
 
@@ -189,7 +189,7 @@ export class Font {
     let size: string;
     const sz = fontInfo.size;
     if (sz === undefined) {
-      size = Metrics.lookupMetric('fontSize') + 'pt';
+      size = Metrics.get('fontSize') + 'pt';
     } else if (typeof sz === 'number') {
       size = sz + 'pt ';
     } else {
@@ -197,7 +197,7 @@ export class Font {
       size = sz.trim() + ' ';
     }
 
-    const family: string = fontInfo.family ?? Metrics.lookupMetric('fontFamily');
+    const family: string = fontInfo.family ?? Metrics.get('fontFamily');
 
     return `${style}${weight}${size}${family}`;
   }

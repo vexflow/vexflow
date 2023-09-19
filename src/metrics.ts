@@ -4,12 +4,12 @@ import { FontInfo } from './font';
 
 export class Metrics {
   /** Use the provided key to look up a FontInfo in CommonMetrics. **/
-  static lookupMetricFontInfo(key: string): Required<FontInfo> {
+  static getFontInfo(key: string): Required<FontInfo> {
     return {
-      family: Metrics.lookupMetric(`${key}.fontFamily`),
-      size: Metrics.lookupMetric(`${key}.fontSize`),
-      weight: Metrics.lookupMetric(`${key}.fontWeight`),
-      style: Metrics.lookupMetric(`${key}.fontStyle`),
+      family: Metrics.get(`${key}.fontFamily`),
+      size: Metrics.get(`${key}.fontSize`),
+      weight: Metrics.get(`${key}.fontWeight`),
+      style: Metrics.get(`${key}.fontStyle`),
     };
   }
 
@@ -27,7 +27,7 @@ export class Metrics {
    * Retrieve the value from the most specific key (i.e., prefer #3 over #2 over #1 in the above example).
    */
   // eslint-disable-next-line
-  static lookupMetric(key: string, defaultValue?: any): any {
+  static get(key: string, defaultValue?: any): any {
     const keyParts = key.split('.');
     const lastKeyPart = keyParts.pop()!; // Use ! because keyParts is not empty, since ''.split('.') still returns [''].
 
@@ -49,6 +49,7 @@ export class Metrics {
     return retVal;
   }
 }
+
 // eslint-disable-next-line
 export const MetricsDefaults: Record<string, any> = {
   fontFamily: 'Bravura',

@@ -188,7 +188,7 @@ const basic2 = createSingleMeasureTest((f) => {
 
 const snare0 = createSingleMeasureTest((f) => {
   const font = {
-    family: Metrics.lookupMetric('fontFamily'),
+    family: Metrics.get('fontFamily'),
     size: 14,
     weight: FontWeight.BOLD,
     style: FontStyle.ITALIC,

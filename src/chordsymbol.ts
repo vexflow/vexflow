@@ -97,19 +97,19 @@ export class ChordSymbol extends Modifier {
   };
 
   static get superSubRatio(): number {
-    return Metrics.lookupMetric('ChordSymbol.superSubRatio');
+    return Metrics.get('ChordSymbol.superSubRatio');
   }
 
   static get spacingBetweenBlocks(): number {
-    return Metrics.lookupMetric('ChordSymbol.spacing');
+    return Metrics.get('ChordSymbol.spacing');
   }
 
   static get superscriptOffset(): number {
-    return Metrics.lookupMetric('ChordSymbol.superscriptOffset');
+    return Metrics.get('ChordSymbol.superscriptOffset');
   }
 
   static get subscriptOffset(): number {
-    return Metrics.lookupMetric('ChordSymbol.subscriptOffset');
+    return Metrics.get('ChordSymbol.subscriptOffset');
   }
 
   // Glyph data
@@ -139,7 +139,7 @@ export class ChordSymbol extends Modifier {
   static readonly symbolModifiers = SymbolModifiers;
 
   static get minPadding(): number {
-    return Metrics.lookupMetric('NoteHead.minPadding');
+    return Metrics.get('NoteHead.minPadding');
   }
 
   /**

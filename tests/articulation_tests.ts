@@ -419,7 +419,7 @@ function drawArticulations2(options: TestOptions): void {
 
 function tabNotes(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 600, 200);
-  ctx.font = '10pt ' + Metrics.lookupMetric('fontFamily');
+  ctx.font = '10pt ' + Metrics.get('fontFamily');
   const stave = new TabStave(10, 10, 550);
   stave.setContext(ctx);
   stave.draw();

@@ -99,7 +99,7 @@ export class StaveNote extends StemmableNote {
   }
 
   static get minNoteheadPadding(): number {
-    return Metrics.lookupMetric('NoteHead.minPadding');
+    return Metrics.get('NoteHead.minPadding');
   }
 
   /** Format notes inside a ModifierContext. */
@@ -410,7 +410,7 @@ export class StaveNote extends StemmableNote {
     this.renderOptions = {
       ...this.renderOptions,
       // font size for note heads and rests
-      glyphFontScale: noteStruct.glyphFontScale || Metrics.lookupMetric('fontSize'),
+      glyphFontScale: noteStruct.glyphFontScale || Metrics.get('fontSize'),
       // number of stroke px to the left and right of head
       strokePx: noteStruct.strokePx || StaveNote.LEDGER_LINE_OFFSET,
     };

@@ -84,7 +84,7 @@ function withBend(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 500, 240);
   ctx.scale(1.3, 1.3);
 
-  ctx.setFont(Metrics.lookupMetric('fontFamily'), VexFlowTests.Font.size);
+  ctx.setFont(Metrics.get('fontFamily'), VexFlowTests.Font.size);
   const stave = new TabStave(10, 10, 450).addTabGlyph().setContext(ctx).draw();
 
   const notes = [

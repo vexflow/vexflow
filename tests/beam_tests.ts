@@ -772,7 +772,7 @@ function complexWithAnnotation(options: TestOptions): void {
   ];
 
   const font = {
-    family: Metrics.lookupMetric('Annotation.fontFamily'),
+    family: Metrics.get('Annotation.fontFamily'),
     size: 14,
     weight: FontWeight.BOLD,
     style: FontStyle.ITALIC,

@@ -138,7 +138,7 @@ export class Clef extends StaveModifier {
   /** Get point for clefs. */
   static getPoint(size?: string): number {
     // for sizes other than 'default', clef is 2/3 of the default value
-    return size === 'default' ? Metrics.lookupMetric('fontSize') : (Metrics.lookupMetric('fontSize') * 2) / 3;
+    return size === 'default' ? Metrics.get('fontSize') : (Metrics.get('fontSize') * 2) / 3;
   }
 
   /** Set associated stave. */

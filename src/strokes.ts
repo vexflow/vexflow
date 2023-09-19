@@ -85,7 +85,7 @@ export class Stroke extends Modifier {
     this.position = Modifier.Position.LEFT;
 
     this.renderOptions = {
-      fontScale: Metrics.lookupMetric('Stroke.fontSize'),
+      fontScale: Metrics.get('Stroke.fontSize'),
     };
 
     this.setXShift(0);

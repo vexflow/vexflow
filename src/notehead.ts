@@ -93,7 +93,7 @@ export class NoteHead extends Note {
     this.renderOptions = {
       ...this.renderOptions,
       // font size for note heads
-      glyphFontScale: noteStruct.glyphFontScale || Metrics.lookupMetric('fontSize'),
+      glyphFontScale: noteStruct.glyphFontScale || Metrics.get('fontSize'),
     };
 
     this.fontInfo.size = this.renderOptions.glyphFontScale;

@@ -34,7 +34,7 @@ export class KeySignature extends StaveModifier {
 
     this.setKeySig(keySpec, cancelKeySpec, alterKeySpec);
     this.setPosition(StaveModifierPosition.BEGIN);
-    this.glyphFontScale = Metrics.lookupMetric('fontSize');
+    this.glyphFontScale = Metrics.get('fontSize');
     this.glyphs = [];
     this.paddingForced = false;
   }

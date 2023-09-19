@@ -69,7 +69,7 @@ export class Annotation extends Modifier {
   // Use the same padding for annotations as note head so the
   // words don't run into each other.
   static get minAnnotationPadding(): number {
-    return Metrics.lookupMetric('NoteHead.minPadding');
+    return Metrics.get('NoteHead.minPadding');
   }
   /** Arrange annotations within a `ModifierContext` */
   static format(annotations: Annotation[], state: ModifierContextState): boolean {

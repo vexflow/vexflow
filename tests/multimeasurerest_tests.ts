@@ -98,7 +98,7 @@ function simple(options: TestOptions): void {
   const context = f.getContext();
   const element = new Element();
   element.setText(str);
-  element.setFont(Metrics.lookupMetric('fontFamily'), 16, 'bold');
+  element.setFont(Metrics.get('fontFamily'), 16, 'bold');
   element.renderText(context, xs.left + (xs.right - xs.left) * 0.5 - element.getWidth() * 0.5, strY);
 
   options.assert.ok(true, 'Simple Test');

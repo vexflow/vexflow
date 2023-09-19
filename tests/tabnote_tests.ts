@@ -369,7 +369,7 @@ function drawStemsUpThrough(options: TestOptions, contextBuilder: ContextBuilder
     return tabNote;
   });
 
-  ctx.setFont(Metrics.lookupMetric('fontFamily'), 10, 'bold');
+  ctx.setFont(Metrics.get('fontFamily'), 10, 'bold');
   const voice = new Voice(Flow.TIME4_4).setMode(VoiceMode.SOFT);
   voice.addTickables(notes);
   new Formatter().joinVoices([voice]).formatToStave([voice], stave);

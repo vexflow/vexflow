@@ -377,7 +377,7 @@ export class VexFlowTests {
    */
   static plotLegendForNoteWidth(ctx: RenderContext, x: number, y: number): void {
     ctx.save();
-    ctx.setFont(Metrics.lookupMetric('fontFamily'), 8);
+    ctx.setFont(Metrics.get('fontFamily'), 8);
 
     const spacing = 12;
     let lastY = y;

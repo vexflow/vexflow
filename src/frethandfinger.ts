@@ -34,7 +34,7 @@ export class FretHandFinger extends Modifier {
       const pos = num.getPosition();
       const index = num.checkIndex();
       const props = note.getKeyProps()[index];
-      const textHeight = Metrics.lookupMetric('FretHandFinger.fontSize');
+      const textHeight = Metrics.get('FretHandFinger.fontSize');
       if (num.position === ModifierPosition.ABOVE) {
         state.topTextLine += textHeight / Tables.STAVE_LINE_DISTANCE + 0.5;
       }

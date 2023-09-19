@@ -841,7 +841,7 @@ function annotations(options: TestOptions): void {
         note.addModifier(
           new Annotation(sm.lyrics[iii])
             .setVerticalJustification(Annotation.VerticalJustify.BOTTOM)
-            .setFont(Metrics.lookupMetric('fontFamily'), 12, FontWeight.NORMAL)
+            .setFont(Metrics.get('fontFamily'), 12, FontWeight.NORMAL)
         );
       }
       notes.push(note);

@@ -172,7 +172,7 @@ export class Stem extends Element {
   }
 
   adjustHeightForFlag(): void {
-    this.renderHeightAdjustment = Metrics.lookupMetric('Stem.heightAdjustmentForFlag', -3);
+    this.renderHeightAdjustment = Metrics.get('Stem.heightAdjustmentForFlag', -3);
   }
 
   adjustHeightForBeam(): void {

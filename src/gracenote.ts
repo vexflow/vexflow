@@ -29,7 +29,7 @@ export class GraceNote extends StaveNote {
 
   constructor(noteStruct: GraceNoteStruct) {
     super({
-      glyphFontScale: Metrics.lookupMetric('fontSize') * GraceNote.SCALE,
+      glyphFontScale: Metrics.get('fontSize') * GraceNote.SCALE,
       strokePx: GraceNote.LEDGER_LINE_OFFSET,
       ...noteStruct,
     });

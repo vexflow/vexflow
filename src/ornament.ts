@@ -35,7 +35,7 @@ export class Ornament extends Modifier {
     return Category.Ornament;
   }
   static get minPadding(): number {
-    return Metrics.lookupMetric('NoteHead.minPadding');
+    return Metrics.get('NoteHead.minPadding');
   }
 
   protected ornamentAlignWithNoteHead: string[] | boolean;

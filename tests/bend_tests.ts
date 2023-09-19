@@ -213,7 +213,7 @@ function bendPhrase(options: TestOptions, contextBuilder: ContextBuilder): void 
   const ctx = contextBuilder(options.elementId, 500, 240);
   ctx.scale(1.5, 1.5);
 
-  ctx.font = Metrics.lookupMetric('Bend.fontSize') + Metrics.lookupMetric('Bend.fontFamily'); // Optionally use constants defined in Font.
+  ctx.font = Metrics.get('Bend.fontSize') + Metrics.get('Bend.fontFamily'); // Optionally use constants defined in Font.
   const stave = new TabStave(10, 10, 450).addClef('tab').setContext(ctx).draw();
 
   const phrase1 = [

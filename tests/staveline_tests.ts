@@ -37,7 +37,7 @@ function simple0(options: TestOptions): void {
     firstIndexes: [0],
     lastIndexes: [0],
     options: {
-      font: { family: Metrics.lookupMetric('fontFamily'), size: 12, style: FontStyle.ITALIC },
+      font: { family: Metrics.get('fontFamily'), size: 12, style: FontStyle.ITALIC },
       text: 'gliss.',
     },
   });

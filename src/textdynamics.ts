@@ -59,7 +59,7 @@ export class TextDynamics extends Note {
     this.line = noteStruct.line ?? 0;
     this.text = '';
 
-    this.renderOptions = { glyphFontSize: Metrics.lookupMetric('fontSize'), ...this.renderOptions };
+    this.renderOptions = { glyphFontSize: Metrics.get('fontSize'), ...this.renderOptions };
     this.fontInfo.size = defined(this.renderOptions.glyphFontSize) * this.renderOptions.glyphFontScale;
     L('New Dynamics Text: ', this.sequence);
   }

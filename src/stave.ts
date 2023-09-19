@@ -75,12 +75,12 @@ export class Stave extends Element {
   // This is the sum of the padding that normally goes on left + right of a stave during
   // drawing. Used to size staves correctly with content width.
   static get defaultPadding(): number {
-    return Metrics.lookupMetric('Stave.padding') + Metrics.lookupMetric('Stave.endPaddingMax');
+    return Metrics.get('Stave.padding') + Metrics.get('Stave.endPaddingMax');
   }
 
   // Right padding, used by system if startX is already determined.
   static get rightPadding(): number {
-    return Metrics.lookupMetric('Stave.endPaddingMax');
+    return Metrics.get('Stave.endPaddingMax');
   }
 
   constructor(x: number, y: number, width: number, options?: StaveOptions) {
