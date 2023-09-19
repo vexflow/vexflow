@@ -691,8 +691,6 @@ export enum Glyphs {
   accidentalCommaSlashUp = '\ue479',
   // U+E264  Double flat
   accidentalDoubleFlat = '\ue264',
-  // U+1D12B  Double flat
-  accidentalDoubleFlatAlternate = '\u{1d12b}',
   // U+ED30  Arabic double flat
   accidentalDoubleFlatArabic = '\ued30',
   // U+E2F0  Double flat equal tempered semitone
@@ -715,8 +713,6 @@ export enum Glyphs {
   accidentalDoubleFlatTwoArrowsUp = '\ue2cf',
   // U+E263  Double sharp
   accidentalDoubleSharp = '\ue263',
-  // U+1D12A  Double sharp
-  accidentalDoubleSharpAlternate = '\u{1d12a}',
   // U+ED38  Arabic double sharp
   accidentalDoubleSharpArabic = '\ued38',
   // U+E2F4  Double sharp equal tempered semitone
@@ -755,8 +751,6 @@ export enum Glyphs {
   accidentalFiveQuarterTonesSharpArrowUp = '\ue276',
   // U+E260  Flat
   accidentalFlat = '\ue260',
-  // U+266D  Flat
-  accidentalFlatAlternate = '\u266d',
   // U+ED32  Arabic half-tone flat
   accidentalFlatArabic = '\ued32',
   // U+E2F1  Flat equal tempered semitone
@@ -843,8 +837,6 @@ export enum Glyphs {
   accidentalNarrowReversedFlatAndFlat = '\ue285',
   // U+E261  Natural
   accidentalNatural = '\ue261',
-  // U+266E  Natural
-  accidentalNaturalAlternate = '\u266e',
   // U+ED34  Arabic natural
   accidentalNaturalArabic = '\ued34',
   // U+E2F2  Natural equal tempered semitone
@@ -897,20 +889,14 @@ export enum Glyphs {
   accidentalQuarterSharpEqualTempered = '\ue2f6',
   // U+E47F  Quarter-tone flat
   accidentalQuarterToneFlat4 = '\ue47f',
-  // U+1D133  Quarter-tone flat
-  accidentalQuarterToneFlat4Alternate = '\u{1d133}',
   // U+ED33  Arabic quarter-tone flat
   accidentalQuarterToneFlatArabic = '\ued33',
   // U+E270  Quarter-tone flat
   accidentalQuarterToneFlatArrowUp = '\ue270',
-  // U+1D12C  Quarter-tone flat
-  accidentalQuarterToneFlatArrowUpAlternate = '\u{1d12c}',
   // U+E480  Filled reversed flat (quarter-tone flat)
   accidentalQuarterToneFlatFilledReversed = '\ue480',
   // U+E273  Quarter-tone flat
   accidentalQuarterToneFlatNaturalArrowDown = '\ue273',
-  // U+1D12F  Quarter-tone flat
-  accidentalQuarterToneFlatNaturalArrowDownAlternate = '\u{1d12f}',
   // U+E478  Quarter tone flat (Penderecki)
   accidentalQuarterToneFlatPenderecki = '\ue478',
   // U+E280  Reversed flat (quarter-tone flat) (Stein)
@@ -919,20 +905,14 @@ export enum Glyphs {
   accidentalQuarterToneFlatVanBlankenburg = '\ue488',
   // U+E47E  Quarter-tone sharp
   accidentalQuarterToneSharp4 = '\ue47e',
-  // U+1D132  Quarter-tone sharp
-  accidentalQuarterToneSharp4Alternate = '\u{1d132}',
   // U+ED35  Arabic quarter-tone sharp
   accidentalQuarterToneSharpArabic = '\ued35',
   // U+E275  Quarter-tone sharp
   accidentalQuarterToneSharpArrowDown = '\ue275',
-  // U+1D131  Quarter-tone sharp
-  accidentalQuarterToneSharpArrowDownAlternate = '\u{1d131}',
   // U+E472  Quarter tone sharp (Bussotti)
   accidentalQuarterToneSharpBusotti = '\ue472',
   // U+E272  Quarter-tone sharp
   accidentalQuarterToneSharpNaturalArrowUp = '\ue272',
-  // U+1D12E  Quarter-tone sharp
-  accidentalQuarterToneSharpNaturalArrowUpAlternate = '\u{1d12e}',
   // U+E282  Half sharp (quarter-tone sharp) (Stein)
   accidentalQuarterToneSharpStein = '\ue282',
   // U+E475  Quarter tone sharp with wiggly tail
@@ -957,8 +937,6 @@ export enum Glyphs {
   accidentalReversedFlatArrowUp = '\ue290',
   // U+E262  Sharp
   accidentalSharp = '\ue262',
-  // U+266F  Sharp
-  accidentalSharpAlternate = '\u266f',
   // U+ED36  Arabic half-tone sharp
   accidentalSharpArabic = '\ued36',
   // U+E2F3  Sharp equal tempered semitone
@@ -1011,8 +989,6 @@ export enum Glyphs {
   accidentalThreeQuarterTonesFlatArabic = '\ued31',
   // U+E271  Three-quarter-tones flat
   accidentalThreeQuarterTonesFlatArrowDown = '\ue271',
-  // U+1D12D  Three-quarter-tones flat
-  accidentalThreeQuarterTonesFlatArrowDownAlternate = '\u{1d12d}',
   // U+E278  Three-quarter-tones flat
   accidentalThreeQuarterTonesFlatArrowUp = '\ue278',
   // U+E489  Three-quarter-tones flat (Couper)
@@ -1029,8 +1005,6 @@ export enum Glyphs {
   accidentalThreeQuarterTonesSharpArrowDown = '\ue277',
   // U+E274  Three-quarter-tones sharp
   accidentalThreeQuarterTonesSharpArrowUp = '\ue274',
-  // U+1D130  Three-quarter-tones sharp
-  accidentalThreeQuarterTonesSharpArrowUpAlternate = '\u{1d130}',
   // U+E474  Three quarter tones sharp (Bussotti)
   accidentalThreeQuarterTonesSharpBusotti = '\ue474',
   // U+E283  One and a half sharps (three-quarter-tones sharp) (Stein)
@@ -1109,20 +1083,14 @@ export enum Glyphs {
   analyticsChoralmelodie = '\ue86a',
   // U+E863  End of stimme
   analyticsEndStimme = '\ue863',
-  // U+1D1A8  End of stimme
-  analyticsEndStimmeAlternate = '\u{1d1a8}',
   // U+E86B  Hauptrhythmus (Berg)
   analyticsHauptrhythmus = '\ue86b',
   // U+E860  Hauptstimme
   analyticsHauptstimme = '\ue860',
-  // U+1D1A6  Hauptstimme
-  analyticsHauptstimmeAlternate = '\u{1d1a6}',
   // U+E869  Inversion 1
   analyticsInversion1 = '\ue869',
   // U+E861  Nebenstimme
   analyticsNebenstimme = '\ue861',
-  // U+1D1A7  Nebenstimme
-  analyticsNebenstimmeAlternate = '\u{1d1a7}',
   // U+E862  Start of stimme
   analyticsStartStimme = '\ue862',
   // U+E864  Theme
@@ -1139,12 +1107,8 @@ export enum Glyphs {
   arpeggiato = '\ue63c',
   // U+E635  Arpeggiato down
   arpeggiatoDown = '\ue635',
-  // U+1D184  Arpeggiato down
-  arpeggiatoDownAlternate = '\u{1d184}',
   // U+E634  Arpeggiato up
   arpeggiatoUp = '\ue634',
-  // U+1D183  Arpeggiato up
-  arpeggiatoUpAlternate = '\u{1d183}',
   // U+EB64  Black arrow down (S)
   arrowBlackDown = '\ueb64',
   // U+EB65  Black arrow down-left (SW)
@@ -1243,14 +1207,10 @@ export enum Glyphs {
   arrowheadWhiteUpRight = '\ueb81',
   // U+E4A0  Accent above
   articAccentAbove = '\ue4a0',
-  // U+1D17B  Accent above
-  articAccentAboveAlternate = '\u{1d17b}',
   // U+E4A1  Accent below
   articAccentBelow = '\ue4a1',
   // U+E4B0  Accent-staccato above
   articAccentStaccatoAbove = '\ue4b0',
-  // U+1D181  Accent-staccato above
-  articAccentStaccatoAboveAlternate = '\u{1d181}',
   // U+E4B1  Accent-staccato below
   articAccentStaccatoBelow = '\ue4b1',
   // U+E4BA  Laissez vibrer (l.v.) above
@@ -1259,14 +1219,10 @@ export enum Glyphs {
   articLaissezVibrerBelow = '\ue4bb',
   // U+E4AC  Marcato above
   articMarcatoAbove = '\ue4ac',
-  // U+1D17F  Marcato above
-  articMarcatoAboveAlternate = '\u{1d17f}',
   // U+E4AD  Marcato below
   articMarcatoBelow = '\ue4ad',
   // U+E4AE  Marcato-staccato above
   articMarcatoStaccatoAbove = '\ue4ae',
-  // U+1D180  Marcato-staccato above
-  articMarcatoStaccatoAboveAlternate = '\u{1d180}',
   // U+E4AF  Marcato-staccato below
   articMarcatoStaccatoBelow = '\ue4af',
   // U+E4BC  Marcato-tenuto above
@@ -1291,8 +1247,6 @@ export enum Glyphs {
   articSoftAccentTenutoStaccatoBelow = '\ued47',
   // U+E4A6  Staccatissimo above
   articStaccatissimoAbove = '\ue4a6',
-  // U+1D17E  Staccatissimo above
-  articStaccatissimoAboveAlternate = '\u{1d17e}',
   // U+E4A7  Staccatissimo below
   articStaccatissimoBelow = '\ue4a7',
   // U+E4AA  Staccatissimo stroke above
@@ -1305,8 +1259,6 @@ export enum Glyphs {
   articStaccatissimoWedgeBelow = '\ue4a9',
   // U+E4A2  Staccato above
   articStaccatoAbove = '\ue4a2',
-  // U+1D17C  Staccato above
-  articStaccatoAboveAlternate = '\u{1d17c}',
   // U+E4A3  Staccato below
   articStaccatoBelow = '\ue4a3',
   // U+E4B6  Stress above
@@ -1315,8 +1267,6 @@ export enum Glyphs {
   articStressBelow = '\ue4b7',
   // U+E4A4  Tenuto above
   articTenutoAbove = '\ue4a4',
-  // U+1D17D  Tenuto above
-  articTenutoAboveAlternate = '\u{1d17d}',
   // U+E4B4  Tenuto-accent above
   articTenutoAccentAbove = '\ue4b4',
   // U+E4B5  Tenuto-accent below
@@ -1325,8 +1275,6 @@ export enum Glyphs {
   articTenutoBelow = '\ue4a5',
   // U+E4B2  Louré (tenuto-staccato) above
   articTenutoStaccatoAbove = '\ue4b2',
-  // U+1D182  Louré (tenuto-staccato) above
-  articTenutoStaccatoAboveAlternate = '\u{1d182}',
   // U+E4B3  Louré (tenuto-staccato) below
   articTenutoStaccatoBelow = '\ue4b3',
   // U+E4B8  Unstress above
@@ -1335,38 +1283,24 @@ export enum Glyphs {
   articUnstressBelow = '\ue4b9',
   // U+E1E7  Augmentation dot
   augmentationDot = '\ue1e7',
-  // U+1D16D  Augmentation dot
-  augmentationDotAlternate = '\u{1d16d}',
   // U+E036  Dashed barline
   barlineDashed = '\ue036',
-  // U+1D104  Dashed barline
-  barlineDashedAlternate = '\u{1d104}',
   // U+E037  Dotted barline
   barlineDotted = '\ue037',
   // U+E031  Double barline
   barlineDouble = '\ue031',
-  // U+1D101  Double barline
-  barlineDoubleAlternate = '\u{1d101}',
   // U+E032  Final barline
   barlineFinal = '\ue032',
-  // U+1D102  Final barline
-  barlineFinalAlternate = '\u{1d102}',
   // U+E034  Heavy barline
   barlineHeavy = '\ue034',
   // U+E035  Heavy double barline
   barlineHeavyHeavy = '\ue035',
   // U+E033  Reverse final barline
   barlineReverseFinal = '\ue033',
-  // U+1D103  Reverse final barline
-  barlineReverseFinalAlternate = '\u{1d103}',
   // U+E038  Short barline
   barlineShort = '\ue038',
-  // U+1D105  Short barline
-  barlineShortAlternate = '\u{1d105}',
   // U+E030  Single barline
   barlineSingle = '\ue030',
-  // U+1D100  Single barline
-  barlineSingleAlternate = '\u{1d100}',
   // U+E039  Tick barline
   barlineTick = '\ue039',
   // U+EAF4  Accel./rit. beam 1 (widest)
@@ -1403,36 +1337,26 @@ export enum Glyphs {
   beamAccelRitFinal = '\ueb03',
   // U+E000  Brace
   brace = '\ue000',
-  // U+1D114  Brace
-  braceAlternate = '\u{1d114}',
   // U+E002  Bracket
   bracket = '\ue002',
-  // U+1D115  Bracket
-  bracketAlternate = '\u{1d115}',
   // U+E004  Bracket bottom
   bracketBottom = '\ue004',
   // U+E003  Bracket top
   bracketTop = '\ue003',
   // U+E5E3  Bend
   brassBend = '\ue5e3',
-  // U+1D189  Bend
-  brassBendAlternate = '\u{1d189}',
   // U+E5D6  Doit, long
   brassDoitLong = '\ue5d6',
   // U+E5D5  Doit, medium
   brassDoitMedium = '\ue5d5',
   // U+E5D4  Doit, short
   brassDoitShort = '\ue5d4',
-  // U+1D185  Doit, short
-  brassDoitShortAlternate = '\u{1d185}',
   // U+E5D9  Lip fall, long
   brassFallLipLong = '\ue5d9',
   // U+E5D8  Lip fall, medium
   brassFallLipMedium = '\ue5d8',
   // U+E5D7  Lip fall, short
   brassFallLipShort = '\ue5d7',
-  // U+1D186  Lip fall, short
-  brassFallLipShortAlternate = '\u{1d186}',
   // U+E5DF  Rough fall, long
   brassFallRoughLong = '\ue5df',
   // U+E5DE  Rough fall, medium
@@ -1447,8 +1371,6 @@ export enum Glyphs {
   brassFallSmoothShort = '\ue5da',
   // U+E5E1  Flip
   brassFlip = '\ue5e1',
-  // U+1D187  Flip
-  brassFlipAlternate = '\u{1d187}',
   // U+E5E8  Harmon mute, stem in
   brassHarmonMuteClosed = '\ue5e8',
   // U+E5E9  Harmon mute, stem extended, left
@@ -1483,14 +1405,10 @@ export enum Glyphs {
   brassScoop = '\ue5d0',
   // U+E5E2  Smear
   brassSmear = '\ue5e2',
-  // U+1D188  Smear
-  brassSmearAlternate = '\u{1d188}',
   // U+E5EF  Valve trill
   brassValveTrill = '\ue5ef',
   // U+E4CE  Breath mark (comma)
   breathMarkComma = '\ue4ce',
-  // U+1D112  Breath mark (comma)
-  breathMarkCommaAlternate = '\u{1d112}',
   // U+E4D5  Breath mark (Salzedo)
   breathMarkSalzedo = '\ue4d5',
   // U+E4CF  Breath mark (tick-like)
@@ -1503,8 +1421,6 @@ export enum Glyphs {
   buzzRoll = '\ue22a',
   // U+E05C  C clef
   cClef = '\ue05c',
-  // U+1D121  C clef
-  cClefAlternate = '\u{1d121}',
   // U+E05D  C clef ottava bassa
   cClef8vb = '\ue05d',
   // U+E05F  C clef, arrow down
@@ -1521,8 +1437,6 @@ export enum Glyphs {
   cClefSquare = '\ue060',
   // U+E4D1  Caesura
   caesura = '\ue4d1',
-  // U+1D113  Caesura
-  caesuraAlternate = '\u{1d113}',
   // U+E4D4  Curved caesura
   caesuraCurved = '\ue4d4',
   // U+E4D3  Short caesura
@@ -1545,8 +1459,6 @@ export enum Glyphs {
   chantCaesura = '\ue8f8',
   // U+E906  Plainchant C clef
   chantCclef = '\ue906',
-  // U+1D1D0  Plainchant C clef
-  chantCclefAlternate = '\u{1d1d0}',
   // U+E9D2  Circulus above
   chantCirculusAbove = '\ue9d2',
   // U+E9D3  Circulus below
@@ -1599,8 +1511,6 @@ export enum Glyphs {
   chantEpisema = '\ue9d8',
   // U+E902  Plainchant F clef
   chantFclef = '\ue902',
-  // U+1D1D1  Plainchant F clef
-  chantFclefAlternate = '\u{1d1d1}',
   // U+E9D0  Ictus above
   chantIctusAbove = '\ue9d0',
   // U+E9D1  Ictus below
@@ -1623,8 +1533,6 @@ export enum Glyphs {
   chantPodatusLower = '\ue9b0',
   // U+E9B1  Podatus, upper
   chantPodatusUpper = '\ue9b1',
-  // U+1D1D4  Podatus, upper
-  chantPodatusUpperAlternate = '\u{1d1d4}',
   // U+E990  Punctum
   chantPunctum = '\ue990',
   // U+E998  Punctum cavum
@@ -1643,8 +1551,6 @@ export enum Glyphs {
   chantPunctumLineaCavum = '\ue99a',
   // U+E996  Punctum virga
   chantPunctumVirga = '\ue996',
-  // U+1D1D3  Punctum virga
-  chantPunctumVirgaAlternate = '\u{1d1d3}',
   // U+E997  Punctum virga, reversed
   chantPunctumVirgaReversed = '\ue997',
   // U+E99B  Quilisma
@@ -1681,8 +1587,6 @@ export enum Glyphs {
   clefChangeCombining = '\ue07f',
   // U+E048  Coda
   coda = '\ue048',
-  // U+1D10C  Coda
-  codaAlternate = '\u{1d10c}',
   // U+E049  Square coda
   codaSquare = '\ue049',
   // U+E897  Beat 2, compound time
@@ -1709,36 +1613,20 @@ export enum Glyphs {
   conductorWeakBeat = '\ue893',
   // U+E8E0  Begin beam
   controlBeginBeam = '\ue8e0',
-  // U+1D173  Begin beam
-  controlBeginBeamAlternate = '\u{1d173}',
   // U+E8E6  Begin phrase
   controlBeginPhrase = '\ue8e6',
-  // U+1D179  Begin phrase
-  controlBeginPhraseAlternate = '\u{1d179}',
   // U+E8E4  Begin slur
   controlBeginSlur = '\ue8e4',
-  // U+1D177  Begin slur
-  controlBeginSlurAlternate = '\u{1d177}',
   // U+E8E2  Begin tie
   controlBeginTie = '\ue8e2',
-  // U+1D175  Begin tie
-  controlBeginTieAlternate = '\u{1d175}',
   // U+E8E1  End beam
   controlEndBeam = '\ue8e1',
-  // U+1D174  End beam
-  controlEndBeamAlternate = '\u{1d174}',
   // U+E8E7  End phrase
   controlEndPhrase = '\ue8e7',
-  // U+1D17A  End phrase
-  controlEndPhraseAlternate = '\u{1d17a}',
   // U+E8E5  End slur
   controlEndSlur = '\ue8e5',
-  // U+1D178  End slur
-  controlEndSlurAlternate = '\u{1d178}',
   // U+E8E3  End tie
   controlEndTie = '\ue8e3',
-  // U+1D176  End tie
-  controlEndTieAlternate = '\u{1d176}',
   // U+ED64  Double flat
   csymAccidentalDoubleFlat = '\ued64',
   // U+ED63  Double sharp
@@ -1765,8 +1653,6 @@ export enum Glyphs {
   csymDiagonalArrangementSlash = '\ue87c',
   // U+E870  Diminished
   csymDiminished = '\ue870',
-  // U+1D1A9  Diminished
-  csymDiminishedAlternate = '\u{1d1a9}',
   // U+E871  Half-diminished
   csymHalfDiminished = '\ue871',
   // U+E873  Major seventh
@@ -1785,12 +1671,8 @@ export enum Glyphs {
   curlewSign = '\ue4d6',
   // U+E046  Da capo
   daCapo = '\ue046',
-  // U+1D10A  Da capo
-  daCapoAlternate = '\u{1d10a}',
   // U+E045  Dal segno
   dalSegno = '\ue045',
-  // U+1D109  Dal segno
-  dalSegnoAlternate = '\u{1d109}',
   // U+EA3C  Daseian excellentes 1
   daseianExcellentes1 = '\uea3c',
   // U+EA3D  Daseian excellentes 2
@@ -1831,8 +1713,6 @@ export enum Glyphs {
   doubleLateralRollStevens = '\ue234',
   // U+E5F0  Double-tongue above
   doubleTongueAbove = '\ue5f0',
-  // U+1D18A  Double-tongue above
-  doubleTongueAboveAlternate = '\u{1d18a}',
   // U+E5F1  Double-tongue below
   doubleTongueBelow = '\ue5f1',
   // U+E546  Colon separator for combined dynamics
@@ -1845,12 +1725,8 @@ export enum Glyphs {
   dynamicCombinedSeparatorSpace = '\ue548',
   // U+E53E  Crescendo
   dynamicCrescendoHairpin = '\ue53e',
-  // U+1D192  Crescendo
-  dynamicCrescendoHairpinAlternate = '\u{1d192}',
   // U+E53F  Diminuendo
   dynamicDiminuendoHairpin = '\ue53f',
-  // U+1D193  Diminuendo
-  dynamicDiminuendoHairpinAlternate = '\u{1d193}',
   // U+E52F  ff
   dynamicFF = '\ue52f',
   // U+E530  fff
@@ -1863,8 +1739,6 @@ export enum Glyphs {
   dynamicFFFFFF = '\ue533',
   // U+E522  Forte
   dynamicForte = '\ue522',
-  // U+1D191  Forte
-  dynamicForteAlternate = '\u{1d191}',
   // U+E534  Forte-piano
   dynamicFortePiano = '\ue534',
   // U+E535  Forzando
@@ -1885,8 +1759,6 @@ export enum Glyphs {
   dynamicMessaDiVoce = '\ue540',
   // U+E521  Mezzo
   dynamicMezzo = '\ue521',
-  // U+1D190  Mezzo
-  dynamicMezzoAlternate = '\u{1d190}',
   // U+E526  Niente
   dynamicNiente = '\ue526',
   // U+E541  Niente (for hairpins)
@@ -1905,20 +1777,14 @@ export enum Glyphs {
   dynamicPPPPPP = '\ue527',
   // U+E520  Piano
   dynamicPiano = '\ue520',
-  // U+1D18F  Piano
-  dynamicPianoAlternate = '\u{1d18f}',
   // U+E523  Rinforzando
   dynamicRinforzando = '\ue523',
-  // U+1D18C  Rinforzando
-  dynamicRinforzandoAlternate = '\u{1d18c}',
   // U+E53C  Rinforzando 1
   dynamicRinforzando1 = '\ue53c',
   // U+E53D  Rinforzando 2
   dynamicRinforzando2 = '\ue53d',
   // U+E524  Sforzando
   dynamicSforzando = '\ue524',
-  // U+1D18D  Sforzando
-  dynamicSforzandoAlternate = '\u{1d18d}',
   // U+E536  Sforzando 1
   dynamicSforzando1 = '\ue536',
   // U+E538  Sforzando-pianissimo
@@ -1933,8 +1799,6 @@ export enum Glyphs {
   dynamicSforzatoPiano = '\ue53a',
   // U+E525  Z
   dynamicZ = '\ue525',
-  // U+1D18E  Z
-  dynamicZAlternate = '\u{1d18e}',
   // U+EB46  Eight channels (7.1 surround)
   elecAudioChannelsEight = '\ueb46',
   // U+EB43  Five channels
@@ -2067,20 +1931,14 @@ export enum Glyphs {
   elecVolumeLevel80 = '\ueb32',
   // U+E062  F clef
   fClef = '\ue062',
-  // U+1D122  F clef
-  fClefAlternate = '\u{1d122}',
   // U+E066  F clef quindicesima alta
   fClef15ma = '\ue066',
   // U+E063  F clef quindicesima bassa
   fClef15mb = '\ue063',
   // U+E065  F clef ottava alta
   fClef8va = '\ue065',
-  // U+1D123  F clef ottava alta
-  fClef8vaAlternate = '\u{1d123}',
   // U+E064  F clef ottava bassa
   fClef8vb = '\ue064',
-  // U+1D124  F clef ottava bassa
-  fClef8vbAlternate = '\u{1d124}',
   // U+E068  F clef, arrow down
   fClefArrowDown = '\ue068',
   // U+E067  F clef, arrow up
@@ -2093,12 +1951,8 @@ export enum Glyphs {
   fClefTurned = '\ue077',
   // U+E4C0  Fermata above
   fermataAbove = '\ue4c0',
-  // U+1D110  Fermata above
-  fermataAboveAlternate = '\u{1d110}',
   // U+E4C1  Fermata below
   fermataBelow = '\ue4c1',
-  // U+1D111  Fermata below
-  fermataBelowAlternate = '\u{1d111}',
   // U+E4C6  Long fermata above
   fermataLongAbove = '\ue4c6',
   // U+E4C7  Long fermata below
@@ -2295,14 +2149,10 @@ export enum Glyphs {
   flag128thDown = '\ue249',
   // U+E248  Combining flag 5 (128th) above
   flag128thUp = '\ue248',
-  // U+1D172  Combining flag 5 (128th) above
-  flag128thUpAlternate = '\u{1d172}',
   // U+E243  Combining flag 2 (16th) below
   flag16thDown = '\ue243',
   // U+E242  Combining flag 2 (16th) above
   flag16thUp = '\ue242',
-  // U+1D16F  Combining flag 2 (16th) above
-  flag16thUpAlternate = '\u{1d16f}',
   // U+E24B  Combining flag 6 (256th) below
   flag256thDown = '\ue24b',
   // U+E24A  Combining flag 6 (256th) above
@@ -2311,8 +2161,6 @@ export enum Glyphs {
   flag32ndDown = '\ue245',
   // U+E244  Combining flag 3 (32nd) above
   flag32ndUp = '\ue244',
-  // U+1D170  Combining flag 3 (32nd) above
-  flag32ndUpAlternate = '\u{1d170}',
   // U+E24D  Combining flag 7 (512th) below
   flag512thDown = '\ue24d',
   // U+E24C  Combining flag 7 (512th) above
@@ -2321,14 +2169,10 @@ export enum Glyphs {
   flag64thDown = '\ue247',
   // U+E246  Combining flag 4 (64th) above
   flag64thUp = '\ue246',
-  // U+1D171  Combining flag 4 (64th) above
-  flag64thUpAlternate = '\u{1d171}',
   // U+E241  Combining flag 1 (8th) below
   flag8thDown = '\ue241',
   // U+E240  Combining flag 1 (8th) above
   flag8thUp = '\ue240',
-  // U+1D16E  Combining flag 1 (8th) above
-  flag8thUpAlternate = '\u{1d16e}',
   // U+E251  Internal combining flag below
   flagInternalDown = '\ue251',
   // U+E250  Internal combining flag above
@@ -2339,8 +2183,6 @@ export enum Glyphs {
   fretboard3StringNut = '\ue851',
   // U+E852  4-string fretboard
   fretboard4String = '\ue852',
-  // U+1D11D  4-string fretboard
-  fretboard4StringAlternate = '\u{1d11d}',
   // U+E853  4-string fretboard at nut
   fretboard4StringNut = '\ue853',
   // U+E854  5-string fretboard
@@ -2349,8 +2191,6 @@ export enum Glyphs {
   fretboard5StringNut = '\ue855',
   // U+E856  6-string fretboard
   fretboard6String = '\ue856',
-  // U+1D11C  6-string fretboard
-  fretboard6StringAlternate = '\u{1d11c}',
   // U+E857  6-string fretboard at nut
   fretboard6StringNut = '\ue857',
   // U+E858  Fingered fret (filled circle)
@@ -2465,20 +2305,14 @@ export enum Glyphs {
   functionZero = '\uea70',
   // U+E050  G clef
   gClef = '\ue050',
-  // U+1D11E  G clef
-  gClefAlternate = '\u{1d11e}',
   // U+E054  G clef quindicesima alta
   gClef15ma = '\ue054',
   // U+E051  G clef quindicesima bassa
   gClef15mb = '\ue051',
   // U+E053  G clef ottava alta
   gClef8va = '\ue053',
-  // U+1D11F  G clef ottava alta
-  gClef8vaAlternate = '\u{1d11f}',
   // U+E052  G clef ottava bassa
   gClef8vb = '\ue052',
-  // U+1D120  G clef ottava bassa
-  gClef8vbAlternate = '\u{1d120}',
   // U+E056  G clef ottava bassa with C clef
   gClef8vbCClef = '\ue056',
   // U+E055  G clef ottava bassa (old style)
@@ -2501,24 +2335,16 @@ export enum Glyphs {
   gClefTurned = '\ue074',
   // U+E586  Glissando down
   glissandoDown = '\ue586',
-  // U+1D1B2  Glissando down
-  glissandoDownAlternate = '\u{1d1b2}',
   // U+E585  Glissando up
   glissandoUp = '\ue585',
-  // U+1D1B1  Glissando up
-  glissandoUpAlternate = '\u{1d1b1}',
   // U+E561  Slashed grace note stem down
   graceNoteAcciaccaturaStemDown = '\ue561',
   // U+E560  Slashed grace note stem up
   graceNoteAcciaccaturaStemUp = '\ue560',
-  // U+1D194  Slashed grace note stem up
-  graceNoteAcciaccaturaStemUpAlternate = '\u{1d194}',
   // U+E563  Grace note stem down
   graceNoteAppoggiaturaStemDown = '\ue563',
   // U+E562  Grace note stem up
   graceNoteAppoggiaturaStemUp = '\ue562',
-  // U+1D195  Grace note stem up
-  graceNoteAppoggiaturaStemUpAlternate = '\u{1d195}',
   // U+E565  Slash for stem down grace note
   graceNoteSlashStemDown = '\ue565',
   // U+E564  Slash for stem up grace note
@@ -2873,8 +2699,6 @@ export enum Glyphs {
   keyboardPedalE = '\ue652',
   // U+E656  Half-pedal mark
   keyboardPedalHalf = '\ue656',
-  // U+1D1B0  Half-pedal mark
-  keyboardPedalHalfAlternate = '\u{1d1b0}',
   // U+E65B  Half pedal mark 1
   keyboardPedalHalf2 = '\ue65b',
   // U+E65C  Half pedal mark 2
@@ -2903,8 +2727,6 @@ export enum Glyphs {
   keyboardPedalParensRight = '\ue677',
   // U+E650  Pedal mark
   keyboardPedalPed = '\ue650',
-  // U+1D1AE  Pedal mark
-  keyboardPedalPedAlternate = '\u{1d1ae}',
   // U+E65A  Pedal S
   keyboardPedalS = '\ue65a',
   // U+E659  Sostenuto pedal mark
@@ -2917,8 +2739,6 @@ export enum Glyphs {
   keyboardPedalToeToHeel = '\ue675',
   // U+E655  Pedal up mark
   keyboardPedalUp = '\ue655',
-  // U+1D1AF  Pedal up mark
-  keyboardPedalUpAlternate = '\u{1d1af}',
   // U+E657  Pedal up notch
   keyboardPedalUpNotch = '\ue657',
   // U+E65D  Pedal up special
@@ -2937,56 +2757,34 @@ export enum Glyphs {
   keyboardRightPedalPictogram = '\ue660',
   // U+EC3E  Kievan flat
   kievanAccidentalFlat = '\uec3e',
-  // U+1D1E8  Kievan flat
-  kievanAccidentalFlatAlternate = '\u{1d1e8}',
   // U+EC3D  Kievan sharp
   kievanAccidentalSharp = '\uec3d',
   // U+EC3C  Kievan augmentation dot
   kievanAugmentationDot = '\uec3c',
   // U+EC30  Kievan C clef (tse-fa-ut)
   kievanCClef = '\uec30',
-  // U+1D1DE  Kievan C clef (tse-fa-ut)
-  kievanCClefAlternate = '\u{1d1de}',
   // U+EC31  Kievan ending symbol
   kievanEndingSymbol = '\uec31',
-  // U+1D1DF  Kievan ending symbol
-  kievanEndingSymbolAlternate = '\u{1d1df}',
   // U+EC3A  Kievan eighth note, stem down
   kievanNote8thStemDown = '\uec3a',
-  // U+1D1E6  Kievan eighth note, stem down
-  kievanNote8thStemDownAlternate = '\u{1d1e6}',
   // U+EC39  Kievan eighth note, stem up
   kievanNote8thStemUp = '\uec39',
-  // U+1D1E7  Kievan eighth note, stem up
-  kievanNote8thStemUpAlternate = '\u{1d1e7}',
   // U+EC3B  Kievan beam
   kievanNoteBeam = '\uec3b',
   // U+EC35  Kievan half note (on staff line)
   kievanNoteHalfStaffLine = '\uec35',
-  // U+1D1E3  Kievan half note (on staff line)
-  kievanNoteHalfStaffLineAlternate = '\u{1d1e3}',
   // U+EC36  Kievan half note (in staff space)
   kievanNoteHalfStaffSpace = '\uec36',
   // U+EC38  Kievan quarter note, stem down
   kievanNoteQuarterStemDown = '\uec38',
-  // U+1D1E4  Kievan quarter note, stem down
-  kievanNoteQuarterStemDownAlternate = '\u{1d1e4}',
   // U+EC37  Kievan quarter note, stem up
   kievanNoteQuarterStemUp = '\uec37',
-  // U+1D1E5  Kievan quarter note, stem up
-  kievanNoteQuarterStemUpAlternate = '\u{1d1e5}',
   // U+EC32  Kievan reciting note
   kievanNoteReciting = '\uec32',
-  // U+1D1E1  Kievan reciting note
-  kievanNoteRecitingAlternate = '\u{1d1e1}',
   // U+EC33  Kievan whole note
   kievanNoteWhole = '\uec33',
-  // U+1D1E2  Kievan whole note
-  kievanNoteWholeAlternate = '\u{1d1e2}',
   // U+EC34  Kievan final whole note
   kievanNoteWholeFinal = '\uec34',
-  // U+1D1E0  Kievan final whole note
-  kievanNoteWholeFinalAlternate = '\u{1d1e0}',
   // U+EC40  Do hand sign
   kodalyHandDo = '\uec40',
   // U+EC43  Fa hand sign
@@ -3221,8 +3019,6 @@ export enum Glyphs {
   medRenFlatHardB = '\ue9e1',
   // U+E9E0  Flat, soft b (fa)
   medRenFlatSoftB = '\ue9e0',
-  // U+1D1D2  Flat, soft b (fa)
-  medRenFlatSoftBAlternate = '\u{1d1d2}',
   // U+E9E4  Flat with dot
   medRenFlatWithDot = '\ue9e4',
   // U+EA24  G clef (Corpus Monodicum)
@@ -3247,8 +3043,6 @@ export enum Glyphs {
   medRenQuilismaCMN = '\uea28',
   // U+E9E3  Croix
   medRenSharpCroix = '\ue9e3',
-  // U+1D1CF  Croix
-  medRenSharpCroixAlternate = '\u{1d1cf}',
   // U+EA29  Strophicus (Corpus Monodicum)
   medRenStrophicusCMN = '\uea29',
   // U+EA10  Alteration sign
@@ -3265,24 +3059,16 @@ export enum Glyphs {
   mensuralBlackMaxima = '\ue950',
   // U+E954  Black mensural minima
   mensuralBlackMinima = '\ue954',
-  // U+1D1BC  Black mensural minima
-  mensuralBlackMinimaAlternate = '\u{1d1bc}',
   // U+E958  Black mensural void minima
   mensuralBlackMinimaVoid = '\ue958',
-  // U+1D1BB  Black mensural void minima
-  mensuralBlackMinimaVoidAlternate = '\u{1d1bb}',
   // U+E953  Black mensural semibrevis
   mensuralBlackSemibrevis = '\ue953',
-  // U+1D1BA  Black mensural semibrevis
-  mensuralBlackSemibrevisAlternate = '\u{1d1ba}',
   // U+E959  Black mensural semibrevis caudata
   mensuralBlackSemibrevisCaudata = '\ue959',
   // U+E95B  Black mensural oblique semibrevis
   mensuralBlackSemibrevisOblique = '\ue95b',
   // U+E957  Black mensural void semibrevis
   mensuralBlackSemibrevisVoid = '\ue957',
-  // U+1D1B9  Black mensural void semibrevis
-  mensuralBlackSemibrevisVoidAlternate = '\u{1d1b9}',
   // U+E955  Black mensural semiminima
   mensuralBlackSemiminima = '\ue955',
   // U+E905  Mensural C clef
@@ -3449,42 +3235,26 @@ export enum Glyphs {
   mensuralObliqueDesc5thWhite = '\ue98f',
   // U+E910  Tempus perfectum cum prolatione perfecta (9/8)
   mensuralProlation1 = '\ue910',
-  // U+1D1C7  Tempus perfectum cum prolatione perfecta (9/8)
-  mensuralProlation1Alternate = '\u{1d1c7}',
   // U+E919  Tempus imperfectum cum prolatione imperfecta diminution 4
   mensuralProlation10 = '\ue919',
-  // U+1D1CE  Tempus imperfectum cum prolatione imperfecta diminution 4
-  mensuralProlation10Alternate = '\u{1d1ce}',
   // U+E91A  Tempus imperfectum cum prolatione imperfecta diminution 5
   mensuralProlation11 = '\ue91a',
   // U+E911  Tempus perfectum cum prolatione imperfecta (3/4)
   mensuralProlation2 = '\ue911',
-  // U+1D1C8  Tempus perfectum cum prolatione imperfecta (3/4)
-  mensuralProlation2Alternate = '\u{1d1c8}',
   // U+E912  Tempus perfectum cum prolatione imperfecta diminution 1 (3/8)
   mensuralProlation3 = '\ue912',
-  // U+1D1C9  Tempus perfectum cum prolatione imperfecta diminution 1 (3/8)
-  mensuralProlation3Alternate = '\u{1d1c9}',
   // U+E913  Tempus perfectum cum prolatione perfecta diminution 2 (9/16)
   mensuralProlation4 = '\ue913',
   // U+E914  Tempus imperfectum cum prolatione perfecta (6/8)
   mensuralProlation5 = '\ue914',
-  // U+1D1CA  Tempus imperfectum cum prolatione perfecta (6/8)
-  mensuralProlation5Alternate = '\u{1d1ca}',
   // U+E915  Tempus imperfectum cum prolatione imperfecta (2/4)
   mensuralProlation6 = '\ue915',
-  // U+1D1CB  Tempus imperfectum cum prolatione imperfecta (2/4)
-  mensuralProlation6Alternate = '\u{1d1cb}',
   // U+E916  Tempus imperfectum cum prolatione imperfecta diminution 1 (2/2)
   mensuralProlation7 = '\ue916',
-  // U+1D1CC  Tempus imperfectum cum prolatione imperfecta diminution 1 (2/2)
-  mensuralProlation7Alternate = '\u{1d1cc}',
   // U+E917  Tempus imperfectum cum prolatione imperfecta diminution 2 (6/16)
   mensuralProlation8 = '\ue917',
   // U+E918  Tempus imperfectum cum prolatione imperfecta diminution 3 (2/2)
   mensuralProlation9 = '\ue918',
-  // U+1D1CD  Tempus imperfectum cum prolatione imperfecta diminution 3 (2/2)
-  mensuralProlation9Alternate = '\u{1d1cd}',
   // U+E920  Combining dot
   mensuralProlationCombiningDot = '\ue920',
   // U+E924  Combining void dot
@@ -3531,34 +3301,22 @@ export enum Glyphs {
   mensuralProportionTempusPerfectum = '\ue91b',
   // U+E9F3  Brevis rest
   mensuralRestBrevis = '\ue9f3',
-  // U+1D1C3  Brevis rest
-  mensuralRestBrevisAlternate = '\u{1d1c3}',
   // U+E9F7  Fusa rest
   mensuralRestFusa = '\ue9f7',
   // U+E9F2  Longa imperfecta rest
   mensuralRestLongaImperfecta = '\ue9f2',
-  // U+1D1C2  Longa imperfecta rest
-  mensuralRestLongaImperfectaAlternate = '\u{1d1c2}',
   // U+E9F1  Longa perfecta rest
   mensuralRestLongaPerfecta = '\ue9f1',
-  // U+1D1C1  Longa perfecta rest
-  mensuralRestLongaPerfectaAlternate = '\u{1d1c1}',
   // U+E9F0  Maxima rest
   mensuralRestMaxima = '\ue9f0',
   // U+E9F5  Minima rest
   mensuralRestMinima = '\ue9f5',
-  // U+1D1C5  Minima rest
-  mensuralRestMinimaAlternate = '\u{1d1c5}',
   // U+E9F4  Semibrevis rest
   mensuralRestSemibrevis = '\ue9f4',
-  // U+1D1C4  Semibrevis rest
-  mensuralRestSemibrevisAlternate = '\u{1d1c4}',
   // U+E9F8  Semifusa rest
   mensuralRestSemifusa = '\ue9f8',
   // U+E9F6  Semiminima rest
   mensuralRestSemiminima = '\ue9f6',
-  // U+1D1C6  Semiminima rest
-  mensuralRestSemiminimaAlternate = '\u{1d1c6}',
   // U+EA01  Signum congruentiae down
   mensuralSignumDown = '\uea01',
   // U+EA00  Signum congruentiae up
@@ -3569,26 +3327,16 @@ export enum Glyphs {
   mensuralTempusPerfectumHoriz = '\ue92e',
   // U+E95E  White mensural brevis
   mensuralWhiteBrevis = '\ue95e',
-  // U+1D1B8  White mensural brevis
-  mensuralWhiteBrevisAlternate = '\u{1d1b8}',
   // U+E961  White mensural fusa
   mensuralWhiteFusa = '\ue961',
-  // U+1D1BE  White mensural fusa
-  mensuralWhiteFusaAlternate = '\u{1d1be}',
   // U+E95D  White mensural longa
   mensuralWhiteLonga = '\ue95d',
-  // U+1D1B7  White mensural longa
-  mensuralWhiteLongaAlternate = '\u{1d1b7}',
   // U+E95C  White mensural maxima
   mensuralWhiteMaxima = '\ue95c',
-  // U+1D1B6  White mensural maxima
-  mensuralWhiteMaximaAlternate = '\u{1d1b6}',
   // U+E95F  White mensural minima
   mensuralWhiteMinima = '\ue95f',
   // U+E962  White mensural semibrevis
   mensuralWhiteSemibrevis = '\ue962',
-  // U+1D1B9  White mensural semibrevis
-  mensuralWhiteSemibrevisAlternate = '\u{1d1b9}',
   // U+E960  White mensural semiminima
   mensuralWhiteSemiminima = '\ue960',
   // U+ECB7  Augmentation dot
@@ -3657,14 +3405,10 @@ export enum Glyphs {
   note128thDown = '\ue1e0',
   // U+E1DF  128th note (semihemidemisemiquaver) stem up
   note128thUp = '\ue1df',
-  // U+1D164  128th note (semihemidemisemiquaver) stem up
-  note128thUpAlternate = '\u{1d164}',
   // U+E1DA  16th note (semiquaver) stem down
   note16thDown = '\ue1da',
   // U+E1D9  16th note (semiquaver) stem up
   note16thUp = '\ue1d9',
-  // U+1D161  16th note (semiquaver) stem up
-  note16thUpAlternate = '\u{1d161}',
   // U+E1E2  256th note (demisemihemidemisemiquaver) stem down
   note256thDown = '\ue1e2',
   // U+E1E1  256th note (demisemihemidemisemiquaver) stem up
@@ -3673,8 +3417,6 @@ export enum Glyphs {
   note32ndDown = '\ue1dc',
   // U+E1DB  32nd note (demisemiquaver) stem up
   note32ndUp = '\ue1db',
-  // U+1D162  32nd note (demisemiquaver) stem up
-  note32ndUpAlternate = '\u{1d162}',
   // U+E1E4  512th note (hemidemisemihemidemisemiquaver) stem down
   note512thDown = '\ue1e4',
   // U+E1E3  512th note (hemidemisemihemidemisemiquaver) stem up
@@ -3683,14 +3425,10 @@ export enum Glyphs {
   note64thDown = '\ue1de',
   // U+E1DD  64th note (hemidemisemiquaver) stem up
   note64thUp = '\ue1dd',
-  // U+1D163  64th note (hemidemisemiquaver) stem up
-  note64thUpAlternate = '\u{1d163}',
   // U+E1D8  Eighth note (quaver) stem down
   note8thDown = '\ue1d8',
   // U+E1D7  Eighth note (quaver) stem up
   note8thUp = '\ue1d7',
-  // U+1D160  Eighth note (quaver) stem up
-  note8thUpAlternate = '\u{1d160}',
   // U+E197  A (black note)
   noteABlack = '\ue197',
   // U+E196  A flat (black note)
@@ -3777,8 +3515,6 @@ export enum Glyphs {
   noteDoWhole = '\ue150',
   // U+E1D0  Double whole note (breve)
   noteDoubleWhole = '\ue1d0',
-  // U+1D15C  Double whole note (breve)
-  noteDoubleWholeAlternate = '\u{1d15c}',
   // U+E1D1  Double whole note (square)
   noteDoubleWholeSquare = '\ue1d1',
   // U+E1A3  E (black note)
@@ -3869,8 +3605,6 @@ export enum Glyphs {
   noteHalfDown = '\ue1d4',
   // U+E1D3  Half note (minim) stem up
   noteHalfUp = '\ue1d3',
-  // U+1D15E  Half note (minim) stem up
-  noteHalfUpAlternate = '\u{1d15e}',
   // U+E165  La (black note)
   noteLaBlack = '\ue165',
   // U+E15D  La (half note)
@@ -3905,8 +3639,6 @@ export enum Glyphs {
   noteQuarterDown = '\ue1d6',
   // U+E1D5  Quarter note (crotchet) stem up
   noteQuarterUp = '\ue1d5',
-  // U+1D15F  Quarter note (crotchet) stem up
-  noteQuarterUpAlternate = '\u{1d15f}',
   // U+EEF4  Ra (black note)
   noteRaBlack = '\ueef4',
   // U+EEEB  Ra (half note)
@@ -4041,18 +3773,12 @@ export enum Glyphs {
   noteTiWhole = '\ue156',
   // U+E1D2  Whole note (semibreve)
   noteWhole = '\ue1d2',
-  // U+1D15D  Whole note (semibreve)
-  noteWholeAlternate = '\u{1d15d}',
   // U+E0A4  Black notehead
   noteheadBlack = '\ue0a4',
-  // U+1D158  Black notehead
-  noteheadBlackAlternate = '\u{1d158}',
   // U+E0F7  Circle slash notehead
   noteheadCircleSlash = '\ue0f7',
   // U+E0B3  Circle X notehead
   noteheadCircleX = '\ue0b3',
-  // U+1D145  Circle X notehead
-  noteheadCircleXAlternate = '\u{1d145}',
   // U+E0B0  Circle X double whole
   noteheadCircleXDoubleWhole = '\ue0b0',
   // U+E0B2  Circle X half
@@ -4113,12 +3839,8 @@ export enum Glyphs {
   noteheadClusterRoundWhite = '\ue122',
   // U+E121  Cluster notehead black (square)
   noteheadClusterSquareBlack = '\ue121',
-  // U+1D15B  Cluster notehead black (square)
-  noteheadClusterSquareBlackAlternate = '\u{1d15b}',
   // U+E120  Cluster notehead white (square)
   noteheadClusterSquareWhite = '\ue120',
-  // U+1D15A  Cluster notehead white (square)
-  noteheadClusterSquareWhiteAlternate = '\u{1d15a}',
   // U+E125  Whole note cluster, 2nd
   noteheadClusterWhole2nd = '\ue125',
   // U+E129  Whole note cluster, 3rd
@@ -4227,8 +3949,6 @@ export enum Glyphs {
   noteheadDoubleWholeWithX = '\ue0b4',
   // U+E0A3  Half (minim) notehead
   noteheadHalf = '\ue0a3',
-  // U+1D157  Half (minim) notehead
-  noteheadHalfAlternate = '\u{1d157}',
   // U+E0FB  Filled half (minim) notehead
   noteheadHalfFilled = '\ue0fb',
   // U+E0B6  Half notehead with X
@@ -4255,30 +3975,20 @@ export enum Glyphs {
   noteheadLargeArrowUpWhole = '\ue0ee',
   // U+E0CB  Moon notehead black
   noteheadMoonBlack = '\ue0cb',
-  // U+1D153  Moon notehead black
-  noteheadMoonBlackAlternate = '\u{1d153}',
   // U+E0CA  Moon notehead white
   noteheadMoonWhite = '\ue0ca',
-  // U+1D152  Moon notehead white
-  noteheadMoonWhiteAlternate = '\u{1d152}',
   // U+EEA0  Sine notehead (Nancarrow)
   noteheadNancarrowSine = '\ueea0',
   // U+E0A5  Null notehead
   noteheadNull = '\ue0a5',
-  // U+1D159  Null notehead
-  noteheadNullAlternate = '\u{1d159}',
   // U+E0CE  Parenthesis notehead
   noteheadParenthesis = '\ue0ce',
-  // U+1D156  Parenthesis notehead
-  noteheadParenthesisAlternate = '\u{1d156}',
   // U+E0F5  Opening parenthesis
   noteheadParenthesisLeft = '\ue0f5',
   // U+E0F6  Closing parenthesis
   noteheadParenthesisRight = '\ue0f6',
   // U+E0AF  Plus notehead black
   noteheadPlusBlack = '\ue0af',
-  // U+1D144  Plus notehead black
-  noteheadPlusBlackAlternate = '\u{1d144}',
   // U+E0AC  Plus notehead double whole
   noteheadPlusDoubleWhole = '\ue0ac',
   // U+E0AE  Plus notehead half
@@ -4325,8 +4035,6 @@ export enum Glyphs {
   noteheadSlashDiamondWhite = '\ue104',
   // U+E101  Slash with horizontal ends
   noteheadSlashHorizontalEnds = '\ue101',
-  // U+1D10D  Slash with horizontal ends
-  noteheadSlashHorizontalEndsAlternate = '\u{1d10d}',
   // U+E108  Muted slash with horizontal ends
   noteheadSlashHorizontalEndsMuted = '\ue108',
   // U+E100  Slash with vertical ends
@@ -4363,74 +4071,46 @@ export enum Glyphs {
   noteheadSlashedWhole2 = '\ue0d4',
   // U+E0B9  Square notehead black
   noteheadSquareBlack = '\ue0b9',
-  // U+1D147  Square notehead black
-  noteheadSquareBlackAlternate = '\u{1d147}',
   // U+E11A  Large square black notehead
   noteheadSquareBlackLarge = '\ue11a',
   // U+E11B  Large square white notehead
   noteheadSquareBlackWhite = '\ue11b',
   // U+E0B8  Square notehead white
   noteheadSquareWhite = '\ue0b8',
-  // U+1D146  Square notehead white
-  noteheadSquareWhiteAlternate = '\u{1d146}',
   // U+E0C7  Triangle notehead down black
   noteheadTriangleDownBlack = '\ue0c7',
-  // U+1D14F  Triangle notehead down black
-  noteheadTriangleDownBlackAlternate = '\u{1d14f}',
   // U+E0C3  Triangle notehead down double whole
   noteheadTriangleDownDoubleWhole = '\ue0c3',
   // U+E0C5  Triangle notehead down half
   noteheadTriangleDownHalf = '\ue0c5',
   // U+E0C6  Triangle notehead down white
   noteheadTriangleDownWhite = '\ue0c6',
-  // U+1D14E  Triangle notehead down white
-  noteheadTriangleDownWhiteAlternate = '\u{1d14e}',
   // U+E0C4  Triangle notehead down whole
   noteheadTriangleDownWhole = '\ue0c4',
   // U+E0C0  Triangle notehead left black
   noteheadTriangleLeftBlack = '\ue0c0',
-  // U+1D14B  Triangle notehead left black
-  noteheadTriangleLeftBlackAlternate = '\u{1d14b}',
   // U+E0BF  Triangle notehead left white
   noteheadTriangleLeftWhite = '\ue0bf',
-  // U+1D14A  Triangle notehead left white
-  noteheadTriangleLeftWhiteAlternate = '\u{1d14a}',
   // U+E0C2  Triangle notehead right black
   noteheadTriangleRightBlack = '\ue0c2',
-  // U+1D14D  Triangle notehead right black
-  noteheadTriangleRightBlackAlternate = '\u{1d14d}',
   // U+E0C1  Triangle notehead right white
   noteheadTriangleRightWhite = '\ue0c1',
-  // U+1D14C  Triangle notehead right white
-  noteheadTriangleRightWhiteAlternate = '\u{1d14c}',
   // U+E0CD  Triangle-round notehead down black
   noteheadTriangleRoundDownBlack = '\ue0cd',
-  // U+1D155  Triangle-round notehead down black
-  noteheadTriangleRoundDownBlackAlternate = '\u{1d155}',
   // U+E0CC  Triangle-round notehead down white
   noteheadTriangleRoundDownWhite = '\ue0cc',
-  // U+1D154  Triangle-round notehead down white
-  noteheadTriangleRoundDownWhiteAlternate = '\u{1d154}',
   // U+E0BE  Triangle notehead up black
   noteheadTriangleUpBlack = '\ue0be',
-  // U+1D149  Triangle notehead up black
-  noteheadTriangleUpBlackAlternate = '\u{1d149}',
   // U+E0BA  Triangle notehead up double whole
   noteheadTriangleUpDoubleWhole = '\ue0ba',
   // U+E0BC  Triangle notehead up half
   noteheadTriangleUpHalf = '\ue0bc',
   // U+E0C9  Triangle notehead up right black
   noteheadTriangleUpRightBlack = '\ue0c9',
-  // U+1D151  Triangle notehead up right black
-  noteheadTriangleUpRightBlackAlternate = '\u{1d151}',
   // U+E0C8  Triangle notehead up right white
   noteheadTriangleUpRightWhite = '\ue0c8',
-  // U+1D150  Triangle notehead up right white
-  noteheadTriangleUpRightWhiteAlternate = '\u{1d150}',
   // U+E0BD  Triangle notehead up white
   noteheadTriangleUpWhite = '\ue0bd',
-  // U+1D148  Triangle notehead up white
-  noteheadTriangleUpWhiteAlternate = '\u{1d148}',
   // U+E0BB  Triangle notehead up whole
   noteheadTriangleUpWhole = '\ue0bb',
   // U+E0B7  Void notehead with X
@@ -4443,8 +4123,6 @@ export enum Glyphs {
   noteheadWholeWithX = '\ue0b5',
   // U+E0A9  X notehead black
   noteheadXBlack = '\ue0a9',
-  // U+1D143  X notehead black
-  noteheadXBlackAlternate = '\u{1d143}',
   // U+E0A6  X notehead double whole
   noteheadXDoubleWhole = '\ue0a6',
   // U+E0A8  X notehead half
@@ -4613,14 +4291,10 @@ export enum Glyphs {
   ornamentBottomLeftConcaveStroke = '\ue59a',
   // U+E59B  Ornament bottom left concave stroke, large
   ornamentBottomLeftConcaveStrokeLarge = '\ue59b',
-  // U+1D1A1  Ornament bottom left concave stroke, large
-  ornamentBottomLeftConcaveStrokeLargeAlternate = '\u{1d1a1}',
   // U+E59C  Ornament bottom left convex stroke
   ornamentBottomLeftConvexStroke = '\ue59c',
   // U+E5A7  Ornament bottom right concave stroke
   ornamentBottomRightConcaveStroke = '\ue5a7',
-  // U+1D19F  Ornament bottom right concave stroke
-  ornamentBottomRightConcaveStrokeAlternate = '\u{1d19f}',
   // U+E5A8  Ornament bottom right convex stroke
   ornamentBottomRightConvexStroke = '\ue5a8',
   // U+E581  Comma
@@ -4637,8 +4311,6 @@ export enum Glyphs {
   ornamentHighLeftConcaveStroke = '\ue592',
   // U+E593  Ornament high left convex stroke
   ornamentHighLeftConvexStroke = '\ue593',
-  // U+1D1A2  Ornament high left convex stroke
-  ornamentHighLeftConvexStrokeAlternate = '\u{1d1a2}',
   // U+E5A2  Ornament high right concave stroke
   ornamentHighRightConcaveStroke = '\ue5a2',
   // U+E5A3  Ornament high right convex stroke
@@ -4657,26 +4329,18 @@ export enum Glyphs {
   ornamentLeftShakeT = '\ue596',
   // U+E594  Ornament left vertical stroke
   ornamentLeftVerticalStroke = '\ue594',
-  // U+1D19B  Ornament left vertical stroke
-  ornamentLeftVerticalStrokeAlternate = '\u{1d19b}',
   // U+E595  Ornament left vertical stroke with cross (+)
   ornamentLeftVerticalStrokeWithCross = '\ue595',
   // U+E598  Ornament low left concave stroke
   ornamentLowLeftConcaveStroke = '\ue598',
   // U+E599  Ornament low left convex stroke
   ornamentLowLeftConvexStroke = '\ue599',
-  // U+1D1A4  Ornament low left convex stroke
-  ornamentLowLeftConvexStrokeAlternate = '\u{1d1a4}',
   // U+E5A5  Ornament low right concave stroke
   ornamentLowRightConcaveStroke = '\ue5a5',
-  // U+1D1A3  Ornament low right concave stroke
-  ornamentLowRightConcaveStrokeAlternate = '\u{1d1a3}',
   // U+E5A6  Ornament low right convex stroke
   ornamentLowRightConvexStroke = '\ue5a6',
   // U+E59F  Ornament middle vertical stroke
   ornamentMiddleVerticalStroke = '\ue59f',
-  // U+1D1A0  Ornament middle vertical stroke
-  ornamentMiddleVerticalStrokeAlternate = '\u{1d1a0}',
   // U+E56D  Mordent
   ornamentMordent = '\ue56d',
   // U+E57C  Oblique straight line NW-SE
@@ -4767,38 +4431,24 @@ export enum Glyphs {
   ornamentTopLeftConcaveStroke = '\ue590',
   // U+E591  Ornament top left convex stroke
   ornamentTopLeftConvexStroke = '\ue591',
-  // U+1D1A5  Ornament top left convex stroke
-  ornamentTopLeftConvexStrokeAlternate = '\u{1d1a5}',
   // U+E5A0  Ornament top right concave stroke
   ornamentTopRightConcaveStroke = '\ue5a0',
   // U+E5A1  Ornament top right convex stroke
   ornamentTopRightConvexStroke = '\ue5a1',
-  // U+1D19E  Ornament top right convex stroke
-  ornamentTopRightConvexStrokeAlternate = '\u{1d19e}',
   // U+E56E  Tremblement
   ornamentTremblement = '\ue56e',
   // U+E589  Tremblement appuyé (Couperin)
   ornamentTremblementCouperin = '\ue589',
   // U+E566  Trill
   ornamentTrill = '\ue566',
-  // U+1D196  Trill
-  ornamentTrillAlternate = '\u{1d196}',
   // U+E567  Turn
   ornamentTurn = '\ue567',
-  // U+1D197  Turn
-  ornamentTurnAlternate = '\u{1d197}',
   // U+E568  Inverted turn
   ornamentTurnInverted = '\ue568',
-  // U+1D198  Inverted turn
-  ornamentTurnInvertedAlternate = '\u{1d198}',
   // U+E569  Turn with slash
   ornamentTurnSlash = '\ue569',
-  // U+1D199  Turn with slash
-  ornamentTurnSlashAlternate = '\u{1d199}',
   // U+E56A  Turn up
   ornamentTurnUp = '\ue56a',
-  // U+1D19A  Turn up
-  ornamentTurnUpAlternate = '\u{1d19a}',
   // U+E56B  Inverted turn up
   ornamentTurnUpS = '\ue56b',
   // U+E577  Curve above
@@ -4807,22 +4457,14 @@ export enum Glyphs {
   ornamentVerticalLine = '\ue583',
   // U+E59D  Ornament zig-zag line without right-hand end
   ornamentZigZagLineNoRightEnd = '\ue59d',
-  // U+1D19C  Ornament zig-zag line without right-hand end
-  ornamentZigZagLineNoRightEndAlternate = '\u{1d19c}',
   // U+E59E  Ornament zig-zag line with right-hand end
   ornamentZigZagLineWithRightEnd = '\ue59e',
-  // U+1D19D  Ornament zig-zag line with right-hand end
-  ornamentZigZagLineWithRightEndAlternate = '\u{1d19d}',
   // U+E510  Ottava
   ottava = '\ue510',
   // U+E511  Ottava alta
   ottavaAlta = '\ue511',
-  // U+1D136  Ottava alta
-  ottavaAltaAlternate = '\u{1d136}',
   // U+E512  Ottava bassa
   ottavaBassa = '\ue512',
-  // U+1D137  Ottava bassa
-  ottavaBassaAlternate = '\u{1d137}',
   // U+E513  Ottava bassa (ba)
   ottavaBassaBa = '\ue513',
   // U+E51C  Ottava bassa (8vb)
@@ -5389,12 +5031,8 @@ export enum Glyphs {
   pluckedBuzzPizzicato = '\ue632',
   // U+E638  Damp
   pluckedDamp = '\ue638',
-  // U+1D1B4  Damp
-  pluckedDampAlternate = '\u{1d1b4}',
   // U+E639  Damp all
   pluckedDampAll = '\ue639',
-  // U+1D1B5  Damp all
-  pluckedDampAllAlternate = '\u{1d1b5}',
   // U+E63B  Damp for stem
   pluckedDampOnStem = '\ue63b',
   // U+E637  Fingernail flick
@@ -5407,30 +5045,20 @@ export enum Glyphs {
   pluckedSnapPizzicatoAbove = '\ue631',
   // U+E630  Snap pizzicato below
   pluckedSnapPizzicatoBelow = '\ue630',
-  // U+1D1AD  Snap pizzicato below
-  pluckedSnapPizzicatoBelowAlternate = '\u{1d1ad}',
   // U+E636  With fingernails
   pluckedWithFingernails = '\ue636',
-  // U+1D1B3  With fingernails
-  pluckedWithFingernailsAlternate = '\u{1d1b3}',
   // U+E514  Quindicesima
   quindicesima = '\ue514',
   // U+E515  Quindicesima alta
   quindicesimaAlta = '\ue515',
   // U+E516  Quindicesima bassa
   quindicesimaBassa = '\ue516',
-  // U+1D139  Quindicesima bassa
-  quindicesimaBassaAlternate = '\u{1d139}',
   // U+E51D  Quindicesima bassa (mb)
   quindicesimaBassaMb = '\ue51d',
   // U+E500  Repeat last bar
   repeat1Bar = '\ue500',
-  // U+1D10E  Repeat last bar
-  repeat1BarAlternate = '\u{1d10e}',
   // U+E501  Repeat last two bars
   repeat2Bars = '\ue501',
-  // U+1D10F  Repeat last two bars
-  repeat2BarsAlternate = '\u{1d10f}',
   // U+E502  Repeat last four bars
   repeat4Bars = '\ue502',
   // U+E505  Repeat bar lower dot
@@ -5443,54 +5071,34 @@ export enum Glyphs {
   repeatDot = '\ue044',
   // U+E043  Repeat dots
   repeatDots = '\ue043',
-  // U+1D108  Repeat dots
-  repeatDotsAlternate = '\u{1d108}',
   // U+E040  Left (start) repeat sign
   repeatLeft = '\ue040',
-  // U+1D106  Left (start) repeat sign
-  repeatLeftAlternate = '\u{1d106}',
   // U+E041  Right (end) repeat sign
   repeatRight = '\ue041',
-  // U+1D107  Right (end) repeat sign
-  repeatRightAlternate = '\u{1d107}',
   // U+E042  Right and left repeat sign
   repeatRightLeft = '\ue042',
   // U+E4ED  1024th rest
   rest1024th = '\ue4ed',
   // U+E4EA  128th (semihemidemisemiquaver) rest
   rest128th = '\ue4ea',
-  // U+1D142  128th (semihemidemisemiquaver) rest
-  rest128thAlternate = '\u{1d142}',
   // U+E4E7  16th (semiquaver) rest
   rest16th = '\ue4e7',
-  // U+1D13F  16th (semiquaver) rest
-  rest16thAlternate = '\u{1d13f}',
   // U+E4EB  256th rest
   rest256th = '\ue4eb',
   // U+E4E8  32nd (demisemiquaver) rest
   rest32nd = '\ue4e8',
-  // U+1D140  32nd (demisemiquaver) rest
-  rest32ndAlternate = '\u{1d140}',
   // U+E4EC  512th rest
   rest512th = '\ue4ec',
   // U+E4E9  64th (hemidemisemiquaver) rest
   rest64th = '\ue4e9',
-  // U+1D141  64th (hemidemisemiquaver) rest
-  rest64thAlternate = '\u{1d141}',
   // U+E4E6  Eighth (quaver) rest
   rest8th = '\ue4e6',
-  // U+1D13E  Eighth (quaver) rest
-  rest8thAlternate = '\u{1d13e}',
   // U+E4E2  Double whole (breve) rest
   restDoubleWhole = '\ue4e2',
-  // U+1D13A  Double whole (breve) rest
-  restDoubleWholeAlternate = '\u{1d13a}',
   // U+E4F3  Double whole rest on leger lines
   restDoubleWholeLegerLine = '\ue4f3',
   // U+E4EE  Multiple measure rest
   restHBar = '\ue4ee',
-  // U+1D129  Multiple measure rest
-  restHBarAlternate = '\u{1d129}',
   // U+E4EF  H-bar, left half
   restHBarLeft = '\ue4ef',
   // U+E4F0  H-bar, middle
@@ -5499,8 +5107,6 @@ export enum Glyphs {
   restHBarRight = '\ue4f1',
   // U+E4E4  Half (minim) rest
   restHalf = '\ue4e4',
-  // U+1D13C  Half (minim) rest
-  restHalfAlternate = '\u{1d13c}',
   // U+E4F5  Half rest on leger line
   restHalfLegerLine = '\ue4f5',
   // U+E4E1  Longa rest
@@ -5509,16 +5115,12 @@ export enum Glyphs {
   restMaxima = '\ue4e0',
   // U+E4E5  Quarter (crotchet) rest
   restQuarter = '\ue4e5',
-  // U+1D13D  Quarter (crotchet) rest
-  restQuarterAlternate = '\u{1d13d}',
   // U+E4F2  Old-style quarter (crotchet) rest
   restQuarterOld = '\ue4f2',
   // U+E4F6  Z-style quarter (crotchet) rest
   restQuarterZ = '\ue4f6',
   // U+E4E3  Whole (semibreve) rest
   restWhole = '\ue4e3',
-  // U+1D13B  Whole (semibreve) rest
-  restWholeAlternate = '\u{1d13b}',
   // U+E4F4  Whole rest on leger line
   restWholeLegerLine = '\ue4f4',
   // U+E001  Reversed brace
@@ -5557,8 +5159,6 @@ export enum Glyphs {
   schaefferPreviousClef = '\ue070',
   // U+E047  Segno
   segno = '\ue047',
-  // U+1D10B  Segno
-  segnoAlternate = '\u{1d10b}',
   // U+E04A  Segno (serpent)
   segnoSerpent1 = '\ue04a',
   // U+E04B  Segno (serpent with vertical lines)
@@ -5593,48 +5193,36 @@ export enum Glyphs {
   splitBarDivider = '\ue00a',
   // U+E010  1-line staff
   staff1Line = '\ue010',
-  // U+1D116  1-line staff
-  staff1LineAlternate = '\u{1d116}',
   // U+E01C  1-line staff (narrow)
   staff1LineNarrow = '\ue01c',
   // U+E016  1-line staff (wide)
   staff1LineWide = '\ue016',
   // U+E011  2-line staff
   staff2Lines = '\ue011',
-  // U+1D117  2-line staff
-  staff2LinesAlternate = '\u{1d117}',
   // U+E01D  2-line staff (narrow)
   staff2LinesNarrow = '\ue01d',
   // U+E017  2-line staff (wide)
   staff2LinesWide = '\ue017',
   // U+E012  3-line staff
   staff3Lines = '\ue012',
-  // U+1D118  3-line staff
-  staff3LinesAlternate = '\u{1d118}',
   // U+E01E  3-line staff (narrow)
   staff3LinesNarrow = '\ue01e',
   // U+E018  3-line staff (wide)
   staff3LinesWide = '\ue018',
   // U+E013  4-line staff
   staff4Lines = '\ue013',
-  // U+1D119  4-line staff
-  staff4LinesAlternate = '\u{1d119}',
   // U+E01F  4-line staff (narrow)
   staff4LinesNarrow = '\ue01f',
   // U+E019  4-line staff (wide)
   staff4LinesWide = '\ue019',
   // U+E014  5-line staff
   staff5Lines = '\ue014',
-  // U+1D11A  5-line staff
-  staff5LinesAlternate = '\u{1d11a}',
   // U+E020  5-line staff (narrow)
   staff5LinesNarrow = '\ue020',
   // U+E01A  5-line staff (wide)
   staff5LinesWide = '\ue01a',
   // U+E015  6-line staff
   staff6Lines = '\ue015',
-  // U+1D11B  6-line staff
-  staff6LinesAlternate = '\u{1d11b}',
   // U+E021  6-line staff (narrow)
   staff6LinesNarrow = '\ue021',
   // U+E01B  6-line staff (wide)
@@ -5679,8 +5267,6 @@ export enum Glyphs {
   staffPosRaise8 = '\ueb97',
   // U+E210  Combining stem
   stem = '\ue210',
-  // U+1D165  Combining stem
-  stemAlternate = '\u{1d165}',
   // U+E215  Combining bow on bridge stem
   stemBowOnBridge = '\ue215',
   // U+E216  Combining bow on tailpiece stem
@@ -5703,8 +5289,6 @@ export enum Glyphs {
   stemRimShot = '\ue21e',
   // U+E211  Combining sprechgesang stem
   stemSprechgesang = '\ue211',
-  // U+1D166  Combining sprechgesang stem
-  stemSprechgesangAlternate = '\u{1d166}',
   // U+E214  Combining sul ponticello (bow behind bridge) stem
   stemSulPonticello = '\ue214',
   // U+E21D  Combining sussurando stem
@@ -5733,8 +5317,6 @@ export enum Glyphs {
   stringsChangeBowDirection = '\ue626',
   // U+E610  Down bow
   stringsDownBow = '\ue610',
-  // U+1D1AA  Down bow
-  stringsDownBowAlternate = '\u{1d1aa}',
   // U+EE82  Down bow, away from body
   stringsDownBowAwayFromBody = '\uee82',
   // U+EE84  Down bow, beyond bridge
@@ -5749,8 +5331,6 @@ export enum Glyphs {
   stringsHalfHarmonic = '\ue615',
   // U+E614  Harmonic
   stringsHarmonic = '\ue614',
-  // U+1D1AC  Harmonic
-  stringsHarmonicAlternate = '\u{1d1ac}',
   // U+E620  Jeté (gettato) above
   stringsJeteAbove = '\ue620',
   // U+E621  Jeté (gettato) below
@@ -5787,8 +5367,6 @@ export enum Glyphs {
   stringsTripleChopOutward = '\uee8b',
   // U+E612  Up bow
   stringsUpBow = '\ue612',
-  // U+1D1AB  Up bow
-  stringsUpBowAlternate = '\u{1d1ab}',
   // U+EE83  Up bow, away from body
   stringsUpBowAwayFromBody = '\uee83',
   // U+EE85  Up bow, beyond bridge
@@ -5943,8 +5521,6 @@ export enum Glyphs {
   timeSigComma = '\ue096',
   // U+E08A  Common time
   timeSigCommon = '\ue08a',
-  // U+1D134  Common time
-  timeSigCommonAlternate = '\u{1d134}',
   // U+ECFA  Reversed common time
   timeSigCommonReversed = '\uecfa',
   // U+ECEA  Turned common time
@@ -5955,8 +5531,6 @@ export enum Glyphs {
   timeSigCut3 = '\uec86',
   // U+E08B  Cut time
   timeSigCutCommon = '\ue08b',
-  // U+1D135  Cut time
-  timeSigCutCommonAlternate = '\u{1d135}',
   // U+ECFB  Reversed cut time
   timeSigCutCommonReversed = '\uecfb',
   // U+ECEB  Turned cut time
@@ -5999,16 +5573,10 @@ export enum Glyphs {
   timeSigX = '\ue09c',
   // U+E220  Combining tremolo 1
   tremolo1 = '\ue220',
-  // U+1D167  Combining tremolo 1
-  tremolo1Alternate = '\u{1d167}',
   // U+E221  Combining tremolo 2
   tremolo2 = '\ue221',
-  // U+1D168  Combining tremolo 2
-  tremolo2Alternate = '\u{1d168}',
   // U+E222  Combining tremolo 3
   tremolo3 = '\ue222',
-  // U+1D169  Combining tremolo 3
-  tremolo3Alternate = '\u{1d169}',
   // U+E223  Combining tremolo 4
   tremolo4 = '\ue223',
   // U+E224  Combining tremolo 5
@@ -6023,24 +5591,16 @@ export enum Glyphs {
   tremoloDivisiDots6 = '\ue231',
   // U+E225  Fingered tremolo 1
   tremoloFingered1 = '\ue225',
-  // U+1D16A  Fingered tremolo 1
-  tremoloFingered1Alternate = '\u{1d16a}',
   // U+E226  Fingered tremolo 2
   tremoloFingered2 = '\ue226',
-  // U+1D16B  Fingered tremolo 2
-  tremoloFingered2Alternate = '\u{1d16b}',
   // U+E227  Fingered tremolo 3
   tremoloFingered3 = '\ue227',
-  // U+1D16C  Fingered tremolo 3
-  tremoloFingered3Alternate = '\u{1d16c}',
   // U+E228  Fingered tremolo 4
   tremoloFingered4 = '\ue228',
   // U+E229  Fingered tremolo 5
   tremoloFingered5 = '\ue229',
   // U+E5F2  Triple-tongue above
   tripleTongueAbove = '\ue5f2',
-  // U+1D18B  Triple-tongue above
-  tripleTongueAboveAlternate = '\u{1d18b}',
   // U+E5F3  Triple-tongue below
   tripleTongueBelow = '\ue5f3',
   // U+E880  Tuplet 0
@@ -6071,12 +5631,8 @@ export enum Glyphs {
   unmeasuredTremoloSimple = '\ue22d',
   // U+E069  Unpitched percussion clef 1
   unpitchedPercussionClef1 = '\ue069',
-  // U+1D125  Unpitched percussion clef 1
-  unpitchedPercussionClef1Alternate = '\u{1d125}',
   // U+E06A  Unpitched percussion clef 2
   unpitchedPercussionClef2 = '\ue06a',
-  // U+1D126  Unpitched percussion clef 2
-  unpitchedPercussionClef2Alternate = '\u{1d126}',
   // U+E517  Ventiduesima
   ventiduesima = '\ue517',
   // U+E518  Ventiduesima alta

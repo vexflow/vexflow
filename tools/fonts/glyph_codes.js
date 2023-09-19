@@ -51,6 +51,11 @@ function addEntry(smuflCodeName, codepoint, description = '', suffix = '') {
   outputEnum += `  ${comment}  ${smuflCodeName}${suffix} = ${glyphString},\n`;
 }
 
+function sanitizeDescription(description) {
+  // Avoid an eslint warning by replacing codepoint 160 (non-breaking space) with a regular space.
+  return description.replace(/\xA0/g, ' ');
+}
+
 function addSMuFLGlyphs() {
   outputEnum += `\n  ////// SMuFL GLYPHS /////////////////////////////////////////\n`;
   for (let smuflCodeName in glyphNames) {
@@ -63,10 +68,12 @@ function addSMuFLGlyphs() {
       smuflCodeName = 'sixStringTabClef';
     }
 
-    addEntry(smuflCodeName, glyphInfo.codepoint, glyphInfo.description);
-    if (glyphInfo.alternateCodepoint) {
-      addEntry(smuflCodeName, glyphInfo.alternateCodepoint, glyphInfo.description, 'Alternate');
-    }
+    addEntry(smuflCodeName, glyphInfo.codepoint, sanitizeDescription(glyphInfo.description));
+
+    // We do not include alternate codepoints for now.
+    // if (glyphInfo.alternateCodepoint) {
+    //   addEntry(smuflCodeName, glyphInfo.alternateCodepoint, sanitizeDescription(glyphInfo.description), 'Alternate');
+    // }
   }
 }
 
