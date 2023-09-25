@@ -91,6 +91,7 @@ export class Element {
   protected registry?: Registry;
 
   #fontInfo: Required<FontInfo>;
+  #fontScale: number;
   #text = '';
   #metricsValid = false;
   #textMetrics: TextMetrics = {
@@ -119,6 +120,7 @@ export class Element {
 
     this.rendered = false;
     this.#fontInfo = Metrics.getFontInfo(this.#attrs.type);
+    this.#fontScale = Metrics.get(`${this.#attrs.type}.fontScale`);
 
     // If a default registry exist, then register with it right away.
     Registry.getDefaultRegistry()?.register(this);
@@ -421,6 +423,10 @@ export class Element {
    */
   getFontSize(): string {
     return this.fontSize;
+  }
+
+  getFontScale(): number {
+    return this.#fontScale;
   }
 
   /**

@@ -54,7 +54,6 @@ export interface StaveNoteStruct extends NoteStruct {
   stemDirection?: number;
   autoStem?: boolean;
   strokePx?: number;
-  glyphFontScale?: number;
   octaveShift?: number;
   clef?: string;
 }
@@ -409,8 +408,6 @@ export class StaveNote extends StemmableNote {
 
     this.renderOptions = {
       ...this.renderOptions,
-      // font size for note heads and rests
-      glyphFontScale: noteStruct.glyphFontScale || Metrics.get('fontSize'),
       // number of stroke px to the left and right of head
       strokePx: noteStruct.strokePx || StaveNote.LEDGER_LINE_OFFSET,
     };
@@ -515,9 +512,10 @@ export class StaveNote extends StemmableNote {
         displaced,
         stemDirection,
         customGlyphCode: noteProps.code,
-        glyphFontScale: this.renderOptions.glyphFontScale,
         line: noteProps.line,
       });
+
+      notehead.fontInfo = this.fontInfo;
 
       this.addChildElement(notehead);
       this.#noteHeads[this.#sortedKeyProps[i].index] = notehead;
@@ -1146,11 +1144,6 @@ export class StaveNote extends StemmableNote {
     if (this.stem) {
       this.stem.setContext(ctx).draw();
     }
-  }
-
-  /** Primarily used as the scaling factor for grace notes, GraceNote will return the required scale. */
-  getStaveNoteScale(): number {
-    return 1.0;
   }
 
   /**

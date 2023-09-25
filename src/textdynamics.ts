@@ -1,11 +1,10 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 
-import { Metrics } from './metrics';
 import { Note } from './note';
 import { TextNoteStruct } from './textnote';
 import { Category } from './typeguard';
-import { defined, log, RuntimeError } from './util';
+import { log, RuntimeError } from './util';
 
 // eslint-disable-next-line
 function L(...args: any[]) {
@@ -59,8 +58,6 @@ export class TextDynamics extends Note {
     this.line = noteStruct.line ?? 0;
     this.text = '';
 
-    this.renderOptions = { glyphFontSize: Metrics.get('fontSize'), ...this.renderOptions };
-    this.fontInfo.size = defined(this.renderOptions.glyphFontSize) * this.renderOptions.glyphFontScale;
     L('New Dynamics Text: ', this.sequence);
   }
 

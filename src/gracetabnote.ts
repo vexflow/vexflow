@@ -23,8 +23,6 @@ export class GraceTabNote extends TabNote {
       ...this.renderOptions,
       // vertical shift from stave line
       yShift: 0.3,
-      // grace glyph scale
-      scale: 0.6,
     };
 
     this.updateWidth();
