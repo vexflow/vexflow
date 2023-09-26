@@ -7,7 +7,7 @@ export class Metrics {
   static getFontInfo(key: string): Required<FontInfo> {
     return {
       family: Metrics.get(`${key}.fontFamily`),
-      size: Metrics.get(`${key}.fontSize`),
+      size: Metrics.get(`${key}.fontSize`) * Metrics.get(`${key}.fontScale`),
       weight: Metrics.get(`${key}.fontWeight`),
       style: Metrics.get(`${key}.fontStyle`),
     };
@@ -54,6 +54,7 @@ export class Metrics {
 export const MetricsDefaults: Record<string, any> = {
   fontFamily: 'Bravura',
   fontSize: 30,
+  fontScale: 1.0,
   fontWeight: 'normal',
   fontStyle: 'normal',
 
@@ -88,6 +89,14 @@ export const MetricsDefaults: Record<string, any> = {
   FretHandFinger: {
     fontSize: 9,
     fontWeight: 'bold',
+  },
+
+  GraceNote: {
+    fontScale: 2 / 3,
+  },
+
+  GraceTabNote: {
+    fontScale: 2 / 3,
   },
 
   NoteHead: {

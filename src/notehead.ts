@@ -3,7 +3,6 @@
 
 import { BoundingBox } from './boundingbox';
 import { ElementStyle } from './element';
-import { Metrics } from './metrics';
 import { Note, NoteStruct } from './note';
 import { Stave } from './stave';
 import { Stem } from './stem';
@@ -17,7 +16,6 @@ function L(...args: any[]) {
 
 export interface NoteHeadStruct extends NoteStruct {
   line?: number;
-  glyphFontScale?: number;
   slashed?: boolean;
   style?: ElementStyle;
   customGlyphCode?: string;
@@ -92,11 +90,7 @@ export class NoteHead extends Note {
 
     this.renderOptions = {
       ...this.renderOptions,
-      // font size for note heads
-      glyphFontScale: noteStruct.glyphFontScale || Metrics.get('fontSize'),
     };
-
-    this.fontInfo.size = this.renderOptions.glyphFontScale;
   }
   /** Get the width of the notehead. */
   getWidth(): number {

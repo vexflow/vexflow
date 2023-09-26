@@ -2,6 +2,7 @@
 // MIT License
 
 import { Beam } from './beam';
+import { Font } from './font';
 import { Fraction } from './fraction';
 import { Glyphs } from './glyphs';
 import { Metrics } from './metrics';
@@ -253,11 +254,7 @@ export abstract class Note extends Tickable {
     yShift: number;
     extendLeft?: number;
     extendRight?: number;
-    glyphFontScale: number;
     annotationSpacing: number;
-    glyphFontSize?: number;
-    scale: number;
-    font: string;
     strokePx: number;
   };
   protected duration: string;
@@ -333,10 +330,7 @@ export abstract class Note extends Tickable {
     // The render surface.
     this.renderOptions = {
       annotationSpacing: 5,
-      glyphFontScale: 1,
       strokePx: 1,
-      scale: 1,
-      font: '',
       yShift: 0,
     };
   }

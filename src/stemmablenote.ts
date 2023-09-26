@@ -65,7 +65,7 @@ export abstract class StemmableNote extends Note {
           : glyphProps.codeFlagUp ?? Glyphs.null;
 
       this.flag.setText(flagCode);
-      this.flag.fontSize = this.renderOptions.glyphFontScale;
+      this.flag.fontInfo = this.fontInfo;
     }
   }
 
@@ -166,16 +166,11 @@ export abstract class StemmableNote extends Note {
     return this.getAbsoluteX() + this.xShift + this.getGlyphWidth() / 2;
   }
 
-  /** Primarily used as the scaling factor for grace notes, GraceNote will return the required scale. */
-  getStaveNoteScale(): number {
-    return 1.0;
-  }
-
   // Get the stem extension for the current duration
   getStemExtension(): number {
     const glyphProps = this.getGlyphProps();
     const flagHeight = this.flag.getHeight();
-    const scale = this.getStaveNoteScale();
+    const scale = this.getFontScale();
 
     if (this.stemExtensionOverride !== undefined) {
       return this.stemExtensionOverride;

@@ -2,11 +2,10 @@
 // @author Mike Corrigan <corrigan@gmail.com>
 // MIT License
 
-import { GraceNote } from './gracenote';
 import { Metrics } from './metrics';
 import { Modifier } from './modifier';
 import { Stem } from './stem';
-import { Category, isGraceNote } from './typeguard';
+import { Category } from './typeguard';
 
 /** Tremolo implements tremolo notation. */
 export class Tremolo extends Modifier {
@@ -34,7 +33,7 @@ export class Tremolo extends Modifier {
     this.setRendered();
 
     const stemDirection = note.getStemDirection();
-    const scale = isGraceNote(note) ? GraceNote.SCALE : 1;
+    const scale = note.getFontScale();
     const ySpacing = Metrics.get(`Tremolo.spacing`) * stemDirection * scale;
 
     const x =
