@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      html {
+        font-family: sans-serif;
+        font-size: 22px;
+      }
+
+      body {
+        margin: 20px;
+      }
+
+      button {
+        font-size: 18px;
+        padding: 10px;
+        cursor: pointer;
+      }
+
+      .music {
+        font-family: Bravura;
+        font-size: 100px;
+        display: none;
+      }
+
+      .text {
+        font-family: Academico, serif;
+        font-size: 32px;
+        width: 80vw;
+        line-height: 1.6;
+        margin: auto;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <p id="info">
+      This page loads `vexflow-bravura.js`, which contains the embedded fonts Bravura &amp; Academico. The music glyphs
+      below are set in <b>Bravura</b>. Glyph code points were copied from:
+      <a href="https://w3c.github.io/smufl/latest/">https://w3c.github.io/smufl/latest/</a>
+    </p>
+    <div class="music">
+      &#xE560; &#xE1D7; &#xE050; &#xE062; &#xE080; &#xE081; &#xE082; &#xE083; &#xE084; &#xE08A; &#xE08B; &#xE1D2;
+      &#xE1D3; &#xE1D4; &#xE1D5; &#xE1D6; &#xE1D7; &#xE1D8; &#xE1D9; &#xE1DA; &#xE1DB; &#xE1DC; &#xE1DD; &#xE1DE;
+      &#xE1DF; &#xE1E0; &#xE1E1; &#xE1E2; &#xE1E7; &#xE260; &#xE261; &#xE262; &#xE263; &#xE264; &#xE245; &#xE269;
+      &#xE002; &#xE0A2; &#xE1F6; &#xE014; &#xE030; &#xE032; &#xE1FE; &#xE1FF; &#xE200; &#xE201; &#xE202; &#xE203;
+    </div>
+    <div class="text">
+      This text is in <b><span id="font-name">Academico</span></b
+      >. <br /><br />
+      VexFlow is a music engraving library written in Typescript.<br />
+      Build scores quickly, like an engraving wizard.<br />The quick brown fox jumps over the lazy dog.<br /><br />
+    </div>
+    <!--  -->
+    <script src="../../build/cjs/vexflow-bravura.js"></script>
+    <script>
+      document.fonts.ready.then((fontFaceSet) => {
+        document.querySelector('.music').style.display = 'block';
+        document.querySelector('.text').style.display = 'block';
+      });
+    </script>
+  </body>
+</html>

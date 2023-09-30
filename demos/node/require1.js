@@ -1,20 +1,14 @@
-// node require.js
-//
+// Summary: Demonstrate different ways to require() the VexFlow module.
+// Run:
+//   node require1.js
 
-const Vex = require('vexflow');
-// const Vex = require('vexflow/bravura');
-// const Vex = require('vexflow/petaluma');
-// const Vex = require('vexflow/gonville');
+// const Vex1 = require('vexflow');
+const Vex1 = require('vxflw-early-access');
+// const Vex2 = require('vexflow/bravura');
+const Vex2 = require('vxflw-early-access/bravura');
 
-// If you use 'vexflow/core', you will also need to call fetchMusicFont(...) below.
-// const Vex = require('vexflow/core');
+console.log('Default Font Stack:', Vex1.Flow.getMusicFont());
+console.log(Vex1.Flow.BUILD);
 
-console.log('Default Music Font:', Vex.Flow.getMusicFont());
-
-// Used with 'vexflow/core'.
-// Vex.Flow.fetchMusicFont('Petaluma').then(() => {
-//   Vex.Flow.setMusicFont('Petaluma');
-//   console.log('Music Font is Now:', Vex.Flow.getMusicFont());
-// });
-
-console.log(Vex.Flow.BUILD);
+console.log('Default Font Stack:', Vex2.Flow.getMusicFont());
+console.log(Vex2.Flow.BUILD);

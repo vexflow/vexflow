@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <style>
       body {
-        font: 16px Helvetica, Arial, sans-serif;
+        font-size: 16pt;
+        font-family: Helvetica, Arial, sans-serif;
       }
     </style>
   </head>
@@ -14,28 +15,35 @@
     <p>See also: <a href="module.html">ES Modules</a></p>
     <script src="../../build/cjs/vexflow.js"></script>
     <script>
-      const { Factory } = Vex.Flow;
-      const { VERSION, ID, DATE } = Vex.Flow.BUILD;
-      document.querySelector('#info').innerText = VERSION + ' / ' + ID + ' / ' + DATE;
-
-      const factory = new Factory({
-        renderer: { elementId: 'output', width: 500, height: 200 },
+      Vex.Flow.loadFonts('Bravura', 'Academico').then(() => {
+        console.log('Fonts loaded!');
+        showVexFlowScore();
       });
 
-      const score = factory.EasyScore();
-      const system = factory.System();
+      function showVexFlowScore() {
+        const { Factory } = Vex.Flow;
+        const { VERSION, ID, DATE } = Vex.Flow.BUILD;
+        document.querySelector('#info').innerText = VERSION + ' / ' + ID + ' / ' + DATE;
 
-      system
-        .addStave({
-          voices: [
-            score.voice(score.notes('C#5/q, B4, A4, G#4', { stem: 'up' })),
-            score.voice(score.notes('C#4/h, C#4', { stem: 'down' })),
-          ],
-        })
-        .addClef('treble')
-        .addTimeSignature('4/4');
+        const factory = new Factory({
+          renderer: { elementId: 'output', width: 500, height: 200 },
+        });
 
-      factory.draw();
+        const score = factory.EasyScore();
+        const system = factory.System();
+
+        system
+          .addStave({
+            voices: [
+              score.voice(score.notes('C#5/q, B4, A4, G#4', { stem: 'up' })),
+              score.voice(score.notes('C#4/h, C#4', { stem: 'down' })),
+            ],
+          })
+          .addClef('treble')
+          .addTimeSignature('4/4');
+
+        factory.draw();
+      }
     </script>
   </body>
 </html>

@@ -43,7 +43,3 @@ await Vex.Flow.setMusicFont('Petaluma');
 ## core-with-promise.html
 
 The async `Vex.Flow.setMusicFont(...)` returns a Promise. This demo shows how to use a `.then(onFulfilledCallback)` to request a font stack, and initialize VexFlow once the fonts are ready.
-
-## font-module.html
-
-This demonstrates that each font module file (vexflow-font-xxx.js) loads properly. As each font loads, it adds its own data to the global VexFlowFont object.

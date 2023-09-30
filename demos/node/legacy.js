@@ -1,7 +1,9 @@
-// node legacy.js
-//
-// This demonstrates that VexFlow can be imported even with older versions of Node JS (e.g. v11.15.0).
+// Summary: This demonstrates that VexFlow can be imported even with older versions of Node JS (e.g. v11.15.0).
 // Those older versions do not support `globalThis`, but provide `global` and `this` as the global object.
+//
+// Run:
+//   node legacy.js
+//
 
 // In Node v11.15.0, the require path must look like one of the following:
 //   require('../../build/cjs/vexflow')
@@ -20,6 +22,8 @@ console.log('VexFlow BUILD ID: ' + Vex.Flow.BUILD.ID);
 
 console.log('The music font stack is: ' + Vex.Flow.getMusicFont());
 
+// TODO: VexFlow 5 broke this.
+// We need something like Metrics.lookupFontInfo('Stave');
 console.log("Stave's default TEXT_FONT is [" + Font.toCSSString(Stave.TEXT_FONT) + ']');
 
 console.log("This accidental's type is " + new Accidental(`##`).type);

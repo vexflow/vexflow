@@ -1,9 +1,12 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <style>
       body {
-        font: 16px Helvetica, Arial, sans-serif;
+        font:
+          16px Helvetica,
+          Arial,
+          sans-serif;
       }
     </style>
   </head>
@@ -27,19 +30,6 @@
     <script type="module">
       import Vex from '../../build/esm/entry/vexflow.js';
       Vex.Flow.setMusicFont('Petaluma');
-
-      // Instead of the above two lines, use the code below
-      // to load the music fonts dynamically.
-      // This results in a smaller initial bundle, but adds some
-      // latency due to the asynchronous loading of the fonts.
-      //
-      // import Vex from '../../build/esm/entry/vexflow-core.js';
-      // await Vex.Flow.fetchMusicFont('Bravura');
-      // Vex.Flow.setMusicFont('Bravura');
-      // await Vex.Flow.fetchMusicFont('Gonville');
-      // Vex.Flow.setMusicFont('Gonville');
-      // await Vex.Flow.fetchMusicFont('Petaluma');
-      // Vex.Flow.setMusicFont('Petaluma');
 
       const { VERSION, ID, DATE } = Vex.Flow.BUILD;
       document.querySelector('#info').innerText = `${VERSION} / ${ID} / ${DATE}`;

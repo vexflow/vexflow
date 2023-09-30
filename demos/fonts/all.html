@@ -1,0 +1,75 @@
+<!doctype html>
+<!-- 
+  Summary: Preload fonts from the jsdelivr CDN, and render four staves (one in each music font).
+  Run: Open this html file in your web browser.
+ -->
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      html {
+        font: 16px sans-serif;
+      }
+      body {
+        margin: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <p>This demo renders four staves, each with a different music engraving font.</p>
+    <h3><a href="https://github.com/steinbergmedia/bravura">Bravura</a></h3>
+    <div id="outputBravura"></div>
+    <h3><a href="https://www.chiark.greenend.org.uk/~sgtatham/gonville/">Gonville</a></h3>
+    <div id="outputGonville"></div>
+    <h3><a href="https://github.com/steinbergmedia/petaluma">Petaluma</a></h3>
+    <div id="outputPetaluma"></div>
+    <h3><a href="https://github.com/MuseScoreFonts/Leland">Leland</a></h3>
+    <div id="outputLeland"></div>
+    <p>View the source code for more information.</p>
+    <!--
+        To view this demo, open all.html in your web browser.
+        The standard VexFlow library (build/cjs/vexflow.js) is bundled with ZERO music fonts.
+        You can either load SMuFL fonts from your own server, or from the VexFlow fonts CDN (jsdelivr).
+        The build/cjs/*.js files are compatible with <script> tags.
+        The build/esm/*.js files are compatible with ESM import statements.
+    -->
+    <script src="../../build/cjs/vexflow.js"></script>
+    <script type="module">
+      const VF = Vex.Flow;
+
+      console.log(VF.BUILD);
+      console.log('VexFlow BUILD ' + JSON.stringify(VF.BUILD));
+
+      // Load the specified fonts from the jsdelivr CDN.
+      await VF.loadFonts('Bravura', 'GonvilleSmufl', 'Petaluma', 'Leland');
+
+      function drawScoreInDiv(elementId) {
+        const factory = new VF.Factory({ renderer: { elementId, width: 500, height: 130 } });
+        const score = factory.EasyScore();
+        factory
+          .System()
+          .addStave({
+            voices: [
+              score.voice(score.notes('C#5/q, B4, A4, G#4', { stem: 'up' })),
+              score.voice(score.notes('C#4/h, C#4', { stem: 'down' })),
+            ],
+          })
+          .addClef('treble')
+          .addTimeSignature('4/4');
+        factory.draw();
+      }
+
+      VF.setMusicFont('Bravura'); // Calling setMusicFont() here is optional, since Bravura is the default music font.
+      drawScoreInDiv('outputBravura');
+
+      VF.setMusicFont('GonvilleSmufl');
+      drawScoreInDiv('outputGonville');
+
+      VF.setMusicFont('Petaluma');
+      drawScoreInDiv('outputPetaluma');
+
+      VF.setMusicFont('Leland');
+      drawScoreInDiv('outputLeland');
+    </script>
+  </body>
+</html>
