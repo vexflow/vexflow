@@ -1,10 +1,12 @@
-// node import.mjs
+// Run:
+//   node import.mjs
 
 // This file is an ES module that imports VexFlow.
 // This file needs to have the .mjs extension, or the nearest package.json needs to specify type="module".
 // Otherwise, the import statement will not work.
 
-import { Vex } from 'vexflow';
+// import { Vex } from 'vexflow';
+import { Vex } from 'vxflw-early-access';
 
 // The above import statement is equivalent to the following:
 // import { Vex } from '../../build/esm/entry/vexflow.js';
@@ -20,10 +22,9 @@ import { Vex } from 'vexflow';
 }
 */
 
-// If you do not wish to import all three music engraving fonts, use one of the following instead:
+// If you want to use the vexflow-bravura.js distribution, which bundles the Bravura & Academico fonts you can import it like this:
 // import { Vex } from 'vexflow/bravura';
-// import { Vex } from 'vexflow/petaluma';
-// import { Vex } from 'vexflow/gonville';
+// import { Vex } from 'vxflw-early-access/bravura';
 
 // To use this ES module in a script tag, you will need to set type="module".
 // Additionally, the webpage will need to be able to resolve to the correct ESM entry point.

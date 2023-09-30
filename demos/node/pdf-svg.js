@@ -1,38 +1,43 @@
-// An example of how to use VexFlow in node.
-// Run: `node pdf.js`
-// Saves a PDF in `output/score.pdf`.
+// Summary:
+//   Render a score in SVG and convert it to a PDF. Saved in `output/score.pdf`.
+// Run:
+//   node pdf-svg.js
+// Status:
+//   BROKEN
+//   VexFlow 5 broke this demo because the paths are no longer draw into the SVG context.
+//   Instead of JSDOM, we'll probably need to use Puppeteer or Playwright (https://playwright.dev/docs/api/class-playwright).
 
-const Vex = require('vexflow');
+// const Vex = require('vexflow');
 // const Vex = require('vexflow/bravura');
-// const Vex = require('vexflow/petaluma');
-// const Vex = require('vexflow/gonville');
+const Vex = require('vxflw-early-access');
 
+const fs = require('fs');
 const { JSDOM } = require('jsdom');
 const { jsPDF } = require('jspdf');
 require('svg2pdf.js');
-const fs = require('fs');
 
 // Make sure the output folder exists.
 if (!fs.existsSync('./output/')) {
   fs.mkdirSync('./output/');
 }
 
+const outputFile = 'output/score-svg.pdf';
+
 const { Stave, StaveNote, Formatter, Renderer } = Vex.Flow;
 
 console.log('VexFlow Build: ' + Vex.Flow.BUILD.ID);
 
-const dom = new JSDOM('<!DOCTYPE html><html><body><div id="container"></div><body></html>');
+const dom = new JSDOM(`<!DOCTYPE html><html><head><style></style></head><body><div id="container"></div><body></html>`);
+
 global.window = dom.window;
 global.document = dom.window.document;
 
-// Create an SVG renderer and attach it to the DIV element named "vf".
 const div = document.getElementById('container');
 const renderer = new Renderer(div, Renderer.Backends.SVG);
 
 // Configure the rendering context.
 renderer.resize(200, 200);
 const context = renderer.getContext();
-context.setFont('Arial', 10);
 
 const stave = new Stave(10, 0, 190);
 
@@ -54,5 +59,5 @@ Formatter.FormatAndDraw(context, stave, notes);
 
 const doc = new jsPDF();
 const svgElement = div.childNodes[0];
-doc.svg(svgElement).then(() => doc.save('output/score.pdf'));
-console.log('Saved a PDF: output/score.pdf');
+doc.svg(svgElement).then(() => doc.save(outputFile));
+console.log('Saved a PDF:', outputFile);
