@@ -8,7 +8,7 @@ import { Metrics } from './metrics';
 import { Registry } from './registry';
 import { RenderContext } from './rendercontext';
 import { Category } from './typeguard';
-import { defined, prefix, RuntimeError } from './util';
+import { defined, globalObject, prefix, RuntimeError } from './util';
 
 /** Element attributes. */
 export interface ElementAttributes {
@@ -81,6 +81,15 @@ export class Element {
   protected static ID: number = 1000;
   protected static newID(): string {
     return `auto${Element.ID++}`;
+  }
+
+  /** Canvas used to measure text. See measureText(): TextMetrics. */
+  static #txtCanvas?: HTMLCanvasElement | OffscreenCanvas;
+
+  // Note: Canvas is node-canvas.
+  // https://www.npmjs.com/package/canvas
+  static setTextMeasurementCanvas(canvas: HTMLCanvasElement | OffscreenCanvas /* | Canvas */): void {
+    Element.#txtCanvas = canvas;
   }
 
   #context?: RenderContext;
@@ -577,20 +586,28 @@ export class Element {
     ctx.restore();
   }
 
-  /** Canvas used to measure text. */
-  static #txtCanvas?: HTMLCanvasElement;
-
   /** Measure the text using the textFont. */
   measureText(): TextMetrics {
-    let txtCanvas = Element.#txtCanvas;
+    // TODO: What about SVG.getBBox()?
+    // https://developer.mozilla.org/en-US/docs/Web/API/SVGGraphicsElement/getBBox
+
+    let txtCanvas: HTMLCanvasElement | OffscreenCanvas | undefined = Element.#txtCanvas;
+    // Create the canvas element that will be used to measure text.
     if (!txtCanvas) {
-      // Create the canvas element that will be used to measure text in the event
-      // of a cache miss.
-      txtCanvas = document.createElement('canvas');
+      if (typeof document !== 'undefined') {
+        txtCanvas = document.createElement('canvas'); // Defaults to 300 x 150. See: https://www.w3.org/TR/2012/WD-html5-author-20120329/the-canvas-element.html#the-canvas-element
+      } else if (typeof OffscreenCanvas !== 'undefined') {
+        txtCanvas = new OffscreenCanvas(300, 150);
+      }
       Element.#txtCanvas = txtCanvas;
     }
-    const context = txtCanvas.getContext('2d');
-    if (!context) throw new RuntimeError('Font', 'No txt context');
+
+    const context = txtCanvas?.getContext('2d');
+    if (!context) {
+      // eslint-disable-next-line no-console
+      console.warn('Element: No context for txtCanvas. Returning empty text metrics.');
+      return this.#textMetrics;
+    }
     context.font = Font.toCSSString(Font.validate(this.#fontInfo));
     this.#textMetrics = context.measureText(this.#text);
     this.#height = this.#textMetrics.actualBoundingBoxAscent + this.#textMetrics.actualBoundingBoxDescent;
