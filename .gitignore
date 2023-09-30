@@ -1,7 +1,7 @@
 reference*
 releases
 build
-#demos/node/output
+demos/node/output
 node_modules
 graphs
 .eslintcache
