@@ -2,7 +2,6 @@
 // MIT License
 //
 // vexflow-debug.ts is the entry point for the build output file vexflow-debug.js.
-// It statically bundles all the music engraving fonts.
 
 // Currently, it is identical to vexflow.ts, but the webpack config inside Gruntfile.js
 // sets the webpack mode to 'development' to produce an unminified build.
