@@ -6,7 +6,7 @@
       body {
         padding: 20px;
         background: white;
-        font-family: Helvetica Neue, Arial, sans-serif;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
         font-size: 18px;
         color: green;
         margin: auto;
@@ -15,13 +15,13 @@
       }
 
       a {
-        color: #green;
+        color: green;
         text-decoration: none;
         border-bottom: dotted 2px;
       }
 
       a.button {
-        color: #green;
+        color: green;
         background: #bfb;
         text-decoration: none;
         padding: 5px;
@@ -50,7 +50,13 @@
     <p></p>
     <textarea id="source" style="width: 800; height: 200"></textarea>
     <p>For more information visit <a href="http://0xfe.blogspot.com">0xfe.blogspot.com</a>.</p>
-    <script src="../../../build/cjs/vexflow-debug.js"></script>
+
+    <!-- Make sure only one version of VexFlow is loaded! -->
+    <!-- Version 4.x -->
+    <!-- <script src="../../../build/cjs/vexflow-debug.js"></script> -->
+    <!-- Version 3.0.9 -->
+    <script src="../../../releases/3.0.9/vexflow-debug.js"></script>
+
     <script src="gonville_all.ts"></script>
     <script src="microtonal.ts"></script>
     <script>
@@ -315,13 +321,23 @@
         validCodes: validGlyphCodes,
       });
 
-      // Version 4.0.0
-      const font = Vex.Flow.Font.load('VexFlowFont', combinedFont);
-      Vex.Flow.setMusicFont('VexFlowFont');
+      // Pick a major version below. (4 or 3). Version 5 is not supported (yet).
+      let version = 3;
+      let font;
 
-      // Version 3.0.9
-      // const font = new Vex.Flow.Font('VexFlowFont', {} /* metrics */, combinedFont /* fontData */);
-      // Vex.Flow.DEFAULT_FONT_STACK = [font];
+      switch (version) {
+        case 4:
+        default:
+          // Version 4.x
+          font = Vex.Flow.Font.load('VexFlowFont', combinedFont);
+          Vex.Flow.setMusicFont('VexFlowFont');
+          break;
+        case 3:
+          // Version 3.0.9
+          font = new Vex.Flow.Font('VexFlowFont', {} /* metrics */, combinedFont /* fontData */);
+          Vex.Flow.DEFAULT_FONT_STACK = [font];
+          break;
+      }
 
       drawGlyphs(font);
       populateTextArea(generateFontString(combinedFont));
