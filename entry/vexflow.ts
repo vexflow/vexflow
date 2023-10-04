@@ -2,8 +2,6 @@
 // MIT License
 //
 // vexflow.ts is the entry point for the build output file vexflow.js.
-// It statically bundles all the music engraving fonts, and sets the music font stack to:
-// Flow.setMusicFont('Bravura', 'Roboto Slab');
 
 // The webpack config inside Gruntfile.js sets the mode to 'production' to produce a minified build.
 
