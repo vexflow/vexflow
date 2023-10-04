@@ -76,7 +76,7 @@
         background: white;
         font-size: 18px;
         color: black;
-        margin: 40px 40px 80px 40px;
+        margin: 0px;
       }
       a {
         color: #264;
@@ -92,13 +92,20 @@
         background: #faa;
         border: 15px solid #d99;
       }
-      div {
+      div#top {
+        top: 0px;
         padding: 10px;
         background: #aaf;
         border: 15px solid #99e;
         box-sizing: border-box;
         width: 100vw;
         position: fixed;
+      }
+      div#glyphs {
+        margin-top: 250px;
+      }
+      div#parent {
+        overflow: auto;
       }
       p {
         margin: 10px;
@@ -114,27 +121,29 @@
   </head>
 
   <body>
-    <div>
-      <h1 id="title">Glyph Inspector</h1>
-      <p>
-        <a onclick="chooseFont('Bravura')">Bravura</a> &nbsp;
-        <a onclick="chooseFont('Bravura Text')">Bravura Text</a> &nbsp;
-        <a onclick="chooseFont('FinaleAsh')">FinaleAsh</a> &nbsp;
-        <a onclick="chooseFont('FinaleBroadway')">FinaleBroadway</a> &nbsp;
-        <a onclick="chooseFont('FinaleJazz')">FinaleJazz</a> &nbsp;
-        <a onclick="chooseFont('FinaleMaestro')">FinaleMaestro</a> &nbsp;
-        <a onclick="chooseFont('GonvilleSmufl')">GonvilleSmufl</a> &nbsp;
-        <a onclick="chooseFont('Gootville')">Gootville</a> &nbsp;
-        <a onclick="chooseFont('Gootville Text')">Gootville Text</a> &nbsp;
-        <a onclick="chooseFont('Leland')">Leland</a> &nbsp;
-        <a onclick="chooseFont('Leland Text')">Leland Text</a> &nbsp;
-        <a onclick="chooseFont('MuseJazz')">MuseJazz</a> &nbsp;<!-- FORMAT CODE LINE BREAK -->
-        <a onclick="chooseFont('Petaluma')">Petaluma</a> &nbsp;
-        <a onclick="chooseFont('Petaluma Text')">Petaluma Text</a> &nbsp;
-      </p>
-      <p>note: Cross indicates render coordinates.</p>
+    <div id="'parent">
+      <div id="top">
+        <h1 id="title">Glyph Inspector</h1>
+        <p>
+          <a onclick="chooseFont('Bravura')">Bravura</a> &nbsp;
+          <a onclick="chooseFont('Bravura Text')">Bravura Text</a> &nbsp;
+          <a onclick="chooseFont('FinaleAsh')">FinaleAsh</a> &nbsp;
+          <a onclick="chooseFont('FinaleBroadway')">FinaleBroadway</a> &nbsp;
+          <a onclick="chooseFont('FinaleJazz')">FinaleJazz</a> &nbsp;
+          <a onclick="chooseFont('FinaleMaestro')">FinaleMaestro</a> &nbsp;
+          <a onclick="chooseFont('GonvilleSmufl')">GonvilleSmufl</a> &nbsp;
+          <a onclick="chooseFont('Gootville')">Gootville</a> &nbsp;
+          <a onclick="chooseFont('Gootville Text')">Gootville Text</a> &nbsp;
+          <a onclick="chooseFont('Leland')">Leland</a> &nbsp;
+          <a onclick="chooseFont('Leland Text')">Leland Text</a> &nbsp;
+          <a onclick="chooseFont('MuseJazz')">MuseJazz</a> &nbsp;<!-- FORMAT CODE LINE BREAK -->
+          <a onclick="chooseFont('Petaluma')">Petaluma</a> &nbsp;
+          <a onclick="chooseFont('Petaluma Text')">Petaluma Text</a> &nbsp;
+        </p>
+        <p>note: Cross indicates render coordinates.</p>
+      </div>
+      <div id="glyphs"></div>
     </div>
-    <canvas id="glyphs"></canvas>
     <!-- PRELOAD ALL FONT FILES using empty <span> tags. -->
     <span style="font-family: Bravura"></span>
     <span style="font-family: Bravura Text"></span>
@@ -168,71 +177,59 @@
         }
       }
 
-      let ctx;
 
       function codepoint2decimal(codepoint) {
         // Return the decimal value of 'XXXX' of codepoint, which has a string format 'U+XXXX'
         return parseInt(codepoint.substring(2), 16);
       }
 
-      // Make this function available to the <a onclick="chooseFont(...)">...</a> links.
-      window.chooseFont = function chooseFont(fontName) {
-        document.getElementById('title').innerText = 'Glyph Inspector – ' + fontName;
+      function drawGlyph(canvasId,glyphCode,glyphName,fontName) {
+        let canvas = document.getElementById(canvasId);
+          if (!canvas) {
+            canvas = document.createElement('canvas');
+            canvas.id = canvasId;
+            // Retina display trick:
+            // Make the canvas twice as large as our width x height.
+            // Then set the scale to (2, 2).
+            canvas.width  = 300;
+            canvas.height = 300;
+            canvas.style.height = '150px';
+            canvas.style.width = '150px';
+            glyphs.appendChild(canvas);
+          } else {
+            // Clear canvas
+            canvas.width  = 300;
+            canvas.height = 300;           
+          }
+          var ctx = canvas.getContext('2d');
+          ctx.setTransform(2, 0, 0, 2, 0, 0); // reset the scale to (2, 2)
 
-        // Calculate the canvas height programmatically based on the number of glyphs.
-        const canvasWidth = 3000;
-        const ROW_HEIGHT = 100;
-        const COL_WIDTH = 150;
-        const numGlyphs = Object.keys(SMuFLGlyphInfo).length;
-        const numGlyphsPerRow = canvasWidth / COL_WIDTH;
-        const numRowsNeeded = Math.ceil(numGlyphs / numGlyphsPerRow);
-        const canvasHeight = numRowsNeeded * ROW_HEIGHT;
-
-        var canvas = document.getElementById('glyphs');
-        // Retina display trick:
-        // Make the canvas twice as large as our width x height.
-        // Then set the scale to (2, 2).
-        canvas.width = canvasWidth * 2; // Setting the width clears the canvas.
-        canvas.height = canvasHeight * 2;
-        canvas.style.height = canvasHeight + 'px';
-        canvas.style.width = canvasWidth + 'px';
-        if (!ctx) {
-          ctx = canvas.getContext('2d');
-        }
-        ctx.setTransform(2, 0, 0, 2, 0, 0); // reset the scale to (2, 2)
-
-        var x = 0;
-        var y = 250;
-
-        const arr = Object.keys(SMuFLGlyphInfo).sort(function (a, b) {
-          return codepoint2decimal(SMuFLGlyphInfo[a].codepoint) - codepoint2decimal(SMuFLGlyphInfo[b].codepoint);
-        });
-        arr.forEach((glyphName, index) => {
+          var x = 10;
+          var y = 50;
           // Show the glyph name.
-          const code = codepoint2decimal(SMuFLGlyphInfo[glyphName].codepoint);
+          const code = parseInt(glyphCode, 16);
           ctx.fillStyle = '#222';
           ctx.strokeStyle = '#222';
           ctx.font = '9pt sans-serif';
+          ctx.fillText(glyphCode, x, y + 40);
           // if the name has more than 25 characters, break it up into two lines.
-          if (glyphName.length > 25) {
-            ctx.fillText(glyphName.slice(0, 22) + '...', x, y + 50);
-            ctx.fillText(glyphName.slice(22 - glyphName.length), x, y + 60);
+          if (glyphName.length > 20) {
+            ctx.fillText(glyphName.slice(0, 17) + '...', x, y + 50);
+            ctx.fillText(glyphName.slice(17 - glyphName.length), x, y + 60);
           } else ctx.fillText(glyphName, x, y + 50);
-          console.log(glyphName);
-
-          const originX = x + 75;
+          
+          const originX = x + 50;
           const originY = y;
 
           // Show the glyph outline.
           ctx.fillStyle = '#006400';
           ctx.font = '30pt ' + fontName;
-          ctx.fillText(String.fromCharCode(code), originX, originY);
+          ctx.fillText(String.fromCodePoint(code), originX, originY);
           // See the GlyphMetrics interface in glyph.ts.
           const metrics = ctx.measureText(String.fromCharCode(code));
           ctx.save();
           ctx.font = '9pt monospace';
           const height = metrics.actualBoundingBoxDescent + metrics.actualBoundingBoxAscent;
-          ctx.fillText('code: ' + SMuFLGlyphInfo[glyphName].codepoint.substring(2), x, y + 18);
           ctx.fillText('w: ' + Math.round(metrics.width), x, y - 6);
           ctx.fillText('h: ' + Math.round(height), x, y + 6);
           ctx.restore();
@@ -244,17 +241,27 @@
           ctx.moveTo(originX, originY - 6);
           ctx.lineTo(originX, originY + 6);
           ctx.stroke();
+      }
 
-          // Each column is 200px wide.
-          x += COL_WIDTH;
+      // Make this function available to the <a onclick="chooseFont(...)">...</a> links.
+      window.chooseFont = function chooseFont(fontName) {
+        document.getElementById('title').innerText = 'Glyph Inspector – ' + fontName;
 
-          // Wrap around to the next line.
-          if (x > canvasWidth - COL_WIDTH) {
-            x = 0;
-
-            // Each row is 150px high.
-            y += ROW_HEIGHT;
+        var glyphs = document.getElementById('glyphs');
+        const arr = Object.keys(SMuFLGlyphInfo).sort(function (a, b) {
+          return codepoint2decimal(SMuFLGlyphInfo[a].codepoint) - codepoint2decimal(SMuFLGlyphInfo[b].codepoint);
+        });
+        arr.forEach((glyphName, index) => {
+          var glyphCode = SMuFLGlyphInfo[glyphName].codepoint.substring(2);
+          var canvasId = glyphCode + '_' + glyphName;
+          drawGlyph(canvasId, glyphCode, glyphName, fontName);
+          var alternateCodepoint = SMuFLGlyphInfo[glyphName].alternateCodepoint;
+          if (alternateCodepoint) {
+            glyphCode = alternateCodepoint.substring(2)
+            canvasId = glyphCode + '_' + glyphName;
+            drawGlyph(canvasId, glyphCode, glyphName, fontName);  
           }
+
         });
       };
     </script>
