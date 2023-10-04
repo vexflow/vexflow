@@ -20,6 +20,7 @@ registerFont(path.join(fontsDir, 'academico/academico.otf'), { family: 'Academic
 registerFont(path.join(fontsDir, 'petaluma/petaluma.otf'), { family: 'Petaluma' });
 registerFont(path.join(fontsDir, 'petalumascript/petalumascript.otf'), { family: 'Petaluma Script' });
 registerFont(path.join(fontsDir, 'gonvillesmufl/gonvillesmufl.otf'), { family: 'Gonville' });
+registerFont(path.join(fontsDir, 'finaleash/finaleash.otf'), { family: 'Finale Ash' });
 
 const dom = new JSDOM(`<!DOCTYPE html><body><div id="qunit-tests"></div></body>`);
 global.window = dom.window;
@@ -38,7 +39,7 @@ const runOptions = {
 // For example:
 //   node generate_images_jsdom.js SCRIPT_DIR IMAGE_OUTPUT_DIR --fonts=petaluma
 //   node generate_images_jsdom.js SCRIPT_DIR IMAGE_OUTPUT_DIR --fonts=bravura,gonville
-const ALL_FONTS = ['Bravura', 'Gonville', 'Petaluma'];
+const ALL_FONTS = ['Bravura', 'Gonville', 'Petaluma', 'Finale Ash'];
 let fontStacksToTest = ALL_FONTS;
 const { argv } = process;
 
