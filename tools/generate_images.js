@@ -80,7 +80,7 @@ const parseArgs = () => {
     }
   });
 
-  backends = backends || {
+  backends = backends ?? {
     pptr: true,
   };
 
@@ -148,7 +148,7 @@ const appMain = async () => {
 
   const backendDefs = {
     jsdom: {
-      path: './tools/generate_png_images.js',
+      path: './tools/generate_images_jsdom.js',
       getArgs: () => {
         return [`../${ver}`, imageDir].concat(args);
       },

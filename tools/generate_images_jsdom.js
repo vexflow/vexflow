@@ -4,9 +4,23 @@
 // This meant to be used with the visual regression test system in
 // `tools/visual_regression.sh`.
 
-const { JSDOM } = require('jsdom');
 const fs = require('fs');
 const path = require('path');
+
+const { JSDOM } = require('jsdom');
+
+const { registerFont } = require('canvas');
+
+// JSDOM uses node-canvas internally. https://www.npmjs.com/package/canvas
+// node-canvas can load custom fonts with registerFont(...).
+// node-canvas doesn't seem to support WOFF2. Regular WOFF works fine.
+const fontsDir = path.resolve(__dirname, '../node_modules/@vexflow-fonts/');
+registerFont(path.join(fontsDir, 'bravura/bravura.otf'), { family: 'Bravura' });
+registerFont(path.join(fontsDir, 'academico/academico.otf'), { family: 'Academico' });
+registerFont(path.join(fontsDir, 'petaluma/petaluma.otf'), { family: 'Petaluma' });
+registerFont(path.join(fontsDir, 'petalumascript/petalumascript.otf'), { family: 'Petaluma Script' });
+registerFont(path.join(fontsDir, 'gonvillesmufl/gonvillesmufl.otf'), { family: 'Gonville' });
+registerFont(path.join(fontsDir, 'finaleash/finaleash.otf'), { family: 'Finale Ash' });
 
 const dom = new JSDOM(`<!DOCTYPE html><body><div id="qunit-tests"></div></body>`);
 global.window = dom.window;
@@ -18,13 +32,14 @@ const runOptions = {
   jobs: 1,
   job: 0,
 };
+
 // Optional:
 //  --fonts argument specifies which font stacks to test. Defaults to all.
 //  --jobs, --job: see tests/vexflow_test_helpers.ts: VexFlowTests.run()
 // For example:
-//   node generate_png_images.js SCRIPT_DIR IMAGE_OUTPUT_DIR --fonts=petaluma
-//   node generate_png_images.js SCRIPT_DIR IMAGE_OUTPUT_DIR --fonts=bravura,gonville
-const ALL_FONTS = ['Bravura', 'Gonville', 'Petaluma'];
+//   node generate_images_jsdom.js SCRIPT_DIR IMAGE_OUTPUT_DIR --fonts=petaluma
+//   node generate_images_jsdom.js SCRIPT_DIR IMAGE_OUTPUT_DIR --fonts=bravura,gonville
+const ALL_FONTS = ['Bravura', 'Gonville', 'Petaluma', 'Finale Ash'];
 let fontStacksToTest = ALL_FONTS;
 const { argv } = process;
 
@@ -50,6 +65,9 @@ if (argv.length >= 5) {
 // we mock out the QUnit methods (since we don't care about assertions).
 if (!global.QUnit) {
   const QUMock = {
+    moduleName: '',
+    testName: '',
+
     assertions: {
       ok: () => true,
       equal: () => true,
@@ -65,19 +83,20 @@ if (!global.QUnit) {
     },
 
     module(name) {
-      QUMock.current_module = name;
+      QUMock.moduleName = name;
     },
 
     // See: https://api.qunitjs.com/QUnit/test/
-    test(name, callback) {
-      QUMock.current_test = name;
-      QUMock.assertions.test.module.name = name;
+    test(testName, callback) {
+      QUMock.testName = testName;
+      QUMock.assertions.test.module.name = QUMock.moduleName;
       // Print out the progress and keep it on a single line.
-      process.stdout.write(`\u001B[0G${QUMock.current_module} :: ${name}\u001B[0K`);
+      process.stdout.write(`\u001B[0G${QUMock.moduleName} :: ${testName}\u001B[0K`);
       callback(QUMock.assertions);
     },
   };
 
+  // QUNIT MOCK
   global.QUnit = QUMock;
   for (const k in QUMock.assertions) {
     // Make all methods & properties of QUMock.assertions global.
@@ -97,8 +116,8 @@ if (!global.QUnit) {
 // In 4.0.0, this file was renamed to vexflow-debug-with-tests.js for clarity.
 //   It includes both the VexFlow library and the test code.
 // We use file detection to determine which file(s) to include.
-const vexflowDebugWithTestsJS = path.join(scriptDir, 'vexflow-debug-with-tests.js');
-if (fs.existsSync(path.resolve(__dirname, vexflowDebugWithTestsJS))) {
+const vexflowDebugWithTestsJS = path.resolve(__dirname, path.join(scriptDir, 'vexflow-debug-with-tests.js'));
+if (fs.existsSync(vexflowDebugWithTestsJS)) {
   // console.log('Generating Images for version >= 4.0.0');
   global.Vex = require(vexflowDebugWithTestsJS);
 } else {

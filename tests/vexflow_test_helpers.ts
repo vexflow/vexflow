@@ -35,7 +35,7 @@ function restoreOriginalFontStack(): void {
 
 // A micro util inspired by jQuery.
 if (!global.$) {
-  // generate_png_images.js uses jsdom and does not include jQuery.
+  // generate_images_jsdom.js uses jsdom and does not include jQuery.
   global.$ = (param: HTMLElement | string) => {
     let element: HTMLElement;
     if (typeof param !== 'string') {
@@ -93,9 +93,13 @@ export type RunOptions = {
   job: number;
 };
 
-/** Allow `name` to be used inside file names. */
-function sanitizeName(name: string): string {
-  return name.replace(/[^a-zA-Z0-9]/g, '_');
+/**
+ * Clean the input string so we can use it inside file names.
+ * Only allow alphanumeric characters and underscores.
+ * Replace other characters with underscores.
+ */
+function sanitize(text: string): string {
+  return text.replace(/[^a-zA-Z0-9]/g, '_');
 }
 
 const CANVAS_TEST_CONFIG = {
@@ -187,7 +191,7 @@ export class VexFlowTests {
     });
   }
 
-  // See: generate_png_images.js
+  // See: generate_images_jsdom.js
   // Provides access to Node JS fs & process.
   // eslint-disable-next-line
   static shims: any;
@@ -312,15 +316,20 @@ export class VexFlowTests {
    */
   static runNodeTestHelper(fontName: string, element: HTMLElement): void {
     if (Renderer.lastContext !== undefined) {
-      const moduleName = sanitizeName(QUnit.module.name);
-      const testName = sanitizeName(QUnit.test.name);
-      // If we are only testing Bravura, we OMIT the font name from the
-      // output image file name, which allows visual diffs against
-      // the previous release: version 3.0.9. In the future, if we decide
-      // to test all fonts by default, we can remove this check.
-      const onlyBravura = NODE_TEST_CONFIG.fontStacks.length === 1 && fontName === 'Bravura';
-      const fontInfo = onlyBravura ? '' : `.${fontName}`;
-      const fileName = `${VexFlowTests.NODE_IMAGEDIR}/${moduleName}.${testName}${fontInfo}.png`;
+      // See QUNIT MOCK in generate_images_jsdom.js
+      const fileName =
+        VexFlowTests.NODE_IMAGEDIR +
+        '/' +
+        // eslint-disable-next-line
+        // @ts-ignore
+        sanitize(QUnit.moduleName) +
+        '.' +
+        // eslint-disable-next-line
+        // @ts-ignore
+        sanitize(QUnit.testName) +
+        '.' +
+        sanitize(fontName) +
+        '.jsdom.png';
 
       const imageData = (element as HTMLCanvasElement).toDataURL().split(';base64,').pop();
       const imageBuffer = Buffer.from(imageData as string, 'base64');
@@ -357,8 +366,7 @@ export class VexFlowTests {
           // since we have a canvas+bravura test case and a svg+bravura test case
           // that would otherwise have the same titleId.
         }
-        const titleId = `${prefix}${sanitizeName(moduleName)}.${sanitizeName(name)}.${fontStackName}`;
-
+        const titleId = `${prefix}${sanitize(moduleName)}.${sanitize(name)}.${sanitize(fontStackName)}`;
         const element = VexFlowTests.createTest(elementId, title, tagName, titleId);
         const options: TestOptions = { elementId, params, assert, backend };
         const isSVG = backend === Renderer.Backends.SVG;
