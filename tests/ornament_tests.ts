@@ -180,21 +180,21 @@ function drawOrnamentsDelayedMultipleVoices(options: TestOptions, contextBuilder
   stave.addTimeSignature('4/4');
 
   const notes1 = [
-    new StaveNote({ keys: ['f/5'], duration: '2r'}),
-    new StaveNote({ keys: ['c/5'], duration: '2', stem_direction: 1 }),
+    new StaveNote({ keys: ['f/5'], duration: '2r' }),
+    new StaveNote({ keys: ['c/5'], duration: '2', stemDirection: 1 }),
   ];
   const notes2 = [
-    new StaveNote({ keys: ['a/4'], duration: '4', stem_direction: -1 }),
-    new StaveNote({ keys: ['e/4'], duration: '4r'}),
-    new StaveNote({ keys: ['e/4'], duration: '2r'}),
+    new StaveNote({ keys: ['a/4'], duration: '4', stemDirection: -1 }),
+    new StaveNote({ keys: ['e/4'], duration: '4r' }),
+    new StaveNote({ keys: ['e/4'], duration: '2r' }),
   ];
 
-  notes1[1].addModifier(new Ornament('turn_inverted').setDelayed(true), 0);
+  notes1[1].addModifier(new Ornament('turnInverted').setDelayed(true), 0);
   notes2[0].addModifier(new Ornament('turn').setDelayed(true), 0);
 
-  const voice1 = new Voice({ num_beats: 4, beat_value: 4, });
+  const voice1 = new Voice({ numBeats: 4, beatValue: 4 });
   voice1.addTickables(notes1);
-  const voice2 = new Voice({ num_beats: 4, beat_value: 4, });
+  const voice2 = new Voice({ numBeats: 4, beatValue: 4 });
   voice2.addTickables(notes2);
 
   const formatWidth = stave.getNoteEndX() - stave.getNoteStartX();
