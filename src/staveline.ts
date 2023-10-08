@@ -178,19 +178,6 @@ export class StaveLine extends Element {
     }
   }
 
-  // Apply the text styling to the context
-  applyFontStyle(): void {
-    const ctx = this.checkContext();
-    ctx.setFont(this.fontInfo);
-
-    const renderOptions = this.renderOptions;
-    const color = renderOptions.color;
-    if (color) {
-      ctx.setStrokeStyle(color);
-      ctx.setFillStyle(color);
-    }
-  }
-
   // Helper function to draw a line with arrow heads
   protected drawArrowLine(ctx: RenderContext, pt1: { x: number; y: number }, pt2: { x: number; y: number }): void {
     const bothArrows = this.renderOptions.drawStartArrow && this.renderOptions.drawEndArrow;
@@ -323,7 +310,7 @@ export class StaveLine extends Element {
     ctx.restore();
 
     // Determine the x coordinate where to start the text
-    const textWidth = ctx.measureText(this.text).width;
+    const textWidth = this.width;
     const justification = renderOptions.textJustification;
     let x = 0;
     if (justification === StaveLine.TextJustification.LEFT) {
@@ -346,10 +333,10 @@ export class StaveLine extends Element {
     }
 
     // Draw the text
-    ctx.save();
-    this.applyFontStyle();
-    ctx.fillText(this.text, x, y);
-    ctx.restore();
+    const color = renderOptions.color;
+    this.applyStyle(ctx, { fillStyle: color, strokeStyle: color });
+    this.renderText(ctx, x, y);
+    this.restoreStyle(ctx);
 
     return this;
   }
