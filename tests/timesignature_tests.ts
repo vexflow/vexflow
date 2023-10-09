@@ -31,7 +31,7 @@ function parser(assert: Assert): void {
   const timeSig = new TimeSignature();
   assert.equal(timeSig.getTimeSpec(), '4/4', 'default time signature is 4/4');
 
-  const mustFail = ['asdf', '123/', '/10', '/', '4567', 'C+', '1+', '+1', '(3+', '+3)', '()', '(+)'];
+  const mustFail = ['asdf', '123/', '/10', '/', 'C+'];
   mustFail.forEach((invalidString) => {
     assert.throws(() => new TimeSignature(invalidString), /BadTimeSignature/);
   });
@@ -60,6 +60,7 @@ function basic(options: TestOptions, contextBuilder: ContextBuilder): void {
     .addTimeSignature('6/8')
     .addTimeSignature('C')
     .addTimeSignature('C|')
+    .addTimeSignature('3')
     .addEndTimeSignature('2/2')
     .addEndTimeSignature('3/4')
     .addEndTimeSignature('4/4')
