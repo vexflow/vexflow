@@ -22,13 +22,6 @@ export interface TimeSignatureInfo {
 const assertIsValidTimeSig = (timeSpec: string) => {
   const numbers = timeSpec.split('/');
 
-  if (numbers.length !== 2 && numbers[0] !== '+' && numbers[0] !== '-') {
-    throw new RuntimeError(
-      'BadTimeSignature',
-      `Invalid time spec: ${timeSpec}. Must be in the form "<numerator>/<denominator>"`
-    );
-  }
-
   numbers.forEach((number) => {
     // Characters consisting in number 0..9, '+', '-', '(' or ')'
     if (/^[0-9+\-()]+$/.test(number) === false) {
