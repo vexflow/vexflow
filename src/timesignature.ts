@@ -130,9 +130,9 @@ export class TimeSignature extends StaveModifier {
     botWidth = this.botText.getWidth();
     height = Math.max(height, this.botText.getHeight());
 
-    // If the height of the digits is more than two staff spaces (20), shift to the next line
-    // in order to center the digits on lines 1 and 5 rather than 2 and 4.
-    this.lineShift = height > 24 ? 1 : 0;
+    // If the height of the digits is more than three staff spaces (30), shift half a line line
+    // in order to center the digits on lines 1.5 and 4.5 rather than 2 and 4.
+    this.lineShift = height > 30 ? 0.5 : 0;
 
     this.width = Math.max(topWidth, botWidth);
     this.topStartX = (this.width - topWidth) / 2.0;
