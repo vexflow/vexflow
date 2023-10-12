@@ -5,65 +5,6 @@
 <html>
   <head>
     <title>Glyph Inspector</title>
-    <meta charset="utf-8" />
-    <style>
-      @font-face {
-        font-family: Bravura;
-        src: url(../../../node_modules/@vexflow-fonts/bravura/bravura.woff2);
-      }
-      @font-face {
-        font-family: 'Bravura Text';
-        src: url(../../../node_modules/@vexflow-fonts/bravuratext/bravuratext.woff2);
-      }
-      @font-face {
-        font-family: FinaleAsh;
-        src: url(../../../node_modules/@vexflow-fonts/finaleash/finaleash.woff2);
-      }
-      @font-face {
-        font-family: FinaleJazz;
-        src: url(../../../node_modules/@vexflow-fonts/finalejazz/finalejazz.woff2);
-      }
-      @font-face {
-        font-family: FinaleBroadway;
-        src: url(../../../node_modules/@vexflow-fonts/finalebroadway/finalebroadway.woff2);
-      }
-      @font-face {
-        font-family: FinaleMaestro;
-        src: url(../../../node_modules/@vexflow-fonts/finalemaestro/finalemaestro.woff2);
-      }
-      @font-face {
-        font-family: GonvilleSmufl;
-        src: url(../../../node_modules/@vexflow-fonts/gonvillesmufl/gonvillesmufl.woff2);
-      }
-      @font-face {
-        font-family: Gootville;
-        src: url(../../../node_modules/@vexflow-fonts/gootville/gootville.woff2);
-      }
-      @font-face {
-        font-family: 'Gootville Text';
-        src: url(../../../node_modules/@vexflow-fonts/gootvilletext/gootvilletext.woff2);
-      }
-      @font-face {
-        font-family: Leland;
-        src: url(../../../node_modules/@vexflow-fonts/leland/leland.woff2);
-      }
-      @font-face {
-        font-family: 'Leland Text';
-        src: url(../../../node_modules/@vexflow-fonts/lelandtext/lelandtext.woff2);
-      }
-      @font-face {
-        font-family: MuseJazz;
-        src: url(../../../node_modules/@vexflow-fonts/musejazz/musejazz.woff2);
-      }
-      @font-face {
-        font-family: Petaluma;
-        src: url(../../../node_modules/@vexflow-fonts/petaluma/petaluma.woff2);
-      }
-      @font-face {
-        font-family: 'Petaluma Text';
-        src: url(../../../node_modules/@vexflow-fonts/petalumatext/petalumatext.woff2);
-      }
-    </style>
     <style>
       body {
         background: white;
@@ -104,24 +45,51 @@
       div#glyphs {
         margin-top: 250px;
       }
-      div#parent {
-        overflow: auto;
-      }
       p {
         margin: 10px;
         font-size: 13px;
+        line-height: 1.5;
       }
       h1 {
         margin: 10px;
         font-size: 40px;
       }
     </style>
-
+    <!-- fonts.css defines all the @font-face rules. -->
+    <link rel="stylesheet" href="../../../tests/fonts.css" type="text/css" media="screen" />
     <script src="../config/glyphnames.js"></script>
   </head>
 
   <body>
-    <div id="'parent">
+    <div id="font-preload">
+      <!--
+        Preload fonts and styles for testing.
+        The empty tags <b></b>, <i></i>, and <span style="font-weight: xxx"></span> are for loading different font weights/styles. 
+      -->
+      <!--
+        On this page, we are only concerned with music engraving fonts.
+        Do not load Academico, Edwin, Nepomuk, Roboto Slab, or any Finale font that is for text.
+      -->
+      <span style="font-family: Bravura"></span>
+      <span style="font-family: 'Bravura Text'"></span>
+      <span style="font-family: Finale Ash"></span>
+      <span style="font-family: Finale Broadway"></span>
+      <span style="font-family: Finale Jazz"></span>
+      <span style="font-family: Finale Maestro"></span>
+      <span style="font-family: GonvilleSmufl"></span>
+      <span style="font-family: Gootville"></span>
+      <span style="font-family: Gootville Text"></span>
+      <span style="font-family: Leipzig"></span>
+      <span style="font-family: Leland"></span>
+      <span style="font-family: Leland Text"></span>
+      <span style="font-family: MuseJazz"></span>
+      <span style="font-family: Petaluma"></span>
+      <span style="font-family: Petaluma Text"></span>
+      <span style="font-family: Sebastian"></span>
+      <span style="font-family: Sebastian Text"></span>
+    </div>
+
+    <div id="parent">
       <div id="top">
         <h1 id="title">Glyph Inspector</h1>
         <p>
@@ -133,32 +101,21 @@
           <a onclick="chooseFont('FinaleMaestro')">FinaleMaestro</a> &nbsp;
           <a onclick="chooseFont('GonvilleSmufl')">GonvilleSmufl</a> &nbsp;
           <a onclick="chooseFont('Gootville')">Gootville</a> &nbsp;
-          <a onclick="chooseFont('Gootville Text')">Gootville Text</a> &nbsp;
+          <a onclick="chooseFont('Gootville Text')">Gootville Text</a> &nbsp;<br />
+          <a onclick="chooseFont('Leipzig')">Leipzig</a> &nbsp;<!-- NEW LINE -->
           <a onclick="chooseFont('Leland')">Leland</a> &nbsp;
           <a onclick="chooseFont('Leland Text')">Leland Text</a> &nbsp;
-          <a onclick="chooseFont('MuseJazz')">MuseJazz</a> &nbsp;<!-- FORMAT CODE LINE BREAK -->
+          <a onclick="chooseFont('MuseJazz')">MuseJazz</a> &nbsp;
           <a onclick="chooseFont('Petaluma')">Petaluma</a> &nbsp;
           <a onclick="chooseFont('Petaluma Text')">Petaluma Text</a> &nbsp;
+          <a onclick="chooseFont('Sebastian')">Sebastian</a> &nbsp;
+          <a onclick="chooseFont('Sebastian Text')">Sebastian Text</a> &nbsp;
         </p>
         <p>note: Cross indicates render coordinates.</p>
       </div>
       <div id="glyphs"></div>
     </div>
-    <!-- PRELOAD ALL FONT FILES using empty <span> tags. -->
-    <span style="font-family: Bravura"></span>
-    <span style="font-family: Bravura Text"></span>
-    <span style="font-family: FinaleAsh"></span>
-    <span style="font-family: FinaleBroadway"></span>
-    <span style="font-family: FinaleJazz"></span>
-    <span style="font-family: FinaleMaestro"></span>
-    <span style="font-family: GonvilleSmufl"></span>
-    <span style="font-family: Gootville"></span>
-    <span style="font-family: Gootville Text"></span>
-    <span style="font-family: Leland"></span>
-    <span style="font-family: Leland Text"></span>
-    <span style="font-family: MuseJazz"></span>
-    <span style="font-family: Petaluma"></span>
-    <span style="font-family: Petaluma Text"></span>
+
     <script type="module">
       // Only proceed after all fonts have loaded.
       const fontFaceSet = await document.fonts.ready;
@@ -177,70 +134,69 @@
         }
       }
 
-
       function codepoint2decimal(codepoint) {
         // Return the decimal value of 'XXXX' of codepoint, which has a string format 'U+XXXX'
         return parseInt(codepoint.substring(2), 16);
       }
 
-      function drawGlyph(canvasId,glyphCode,glyphName,fontName) {
+      function drawGlyph(canvasId, glyphCode, glyphName, fontName) {
         let canvas = document.getElementById(canvasId);
-          if (!canvas) {
-            canvas = document.createElement('canvas');
-            canvas.id = canvasId;
-            // Retina display trick:
-            // Make the canvas twice as large as our width x height.
-            // Then set the scale to (2, 2).
-            canvas.width  = 300;
-            canvas.height = 300;
-            canvas.style.height = '150px';
-            canvas.style.width = '150px';
-            glyphs.appendChild(canvas);
-          } else {
-            // Clear canvas
-            canvas.width  = 300;
-            canvas.height = 300;           
-          }
-          var ctx = canvas.getContext('2d');
-          ctx.setTransform(2, 0, 0, 2, 0, 0); // reset the scale to (2, 2)
+        if (!canvas) {
+          canvas = document.createElement('canvas');
+          canvas.id = canvasId;
+          // Retina display trick:
+          // Make the canvas twice as large as our width x height.
+          // Then set the scale to (2, 2).
+          canvas.width = 300;
+          canvas.height = 300;
+          canvas.style.height = '150px';
+          canvas.style.width = '150px';
+          glyphs.appendChild(canvas);
+        } else {
+          // Clear canvas
+          canvas.width = 300;
+          canvas.height = 300;
+        }
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(2, 0, 0, 2, 0, 0); // reset the scale to (2, 2)
 
-          var x = 10;
-          var y = 50;
-          // Show the glyph name.
-          const code = parseInt(glyphCode, 16);
-          ctx.fillStyle = '#222';
-          ctx.strokeStyle = '#222';
-          ctx.font = '9pt sans-serif';
-          ctx.fillText(glyphCode, x, y + 40);
-          // if the name has more than 25 characters, break it up into two lines.
-          if (glyphName.length > 20) {
-            ctx.fillText(glyphName.slice(0, 17) + '...', x, y + 50);
-            ctx.fillText(glyphName.slice(17 - glyphName.length), x, y + 60);
-          } else ctx.fillText(glyphName, x, y + 50);
-          
-          const originX = x + 50;
-          const originY = y;
+        var x = 10;
+        var y = 50;
+        // Show the glyph name.
+        const code = parseInt(glyphCode, 16);
+        ctx.fillStyle = '#222';
+        ctx.strokeStyle = '#222';
+        ctx.font = '9pt sans-serif';
+        ctx.fillText(glyphCode, x, y + 40);
+        // if the name has more than 25 characters, break it up into two lines.
+        if (glyphName.length > 20) {
+          ctx.fillText(glyphName.slice(0, 17) + '...', x, y + 50);
+          ctx.fillText(glyphName.slice(17 - glyphName.length), x, y + 60);
+        } else ctx.fillText(glyphName, x, y + 50);
 
-          // Show the glyph outline.
-          ctx.fillStyle = '#006400';
-          ctx.font = '30pt ' + fontName;
-          ctx.fillText(String.fromCodePoint(code), originX, originY);
-          // See the GlyphMetrics interface in glyph.ts.
-          const metrics = ctx.measureText(String.fromCharCode(code));
-          ctx.save();
-          ctx.font = '9pt monospace';
-          const height = metrics.actualBoundingBoxDescent + metrics.actualBoundingBoxAscent;
-          ctx.fillText('w: ' + Math.round(metrics.width), x, y - 6);
-          ctx.fillText('h: ' + Math.round(height), x, y + 6);
-          ctx.restore();
-          // draw magenta cross hairs at the glyph's origin
-          ctx.strokeStyle = 'magenta';
-          ctx.beginPath();
-          ctx.moveTo(originX - 6, originY);
-          ctx.lineTo(originX + 6, originY);
-          ctx.moveTo(originX, originY - 6);
-          ctx.lineTo(originX, originY + 6);
-          ctx.stroke();
+        const originX = x + 50;
+        const originY = y;
+
+        // Show the glyph outline.
+        ctx.fillStyle = '#006400';
+        ctx.font = '30pt ' + fontName;
+        ctx.fillText(String.fromCodePoint(code), originX, originY);
+        // See the GlyphMetrics interface in glyph.ts.
+        const metrics = ctx.measureText(String.fromCharCode(code));
+        ctx.save();
+        ctx.font = '9pt monospace';
+        const height = metrics.actualBoundingBoxDescent + metrics.actualBoundingBoxAscent;
+        ctx.fillText('w: ' + Math.round(metrics.width), x, y - 6);
+        ctx.fillText('h: ' + Math.round(height), x, y + 6);
+        ctx.restore();
+        // draw magenta cross hairs at the glyph's origin
+        ctx.strokeStyle = 'magenta';
+        ctx.beginPath();
+        ctx.moveTo(originX - 6, originY);
+        ctx.lineTo(originX + 6, originY);
+        ctx.moveTo(originX, originY - 6);
+        ctx.lineTo(originX, originY + 6);
+        ctx.stroke();
       }
 
       // Make this function available to the <a onclick="chooseFont(...)">...</a> links.
@@ -257,11 +213,10 @@
           drawGlyph(canvasId, glyphCode, glyphName, fontName);
           var alternateCodepoint = SMuFLGlyphInfo[glyphName].alternateCodepoint;
           if (alternateCodepoint) {
-            glyphCode = alternateCodepoint.substring(2)
+            glyphCode = alternateCodepoint.substring(2);
             canvasId = glyphCode + '_' + glyphName;
-            drawGlyph(canvasId, glyphCode, glyphName, fontName);  
+            drawGlyph(canvasId, glyphCode, glyphName, fontName);
           }
-
         });
       };
     </script>

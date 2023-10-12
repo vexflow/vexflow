@@ -37,6 +37,20 @@
 
 /***************************************/
 
+/* Bravura Text */
+
+@font-face {
+  font-family: 'Bravura Text';
+  font-style: normal;
+  font-display: block;
+  font-weight: 400;
+  src:
+    local('Bravura Text'),
+    url(../node_modules/@vexflow-fonts/bravuratext/bravuratext.woff2) format('woff2');
+}
+
+/***************************************/
+
 /* Edwin */
 
 @font-face {
@@ -224,6 +238,7 @@
 /***************************************/
 
 /* GonvilleSmufl */
+
 @font-face {
   font-family: 'GonvilleSmufl';
   font-style: normal;
@@ -237,6 +252,7 @@
 /***************************************/
 
 /* Gootville */
+
 @font-face {
   font-family: 'Gootville';
   font-style: normal;
@@ -249,7 +265,22 @@
 
 /***************************************/
 
+/* Gootville Text */
+
+@font-face {
+  font-family: 'Gootville Text';
+  font-style: normal;
+  font-display: block;
+  font-weight: 400;
+  src:
+    local('Gootville Text'),
+    url(../node_modules/@vexflow-fonts/gootvilletext/gootvilletext.woff2) format('woff2');
+}
+
+/***************************************/
+
 /* Leipzig */
+
 @font-face {
   font-family: 'Leipzig';
   font-style: normal;
@@ -272,6 +303,20 @@
   src:
     local('Leland'),
     url(../node_modules/@vexflow-fonts/leland/leland.woff2) format('woff2');
+}
+
+/***************************************/
+
+/* Leland Text */
+
+@font-face {
+  font-family: 'Leland Text';
+  font-style: normal;
+  font-display: block;
+  font-weight: 400;
+  src:
+    local('Leland Text'),
+    url(../node_modules/@vexflow-fonts/lelandtext/lelandtext.woff2) format('woff2');
 }
 
 /***************************************/
@@ -316,18 +361,6 @@
     url(../node_modules/@vexflow-fonts/nepomuk/nepomuk-regular.woff2) format('woff2');
 }
 
-/* regular + small caps */
-@font-face {
-  font-family: 'Nepomuk';
-  font-weight: 400;
-  font-style: normal;
-  font-variant: small-caps;
-  font-display: swap;
-  src:
-    local('Nepomuk'),
-    url(../node_modules/@vexflow-fonts/nepomuk/nepomuk-regularsc.woff2) format('woff2');
-}
-
 @font-face {
   font-family: 'Nepomuk';
   font-weight: bold;
@@ -336,18 +369,6 @@
   src:
     local('Nepomuk'),
     url(../node_modules/@vexflow-fonts/nepomuk/nepomuk-bold.woff2) format('woff2');
-}
-
-/* bold + small-caps */
-@font-face {
-  font-family: 'Nepomuk';
-  font-weight: bold;
-  font-style: normal;
-  font-variant: small-caps;
-  font-display: swap;
-  src:
-    local('Nepomuk'),
-    url(../node_modules/@vexflow-fonts/nepomuk/nepomuk-boldsc.woff2) format('woff2');
 }
 
 @font-face {
@@ -398,6 +419,20 @@
 
 /***************************************/
 
+/* Petaluma Text */
+
+@font-face {
+  font-family: 'Petaluma Text';
+  font-style: normal;
+  font-display: block;
+  font-weight: 400;
+  src:
+    local('Petaluma Text'),
+    url(../node_modules/@vexflow-fonts/petalumatext/petalumatext.woff2) format('woff2');
+}
+
+/***************************************/
+
 /* Roboto Slab */
 
 @font-face {
@@ -442,4 +477,18 @@
   src:
     local('Sebastian'),
     url(../node_modules/@vexflow-fonts/sebastian/sebastian.woff2) format('woff2');
+}
+
+/***************************************/
+
+/* Sebastian Text */
+
+@font-face {
+  font-family: 'Sebastian Text';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src:
+    local('Sebastian Text'),
+    url(../node_modules/@vexflow-fonts/sebastiantext/sebastiantext.woff2) format('woff2');
 }
