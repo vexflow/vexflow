@@ -1,42 +1,5 @@
 ## Font Generation Scripts
 
-### Generate SMuFL font
-
-To add a new SMuFL glyph to Vexflow, add the SMuFL code with the Gonville backup code to `config/valid_codes.json`. Then run the following:
-
-```sh
-# Generate Gonville glyphs
-$ ./gonville2smufl.py @/gonville/Gonville-18_20200703.otf @/gonville/GonvilleSmufl.otf
-$ node fontgen_smufl.js @/gonville/GonvilleSmufl.otf ../../src/fonts/gonville_glyphs.ts
-
-# Generate Bravura glyphs
-$ node fontgen_smufl.js @/bravura/Bravura_1.392.otf ../../src/fonts/bravura_glyphs.ts
-
-# Generate Petaluma glyphs
-$ node fontgen_smufl.js @/petaluma/Petaluma_1.065.otf ../../src/fonts/petaluma_glyphs.ts
-
-# Generate Gonville glyphs
-$ node fontgen_gonville.js @/gonville/Gonville-18_20200703.otf../../src/fonts/gonville_glyphs.ts
-```
-
-### Add Custom Glyph
-
-To add a custom glyph, add its outline to `fonts/custom_glyphs.js` and a custom code (with the `vex` prefix) to `config/valid_codes.json`. Then run the following.
-
-```sh
-$ node fontgen_custom.js ../../src/fonts/
-```
-
-### Generate Text Metrics for a Text Font
-
-To create text metrics for your own font, first obtain a font file (e.g., \*.otf). Then run:
-
-```sh
-$ node fontgen_text.js MyFont.otf myfont_glyphs.ts
-```
-
-You can register these metrics using `TextFormatter.registerInfo(...)` and the metrics will be available for your module. See `chordsymbol.ts` for examples.
-
 ## Gonville
 
 The Gonville font was designed by Simon Tatham. It has been used by VexFlow [since 2010](https://github.com/0xfe/vexflow/tree/8c10ac8aee4cd92f71786ae1c6cd751497bcb753/src/fonts).
