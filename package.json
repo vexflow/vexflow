@@ -1,6 +1,6 @@
 {
   "name": "vxflw-early-access",
-  "version": "5.0.0-alpha.3",
+  "version": "5.0.0-alpha.5",
   "description": "A JavaScript library for rendering music notation and guitar tablature.",
   "exports": {
     ".": {
