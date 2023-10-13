@@ -258,7 +258,7 @@ export class Font {
    *
    * You can also self host, and specify your own server URL here.
    */
-  static WEB_FONT_HOST = 'https://cdn.jsdelivr.net/npm/vexflow-fonts@1.0.6/';
+  static WEB_FONT_HOST = 'https://cdn.jsdelivr.net/npm/@vexflow-fonts/';
 
   /**
    * These font files will be loaded from the CDN specified by `Font.WEB_FONT_HOST` when
@@ -266,27 +266,33 @@ export class Font {
    * set of fonts to load. See: `Font.loadWebFonts()`.
    */
   static WEB_FONT_FILES: Record<string /* fontName */, string /* fontPath */> = {
-    Academico: 'academico/Academico_0.902.woff2',
-    Bravura: 'bravura/Bravura_1.392.woff2',
-    BravuraText: 'bravura/BravuraText_1.393.woff2',
-    GonvilleSmufl: 'gonvillesmufl/GonvilleSmufl_1.100.woff2',
-    Gootville: 'gootville/Gootville_1.3.woff2',
-    GootvilleText: 'gootville/GootvilleText_1.2.woff2',
-    Leland: 'leland/Leland_0.75.woff2',
-    LelandText: 'leland/LelandText_0.75.woff2',
-    Petaluma: 'petaluma/Petaluma_1.065.woff2',
-    'Petaluma Script': 'petaluma/PetalumaScript_1.10_FS.woff2',
-    MuseJazz: 'musejazz/MuseJazz_1.0.woff2',
-    MuseJazzText: 'musejazz/MuseJazzText_1.0.woff2',
-    'Roboto Slab': 'robotoslab/RobotoSlab-Medium_2.001.woff2',
-    FinaleAsh: 'finale/FinaleAsh_1.7.woff2',
-    FinaleAshText: 'finale/FinaleAshText_1.3.woff2',
-    FinaleJazz: 'finale/FinaleJazz_1.9.woff2',
-    FinaleJazzText: 'finale/FinaleJazzText_1.3.woff2',
-    FinaleBroadway: 'finale/FinaleBroadway_1.4.woff2',
-    FinaleBroadwayText: 'finale/FinaleBroadwayText_1.1.woff2',
-    FinaleMaestro: 'finale/FinaleMaestro_2.7.woff2',
-    FinaleMaestroText: 'finale/FinaleMaestroText-Regular_1.6.woff2',
+    Academico: 'academico/academico.woff2',
+    Bravura: 'bravura/bravura.woff2',
+    'Bravura Text': 'bravuratext/bravuratext.woff2',
+    Edwin: 'edwin/edwin-roman.woff2',
+    'Finale Ash': 'finaleash/finaleash.woff2',
+    'Finale Ash Text': 'finaleashtext/finaleashtext.woff2',
+    'Finale Broadway': 'finalebroadway/finalebroadway.woff2',
+    'Finale Broadway Text': 'finalebroadwaytext/finalebroadwaytext.woff2',
+    'Finale Jazz': 'finalejazz/finalejazz.woff2',
+    'Finale Jazz Text': 'finalejazztext/finalejazztext.woff2',
+    'Finale Maestro': 'finalemaestro/finalemaestro.woff2',
+    'Finale Maestro Text': 'finalemaestrotext/finalemaestrotext-regular.woff2',
+    GonvilleSmufl: 'gonvillesmufl/gonvillesmufl.woff2',
+    Gootville: 'gootville/gootville.woff2',
+    'Gootville Text': 'gootvilletext/gootvilletext.woff2',
+    Leipzig: 'leipzig/leipzig.woff2',
+    Leland: 'leland/leland.woff2',
+    'Leland Text': 'lelandtext/lelandtext.woff2',
+    MuseJazz: 'musejazz/musejazz.woff2',
+    'MuseJazz Text': 'musejazztext/musejazztext.woff2',
+    Nepomuk: 'nepomuk/nepomuk.woff2',
+    Petaluma: 'petaluma/petaluma.woff2',
+    'Petaluma Script': 'petalumascript/petalumascript.woff2',
+    'Petaluma Text': 'petalumatext/petalumatext.woff2',
+    'Roboto Slab': 'robotoslab/robotoslab-regular-400.woff2',
+    Sebastian: 'sebastian/sebastian.woff2',
+    'Sebastian Text': 'sebastiantext/sebastiantext.woff2',
   };
 
   /**

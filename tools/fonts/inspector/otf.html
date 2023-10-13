@@ -123,35 +123,47 @@
       // We can derive the OTF file path automatically from the font name.
       const musicFonts = [
         'Bravura',
+        'Bravura Text',
         'Finale Ash',
         'Finale Broadway',
         'Finale Jazz',
         'Finale Maestro',
         'GonvilleSmufl',
         'Gootville',
+        'Gootville Text',
+        'Leipzig',
         'Leland',
+        'Leland Text',
         'MuseJazz',
         'Petaluma',
+        'Petaluma Text',
+        'Sebastian',
+        'Sebastian Text',
       ];
 
-      // The OTF files have weird names, so we need to map them to the font names.
+      // If the value is null, the folder/filename.otf are the same as the lower-cased font name.
+      // Other OTF files have custom names, so we map them to the font names.
       const textFonts = {
-        Academico: 'academico/academico.otf',
-        'Roboto Slab': 'robotoslab/robotoslab-regular-400.otf',
-        Edwin: 'edwin/edwin-roman.otf',
-        'Finale Maestro Text': 'finalemaestrotext/finalemaestrotext-regular.otf',
-        'MuseJazz Text': 'musejazztext/musejazztext.otf',
-        'Petaluma Script': 'petalumascript/petalumascript.otf',
+        Academico: null,
+        Edwin: 'edwin-roman',
+        'Finale Ash Text': null,
+        'Finale Broadway Text': null,
+        'Finale Jazz Text': null,
+        'Finale Maestro Text': 'finalemaestrotext-regular',
+        'MuseJazz Text': null,
+        Nepomuk: 'nepomuk-regular',
+        'Petaluma Script': null,
+        'Roboto Slab': 'robotoslab-regular-400',
       };
 
       function addButtons() {
         // Add buttons at the top.
-        let buttonsHTML = '';
+        let buttonsHTML = '<div style="font-variant: small-caps">Music Fonts</div>';
         for (const fontName of musicFonts) {
           const fontNameNoSpaces = fontName.replace(/\s/g, '');
           buttonsHTML += `<button id="btn_${fontNameNoSpaces}" onclick="setFont(event, '${fontName}');">${fontName}</button>`;
         }
-        buttonsHTML += '<br />';
+        buttonsHTML += '<br /><br />' + '<div style="font-variant: small-caps">Text Fonts</div>';
         for (const fontName in textFonts) {
           const fontNameNoSpaces = fontName.replace(/\s/g, '');
           buttonsHTML += `<button id="btn_${fontNameNoSpaces}" onclick="setFont(event, '${fontName}');">${fontName}</button>`;
@@ -201,16 +213,21 @@
         const fontPath = '../../../node_modules/@vexflow-fonts/';
 
         // Derive the OTF file path from the font name.
-        musicFonts.forEach(async (fontName) => {
-          const lowerCaseNoSpaces = fontName.toLowerCase().replace(/\s/g, '');
-          const fontFace = new FontFace(fontName, `url(${fontPath + lowerCaseNoSpaces}/${lowerCaseNoSpaces}.otf)`);
+        musicFonts.forEach(async (musicFontName) => {
+          console.log(musicFontName);
+          const lowerCaseNoSpaces = musicFontName.toLowerCase().replace(/\s/g, '');
+          const fontFace = new FontFace(musicFontName, `url(${fontPath + lowerCaseNoSpaces}/${lowerCaseNoSpaces}.otf)`);
           await fontFace.load();
           document.fonts.add(fontFace);
         });
 
         // Text font OTFs may have special file names, so we read them from the textFonts mapping.
-        for (const fontName in textFonts) {
-          const fontFace = new FontFace(fontName, `url(${fontPath + textFonts[fontName]})`);
+        for (const textFontName in textFonts) {
+          console.log(textFontName);
+          const lowerCaseNoSpaces = textFontName.toLowerCase().replace(/\s/g, '');
+          const folderName = lowerCaseNoSpaces + '/';
+          const fileName = textFonts[textFontName] ?? lowerCaseNoSpaces;
+          const fontFace = new FontFace(textFontName, `url(${fontPath + folderName + fileName}.otf)`);
           await fontFace.load();
           document.fonts.add(fontFace);
         }
