@@ -2,36 +2,57 @@
 
 VexFlow is an open-source library for rendering music notation. It is written in TypeScript (compiled to ES6), and outputs scores to HTML Canvas and SVG. It works in browsers and also in Node.js projects (e.g., a command line script to save a score as a PDF).
 
-The guide below refers to VexFlow 4. If you need to work with the previous version, follow the [version 3.0.9 tutorial.](https://github.com/0xfe/vexflow/wiki/VexFlow-3.0.9-Tutorial)
+The guide below refers to VexFlow 5.
 
 ## Quick Start
 
 The quickest way to add VexFlow to a web page is via a `<script>` tag.
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/vexflow@4.0.3/build/cjs/vexflow.js"></script>
+<!-- Load Bravura and Academico (see vexflow-fonts for available fonts) -->
+<style>
+  @font-face {
+    font-family: 'Bravura';
+    src: url(https://cdn.jsdelivr.net/npm/@vexflow-fonts/bravura/bravura.woff2) format(woff2);
+  }
+  @font-face {
+    font-family: 'Academico';
+    src: url(https://cdn.jsdelivr.net/npm/@vexflow-fonts/academico/academico.woff2) format(woff2);
+  }
+</style>
+<span style="font-family: Academico"></span>
+<span style="font-family: Bravura"></span>     
+
+<!-- Div where the scores will be output -->
+<div id="output"></div>
+
+<!-- Load library -->
+<script src="https://cdn.jsdelivr.net/npm/vxflw-early-access@alpha/build/cjs/vexflow.js"></script>
+
 <script>
+document.fonts.ready.then(() => {
+  Vex.Flow.setMusicFont('Bravura', 'Academico');
   // YOUR CODE GOES HERE
+});
 </script>
 ```
 
-The URL above includes a version number <code>vexflow@x.y.z</code>. Specifying a particular version is good practice, to prevent rare issues with a future update breaking your deployment. During development &amp; testing, feel free to use the latest release by omitting the version number: https://cdn.jsdelivr.net/npm/vexflow/build/cjs/vexflow.js
+The URL above includes a version number <code>vxflw-early-access@x.y.z</code>. Specifying a particular version is good practice, to prevent rare issues with a future update breaking your deployment. During development &amp; testing, feel free to use the latest release by omitting the version number: https://cdn.jsdelivr.net/npm/vxflw-early-access/build/cjs/vexflow.js
 
 If your project uses a bundler, you can install VexFlow from npm:
 
 ```sh
-npm install vexflow
+npm install vxflw-early-access
 ```
 
 Read our detailed guide on [integrating with VexFlow.](https://github.com/0xfe/vexflow/wiki/VexFlow-4-Tutorial)
 
-## EasyScore
+## Factory (with EasyScore)
 
-EasyScore is VexFlow's high-level API for creating music notation. On a web page containing a `<div id="output"></div>`, the following code displays a score:
+Factory is VexFlow's recommended API for creating music notation. EasyScore is VexFlow's high-level API for creating voices and notes. On a web page containing a `<div id="output"></div>`, the following code displays a score:
 
 ```javascript
-const { Factory, EasyScore, System } = Vex.Flow;
-
+const { Factory } = Vex.Flow;
 const vf = new Factory({
   renderer: { elementId: 'output', width: 500, height: 200 },
 });
@@ -52,7 +73,7 @@ system
 vf.draw();
 ```
 
-[See a running example of EasyScore here.](https://jsfiddle.net/xure9svb/)
+[See it running here.](https://vexflow.github.io/vexflow-examples/static/step0)
 
 [Learn more about EasyScore here.](https://github.com/0xfe/vexflow/wiki/Using-EasyScore)
 
@@ -84,9 +105,9 @@ stave.setContext(context).draw();
 
 ## Examples
 
-- Take a look at [the VexFlow tutorial](https://github.com/0xfe/vexflow/wiki/Tutorial).
+- Take a look at [the VexFlow Examples](https://vexflow.github.io/vexflow-examples).
 
-- Dig into [the unit tests](https://github.com/0xfe/vexflow/tree/master/tests).
+- Dig into [the unit tests](https://github.com/vexflow/vexflow/tree/main/tests).
 
 ## More Resources
 
@@ -102,12 +123,12 @@ stave.setContext(context).draw();
 
 ## Sponsor this Project
 
-If you find VexFlow useful, please consider sponsoring its development: https://github.com/sponsors/0xfe.
+If you find VexFlow useful, please consider sponsoring its development: https://github.com/sponsors/vexflow.
 
 # MIT License
 
-Copyright (c) Mohit Muthanna Cheppudira 2010 <br/>
-0xFE <mohit@muthanna.com> https://www.vexflow.com
+Copyright (c) 2023-present VexFlow contributors (see AUTHORS.md).
+Copyright (c) 2010-2022 Mohit Muthanna Cheppudira
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
