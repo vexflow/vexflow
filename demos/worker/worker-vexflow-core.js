@@ -15,7 +15,7 @@ onmessage = function (e) {
   function draw() {
     const fonts = ['Bravura', 'GonvilleSmufl', 'Petaluma', 'Leland'];
     const randomFont = fonts[Math.floor(Math.random() * fonts.length)];
-    Vex.Flow.setMusicFont(randomFont);
+    Vex.Flow.setFonts(randomFont);
 
     const { Stave, CanvasContext, BarlineType, StaveNote, Formatter } = Vex.Flow;
 

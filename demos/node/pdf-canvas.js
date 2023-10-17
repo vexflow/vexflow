@@ -31,8 +31,8 @@ const outputFile = 'output/score-canvas.pdf';
 
 const { Stave, StaveNote, Formatter, Renderer } = Vex.Flow;
 
-Vex.Flow.setMusicFont('Bravura');
-// Vex.Flow.setMusicFont('Petaluma');
+Vex.Flow.setFonts('Bravura');
+// Vex.Flow.setFonts('Petaluma');
 
 console.log('VexFlow Build: ' + Vex.Flow.BUILD.ID);
 

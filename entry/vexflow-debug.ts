@@ -10,7 +10,7 @@
 
 import { Flow } from '../src/flow';
 
-Flow.setMusicFont('Bravura', 'Roboto Slab');
+Flow.setFonts('Bravura', 'Roboto Slab');
 
 // Re-export all exports from index.ts.
 export * from '../src/index';

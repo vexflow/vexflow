@@ -194,8 +194,8 @@ export class Flow {
   /**
    * Examples:
    * ```
-   * Vex.Flow.setMusicFont('Petaluma');
-   * Vex.Flow.setMusicFont('Bravura', 'Gonville');
+   * Vex.Flow.setFonts('Petaluma');
+   * Vex.Flow.setFonts('Bravura', 'Gonville');
    * ```
    *
    * **CASE 1**: You are using `vexflow.js`, which includes all music fonts (Bravura, Gonville, Petaluma, Custom).
@@ -210,20 +210,46 @@ export class Flow {
    * Example:
    * ```
    * await Vex.Flow.fetchMusicFont('Petaluma');
-   * Vex.Flow.setMusicFont('Petaluma');
+   * Vex.Flow.setFonts('Petaluma');
    * ... (do VexFlow stuff) ...
    * ```
    * See `demos/fonts/` for more examples.
    *
    * @returns an array of Font objects corresponding to the provided `fontNames`.
    */
-  static setMusicFont(...fontNames: string[]): void {
+  static setFonts(...fontNames: string[]): void {
     // Convert the array of font names into an array of Font objects.
     MetricsDefaults.fontFamily = fontNames.join(',');
   }
 
-  static getMusicFont(): string[] {
+  static getFonts(): string[] {
     return Metrics.get('fontFamily').split(',');
+  }
+
+  /**
+   * Load the fonts that are used by your app.
+   * If `fontNames` is undefined, all fonts in Font.FILES will be loaded.
+   * This is useful for debugging, but not recommended for production because it will load lots of fonts.
+   *
+   * For example, on the `flow.html` test page, you could call:
+   *   `await Vex.Flow.loadFonts();`
+   *
+   * Alternatively, you may load web fonts with a stylesheet link (e.g., from Google Fonts),
+   * and a @font-face { font-family: ... } rule in your CSS.
+   *
+   * Customize `Font.HOST_URL` and `Font.FILES` to load different fonts for your app.
+   */
+  static async loadFonts(...fontNames: string[]): Promise<void> {
+    if (!fontNames) {
+      fontNames = Object.keys(Font.FILES);
+    }
+
+    const fontLoadPromises: Promise<FontFace>[] = [];
+    for (const fontName of fontNames) {
+      fontLoadPromises.push(Font.load(fontName));
+    }
+
+    await Promise.all(fontLoadPromises);
   }
 
   static get RENDER_PRECISION_PLACES(): number {

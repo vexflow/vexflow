@@ -29,7 +29,7 @@
     <p>See also: <a href="script-tag.html">Script Tag</a></p>
     <script type="module">
       import Vex from '../../build/esm/entry/vexflow.js';
-      Vex.Flow.setMusicFont('Petaluma');
+      Vex.Flow.setFonts('Petaluma');
 
       const { VERSION, ID, DATE } = Vex.Flow.BUILD;
       document.querySelector('#info').innerText = `${VERSION} / ${ID} / ${DATE}`;
@@ -55,8 +55,8 @@
 
       factory.draw();
 
-      // Just for debugging, assign Vex.Flow to the global VF variable.
-      // No you can do VF.setMusicFont('Gonville'); from the command line.
+      // Just for debugging, assign Vex.Flow to the global window.VF variable.
+      // Now you can do VF.setFonts('Gonville'); from the developer tools command line.
       window.VF = Vex.Flow;
     </script>
   </body>

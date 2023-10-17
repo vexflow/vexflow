@@ -110,15 +110,15 @@ async function step1() {
   VF = Flow;
 
   console.log('Loaded VexFlow Version: ', VF.BUILD.VERSION, ' Build: ', VF.BUILD.ID);
-  console.log('The default music font stack is:', VF.getMusicFont());
+  console.log('The default music font stack is:', VF.getFonts());
 
   console.log('\n==================================\n');
   console.log('>>> Bravura...');
 }
 
 async function step2() {
-  VF.setMusicFont('Bravura', 'Academico');
-  console.log('The current music font stack is:', VF.getMusicFont());
+  VF.setFonts('Bravura', 'Academico');
+  console.log('The current music font stack is:', VF.getFonts());
   fs.writeFileSync('output/score_bravura.svg', svgScore('Bravura'));
 
   console.log('\n==================================\n');
@@ -126,8 +126,8 @@ async function step2() {
 }
 
 async function step3() {
-  VF.setMusicFont('Petaluma', 'Petaluma Script');
-  console.log('The current music font stack is:', VF.getMusicFont());
+  VF.setFonts('Petaluma', 'Petaluma Script');
+  console.log('The current music font stack is:', VF.getFonts());
   fs.writeFileSync('output/score_petaluma.svg', svgScore('Petaluma'));
 
   console.log('\n==================================\n');
@@ -135,8 +135,8 @@ async function step3() {
 }
 
 async function step4() {
-  VF.setMusicFont('GonvilleSmufl', 'Academico');
-  console.log('The current music font stack is:', VF.getMusicFont());
+  VF.setFonts('GonvilleSmufl', 'Academico');
+  console.log('The current music font stack is:', VF.getFonts());
   fs.writeFileSync('output/score_gonvillesmufl.svg', svgScore('GonvilleSmufl'));
 
   console.log('\n==================================\n');
@@ -144,8 +144,8 @@ async function step4() {
 }
 
 async function step5() {
-  VF.setMusicFont('Leland', 'Edwin');
-  console.log('The current music font stack is:', VF.getMusicFont());
+  VF.setFonts('Leland', 'Edwin');
+  console.log('The current music font stack is:', VF.getFonts());
   fs.writeFileSync('output/score_leland.svg', svgScore('Leland'));
 
   console.log('\n==================================\n');
