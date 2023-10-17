@@ -2,23 +2,11 @@
 
 ## all.html
 
-The full `vexflow.js` includes the following music engraving fonts: Bravura, Petaluma, Gonville, Leland, and Custom. In this case, `Vex.Flow.setMusicFont('Bravura', ...);` is a synchronous function that changes the current font stack.
+The full `vexflow.js` includes the following music engraving fonts: Bravura, Petaluma, Gonville, Leland, and Custom. In this case, `Vex.Flow.setFonts('Bravura', ...);` is a synchronous function that changes the current font stack.
 
 ## bravura.html
 
-This page uses `vexflow-bravura.js`, which statically bundles only the Bravura font. You do not need to call `Flow.setMusicFont(...)`.
-
-## gonville.html
-
-This page uses `vexflow-gonville.js`, which statically bundles only the Gonville font. You do not need to call `Flow.setMusicFont(...)`.
-
-## petaluma.html
-
-This page uses `vexflow-petaluma.js`, which statically bundles only the Petaluma font. You do not need to call `Flow.setMusicFont(...)`.
-
-## leland.html
-
-This page uses `vexflow-leland.js`, which statically bundles only the Leland font. You do not need to call `Flow.setMusicFont(...)`.
+This page uses `vexflow-bravura.js`, which statically bundles only the Bravura font. You do not need to call `Vex.Flow.setFonts(...)`.
 
 ## core.html
 
@@ -35,11 +23,11 @@ vexflow-font-custom.js
 `core.html` uses the <b>await</b> keyword to call an async function that returns after the requested font is loaded:
 
 ```
-await Vex.Flow.setMusicFont('Petaluma');
+await Vex.Flow.setFonts('Petaluma');
 ```
 
-**IMPORTANT**: The default font stack is empty, so you **must** call `Flow.setMusicFont(...)` before rendering your score.
+**IMPORTANT**: The default font stack is empty, so you **must** call `Vex.Flow.setFonts(...)` before rendering your score.
 
 ## core-with-promise.html
 
-The async `Vex.Flow.setMusicFont(...)` returns a Promise. This demo shows how to use a `.then(onFulfilledCallback)` to request a font stack, and initialize VexFlow once the fonts are ready.
+The async `Vex.Flow.setFonts(...)` returns a Promise. This demo shows how to use a `.then(onFulfilledCallback)` to request a font stack, and initialize VexFlow once the fonts are ready.

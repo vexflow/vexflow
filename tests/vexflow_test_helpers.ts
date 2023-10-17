@@ -26,11 +26,11 @@ export interface TestOptions {
 // Each test case will switch through the available fonts, and then restore the original font when done.
 let originalFontNames: string[];
 function useTempFontStack(fontName: string): void {
-  originalFontNames = Flow.getMusicFont();
-  Flow.setMusicFont(...VexFlowTests.FONT_STACKS[fontName]);
+  originalFontNames = Flow.getFonts();
+  Flow.setFonts(...VexFlowTests.FONT_STACKS[fontName]);
 }
 function restoreOriginalFontStack(): void {
-  Flow.setMusicFont(...originalFontNames);
+  Flow.setFonts(...originalFontNames);
 }
 
 // A micro util inspired by jQuery.

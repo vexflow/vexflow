@@ -40,7 +40,7 @@
       function onFontsLoaded() {
         // The first argument is the primary music engraving font.
         // The others are fallbacks, in case a glyph is not found in the first music font.
-        Vex.Flow.setMusicFont('Petaluma', 'Bravura', 'Leland', 'Gonville');
+        Vex.Flow.setFonts('Petaluma', 'Bravura', 'Leland', 'Gonville');
 
         const factory = new Vex.Flow.Factory({ renderer: { elementId: 'output', width: 500, height: 200 } });
         const score = factory.EasyScore();

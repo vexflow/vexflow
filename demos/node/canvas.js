@@ -29,8 +29,8 @@ const canvas = createCanvas(1000, 500);
 // In browsers, canvas elements usually default to 300 x 150.
 Vex.Flow.Element.setTextMeasurementCanvas(createCanvas(300, 150));
 
-Vex.Flow.setMusicFont('Bravura');
-// Vex.Flow.setMusicFont('Petaluma');
+Vex.Flow.setFonts('Bravura');
+// Vex.Flow.setFonts('Petaluma');
 
 const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
 const context = renderer.getContext();

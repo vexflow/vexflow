@@ -1,7 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 
 import { ArticulationStruct } from './articulation';
-import { Font } from './font';
 import { Fraction } from './fraction';
 import { Glyphs } from './glyphs';
 import { GlyphProps, KeyProps } from './note';
@@ -353,25 +352,6 @@ export class Tables {
       codeFlagUp: '\ue248' /*flag128thUp*/,
     },
   };
-
-  /**
-   * Customize this by calling Flow.setMusicFont(...fontNames);
-   */
-  static MUSIC_FONT_STACK: Font[] = [];
-
-  /**
-   * @returns the `Font` object at the head of the music font stack.
-   */
-  static currentMusicFont(): Font {
-    if (Tables.MUSIC_FONT_STACK.length === 0) {
-      throw new RuntimeError(
-        'NoFonts',
-        'The font stack is empty. See: await Flow.fetchMusicFont(...); Flow.setMusicFont(...).'
-      );
-    } else {
-      return Tables.MUSIC_FONT_STACK[0];
-    }
-  }
 
   static NOTATION_FONT_SCALE = 39;
   static TABLATURE_FONT_SCALE = 39;

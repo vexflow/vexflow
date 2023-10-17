@@ -154,7 +154,7 @@ function setTextFontToGeorgia(options: TestOptions): void {
   options.assert.ok(true);
 }
 function setMusicFontToPetaluma(options: TestOptions): void {
-  Flow.setMusicFont('Petaluma');
+  Flow.setFonts('Petaluma');
 
   const factory = VexFlowTests.makeFactory(options, 400, 200);
   const stave = factory.Stave({ y: 40 });

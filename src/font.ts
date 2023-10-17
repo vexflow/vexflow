@@ -258,14 +258,14 @@ export class Font {
    *
    * You can also self host, and specify your own server URL here.
    */
-  static WEB_FONT_HOST = 'https://cdn.jsdelivr.net/npm/@vexflow-fonts/';
+  static HOST_URL = 'https://cdn.jsdelivr.net/npm/@vexflow-fonts/';
 
   /**
-   * These font files will be loaded from the CDN specified by `Font.WEB_FONT_HOST` when
-   * `await Font.loadWebFonts()` is called. Customize this field to specify a different
-   * set of fonts to load. See: `Font.loadWebFonts()`.
+   * These font files will be loaded from the CDN specified by `Font.HOST_URL`.
+   * `await Vex.Flow.loadFonts()` loads all of the fonts below. Useful during debugging.
+   * `await Vex.Flow.loadFonts(FontName1, FontName2)` loads only the specified fonts.
    */
-  static WEB_FONT_FILES: Record<string /* fontName */, string /* fontPath */> = {
+  static FILES: Record<string /* fontName */, string /* fontPath */> = {
     Academico: 'academico/academico.woff2',
     Bravura: 'bravura/bravura.woff2',
     'Bravura Text': 'bravuratext/bravuratext.woff2',
@@ -296,47 +296,39 @@ export class Font {
   };
 
   /**
+   * This method is asynchronous, so you should use await or .then() to wait for the fonts to load before proceeding.
+   *
    * @param fontName
-   * @param woffURL The absolute or relative URL to the woff file.
-   * @param includeWoff2 If true, we assume that a woff2 file is in
-   * the same folder as the woff file, and will append a `2` to the url.
+   * @param url The absolute or relative URL to the woff2/otf file. It can also be a data URI.
    */
-  // Support distributions of the typescript compiler that do not yet include the FontFace API declarations.
-  // eslint-disable-next-line
-  // @ts-ignore
-  static async loadWebFont(fontName: string, woffURL: string): Promise<FontFace> {
-    const fontFace = new FontFace(fontName, `url(${woffURL})`);
-    await fontFace.load();
-    // eslint-disable-next-line
-    // @ts-ignore
-    document.fonts.add(fontFace);
-    return fontFace;
-  }
-
-  /**
-   * Load the web fonts that are used by your app.
-   * If fontNames is undefined, all fonts in Font.WEB_FONT_FILES will be loaded.
-   *
-   * For example, `flow.html` calls:
-   *   `await Vex.Flow.Font.loadWebFonts();`
-   * Alternatively, you may load web fonts with a stylesheet link (e.g., from Google Fonts),
-   * and a @font-face { font-family: ... } rule in your CSS.
-   *
-   * You can customize `Font.WEB_FONT_HOST` and `Font.WEB_FONT_FILES` to load different fonts
-   * for your app.
-   */
-  static async loadWebFonts(fontNames?: string[]): Promise<void> {
-    const allFiles = Font.WEB_FONT_FILES;
-    if (!fontNames) {
-      fontNames = Object.keys(allFiles);
+  static async load(fontName: string, url?: string, descriptors?: Record<string, string>): Promise<FontFace> {
+    if (typeof FontFace === 'undefined') {
+      return Promise.reject(new Error('FontFace API is not available in this environment. Cannot load fonts.'));
     }
 
-    const host = Font.WEB_FONT_HOST;
-    for (const fontName of fontNames) {
-      const fontPath = allFiles[fontName];
-      if (fontPath) {
-        Font.loadWebFont(fontName, host + fontPath);
+    // If url is not specified, we load the font from the jsDelivr CDN.
+    if (url === undefined) {
+      const allFiles = Font.FILES;
+      if (!(fontName in allFiles)) {
+        return Promise.reject(new Error(`Font ${fontName} not found in Font.FILES`));
       }
+      url = Font.HOST_URL + allFiles[fontName];
     }
+
+    const fontFace = new FontFace(fontName, `url(${url})`, descriptors);
+    const fontFaceLoadPromise = fontFace.load();
+
+    // https://developer.mozilla.org/en-US/docs/Web/API/FontFaceSet
+    let fontFaceSet;
+    if (typeof document !== 'undefined') {
+      fontFaceSet = document.fonts;
+    } else if (typeof self !== 'undefined' && 'fonts' in self) {
+      // Workers do not have a document object.
+      // https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope/fonts
+      // eslint-disable-next-line
+      fontFaceSet = self.fonts as any;
+    }
+    fontFaceSet?.add(fontFace);
+    return fontFaceLoadPromise;
   }
 }

@@ -21,7 +21,7 @@ The quickest way to add VexFlow to a web page is via a `<script>` tag.
   }
 </style>
 <span style="font-family: Academico"></span>
-<span style="font-family: Bravura"></span>     
+<span style="font-family: Bravura"></span>
 
 <!-- Div where the scores will be output -->
 <div id="output"></div>
@@ -30,10 +30,10 @@ The quickest way to add VexFlow to a web page is via a `<script>` tag.
 <script src="https://cdn.jsdelivr.net/npm/vxflw-early-access@alpha/build/cjs/vexflow.js"></script>
 
 <script>
-document.fonts.ready.then(() => {
-  Vex.Flow.setMusicFont('Bravura', 'Academico');
-  // YOUR CODE GOES HERE
-});
+  document.fonts.ready.then(() => {
+    Vex.Flow.setFonts('Bravura', 'Academico');
+    // YOUR CODE GOES HERE
+  });
 </script>
 ```
 

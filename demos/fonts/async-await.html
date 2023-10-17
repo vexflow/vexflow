@@ -4,8 +4,8 @@
   Run: Start a web server and load this page.
   Summary: Use async/await to load fonts dynamically.
   For example:
-    await Vex.Flow.Font.load('Bravura');
-    Vex.Flow.setMusicFont('Bravura');
+    await Vex.Flow.loadFonts('Bravura');
+    Vex.Flow.setFonts('Bravura');
   Open the developer console to verify that ONLY vexflow-core.js is loaded when this page is first shown.
   -->
   <head>
@@ -36,7 +36,7 @@
     </p>
     <p>
       <b>vexflow.js</b> does not bundle any fonts, to allow your webpage to load a small initial bundle. It will load
-      fonts on demand when you call <code> await Vex.Flow.Font.load(fontName); </code>.
+      fonts on demand when you call <code>await Vex.Flow.loadFonts(fontName1, fontName2, ...); </code>.
     </p>
     <p>
       Open your browser's developer tools and choose one of the fonts below. You will see that a font module is
@@ -53,7 +53,7 @@
       vexflow.js includes no music fonts.
       Do the following to load a font dynamically:
           await Vex.Flow.Font.load(fontName);
-          Vex.Flow.setMusicFont(fontName);
+          Vex.Flow.setFonts(fontName);
     -->
     <script src="../../build/cjs/vexflow.js"></script>
     <script type="module">
@@ -63,8 +63,8 @@
           container.removeChild(container.firstChild);
         }
 
-        await Vex.Flow.Font.load(fontName);
-        Vex.Flow.setMusicFont(fontName);
+        await Vex.Flow.loadFonts(fontName);
+        Vex.Flow.setFonts(fontName);
 
         renderScore();
       }

@@ -20,7 +20,7 @@ const { Stave, Accidental, Font } = Vex.Flow;
 
 console.log('VexFlow BUILD ID: ' + Vex.Flow.BUILD.ID);
 
-console.log('The music font stack is: ' + Vex.Flow.getMusicFont());
+console.log('The music font stack is: ' + Vex.Flow.getFonts());
 
 // TODO: VexFlow 5 broke this.
 // We need something like Metrics.lookupFontInfo('Stave');
