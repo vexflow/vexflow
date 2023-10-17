@@ -13,7 +13,7 @@ const StrokesTests = {
     const run = VexFlowTests.runTests;
     // TODO: Rename tests by removing 'Strokes - ' since it is redundant with the module name.
     // This will make flow.html easier to read.
-    run('Strokes - Brush/Roll/Rasquedo', brushRollRasquedo);
+    run('Strokes - Brush/Roll/Rasgueado', brushRollRasgueado);
     run('Strokes - Arpeggio directionless (without arrows)', arpeggioDirectionless);
     run('Strokes - Multi Voice', multiVoice);
     run('Strokes - Notation and Tab', notesWithTab);
@@ -21,7 +21,7 @@ const StrokesTests = {
   },
 };
 
-function brushRollRasquedo(options: TestOptions): void {
+function brushRollRasgueado(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, 600, 200);
   const score = f.EasyScore();
 
@@ -65,7 +65,7 @@ function brushRollRasquedo(options: TestOptions): void {
 
   f.draw();
 
-  options.assert.ok(true, 'Brush/Roll/Rasquedo');
+  options.assert.ok(true, 'Brush/Roll/Rasgueado');
 }
 
 function arpeggioDirectionless(options: TestOptions): void {

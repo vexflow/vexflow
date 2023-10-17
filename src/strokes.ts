@@ -2,7 +2,7 @@
 // @author Larry Kuhns
 //
 // This file implements the `Stroke` class which renders chord strokes
-// that can be arpeggiated, brushed, rasquedo, etc.
+// that can be arpeggiated, brushed, rasgueado, etc.
 
 import { Element } from './element';
 import { Metrics } from './metrics';
@@ -22,8 +22,8 @@ export class Stroke extends Modifier {
     BRUSH_UP: 2,
     ROLL_DOWN: 3, // Arpeggiated chord
     ROLL_UP: 4, // Arpeggiated chord
-    RASQUEDO_DOWN: 5,
-    RASQUEDO_UP: 6,
+    RASGUEADO_DOWN: 5,
+    RASGUEADO_UP: 6,
     ARPEGGIO_DIRECTIONLESS: 7, // Arpeggiated chord without upwards or downwards arrow
   };
 
@@ -136,7 +136,7 @@ export class Stroke extends Modifier {
     switch (this.type) {
       case Stroke.Type.BRUSH_DOWN:
       case Stroke.Type.ROLL_DOWN:
-      case Stroke.Type.RASQUEDO_DOWN:
+      case Stroke.Type.RASGUEADO_DOWN:
         arrow = '\ueb78' /*arrowheadBlackUp*/;
         arrowY = topY;
         topY -= lineSpace / 2;
@@ -144,7 +144,7 @@ export class Stroke extends Modifier {
         break;
       case Stroke.Type.BRUSH_UP:
       case Stroke.Type.ROLL_UP:
-      case Stroke.Type.RASQUEDO_UP:
+      case Stroke.Type.RASGUEADO_UP:
         arrow = '\ueb7c' /*arrowheadBlackDown*/;
         arrowY = botY + lineSpace;
         topY -= lineSpace / 2;
@@ -172,7 +172,7 @@ export class Stroke extends Modifier {
         el.setText(txt);
       }
       if (
-        this.type === Stroke.Type.RASQUEDO_DOWN ||
+        this.type === Stroke.Type.RASGUEADO_DOWN ||
         this.type === Stroke.Type.ROLL_DOWN ||
         this.type === Stroke.Type.ARPEGGIO_DIRECTIONLESS
       ) {
@@ -200,14 +200,14 @@ export class Stroke extends Modifier {
       );
     }
 
-    // Draw the rasquedo "R"
-    if (this.type === Stroke.Type.RASQUEDO_DOWN || this.type === Stroke.Type.RASQUEDO_UP) {
+    // Draw the rasgueado "R"
+    if (this.type === Stroke.Type.RASGUEADO_DOWN || this.type === Stroke.Type.RASGUEADO_UP) {
       const el = new Element('Stroke.text');
       el.setText('R');
       el.renderText(
         ctx,
         x + this.xShift - el.getWidth() / 2,
-        textY + (this.type === Stroke.Type.RASQUEDO_DOWN ? el.getHeight() : 0)
+        textY + (this.type === Stroke.Type.RASGUEADO_DOWN ? el.getHeight() : 0)
       );
     }
   }
