@@ -2,10 +2,11 @@
 //
 // This class implements dot modifiers for notes.
 
+import { Glyphs } from './glyphs';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { Note } from './note';
-import { Category, isGraceNote, isStaveNote, isTabNote } from './typeguard';
+import { Category, isStaveNote, isTabNote } from './typeguard';
 import { RuntimeError } from './util';
 
 export class Dot extends Modifier {
@@ -13,7 +14,6 @@ export class Dot extends Modifier {
     return Category.Dot;
   }
 
-  protected radius: number;
   protected dotShiftY: number;
 
   /** Returns the dots associated to a Note. */
@@ -133,17 +133,13 @@ export class Dot extends Modifier {
 
     this.position = Modifier.Position.RIGHT;
 
-    this.radius = 2;
-    this.setWidth(5);
+    this.setText(Glyphs.augmentationDot);
     this.dotShiftY = 0;
   }
 
   setNote(note: Note): this {
     this.note = note;
-    if (isGraceNote(note)) {
-      this.radius *= 0.5;
-      this.setWidth(3);
-    }
+    this.font = note.font;
     return this;
   }
 
@@ -163,16 +159,13 @@ export class Dot extends Modifier {
     const start = note.getModifierStartXY(this.position, this.index, { forceFlagRight: true });
 
     // Set the starting y coordinate to the base of the stem for TabNotes.
-
     if (isTabNote(note)) {
       start.y = note.getStemExtents().baseY;
     }
 
-    const x = start.x + this.xShift + this.width - this.radius;
-    const y = start.y + this.yShift + this.dotShiftY * lineSpace;
+    const x = start.x;
+    const y = start.y + this.dotShiftY * lineSpace;
 
-    ctx.beginPath();
-    ctx.arc(x, y, this.radius, 0, Math.PI * 2, false);
-    ctx.fill();
+    this.renderText(ctx, x, y);
   }
 }
