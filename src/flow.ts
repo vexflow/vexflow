@@ -192,42 +192,13 @@ export class Flow {
   static VoiceMode = VoiceMode;
 
   /**
-   * Examples:
-   * ```
-   * Vex.Flow.setFonts('Petaluma');
-   * Vex.Flow.setFonts('Bravura', 'Gonville');
-   * ```
-   *
-   * **CASE 1**: You are using `vexflow.js`, which includes all music fonts (Bravura, Gonville, Petaluma, Custom).
-   * In this case, calling this method is optional, since VexFlow already defaults to a music font stack of:
-   * 'Bravura', 'Gonville', 'Custom'.
-   *
-   * **CASE 2**: You are using `vexflow-bravura.js` or `vexflow-petaluma.js` or `vexflow-gonville.js`,
-   * which includes a single music font. Calling this method is unnecessary.
-   *
-   * **CASE 3**: You are using the light weight `vexflow-core.js` to take advantage of lazy loading for fonts.
-   * In this case, the default music font stack is empty.
-   * Example:
-   * ```
-   * await Vex.Flow.fetchMusicFont('Petaluma');
-   * Vex.Flow.setFonts('Petaluma');
-   * ... (do VexFlow stuff) ...
-   * ```
-   * See `demos/fonts/` for more examples.
-   *
-   * @returns an array of Font objects corresponding to the provided `fontNames`.
-   */
-  static setFonts(...fontNames: string[]): void {
-    // Convert the array of font names into an array of Font objects.
-    MetricsDefaults.fontFamily = fontNames.join(',');
-  }
-
-  static getFonts(): string[] {
-    return Metrics.get('fontFamily').split(',');
-  }
-
-  /**
    * Load the fonts that are used by your app.
+   *
+   * Call this if you are using `vexflow-core.js` to take advantage of lazy loading for fonts.
+   *
+   * If you are using `vexflow.js` or `vexflow-bravura.js`, this method is unnecessary, since
+   * they already call loadFonts(...) and setFonts(...) for you.
+   *
    * If `fontNames` is undefined, all fonts in Font.FILES will be loaded.
    * This is useful for debugging, but not recommended for production because it will load lots of fonts.
    *
@@ -250,6 +221,31 @@ export class Flow {
     }
 
     await Promise.all(fontLoadPromises);
+  }
+
+  /**
+   * Call this if you are using `vexflow-core.js` to take advantage of lazy loading for fonts.
+   *
+   * `vexflow.js` and `vexflow-bravura.js` already call setFonts('Bravura', 'Academico'), so you only
+   * need to call this when switching fonts.
+   *
+   * Example:
+   * ```
+   * await Vex.Flow.loadFonts('Bravura', 'Academico', 'Petaluma', 'Petaluma Script');
+   * Vex.Flow.setFonts('Bravura', 'Academico');
+   * ... render a score in Bravura ...
+   * Vex.Flow.setFonts('Petaluma', 'Petaluma Script');
+   * ... render a score in Petaluma...
+   * ```
+   * See `demos/fonts/` for more examples.
+   */
+  static setFonts(...fontNames: string[]): void {
+    // Convert the array of font names into an array of Font objects.
+    MetricsDefaults.fontFamily = fontNames.join(',');
+  }
+
+  static getFonts(): string[] {
+    return Metrics.get('fontFamily').split(',');
   }
 
   static get RENDER_PRECISION_PLACES(): number {

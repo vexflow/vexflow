@@ -52,7 +52,7 @@ export class Metrics {
 
 // eslint-disable-next-line
 export const MetricsDefaults: Record<string, any> = {
-  fontFamily: 'Bravura',
+  fontFamily: 'Bravura,Academico',
   fontSize: 30,
   fontScale: 1.0,
   fontWeight: 'normal',

@@ -17,11 +17,6 @@
       "types": "./build/types/entry/vexflow-bravura.d.ts",
       "require": "./build/cjs/vexflow-bravura.js",
       "import": "./build/esm/entry/vexflow-bravura.js"
-    },
-    "./petaluma": {
-      "types": "./build/types/entry/vexflow-petaluma.d.ts",
-      "require": "./build/cjs/vexflow-petaluma.js",
-      "import": "./build/esm/entry/vexflow-petaluma.js"
     }
   },
   "main": "./build/cjs/vexflow.js",
@@ -48,8 +43,6 @@
     "tests/flow.css",
     "tests/qunit/qunit.css",
     "tests/qunit/qunit.js",
-    "releases/vexflow-min.js",
-    "releases/vexflow-debug.js",
     "AUTHORS.md"
   ],
   "bugs": {
