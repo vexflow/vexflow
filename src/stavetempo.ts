@@ -2,6 +2,7 @@
 // @author: Radosaw Eichler 2012
 
 import { Element } from './element';
+import { Glyphs } from './glyphs';
 import { Metrics } from './metrics';
 import { Stave } from './stave';
 import { StaveModifier, StaveModifierPosition } from './stavemodifier';
@@ -9,10 +10,13 @@ import { Tables } from './tables';
 import { Category } from './typeguard';
 
 export interface StaveTempoOptions {
-  bpm?: number;
+  name?: string;
+  parenthesis?: boolean;
   duration?: string;
   dots?: number;
-  name?: string;
+  bpm?: number;
+  duration2?: string;
+  dots2?: number;
 }
 
 export class StaveTempo extends StaveModifier {
@@ -32,18 +36,35 @@ export class StaveTempo extends StaveModifier {
   }
 
   #durationToCode: Record<string, string> = {
-    '1/2': '\ue1d0' /*metNoteDoubleWhole*/,
-    1: '\ueca2' /*metNoteWhole*/,
-    2: '\ueca3' /*metNoteHalfUp*/,
-    4: '\ueca5' /*metNoteQuarterUp*/,
-    8: '\ueca7' /*metNote8thUp*/,
-    16: '\ueca9' /*metNote16thUp*/,
-    32: '\uecab' /*metNote32ndUp*/,
-    64: '\uecad' /*metNote64thUp*/,
-    128: '\uecaf' /*metNote128thUp*/,
-    256: '\uecb1' /*metNote256thUp*/,
-    512: '\uecb3' /*metNote512thUp*/,
-    1024: '\uecb5' /*metNote1024thUp*/,
+    '1/4': Glyphs.metNoteDoubleWholeSquare,
+    long: Glyphs.metNoteDoubleWholeSquare,
+    '1/2': Glyphs.metNoteDoubleWhole,
+    breve: Glyphs.metNoteDoubleWhole,
+    1: Glyphs.metNoteWhole,
+    whole: Glyphs.metNoteWhole,
+    w: Glyphs.metNoteWhole,
+    2: Glyphs.metNoteHalfUp,
+    half: Glyphs.metNoteHalfUp,
+    h: Glyphs.metNoteHalfUp,
+    4: Glyphs.metNoteQuarterUp,
+    quarter: Glyphs.metNoteQuarterUp,
+    q: Glyphs.metNoteQuarterUp,
+    8: Glyphs.metNote8thUp,
+    eighth: Glyphs.metNote8thUp,
+    16: Glyphs.metNote16thUp,
+    '16th': Glyphs.metNote16thUp,
+    32: Glyphs.metNote32ndUp,
+    '32nd': Glyphs.metNote32ndUp,
+    64: Glyphs.metNote64thUp,
+    '64th': Glyphs.metNote64thUp,
+    128: Glyphs.metNote128thUp,
+    '128th': Glyphs.metNote128thUp,
+    256: Glyphs.metNote256thUp,
+    '256th': Glyphs.metNote256thUp,
+    512: Glyphs.metNote512thUp,
+    '512th': Glyphs.metNote512thUp,
+    1024: Glyphs.metNote1024thUp,
+    '1024th': Glyphs.metNote1024thUp,
   };
 
   setTempo(tempo: StaveTempoOptions): this {
@@ -55,47 +76,63 @@ export class StaveTempo extends StaveModifier {
     const ctx = stave.checkContext();
     this.setRendered();
 
-    const name = this.tempo.name;
-    const duration = this.tempo.duration;
-    const dots = this.tempo.dots ?? 0;
-    const bpm = this.tempo.bpm;
+    const { name, duration, dots, bpm, duration2, dots2, parenthesis } = this.tempo;
     let x = this.x + shiftX;
     const y = stave.getYForTopText(1);
-
-    ctx.save();
+    const el = new Element('StaveTempo.glyph');
+    const elText = new Element('StaveTempo');
 
     if (name) {
       this.text = name;
       this.fontInfo = Metrics.getFontInfo('StaveTempo.name');
       this.renderText(ctx, shiftX, y);
-      x += this.getWidth();
+      x += this.getWidth() + 3;
     }
 
-    if (duration && bpm) {
-      if (name) {
-        x += 2;
-        ctx.setFont(Metrics.getFontInfo('StaveTempo'));
-        ctx.fillText('(', x + this.xShift, y + this.yShift);
-        x += 5;
-      }
+    if ((name && duration) || parenthesis) {
+      elText.setText('(');
+      elText.renderText(ctx, x + this.xShift, y + this.yShift);
+      x += elText.getWidth() + 3;
+    }
 
-      x += 3;
-      const el = new Element('StaveTempo.glyph');
-      el.setText(this.#durationToCode[Tables.sanitizeDuration(duration)]);
+    if (duration) {
+      el.setText(this.#durationToCode[duration]);
       el.renderText(ctx, x + this.xShift, y + this.yShift);
-      x += el.getWidth();
-
-      // Draw dot
-      ctx.setFont(Metrics.getFontInfo('StaveTempo.glyph'));
-      for (let i = 0; i < dots; i++) {
-        x += 6;
-        ctx.fillText('\uecb7' /*metAugmentationDot*/, x + this.xShift, y + 2 + this.yShift);
+      x += el.getWidth() + 3;
+      if (dots) {
+        // Draw dot
+        el.setText(Glyphs.metAugmentationDot);
+        for (let i = 0; i < dots; i++) {
+          el.renderText(ctx, x + this.xShift, y + 2 + this.yShift);
+          x += el.getWidth() + 3;
+        }
       }
-      ctx.setFont(Metrics.getFontInfo('StaveTempo'));
-      ctx.fillText(' = ' + bpm + (name ? ')' : ''), x + 3 + this.xShift, y + this.yShift);
+      elText.setText('=');
+      elText.renderText(ctx, x + this.xShift, y + this.yShift);
+      x += elText.getWidth() + 3;
+      if (duration2) {
+        el.setText(this.#durationToCode[duration2]);
+        el.renderText(ctx, x + this.xShift, y + this.yShift);
+        x += el.getWidth() + 3;
+        if (dots2) {
+          // Draw dot
+          el.setText(Glyphs.metAugmentationDot);
+          for (let i = 0; i < dots2; i++) {
+            el.renderText(ctx, x + this.xShift, y + 2 + this.yShift);
+            x += el.getWidth() + 3;
+          }
+        }
+      } else if (bpm) {
+        elText.setText('' + bpm);
+        elText.renderText(ctx, x + this.xShift, y + this.yShift);
+        x += elText.getWidth() + 3;
+      }
+      if (name || parenthesis) {
+        elText.setText(')');
+        elText.renderText(ctx, x + this.xShift, y + this.yShift);
+      }
     }
 
-    ctx.restore();
     return this;
   }
 }
