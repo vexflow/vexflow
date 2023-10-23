@@ -671,7 +671,7 @@ function drawTempo(options: TestOptions, contextBuilder: ContextBuilder): void {
     x += width;
   }
 
-  drawTempoStaveBar(120, { duration: 'q', dots: 1, bpm: 80 }, 0);
+  drawTempoStaveBar(120, { duration: 'q', dots: 1, bpm: '80-90' }, 0);
   drawTempoStaveBar(100, { duration: '8', dots: 2, bpm: 90 }, 0);
   drawTempoStaveBar(100, { duration: '16', dots: 1, bpm: 96 }, 0);
   drawTempoStaveBar(100, { duration: '32', bpm: 70 }, 0);
@@ -690,7 +690,7 @@ function drawTempo(options: TestOptions, contextBuilder: ContextBuilder): void {
   y += 150;
 
   drawTempoStaveBar(120, { duration: 'w', bpm: 80 }, 0);
-  drawTempoStaveBar(100, { duration: 'h', dots2: 1, duration2: 'q' }, 0);
+  drawTempoStaveBar(100, { duration: 'h', duration2: 'q', dots2: 1 }, 0);
   drawTempoStaveBar(100, { duration: 'q', dots: 1, duration2: 'h', parenthesis: true }, 0);
   drawTempoStaveBar(100, { duration: '8', bpm: 70 }, 0);
   drawTempoStaveBar(250, { name: 'Andante grazioso' }, 0, [
