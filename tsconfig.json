@@ -11,7 +11,7 @@
     "skipLibCheck": true /* Skip type checking of declaration files. */,
     "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
     "moduleResolution": "node",
-    "lib": ["dom", "es2017"],
+    "lib": ["dom", "es2020"],
     "removeComments": false
     // "noImplicitOverride": true, /* Introduce in the future for more type safety. Will cause >= 217 errors due to lack of "override" keyword. */
   },

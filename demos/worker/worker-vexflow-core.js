@@ -3,9 +3,7 @@
 
 // Web Workers have an importScripts() method that allows you to load scripts. importScripts(...) is similar to require(...) in Node.js.
 
-// TODO: Eventually, vexflow.js will include Bravura & Petaluma. vexflow-core.js will be the slim build with zero fonts.
-// const libName = 'vexflow-core.js';
-const libName = 'vexflow.js';
+const libName = 'vexflow-core.js'; // vexflow-core.js is the slim build with zero bundled fonts.
 importScripts('../../build/cjs/' + libName);
 const color = '#74AB00';
 

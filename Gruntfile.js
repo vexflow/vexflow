@@ -106,11 +106,24 @@ const concurrently = require('concurrently');
 // release-it can only be dynamically imported.
 const releaseItDynamicImport = import('release-it');
 
-// A module entry file `entry/xxxx.ts` will be mapped to a build output file in build/cjs/ or /build/esm/entry/.
+// The VEX_XXXX constants below specify entry files for webpack.
+// A module entry file `entry/xxxx.ts` will be mapped to a build output file in build/cjs/ or build/esm/entry/.
 // Also see the package.json `exports` field, which is one way for projects to specify which entry file to import.
-const VEX = 'vexflow';
+// For example, if we want to add a build target which bundles the Petaluma font, we would:
+// - add an entry file `vexflow/entry/vexflow-petaluma.ts` by duplicating `vexflow/entry/vexflow-bravura.ts` and changing the loaded fonts.
+// - uncomment the const VEX_PETALUMA line below.
+// - add VEX_PETALUMA to the PRODUCTION_BUILD_TARGETS array.
+const VEX = 'vexflow'; // Bundles Bravura and Petaluma.
+const VEX_CORE = 'vexflow-core'; // Dynamically load any SMuFL font at runtime. Bundles ZERO fonts.
+const VEX_BRAVURA = 'vexflow-bravura'; // Bundles only Bravura.
+// const VEX_PETALUMA = 'vexflow-petaluma'; // Bundles Petaluma and Petaluma Script.
+// const VEX_XXXXXXXX = 'vexflow-xxxxxxxx'; // Bundles XXXXXXXX and YYYYYYYY.
+// ... add more fonts here ...
 const VEX_DEBUG = 'vexflow-debug';
 const VEX_DEBUG_TESTS = 'vexflow-debug-with-tests';
+
+const PRODUCTION_BUILD_TARGETS = [VEX, VEX_CORE, VEX_BRAVURA /*, VEX_PETALUMA */];
+const DEBUG_BUILD_TARGETS = [VEX_DEBUG, VEX_DEBUG_TESTS];
 
 const versionInfo = require('./tools/version_info');
 // Add a banner to the top of some CJS output files.
@@ -321,11 +334,11 @@ function webpackConfigs() {
   const WATCH = true;
 
   function prodConfig(watch = false) {
-    return getConfig([VEX], PRODUCTION_MODE, BANNER, 'Vex', watch);
+    return getConfig(PRODUCTION_BUILD_TARGETS, PRODUCTION_MODE, BANNER, 'Vex', watch);
   }
 
   function debugConfig(watch = false) {
-    return getConfig([VEX_DEBUG, VEX_DEBUG_TESTS], DEVELOPMENT_MODE, BANNER, 'Vex', watch);
+    return getConfig(DEBUG_BUILD_TARGETS, DEVELOPMENT_MODE, BANNER, 'Vex', watch);
   }
 
   return {
@@ -439,7 +452,6 @@ module.exports = (grunt) => {
     'webpack:prodAndDebug',
     'build:esm',
     'build:types',
-    // 'build:docs',
   ]);
 
   grunt.registerTask('lint', 'eslint', ['eslint']);
@@ -715,7 +727,7 @@ module.exports = (grunt) => {
         'GITHUB_TOKEN environment variable is missing.\n' +
           'You can manually release to GitHub at https://github.com/vexflow/vexflow/releases/new\n' +
           'Or use the GitHub CLI:\n' +
-          'gh release create 4.0.0 --title "Release 4.0.0"\n\n'
+          'gh release create 5.0.0 --title "Release 5.0.0"\n\n'
       );
     }
 
@@ -728,15 +740,12 @@ module.exports = (grunt) => {
       verbose: 1, // See the output of each hook.
       // verbose: 2, // Only for debugging.
       hooks: {
-        'before:init': ['grunt clean', 'grunt v309:add'],
+        'before:init': ['grunt clean'],
         'after:bump': ['grunt', 'echo Adding build/ folder...', 'git add -f build/'],
         'after:npm:release': [],
         'after:git:release': [],
         'after:github:release': [],
-        'after:release': [
-          'grunt v309:remove',
-          'echo Successfully released ${name} ${version} to https://github.com/${repo.repository}',
-        ],
+        'after:release': ['echo Successfully released ${name} ${version} to https://github.com/${repo.repository}'],
       },
       git: {
         commitMessage: 'Release VexFlow ${version}',
@@ -804,38 +813,6 @@ module.exports = (grunt) => {
         }
         done();
       });
-  });
-
-  // VexFlow examples on JSFiddle and other websites broke because VexFlow 4 removed these URLs:
-  //   https://unpkg.com/vexflow/releases/vexflow-debug.js
-  //   https://unpkg.com/vexflow/releases/vexflow-min.js
-  // This command restores version 3.0.9 to those locations, but adds a console.warn(...) to the JS file to alert developers
-  // that a new version has been released.
-  //
-  // Use this command during the release script to publish version 3.0.9 to npm alongside version 4.x.
-  //   grunt v309:add
-  //   grunt v309:remove
-  grunt.registerTask('v309', 'Include the legacy version when publishing to npm.', function (command) {
-    const minifiedFile = 'releases/vexflow-min.js';
-    const debugFile = 'releases/vexflow-debug.js';
-
-    if (command === 'add') {
-      // Commit ID 00ec15c67ff333ea49f4d3defbd9e22374c03684 is version 3.0.9.
-      const commitID = '00ec15c67ff333ea49f4d3defbd9e22374c03684';
-      runCommand('git', 'checkout', commitID, minifiedFile);
-      runCommand('git', 'checkout', commitID, debugFile);
-
-      const message =
-        '\nconsole.warn("Please upgrade to the newest release of VexFlow.\\n' +
-        'See: https://github.com/vexflow/vexflow for more information.\\nThis page uses version 3.0.9, which is no longer supported.");\n\n' +
-        '// YOU ARE LOOKING AT VEXFLOW LEGACY VERSION 3.0.9.\n' +
-        '// SEE THE `build/` FOLDER FOR THE NEWEST RELEASE.\n';
-      fs.appendFileSync(minifiedFile, message);
-      fs.appendFileSync(debugFile, message);
-    } else {
-      runCommand('git', 'rm', '-f', minifiedFile);
-      runCommand('git', 'rm', '-f', debugFile);
-    }
   });
 };
 

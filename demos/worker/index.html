@@ -1,13 +1,13 @@
-<!--
-Summary: Use web workers to render multiple scores simultaneously.
-Run: 
-  Start a web server with `npx http-server -p 8080` from the `vexflow/` folder
-  Navigate to http://127.0.0.1:8080/demos/worker/
--->
 <!doctype html>
 <html>
   <head>
     <meta charset="UTF-8" />
+    <!--
+      Summary: Use web workers to render multiple scores simultaneously.
+      Run: 
+        Start a web server with `npx http-server -p 8080` from the `vexflow/` folder
+        Navigate to http://127.0.0.1:8080/demos/worker/
+    -->
     <style>
       html {
         font: 16px sans-serif;
@@ -47,11 +47,7 @@ Run:
             `<canvas id="outputCanvas${i}" width="1000" height="400"></canvas>`
           );
 
-          const workerJS = 'worker-vexflow.js';
-          // const workerJS = 'worker-vexflow-core.js';
-          // Test the standard bundle (vexflow.js) and also the minimal bundle with dynamically loaded fonts (vexflow-core.js).
-          // const workerJS = Math.random() > 0.5 ? 'worker-vexflow.js' : 'worker-vexflow-core.js';
-
+          const workerJS = 'worker-vexflow-core.js';
           const w = new Worker(workerJS);
           w.onmessage = function (e) {
             console.log(`Message from #${i} / ${workerJS}:  [${e.data}]`);
