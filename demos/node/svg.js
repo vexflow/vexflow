@@ -3,7 +3,7 @@
 //   node svg.js > output/svgcontext.svg
 //
 // ### CURRENT LIMITATIONS ###
-// If you open the SVG file, you'll see: font-family="Bravura,Roboto Slab"
+// If you open the SVG file, you'll see: font-family="Bravura,Academico"
 // If these fonts are not installed on your system, the glyphs will look like empty squares instead of music symbols.
 //
 // In V4, the VexFlow library contained the paths for every supported glyph, so we could save those paths into the SVG output.

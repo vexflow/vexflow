@@ -1,21 +1,18 @@
 <!doctype html>
 <html>
-  <!-- 
-  Run: Start a web server and load this page.
-  Summary: Use async/await to load fonts dynamically.
-  For example:
-    await Vex.Flow.loadFonts('Bravura');
-    Vex.Flow.setFonts('Bravura');
-  Open the developer console to verify that ONLY vexflow-core.js is loaded when this page is first shown.
-  -->
   <head>
     <meta charset="UTF-8" />
+    <!-- 
+      Run: Start a web server and load this page.
+      Summary: vexflow-core.js includes no music fonts, so we load fonts at runtime.
+      For example:
+        await Vex.Flow.loadFonts('Bravura');
+        Vex.Flow.setFonts('Bravura');
+      Open the developer console to verify that ONLY vexflow-core.js is loaded when this page is first displayed.
+    -->
     <style>
       html {
-        font:
-          16px 'Helvetica Neue',
-          Arial,
-          sans-serif;
+        font: 16px sans-serif;
       }
       body {
         margin: 20px;
@@ -35,8 +32,8 @@
       >).
     </p>
     <p>
-      <b>vexflow.js</b> does not bundle any fonts, to allow your webpage to load a small initial bundle. It will load
-      fonts on demand when you call <code>await Vex.Flow.loadFonts(fontName1, fontName2, ...); </code>.
+      <b>vexflow-core.js</b> does not bundle any fonts, to allow your webpage to load a small initial bundle. It will
+      load fonts on demand when you call <code>await Vex.Flow.loadFonts(fontName1, fontName2, ...); </code>.
     </p>
     <p>
       Open your browser's developer tools and choose one of the fonts below. You will see that a font module is
@@ -49,13 +46,7 @@
       <a href="#" onclick="chooseFont('Petaluma')">Petaluma</a> &nbsp;
     </div>
     <div id="output"></div>
-    <!--
-      vexflow.js includes no music fonts.
-      Do the following to load a font dynamically:
-          await Vex.Flow.Font.load(fontName);
-          Vex.Flow.setFonts(fontName);
-    -->
-    <script src="../../build/cjs/vexflow.js"></script>
+    <script src="../../build/cjs/vexflow-core.js"></script>
     <script type="module">
       async function chooseFont(fontName) {
         const container = document.getElementById('output');

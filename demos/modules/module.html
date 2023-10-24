@@ -29,32 +29,38 @@
       import Vex from '../../build/esm/entry/vexflow.js';
       Vex.Flow.setFonts('Petaluma');
 
+      document.fonts.ready.then(() => {
+        showScore();
+      });
+
       const { VERSION, ID, DATE } = Vex.Flow.BUILD;
       document.querySelector('#info').innerText = `${VERSION} / ${ID} / ${DATE}`;
 
-      const { Factory } = Vex.Flow;
+      function showScore() {
+        const { Factory } = Vex.Flow;
 
-      const factory = new Factory({
-        renderer: { elementId: 'output', width: 500, height: 200 },
-      });
+        const factory = new Factory({
+          renderer: { elementId: 'output', width: 500, height: 200 },
+        });
 
-      const score = factory.EasyScore();
-      const system = factory.System();
+        const score = factory.EasyScore();
+        const system = factory.System();
 
-      system
-        .addStave({
-          voices: [
-            score.voice(score.notes('C#5/q, B4, A4, G#4', { stem: 'up' })),
-            score.voice(score.notes('C#4/h, C#4', { stem: 'down' })),
-          ],
-        })
-        .addClef('treble')
-        .addTimeSignature('4/4');
+        system
+          .addStave({
+            voices: [
+              score.voice(score.notes('C#5/q, B4, A4, G#4', { stem: 'up' })),
+              score.voice(score.notes('C#4/h, C#4', { stem: 'down' })),
+            ],
+          })
+          .addClef('treble')
+          .addTimeSignature('4/4');
 
-      factory.draw();
+        factory.draw();
+      }
 
       // Just for debugging, assign Vex.Flow to the global window.VF variable.
-      // Now you can do VF.setFonts('Gonville'); from the developer tools command line.
+      // Now you can do VF.setFonts('Bravura'); from the developer tools command line.
       window.VF = Vex.Flow;
     </script>
   </body>

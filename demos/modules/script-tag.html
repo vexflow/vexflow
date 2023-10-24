@@ -18,10 +18,10 @@
     <script>
       Vex.Flow.loadFonts('Bravura', 'Academico').then(() => {
         console.log('Fonts loaded!');
-        showVexFlowScore();
+        showScore();
       });
 
-      function showVexFlowScore() {
+      function showScore() {
         const { Factory } = Vex.Flow;
         const { VERSION, ID, DATE } = Vex.Flow.BUILD;
         document.querySelector('#info').innerText = VERSION + ' / ' + ID + ' / ' + DATE;
