@@ -26,20 +26,20 @@ console.log(StaveNoteAlias === StaveNote);
 console.log(Vex3.Vex.sortAndUnique === Vex.sortAndUnique);
 console.log(Vex3 === Vex0);
 console.log(Vex2.Vex === Vex);
-console.log(StaveNote === Vex.Flow.StaveNote);
-console.log(StaveNote === Vex2.Flow.StaveNote);
+console.log(StaveNote === VexFlow.StaveNote);
+console.log(StaveNote === Vex2.VexFlow.StaveNote);
 
 console.log(Vex3.default === Vex1);
-console.log(Vex3.Flow.StaveNote == StaveNote);
-console.log(Vex3.default.Flow.StaveNote == StaveNote);
+console.log(Vex3.VexFlow.StaveNote == StaveNote);
+console.log(Vex3.default.VexFlow.StaveNote == StaveNote);
 
-console.log(Vex3.Vex.Flow === Vex3.default.Flow);
-console.log(Vex3.Flow === Vex3.default.Flow);
+console.log(Vex3.VexFlow === Vex3.default.VexFlow);
+console.log(Vex3.VexFlow === Vex3.default.VexFlow);
 
 // Verify that a modification to the Flow module in one place will be reflected
 // everywhere we can access the Flow module.
 
-Vex.Flow.HELLO = 123;
-console.log(Vex1.Flow.HELLO === 123);
-console.log(Vex3.Flow.HELLO === 123);
-console.log(Vex3.default.Flow.HELLO === 123);
+VexFlow.HELLO = 123;
+console.log(Vex1.VexFlow.HELLO === 123);
+console.log(Vex3.VexFlow.HELLO === 123);
+console.log(Vex3.default.VexFlow.HELLO === 123);

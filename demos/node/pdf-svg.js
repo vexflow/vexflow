@@ -23,9 +23,9 @@ if (!fs.existsSync('./output/')) {
 
 const outputFile = 'output/score-svg.pdf';
 
-const { Stave, StaveNote, Formatter, Renderer } = Vex.Flow;
+const { Stave, StaveNote, Formatter, Renderer } = VexFlow;
 
-console.log('VexFlow Build: ' + Vex.Flow.BUILD.ID);
+console.log('VexFlow Build: ' + VexFlow.BUILD.ID);
 
 const dom = new JSDOM(`<!DOCTYPE html><html><head><style></style></head><body><div id="container"></div><body></html>`);
 

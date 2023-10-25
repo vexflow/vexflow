@@ -20,17 +20,17 @@ const { createCanvas, registerFont } = require('canvas');
 registerFont('../../node_modules/@vexflow-fonts/bravura/bravura.otf', { family: 'Bravura' });
 registerFont('../../node_modules/@vexflow-fonts/petaluma/petaluma.otf', { family: 'Petaluma' });
 
-const { Renderer, Stave, StaveNote, Formatter } = Vex.Flow;
+const { Renderer, Stave, StaveNote, Formatter } = VexFlow;
 
 const canvas = createCanvas(1000, 500);
 
 // VexFlow 5 uses a hidden canvas for measuring font glyphs.
 // https://www.w3.org/TR/2012/WD-html5-author-20120329/the-canvas-element.html#the-canvas-element
 // In browsers, canvas elements usually default to 300 x 150.
-Vex.Flow.Element.setTextMeasurementCanvas(createCanvas(300, 150));
+VexFlow.Element.setTextMeasurementCanvas(createCanvas(300, 150));
 
-Vex.Flow.setFonts('Bravura');
-// Vex.Flow.setFonts('Petaluma');
+VexFlow.setFonts('Bravura');
+// VexFlow.setFonts('Petaluma');
 
 const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
 const context = renderer.getContext();

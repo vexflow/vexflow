@@ -15,8 +15,8 @@ export enum ModifierPosition {
   BELOW = 4,
 }
 
-// To enable logging for this class. Set `Vex.Flow.Modifier.DEBUG` to `true`.
-// function L(...args) { if (Modifier.DEBUG) log('Vex.Flow.Modifier', args); }
+// To enable logging for this class. Set `VexFlow.Modifier.DEBUG` to `true`.
+// function L(...args) { if (Modifier.DEBUG) log('VexFlow.Modifier', args); }
 
 /**
  * `Modifier` is an abstract interface for notational elements that modify

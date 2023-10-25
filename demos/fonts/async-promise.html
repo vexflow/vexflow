@@ -22,7 +22,7 @@
     </p>
     <p>
       Using <b>vexflow-core.js</b> allows your webpage to load a smaller initial bundle. It will load fonts on demand
-      when you call <code>Vex.Flow.loadFonts(...fontNames)</code>. This method is asynchronous and returns a Promise.
+      when you call <code>VexFlow.loadFonts(...fontNames)</code>. This method is asynchronous and returns a Promise.
     </p>
     <p>Open your browser's developer tools to see that font files are downloaded upon request:</p>
     <p>View the page's source.</p>
@@ -32,14 +32,14 @@
     <script>
       // You can skip some fonts if you will not be using them.
       // See your browser's developer tools > network tab to see which fonts are loaded.
-      Vex.Flow.loadFonts('Bravura', 'Petaluma', 'Leland').then(onFontsLoaded);
+      VexFlow.loadFonts('Bravura', 'Petaluma', 'Leland').then(onFontsLoaded);
 
       function onFontsLoaded() {
         // The first argument is the primary music engraving font.
         // The others are fallbacks, in case a glyph is not found in the first music font.
-        Vex.Flow.setFonts('Petaluma', 'Bravura', 'Leland');
+        VexFlow.setFonts('Petaluma', 'Bravura', 'Leland');
 
-        const factory = new Vex.Flow.Factory({ renderer: { elementId: 'output', width: 500, height: 200 } });
+        const factory = new VexFlow.Factory({ renderer: { elementId: 'output', width: 500, height: 200 } });
         const score = factory.EasyScore();
         const system = factory.System();
         system

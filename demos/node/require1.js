@@ -8,8 +8,8 @@
 const Vex1 = require('vxflw-early-access');
 const Vex2 = require('vxflw-early-access/bravura');
 
-console.log('Default Font Stack:', Vex1.Flow.getFonts());
-console.log(Vex1.Flow.BUILD);
+console.log('Default Font Stack:', Vex1.VexFlow.getFonts());
+console.log(Vex1.VexFlow.BUILD);
 
-console.log('Default Font Stack:', Vex2.Flow.getFonts());
-console.log(Vex2.Flow.BUILD);
+console.log('Default Font Stack:', Vex2.VexFlow.getFonts());
+console.log(Vex2.VexFlow.BUILD);

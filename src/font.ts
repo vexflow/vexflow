@@ -262,8 +262,8 @@ export class Font {
 
   /**
    * These font files will be loaded from the CDN specified by `Font.HOST_URL`.
-   * `await Vex.Flow.loadFonts()` loads all of the fonts below. Useful during debugging.
-   * `await Vex.Flow.loadFonts(FontName1, FontName2)` loads only the specified fonts.
+   * `await VexFlow.loadFonts()` loads all of the fonts below. Useful during debugging.
+   * `await VexFlow.loadFonts(FontName1, FontName2)` loads only the specified fonts.
    */
   static FILES: Record<string /* fontName */, string /* fontPath */> = {
     Academico: 'academico/academico.woff2',

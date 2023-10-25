@@ -9,7 +9,7 @@ import { log, RuntimeError } from './util';
 
 // eslint-disable-next-line
 function L(...args: any[]) {
-  if (TextDynamics.DEBUG) log('Vex.Flow.TextDynamics', args);
+  if (TextDynamics.DEBUG) log('VexFlow.TextDynamics', args);
 }
 
 /**
@@ -20,7 +20,7 @@ function L(...args: any[]) {
  * the following letters:  P, M, F, Z, R, S
  */
 export class TextDynamics extends Note {
-  /** To enable logging for this class. Set `Vex.Flow.TextDynamics.DEBUG` to `true`. */
+  /** To enable logging for this class. Set `VexFlow.TextDynamics.DEBUG` to `true`. */
   static DEBUG: boolean = false;
 
   static get CATEGORY(): string {

@@ -13,7 +13,7 @@ import { default as fs } from 'fs';
 
 import { JSDOM } from 'jsdom';
 
-// Reference to Vex.Flow, assigned in the step1() function.
+// Reference to VexFlow, assigned in the step1() function.
 let VF;
 
 async function waitForKeyPress() {

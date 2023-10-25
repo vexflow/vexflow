@@ -118,7 +118,7 @@ function createContexts<T>(
 
 // eslint-disable-next-line
 function L(...args: any[]) {
-  if (Formatter.DEBUG) log('Vex.Flow.Formatter', args);
+  if (Formatter.DEBUG) log('VexFlow.Formatter', args);
 }
 
 /**
@@ -173,7 +173,7 @@ function getRestLineForNextNoteGroup(
  * here (`FormatAndDraw`, `FormatAndDrawTab`) also serve as useful usage examples.
  */
 export class Formatter {
-  // To enable logging for this class. Set `Vex.Flow.Formatter.DEBUG` to `true`.
+  // To enable logging for this class. Set `VexFlow.Formatter.DEBUG` to `true`.
   static DEBUG: boolean = false;
   protected hasMinTotalWidth: boolean;
   protected minTotalWidth: number;

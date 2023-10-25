@@ -31,7 +31,7 @@ The quickest way to add VexFlow to a web page is via a `<script>` tag.
 
 <script>
   document.fonts.ready.then(() => {
-    Vex.Flow.setFonts('Bravura', 'Academico');
+    VexFlow.setFonts('Bravura', 'Academico');
     // YOUR CODE GOES HERE
   });
 </script>
@@ -52,7 +52,7 @@ Read our detailed guide on [integrating with VexFlow.](https://github.com/0xfe/v
 Factory is VexFlow's recommended API for creating music notation. EasyScore is VexFlow's high-level API for creating voices and notes. On a web page containing a `<div id="output"></div>`, the following code displays a score:
 
 ```javascript
-const { Factory } = Vex.Flow;
+const { Factory } = VexFlow;
 const vf = new Factory({
   renderer: { elementId: 'output', width: 500, height: 200 },
 });
@@ -82,7 +82,7 @@ vf.draw();
 If you need more control, you can use the low-level VexFlow API. Below, we render a stave using SVG. [See a running example of the low-level API here.](https://jsfiddle.net/5zgf03un/)
 
 ```javascript
-const { Renderer, Stave } = Vex.Flow;
+const { Renderer, Stave } = VexFlow;
 
 // Create an SVG renderer and attach it to the DIV element with id="output".
 const div = document.getElementById('output');

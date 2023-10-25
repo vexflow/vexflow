@@ -1,4 +1,4 @@
-const VF = Vex.Flow;
+const VF = VexFlow;
 
 function subgroup(el, iterations, params) {
   const options = {

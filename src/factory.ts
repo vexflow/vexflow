@@ -67,14 +67,14 @@ export interface FactoryOptions {
 
 // eslint-disable-next-line
 function L(...args: any[]) {
-  if (Factory.DEBUG) log('Vex.Flow.Factory', args);
+  if (Factory.DEBUG) log('VexFlow.Factory', args);
 }
 
 /**
  * Factory implements a high level API around VexFlow.
  */
 export class Factory {
-  /** To enable logging for this class. Set `Vex.Flow.Factory.DEBUG` to `true`. */
+  /** To enable logging for this class. Set `VexFlow.Factory.DEBUG` to `true`. */
   static DEBUG: boolean = false;
 
   /**
@@ -84,7 +84,7 @@ export class Factory {
    *
    * Create an SVG renderer and attach it to the DIV element named "boo" to render using <page-width> 1200 and <page-height> 600
    *
-   * `const vf: Factory = Vex.Flow.Factory.newFromElementId('boo', 1200, 600 );`
+   * `const vf: Factory = VexFlow.Factory.newFromElementId('boo', 1200, 600 );`
    */
   static newFromElementId(elementId: string | null, width = 500, height = 200): Factory {
     return new Factory({ renderer: { elementId, width, height } });
@@ -104,7 +104,7 @@ export class Factory {
    *
    * Create an SVG renderer and attach it to the DIV element named "boo" to render using <page-width> 1200 and <page-height> 600
    *
-   * `const vf: Factory = new Vex.Flow.Factory({renderer: { elementId: 'boo', width: 1200, height: 600 }});`
+   * `const vf: Factory = new VexFlow.Factory({renderer: { elementId: 'boo', width: 1200, height: 600 }});`
    */
   constructor(options: FactoryOptions = {}) {
     L('New factory: ', options);
@@ -639,7 +639,7 @@ export class Factory {
   /**
    * Creates EasyScore. Normally the first step after constructing a Factory. For example:
    * ```
-   * const vf: Factory = new Vex.Flow.Factory({renderer: { elementId: 'boo', width: 1200, height: 600 }});
+   * const vf: Factory = new VexFlow.Factory({renderer: { elementId: 'boo', width: 1200, height: 600 }});
    * const score: EasyScore = vf.EasyScore();
    * ```
    * @param options.factory optional instance of Factory

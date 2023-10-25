@@ -11,7 +11,7 @@ import { log } from './util';
 
 // eslint-disable-next-line
 function L(...args: any[]) {
-  if (Clef.DEBUG) log('Vex.Flow.Clef', args);
+  if (Clef.DEBUG) log('VexFlow.Clef', args);
 }
 
 /**
@@ -20,7 +20,7 @@ function L(...args: any[]) {
  * See `tests/clef_tests.ts` for usage examples.
  */
 export class Clef extends StaveModifier {
-  /** To enable logging for this class, set `Vex.Flow.Clef.DEBUG` to `true`. */
+  /** To enable logging for this class, set `VexFlow.Clef.DEBUG` to `true`. */
   static DEBUG: boolean = false;
 
   static get CATEGORY(): string {

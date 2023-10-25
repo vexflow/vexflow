@@ -163,14 +163,14 @@
         console.log('LOADING ESM: ' + vexPlusTestsURL);
         loadVexFlow = async () => {
           const module = await import(vexPlusTestsURL);
-          window.Vex = module.Vex;
-          return Vex.Flow;
+          window.VexFlow = module.VexFlow;
+          return VexFlow;
         };
       } else {
         console.log('LOADING CJS: ' + vexPlusTestsURL);
         loadVexFlow = async () => {
           await loadScript(vexPlusTestsURL);
-          return Vex.Flow;
+          return VexFlow;
         };
       }
 

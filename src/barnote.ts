@@ -9,7 +9,7 @@ import { log } from './util';
 
 // eslint-disable-next-line
 function L(...args: any[]) {
-  if (BarNote.DEBUG) log('Vex.Flow.BarNote', args);
+  if (BarNote.DEBUG) log('VexFlow.BarNote', args);
 }
 
 /**
@@ -20,7 +20,7 @@ function L(...args: any[]) {
  * See `tests/barnote_tests.ts` for usage examples.
  */
 export class BarNote extends Note {
-  /** To enable logging for this class. Set `Vex.Flow.BarNote.DEBUG` to `true`. */
+  /** To enable logging for this class. Set `VexFlow.BarNote.DEBUG` to `true`. */
   static DEBUG: boolean = false;
 
   static get CATEGORY(): string {

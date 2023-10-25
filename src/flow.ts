@@ -203,7 +203,7 @@ export class Flow {
    * This is useful for debugging, but not recommended for production because it will load lots of fonts.
    *
    * For example, on the `flow.html` test page, you could call:
-   *   `await Vex.Flow.loadFonts();`
+   *   `await VexFlow.loadFonts();`
    *
    * Alternatively, you may load web fonts with a stylesheet link (e.g., from Google Fonts),
    * and a @font-face { font-family: ... } rule in your CSS.
@@ -231,10 +231,10 @@ export class Flow {
    *
    * Example:
    * ```
-   * await Vex.Flow.loadFonts('Bravura', 'Academico', 'Petaluma', 'Petaluma Script');
-   * Vex.Flow.setFonts('Bravura', 'Academico');
+   * await VexFlow.loadFonts('Bravura', 'Academico', 'Petaluma', 'Petaluma Script');
+   * VexFlow.setFonts('Bravura', 'Academico');
    * ... render a score in Bravura ...
-   * Vex.Flow.setFonts('Petaluma', 'Petaluma Script');
+   * VexFlow.setFonts('Petaluma', 'Petaluma Script');
    * ... render a score in Petaluma...
    * ```
    * See `demos/fonts/` for more examples.

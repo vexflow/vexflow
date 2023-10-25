@@ -16,14 +16,14 @@
     <p>See also: <a href="module.html">ES Modules</a></p>
     <script src="../../build/cjs/vexflow.js"></script>
     <script>
-      Vex.Flow.loadFonts('Bravura', 'Academico').then(() => {
+      VexFlow.loadFonts('Bravura', 'Academico').then(() => {
         console.log('Fonts loaded!');
         showScore();
       });
 
       function showScore() {
-        const { Factory } = Vex.Flow;
-        const { VERSION, ID, DATE } = Vex.Flow.BUILD;
+        const { Factory } = VexFlow;
+        const { VERSION, ID, DATE } = VexFlow.BUILD;
         document.querySelector('#info').innerText = VERSION + ' / ' + ID + ' / ' + DATE;
 
         const factory = new Factory({

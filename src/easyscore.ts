@@ -17,10 +17,10 @@ import { TupletOptions } from './tuplet';
 import { defined, log, RuntimeError } from './util';
 import { Voice } from './voice';
 
-// To enable logging for this class. Set `Vex.Flow.EasyScore.DEBUG` to `true`.
+// To enable logging for this class. Set `VexFlow.EasyScore.DEBUG` to `true`.
 // eslint-disable-next-line
 function L(...args: any[]): void {
-  if (EasyScore.DEBUG) log('Vex.Flow.EasyScore', args);
+  if (EasyScore.DEBUG) log('VexFlow.EasyScore', args);
 }
 
 // eslint-disable-next-line

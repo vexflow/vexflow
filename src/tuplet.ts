@@ -8,7 +8,7 @@
  * values, then options.numNotes must be set.
  *
  * @constructor
- * @param {Array.<Vex.Flow.StaveNote>} A set of notes: staveNotes,
+ * @param {Array.<VexFlow.StaveNote>} A set of notes: staveNotes,
  *   notes, etc... any class that inherits stemmableNote at some
  *   point in its prototype chain.
  * @param options: object {

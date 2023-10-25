@@ -454,9 +454,9 @@ export const MINOR_KEYS = [
   'A#m',
 ];
 
-// VexFlow classes can be accessed via Vex.Flow.* or by directly importing a library class.
-// Tests can be accessed via Vex.Flow.Test.* or by directly importing a test class.
-// Here we set Vex.Flow.Test = VexFlowTests.
+// VexFlow classes can be accessed via VexFlow.* or by directly importing a library class.
+// Tests can be accessed via VexFlow.Test.* or by directly importing a test class.
+// Here we set VexFlow.Test = VexFlowTests.
 // eslint-disable-next-line
 // @ts-ignore
 Flow.Test = VexFlowTests;

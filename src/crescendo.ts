@@ -20,10 +20,10 @@ export interface CrescendoParams {
   endX: number;
 }
 
-// To enable logging for this class. Set `Vex.Flow.Crescendo.DEBUG` to `true`.
+// To enable logging for this class. Set `VexFlow.Crescendo.DEBUG` to `true`.
 // eslint-disable-next-line
 function L(...args: any[]) {
-  if (Crescendo.DEBUG) log('Vex.Flow.Crescendo', args);
+  if (Crescendo.DEBUG) log('VexFlow.Crescendo', args);
 }
 
 // Helper to draw the hairpin.

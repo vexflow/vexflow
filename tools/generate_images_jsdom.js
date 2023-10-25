@@ -136,14 +136,14 @@ if (fs.existsSync(vexflowDebugWithTestsJS)) {
 }
 
 // Some versions of VexFlow (during the 3.0.9 => 4.0.0 migration) may have required the next line:
-// global.Vex.Flow.shims = { fs };
+// global.VexFlow.shims = { fs };
 
 // 4.0.0
 // vexflow_test_helpers uses this to write out image files.
-global.Vex.Flow.Test.shims = { fs };
+global.VexFlow.Test.shims = { fs };
 
 // Tell VexFlow that we're outside the browser. Just run the Node tests.
-const VFT = Vex.Flow.Test;
+const VFT = VexFlow.Test;
 VFT.RUN_CANVAS_TESTS = false;
 VFT.RUN_SVG_TESTS = false;
 VFT.RUN_NODE_TESTS = true;

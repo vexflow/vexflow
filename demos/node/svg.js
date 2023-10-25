@@ -19,7 +19,7 @@
 const Vex = require('vxflw-early-access');
 const { JSDOM } = require('jsdom');
 
-const VF = Vex.Flow;
+const VF = VexFlow;
 
 const dom = new JSDOM('<!DOCTYPE html><html><body><div id="vf"></div><body></html>');
 

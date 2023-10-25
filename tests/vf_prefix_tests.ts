@@ -3,7 +3,7 @@
 //
 // VF.* Prefix Tests
 //
-// VexFlow classes are available under the global Vex.Flow.* namespace.
+// VexFlow classes are available under the global VexFlow.* namespace.
 
 import { VexFlowTests } from './vexflow_test_helpers';
 
@@ -85,7 +85,7 @@ import {
 } from '../src/index';
 
 // Tell TypeScript that we want very flexible typing,
-// so we can use the Vex.Flow.* API in unusual ways without warnings.
+// so we can use the VexFlow.* API in unusual ways without warnings.
 // eslint-disable-next-line
 declare let Vex: Record<string, any> & { Flow: typeof Flow & Record<string, any> };
 
@@ -98,9 +98,9 @@ const VFPrefixTests = {
 };
 
 function VFPrefix(assert: Assert): void {
-  // Intentionally use Vex.Flow here so we can verify that the Vex.Flow.* API
+  // Intentionally use VexFlow here so we can verify that the VexFlow.* API
   // is equivalent to using the individual classes in TypeScript.
-  const VF = Vex.Flow;
+  const VF = VexFlow;
   assert.equal(Accidental, VF.Accidental);
   assert.equal(Annotation, VF.Annotation);
   assert.equal(Articulation, VF.Articulation);
@@ -180,11 +180,11 @@ function VFPrefix(assert: Assert): void {
 }
 
 /**
- * If you have name collisions with VexFlow classes, consider extracting classes from Vex.Flow
+ * If you have name collisions with VexFlow classes, consider extracting classes from VexFlow
  * and renaming them with a VF prefix.
  */
 function VFAlias(assert: Assert): void {
-  const Flow = Vex.Flow;
+  const Flow = VexFlow;
   const VFAliases = {
     get VFAccidental() {
       return Flow.Accidental;
