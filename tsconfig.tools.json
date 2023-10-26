@@ -1,0 +1,9 @@
+// This tsconfig is not used to build any targets. It is to tell eslint to format the tools/ folder.
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./build/tools/",
+    "declaration": false
+  },
+  "include": ["./tools"]
+}

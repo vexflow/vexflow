@@ -160,14 +160,14 @@
       let loadVexFlow;
 
       if (useESM && !isFileProtocol) {
-        console.log('LOADING ESM');
+        console.log('LOADING ESM: ' + vexPlusTestsURL);
         loadVexFlow = async () => {
           const module = await import(vexPlusTestsURL);
           window.Vex = module.Vex;
           return Vex.Flow;
         };
       } else {
-        console.log('LOADING CJS');
+        console.log('LOADING CJS: ' + vexPlusTestsURL);
         loadVexFlow = async () => {
           await loadScript(vexPlusTestsURL);
           return Vex.Flow;

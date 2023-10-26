@@ -19,6 +19,7 @@ registerFont(path.join(fontsDir, 'bravura/bravura.otf'), { family: 'Bravura' });
 registerFont(path.join(fontsDir, 'academico/academico.otf'), { family: 'Academico' });
 registerFont(path.join(fontsDir, 'petaluma/petaluma.otf'), { family: 'Petaluma' });
 registerFont(path.join(fontsDir, 'petalumascript/petalumascript.otf'), { family: 'Petaluma Script' });
+registerFont(path.join(fontsDir, 'sebastian/sebastian.otf'), { family: 'Sebastian' });
 registerFont(path.join(fontsDir, 'gonvillesmufl/gonvillesmufl.otf'), { family: 'Gonville' });
 registerFont(path.join(fontsDir, 'finaleash/finaleash.otf'), { family: 'Finale Ash' });
 
@@ -39,7 +40,7 @@ const runOptions = {
 // For example:
 //   node generate_images_jsdom.js SCRIPT_DIR IMAGE_OUTPUT_DIR --fonts=petaluma
 //   node generate_images_jsdom.js SCRIPT_DIR IMAGE_OUTPUT_DIR --fonts=bravura,gonville
-const ALL_FONTS = ['Bravura', 'Gonville', 'Petaluma', 'Finale Ash'];
+const ALL_FONTS = ['Bravura', 'Gonville', 'Petaluma', 'Finale Ash', 'Sebastian'];
 let fontStacksToTest = ALL_FONTS;
 const { argv } = process;
 
