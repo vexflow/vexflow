@@ -128,8 +128,10 @@ const SVG_TEST_CONFIG = {
     'Gonville',
     'Gootville',
     'Leland',
+    'Leipzig',
     'MuseJazz',
     'Petaluma',
+    'Sebastian',
   ],
 };
 
@@ -218,8 +220,10 @@ export class VexFlowTests {
     Gonville: ['GonvilleSmufl', 'Academico'],
     Gootville: ['Gootville', 'Edwin'],
     Leland: ['Leland', 'Edwin'],
+    Leipzig: ['Leipzig', 'Academico'],
     MuseJazz: ['MuseJazz', 'MuseJazz Text'],
     Petaluma: ['Petaluma', 'Petaluma Script'],
+    Sebastian: ['Sebastian', 'Nepomuk'],
   };
 
   static set NODE_FONT_STACKS(fontStacks: string[]) {

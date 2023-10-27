@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
+const { exit } = require('process');
 
 const { argv } = process;
 
@@ -41,6 +42,7 @@ const options = {
   IMAGE_OUTPUT_DIR: argv[3],
   TIMEOUT: 60 * 1000, // 60 seconds.
 };
+
 const args = process.argv.slice(4);
 // console.log(args);
 args.forEach((str) => {
@@ -98,15 +100,14 @@ const savePNGData = (filename, pngDataURL) => {
 const launch = async (query, jobInfo) => {
   const browser = await puppeteer.launch({ headless: 'new', devtools: false });
   const page = await browser.newPage();
-  page
-    .on('error', (msg) => {
-      jobLog(msg, 'error', jobInfo);
-      process.exit(2);
-    })
-    .on('pageerror', (msg) => {
-      jobLog(msg.toString(), 'pageerror', jobInfo);
-      process.exit(1);
-    });
+  page.on('error', (msg) => {
+    jobLog(msg, 'error', jobInfo);
+    process.exit(2);
+  });
+  page.on('pageerror', (msg) => {
+    jobLog(msg.toString(), 'pageerror', jobInfo);
+    process.exit(1);
+  });
   // This is useful during development.
   // page.on('console', (message) => {
   //   console.log(`  >> ${message.text()}`);
@@ -116,6 +117,7 @@ const launch = async (query, jobInfo) => {
     log(error);
     process.exit(3);
   });
+
   return {
     browser,
     page,
