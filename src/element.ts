@@ -8,7 +8,7 @@ import { Metrics } from './metrics';
 import { Registry } from './registry';
 import { RenderContext } from './rendercontext';
 import { Category } from './typeguard';
-import { defined, globalObject, prefix, RuntimeError } from './util';
+import { defined, prefix, RuntimeError } from './util';
 
 /** Element attributes. */
 export interface ElementAttributes {
@@ -614,6 +614,29 @@ export class Element {
     this.#width = this.#textMetrics.width;
     this.#metricsValid = true;
     return this.#textMetrics;
+  }
+
+  /** Measure the text using the FontInfo related with key. */
+  static getElementWidth(text: string, key = ''): number {
+    let txtCanvas: HTMLCanvasElement | OffscreenCanvas | undefined = Element.#txtCanvas;
+    // Create the canvas element that will be used to measure text.
+    if (!txtCanvas) {
+      if (typeof document !== 'undefined') {
+        txtCanvas = document.createElement('canvas'); // Defaults to 300 x 150. See: https://www.w3.org/TR/2012/WD-html5-author-20120329/the-canvas-element.html#the-canvas-element
+      } else if (typeof OffscreenCanvas !== 'undefined') {
+        txtCanvas = new OffscreenCanvas(300, 150);
+      }
+      Element.#txtCanvas = txtCanvas;
+    }
+
+    const context = txtCanvas?.getContext('2d');
+    if (!context) {
+      // eslint-disable-next-line no-console
+      console.warn('Element: No context for txtCanvas. Returning empty text metrics.');
+      return 0;
+    }
+    context.font = Font.toCSSString(Metrics.getFontInfo(key));
+    return context.measureText(text).width;
   }
 
   /** Get the text metrics. */

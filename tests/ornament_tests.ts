@@ -14,6 +14,7 @@ import { Dot } from '../src/dot';
 import { Element } from '../src/element';
 import { Factory } from '../src/factory';
 import { Formatter } from '../src/formatter';
+import { Glyphs } from '../src/glyphs';
 import { Ornament } from '../src/ornament';
 import { ContextBuilder } from '../src/renderer';
 import { Stave } from '../src/stave';
@@ -278,9 +279,7 @@ function drawOrnamentsWithAccidentals(options: TestOptions): void {
 }
 
 function jazzOrnaments(options: TestOptions): void {
-  const el = new Element();
-  el.setText('\ue050' /* gClef */); // widest clef
-  const clefWidth = el.getWidth();
+  const clefWidth = Element.getElementWidth(Glyphs.gClef);
 
   // Helper function.
   function draw(modifiers: Ornament[], keys: string[], x: number, width: number, y: number, stemDirection?: number) {

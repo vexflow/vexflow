@@ -7,6 +7,7 @@
 import { MAJOR_KEYS, MINOR_KEYS, TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Element } from '../src/element';
+import { Glyphs } from '../src/glyphs';
 import { KeySignature } from '../src/keysignature';
 import { ContextBuilder } from '../src/renderer';
 import { Stave } from '../src/stave';
@@ -22,18 +23,12 @@ const ClefKeySignatureTests = {
   },
 };
 
-function getWidth(code: string) {
-  const el = new Element();
-  el.setText(code);
-  return el.getWidth();
-}
-
 const fontWidths = () => {
-  const sharpWidth = getWidth('\ue262' /*accidentalSharp*/) + 1;
-  const flatWidth = getWidth('\ue260' /*accidentalFlat*/) + 1;
+  const sharpWidth = Element.getElementWidth(Glyphs.accidentalSharp) + 1;
+  const flatWidth = Element.getElementWidth(Glyphs.accidentalFlat) + 1;
   const ksPadding = 10; // hard-coded in keysignature.ts
-  const naturalWidth = getWidth('\ue261' /*accidentalNatural*/) + 2;
-  const clefWidth = getWidth('\ue050' /*gClef*/); // widest clef
+  const naturalWidth = Element.getElementWidth(Glyphs.accidentalNatural) + 2;
+  const clefWidth = Element.getElementWidth(Glyphs.gClef); // widest clef
   return { sharpWidth, flatWidth, naturalWidth, clefWidth, ksPadding };
 };
 
