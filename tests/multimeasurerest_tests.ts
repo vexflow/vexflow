@@ -6,7 +6,7 @@
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Element } from '../src/element';
-import { Flow } from '../src/flow';
+import { Flow } from '../src/vexflow';
 import { Metrics } from '../src/metrics';
 import { MultimeasureRestRenderOptions } from '../src/multimeasurerest';
 

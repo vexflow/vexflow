@@ -12,7 +12,7 @@ import { Beam } from '../src/beam';
 import { Bend } from '../src/bend';
 import { Dot } from '../src/dot';
 import { Element } from '../src/element';
-import { Flow } from '../src/flow';
+import { Flow } from '../src/vexflow';
 import { FontWeight } from '../src/font';
 import { Formatter } from '../src/formatter';
 import { FretHandFinger } from '../src/frethandfinger';

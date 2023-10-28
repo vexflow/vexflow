@@ -5,7 +5,7 @@
 
 import { VexFlowTests } from './vexflow_test_helpers';
 
-import { Flow } from '../src/flow';
+import { Flow } from '../src/vexflow';
 import { TickContext } from '../src/tickcontext';
 import { MockTickable } from './mocks';
 

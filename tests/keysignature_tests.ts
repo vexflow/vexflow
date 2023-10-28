@@ -4,10 +4,10 @@
 // Key Signature Tests
 //
 
+import { Flow } from '../src/vexflow';
 import { MAJOR_KEYS, MINOR_KEYS, TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Element } from '../src/element';
-import { Flow } from '../src/flow';
 import { Glyphs } from '../src/glyphs';
 import { KeySignature } from '../src/keysignature';
 import { ContextBuilder } from '../src/renderer';

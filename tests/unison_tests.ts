@@ -4,7 +4,7 @@
 // Unison Tests
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
-import { Flow } from '../src/flow';
+import { Flow } from '../src/vexflow';
 
 const UnisonTests = {
   Start(): void {

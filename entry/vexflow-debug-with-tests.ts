@@ -15,7 +15,7 @@
 import * as VexSrc from '../src/index';
 import * as VexTests from '../tests/index';
 
-import { Flow } from '../src/flow';
+import { Flow } from '../src/vexflow';
 import { Font } from '../src/font';
 import { Academico } from '../src/fonts/academico';
 import { AcademicoBold } from '../src/fonts/academicobold';

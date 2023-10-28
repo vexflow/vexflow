@@ -13,7 +13,7 @@ import { Annotation, AnnotationVerticalJustify } from '../src/annotation';
 import { Articulation } from '../src/articulation';
 import { Beam } from '../src/beam';
 import { Dot } from '../src/dot';
-import { Flow } from '../src/flow';
+import { Flow } from '../src/vexflow';
 import { Formatter } from '../src/formatter';
 import { Fraction } from '../src/fraction';
 import { FretHandFinger } from '../src/frethandfinger';

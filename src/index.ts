@@ -18,7 +18,6 @@ export * from './dot';
 export * from './easyscore';
 export * from './element';
 export * from './factory';
-export * from './flow';
 export * from './font';
 // Do not export './fonts/*' because they are used by the entry/* files.
 export * from './formatter';
@@ -84,7 +83,7 @@ export * from './tuplet';
 export * from './typeguard';
 export * from './util';
 // Do not export './version'. It is accessible via VexFlow.BUILD.
-export * from './vex';
+export * from './vexflow';
 export * from './vibrato';
 export * from './vibratobracket';
 export * from './voice';

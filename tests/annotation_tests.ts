@@ -14,7 +14,7 @@ import { Articulation } from '../src/articulation';
 import { Beam } from '../src/beam';
 import { Bend } from '../src/bend';
 import { ElementStyle } from '../src/element';
-import { Flow } from '../src/flow';
+import { Flow } from '../src/vexflow';
 import { Formatter } from '../src/formatter';
 import { Metrics } from '../src/metrics';
 import { ModifierPosition } from '../src/modifier';
@@ -152,9 +152,7 @@ function styling(options: TestOptions, contextBuilder: ContextBuilder): void {
   const stave = new Stave(10, 10, 450).addClef('treble').setContext(ctx).draw();
 
   const annotation = (text: string, style: ElementStyle) =>
-    new Annotation(text)
-      .setFont(Metrics.get('Annotation.fontFamily'), FONT_SIZE, 'normal', 'italic')
-      .setStyle(style);
+    new Annotation(text).setFont(Metrics.get('Annotation.fontFamily'), FONT_SIZE, 'normal', 'italic').setStyle(style);
 
   const notes = [
     staveNote({ keys: ['c/4', 'e/4'], duration: 'h' }).addModifier(annotation('quiet', { fillStyle: '#0F0' }), 0),

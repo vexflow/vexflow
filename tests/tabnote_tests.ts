@@ -6,7 +6,7 @@
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Dot } from '../src/dot';
-import { Flow } from '../src/flow';
+import { Flow } from '../src/vexflow';
 import { Formatter } from '../src/formatter';
 import { Metrics } from '../src/metrics';
 import { RenderContext } from '../src/rendercontext';

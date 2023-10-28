@@ -7,7 +7,7 @@ import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Articulation } from '../src/articulation';
 import { Beam } from '../src/beam';
-import { Flow } from '../src/flow';
+import { Flow } from '../src/vexflow';
 import { Formatter } from '../src/formatter';
 import { Glyphs } from '../src/glyphs';
 import { Metrics } from '../src/metrics';
