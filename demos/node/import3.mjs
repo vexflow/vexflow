@@ -36,8 +36,8 @@ console.log(Vex3.default.VexFlow.StaveNote == StaveNote);
 console.log(Vex3.VexFlow === Vex3.default.VexFlow);
 console.log(Vex3.VexFlow === Vex3.default.VexFlow);
 
-// Verify that a modification to the Flow module in one place will be reflected
-// everywhere we can access the Flow module.
+// Verify that a modification to the VexFlow module in one place will be reflected
+// everywhere we can access the VexFlow module.
 
 VexFlow.HELLO = 123;
 console.log(Vex1.VexFlow.HELLO === 123);

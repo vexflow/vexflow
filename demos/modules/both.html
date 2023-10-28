@@ -7,15 +7,14 @@
     <p>Take a look at the source code. Output is logged to the developer console.</p>
     <!-- ES Module -->
     <script type="module">
-      // import { Vex, Flow, StaveNote } from '../../build/esm/entry/vexflow.js';
-      import { Vex, Flow, StaveNote } from '../../build/esm/entry/vexflow-debug.js';
-      // import { Vex, Flow, StaveNote, ArticulationTests } from '../../build/esm/entry/vexflow-debug-with-tests.js';
-      // import { Vex, Flow, StaveNote } from '../../build/esm/entry/vexflow-bravura.js';
-      // import { Vex, Flow, StaveNote } from '../../build/esm/entry/vexflow-gonville.js';
-      // import { Vex, Flow, StaveNote } from '../../build/esm/entry/vexflow-petaluma.js';
-      // import { Vex, Flow, StaveNote } from '../../build/esm/entry/vexflow-core.js';
-      console.log(Vex);
-      console.log(Flow);
+      // import { VexFlow, StaveNote } from '../../build/esm/entry/vexflow.js';
+      import { VexFlow, StaveNote } from '../../build/esm/entry/vexflow-debug.js';
+      // import { VexFlow, StaveNote, ArticulationTests } from '../../build/esm/entry/vexflow-debug-with-tests.js';
+      // import { VexFlow, StaveNote } from '../../build/esm/entry/vexflow-bravura.js';
+      // import { VexFlow, StaveNote } from '../../build/esm/entry/vexflow-gonville.js';
+      // import { VexFlow, StaveNote } from '../../build/esm/entry/vexflow-petaluma.js';
+      // import { VexFlow, StaveNote } from '../../build/esm/entry/vexflow-core.js';
+      console.log(VexFlow);
       console.log(StaveNote);
     </script>
 
@@ -28,9 +27,8 @@
     <!-- <script src="../../build/cjs/vexflow-petaluma.js"></script> -->
     <!-- <script src="../../build/cjs/vexflow-core.js"></script> -->
     <script>
-      const { Vex, Flow, StaveNote } = window.Vex;
-      console.log(Vex);
-      console.log(Flow);
+      const { VexFlow, StaveNote } = window.Vex;
+      console.log(VexFlow);
       console.log(StaveNote);
     </script>
   </body>

@@ -6,7 +6,7 @@
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Annotation } from '../src/annotation';
-import { Flow } from '../src/vexflow';
+import { VexFlow } from '../src/vexflow';
 import { Formatter } from '../src/formatter';
 import { Note } from '../src/note';
 import { RenderContext } from '../src/rendercontext';
@@ -53,7 +53,7 @@ function setupContext(options: TestOptions, w: number = 0, h: number = 0): { con
  * Helper function to create the TabTie between two Note objects.
  */
 function tieNotes(notes: Note[], indexes: number[], stave: Stave, ctx: RenderContext, text?: string): void {
-  const voice = new Voice(Flow.TIME4_4);
+  const voice = new Voice(VexFlow.TIME4_4);
   voice.addTickables(notes);
 
   new Formatter().joinVoices([voice]).format([voice], 100);
@@ -138,7 +138,7 @@ function multiTest(options: TestOptions, createTabTie: (notes: TieNotes) => TabT
     }),
   ];
 
-  const voice = new Voice(Flow.TIME4_4).addTickables(notes);
+  const voice = new Voice(VexFlow.TIME4_4).addTickables(notes);
   new Formatter().joinVoices([voice]).format([voice], 300);
   voice.draw(context, stave);
 
@@ -208,7 +208,7 @@ function continuous(options: TestOptions, contextBuilder: ContextBuilder): void 
     tabNote({ positions: [{ str: 4, fret: 6 }], duration: 'h' }),
   ];
 
-  const voice = new Voice(Flow.TIME4_4).addTickables(notes);
+  const voice = new Voice(VexFlow.TIME4_4).addTickables(notes);
   new Formatter().joinVoices([voice]).format([voice], 300);
   voice.draw(context, stave);
 

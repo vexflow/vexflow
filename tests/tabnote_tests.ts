@@ -3,10 +3,10 @@
 //
 // TabNote Tests
 
+import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Dot } from '../src/dot';
-import { Flow } from '../src/vexflow';
 import { Formatter } from '../src/formatter';
 import { Metrics } from '../src/metrics';
 import { RenderContext } from '../src/rendercontext';
@@ -36,7 +36,7 @@ const TabNoteTests = {
 };
 
 function ticks(assert: Assert): void {
-  const BEAT = (1 * Flow.RESOLUTION) / 4;
+  const BEAT = (1 * VexFlow.RESOLUTION) / 4;
 
   let note = new TabNote({ positions: [{ str: 6, fret: 6 }], duration: '1' });
   assert.equal(note.getTicks().value(), BEAT * 4, 'Whole note has 4 beats');
@@ -223,7 +223,7 @@ function drawStemsUp(options: TestOptions, contextBuilder: ContextBuilder): void
     return tabNote;
   });
 
-  const voice = new Voice(Flow.TIME4_4).setMode(VoiceMode.SOFT);
+  const voice = new Voice(VexFlow.TIME4_4).setMode(VoiceMode.SOFT);
   voice.addTickables(notes);
   new Formatter().joinVoices([voice]).formatToStave([voice], stave);
   voice.draw(ctx, stave);
@@ -296,7 +296,7 @@ function drawStemsDown(options: TestOptions, contextBuilder: ContextBuilder): vo
     return tabNote;
   });
 
-  const voice = new Voice(Flow.TIME4_4).setMode(VoiceMode.SOFT);
+  const voice = new Voice(VexFlow.TIME4_4).setMode(VoiceMode.SOFT);
   voice.addTickables(notes);
   new Formatter().joinVoices([voice]).formatToStave([voice], stave);
   voice.draw(ctx, stave);
@@ -370,7 +370,7 @@ function drawStemsUpThrough(options: TestOptions, contextBuilder: ContextBuilder
   });
 
   ctx.setFont(Metrics.get('fontFamily'), 10, 'bold');
-  const voice = new Voice(Flow.TIME4_4).setMode(VoiceMode.SOFT);
+  const voice = new Voice(VexFlow.TIME4_4).setMode(VoiceMode.SOFT);
   voice.addTickables(notes);
   new Formatter().joinVoices([voice]).formatToStave([voice], stave);
   voice.draw(ctx, stave);
@@ -449,7 +449,7 @@ function drawStemsDownThrough(options: TestOptions, contextBuilder: ContextBuild
 
   ctx.setFont('Arial', 10, 'bold');
 
-  const voice = new Voice(Flow.TIME4_4).setMode(VoiceMode.SOFT);
+  const voice = new Voice(VexFlow.TIME4_4).setMode(VoiceMode.SOFT);
   voice.addTickables(notes);
   new Formatter().joinVoices([voice]).formatToStave([voice], stave);
   voice.draw(ctx, stave);
@@ -500,7 +500,7 @@ function drawStemsDotted(options: TestOptions, contextBuilder: ContextBuilder): 
 
   Dot.buildAndAttach([notes[0], notes[2], notes[2]]);
 
-  const voice = new Voice(Flow.TIME4_4).setMode(VoiceMode.SOFT);
+  const voice = new Voice(VexFlow.TIME4_4).setMode(VoiceMode.SOFT);
   voice.addTickables(notes);
   new Formatter().joinVoices([voice]).formatToStave([voice], stave);
   voice.draw(ctx, stave);

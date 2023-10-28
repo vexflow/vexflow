@@ -8,9 +8,9 @@
 //       The SVGContext operates differently. It just sets the sx and sy as the new scale, instead of multiplying it.
 //       See: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/scale
 
+import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
-import { Flow } from '../src/vexflow';
 import { Formatter } from '../src/formatter';
 import { NoteHead } from '../src/notehead';
 import { RenderContext } from '../src/rendercontext';
@@ -50,7 +50,7 @@ function basic(options: TestOptions, contextBuilder: ContextBuilder): void {
   stave.setContext(ctx).draw();
 
   const formatter = new Formatter();
-  const voice = new Voice(Flow.TIME4_4).setStrict(false);
+  const voice = new Voice(VexFlow.TIME4_4).setStrict(false);
 
   const noteHead1 = new NoteHead({ duration: '4', line: 3 });
   const noteHead2 = new NoteHead({ duration: '1', line: 2.5 });
@@ -266,7 +266,7 @@ function basicBoundingBoxes(options: TestOptions, contextBuilder: ContextBuilder
   stave.setContext(ctx).draw();
 
   const formatter = new Formatter();
-  const voice = new Voice(Flow.TIME4_4).setStrict(false);
+  const voice = new Voice(VexFlow.TIME4_4).setStrict(false);
 
   const nh1 = new StaveNote({ keys: ['b/4'], duration: '4' });
   const nh2 = new StaveNote({ keys: ['a/4'], duration: '2' });

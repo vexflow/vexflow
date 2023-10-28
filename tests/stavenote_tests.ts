@@ -6,6 +6,7 @@
 // TODO: In StaveNote.preFormat() line 929, should noteHeadPadding default to StaveNote.minNoteheadPadding?
 //       The bounding box of a note changes slightly when we add a ModifierContext (even if we add zero modifiers).
 
+import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Accidental } from '../src/accidental';
@@ -13,7 +14,6 @@ import { Annotation, AnnotationVerticalJustify } from '../src/annotation';
 import { Articulation } from '../src/articulation';
 import { Beam } from '../src/beam';
 import { Dot } from '../src/dot';
-import { Flow } from '../src/vexflow';
 import { Formatter } from '../src/formatter';
 import { Fraction } from '../src/fraction';
 import { FretHandFinger } from '../src/frethandfinger';
@@ -116,7 +116,7 @@ function draw(
 }
 
 function ticks(assert: Assert): void {
-  const BEAT = (1 * Flow.RESOLUTION) / 4;
+  const BEAT = (1 * VexFlow.RESOLUTION) / 4;
 
   // Key value pairs of `testName: [durationString, expectedBeats, expectedNoteType]`
   const tickTests: Record<string, [string, number, string]> = {
@@ -167,7 +167,7 @@ function ticks(assert: Assert): void {
 }
 
 function ticksNewAPI(assert: Assert): void {
-  const BEAT = (1 * Flow.RESOLUTION) / 4;
+  const BEAT = (1 * VexFlow.RESOLUTION) / 4;
 
   // Key value pairs of `testName: [noteData, expectedBeats, expectedNoteType]`
   const tickTests: Record<string, [StaveNoteStruct, number, string]> = {
@@ -286,8 +286,8 @@ function stemExtensionPitch(assert: Assert): void {
     //    const wholeNote = new StaveNote({ keys: keys, duration: 'w' });
     //    assert.equal(
     //      wholeNote.getStemExtension(),
-    //      -1 * Flow.STEM_HEIGHT,
-    //      'For ' + keys.toString() + ' wholeNote StemExtension must always be -1 * Flow.STEM_HEIGHT'
+    //      -1 * VexFlow.STEM_HEIGHT,
+    //      'For ' + keys.toString() + ' wholeNote StemExtension must always be -1 * VexFlow.STEM_HEIGHT'
     //    );
   });
 }

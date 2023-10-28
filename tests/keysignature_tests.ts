@@ -4,7 +4,7 @@
 // Key Signature Tests
 //
 
-import { Flow } from '../src/vexflow';
+import { VexFlow } from '../src/vexflow';
 import { MAJOR_KEYS, MINOR_KEYS, TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Element } from '../src/element';
@@ -42,7 +42,7 @@ function parser(assert: Assert): void {
   assert.expect(11);
 
   function catchError(spec: string): void {
-    assert.throws(() => Flow.keySignature(spec), /BadKeySignature/);
+    assert.throws(() => VexFlow.keySignature(spec), /BadKeySignature/);
   }
 
   catchError('asdf');
@@ -56,13 +56,13 @@ function parser(assert: Assert): void {
   catchError('Dbm');
   catchError('B#m');
 
-  Flow.keySignature('B');
-  Flow.keySignature('C');
-  Flow.keySignature('Fm');
-  Flow.keySignature('Ab');
-  Flow.keySignature('Abm');
-  Flow.keySignature('F#');
-  Flow.keySignature('G#m');
+  VexFlow.keySignature('B');
+  VexFlow.keySignature('C');
+  VexFlow.keySignature('Fm');
+  VexFlow.keySignature('Ab');
+  VexFlow.keySignature('Abm');
+  VexFlow.keySignature('F#');
+  VexFlow.keySignature('G#m');
 
   assert.ok(true, 'all pass');
 }

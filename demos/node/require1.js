@@ -2,14 +2,12 @@
 // Run:
 //   node require1.js
 
-// const Vex1 = require('vexflow');
-// const Vex2 = require('vexflow/bravura');
+// This version bundles music fonts Bravura, Petaluma, Gonville, and text fonts Academico and Petaluma Script.
+const ModuleA = require('vxflw-early-access'); // require('vexflow');
+console.log('Default Font Stack:', ModuleA.VexFlow.getFonts());
+console.log(ModuleA.VexFlow.BUILD);
 
-const Vex1 = require('vxflw-early-access');
-const Vex2 = require('vxflw-early-access/bravura');
-
-console.log('Default Font Stack:', Vex1.VexFlow.getFonts());
-console.log(Vex1.VexFlow.BUILD);
-
-console.log('Default Font Stack:', Vex2.VexFlow.getFonts());
-console.log(Vex2.VexFlow.BUILD);
+// This version bundles Bravura and Academico.
+const ModuleB = require('vxflw-early-access/bravura'); // require('vexflow/bravura');
+console.log('Default Font Stack:', ModuleB.VexFlow.getFonts());
+console.log(ModuleB.VexFlow.BUILD);

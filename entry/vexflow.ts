@@ -5,7 +5,8 @@
 
 // The webpack config inside Gruntfile.js sets the webpack mode to 'production' to produce a minified build.
 
-import { Flow } from '../src/vexflow';
+import { VexFlow } from '../src/vexflow';
+
 import { Font } from '../src/font';
 import { Academico } from '../src/fonts/academico';
 import { AcademicoBold } from '../src/fonts/academicobold';
@@ -38,7 +39,7 @@ const fontLoadPromises = [
   fontPetalumaScript,
 ];
 
-Flow.setFonts('Bravura', 'Academico');
+VexFlow.setFonts('Bravura', 'Academico');
 
 Promise.allSettled(fontLoadPromises).then(() => {
   //

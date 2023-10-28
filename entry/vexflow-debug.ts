@@ -12,7 +12,8 @@
 // It bundles the same fonts as vexflow.js.
 // Other music/text fonts need to be loaded at runtime during page load. See VexFlow.loadFonts().
 
-import { Flow } from '../src/vexflow';
+import { VexFlow } from '../src/vexflow';
+
 import { Font } from '../src/font';
 import { Academico } from '../src/fonts/academico';
 import { AcademicoBold } from '../src/fonts/academicobold';
@@ -45,7 +46,7 @@ const fontLoadPromises = [
   fontPetalumaScript,
 ];
 
-Flow.setFonts('Bravura', 'Academico');
+VexFlow.setFonts('Bravura', 'Academico');
 
 Promise.allSettled(fontLoadPromises).then(() => {
   //

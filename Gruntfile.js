@@ -188,7 +188,7 @@ function webpackConfigs() {
   //   an object that maps entry names to file names
   //   a file name string
   // returns a webpack config object.
-  function getConfig(entryFiles, mode, addBanner, libraryName, watch = false) {
+  function getConfig(entryFiles, mode, addBanner, watch = false) {
     let entry, filename;
     if (Array.isArray(entryFiles)) {
       entry = {};
@@ -285,7 +285,7 @@ function webpackConfigs() {
         path: BUILD_CJS_DIR,
         filename: filename,
         library: {
-          name: libraryName,
+          name: 'VexFlow', // The name of the exported library.
           type: 'umd',
           export: 'default',
         },
@@ -334,11 +334,11 @@ function webpackConfigs() {
   const WATCH = true;
 
   function prodConfig(watch = false) {
-    return getConfig(PRODUCTION_BUILD_TARGETS, PRODUCTION_MODE, BANNER, 'Vex', watch);
+    return getConfig(PRODUCTION_BUILD_TARGETS, PRODUCTION_MODE, BANNER, watch);
   }
 
   function debugConfig(watch = false) {
-    return getConfig(DEBUG_BUILD_TARGETS, DEVELOPMENT_MODE, BANNER, 'Vex', watch);
+    return getConfig(DEBUG_BUILD_TARGETS, DEVELOPMENT_MODE, BANNER, watch);
   }
 
   return {

@@ -25,7 +25,6 @@ import {
   EasyScore,
   Element,
   Factory,
-  Flow,
   Font,
   Formatter,
   Fraction,
@@ -78,16 +77,12 @@ import {
   Tremolo,
   Tuning,
   Tuplet,
+  VexFlow,
   Vibrato,
   VibratoBracket,
   Voice,
   Volta,
 } from '../src/index';
-
-// Tell TypeScript that we want very flexible typing,
-// so we can use the VexFlow.* API in unusual ways without warnings.
-// eslint-disable-next-line
-declare let Vex: Record<string, any> & { Flow: typeof Flow & Record<string, any> };
 
 const VFPrefixTests = {
   Start(): void {
@@ -118,7 +113,6 @@ function VFPrefix(assert: Assert): void {
   assert.equal(EasyScore, VF.EasyScore);
   assert.equal(Element, VF.Element);
   assert.equal(Factory, VF.Factory);
-  assert.equal(Flow.RESOLUTION, VF.RESOLUTION);
   assert.equal(Font, VF.Font);
   assert.equal(Formatter, VF.Formatter);
   assert.propEqual(new Formatter(), new VF.Formatter(), 'new Formatter()');
@@ -147,7 +141,7 @@ function VFPrefix(assert: Assert): void {
   assert.equal(RepeatNote, VF.RepeatNote);
   assert.equal(Repetition, VF.Repetition);
   assert.equal(Stave, VF.Stave);
-  assert.notEqual(Stave, VF.StaveNote);
+  assert.notEqual(Stave, VF.StaveNote); // Sanity check.
   assert.equal(StaveConnector, VF.StaveConnector);
   assert.equal(StaveHairpin, VF.StaveHairpin);
   assert.equal(StaveLine, VF.StaveLine);
@@ -180,23 +174,13 @@ function VFPrefix(assert: Assert): void {
 }
 
 /**
- * If you have name collisions with VexFlow classes, consider extracting classes from VexFlow
- * and renaming them with a VF prefix.
+ * If you have name collisions with VexFlow classes (e.g., if you have an Accidental class in your app),
+ * consider extracting classes from VexFlow and renaming them with a VF prefix.
  */
 function VFAlias(assert: Assert): void {
-  const Flow = VexFlow;
-  const VFAliases = {
-    get VFAccidental() {
-      return Flow.Accidental;
-    },
-    get VFAnnotation() {
-      return Flow.Annotation;
-    },
-    get VFVibrato() {
-      return Flow.Vibrato;
-    },
-  };
-  const { VFVibrato, VFAccidental, VFAnnotation } = VFAliases;
+  const VFVibrato = VexFlow.Vibrato;
+  const VFAccidental = VexFlow.Accidental;
+  const VFAnnotation = VexFlow.Annotation;
   assert.equal(Accidental, VFAccidental);
   assert.equal(Annotation, VFAnnotation);
 

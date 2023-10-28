@@ -519,6 +519,7 @@ export class Tables {
     return spec in keySignatures;
   }
 
+  // TODO: Should these be moved to glyphs.ts? We could have a non-SMuFL section....
   static unicode = {
     // ♯ accidental sharp
     sharp: '\u266f',

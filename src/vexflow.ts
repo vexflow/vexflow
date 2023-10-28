@@ -174,6 +174,8 @@ export class VexFlow {
 
   static RuntimeError = RuntimeError;
 
+  static Test = undefined; // Set by vexflow_test_helpers.ts in the debug version of this library.
+
   // Exported Enums.
   // Sorted by the module / file they are exported from.
   static AnnotationHorizontalJustify = AnnotationHorizontalJustify;

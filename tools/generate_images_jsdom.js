@@ -119,24 +119,9 @@ if (!global.QUnit) {
 // We use file detection to determine which file(s) to include.
 const vexflowDebugWithTestsJS = path.resolve(__dirname, path.join(scriptDir, 'vexflow-debug-with-tests.js'));
 if (fs.existsSync(vexflowDebugWithTestsJS)) {
-  // console.log('Generating Images for version >= 4.0.0');
-  global.Vex = require(vexflowDebugWithTestsJS);
-} else {
-  // console.log('Generating Images for version <= 3.0.9');
-  const vexflowTests = require(path.join(scriptDir, 'vexflow-tests.js'));
-  if (typeof vexflowTests.Flow === 'object') {
-    // During the migration of 3.0.9 => 4.0.0.
-    // vexflowTests has all we need!
-    global.Vex = vexflowTests;
-  } else {
-    // typeof vexflowTests.Flow === 'undefined'
-    // Version 3.0.9 and older used vexflow-tests.js in combination with vexflow-debug.js!
-    global.Vex = require(path.join(scriptDir, 'vexflow-debug.js'));
-  }
+  // console.log('Generating Images for version >= 5.0.0');
+  global.VexFlow = require(vexflowDebugWithTestsJS);
 }
-
-// Some versions of VexFlow (during the 3.0.9 => 4.0.0 migration) may have required the next line:
-// global.VexFlow.shims = { fs };
 
 // 4.0.0
 // vexflow_test_helpers uses this to write out image files.

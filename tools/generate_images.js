@@ -100,14 +100,11 @@ const resolveJobsOption = (verIn) => {
 
   if (jsFileName) {
     try {
-      global.Vex = require(jsFileName);
-      if (global.Vex) {
-        const { Flow } = global.Vex;
-        if (Flow) {
-          const { Test } = Flow;
-          if (Test && Test.tests && Test.parseJobOptions) {
-            numTests = Test.tests.length;
-          }
+      global.VexFlow = require(jsFileName);
+      if (global.VexFlow) {
+        const { Test } = VexFlow;
+        if (Test && Test.tests && Test.parseJobOptions) {
+          numTests = Test.tests.length;
         }
       }
     } catch (e) {

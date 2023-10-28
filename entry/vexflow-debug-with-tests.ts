@@ -12,10 +12,11 @@
 // It bundles the same fonts as vexflow.js.
 // Other music/text fonts need to be loaded at runtime during page load. See VexFlow.loadFonts().
 
-import * as VexSrc from '../src/index';
-import * as VexTests from '../tests/index';
+import { VexFlow } from '../src/vexflow';
+import { VexFlowTests } from '../tests/vexflow_test_helpers';
 
-import { Flow } from '../src/vexflow';
+// import * as VexSrc from '../src/index';
+// import * as VexTests from '../tests/index';
 import { Font } from '../src/font';
 import { Academico } from '../src/fonts/academico';
 import { AcademicoBold } from '../src/fonts/academicobold';
@@ -48,7 +49,7 @@ const fontLoadPromises = [
   fontPetalumaScript,
 ];
 
-Flow.setFonts('Bravura', 'Academico');
+VexFlow.setFonts('Bravura', 'Academico');
 
 Promise.allSettled(fontLoadPromises).then(() => {
   //
@@ -60,7 +61,14 @@ export * from '../src/index';
 export * from '../tests/index';
 
 // Also collect all exports into a default export for CJS projects.
-export default {
-  ...VexSrc,
-  ...VexTests,
-};
+// export default {
+//   ...VexSrc,
+//   ...VexTests,
+// };
+
+// VexFlow classes can be accessed via VexFlow.* or by directly importing a library class.
+// Tests can be accessed via VexFlow.Test.* or by directly importing a test class.
+// eslint-disable-next-line
+// @ts-ignore
+VexFlow.Test = VexFlowTests;
+export default VexFlow;

@@ -1,3 +1,7 @@
+# 5.0.0
+
+- `vex.ts` and `flow.ts` modules are merged into vexflow.ts, which exports the `VexFlow` class.
+
 # 4.0.1
 
 Detailed changes are listed on the wiki: https://github.com/0xfe/vexflow/wiki/Changelog-ver-4.0

@@ -3,9 +3,9 @@
 //
 // Voice Tests
 
+import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
-import { Flow } from '../src/vexflow';
 import { Formatter } from '../src/formatter';
 import { ContextBuilder } from '../src/renderer';
 import { Stave } from '../src/stave';
@@ -23,7 +23,7 @@ const VoiceTests = {
   },
 };
 
-const BEAT = (1 * Flow.RESOLUTION) / 4;
+const BEAT = (1 * VexFlow.RESOLUTION) / 4;
 
 // Helper function to create a tickable with a preset number of ticks.
 const createTickable = () => new MockTickable().setTicks(BEAT);
@@ -33,7 +33,7 @@ function strict(assert: Assert): void {
 
   const tickables = [createTickable(), createTickable(), createTickable()];
 
-  const voice = new Voice(Flow.TIME4_4);
+  const voice = new Voice(VexFlow.TIME4_4);
   assert.equal(voice.getTotalTicks().value(), BEAT * 4, '4/4 Voice has 4 beats');
   assert.equal(voice.getTicksUsed().value(), BEAT * 0, 'No beats in voice');
   voice.addTickables(tickables);
@@ -66,7 +66,7 @@ function ignore(assert: Assert): void {
     createTickable(),
   ];
 
-  const voice = new Voice(Flow.TIME4_4);
+  const voice = new Voice(VexFlow.TIME4_4);
   voice.addTickables(tickables);
   assert.ok(true, 'all pass');
 }
@@ -84,7 +84,7 @@ function full(options: TestOptions, contextBuilder: ContextBuilder): void {
 
   notes.forEach((note) => note.setStave(stave));
 
-  const voice = new Voice(Flow.TIME4_4).setMode(Voice.Mode.FULL).addTickables(notes);
+  const voice = new Voice(VexFlow.TIME4_4).setMode(Voice.Mode.FULL).addTickables(notes);
 
   new Formatter().joinVoices([voice]).formatToStave([voice], stave);
 

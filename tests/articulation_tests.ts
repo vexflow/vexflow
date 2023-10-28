@@ -7,7 +7,7 @@ import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Articulation } from '../src/articulation';
 import { Beam } from '../src/beam';
-import { Flow } from '../src/vexflow';
+import { VexFlow } from '../src/vexflow';
 import { Formatter } from '../src/formatter';
 import { Glyphs } from '../src/glyphs';
 import { Metrics } from '../src/metrics';
@@ -480,7 +480,7 @@ function tabNotes(options: TestOptions, contextBuilder: ContextBuilder): void {
   notes3[2].addModifier(new Articulation('a.').setPosition(3), 0);
   notes3[3].addModifier(new Articulation('a.').setPosition(4), 0);
 
-  const voice = new Voice(Flow.TIME4_4).setMode(Voice.Mode.SOFT);
+  const voice = new Voice(VexFlow.TIME4_4).setMode(Voice.Mode.SOFT);
 
   voice.addTickables(notes1);
   voice.addTickables(notes2);
