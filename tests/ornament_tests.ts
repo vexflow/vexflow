@@ -279,7 +279,7 @@ function drawOrnamentsWithAccidentals(options: TestOptions): void {
 }
 
 function jazzOrnaments(options: TestOptions): void {
-  const clefWidth = Element.getElementWidth(Glyphs.gClef);
+  const clefWidth = Element.measureWidth(Glyphs.gClef);
 
   // Helper function.
   function draw(modifiers: Ornament[], keys: string[], x: number, width: number, y: number, stemDirection?: number) {

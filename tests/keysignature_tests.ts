@@ -31,10 +31,10 @@ const KeySignatureTests = {
 };
 
 const fontWidths = () => {
-  const sharpWidth = Element.getElementWidth(Glyphs.accidentalSharp) + 1;
-  const flatWidth = Element.getElementWidth(Glyphs.accidentalFlat) + 1;
-  const naturalWidth = Element.getElementWidth(Glyphs.accidentalNatural) + 2;
-  const clefWidth = Element.getElementWidth(Glyphs.gClef) * 2; // widest clef
+  const sharpWidth = Element.measureWidth(Glyphs.accidentalSharp) + 1;
+  const flatWidth = Element.measureWidth(Glyphs.accidentalFlat) + 1;
+  const naturalWidth = Element.measureWidth(Glyphs.accidentalNatural) + 2;
+  const clefWidth = Element.measureWidth(Glyphs.gClef) * 2; // widest clef
   return { sharpWidth, flatWidth, naturalWidth, clefWidth };
 };
 

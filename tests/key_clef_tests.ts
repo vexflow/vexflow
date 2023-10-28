@@ -24,11 +24,11 @@ const ClefKeySignatureTests = {
 };
 
 const fontWidths = () => {
-  const sharpWidth = Element.getElementWidth(Glyphs.accidentalSharp) + 1;
-  const flatWidth = Element.getElementWidth(Glyphs.accidentalFlat) + 1;
+  const sharpWidth = Element.measureWidth(Glyphs.accidentalSharp) + 1;
+  const flatWidth = Element.measureWidth(Glyphs.accidentalFlat) + 1;
   const ksPadding = 10; // hard-coded in keysignature.ts
-  const naturalWidth = Element.getElementWidth(Glyphs.accidentalNatural) + 2;
-  const clefWidth = Element.getElementWidth(Glyphs.gClef); // widest clef
+  const naturalWidth = Element.measureWidth(Glyphs.accidentalNatural) + 2;
+  const clefWidth = Element.measureWidth(Glyphs.gClef); // widest clef
   return { sharpWidth, flatWidth, naturalWidth, clefWidth, ksPadding };
 };
 
