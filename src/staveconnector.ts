@@ -2,6 +2,7 @@
 // MIT License
 
 import { Element } from './element';
+import { Glyphs } from './glyphs';
 import { RenderContext } from './rendercontext';
 import { Stave } from './stave';
 import { Tables } from './tables';
@@ -232,9 +233,9 @@ export class StaveConnector extends Element {
         topY -= 6;
         botY += 6;
         attachmentHeight = botY - topY;
-        element.setText('\ue003' /* bracketTop */);
+        element.setText(Glyphs.bracketTop);
         element.renderText(ctx, topX - 5, topY);
-        element.setText('\ue004' /* bracketBottom */);
+        element.setText(Glyphs.bracketBottom);
         element.renderText(ctx, topX - 5, botY);
         topX -= 5;
         break;

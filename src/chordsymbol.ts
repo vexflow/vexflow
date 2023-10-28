@@ -11,6 +11,7 @@
 
 import { Element } from './element';
 import { Font } from './font';
+import { Glyphs } from './glyphs';
 import { Metrics } from './metrics';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
@@ -114,26 +115,26 @@ export class ChordSymbol extends Modifier {
 
   // Glyph data
   static readonly glyphs: Record<string, string> = {
-    diminished: '\ue870' /*csymDiminished*/,
-    dim: '\ue870' /*csymDiminished*/,
-    halfDiminished: '\ue871' /*csymHalfDiminished*/,
-    '+': '\ue872' /*csymAugmented*/,
-    augmented: '\ue872' /*csymAugmented*/,
-    majorSeventh: '\ue873' /*csymMajorSeventh*/,
-    minor: '\ue874' /*csymMinor*/,
-    '-': '\ue874' /*csymMinor*/,
-    '(': '\u0028' /*csymParensLeftTall*/,
-    leftParen: '\u0028' /*csymParensLeftTall*/,
-    ')': '\u0029' /*csymParensRightTall*/,
-    rightParen: '\u0029' /*csymParensRightTall*/,
-    leftBracket: '\ue877' /*csymBracketLeftTall*/,
-    rightBracket: '\ue878' /*csymBracketRightTall*/,
-    leftParenTall: '\u0028' /*csymParensLeftVeryTall*/,
-    rightParenTall: '\u0029' /*csymParensRightVeryTall*/,
-    '/': '\ue87c' /*csymDiagonalArrangementSlash*/,
-    over: '\ue87c' /*csymDiagonalArrangementSlash*/,
-    '#': '\ued62' /*csymAccidentalSharp*/,
-    b: '\ued60' /*csymAccidentalFlat*/,
+    diminished: Glyphs.csymDiminished,
+    dim: Glyphs.csymDiminished,
+    halfDiminished: Glyphs.csymHalfDiminished,
+    '+': Glyphs.csymAugmented,
+    augmented: Glyphs.csymAugmented,
+    majorSeventh: Glyphs.csymMajorSeventh,
+    minor: Glyphs.csymMinor,
+    '-': Glyphs.csymMinor,
+    '(': '(', // Glyphs.csymParensLeftTall,
+    leftParen: '(', // Glyphs.csymParensLeftTall,
+    ')': ')', // Glyphs.csymParensRightTall,
+    rightParen: ')', // Glyphs.csymParensRightTall,
+    leftBracket: Glyphs.csymBracketLeftTall,
+    rightBracket: Glyphs.csymBracketRightTall,
+    leftParenTall: '(', // Glyphs.csymParensLeftVeryTall,
+    rightParenTall: ')', // Glyphs.csymParensRightVeryTall,
+    '/': Glyphs.csymDiagonalArrangementSlash,
+    over: Glyphs.csymDiagonalArrangementSlash,
+    '#': Glyphs.csymAccidentalSharp,
+    b: Glyphs.csymAccidentalFlat,
   };
 
   static readonly symbolModifiers = SymbolModifiers;

@@ -1,6 +1,7 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 
+import { Glyphs } from './glyphs';
 import { Note } from './note';
 import { TextNoteStruct } from './textnote';
 import { Category } from './typeguard';
@@ -33,12 +34,12 @@ export class TextDynamics extends Note {
   /** The glyph data for each dynamics letter. */
   static get GLYPHS(): Record<string, string> {
     return {
-      f: '\uE522' /*dynamicForte*/,
-      p: '\uE520' /*dynamicPiano*/,
-      m: '\uE521' /*dynamicMezzo*/,
-      s: '\uE524' /*dynamicSforzando*/,
-      z: '\uE525' /*dynamicZ*/,
-      r: '\uE523' /*dynamicRinforzando*/,
+      f: Glyphs.dynamicForte,
+      p: Glyphs.dynamicPiano,
+      m: Glyphs.dynamicMezzo,
+      s: Glyphs.dynamicSforzando,
+      z: Glyphs.dynamicZ,
+      r: Glyphs.dynamicRinforzando,
     };
   }
 

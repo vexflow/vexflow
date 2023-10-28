@@ -11,6 +11,7 @@
 import { Beam } from './beam';
 import { BoundingBox } from './boundingbox';
 import { ElementStyle } from './element';
+import { Glyphs } from './glyphs';
 import { Metrics } from './metrics';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
@@ -784,21 +785,21 @@ export class StaveNote extends StemmableNote {
     // addtional y shifts for rests
     let restShift = 0;
     switch (this.#noteHeads[index].getText()) {
-      case '\ue4e2' /*restDoubleWhole*/:
-      case '\ue4e3' /*restWhole*/:
+      case Glyphs.restDoubleWhole:
+      case Glyphs.restWhole:
         restShift += 0.5;
         break;
-      case '\ue4e4' /*restHalf*/:
-      case '\ue4e5' /*restQuarter*/:
-      case '\ue4e6' /*rest8th*/:
-      case '\ue4e7' /*rest16th*/:
+      case Glyphs.restHalf:
+      case Glyphs.restQuarter:
+      case Glyphs.rest8th:
+      case Glyphs.rest16th:
         restShift -= 0.5;
         break;
-      case '\ue4e8' /*rest32nd*/:
-      case '\ue4e9' /*rest64th*/:
+      case Glyphs.rest32nd:
+      case Glyphs.rest64th:
         restShift -= 1.5;
         break;
-      case '\ue4ea' /*rest128th*/:
+      case Glyphs.rest128th:
         restShift -= 2.5;
         break;
     }

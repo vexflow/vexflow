@@ -8,7 +8,7 @@
 // See `tests/tabnote_tests.ts` for usage examples.
 
 import { Element } from './element';
-import { Metrics } from './metrics';
+import { Glyphs } from './glyphs';
 import { Modifier } from './modifier';
 import { Note } from './note';
 import { Stave } from './stave';
@@ -219,7 +219,7 @@ export class TabNote extends StemmableNote {
 
     if (fret.toUpperCase() === 'X') {
       el = new Element('TabNote');
-      el.setText('\ue263' /*accidentalDoubleSharp*/);
+      el.setText(Glyphs.accidentalDoubleSharp);
     } else {
       el = new Element('TabNote.text');
       el.setText(fret);

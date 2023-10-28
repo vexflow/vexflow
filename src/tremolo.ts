@@ -2,6 +2,7 @@
 // @author Mike Corrigan <corrigan@gmail.com>
 // MIT License
 
+import { Glyphs } from './glyphs';
 import { Metrics } from './metrics';
 import { Modifier } from './modifier';
 import { Stem } from './stem';
@@ -23,7 +24,7 @@ export class Tremolo extends Modifier {
 
     this.num = num;
     this.position = Modifier.Position.CENTER;
-    this.text = '\uE220' /*tremolo1*/;
+    this.text = Glyphs.tremolo1;
   }
 
   /** Draw the tremolo on the rendering context. */
