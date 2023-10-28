@@ -75,95 +75,15 @@ import { TimeSigNote } from './timesignote';
 import { Tremolo } from './tremolo';
 import { Tuning } from './tuning';
 import { Tuplet } from './tuplet';
-// Utility methods used by the rest of the VexFlow codebase.
-import { log, RuntimeError } from './util';
+import { RuntimeError } from './util';
 import { DATE, ID, VERSION } from './version';
 import { Vibrato } from './vibrato';
 import { VibratoBracket } from './vibratobracket';
 import { Voice, VoiceMode, VoiceTime } from './voice';
 
-export class Vex {
-  static Flow = Flow;
-
-  // Users of `Vex.forEach(a, fn)` should use `Array.prototype.forEach()` instead.
-  // static forEach<T>(arr: T[], callbackFn: (value: T, index: number, array: T[]) => void) {
-  //   arr.forEach(callbackFn);
-  // }
-
-  /**
-   * Take `arr` and return a new list consisting of the sorted, unique,
-   * contents of arr. Does not modify `arr`.
-   */
-  // eslint-disable-next-line
-  static sortAndUnique(arr: any[], cmp: any, eq: any): any[] {
-    if (arr.length > 1) {
-      const newArr = [];
-      let last;
-      arr.sort(cmp);
-
-      for (let i = 0; i < arr.length; ++i) {
-        if (i === 0 || !eq(arr[i], last)) {
-          newArr.push(arr[i]);
-        }
-        last = arr[i];
-      }
-
-      return newArr;
-    } else {
-      return arr;
-    }
-  }
-
-  /** Check if array `arr` contains `obj`. */
-  // eslint-disable-next-line
-  static contains(arr: any[], obj: any): boolean {
-    let i = arr.length;
-    while (i--) {
-      if (arr[i] === obj) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  // Get the 2D Canvas context from DOM element with id `canvasId`.
-  static getCanvasContext(canvasId: string): RenderingContext {
-    if (!canvasId) {
-      throw new RuntimeError('BadArgument', 'Invalid canvas selector: ' + canvasId);
-    }
-
-    const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
-    if (!(canvas && canvas.getContext)) {
-      throw new RuntimeError('UnsupportedBrowserError', 'This browser does not support HTML5 Canvas');
-    }
-
-    return canvas.getContext('2d') as RenderingContext;
-  }
-
-  /** Benchmark. Run function `f` once and report time elapsed shifted by `s` milliseconds. */
-  // eslint-disable-next-line
-  static benchmark(s: any, f: any): void {
-    const startTime = new Date().getTime();
-    f();
-    const elapsed = new Date().getTime() - startTime;
-    log(s, elapsed + 'ms');
-  }
-
-  // Get stack trace.
-  static stackTrace(): string | undefined {
-    const err = new Error();
-    return err.stack;
-  }
-
-  // Backwards compatability with 3.0.9.
-  static RERR: RuntimeError;
-
-  // Backwards compatability with 3.0.9.
-  static RuntimeError: RuntimeError;
-}
-
-export class Flow {
+export class VexFlow {
   static get BUILD() {
+    // VERSION, ID, and DATE are imported from version.ts.
     return {
       /** version number. */
       VERSION: VERSION,
@@ -198,7 +118,6 @@ export class Flow {
   static FretHandFinger = FretHandFinger;
   static GhostNote = GhostNote;
   static GlyphNote = GlyphNote;
-  static Glyphs = Glyphs;
   static GraceNote = GraceNote;
   static GraceNoteGroup = GraceNoteGroup;
   static GraceTabNote = GraceTabNote;
@@ -253,6 +172,8 @@ export class Flow {
   static Voice = Voice;
   static Volta = Volta;
 
+  static RuntimeError = RuntimeError;
+
   // Exported Enums.
   // Sorted by the module / file they are exported from.
   static AnnotationHorizontalJustify = AnnotationHorizontalJustify;
@@ -263,6 +184,7 @@ export class Flow {
   static CurvePosition = CurvePosition;
   static FontWeight = FontWeight;
   static FontStyle = FontStyle;
+  static Glyphs = Glyphs;
   static ModifierPosition = ModifierPosition;
   static RendererBackends = RendererBackends;
   static RendererLineEndType = RendererLineEndType;
@@ -357,73 +279,96 @@ export class Flow {
   static get NOTATION_FONT_SCALE(): number {
     return Tables.NOTATION_FONT_SCALE;
   }
+
   static set NOTATION_FONT_SCALE(value: number) {
     Tables.NOTATION_FONT_SCALE = value;
   }
+
   static get TABLATURE_FONT_SCALE(): number {
     return Tables.TABLATURE_FONT_SCALE;
   }
+
   static set TABLATURE_FONT_SCALE(value: number) {
     Tables.TABLATURE_FONT_SCALE = value;
   }
+
   static get RESOLUTION(): number {
     return Tables.RESOLUTION;
   }
+
   static set RESOLUTION(value: number) {
     Tables.RESOLUTION = value;
   }
+
   static get SLASH_NOTEHEAD_WIDTH(): number {
     return Tables.SLASH_NOTEHEAD_WIDTH;
   }
+
   static set SLASH_NOTEHEAD_WIDTH(value: number) {
     Tables.SLASH_NOTEHEAD_WIDTH = value;
   }
+
   static get STAVE_LINE_DISTANCE(): number {
     return Tables.STAVE_LINE_DISTANCE;
   }
+
   static set STAVE_LINE_DISTANCE(value: number) {
     Tables.STAVE_LINE_DISTANCE = value;
   }
+
   static get STAVE_LINE_THICKNESS(): number {
     return Tables.STAVE_LINE_THICKNESS;
   }
+
   static set STAVE_LINE_THICKNESS(value: number) {
     Tables.STAVE_LINE_THICKNESS = value;
   }
+
   static get STEM_HEIGHT(): number {
     return Tables.STEM_HEIGHT;
   }
+
   static set STEM_HEIGHT(value: number) {
     Tables.STEM_HEIGHT = value;
   }
+
   static get STEM_WIDTH(): number {
     return Tables.STEM_WIDTH;
   }
+
   static set STEM_WIDTH(value: number) {
     Tables.STEM_WIDTH = value;
   }
+
   static get TIME4_4(): VoiceTime {
     return Tables.TIME4_4;
   }
+
   static get unicode(): Record<string, string> {
     return Tables.unicode;
   }
+
   static keySignature(spec: string): { type: string; line: number }[] {
     return Tables.keySignature(spec);
   }
+
   static hasKeySignature(spec: string): boolean {
     return Tables.hasKeySignature(spec);
   }
+
   static getKeySignatures(): Record<string, { acc?: string; num: number }> {
     return Tables.getKeySignatures();
   }
+
   static clefProperties(clef: string): { lineShift: number } {
     return Tables.clefProperties(clef);
   }
+
   // eslint-disable-next-line
   static keyProperties(key: string, clef?: string, params?: any): any {
     return Tables.keyProperties(key, clef, params);
   }
+
   static durationToTicks(duration: string): number {
     return Tables.durationToTicks(duration);
   }
