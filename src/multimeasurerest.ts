@@ -3,6 +3,7 @@
 // This class implements multiple measure rests.
 
 import { Element } from './element';
+import { Glyphs } from './glyphs';
 import { Metrics } from './metrics';
 import { RenderContext } from './rendercontext';
 import { Stave } from './stave';
@@ -157,16 +158,16 @@ export class MultiMeasureRest extends Element {
     const elMiddle = new Element();
     let txt = '';
     for (let i = 0; i < n4; ++i) {
-      txt += '\ue4e1' /*restLonga*/ + ' ';
+      txt += Glyphs.restLonga + ' ';
     }
     for (let i = 0; i < n2; ++i) {
-      txt += '\ue4e2' /*restDoubleWhole*/ + ' ';
+      txt += Glyphs.restDoubleWhole + ' ';
     }
     elMiddle.setText(txt);
     const elTop = new Element();
     txt = '';
     for (let i = 0; i < n1; ++i) {
-      txt += '\ue4e3' /*restWhole*/ + ' ';
+      txt += Glyphs.restWhole + ' ';
     }
     elTop.setText(txt);
 

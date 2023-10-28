@@ -1,6 +1,7 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // @author: Larry Kuhns 2011
 
+import { Glyphs } from './glyphs';
 import { Metrics } from './metrics';
 import { Stave } from './stave';
 import { StaveModifier } from './stavemodifier';
@@ -100,14 +101,14 @@ export class Repetition extends StaveModifier {
 
   drawCodaFixed(stave: Stave, x: number): this {
     const y = stave.getYForTopText(stave.getNumLines());
-    this.text = '\ue048' /*coda*/;
+    this.text = Glyphs.coda;
     this.renderText(stave.checkContext(), x, y + Metrics.get('Repetition.coda.offsetY'));
     return this;
   }
 
   drawSegnoFixed(stave: Stave, x: number): this {
     const y = stave.getYForTopText(stave.getNumLines());
-    this.text = '\ue047' /*segno*/;
+    this.text = Glyphs.segno;
     this.renderText(stave.checkContext(), x, y + Metrics.get('Repetition.segno.offsetY'));
     return this;
   }

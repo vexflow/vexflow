@@ -16,6 +16,7 @@ import { Flow } from '../src/flow';
 import { FontWeight } from '../src/font';
 import { Formatter } from '../src/formatter';
 import { FretHandFinger } from '../src/frethandfinger';
+import { Glyphs } from '../src/glyphs';
 import { Metrics } from '../src/metrics';
 import { ModifierPosition } from '../src/modifier';
 import { Note } from '../src/note';
@@ -453,7 +454,7 @@ function justifyStaveNotes(options: TestOptions): void {
 
     f.Formatter()
       .joinVoices(voices)
-      .format(voices, width - (Stave.defaultPadding + getGlyphWidth('\uE050' /*gClef*/)));
+      .format(voices, width - (Stave.defaultPadding + getGlyphWidth(Glyphs.gClef)));
 
     // Show the the width of notes via a horizontal line with red, green, yellow, blue, gray indicators.
     voices[0].getTickables().forEach((note) => Note.plotMetrics(ctx, note, y + 140)); // Bottom line.
@@ -549,8 +550,7 @@ function multiStaves(options: TestOptions): void {
   ];
 
   const staveYs = [20, 130, 250];
-  let staveWidth =
-    width + getGlyphWidth('\uE050' /*gClef*/) + getGlyphWidth('\uE088' /*timeSig8*/) + Stave.defaultPadding;
+  let staveWidth = width + getGlyphWidth(Glyphs.gClef) + getGlyphWidth(Glyphs.timeSig8) + Stave.defaultPadding;
   let staves = [
     f.Stave({ y: staveYs[0], width: staveWidth }).addClef('treble').addTimeSignature('6/8'),
     f.Stave({ y: staveYs[1], width: staveWidth }).addClef('treble').addTimeSignature('6/8'),

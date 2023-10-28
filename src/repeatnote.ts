@@ -1,15 +1,16 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 
 import { GlyphNote, GlyphNoteOptions } from './glyphnote';
+import { Glyphs } from './glyphs';
 import { NoteStruct } from './note';
 import { Category } from './typeguard';
 
 // Map `type` to SMuFL glyph code.
 const CODES: Record<string, string> = {
-  '1': '\uE500' /*repeat1Bar*/,
-  '2': '\uE501' /*repeat2Bars*/,
-  '4': '\uE502' /*repeat4Bars*/,
-  slash: '\uE504' /*repeatBarSlash*/,
+  '1': Glyphs.repeat1Bar,
+  '2': Glyphs.repeat2Bars,
+  '4': Glyphs.repeat4Bars,
+  slash: Glyphs.repeatBarSlash,
 };
 
 export class RepeatNote extends GlyphNote {

@@ -2,6 +2,7 @@
 // MIT License
 
 import { Element } from './element';
+import { Glyphs } from './glyphs';
 import { Metrics } from './metrics';
 import { RenderContext } from './rendercontext';
 import { StaveNote } from './stavenote';
@@ -55,8 +56,8 @@ export class PedalMarking extends Element {
 
   /** Glyph data */
   static readonly GLYPHS: Record<string, string> = {
-    pedalDepress: '\uE650' /*keyboardPedalPed*/,
-    pedalRelease: '\uE655' /*keyboardPedalUp*/,
+    pedalDepress: Glyphs.keyboardPedalPed,
+    pedalRelease: Glyphs.keyboardPedalUp,
   };
 
   /** Pedal type as number. */

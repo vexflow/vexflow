@@ -5,6 +5,7 @@
 // that can be arpeggiated, brushed, rasgueado, etc.
 
 import { Element } from './element';
+import { Glyphs } from './glyphs';
 import { Metrics } from './metrics';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
@@ -137,7 +138,7 @@ export class Stroke extends Modifier {
       case Stroke.Type.BRUSH_DOWN:
       case Stroke.Type.ROLL_DOWN:
       case Stroke.Type.RASGUEADO_DOWN:
-        arrow = '\ueb78' /*arrowheadBlackUp*/;
+        arrow = Glyphs.arrowheadBlackUp;
         arrowY = topY;
         topY -= lineSpace / 2;
         botY += lineSpace / 2;
@@ -145,7 +146,7 @@ export class Stroke extends Modifier {
       case Stroke.Type.BRUSH_UP:
       case Stroke.Type.ROLL_UP:
       case Stroke.Type.RASGUEADO_UP:
-        arrow = '\ueb7c' /*arrowheadBlackDown*/;
+        arrow = Glyphs.arrowheadBlackDown;
         arrowY = botY + lineSpace;
         topY -= lineSpace / 2;
         break;
@@ -162,8 +163,7 @@ export class Stroke extends Modifier {
       ctx.fillRect(x + this.xShift, topY, 1, botY - topY);
     } else {
       // Select the wiggle glyph depending on the arrow direction
-      const lineGlyph =
-        arrow === '\ueb7c' /*arrowheadBlackDown*/ ? '\ueaaa' /*wiggleArpeggiatoDown*/ : '\ueaa9'; /*wiggleArpeggiatoUp*/
+      const lineGlyph = arrow === Glyphs.arrowheadBlackDown ? Glyphs.wiggleArpeggiatoDown : Glyphs.wiggleArpeggiatoUp;
       let txt = '';
       const el = new Element();
       // add glyphs until the required length is achieved
