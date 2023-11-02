@@ -82,17 +82,18 @@ import { VibratoBracket } from './vibratobracket';
 import { Voice, VoiceMode, VoiceTime } from './voice';
 
 export class VexFlow {
-  static get BUILD() {
-    // VERSION, ID, and DATE are imported from version.ts.
-    return {
-      /** version number. */
-      VERSION: VERSION,
-      /** git commit ID that this library was built from. */
-      ID: ID,
-      /** The date when this library was compiled. */
-      DATE: DATE,
-    };
-  }
+  // VERSION, ID, and DATE are imported from version.ts.
+  // INFO is set by the entry file in vexflow/entry/.
+  static BUILD = {
+    // version number.
+    VERSION: VERSION,
+    // git commit ID that this library was built from.
+    ID: ID,
+    // The date when this library was compiled.
+    DATE: DATE,
+    // Which build is this? vexflow, vexflow-bravura, vexflow-core, etc.
+    INFO: '',
+  };
 
   static Accidental = Accidental;
   static Annotation = Annotation;

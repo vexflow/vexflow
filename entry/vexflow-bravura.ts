@@ -16,12 +16,11 @@ const fontBravura = Font.load('Bravura', Bravura, { display: 'block' });
 const fontAcademico = Font.load('Academico', Academico, { display: 'swap' });
 const fontAcademicoBold = Font.load('Academico', AcademicoBold, { display: 'swap', weight: 'bold' });
 
+VexFlow.BUILD.INFO = 'vexflow-bravura';
 VexFlow.setFonts('Bravura', 'Academico');
 Promise.allSettled([fontBravura, fontAcademico, fontAcademicoBold]).then(() => {
   //
 });
 
-// Re-export all exports from index.ts.
 export * from '../src/index';
-// Also collect all exports into a default export for CJS projects.
-export * as default from '../src/index';
+export default VexFlow;

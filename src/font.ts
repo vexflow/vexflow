@@ -300,6 +300,7 @@ export class Font {
    *
    * @param fontName
    * @param url The absolute or relative URL to the woff2/otf file. It can also be a data URI.
+   * @param descriptors See: https://developer.mozilla.org/en-US/docs/Web/API/FontFace/FontFace#descriptors
    */
   static async load(fontName: string, url?: string, descriptors?: Record<string, string>): Promise<FontFace> {
     if (typeof FontFace === 'undefined') {

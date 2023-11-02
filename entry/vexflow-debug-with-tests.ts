@@ -49,22 +49,15 @@ const fontLoadPromises = [
   fontPetalumaScript,
 ];
 
+VexFlow.BUILD.INFO = 'vexflow-debug-with-tests';
 VexFlow.setFonts('Bravura', 'Academico');
 
 Promise.allSettled(fontLoadPromises).then(() => {
   //
 });
 
-// Re-export all exports from vexflow/src/index.ts.
 export * from '../src/index';
-// Re-export all exports from vexflow/tests/index.ts.
 export * from '../tests/index';
-
-// Also collect all exports into a default export for CJS projects.
-// export default {
-//   ...VexSrc,
-//   ...VexTests,
-// };
 
 // VexFlow classes can be accessed via VexFlow.* or by directly importing a library class.
 // Tests can be accessed via VexFlow.Test.* or by directly importing a test class.

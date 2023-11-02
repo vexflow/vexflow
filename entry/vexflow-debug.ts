@@ -46,13 +46,12 @@ const fontLoadPromises = [
   fontPetalumaScript,
 ];
 
+VexFlow.BUILD.INFO = 'vexflow-debug';
 VexFlow.setFonts('Bravura', 'Academico');
 
 Promise.allSettled(fontLoadPromises).then(() => {
   //
 });
 
-// Re-export all exports from vexflow/src/index.ts.
 export * from '../src/index';
-// Also collect all exports into a default export for CJS projects.
-export * as default from '../src/index';
+export default VexFlow;
