@@ -3,10 +3,10 @@
 //
 // Text Note Tests
 
+import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Crescendo } from '../src/crescendo';
-import { Flow } from '../src/flow';
 import { Note } from '../src/note';
 import { Stave } from '../src/stave';
 import { TextNote } from '../src/textnote';
@@ -127,14 +127,14 @@ function superscriptAndSubscript(options: TestOptions): void {
   ]);
 
   const notes2 = [
-    f.TextNote({ text: Flow.unicode.flat + 'I', superscript: '+5', duration: '8' }),
-    f.TextNote({ text: 'D' + Flow.unicode.sharp + '/F', duration: '4d', superscript: 'sus2' }),
+    f.TextNote({ text: VexFlow.unicode.flat + 'I', superscript: '+5', duration: '8' }),
+    f.TextNote({ text: 'D' + VexFlow.unicode.sharp + '/F', duration: '4d', superscript: 'sus2' }),
     f.TextNote({ text: 'ii', superscript: '6', subscript: '4', duration: '8' }),
-    f.TextNote({ text: 'C', superscript: Flow.unicode.triangle + '7', subscript: '', duration: '8' }),
-    f.TextNote({ text: 'vii', superscript: Flow.unicode['o-with-slash'] + '7', duration: '8' }),
+    f.TextNote({ text: 'C', superscript: VexFlow.unicode.triangle + '7', subscript: '', duration: '8' }),
+    f.TextNote({ text: 'vii', superscript: VexFlow.unicode['o-with-slash'] + '7', duration: '8' }),
     f.TextNote({ text: 'V', superscript: '7', duration: '8' }),
   ];
-  options.assert.equal(notes2[0].getText(), Flow.unicode.flat + 'I', 'TextNote.getText() return .text');
+  options.assert.equal(notes2[0].getText(), VexFlow.unicode.flat + 'I', 'TextNote.getText() return .text');
 
   const voice2 = score.voice(notes2);
   voice2.getTickables().forEach((note) => {

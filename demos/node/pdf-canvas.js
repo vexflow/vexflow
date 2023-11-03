@@ -29,12 +29,12 @@ registerFont(fontsDir + 'petalumascript/petalumascript.otf', { family: 'Petaluma
 
 const outputFile = 'output/score-canvas.pdf';
 
-const { Stave, StaveNote, Formatter, Renderer } = Vex.Flow;
+const { Stave, StaveNote, Formatter, Renderer } = VexFlow;
 
-Vex.Flow.setFonts('Bravura');
-// Vex.Flow.setFonts('Petaluma');
+VexFlow.setFonts('Bravura');
+// VexFlow.setFonts('Petaluma');
 
-console.log('VexFlow Build: ' + Vex.Flow.BUILD.ID);
+console.log('VexFlow Build: ' + VexFlow.BUILD.ID);
 
 const dom = new JSDOM(
   `<!DOCTYPE html><html><head><style></style></head><body><canvas id="container"></canvas><body></html>`

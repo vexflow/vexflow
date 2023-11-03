@@ -15,18 +15,18 @@ import { log } from './util';
 
 // eslint-disable-next-line
 function L(...args: any[]) {
-  if (Ornament.DEBUG) log('Vex.Flow.Ornament', args);
+  if (Ornament.DEBUG) log('VexFlow.Ornament', args);
 }
 
 /**
  * Ornament implements ornaments as modifiers that can be
  * attached to notes. The complete list of ornaments is available in
- * `tables.ts` under `Vex.Flow.ornamentCodes`.
+ * `tables.ts` under `VexFlow.ornamentCodes`.
  *
  * See `tests/ornament_tests.ts` for usage examples.
  */
 export class Ornament extends Modifier {
-  /** To enable logging for this class. Set `Vex.Flow.Ornament.DEBUG` to `true`. */
+  /** To enable logging for this class. Set `VexFlow.Ornament.DEBUG` to `true`. */
   static DEBUG: boolean = false;
 
   /** Ornaments category string. */
@@ -137,7 +137,7 @@ export class Ornament extends Modifier {
 
   /**
    * Create a new ornament of type `type`, which is an entry in
-   * `Vex.Flow.ornamentCodes` in `tables.ts`.
+   * `VexFlow.ornamentCodes` in `tables.ts`.
    */
   constructor(type: string) {
     super();

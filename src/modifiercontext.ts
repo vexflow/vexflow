@@ -46,10 +46,10 @@ export interface ModifierContextMetrics {
 
 export type ModifierContextMember = Tickable | Modifier | StaveNote | TabNote;
 
-// To enable logging for this class. Set `Vex.Flow.ModifierContext.DEBUG` to `true`.
+// To enable logging for this class. Set `VexFlow.ModifierContext.DEBUG` to `true`.
 // eslint-disable-next-line
 function L(...args: any[]) {
-  if (ModifierContext.DEBUG) log('Vex.Flow.ModifierContext', args);
+  if (ModifierContext.DEBUG) log('VexFlow.ModifierContext', args);
 }
 
 export class ModifierContext {

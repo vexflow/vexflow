@@ -2,9 +2,9 @@
 // Run:
 //   node require2.js
 
-// const { Vex, Flow, Stave, StaveNote } = require('vexflow');
+// const { VexFlow, Stave, StaveNote } = require('vexflow');
 // const Vex2 = require('vexflow');
-const { Vex, Flow, Stave, StaveNote } = require('vxflw-early-access');
+const { VexFlow, Stave, StaveNote } = require('vxflw-early-access');
 const Vex2 = require('vxflw-early-access');
 
 const Vex3 = require('../../build/cjs/vexflow-debug.js');
@@ -21,10 +21,7 @@ console.log(Vex5.StaveNote);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // The following statements return true:
-console.log(Vex.Flow === Flow);
-console.log(Vex.Flow.StaveNote === Flow.StaveNote);
-console.log(StaveNote === Flow.StaveNote);
-console.log(Vex2.Vex === Vex);
-console.log(Vex2.Flow === Flow);
+console.log(StaveNote === VexFlow.StaveNote);
+console.log(Vex2.VexFlow === VexFlow);
 console.log(Vex2.StaveNote === StaveNote);
-console.log(Flow.Stave === Stave);
+console.log(VexFlow.Stave === Stave);

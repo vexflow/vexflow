@@ -23,7 +23,7 @@ import { Voice } from './voice';
 // To enable logging for this class. Set `GraceNoteGroup.DEBUG` to `true`.
 // eslint-disable-next-line
 function L(...args: any) {
-  if (GraceNoteGroup.DEBUG) log('Vex.Flow.GraceNoteGroup', args);
+  if (GraceNoteGroup.DEBUG) log('VexFlow.GraceNoteGroup', args);
 }
 
 /** GraceNoteGroup is used to format and render grace notes. */

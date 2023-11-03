@@ -8,14 +8,14 @@ importScripts('../../build/cjs/' + libName);
 const color = '#74AB00';
 
 onmessage = function (e) {
-  postMessage('VexFlow BUILD: ' + JSON.stringify(Vex.Flow.BUILD));
+  postMessage('VexFlow BUILD: ' + JSON.stringify(VexFlow.BUILD));
 
   function draw() {
     const fonts = ['Bravura', 'GonvilleSmufl', 'Petaluma', 'Leland'];
     const randomFont = fonts[Math.floor(Math.random() * fonts.length)];
-    Vex.Flow.setFonts(randomFont);
+    VexFlow.setFonts(randomFont);
 
-    const { Stave, CanvasContext, BarlineType, StaveNote, Formatter } = Vex.Flow;
+    const { Stave, CanvasContext, BarlineType, StaveNote, Formatter } = VexFlow;
 
     const offscreenCanvas = e.data.canvas;
     const offscreenCtx = offscreenCanvas.getContext('2d');
@@ -41,5 +41,5 @@ onmessage = function (e) {
   }
 
   // We need to make sure the SMuFL fonts are loaded before VexFlow does any drawing.
-  Vex.Flow.loadFonts('Bravura', 'Petaluma', 'GonvilleSmufl', 'Leland').then(draw);
+  VexFlow.loadFonts('Bravura', 'Petaluma', 'GonvilleSmufl', 'Leland').then(draw);
 };

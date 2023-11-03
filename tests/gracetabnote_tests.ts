@@ -5,7 +5,7 @@
 
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
-import { Flow } from '../src/flow';
+import { VexFlow } from '../src/vexflow';
 import { Formatter } from '../src/formatter';
 import { GraceNoteGroup } from '../src/gracenotegroup';
 import { GraceTabNote } from '../src/gracetabnote';
@@ -71,7 +71,7 @@ function simple(options: TestOptions, contextBuilder: ContextBuilder): void {
   note2.addModifier(new GraceNoteGroup(gracenotes2), 0);
   note3.addModifier(new GraceNoteGroup(gracenotes3), 0);
 
-  const voice = new Voice(Flow.TIME4_4);
+  const voice = new Voice(VexFlow.TIME4_4);
   voice.addTickables([note0, note1, note2, note3]);
 
   new Formatter().joinVoices([voice]).format([voice], 250);
@@ -104,7 +104,7 @@ function slurred(options: TestOptions, contextBuilder: ContextBuilder): void {
   note0.addModifier(new GraceNoteGroup(gracenotes0, true), 0);
   note1.addModifier(new GraceNoteGroup(gracenotes1, true), 0);
 
-  const voice = new Voice(Flow.TIME4_4);
+  const voice = new Voice(VexFlow.TIME4_4);
   voice.addTickables([note0, note1]);
 
   new Formatter().joinVoices([voice]).format([voice], 200);

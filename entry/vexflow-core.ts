@@ -9,7 +9,8 @@
 //
 // The webpack config inside Gruntfile.js sets the mode to 'production' to produce a minified build.
 
-// Re-export all exports from index.ts.
+import { VexFlow } from '../src/vexflow';
+
+VexFlow.BUILD.INFO = 'vexflow-core';
 export * from '../src/index';
-// Also collect all exports into a default export for CJS projects.
-export * as default from '../src/index';
+export default VexFlow;

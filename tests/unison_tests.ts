@@ -2,9 +2,8 @@
 // MIT License
 //
 // Unison Tests
+import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
-
-import { Flow } from '../src/flow';
 
 const UnisonTests = {
   Start(): void {
@@ -32,7 +31,7 @@ const UnisonTests = {
 };
 
 function simple(options: TestOptions): void {
-  Flow.UNISON = options.params.unison;
+  VexFlow.UNISON = options.params.unison;
   const vf = VexFlowTests.makeFactory(options, 500, 200);
   const score = vf.EasyScore();
 
@@ -48,7 +47,7 @@ function simple(options: TestOptions): void {
 }
 
 function style(options: TestOptions): void {
-  Flow.UNISON = options.params.unison;
+  VexFlow.UNISON = options.params.unison;
   const vf = VexFlowTests.makeFactory(options, 500, 200);
   const score = vf.EasyScore();
 
@@ -68,7 +67,7 @@ function style(options: TestOptions): void {
 }
 
 function breve(options: TestOptions): void {
-  Flow.UNISON = options.params.unison;
+  VexFlow.UNISON = options.params.unison;
   const vf = VexFlowTests.makeFactory(options, 500, 200);
   const score = vf.EasyScore();
 

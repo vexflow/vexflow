@@ -14,7 +14,7 @@ import { defined, RuntimeError, sumArray } from './util';
 export interface VoiceTime {
   numBeats: number;
   beatValue: number;
-  /** Defaults to `Flow.RESOLUTION` if not provided. */
+  /** Defaults to `VexFlow.RESOLUTION` if not provided. */
   resolution?: number;
 }
 

@@ -3,9 +3,9 @@
 //
 // TickContext Tests
 
+import { VexFlow } from '../src/vexflow';
 import { VexFlowTests } from './vexflow_test_helpers';
 
-import { Flow } from '../src/flow';
 import { TickContext } from '../src/tickcontext';
 import { MockTickable } from './mocks';
 
@@ -23,7 +23,7 @@ function currentTick(assert: Assert): void {
 }
 
 function tracking(assert: Assert): void {
-  const BEAT = (1 * Flow.RESOLUTION) / 4;
+  const BEAT = (1 * VexFlow.RESOLUTION) / 4;
 
   const tickables = [
     new MockTickable().setTicks(BEAT).setWidth(10),

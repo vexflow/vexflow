@@ -31,9 +31,9 @@ import { Vex } from 'vxflw-early-access';
 // Normally, you would use a bundler like webpack / esbuild / rollup / etc to do this.
 //   <script src="..." type="module"></script>.
 
-console.log('VexFlow VERSION: ' + Vex.Flow.BUILD.VERSION);
-console.log('VexFlow BUILD ID: ' + Vex.Flow.BUILD.ID);
-console.log('VexFlow BUILD DATE: ' + Vex.Flow.BUILD.DATE);
+console.log('VexFlow VERSION: ' + VexFlow.BUILD.VERSION);
+console.log('VexFlow BUILD ID: ' + VexFlow.BUILD.ID);
+console.log('VexFlow BUILD DATE: ' + VexFlow.BUILD.DATE);
 
 // Some notes about running as an ES module.
 // console.log(this);       // this === undefined

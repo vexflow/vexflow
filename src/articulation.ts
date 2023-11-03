@@ -23,7 +23,7 @@ export interface ArticulationStruct {
 
 // eslint-disable-next-line
 function L(...args: any[]) {
-  if (Articulation.DEBUG) log('Vex.Flow.Articulation', args);
+  if (Articulation.DEBUG) log('VexFlow.Articulation', args);
 }
 
 const { ABOVE, BELOW } = Modifier.Position;
@@ -159,12 +159,12 @@ export function getInitialOffset(note: Note, position: number): number {
 /**
  * Articulations and Accents are modifiers that can be
  * attached to notes. The complete list of articulations is available in
- * `tables.ts` under `Vex.Flow.articulationCodes`.
+ * `tables.ts` under `VexFlow.articulationCodes`.
  *
  * See `tests/articulation_tests.ts` for usage examples.
  */
 export class Articulation extends Modifier {
-  /** To enable logging for this class. Set `Vex.Flow.Articulation.DEBUG` to `true`. */
+  /** To enable logging for this class. Set `VexFlow.Articulation.DEBUG` to `true`. */
   static DEBUG: boolean = false;
 
   /** Articulations category string. */
@@ -289,7 +289,7 @@ export class Articulation extends Modifier {
 
   /**
    * Create a new articulation.
-   * @param type entry in `Vex.Flow.articulationCodes` in `tables.ts` or Glyph code.
+   * @param type entry in `VexFlow.articulationCodes` in `tables.ts` or Glyph code.
    *
    * Notes default positions (see https://w3c.github.io/smufl/latest/tables/articulation.html):
    * - Even codes will be positioned ABOVE

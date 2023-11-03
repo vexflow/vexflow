@@ -3,10 +3,10 @@
 //
 // MultiMeasureRest Tests
 
+import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Element } from '../src/element';
-import { Flow } from '../src/flow';
 import { Metrics } from '../src/metrics';
 import { MultimeasureRestRenderOptions } from '../src/multimeasurerest';
 
@@ -66,7 +66,7 @@ function simple(options: TestOptions): void {
         spacingBetweenLinesPx: 15,
         useSymbols: true,
         numberGlyphPoint: 40 * 1.5,
-        semibreveRestGlyphScale: Flow.NOTATION_FONT_SCALE * 1.5,
+        semibreveRestGlyphScale: VexFlow.NOTATION_FONT_SCALE * 1.5,
       },
     ],
   ];

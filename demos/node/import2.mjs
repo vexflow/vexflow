@@ -13,7 +13,7 @@ import { default as fs } from 'fs';
 
 import { JSDOM } from 'jsdom';
 
-// Reference to Vex.Flow, assigned in the step1() function.
+// Reference to VexFlow, assigned in the step1() function.
 let VF;
 
 async function waitForKeyPress() {
@@ -105,9 +105,9 @@ async function step0() {
 }
 
 async function step1() {
-  // const { Flow } = await import('vexflow');
-  const { Flow } = await import('vxflw-early-access');
-  VF = Flow;
+  // const { VexFlow } = await import('vexflow');
+  const { VexFlow } = await import('vxflw-early-access');
+  VF = VexFlow;
 
   console.log('Loaded VexFlow Version: ', VF.BUILD.VERSION, ' Build: ', VF.BUILD.ID);
   console.log('The default music font stack is:', VF.getFonts());

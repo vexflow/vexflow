@@ -18,7 +18,6 @@ export * from './dot';
 export * from './easyscore';
 export * from './element';
 export * from './factory';
-export * from './flow';
 export * from './font';
 // Do not export './fonts/*' because they are used by the entry/* files.
 export * from './formatter';
@@ -66,7 +65,7 @@ export * from './stringnumber';
 export * from './strokes';
 export * from './svgcontext';
 export * from './system';
-// Do not export './tables' because it is internal. Its public API is accessible via Vex.Flow.*.
+// Do not export './tables' because it is internal. Its public API is accessible via VexFlow.*.
 export * from './tabnote';
 export * from './tabslide';
 export * from './tabstave';
@@ -83,8 +82,8 @@ export * from './tuning';
 export * from './tuplet';
 export * from './typeguard';
 export * from './util';
-// Do not export './version'. It is accessible via Vex.Flow.BUILD.
-export * from './vex';
+// Do not export './version'. It is accessible via VexFlow.BUILD.
+export * from './vexflow';
 export * from './vibrato';
 export * from './vibratobracket';
 export * from './voice';

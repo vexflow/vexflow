@@ -22,10 +22,10 @@ export interface TextBracketParams {
   position?: number | string;
 }
 
-// To enable logging for this class. Set `Vex.Flow.TextBracket.DEBUG` to `true`.
+// To enable logging for this class. Set `VexFlow.TextBracket.DEBUG` to `true`.
 // eslint-disable-next-line
 function L(...args: any[]) {
-  if (TextBracket.DEBUG) log('Vex.Flow.TextBracket', args);
+  if (TextBracket.DEBUG) log('VexFlow.TextBracket', args);
 }
 
 export enum TextBracketPosition {

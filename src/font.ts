@@ -262,8 +262,8 @@ export class Font {
 
   /**
    * These font files will be loaded from the CDN specified by `Font.HOST_URL`.
-   * `await Vex.Flow.loadFonts()` loads all of the fonts below. Useful during debugging.
-   * `await Vex.Flow.loadFonts(FontName1, FontName2)` loads only the specified fonts.
+   * `await VexFlow.loadFonts()` loads all of the fonts below. Useful during debugging.
+   * `await VexFlow.loadFonts(FontName1, FontName2)` loads only the specified fonts.
    */
   static FILES: Record<string /* fontName */, string /* fontPath */> = {
     Academico: 'academico/academico.woff2',
@@ -300,6 +300,7 @@ export class Font {
    *
    * @param fontName
    * @param url The absolute or relative URL to the woff2/otf file. It can also be a data URI.
+   * @param descriptors See: https://developer.mozilla.org/en-US/docs/Web/API/FontFace/FontFace#descriptors
    */
   static async load(fontName: string, url?: string, descriptors?: Record<string, string>): Promise<FontFace> {
     if (typeof FontFace === 'undefined') {

@@ -3,7 +3,7 @@
 //
 // VexFlow Test Support Library
 
-import { ContextBuilder, Factory, Flow, RenderContext, Renderer } from '../src/index';
+import { ContextBuilder, Factory, RenderContext, Renderer, VexFlow } from '../src/index';
 
 import { Metrics } from '../src/metrics';
 import { globalObject } from '../src/util';
@@ -26,11 +26,11 @@ export interface TestOptions {
 // Each test case will switch through the available fonts, and then restore the original font when done.
 let originalFontNames: string[];
 function useTempFontStack(fontName: string): void {
-  originalFontNames = Flow.getFonts();
-  Flow.setFonts(...VexFlowTests.FONT_STACKS[fontName]);
+  originalFontNames = VexFlow.getFonts();
+  VexFlow.setFonts(...VexFlowTests.FONT_STACKS[fontName]);
 }
 function restoreOriginalFontStack(): void {
-  Flow.setFonts(...originalFontNames);
+  VexFlow.setFonts(...originalFontNames);
 }
 
 // A micro util inspired by jQuery.
@@ -453,10 +453,3 @@ export const MINOR_KEYS = [
   'D#m',
   'A#m',
 ];
-
-// VexFlow classes can be accessed via Vex.Flow.* or by directly importing a library class.
-// Tests can be accessed via Vex.Flow.Test.* or by directly importing a test class.
-// Here we set Vex.Flow.Test = VexFlowTests.
-// eslint-disable-next-line
-// @ts-ignore
-Flow.Test = VexFlowTests;

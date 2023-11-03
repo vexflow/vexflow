@@ -3,12 +3,12 @@
 //
 // Font Tests
 
+import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Accidental } from '../src/accidental';
 import { Bend } from '../src/bend';
 import { CanvasContext } from '../src/canvascontext';
-import { Flow } from '../src/flow';
 import { Font, FontStyle, FontWeight } from '../src/font';
 import { PedalMarking } from '../src/pedalmarking';
 import { StaveNote } from '../src/stavenote';
@@ -154,7 +154,7 @@ function setTextFontToGeorgia(options: TestOptions): void {
   options.assert.ok(true);
 }
 function setMusicFontToPetaluma(options: TestOptions): void {
-  Flow.setFonts('Petaluma');
+  VexFlow.setFonts('Petaluma');
 
   const factory = VexFlowTests.makeFactory(options, 400, 200);
   const stave = factory.Stave({ y: 40 });

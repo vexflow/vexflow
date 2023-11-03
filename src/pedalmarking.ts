@@ -12,7 +12,7 @@ import { log, RuntimeError } from './util';
 
 // eslint-disable-next-line
 function L(...args: any[]) {
-  if (PedalMarking.DEBUG) log('Vex.Flow.PedalMarking', args);
+  if (PedalMarking.DEBUG) log('VexFlow.PedalMarking', args);
 }
 
 /**
@@ -34,7 +34,7 @@ function drawPedalGlyph(name: string, ctx: RenderContext, x: number, y: number):
  * custom text for the release/depress pedal markings.
  */
 export class PedalMarking extends Element {
-  /** To enable logging for this class. Set `Vex.Flow.PedalMarking.DEBUG` to `true`. */
+  /** To enable logging for this class. Set `VexFlow.PedalMarking.DEBUG` to `true`. */
   static DEBUG: boolean = false;
 
   static get CATEGORY(): string {

@@ -5,9 +5,9 @@
 
 // TODO: Should we change StaveConnector.type => StaveConnectorType? We are inconsistent with this.
 
+import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
-import { Flow } from '../src/flow';
 import { Modifier } from '../src/modifier';
 import { ContextBuilder } from '../src/renderer';
 import { Stave } from '../src/stave';
@@ -52,8 +52,8 @@ function drawSingle(options: TestOptions, contextBuilder: ContextBuilder): void 
 }
 
 function drawSingle4pxStaveLines(options: TestOptions, contextBuilder: ContextBuilder): void {
-  const oldThickness = Flow.STAVE_LINE_THICKNESS;
-  Flow.STAVE_LINE_THICKNESS = 4;
+  const oldThickness = VexFlow.STAVE_LINE_THICKNESS;
+  VexFlow.STAVE_LINE_THICKNESS = 4;
   const ctx = contextBuilder(options.elementId, 400, 300);
   const stave1 = new Stave(25, 10, 300);
   const stave2 = new Stave(25, 120, 300);
@@ -65,7 +65,7 @@ function drawSingle4pxStaveLines(options: TestOptions, contextBuilder: ContextBu
   stave1.draw();
   stave2.draw();
   connector.draw();
-  Flow.STAVE_LINE_THICKNESS = oldThickness;
+  VexFlow.STAVE_LINE_THICKNESS = oldThickness;
 
   options.assert.ok(true, 'all pass');
 }

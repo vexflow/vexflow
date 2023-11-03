@@ -3,6 +3,7 @@
 //
 // Formatter Tests
 
+import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Accidental } from '../src/accidental';
@@ -12,7 +13,6 @@ import { Beam } from '../src/beam';
 import { Bend } from '../src/bend';
 import { Dot } from '../src/dot';
 import { Element } from '../src/element';
-import { Flow } from '../src/flow';
 import { FontWeight } from '../src/font';
 import { Formatter } from '../src/formatter';
 import { FretHandFinger } from '../src/frethandfinger';
@@ -73,7 +73,7 @@ function buildTickContexts(assert: Assert): void {
     return new MockTickable().setTicks(beat);
   }
 
-  const BEAT = (1 * Flow.RESOLUTION) / 4;
+  const BEAT = (1 * VexFlow.RESOLUTION) / 4;
 
   const tickables1 = [
     createTickable(BEAT).setWidth(10),
@@ -87,8 +87,8 @@ function buildTickContexts(assert: Assert): void {
     createTickable(BEAT).setWidth(30),
   ];
 
-  const voice1 = new Voice(Flow.TIME4_4);
-  const voice2 = new Voice(Flow.TIME4_4);
+  const voice1 = new Voice(VexFlow.TIME4_4);
+  const voice2 = new Voice(VexFlow.TIME4_4);
 
   voice1.addTickables(tickables1);
   voice2.addTickables(tickables2);

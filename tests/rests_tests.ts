@@ -7,7 +7,7 @@ import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Beam } from '../src/beam';
 import { Dot } from '../src/dot';
-import { Flow } from '../src/flow';
+import { VexFlow } from '../src/vexflow';
 import { Formatter } from '../src/formatter';
 import { RenderContext } from '../src/rendercontext';
 import { ContextBuilder } from '../src/renderer';
@@ -377,8 +377,8 @@ function multiVoice(options: TestOptions, contextBuilder: ContextBuilder): void 
     noteOnStave({ keys: ['e/3'], stemDirection: -1, duration: '8' }),
   ];
 
-  const voice1 = new Voice(Flow.TIME4_4).addTickables(notes1);
-  const voice2 = new Voice(Flow.TIME4_4).addTickables(notes2);
+  const voice1 = new Voice(VexFlow.TIME4_4).addTickables(notes1);
+  const voice2 = new Voice(VexFlow.TIME4_4).addTickables(notes2);
 
   // Set { alignRests: true } to align rests (vertically) with nearby notes in each voice.
   new Formatter().joinVoices([voice1, voice2]).formatToStave([voice1, voice2], stave, { alignRests: true });

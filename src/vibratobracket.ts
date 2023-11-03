@@ -10,12 +10,12 @@ import { Vibrato } from './vibrato';
 
 // eslint-disable-next-line
 function L(...args: any[]) {
-  if (VibratoBracket.DEBUG) log('Vex.Flow.VibratoBracket', args);
+  if (VibratoBracket.DEBUG) log('VexFlow.VibratoBracket', args);
 }
 
 /** `VibratoBracket` renders vibrato effect between two notes. */
 export class VibratoBracket extends Element {
-  /** To enable logging for this class. Set `Vex.Flow.VibratoBracket.DEBUG` to `true`. */
+  /** To enable logging for this class. Set `VexFlow.VibratoBracket.DEBUG` to `true`. */
   static DEBUG: boolean = false;
 
   static get CATEGORY(): string {

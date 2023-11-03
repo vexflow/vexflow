@@ -59,10 +59,10 @@ export interface StaveNoteStruct extends NoteStruct {
   clef?: string;
 }
 
-// To enable logging for this class. Set `Vex.Flow.StaveNote.DEBUG` to `true`.
+// To enable logging for this class. Set `VexFlow.StaveNote.DEBUG` to `true`.
 // eslint-disable-next-line
 function L(...args: any[]) {
-  if (StaveNote.DEBUG) log('Vex.Flow.StaveNote', args);
+  if (StaveNote.DEBUG) log('VexFlow.StaveNote', args);
 }
 
 const isInnerNoteIndex = (note: StaveNote, index: number) =>

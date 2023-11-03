@@ -75,22 +75,25 @@ import { TimeSigNote } from './timesignote';
 import { Tremolo } from './tremolo';
 import { Tuning } from './tuning';
 import { Tuplet } from './tuplet';
+import { RuntimeError } from './util';
 import { DATE, ID, VERSION } from './version';
 import { Vibrato } from './vibrato';
 import { VibratoBracket } from './vibratobracket';
 import { Voice, VoiceMode, VoiceTime } from './voice';
 
-export class Flow {
-  static get BUILD() {
-    return {
-      /** version number. */
-      VERSION: VERSION,
-      /** git commit ID that this library was built from. */
-      ID: ID,
-      /** The date when this library was compiled. */
-      DATE: DATE,
-    };
-  }
+export class VexFlow {
+  // VERSION, ID, and DATE are imported from version.ts.
+  // INFO is set by the entry file in vexflow/entry/.
+  static BUILD = {
+    // version number.
+    VERSION: VERSION,
+    // git commit ID that this library was built from.
+    ID: ID,
+    // The date when this library was compiled.
+    DATE: DATE,
+    // Which build is this? vexflow, vexflow-bravura, vexflow-core, etc.
+    INFO: '',
+  };
 
   static Accidental = Accidental;
   static Annotation = Annotation;
@@ -116,7 +119,6 @@ export class Flow {
   static FretHandFinger = FretHandFinger;
   static GhostNote = GhostNote;
   static GlyphNote = GlyphNote;
-  static Glyphs = Glyphs;
   static GraceNote = GraceNote;
   static GraceNoteGroup = GraceNoteGroup;
   static GraceTabNote = GraceTabNote;
@@ -171,6 +173,10 @@ export class Flow {
   static Voice = Voice;
   static Volta = Volta;
 
+  static RuntimeError = RuntimeError;
+
+  static Test = undefined; // Set by vexflow_test_helpers.ts in the debug version of this library.
+
   // Exported Enums.
   // Sorted by the module / file they are exported from.
   static AnnotationHorizontalJustify = AnnotationHorizontalJustify;
@@ -181,6 +187,7 @@ export class Flow {
   static CurvePosition = CurvePosition;
   static FontWeight = FontWeight;
   static FontStyle = FontStyle;
+  static Glyphs = Glyphs;
   static ModifierPosition = ModifierPosition;
   static RendererBackends = RendererBackends;
   static RendererLineEndType = RendererLineEndType;
@@ -203,7 +210,7 @@ export class Flow {
    * This is useful for debugging, but not recommended for production because it will load lots of fonts.
    *
    * For example, on the `flow.html` test page, you could call:
-   *   `await Vex.Flow.loadFonts();`
+   *   `await VexFlow.loadFonts();`
    *
    * Alternatively, you may load web fonts with a stylesheet link (e.g., from Google Fonts),
    * and a @font-face { font-family: ... } rule in your CSS.
@@ -231,10 +238,10 @@ export class Flow {
    *
    * Example:
    * ```
-   * await Vex.Flow.loadFonts('Bravura', 'Academico', 'Petaluma', 'Petaluma Script');
-   * Vex.Flow.setFonts('Bravura', 'Academico');
+   * await VexFlow.loadFonts('Bravura', 'Academico', 'Petaluma', 'Petaluma Script');
+   * VexFlow.setFonts('Bravura', 'Academico');
    * ... render a score in Bravura ...
-   * Vex.Flow.setFonts('Petaluma', 'Petaluma Script');
+   * VexFlow.setFonts('Petaluma', 'Petaluma Script');
    * ... render a score in Petaluma...
    * ```
    * See `demos/fonts/` for more examples.
@@ -275,73 +282,96 @@ export class Flow {
   static get NOTATION_FONT_SCALE(): number {
     return Tables.NOTATION_FONT_SCALE;
   }
+
   static set NOTATION_FONT_SCALE(value: number) {
     Tables.NOTATION_FONT_SCALE = value;
   }
+
   static get TABLATURE_FONT_SCALE(): number {
     return Tables.TABLATURE_FONT_SCALE;
   }
+
   static set TABLATURE_FONT_SCALE(value: number) {
     Tables.TABLATURE_FONT_SCALE = value;
   }
+
   static get RESOLUTION(): number {
     return Tables.RESOLUTION;
   }
+
   static set RESOLUTION(value: number) {
     Tables.RESOLUTION = value;
   }
+
   static get SLASH_NOTEHEAD_WIDTH(): number {
     return Tables.SLASH_NOTEHEAD_WIDTH;
   }
+
   static set SLASH_NOTEHEAD_WIDTH(value: number) {
     Tables.SLASH_NOTEHEAD_WIDTH = value;
   }
+
   static get STAVE_LINE_DISTANCE(): number {
     return Tables.STAVE_LINE_DISTANCE;
   }
+
   static set STAVE_LINE_DISTANCE(value: number) {
     Tables.STAVE_LINE_DISTANCE = value;
   }
+
   static get STAVE_LINE_THICKNESS(): number {
     return Tables.STAVE_LINE_THICKNESS;
   }
+
   static set STAVE_LINE_THICKNESS(value: number) {
     Tables.STAVE_LINE_THICKNESS = value;
   }
+
   static get STEM_HEIGHT(): number {
     return Tables.STEM_HEIGHT;
   }
+
   static set STEM_HEIGHT(value: number) {
     Tables.STEM_HEIGHT = value;
   }
+
   static get STEM_WIDTH(): number {
     return Tables.STEM_WIDTH;
   }
+
   static set STEM_WIDTH(value: number) {
     Tables.STEM_WIDTH = value;
   }
+
   static get TIME4_4(): VoiceTime {
     return Tables.TIME4_4;
   }
+
   static get unicode(): Record<string, string> {
     return Tables.unicode;
   }
+
   static keySignature(spec: string): { type: string; line: number }[] {
     return Tables.keySignature(spec);
   }
+
   static hasKeySignature(spec: string): boolean {
     return Tables.hasKeySignature(spec);
   }
+
   static getKeySignatures(): Record<string, { acc?: string; num: number }> {
     return Tables.getKeySignatures();
   }
+
   static clefProperties(clef: string): { lineShift: number } {
     return Tables.clefProperties(clef);
   }
+
   // eslint-disable-next-line
   static keyProperties(key: string, clef?: string, params?: any): any {
     return Tables.keyProperties(key, clef, params);
   }
+
   static durationToTicks(duration: string): number {
     return Tables.durationToTicks(duration);
   }

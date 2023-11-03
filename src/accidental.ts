@@ -34,7 +34,7 @@ type StaveLineAccidentalLayoutMetrics = {
 
 // eslint-disable-next-line
 function L(...args: any[]) {
-  if (Accidental.DEBUG) log('Vex.Flow.Accidental', args);
+  if (Accidental.DEBUG) log('VexFlow.Accidental', args);
 }
 
 /**
@@ -48,7 +48,7 @@ function L(...args: any[]) {
 export class Accidental extends Modifier {
   /** Accidental code provided to the constructor. */
   readonly type: string;
-  /** To enable logging for this class. Set `Vex.Flow.Accidental.DEBUG` to `true`. */
+  /** To enable logging for this class. Set `VexFlow.Accidental.DEBUG` to `true`. */
   static DEBUG: boolean = false;
   protected cautionary: boolean;
 
@@ -501,7 +501,7 @@ export class Accidental extends Modifier {
 
   /**
    * Create accidental.
-   * @param type value from `Vex.Flow.accidentalCodes.accidentals` table in `tables.ts`.
+   * @param type value from `VexFlow.accidentalCodes.accidentals` table in `tables.ts`.
    * For example: `#`, `##`, `b`, `n`, etc.
    */
   constructor(type: string) {

@@ -1,0 +1,29 @@
+html {
+  font-family: 'Georgia', serif;
+  font-size: 18px;
+}
+
+body {
+  margin: 40px 20px;
+  background-color: #181818;
+  color: #ccc;
+}
+
+code {
+  color: #9cf;
+}
+
+pre {
+  margin-left: 100px;
+  color: #9cf;
+}
+
+div#output {
+  display: inline-block;
+  font-size: 0;
+  background-color: #eee;
+}
+
+a {
+  color: #5d7;
+}

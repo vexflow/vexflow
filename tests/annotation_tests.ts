@@ -14,7 +14,7 @@ import { Articulation } from '../src/articulation';
 import { Beam } from '../src/beam';
 import { Bend } from '../src/bend';
 import { ElementStyle } from '../src/element';
-import { Flow } from '../src/flow';
+import { VexFlow } from '../src/vexflow';
 import { Formatter } from '../src/formatter';
 import { Metrics } from '../src/metrics';
 import { ModifierPosition } from '../src/modifier';
@@ -152,9 +152,7 @@ function styling(options: TestOptions, contextBuilder: ContextBuilder): void {
   const stave = new Stave(10, 10, 450).addClef('treble').setContext(ctx).draw();
 
   const annotation = (text: string, style: ElementStyle) =>
-    new Annotation(text)
-      .setFont(Metrics.get('Annotation.fontFamily'), FONT_SIZE, 'normal', 'italic')
-      .setStyle(style);
+    new Annotation(text).setFont(Metrics.get('Annotation.fontFamily'), FONT_SIZE, 'normal', 'italic').setStyle(style);
 
   const notes = [
     staveNote({ keys: ['c/4', 'e/4'], duration: 'h' }).addModifier(annotation('quiet', { fillStyle: '#0F0' }), 0),
@@ -471,7 +469,7 @@ function tabNotes(options: TestOptions, contextBuilder: ContextBuilder): void {
   notes3[2].addModifier(new Annotation('Text').setVerticalJustification(3)); // U
   notes3[3].addModifier(new Annotation('Text').setVerticalJustification(4)); // D
 
-  const voice = new Voice(Flow.TIME4_4).setMode(Voice.Mode.SOFT);
+  const voice = new Voice(VexFlow.TIME4_4).setMode(Voice.Mode.SOFT);
 
   voice.addTickables(notes1);
   voice.addTickables(notes2);

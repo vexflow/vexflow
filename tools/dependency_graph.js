@@ -48,7 +48,7 @@ function getHTMLOutput(title, svg) {
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8" />
     <title>${title}</title>
     <style>
       .node:active path,

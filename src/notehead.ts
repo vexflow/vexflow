@@ -11,7 +11,7 @@ import { defined, log } from './util';
 
 // eslint-disable-next-line
 function L(...args: any[]) {
-  if (NoteHead.DEBUG) log('Vex.Flow.NoteHead', args);
+  if (NoteHead.DEBUG) log('VexFlow.NoteHead', args);
 }
 
 export interface NoteHeadStruct extends NoteStruct {
@@ -34,7 +34,7 @@ export interface NoteHeadStruct extends NoteStruct {
  * See `tests/notehead_tests.ts` for usage examples.
  */
 export class NoteHead extends Note {
-  /** To enable logging for this class. Set `Vex.Flow.NoteHead.DEBUG` to `true`. */
+  /** To enable logging for this class. Set `VexFlow.NoteHead.DEBUG` to `true`. */
   static DEBUG: boolean = false;
 
   static get CATEGORY(): string {

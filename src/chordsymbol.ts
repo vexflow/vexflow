@@ -21,10 +21,10 @@ import { Tables } from './tables';
 import { Category, isStemmableNote } from './typeguard';
 import { log } from './util';
 
-// To enable logging for this class. Set `Vex.Flow.ChordSymbol.DEBUG` to `true`.
+// To enable logging for this class. Set `VexFlow.ChordSymbol.DEBUG` to `true`.
 // eslint-disable-next-line
 function L(...args: any[]): void {
-  if (ChordSymbol.DEBUG) log('Vex.Flow.ChordSymbol', args);
+  if (ChordSymbol.DEBUG) log('VexFlow.ChordSymbol', args);
 }
 
 export class ChordSymbolBlock extends Element {

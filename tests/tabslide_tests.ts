@@ -5,7 +5,7 @@
 
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
-import { Flow } from '../src/flow';
+import { VexFlow } from '../src/vexflow';
 import { Formatter } from '../src/formatter';
 import { RenderContext } from '../src/rendercontext';
 import { ContextBuilder } from '../src/renderer';
@@ -26,7 +26,7 @@ const TabSlideTests = {
 };
 
 function tieNotes(notes: TabNote[], indexes: number[], stave: TabStave, ctx: RenderContext): void {
-  const voice = new Voice(Flow.TIME4_4);
+  const voice = new Voice(VexFlow.TIME4_4);
   voice.addTickables(notes);
 
   new Formatter().joinVoices([voice]).format([voice], 100);
@@ -120,7 +120,7 @@ function multiTest(options: TestOptions, buildTabSlide: (notes: TieNotes) => Tab
     }),
   ];
 
-  const voice = new Voice(Flow.TIME4_4).addTickables(notes);
+  const voice = new Voice(VexFlow.TIME4_4).addTickables(notes);
   new Formatter().joinVoices([voice]).format([voice], 300);
   voice.draw(context, stave);
 
