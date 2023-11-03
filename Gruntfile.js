@@ -364,7 +364,7 @@ module.exports = (grunt) => {
 
     // grunt eslint
     eslint: {
-      target: ['src/**/*.ts', 'tests/**/*.ts', 'src/**/*.js', 'tests/**/*.js', 'entry/**/*.ts'],
+      target: ['entry/**/*.ts', 'src/**/*.ts', 'tests/**/*.ts', 'tests/formatter/*.js'],
       options: {
         fix: true,
       },
