@@ -129,7 +129,7 @@ const versionInfo = require('./tools/version_info');
 // Add a banner to the top of some CJS output files.
 const banner =
   `VexFlow ${versionInfo.VERSION}   ${versionInfo.DATE}   ${versionInfo.ID}\n` +
-  `Copyright (c) 2023-present VexFlow contributors (see https://github.com/vexflow/vexflow/blob/main/AUTHORS.md).\n`;
+  'Copyright (c) 2023-present VexFlow contributors (see https://github.com/vexflow/vexflow/blob/main/AUTHORS.md).';
 
 // Output directories & files.
 const BASE_DIR = __dirname;
@@ -212,11 +212,11 @@ function webpackConfigs() {
     }
 
     // Support different ways of loading VexFlow.
-    // The `globalObject` string is assigned to `root` in line 15 of vexflow-debug.js.
-    // VexFlow is exported as root["Vex"], and can be accessed via:
-    //   - `window.Vex` in browsers
-    //   - `globalThis.Vex` in node JS >= 12
-    //   - `this.Vex` in all other environments
+    // The `globalObject` string is assigned to `root` in line 13 of vexflow-debug.js.
+    // VexFlow is exported as root["VexFlow"], and can be accessed via:
+    //   - `window.VexFlow` in browsers
+    //   - `globalThis.VexFlow` in node JS >= 12
+    //   - `this.VexFlow` in all other environments
     // See: https://webpack.js.org/configuration/output/#outputglobalobject
     //
     // IMPORTANT: The outer parentheses are required! Webpack inserts this string into the final output, and
