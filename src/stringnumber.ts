@@ -215,9 +215,7 @@ export class StringNumber extends Modifier {
             dotY = stemExt.topY + Metrics.get('StringNumber.stemPadding');
           }
           dotY -=
-            this.radius +
-            Metrics.get('StringNumber.verticalPadding') +
-            this.textLine * Tables.STAVE_LINE_DISTANCE;
+            this.radius + Metrics.get('StringNumber.verticalPadding') + this.textLine * Tables.STAVE_LINE_DISTANCE;
         }
         break;
       case Modifier.Position.BELOW:
@@ -228,9 +226,7 @@ export class StringNumber extends Modifier {
             dotY = stemExt.topY - Metrics.get('StringNumber.stemPadding');
           }
           dotY +=
-            this.radius +
-            Metrics.get('StringNumber.verticalPadding') +
-            this.textLine * Tables.STAVE_LINE_DISTANCE;
+            this.radius + Metrics.get('StringNumber.verticalPadding') + this.textLine * Tables.STAVE_LINE_DISTANCE;
         }
         break;
       case Modifier.Position.LEFT:

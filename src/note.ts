@@ -2,7 +2,6 @@
 // MIT License
 
 import { Beam } from './beam';
-import { Font } from './font';
 import { Fraction } from './fraction';
 import { Glyphs } from './glyphs';
 import { Metrics } from './metrics';

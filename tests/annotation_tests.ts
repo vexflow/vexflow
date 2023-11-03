@@ -7,6 +7,7 @@
 //       Did a previous version of the API accept a number as the fourth argument?
 //       We removed the fourth argument from all of our test cases.
 
+import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Annotation, AnnotationVerticalJustify } from '../src/annotation';
@@ -14,7 +15,6 @@ import { Articulation } from '../src/articulation';
 import { Beam } from '../src/beam';
 import { Bend } from '../src/bend';
 import { ElementStyle } from '../src/element';
-import { VexFlow } from '../src/vexflow';
 import { Formatter } from '../src/formatter';
 import { Metrics } from '../src/metrics';
 import { ModifierPosition } from '../src/modifier';

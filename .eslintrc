@@ -6,6 +6,7 @@
     "project": ["./tsconfig.json", "./tsconfig.tools.json"]
   },
   "plugins": ["@typescript-eslint", "prettier", "simple-import-sort", "import"],
+  "ignorePatterns": ["node_modules/", "tests/qunit/"],
   "rules": {
     "no-console": "warn",
     "prettier/prettier": "warn",

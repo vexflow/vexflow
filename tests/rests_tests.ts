@@ -3,11 +3,11 @@
 //
 // Rests Tests
 
+import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Beam } from '../src/beam';
 import { Dot } from '../src/dot';
-import { VexFlow } from '../src/vexflow';
 import { Formatter } from '../src/formatter';
 import { RenderContext } from '../src/rendercontext';
 import { ContextBuilder } from '../src/renderer';

@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <p>To test the ESM entry point, you need load this page from a web server (e.g., <code>npx http-server</code>).</p>
+    <p><a href="../../build/esm/entry/vexflow-bravura.js">Click here to view the vexflow-bravura.js ESM file</a>.</p>
+    <p>
+      It imports from <a href="../../build/esm/src/index.js">index.js</a> and
+      <a href="../../build/esm/src/vexflow.js">vexflow.js</a>, which in turn import from the individual VexFlow modules
+      (e.g., <a href="../../build/esm/src/accidental.js">accidental.js</a>,
+      <a href="../../build/esm/src/voice.js">voice.js</a>, <a href="../../build/esm/src/stavenote.js">stavenote.js</a>)
+    </p>
+    <p>If you open the Network tab of your browser's developer tools, you will see all the JS files being loaded.</p>
+    <div id="output"></div>
+    <script type="module">
+      import VexFlow from '../../build/esm/entry/vexflow-bravura.js';
+      console.log(VexFlow.BUILD);
+
+      // Assign it to window.VexFlow so you can explore the object in the developer console.
+      window.VexFlow = VexFlow;
+
+      // IMPORTANT: Make sure the fonts are loaded before doing any rendering. Otherwise the score may be formatted incorrectly.
+      // For example, the glyphs might be in the wrong place, or the note heads might be detached from the stems.
+      await document.fonts.ready;
+
+      console.log(VexFlow.getFonts());
+
+      const vf = new VexFlow.Factory({
+        renderer: { elementId: 'output', width: 300, height: 180 },
+      });
+
+      const score = vf.EasyScore();
+      const system = vf.System();
+
+      system
+        .addStave({
+          voices: [
+            score.voice(score.notes('C#5/q, B4, A4, G#4', { stem: 'up' })),
+            score.voice(score.notes('C#4/h, C#4', { stem: 'down' })),
+          ],
+        })
+        .addClef('treble')
+        .addTimeSignature('4/4');
+
+      vf.draw();
+    </script>
+  </body>
+</html>

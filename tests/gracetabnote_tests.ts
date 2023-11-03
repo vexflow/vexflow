@@ -3,9 +3,9 @@
 //
 // GraceTabNote Tests
 
+import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
-import { VexFlow } from '../src/vexflow';
 import { Formatter } from '../src/formatter';
 import { GraceNoteGroup } from '../src/gracenotegroup';
 import { GraceTabNote } from '../src/gracetabnote';
