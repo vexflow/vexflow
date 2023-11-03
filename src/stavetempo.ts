@@ -37,7 +37,7 @@ export interface StaveTempoOptions {
    */
   duration2?: string;
   /**
-   * Specifies the number of augmentation dots for a metronome mark note 
+   * Specifies the number of augmentation dots for a metronome mark note
    * at the right of the equation.
    */
   dots2?: number;

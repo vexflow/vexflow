@@ -1,7 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
-//
 // vexflow-bravura.ts is the entry point for vexflow-bravura.js.
 // This version bundles the Bravura music engraving font and the Academico text font.
 

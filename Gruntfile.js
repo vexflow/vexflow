@@ -362,9 +362,12 @@ module.exports = (grunt) => {
     pkg: grunt.file.readJSON('package.json'),
     webpack: webpackConfigs(),
 
+    // grunt eslint
     eslint: {
       target: ['src/**/*.ts', 'tests/**/*.ts', 'src/**/*.js', 'tests/**/*.js', 'entry/**/*.ts'],
-      options: {},
+      options: {
+        fix: true,
+      },
     },
 
     // grunt qunit
@@ -449,12 +452,11 @@ module.exports = (grunt) => {
   // Build all targets for production and debugging.
   grunt.registerTask('default', 'Build all VexFlow targets.', [
     'clean:build',
+    'eslint',
     'webpack:prodAndDebug',
     'build:esm',
     'build:types',
   ]);
-
-  grunt.registerTask('lint', 'eslint', ['eslint']);
 
   // grunt test
   // Run command line qunit tests.

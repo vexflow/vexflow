@@ -136,11 +136,7 @@ export class Repetition extends StaveModifier {
       case Repetition.type.FINE:
       default:
         textX =
-          x -
-          (stave.getNoteStartX() - this.x) +
-          stave.getWidth() -
-          this.width -
-          Metrics.get('Repetition.text.offsetX');
+          x - (stave.getNoteStartX() - this.x) + stave.getWidth() - this.width - Metrics.get('Repetition.text.offsetX');
     }
 
     const y = stave.getYForTopText(stave.getNumLines()) + Metrics.get('Repetition.text.offsetY');

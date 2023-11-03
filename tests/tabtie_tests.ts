@@ -3,10 +3,10 @@
 //
 // TabTie Tests
 
+import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Annotation } from '../src/annotation';
-import { VexFlow } from '../src/vexflow';
 import { Formatter } from '../src/formatter';
 import { Note } from '../src/note';
 import { RenderContext } from '../src/rendercontext';

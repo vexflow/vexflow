@@ -10,17 +10,25 @@
   'use strict';
 
   function _typeof(obj) {
-    "@babel/helpers - typeof";
+    '@babel/helpers - typeof';
 
-    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
-      return typeof obj;
-    } : function (obj) {
-      return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    }, _typeof(obj);
+    return (
+      (_typeof =
+        'function' == typeof Symbol && 'symbol' == typeof Symbol.iterator
+          ? function (obj) {
+              return typeof obj;
+            }
+          : function (obj) {
+              return obj && 'function' == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype
+                ? 'symbol'
+                : typeof obj;
+            }),
+      _typeof(obj)
+    );
   }
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
+      throw new TypeError('Cannot call a class as a function');
     }
   }
   function _defineProperties(target, props) {
@@ -28,20 +36,22 @@
       var descriptor = props[i];
       descriptor.enumerable = descriptor.enumerable || false;
       descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
+      if ('value' in descriptor) descriptor.writable = true;
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
   function _createClass(Constructor, protoProps, staticProps) {
     if (protoProps) _defineProperties(Constructor.prototype, protoProps);
     if (staticProps) _defineProperties(Constructor, staticProps);
-    Object.defineProperty(Constructor, "prototype", {
-      writable: false
+    Object.defineProperty(Constructor, 'prototype', {
+      writable: false,
     });
     return Constructor;
   }
   function _slicedToArray(arr, i) {
-    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+    return (
+      _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest()
+    );
   }
   function _toConsumableArray(arr) {
     return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
@@ -53,10 +63,11 @@
     if (Array.isArray(arr)) return arr;
   }
   function _iterableToArray(iter) {
-    if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
+    if ((typeof Symbol !== 'undefined' && iter[Symbol.iterator] != null) || iter['@@iterator'] != null)
+      return Array.from(iter);
   }
   function _iterableToArrayLimit(arr, i) {
-    var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"];
+    var _i = arr == null ? null : (typeof Symbol !== 'undefined' && arr[Symbol.iterator]) || arr['@@iterator'];
     if (_i == null) return;
     var _arr = [];
     var _n = true;
@@ -72,7 +83,7 @@
       _e = err;
     } finally {
       try {
-        if (!_n && _i["return"] != null) _i["return"]();
+        if (!_n && _i['return'] != null) _i['return']();
       } finally {
         if (_d) throw _e;
       }
@@ -81,11 +92,11 @@
   }
   function _unsupportedIterableToArray(o, minLen) {
     if (!o) return;
-    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+    if (typeof o === 'string') return _arrayLikeToArray(o, minLen);
     var n = Object.prototype.toString.call(o).slice(8, -1);
-    if (n === "Object" && o.constructor) n = o.constructor.name;
-    if (n === "Map" || n === "Set") return Array.from(o);
-    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+    if (n === 'Object' && o.constructor) n = o.constructor.name;
+    if (n === 'Map' || n === 'Set') return Array.from(o);
+    if (n === 'Arguments' || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
   }
   function _arrayLikeToArray(arr, len) {
     if (len == null || len > arr.length) len = arr.length;
@@ -93,36 +104,47 @@
     return arr2;
   }
   function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    throw new TypeError(
+      'Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.'
+    );
   }
   function _nonIterableRest() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    throw new TypeError(
+      'Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.'
+    );
   }
   function _createForOfIteratorHelper(o, allowArrayLike) {
-    var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"];
+    var it = (typeof Symbol !== 'undefined' && o[Symbol.iterator]) || o['@@iterator'];
     if (!it) {
-      if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {
+      if (
+        Array.isArray(o) ||
+        (it = _unsupportedIterableToArray(o)) ||
+        (allowArrayLike && o && typeof o.length === 'number')
+      ) {
         if (it) o = it;
         var i = 0;
         var F = function () {};
         return {
           s: F,
           n: function () {
-            if (i >= o.length) return {
-              done: true
-            };
+            if (i >= o.length)
+              return {
+                done: true,
+              };
             return {
               done: false,
-              value: o[i++]
+              value: o[i++],
             };
           },
           e: function (e) {
             throw e;
           },
-          f: F
+          f: F,
         };
       }
-      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+      throw new TypeError(
+        'Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.'
+      );
     }
     var normalCompletion = true,
       didErr = false,
@@ -146,7 +168,7 @@
         } finally {
           if (didErr) throw err;
         }
-      }
+      },
     };
   }
 
@@ -197,7 +219,7 @@
   var clearTimeout = g.clearTimeout;
   var document = window$1 && window$1.document;
   var navigator = window$1 && window$1.navigator;
-  var localSessionStorage = function () {
+  var localSessionStorage = (function () {
     var x = 'qunit-test-string';
     try {
       g.sessionStorage.setItem(x, x);
@@ -206,7 +228,7 @@
     } catch (e) {
       return undefined;
     }
-  }();
+  })();
 
   // Basic fallback for ES6 Map
   // Support: IE 9-10, Safari 7, PhantomJS; Map is undefined
@@ -214,71 +236,80 @@
   //
   // Fallback for ES7 Map#keys
   // Support: IE 11; Map#keys is undefined
-  var StringMap = typeof g.Map === 'function' && typeof g.Map.prototype.keys === 'function' && typeof g.Symbol === 'function' && _typeof(g.Symbol.iterator) === 'symbol' ? g.Map : function StringMap(input) {
-    var _this = this;
-    var store = Object.create(null);
-    var hasOwn = Object.prototype.hasOwnProperty;
-    this.has = function (strKey) {
-      return hasOwn.call(store, strKey);
-    };
-    this.get = function (strKey) {
-      return store[strKey];
-    };
-    this.set = function (strKey, val) {
-      if (!hasOwn.call(store, strKey)) {
-        this.size++;
-      }
-      store[strKey] = val;
-      return this;
-    };
-    this.delete = function (strKey) {
-      if (hasOwn.call(store, strKey)) {
-        delete store[strKey];
-        this.size--;
-      }
-    };
-    this.forEach = function (callback) {
-      for (var strKey in store) {
-        callback(store[strKey], strKey);
-      }
-    };
-    this.keys = function () {
-      return Object.keys(store);
-    };
-    this.clear = function () {
-      store = Object.create(null);
-      this.size = 0;
-    };
-    this.size = 0;
-    if (input) {
-      input.forEach(function (val, strKey) {
-        _this.set(strKey, val);
-      });
-    }
-  };
+  var StringMap =
+    typeof g.Map === 'function' &&
+    typeof g.Map.prototype.keys === 'function' &&
+    typeof g.Symbol === 'function' &&
+    _typeof(g.Symbol.iterator) === 'symbol'
+      ? g.Map
+      : function StringMap(input) {
+          var _this = this;
+          var store = Object.create(null);
+          var hasOwn = Object.prototype.hasOwnProperty;
+          this.has = function (strKey) {
+            return hasOwn.call(store, strKey);
+          };
+          this.get = function (strKey) {
+            return store[strKey];
+          };
+          this.set = function (strKey, val) {
+            if (!hasOwn.call(store, strKey)) {
+              this.size++;
+            }
+            store[strKey] = val;
+            return this;
+          };
+          this.delete = function (strKey) {
+            if (hasOwn.call(store, strKey)) {
+              delete store[strKey];
+              this.size--;
+            }
+          };
+          this.forEach = function (callback) {
+            for (var strKey in store) {
+              callback(store[strKey], strKey);
+            }
+          };
+          this.keys = function () {
+            return Object.keys(store);
+          };
+          this.clear = function () {
+            store = Object.create(null);
+            this.size = 0;
+          };
+          this.size = 0;
+          if (input) {
+            input.forEach(function (val, strKey) {
+              _this.set(strKey, val);
+            });
+          }
+        };
 
   // Basic fallback for ES6 Set
   // Support: IE 11, `new Set(iterable)` parameter not yet implemented
   // Test for Set#values() which came after Set(iterable).
-  var StringSet = typeof g.Set === 'function' && typeof g.Set.prototype.values === 'function' ? g.Set : function (input) {
-    var set = Object.create(null);
-    if (Array.isArray(input)) {
-      input.forEach(function (item) {
-        set[item] = true;
-      });
-    }
-    return {
-      add: function add(value) {
-        set[value] = true;
-      },
-      has: function has(value) {
-        return value in set;
-      },
-      get size() {
-        return Object.keys(set).length;
-      }
-    };
-  };
+  var StringSet =
+    typeof g.Set === 'function' && typeof g.Set.prototype.values === 'function'
+      ? g.Set
+      : function (input) {
+          var set = Object.create(null);
+          if (Array.isArray(input)) {
+            input.forEach(function (item) {
+              set[item] = true;
+            });
+          }
+          return {
+            add: function add(value) {
+              set[value] = true;
+            },
+            has: function has(value) {
+              return value in set;
+            },
+            get size() {
+              return Object.keys(set).length;
+            },
+          };
+        };
 
   // Support: IE 9
   // Detect if the console object exists and no-op otherwise.
@@ -292,7 +323,7 @@
   // The console object has a log method, but no warn method.
 
   var Logger = {
-    warn: console$1 ? Function.prototype.bind.call(console$1.warn || console$1.log, console$1) : function () {}
+    warn: console$1 ? Function.prototype.bind.call(console$1.warn || console$1.log, console$1) : function () {},
   };
 
   var toString = Object.prototype.toString;
@@ -305,7 +336,12 @@
   // in QUnit 3 and then support globalThis.
   // For example: `QUnit.addReporter(QUnit.reporters.perf)`.
   function getNativePerf() {
-    if (window$1 && typeof window$1.performance !== 'undefined' && typeof window$1.performance.mark === 'function' && typeof window$1.performance.measure === 'function') {
+    if (
+      window$1 &&
+      typeof window$1.performance !== 'undefined' &&
+      typeof window$1.performance.mark === 'function' &&
+      typeof window$1.performance.measure === 'function'
+    ) {
       return window$1.performance;
     } else {
       return undefined;
@@ -313,16 +349,18 @@
   }
   var performance = {
     now: nativePerf ? nativePerf.now.bind(nativePerf) : Date.now,
-    measure: nativePerf ? function (comment, startMark, endMark) {
-      // `performance.measure` may fail if the mark could not be found.
-      // reasons a specific mark could not be found include: outside code invoking `performance.clearMarks()`
-      try {
-        nativePerf.measure(comment, startMark, endMark);
-      } catch (ex) {
-        Logger.warn('performance.measure could not be executed because of ', ex.message);
-      }
-    } : function () {},
-    mark: nativePerf ? nativePerf.mark.bind(nativePerf) : function () {}
+    measure: nativePerf
+      ? function (comment, startMark, endMark) {
+          // `performance.measure` may fail if the mark could not be found.
+          // reasons a specific mark could not be found include: outside code invoking `performance.clearMarks()`
+          try {
+            nativePerf.measure(comment, startMark, endMark);
+          } catch (ex) {
+            Logger.warn('performance.measure could not be executed because of ', ex.message);
+          }
+        }
+      : function () {},
+    mark: nativePerf ? nativePerf.mark.bind(nativePerf) : function () {},
   };
 
   // Returns a new Array with the elements that are in a but not in b
@@ -473,7 +511,7 @@
     // an object literal with name and message properties...
     if (resultErrorString.slice(0, 7) === '[object') {
       // Based on https://es5.github.io/#x15.11.4.4
-      return (error.name || 'Error') + (error.message ? ": ".concat(error.message) : '');
+      return (error.name || 'Error') + (error.message ? ': '.concat(error.message) : '');
     } else {
       return resultErrorString;
     }
@@ -519,7 +557,7 @@
     boolean: useObjectValueEquality,
     number: function number(a, b) {
       // Handle NaN and boxed number
-      return a === b || a.valueOf() === b.valueOf() || isNaN(a.valueOf()) && isNaN(b.valueOf());
+      return a === b || a.valueOf() === b.valueOf() || (isNaN(a.valueOf()) && isNaN(b.valueOf()));
     },
     // Handle boxed string
     string: useObjectValueEquality,
@@ -529,9 +567,11 @@
       return true;
     },
     regexp: function regexp(a, b) {
-      return a.source === b.source &&
-      // Include flags in the comparison
-      getRegExpFlags(a) === getRegExpFlags(b);
+      return (
+        a.source === b.source &&
+        // Include flags in the comparison
+        getRegExpFlags(a) === getRegExpFlags(b)
+      );
     },
     // identical reference only
     function: useStrictEquality,
@@ -635,7 +675,7 @@
         }
       });
       return outerEq;
-    }
+    },
   };
 
   // Entry points from typeEquiv, based on `typeof`
@@ -645,21 +685,23 @@
     boolean: useStrictEquality,
     number: function number(a, b) {
       // Handle NaN
-      return a === b || isNaN(a) && isNaN(b);
+      return a === b || (isNaN(a) && isNaN(b));
     },
     string: useStrictEquality,
     symbol: useStrictEquality,
     function: useStrictEquality,
     object: function object(a, b) {
       // Handle memory (skip recursion)
-      if (memory.some(function (pair) {
-        return pair.a === a && pair.b === b;
-      })) {
+      if (
+        memory.some(function (pair) {
+          return pair.a === a && pair.b === b;
+        })
+      ) {
         return true;
       }
       memory.push({
         a: a,
-        b: b
+        b: b,
       });
       var aObjType = objectType(a);
       var bObjType = objectType(b);
@@ -682,7 +724,13 @@
         aProperties.push(i);
 
         // Skip OOP methods that look the same
-        if (a.constructor !== Object && typeof a.constructor !== 'undefined' && typeof a[i] === 'function' && typeof b[i] === 'function' && a[i].toString() === b[i].toString()) {
+        if (
+          a.constructor !== Object &&
+          typeof a.constructor !== 'undefined' &&
+          typeof a[i] === 'function' &&
+          typeof b[i] === 'function' &&
+          a[i].toString() === b[i].toString()
+        ) {
           continue;
         }
         if (!typeEquiv(a[i], b[i])) {
@@ -694,7 +742,7 @@
         bProperties.push(_i);
       }
       return objTypeCallbacks.array(aProperties.sort(), bProperties.sort());
-    }
+    },
   };
   function typeEquiv(a, b) {
     // Optimization: Only perform type-specific comparison when pairs are not strictly equal.
@@ -706,7 +754,10 @@
     if (aType !== bType) {
       // Support comparing primitive to boxed primitives
       // Try again after possibly unwrapping one
-      return (aType === 'object' && BOXABLE_TYPES.has(objectType(a)) ? a.valueOf() : a) === (bType === 'object' && BOXABLE_TYPES.has(objectType(b)) ? b.valueOf() : b);
+      return (
+        (aType === 'object' && BOXABLE_TYPES.has(objectType(a)) ? a.valueOf() : a) ===
+        (bType === 'object' && BOXABLE_TYPES.has(objectType(b)) ? b.valueOf() : b)
+      );
     }
     return entryTypeCallbacks[aType](a, b);
   }
@@ -817,8 +868,8 @@
         before: [],
         beforeEach: [],
         afterEach: [],
-        after: []
-      }
+        after: [],
+      },
     },
     // Internal: Exposed to make resets easier
     // Ref https://github.com/qunitjs/qunit/pull/1598
@@ -831,8 +882,8 @@
     stats: {
       all: 0,
       bad: 0,
-      testCount: 0
-    }
+      testCount: 0,
+    },
   };
 
   // Apply a predefined QUnit.config object
@@ -884,7 +935,9 @@
         // Native Arrays
         toString.call(obj) === '[object Array]' ||
         // NodeList objects
-        typeof obj.length === 'number' && obj.item !== undefined && (obj.length ? obj.item(0) === obj[0] : obj.item(0) === null && obj[0] === undefined)
+        (typeof obj.length === 'number' &&
+          obj.item !== undefined &&
+          (obj.length ? obj.item(0) === obj[0] : obj.item(0) === null && obj[0] === undefined))
       );
     }
     var reName = /^function (\w+)/;
@@ -894,7 +947,7 @@
         stack = stack || [];
         var objIndex = stack.indexOf(obj);
         if (objIndex !== -1) {
-          return "recursion(".concat(objIndex - stack.length, ")");
+          return 'recursion('.concat(objIndex - stack.length, ')');
         }
         objType = objType || this.typeOf(obj);
         var parser = this.parsers[objType];
@@ -1077,19 +1130,19 @@
         boolean: literal,
         symbol: function symbol(sym) {
           return sym.toString();
-        }
+        },
       },
       // If true, entities are escaped ( <, >, \t, space and \n )
       HTML: false,
       // Indentation unit
       indentChar: '  ',
       // If true, items in a collection, are separated by a \n, else just a space.
-      multiline: true
+      multiline: true,
     };
     return dump;
   })();
 
-  var SuiteReport = /*#__PURE__*/function () {
+  var SuiteReport = /*#__PURE__*/ (function () {
     function SuiteReport(name, parentSuite) {
       _classCallCheck(this, SuiteReport);
       this.name = name;
@@ -1105,122 +1158,139 @@
         parentSuite.pushChildSuite(this);
       }
     }
-    _createClass(SuiteReport, [{
-      key: "start",
-      value: function start(recordTime) {
-        if (recordTime) {
-          this._startTime = performance.now();
-          var suiteLevel = this.fullName.length;
-          performance.mark("qunit_suite_".concat(suiteLevel, "_start"));
-        }
-        return {
-          name: this.name,
-          fullName: this.fullName.slice(),
-          tests: this.tests.map(function (test) {
-            return test.start();
-          }),
-          childSuites: this.childSuites.map(function (suite) {
-            return suite.start();
-          }),
-          testCounts: {
-            total: this.getTestCounts().total
+    _createClass(SuiteReport, [
+      {
+        key: 'start',
+        value: function start(recordTime) {
+          if (recordTime) {
+            this._startTime = performance.now();
+            var suiteLevel = this.fullName.length;
+            performance.mark('qunit_suite_'.concat(suiteLevel, '_start'));
           }
-        };
-      }
-    }, {
-      key: "end",
-      value: function end(recordTime) {
-        if (recordTime) {
-          this._endTime = performance.now();
-          var suiteLevel = this.fullName.length;
-          var suiteName = this.fullName.join(' – ');
-          performance.mark("qunit_suite_".concat(suiteLevel, "_end"));
-          performance.measure(suiteLevel === 0 ? 'QUnit Test Run' : "QUnit Test Suite: ".concat(suiteName), "qunit_suite_".concat(suiteLevel, "_start"), "qunit_suite_".concat(suiteLevel, "_end"));
-        }
-        return {
-          name: this.name,
-          fullName: this.fullName.slice(),
-          tests: this.tests.map(function (test) {
-            return test.end();
-          }),
-          childSuites: this.childSuites.map(function (suite) {
-            return suite.end();
-          }),
-          testCounts: this.getTestCounts(),
-          runtime: this.getRuntime(),
-          status: this.getStatus()
-        };
-      }
-    }, {
-      key: "pushChildSuite",
-      value: function pushChildSuite(suite) {
-        this.childSuites.push(suite);
-      }
-    }, {
-      key: "pushTest",
-      value: function pushTest(test) {
-        this.tests.push(test);
-      }
-    }, {
-      key: "getRuntime",
-      value: function getRuntime() {
-        return Math.round(this._endTime - this._startTime);
-      }
-    }, {
-      key: "getTestCounts",
-      value: function getTestCounts() {
-        var counts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {
-          passed: 0,
-          failed: 0,
-          skipped: 0,
-          todo: 0,
-          total: 0
-        };
-        counts.failed += this.globalFailureCount;
-        counts.total += this.globalFailureCount;
-        counts = this.tests.reduce(function (counts, test) {
-          if (test.valid) {
-            counts[test.getStatus()]++;
-            counts.total++;
+          return {
+            name: this.name,
+            fullName: this.fullName.slice(),
+            tests: this.tests.map(function (test) {
+              return test.start();
+            }),
+            childSuites: this.childSuites.map(function (suite) {
+              return suite.start();
+            }),
+            testCounts: {
+              total: this.getTestCounts().total,
+            },
+          };
+        },
+      },
+      {
+        key: 'end',
+        value: function end(recordTime) {
+          if (recordTime) {
+            this._endTime = performance.now();
+            var suiteLevel = this.fullName.length;
+            var suiteName = this.fullName.join(' – ');
+            performance.mark('qunit_suite_'.concat(suiteLevel, '_end'));
+            performance.measure(
+              suiteLevel === 0 ? 'QUnit Test Run' : 'QUnit Test Suite: '.concat(suiteName),
+              'qunit_suite_'.concat(suiteLevel, '_start'),
+              'qunit_suite_'.concat(suiteLevel, '_end')
+            );
           }
-          return counts;
-        }, counts);
-        return this.childSuites.reduce(function (counts, suite) {
-          return suite.getTestCounts(counts);
-        }, counts);
-      }
-    }, {
-      key: "getStatus",
-      value: function getStatus() {
-        var _this$getTestCounts = this.getTestCounts(),
-          total = _this$getTestCounts.total,
-          failed = _this$getTestCounts.failed,
-          skipped = _this$getTestCounts.skipped,
-          todo = _this$getTestCounts.todo;
-        if (failed) {
-          return 'failed';
-        } else {
-          if (skipped === total) {
-            return 'skipped';
-          } else if (todo === total) {
-            return 'todo';
+          return {
+            name: this.name,
+            fullName: this.fullName.slice(),
+            tests: this.tests.map(function (test) {
+              return test.end();
+            }),
+            childSuites: this.childSuites.map(function (suite) {
+              return suite.end();
+            }),
+            testCounts: this.getTestCounts(),
+            runtime: this.getRuntime(),
+            status: this.getStatus(),
+          };
+        },
+      },
+      {
+        key: 'pushChildSuite',
+        value: function pushChildSuite(suite) {
+          this.childSuites.push(suite);
+        },
+      },
+      {
+        key: 'pushTest',
+        value: function pushTest(test) {
+          this.tests.push(test);
+        },
+      },
+      {
+        key: 'getRuntime',
+        value: function getRuntime() {
+          return Math.round(this._endTime - this._startTime);
+        },
+      },
+      {
+        key: 'getTestCounts',
+        value: function getTestCounts() {
+          var counts =
+            arguments.length > 0 && arguments[0] !== undefined
+              ? arguments[0]
+              : {
+                  passed: 0,
+                  failed: 0,
+                  skipped: 0,
+                  todo: 0,
+                  total: 0,
+                };
+          counts.failed += this.globalFailureCount;
+          counts.total += this.globalFailureCount;
+          counts = this.tests.reduce(function (counts, test) {
+            if (test.valid) {
+              counts[test.getStatus()]++;
+              counts.total++;
+            }
+            return counts;
+          }, counts);
+          return this.childSuites.reduce(function (counts, suite) {
+            return suite.getTestCounts(counts);
+          }, counts);
+        },
+      },
+      {
+        key: 'getStatus',
+        value: function getStatus() {
+          var _this$getTestCounts = this.getTestCounts(),
+            total = _this$getTestCounts.total,
+            failed = _this$getTestCounts.failed,
+            skipped = _this$getTestCounts.skipped,
+            todo = _this$getTestCounts.todo;
+          if (failed) {
+            return 'failed';
           } else {
-            return 'passed';
+            if (skipped === total) {
+              return 'skipped';
+            } else if (todo === total) {
+              return 'todo';
+            } else {
+              return 'passed';
+            }
           }
-        }
-      }
-    }]);
+        },
+      },
+    ]);
     return SuiteReport;
-  }();
+  })();
 
   var moduleStack = [];
   var runSuite = new SuiteReport();
   function isParentModuleInQueue() {
-    var modulesInQueue = config.modules.filter(function (module) {
-      return !module.ignored;
-    }).map(function (module) {
-      return module.moduleId;
-    });
+    var modulesInQueue = config.modules
+      .filter(function (module) {
+        return !module.ignored;
+      })
+      .map(function (module) {
+        return module.moduleId;
+      });
     return moduleStack.some(function (module) {
       return modulesInQueue.includes(module.moduleId);
     });
@@ -1229,8 +1299,8 @@
     var parentModule = moduleStack.length ? moduleStack.slice(-1)[0] : null;
     var moduleName = parentModule !== null ? [parentModule.name, name].join(' > ') : name;
     var parentSuite = parentModule ? parentModule.suiteReport : runSuite;
-    var skip = parentModule !== null && parentModule.skip || modifiers.skip;
-    var todo = parentModule !== null && parentModule.todo || modifiers.todo;
+    var skip = (parentModule !== null && parentModule.skip) || modifiers.skip;
+    var todo = (parentModule !== null && parentModule.todo) || modifiers.todo;
     var env = {};
     if (parentModule) {
       extend(env, parentModule.testEnvironment);
@@ -1243,7 +1313,7 @@
         before: [],
         beforeEach: [],
         afterEach: [],
-        after: []
+        after: [],
       },
       testEnvironment: env,
       tests: [],
@@ -1261,7 +1331,7 @@
       // as either `skipped` or `todo`.
       skip: skip,
       todo: skip ? false : todo,
-      ignored: modifiers.ignored || false
+      ignored: modifiers.ignored || false,
     };
     if (parentModule) {
       parentModule.childModules.push(module);
@@ -1279,7 +1349,17 @@
   function makeSetHook(module, hookName) {
     return function setHook(callback) {
       if (config.currentModule !== module) {
-        Logger.warn('The `' + hookName + '` hook was called inside the wrong module (`' + config.currentModule.name + '`). ' + 'Instead, use hooks provided by the callback to the containing module (`' + module.name + '`). ' + 'This will become an error in QUnit 3.0.');
+        Logger.warn(
+          'The `' +
+            hookName +
+            '` hook was called inside the wrong module (`' +
+            config.currentModule.name +
+            '`). ' +
+            'Instead, use hooks provided by the callback to the containing module (`' +
+            module.name +
+            '`). ' +
+            'This will become an error in QUnit 3.0.'
+        );
       }
       module.hooks[hookName].push(callback);
     };
@@ -1303,7 +1383,7 @@
       before: makeSetHook(module, 'before'),
       beforeEach: makeSetHook(module, 'beforeEach'),
       afterEach: makeSetHook(module, 'afterEach'),
-      after: makeSetHook(module, 'after')
+      after: makeSetHook(module, 'after'),
     };
     var prevModule = config.currentModule;
     config.currentModule = module;
@@ -1312,7 +1392,11 @@
       try {
         var cbReturnValue = executeNow.call(module.testEnvironment, moduleFns);
         if (cbReturnValue && typeof cbReturnValue.then === 'function') {
-          Logger.warn('Returning a promise from a module callback is not supported. ' + 'Instead, use hooks for async behavior. ' + 'This will become an error in QUnit 3.0.');
+          Logger.warn(
+            'Returning a promise from a module callback is not supported. ' +
+              'Instead, use hooks for async behavior. ' +
+              'This will become an error in QUnit 3.0.'
+          );
         }
       } finally {
         // If the module closure threw an uncaught error during the load phase,
@@ -1329,7 +1413,7 @@
   function module$1(name, options, executeNow) {
     var ignored = focused$1 && !isParentModuleInQueue();
     processModule(name, options, executeNow, {
-      ignored: ignored
+      ignored: ignored,
     });
   }
   module$1.only = function () {
@@ -1351,7 +1435,7 @@
       return;
     }
     processModule(name, options, executeNow, {
-      skip: true
+      skip: true,
     });
   };
   module$1.todo = function (name, options, executeNow) {
@@ -1359,16 +1443,17 @@
       return;
     }
     processModule(name, options, executeNow, {
-      todo: true
+      todo: true,
     });
   };
 
   // Doesn't support IE9, it will return undefined on these browsers
   // See also https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Error/Stack
-  var fileName = (sourceFromStacktrace(0) || '').replace(/(:\d+)+\)?/, '')
-  // Remove anything prior to the last slash (Unix/Windows)
-  // from the last frame
-  .replace(/.+[/\\]/, '');
+  var fileName = (sourceFromStacktrace(0) || '')
+    .replace(/(:\d+)+\)?/, '')
+    // Remove anything prior to the last slash (Unix/Windows)
+    // from the last frame
+    .replace(/.+[/\\]/, '');
   function extractStacktrace(e, offset) {
     offset = offset === undefined ? 4 : offset;
     if (e && e.stack) {
@@ -1406,361 +1491,398 @@
     return extractStacktrace(error, offset);
   }
 
-  var Assert = /*#__PURE__*/function () {
+  var Assert = /*#__PURE__*/ (function () {
     function Assert(testContext) {
       _classCallCheck(this, Assert);
       this.test = testContext;
     }
-    _createClass(Assert, [{
-      key: "timeout",
-      value: function timeout(duration) {
-        if (typeof duration !== 'number') {
-          throw new Error('You must pass a number as the duration to assert.timeout');
-        }
-        this.test.timeout = duration;
-
-        // If a timeout has been set, clear it and reset with the new duration
-        if (config.timeout) {
-          clearTimeout(config.timeout);
-          config.timeout = null;
-          if (config.timeoutHandler && this.test.timeout > 0) {
-            this.test.internalResetTimeout(this.test.timeout);
+    _createClass(Assert, [
+      {
+        key: 'timeout',
+        value: function timeout(duration) {
+          if (typeof duration !== 'number') {
+            throw new Error('You must pass a number as the duration to assert.timeout');
           }
-        }
-      }
+          this.test.timeout = duration;
 
-      // Documents a "step", which is a string value, in a test as a passing assertion
-    }, {
-      key: "step",
-      value: function step(message) {
-        var assertionMessage = message;
-        var result = !!message;
-        this.test.steps.push(message);
-        if (typeof message === 'undefined' || message === '') {
-          assertionMessage = 'You must provide a message to assert.step';
-        } else if (typeof message !== 'string') {
-          assertionMessage = 'You must provide a string value to assert.step';
-          result = false;
-        }
-        this.pushResult({
-          result: result,
-          message: assertionMessage
-        });
-      }
+          // If a timeout has been set, clear it and reset with the new duration
+          if (config.timeout) {
+            clearTimeout(config.timeout);
+            config.timeout = null;
+            if (config.timeoutHandler && this.test.timeout > 0) {
+              this.test.internalResetTimeout(this.test.timeout);
+            }
+          }
+        },
 
-      // Verifies the steps in a test match a given array of string values
-    }, {
-      key: "verifySteps",
-      value: function verifySteps(steps, message) {
-        // Since the steps array is just string values, we can clone with slice
-        var actualStepsClone = this.test.steps.slice();
-        this.deepEqual(actualStepsClone, steps, message);
-        this.test.steps.length = 0;
-      }
-    }, {
-      key: "expect",
-      value: function expect(asserts) {
-        if (arguments.length === 1) {
-          this.test.expected = asserts;
-        } else {
-          return this.test.expected;
-        }
-      }
-
-      // Create a new async pause and return a new function that can release the pause.
-    }, {
-      key: "async",
-      value: function async(count) {
-        var requiredCalls = count === undefined ? 1 : count;
-        return this.test.internalStop(requiredCalls);
-      }
-
-      // Exports test.push() to the user API
-      // Alias of pushResult.
-    }, {
-      key: "push",
-      value: function push(result, actual, expected, message, negative) {
-        Logger.warn('assert.push is deprecated and will be removed in QUnit 3.0.' + ' Please use assert.pushResult instead (https://api.qunitjs.com/assert/pushResult).');
-        var currentAssert = this instanceof Assert ? this : config.current.assert;
-        return currentAssert.pushResult({
-          result: result,
-          actual: actual,
-          expected: expected,
-          message: message,
-          negative: negative
-        });
-      }
-    }, {
-      key: "pushResult",
-      value: function pushResult(resultInfo) {
-        // Destructure of resultInfo = { result, actual, expected, message, negative }
-        var assert = this;
-        var currentTest = assert instanceof Assert && assert.test || config.current;
-
-        // Backwards compatibility fix.
-        // Allows the direct use of global exported assertions and QUnit.assert.*
-        // Although, it's use is not recommended as it can leak assertions
-        // to other tests from async tests, because we only get a reference to the current test,
-        // not exactly the test where assertion were intended to be called.
-        if (!currentTest) {
-          throw new Error('assertion outside test context, in ' + sourceFromStacktrace(2));
-        }
-        if (!(assert instanceof Assert)) {
-          assert = currentTest.assert;
-        }
-        return assert.test.pushResult(resultInfo);
-      }
-    }, {
-      key: "ok",
-      value: function ok(result, message) {
-        if (!message) {
-          message = result ? 'okay' : "failed, expected argument to be truthy, was: ".concat(dump.parse(result));
-        }
-        this.pushResult({
-          result: !!result,
-          actual: result,
-          expected: true,
-          message: message
-        });
-      }
-    }, {
-      key: "notOk",
-      value: function notOk(result, message) {
-        if (!message) {
-          message = !result ? 'okay' : "failed, expected argument to be falsy, was: ".concat(dump.parse(result));
-        }
-        this.pushResult({
-          result: !result,
-          actual: result,
-          expected: false,
-          message: message
-        });
-      }
-    }, {
-      key: "true",
-      value: function _true(result, message) {
-        this.pushResult({
-          result: result === true,
-          actual: result,
-          expected: true,
-          message: message
-        });
-      }
-    }, {
-      key: "false",
-      value: function _false(result, message) {
-        this.pushResult({
-          result: result === false,
-          actual: result,
-          expected: false,
-          message: message
-        });
-      }
-    }, {
-      key: "equal",
-      value: function equal(actual, expected, message) {
-        this.pushResult({
-          // eslint-disable-next-line eqeqeq
-          result: expected == actual,
-          actual: actual,
-          expected: expected,
-          message: message
-        });
-      }
-    }, {
-      key: "notEqual",
-      value: function notEqual(actual, expected, message) {
-        this.pushResult({
-          // eslint-disable-next-line eqeqeq
-          result: expected != actual,
-          actual: actual,
-          expected: expected,
-          message: message,
-          negative: true
-        });
-      }
-    }, {
-      key: "propEqual",
-      value: function propEqual(actual, expected, message) {
-        actual = objectValues(actual);
-        expected = objectValues(expected);
-        this.pushResult({
-          result: equiv(actual, expected),
-          actual: actual,
-          expected: expected,
-          message: message
-        });
-      }
-    }, {
-      key: "notPropEqual",
-      value: function notPropEqual(actual, expected, message) {
-        actual = objectValues(actual);
-        expected = objectValues(expected);
-        this.pushResult({
-          result: !equiv(actual, expected),
-          actual: actual,
-          expected: expected,
-          message: message,
-          negative: true
-        });
-      }
-    }, {
-      key: "propContains",
-      value: function propContains(actual, expected, message) {
-        actual = objectValuesSubset(actual, expected);
-
-        // The expected parameter is usually a plain object, but clone it for
-        // consistency with propEqual(), and to make it easy to explain that
-        // inheritence is not considered (on either side), and to support
-        // recursively checking subsets of nested objects.
-        expected = objectValues(expected, false);
-        this.pushResult({
-          result: equiv(actual, expected),
-          actual: actual,
-          expected: expected,
-          message: message
-        });
-      }
-    }, {
-      key: "notPropContains",
-      value: function notPropContains(actual, expected, message) {
-        actual = objectValuesSubset(actual, expected);
-        expected = objectValues(expected);
-        this.pushResult({
-          result: !equiv(actual, expected),
-          actual: actual,
-          expected: expected,
-          message: message,
-          negative: true
-        });
-      }
-    }, {
-      key: "deepEqual",
-      value: function deepEqual(actual, expected, message) {
-        this.pushResult({
-          result: equiv(actual, expected),
-          actual: actual,
-          expected: expected,
-          message: message
-        });
-      }
-    }, {
-      key: "notDeepEqual",
-      value: function notDeepEqual(actual, expected, message) {
-        this.pushResult({
-          result: !equiv(actual, expected),
-          actual: actual,
-          expected: expected,
-          message: message,
-          negative: true
-        });
-      }
-    }, {
-      key: "strictEqual",
-      value: function strictEqual(actual, expected, message) {
-        this.pushResult({
-          result: expected === actual,
-          actual: actual,
-          expected: expected,
-          message: message
-        });
-      }
-    }, {
-      key: "notStrictEqual",
-      value: function notStrictEqual(actual, expected, message) {
-        this.pushResult({
-          result: expected !== actual,
-          actual: actual,
-          expected: expected,
-          message: message,
-          negative: true
-        });
-      }
-    }, {
-      key: 'throws',
-      value: function throws(block, expected, message) {
-        var _validateExpectedExce = validateExpectedExceptionArgs(expected, message, 'throws');
-        var _validateExpectedExce2 = _slicedToArray(_validateExpectedExce, 2);
-        expected = _validateExpectedExce2[0];
-        message = _validateExpectedExce2[1];
-        var currentTest = this instanceof Assert && this.test || config.current;
-        if (typeof block !== 'function') {
-          currentTest.assert.pushResult({
-            result: false,
-            actual: block,
-            message: 'The value provided to `assert.throws` in ' + '"' + currentTest.testName + '" was not a function.'
+        // Documents a "step", which is a string value, in a test as a passing assertion
+      },
+      {
+        key: 'step',
+        value: function step(message) {
+          var assertionMessage = message;
+          var result = !!message;
+          this.test.steps.push(message);
+          if (typeof message === 'undefined' || message === '') {
+            assertionMessage = 'You must provide a message to assert.step';
+          } else if (typeof message !== 'string') {
+            assertionMessage = 'You must provide a string value to assert.step';
+            result = false;
+          }
+          this.pushResult({
+            result: result,
+            message: assertionMessage,
           });
-          return;
-        }
-        var actual;
-        var result = false;
-        currentTest.ignoreGlobalErrors = true;
-        try {
-          block.call(currentTest.testEnvironment);
-        } catch (e) {
-          actual = e;
-        }
-        currentTest.ignoreGlobalErrors = false;
-        if (actual) {
-          var _validateException = validateException(actual, expected, message);
-          var _validateException2 = _slicedToArray(_validateException, 3);
-          result = _validateException2[0];
-          expected = _validateException2[1];
-          message = _validateException2[2];
-        }
-        currentTest.assert.pushResult({
-          result: result,
-          // undefined if it didn't throw
-          actual: actual && errorString(actual),
-          expected: expected,
-          message: message
-        });
-      }
-    }, {
-      key: "rejects",
-      value: function rejects(promise, expected, message) {
-        var _validateExpectedExce3 = validateExpectedExceptionArgs(expected, message, 'rejects');
-        var _validateExpectedExce4 = _slicedToArray(_validateExpectedExce3, 2);
-        expected = _validateExpectedExce4[0];
-        message = _validateExpectedExce4[1];
-        var currentTest = this instanceof Assert && this.test || config.current;
-        var then = promise && promise.then;
-        if (typeof then !== 'function') {
-          currentTest.assert.pushResult({
-            result: false,
-            message: 'The value provided to `assert.rejects` in ' + '"' + currentTest.testName + '" was not a promise.',
-            actual: promise
+        },
+
+        // Verifies the steps in a test match a given array of string values
+      },
+      {
+        key: 'verifySteps',
+        value: function verifySteps(steps, message) {
+          // Since the steps array is just string values, we can clone with slice
+          var actualStepsClone = this.test.steps.slice();
+          this.deepEqual(actualStepsClone, steps, message);
+          this.test.steps.length = 0;
+        },
+      },
+      {
+        key: 'expect',
+        value: function expect(asserts) {
+          if (arguments.length === 1) {
+            this.test.expected = asserts;
+          } else {
+            return this.test.expected;
+          }
+        },
+
+        // Create a new async pause and return a new function that can release the pause.
+      },
+      {
+        key: 'async',
+        value: function async(count) {
+          var requiredCalls = count === undefined ? 1 : count;
+          return this.test.internalStop(requiredCalls);
+        },
+
+        // Exports test.push() to the user API
+        // Alias of pushResult.
+      },
+      {
+        key: 'push',
+        value: function push(result, actual, expected, message, negative) {
+          Logger.warn(
+            'assert.push is deprecated and will be removed in QUnit 3.0.' +
+              ' Please use assert.pushResult instead (https://api.qunitjs.com/assert/pushResult).'
+          );
+          var currentAssert = this instanceof Assert ? this : config.current.assert;
+          return currentAssert.pushResult({
+            result: result,
+            actual: actual,
+            expected: expected,
+            message: message,
+            negative: negative,
           });
-          return;
-        }
-        var done = this.async();
-        return then.call(promise, function handleFulfillment() {
-          currentTest.assert.pushResult({
-            result: false,
-            message: 'The promise returned by the `assert.rejects` callback in ' + '"' + currentTest.testName + '" did not reject.',
-            actual: promise
+        },
+      },
+      {
+        key: 'pushResult',
+        value: function pushResult(resultInfo) {
+          // Destructure of resultInfo = { result, actual, expected, message, negative }
+          var assert = this;
+          var currentTest = (assert instanceof Assert && assert.test) || config.current;
+
+          // Backwards compatibility fix.
+          // Allows the direct use of global exported assertions and QUnit.assert.*
+          // Although, it's use is not recommended as it can leak assertions
+          // to other tests from async tests, because we only get a reference to the current test,
+          // not exactly the test where assertion were intended to be called.
+          if (!currentTest) {
+            throw new Error('assertion outside test context, in ' + sourceFromStacktrace(2));
+          }
+          if (!(assert instanceof Assert)) {
+            assert = currentTest.assert;
+          }
+          return assert.test.pushResult(resultInfo);
+        },
+      },
+      {
+        key: 'ok',
+        value: function ok(result, message) {
+          if (!message) {
+            message = result ? 'okay' : 'failed, expected argument to be truthy, was: '.concat(dump.parse(result));
+          }
+          this.pushResult({
+            result: !!result,
+            actual: result,
+            expected: true,
+            message: message,
           });
-          done();
-        }, function handleRejection(actual) {
-          var result;
-          var _validateException3 = validateException(actual, expected, message);
-          var _validateException4 = _slicedToArray(_validateException3, 3);
-          result = _validateException4[0];
-          expected = _validateException4[1];
-          message = _validateException4[2];
+        },
+      },
+      {
+        key: 'notOk',
+        value: function notOk(result, message) {
+          if (!message) {
+            message = !result ? 'okay' : 'failed, expected argument to be falsy, was: '.concat(dump.parse(result));
+          }
+          this.pushResult({
+            result: !result,
+            actual: result,
+            expected: false,
+            message: message,
+          });
+        },
+      },
+      {
+        key: 'true',
+        value: function _true(result, message) {
+          this.pushResult({
+            result: result === true,
+            actual: result,
+            expected: true,
+            message: message,
+          });
+        },
+      },
+      {
+        key: 'false',
+        value: function _false(result, message) {
+          this.pushResult({
+            result: result === false,
+            actual: result,
+            expected: false,
+            message: message,
+          });
+        },
+      },
+      {
+        key: 'equal',
+        value: function equal(actual, expected, message) {
+          this.pushResult({
+            // eslint-disable-next-line eqeqeq
+            result: expected == actual,
+            actual: actual,
+            expected: expected,
+            message: message,
+          });
+        },
+      },
+      {
+        key: 'notEqual',
+        value: function notEqual(actual, expected, message) {
+          this.pushResult({
+            // eslint-disable-next-line eqeqeq
+            result: expected != actual,
+            actual: actual,
+            expected: expected,
+            message: message,
+            negative: true,
+          });
+        },
+      },
+      {
+        key: 'propEqual',
+        value: function propEqual(actual, expected, message) {
+          actual = objectValues(actual);
+          expected = objectValues(expected);
+          this.pushResult({
+            result: equiv(actual, expected),
+            actual: actual,
+            expected: expected,
+            message: message,
+          });
+        },
+      },
+      {
+        key: 'notPropEqual',
+        value: function notPropEqual(actual, expected, message) {
+          actual = objectValues(actual);
+          expected = objectValues(expected);
+          this.pushResult({
+            result: !equiv(actual, expected),
+            actual: actual,
+            expected: expected,
+            message: message,
+            negative: true,
+          });
+        },
+      },
+      {
+        key: 'propContains',
+        value: function propContains(actual, expected, message) {
+          actual = objectValuesSubset(actual, expected);
+
+          // The expected parameter is usually a plain object, but clone it for
+          // consistency with propEqual(), and to make it easy to explain that
+          // inheritence is not considered (on either side), and to support
+          // recursively checking subsets of nested objects.
+          expected = objectValues(expected, false);
+          this.pushResult({
+            result: equiv(actual, expected),
+            actual: actual,
+            expected: expected,
+            message: message,
+          });
+        },
+      },
+      {
+        key: 'notPropContains',
+        value: function notPropContains(actual, expected, message) {
+          actual = objectValuesSubset(actual, expected);
+          expected = objectValues(expected);
+          this.pushResult({
+            result: !equiv(actual, expected),
+            actual: actual,
+            expected: expected,
+            message: message,
+            negative: true,
+          });
+        },
+      },
+      {
+        key: 'deepEqual',
+        value: function deepEqual(actual, expected, message) {
+          this.pushResult({
+            result: equiv(actual, expected),
+            actual: actual,
+            expected: expected,
+            message: message,
+          });
+        },
+      },
+      {
+        key: 'notDeepEqual',
+        value: function notDeepEqual(actual, expected, message) {
+          this.pushResult({
+            result: !equiv(actual, expected),
+            actual: actual,
+            expected: expected,
+            message: message,
+            negative: true,
+          });
+        },
+      },
+      {
+        key: 'strictEqual',
+        value: function strictEqual(actual, expected, message) {
+          this.pushResult({
+            result: expected === actual,
+            actual: actual,
+            expected: expected,
+            message: message,
+          });
+        },
+      },
+      {
+        key: 'notStrictEqual',
+        value: function notStrictEqual(actual, expected, message) {
+          this.pushResult({
+            result: expected !== actual,
+            actual: actual,
+            expected: expected,
+            message: message,
+            negative: true,
+          });
+        },
+      },
+      {
+        key: 'throws',
+        value: function throws(block, expected, message) {
+          var _validateExpectedExce = validateExpectedExceptionArgs(expected, message, 'throws');
+          var _validateExpectedExce2 = _slicedToArray(_validateExpectedExce, 2);
+          expected = _validateExpectedExce2[0];
+          message = _validateExpectedExce2[1];
+          var currentTest = (this instanceof Assert && this.test) || config.current;
+          if (typeof block !== 'function') {
+            currentTest.assert.pushResult({
+              result: false,
+              actual: block,
+              message:
+                'The value provided to `assert.throws` in ' + '"' + currentTest.testName + '" was not a function.',
+            });
+            return;
+          }
+          var actual;
+          var result = false;
+          currentTest.ignoreGlobalErrors = true;
+          try {
+            block.call(currentTest.testEnvironment);
+          } catch (e) {
+            actual = e;
+          }
+          currentTest.ignoreGlobalErrors = false;
+          if (actual) {
+            var _validateException = validateException(actual, expected, message);
+            var _validateException2 = _slicedToArray(_validateException, 3);
+            result = _validateException2[0];
+            expected = _validateException2[1];
+            message = _validateException2[2];
+          }
           currentTest.assert.pushResult({
             result: result,
-            // leave rejection value of undefined as-is
+            // undefined if it didn't throw
             actual: actual && errorString(actual),
             expected: expected,
-            message: message
+            message: message,
           });
-          done();
-        });
-      }
-    }]);
+        },
+      },
+      {
+        key: 'rejects',
+        value: function rejects(promise, expected, message) {
+          var _validateExpectedExce3 = validateExpectedExceptionArgs(expected, message, 'rejects');
+          var _validateExpectedExce4 = _slicedToArray(_validateExpectedExce3, 2);
+          expected = _validateExpectedExce4[0];
+          message = _validateExpectedExce4[1];
+          var currentTest = (this instanceof Assert && this.test) || config.current;
+          var then = promise && promise.then;
+          if (typeof then !== 'function') {
+            currentTest.assert.pushResult({
+              result: false,
+              message:
+                'The value provided to `assert.rejects` in ' + '"' + currentTest.testName + '" was not a promise.',
+              actual: promise,
+            });
+            return;
+          }
+          var done = this.async();
+          return then.call(
+            promise,
+            function handleFulfillment() {
+              currentTest.assert.pushResult({
+                result: false,
+                message:
+                  'The promise returned by the `assert.rejects` callback in ' +
+                  '"' +
+                  currentTest.testName +
+                  '" did not reject.',
+                actual: promise,
+              });
+              done();
+            },
+            function handleRejection(actual) {
+              var result;
+              var _validateException3 = validateException(actual, expected, message);
+              var _validateException4 = _slicedToArray(_validateException3, 3);
+              result = _validateException4[0];
+              expected = _validateException4[1];
+              message = _validateException4[2];
+              currentTest.assert.pushResult({
+                result: result,
+                // leave rejection value of undefined as-is
+                actual: actual && errorString(actual),
+                expected: expected,
+                message: message,
+              });
+              done();
+            }
+          );
+        },
+      },
+    ]);
     return Assert;
-  }();
+  })();
   function validateExpectedExceptionArgs(expected, message, assertionMethod) {
     var expectedType = objectType(expected);
 
@@ -1771,14 +1893,25 @@
         expected = undefined;
         return [expected, message];
       } else {
-        throw new Error('assert.' + assertionMethod + ' does not accept a string value for the expected argument.\n' + 'Use a non-string object value (e.g. RegExp or validator function) ' + 'instead if necessary.');
+        throw new Error(
+          'assert.' +
+            assertionMethod +
+            ' does not accept a string value for the expected argument.\n' +
+            'Use a non-string object value (e.g. RegExp or validator function) ' +
+            'instead if necessary.'
+        );
       }
     }
-    var valid = !expected ||
-    // TODO: be more explicit here
-    expectedType === 'regexp' || expectedType === 'function' || expectedType === 'object';
+    var valid =
+      !expected ||
+      // TODO: be more explicit here
+      expectedType === 'regexp' ||
+      expectedType === 'function' ||
+      expectedType === 'object';
     if (!valid) {
-      throw new Error('Invalid expected value type (' + expectedType + ') ' + 'provided to assert.' + assertionMethod + '.');
+      throw new Error(
+        'Invalid expected value type (' + expectedType + ') ' + 'provided to assert.' + assertionMethod + '.'
+      );
     }
     return [expected, message];
   }
@@ -1807,7 +1940,8 @@
 
       // Expected is an Error object
     } else if (expectedType === 'object') {
-      result = actual instanceof expected.constructor && actual.name === expected.name && actual.message === expected.message;
+      result =
+        actual instanceof expected.constructor && actual.name === expected.name && actual.message === expected.message;
 
       // Log the string form of the Error object
       expected = errorString(expected);
@@ -1873,7 +2007,7 @@
       throw new TypeError('eventName must be a string when registering a listener');
     } else if (!inArray(eventName, SUPPORTED_EVENTS)) {
       var events = SUPPORTED_EVENTS.join(', ');
-      throw new Error("\"".concat(eventName, "\" is not a valid event; must be one of: ").concat(events, "."));
+      throw new Error('"'.concat(eventName, '" is not a valid event; must be one of: ').concat(events, '.'));
     } else if (typeof callback !== 'function') {
       throw new TypeError('callback must be a function when registering a listener');
     }
@@ -1887,18 +2021,30 @@
     }
   }
 
-  var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+  var commonjsGlobal =
+    typeof globalThis !== 'undefined'
+      ? globalThis
+      : typeof window !== 'undefined'
+      ? window
+      : typeof global !== 'undefined'
+      ? global
+      : typeof self !== 'undefined'
+      ? self
+      : {};
 
-  function commonjsRequire (path) {
-  	throw new Error('Could not dynamically require "' + path + '". Please configure the dynamicRequireTargets or/and ignoreDynamicRequires option of @rollup/plugin-commonjs appropriately for this require call to work.');
+  function commonjsRequire(path) {
+    throw new Error(
+      'Could not dynamically require "' +
+        path +
+        '". Please configure the dynamicRequireTargets or/and ignoreDynamicRequires option of @rollup/plugin-commonjs appropriately for this require call to work.'
+    );
   }
 
-  var promisePolyfill = {exports: {}};
+  var promisePolyfill = { exports: {} };
 
   (function () {
-
     /** @suppress {undefinedVars} */
-    var globalNS = function () {
+    var globalNS = (function () {
       // the only reliable means to get the global object is
       // `Function('return this')()`
       // However, this causes CSP violations in Chrome apps.
@@ -1915,7 +2061,7 @@
         return commonjsGlobal;
       }
       throw new Error('unable to locate global object');
-    }();
+    })();
 
     // Expose the polyfill if Promise is undefined or set to a
     // non-function value. The latter can be due to a named HTMLElement
@@ -1931,24 +2077,29 @@
      */
     function finallyConstructor(callback) {
       var constructor = this.constructor;
-      return this.then(function (value) {
-        // @ts-ignore
-        return constructor.resolve(callback()).then(function () {
-          return value;
-        });
-      }, function (reason) {
-        // @ts-ignore
-        return constructor.resolve(callback()).then(function () {
+      return this.then(
+        function (value) {
           // @ts-ignore
-          return constructor.reject(reason);
-        });
-      });
+          return constructor.resolve(callback()).then(function () {
+            return value;
+          });
+        },
+        function (reason) {
+          // @ts-ignore
+          return constructor.resolve(callback()).then(function () {
+            // @ts-ignore
+            return constructor.reject(reason);
+          });
+        }
+      );
     }
     function allSettled(arr) {
       var P = this;
       return new P(function (resolve, reject) {
         if (!(arr && typeof arr.length !== 'undefined')) {
-          return reject(new TypeError(_typeof(arr) + ' ' + arr + ' is not iterable(cannot read property Symbol(Symbol.iterator))'));
+          return reject(
+            new TypeError(_typeof(arr) + ' ' + arr + ' is not iterable(cannot read property Symbol(Symbol.iterator))')
+          );
         }
         var args = Array.prototype.slice.call(arr);
         if (args.length === 0) return resolve([]);
@@ -1957,23 +2108,27 @@
           if (val && (_typeof(val) === 'object' || typeof val === 'function')) {
             var then = val.then;
             if (typeof then === 'function') {
-              then.call(val, function (val) {
-                res(i, val);
-              }, function (e) {
-                args[i] = {
-                  status: 'rejected',
-                  reason: e
-                };
-                if (--remaining === 0) {
-                  resolve(args);
+              then.call(
+                val,
+                function (val) {
+                  res(i, val);
+                },
+                function (e) {
+                  args[i] = {
+                    status: 'rejected',
+                    reason: e,
+                  };
+                  if (--remaining === 0) {
+                    resolve(args);
+                  }
                 }
-              });
+              );
               return;
             }
           }
           args[i] = {
             status: 'fulfilled',
-            value: val
+            value: val,
           };
           if (--remaining === 0) {
             resolve(args);
@@ -2102,15 +2257,18 @@
     function doResolve(fn, self) {
       var done = false;
       try {
-        fn(function (value) {
-          if (done) return;
-          done = true;
-          resolve(self, value);
-        }, function (reason) {
-          if (done) return;
-          done = true;
-          reject(self, reason);
-        });
+        fn(
+          function (value) {
+            if (done) return;
+            done = true;
+            resolve(self, value);
+          },
+          function (reason) {
+            if (done) return;
+            done = true;
+            reject(self, reason);
+          }
+        );
       } catch (ex) {
         if (done) return;
         done = true;
@@ -2140,9 +2298,13 @@
             if (val && (_typeof(val) === 'object' || typeof val === 'function')) {
               var then = val.then;
               if (typeof then === 'function') {
-                then.call(val, function (val) {
-                  res(i, val);
-                }, reject);
+                then.call(
+                  val,
+                  function (val) {
+                    res(i, val);
+                  },
+                  reject
+                );
                 return;
               }
             }
@@ -2186,13 +2348,15 @@
 
     // Use polyfill for setImmediate for performance gains
     Promise._immediateFn =
-    // @ts-ignore
-    typeof setImmediate === 'function' && function (fn) {
       // @ts-ignore
-      setImmediate(fn);
-    } || function (fn) {
-      setTimeoutFunc(fn, 0);
-    };
+      (typeof setImmediate === 'function' &&
+        function (fn) {
+          // @ts-ignore
+          setImmediate(fn);
+        }) ||
+      function (fn) {
+        setTimeoutFunc(fn, 0);
+      };
     Promise._unhandledRejectionFn = function _unhandledRejectionFn(err) {
       if (typeof console !== 'undefined' && console) {
         console.warn('Possible Unhandled Promise Rejection:', err); // eslint-disable-line no-console
@@ -2388,25 +2552,31 @@
     if (config.stats.testCount === 0 && config.failOnZeroTests === true) {
       var error;
       if (config.filter && config.filter.length) {
-        error = new Error("No tests matched the filter \"".concat(config.filter, "\"."));
+        error = new Error('No tests matched the filter "'.concat(config.filter, '".'));
       } else if (config.module && config.module.length) {
-        error = new Error("No tests matched the module \"".concat(config.module, "\"."));
+        error = new Error('No tests matched the module "'.concat(config.module, '".'));
       } else if (config.moduleId && config.moduleId.length) {
-        error = new Error("No tests matched the moduleId \"".concat(config.moduleId, "\"."));
+        error = new Error('No tests matched the moduleId "'.concat(config.moduleId, '".'));
       } else if (config.testId && config.testId.length) {
-        error = new Error("No tests matched the testId \"".concat(config.testId, "\"."));
+        error = new Error('No tests matched the testId "'.concat(config.testId, '".'));
       } else {
         error = new Error('No tests were run.');
       }
-      test('global failure', extend(function (assert) {
-        assert.pushResult({
-          result: false,
-          message: error.message,
-          source: error.stack
-        });
-      }, {
-        validTest: true
-      }));
+      test(
+        'global failure',
+        extend(
+          function (assert) {
+            assert.pushResult({
+              result: false,
+              message: error.message,
+              source: error.stack,
+            });
+          },
+          {
+            validTest: true,
+          }
+        )
+      );
 
       // We do need to call `advance()` in order to resume the processing queue.
       // Once this new test is finished processing, we'll reach `done` again, and
@@ -2426,7 +2596,7 @@
       passed: passed,
       failed: config.stats.bad,
       total: config.stats.all,
-      runtime: runtime
+      runtime: runtime,
     }).then(function () {
       // Clear own storage items if all tests passed
       if (storage && config.stats.bad === 0) {
@@ -2443,10 +2613,10 @@
     finished: false,
     add: addToTestQueue,
     advance: advance,
-    taskCount: taskQueueLength
+    taskCount: taskQueueLength,
   };
 
-  var TestReport = /*#__PURE__*/function () {
+  var TestReport = /*#__PURE__*/ (function () {
     function TestReport(name, suite, options) {
       _classCallCheck(this, TestReport);
       this.name = name;
@@ -2461,89 +2631,98 @@
       this._endTime = 0;
       suite.pushTest(this);
     }
-    _createClass(TestReport, [{
-      key: "start",
-      value: function start(recordTime) {
-        if (recordTime) {
-          this._startTime = performance.now();
-          performance.mark('qunit_test_start');
-        }
-        return {
-          name: this.name,
-          suiteName: this.suiteName,
-          fullName: this.fullName.slice()
-        };
-      }
-    }, {
-      key: "end",
-      value: function end(recordTime) {
-        if (recordTime) {
-          this._endTime = performance.now();
-          if (performance) {
-            performance.mark('qunit_test_end');
-            var testName = this.fullName.join(' – ');
-            performance.measure("QUnit Test: ".concat(testName), 'qunit_test_start', 'qunit_test_end');
+    _createClass(TestReport, [
+      {
+        key: 'start',
+        value: function start(recordTime) {
+          if (recordTime) {
+            this._startTime = performance.now();
+            performance.mark('qunit_test_start');
           }
-        }
-        return extend(this.start(), {
-          runtime: this.getRuntime(),
-          status: this.getStatus(),
-          errors: this.getFailedAssertions(),
-          assertions: this.getAssertions()
-        });
-      }
-    }, {
-      key: "pushAssertion",
-      value: function pushAssertion(assertion) {
-        this.assertions.push(assertion);
-      }
-    }, {
-      key: "getRuntime",
-      value: function getRuntime() {
-        return Math.round(this._endTime - this._startTime);
-      }
-    }, {
-      key: "getStatus",
-      value: function getStatus() {
-        if (this.skipped) {
-          return 'skipped';
-        }
-        var testPassed = this.getFailedAssertions().length > 0 ? this.todo : !this.todo;
-        if (!testPassed) {
-          return 'failed';
-        } else if (this.todo) {
-          return 'todo';
-        } else {
-          return 'passed';
-        }
-      }
-    }, {
-      key: "getFailedAssertions",
-      value: function getFailedAssertions() {
-        return this.assertions.filter(function (assertion) {
-          return !assertion.passed;
-        });
-      }
-    }, {
-      key: "getAssertions",
-      value: function getAssertions() {
-        return this.assertions.slice();
-      }
+          return {
+            name: this.name,
+            suiteName: this.suiteName,
+            fullName: this.fullName.slice(),
+          };
+        },
+      },
+      {
+        key: 'end',
+        value: function end(recordTime) {
+          if (recordTime) {
+            this._endTime = performance.now();
+            if (performance) {
+              performance.mark('qunit_test_end');
+              var testName = this.fullName.join(' – ');
+              performance.measure('QUnit Test: '.concat(testName), 'qunit_test_start', 'qunit_test_end');
+            }
+          }
+          return extend(this.start(), {
+            runtime: this.getRuntime(),
+            status: this.getStatus(),
+            errors: this.getFailedAssertions(),
+            assertions: this.getAssertions(),
+          });
+        },
+      },
+      {
+        key: 'pushAssertion',
+        value: function pushAssertion(assertion) {
+          this.assertions.push(assertion);
+        },
+      },
+      {
+        key: 'getRuntime',
+        value: function getRuntime() {
+          return Math.round(this._endTime - this._startTime);
+        },
+      },
+      {
+        key: 'getStatus',
+        value: function getStatus() {
+          if (this.skipped) {
+            return 'skipped';
+          }
+          var testPassed = this.getFailedAssertions().length > 0 ? this.todo : !this.todo;
+          if (!testPassed) {
+            return 'failed';
+          } else if (this.todo) {
+            return 'todo';
+          } else {
+            return 'passed';
+          }
+        },
+      },
+      {
+        key: 'getFailedAssertions',
+        value: function getFailedAssertions() {
+          return this.assertions.filter(function (assertion) {
+            return !assertion.passed;
+          });
+        },
+      },
+      {
+        key: 'getAssertions',
+        value: function getAssertions() {
+          return this.assertions.slice();
+        },
 
-      // Remove actual and expected values from assertions. This is to prevent
-      // leaking memory throughout a test suite.
-    }, {
-      key: "slimAssertions",
-      value: function slimAssertions() {
-        this.assertions = this.assertions.map(function (assertion) {
-          delete assertion.actual;
-          delete assertion.expected;
-          return assertion;
-        });
-      }
-    }]);
+        // Remove actual and expected values from assertions. This is to prevent
+        // leaking memory throughout a test suite.
+      },
+      {
+        key: 'slimAssertions',
+        value: function slimAssertions() {
+          this.assertions = this.assertions.map(function (assertion) {
+            delete assertion.actual;
+            delete assertion.expected;
+            return assertion;
+          });
+        },
+      },
+    ]);
     return TestReport;
-  }();
+  })();
 
   function Test(settings) {
     this.expected = null;
@@ -2597,7 +2776,7 @@
     }
     if (!this.skip && typeof this.callback !== 'function') {
       var method = this.todo ? 'QUnit.todo' : 'QUnit.test';
-      throw new TypeError("You must provide a callback to ".concat(method, "(\"").concat(this.testName, "\")"));
+      throw new TypeError('You must provide a callback to '.concat(method, '("').concat(this.testName, '")'));
     }
 
     // Register unique strings
@@ -2624,12 +2803,12 @@
     this.testReport = new TestReport(this.testName, this.module.suiteReport, {
       todo: this.todo,
       skip: this.skip,
-      valid: this.valid()
+      valid: this.valid(),
     });
     this.module.tests.push({
       name: this.testName,
       testId: this.testId,
-      skip: !!this.skip
+      skip: !!this.skip,
     });
     if (this.skip) {
       // Skipped tests will fully ignore any sent callback
@@ -2672,12 +2851,12 @@
           startModule.stats = {
             all: 0,
             bad: 0,
-            started: performance.now()
+            started: performance.now(),
           };
           emit('suiteStart', startModule.suiteReport.start(true));
           return runLoggingCallbacks('moduleStart', {
             name: startModule.name,
-            tests: startModule.tests
+            tests: startModule.tests,
           });
         });
       });
@@ -2690,7 +2869,7 @@
           name: _this.testName,
           module: module.name,
           testId: _this.testId,
-          previousFailure: _this.previousFailure
+          previousFailure: _this.previousFailure,
         }).then(function () {
           if (!config.pollution) {
             saveGlobal();
@@ -2707,7 +2886,10 @@
       try {
         runTest(this);
       } catch (e) {
-        this.pushFailure('Died on test #' + (this.assertions.length + 1) + ': ' + (e.message || e) + '\n' + this.stack, extractStacktrace(e, 0));
+        this.pushFailure(
+          'Died on test #' + (this.assertions.length + 1) + ': ' + (e.message || e) + '\n' + this.stack,
+          extractStacktrace(e, 0)
+        );
 
         // Else next test will carry the responsibility
         saveGlobal();
@@ -2729,7 +2911,10 @@
         // If the test has an async "pause" on it, but the timeout is 0, then we push a
         // failure as the test should be synchronous.
         if (test.timeout === 0 && test.pauses.size > 0) {
-          pushFailure('Test did not finish synchronously even though assert.timeout( 0 ) was used.', sourceFromStacktrace(2));
+          pushFailure(
+            'Test did not finish synchronously even though assert.timeout( 0 ) was used.',
+            sourceFromStacktrace(2)
+          );
         }
       }
     },
@@ -2747,7 +2932,10 @@
           try {
             promise = hook.call(_this2.testEnvironment, _this2.assert);
           } catch (error) {
-            _this2.pushFailure('Global ' + hookName + ' failed on ' + _this2.testName + ': ' + errorString(error), extractStacktrace(error, 0));
+            _this2.pushFailure(
+              'Global ' + hookName + ' failed on ' + _this2.testName + ': ' + errorString(error),
+              extractStacktrace(error, 0)
+            );
             return;
           }
         }
@@ -2771,7 +2959,11 @@
 
         // The 'after' hook should only execute when there are not tests left and
         // when the 'after' and 'finish' tasks are the only tasks left to process
-        if (hookName === 'after' && !lastTestWithinModuleExecuted(hookOwner) && (config.queue.length > 0 || ProcessingQueue.taskCount() > 2)) {
+        if (
+          hookName === 'after' &&
+          !lastTestWithinModuleExecuted(hookOwner) &&
+          (config.queue.length > 0 || ProcessingQueue.taskCount() > 2)
+        ) {
           return;
         }
         config.current = _this3;
@@ -2789,7 +2981,10 @@
           // the simplicity of queueGlobalHook.
           callHook();
         } catch (error) {
-          _this3.pushFailure(hookName + ' failed on ' + _this3.testName + ': ' + (error.message || error), extractStacktrace(error, 0));
+          _this3.pushFailure(
+            hookName + ' failed on ' + _this3.testName + ': ' + (error.message || error),
+            extractStacktrace(error, 0)
+          );
         }
       };
       return runHook;
@@ -2837,14 +3032,24 @@
       this.callback = undefined;
       if (this.steps.length) {
         var stepsList = this.steps.join(', ');
-        this.pushFailure('Expected assert.verifySteps() to be called before end of test ' + "after using assert.step(). Unverified steps: ".concat(stepsList), this.stack);
+        this.pushFailure(
+          'Expected assert.verifySteps() to be called before end of test ' +
+            'after using assert.step(). Unverified steps: '.concat(stepsList),
+          this.stack
+        );
       }
       if (config.requireExpects && this.expected === null) {
         this.pushFailure('Expected number of assertions to be defined, but expect() was ' + 'not called.', this.stack);
       } else if (this.expected !== null && this.expected !== this.assertions.length) {
-        this.pushFailure('Expected ' + this.expected + ' assertions, but ' + this.assertions.length + ' were run', this.stack);
+        this.pushFailure(
+          'Expected ' + this.expected + ' assertions, but ' + this.assertions.length + ' were run',
+          this.stack
+        );
       } else if (this.expected === null && !this.assertions.length) {
-        this.pushFailure('Expected at least one assertion, but none were run - call ' + 'expect(0) to accept zero assertions.', this.stack);
+        this.pushFailure(
+          'Expected at least one assertion, but none were run - call ' + 'expect(0) to accept zero assertions.',
+          this.stack
+        );
       }
       var module = this.module;
       var moduleName = module.name;
@@ -2908,29 +3113,31 @@
         // generating stack trace is expensive, so using a getter will help defer this until we need it
         get source() {
           return test.stack;
-        }
-      }).then(function () {
-        if (allTestsExecuted(module)) {
-          var completedModules = [module];
+        },
+      })
+        .then(function () {
+          if (allTestsExecuted(module)) {
+            var completedModules = [module];
 
-          // Check if the parent modules, iteratively, are done. If that the case,
-          // we emit the `suiteEnd` event and trigger `moduleDone` callback.
-          var parent = module.parentModule;
-          while (parent && allTestsExecuted(parent)) {
-            completedModules.push(parent);
-            parent = parent.parentModule;
-          }
-          var moduleDoneChain = _Promise.resolve();
-          completedModules.forEach(function (completedModule) {
-            moduleDoneChain = moduleDoneChain.then(function () {
-              return logSuiteEnd(completedModule);
+            // Check if the parent modules, iteratively, are done. If that the case,
+            // we emit the `suiteEnd` event and trigger `moduleDone` callback.
+            var parent = module.parentModule;
+            while (parent && allTestsExecuted(parent)) {
+              completedModules.push(parent);
+              parent = parent.parentModule;
+            }
+            var moduleDoneChain = _Promise.resolve();
+            completedModules.forEach(function (completedModule) {
+              moduleDoneChain = moduleDoneChain.then(function () {
+                return logSuiteEnd(completedModule);
+              });
             });
-          });
-          return moduleDoneChain;
-        }
-      }).then(function () {
-        config.current = undefined;
-      });
+            return moduleDoneChain;
+          }
+        })
+        .then(function () {
+          config.current = undefined;
+        });
       function logSuiteEnd(module) {
         // Reset `module.hooks` to ensure that anything referenced in these hooks
         // has been released to be garbage collected. Descendant modules that were
@@ -2954,7 +3161,7 @@
           failed: module.stats.bad,
           passed: module.stats.all - module.stats.bad,
           total: module.stats.all,
-          runtime: Math.round(performance.now() - module.stats.started)
+          runtime: Math.round(performance.now() - module.stats.started),
         });
       }
     },
@@ -2971,19 +3178,37 @@
         return;
       }
       function runTest() {
-        return [function () {
-          return test.before();
-        }].concat(_toConsumableArray(test.hooks('before')), [function () {
-          test.preserveTestEnvironment();
-        }], _toConsumableArray(test.hooks('beforeEach')), [function () {
-          test.run();
-        }], _toConsumableArray(test.hooks('afterEach').reverse()), _toConsumableArray(test.hooks('after').reverse()), [function () {
-          test.after();
-        }, function () {
-          return test.finish();
-        }]);
+        return [
+          function () {
+            return test.before();
+          },
+        ].concat(
+          _toConsumableArray(test.hooks('before')),
+          [
+            function () {
+              test.preserveTestEnvironment();
+            },
+          ],
+          _toConsumableArray(test.hooks('beforeEach')),
+          [
+            function () {
+              test.run();
+            },
+          ],
+          _toConsumableArray(test.hooks('afterEach').reverse()),
+          _toConsumableArray(test.hooks('after').reverse()),
+          [
+            function () {
+              test.after();
+            },
+            function () {
+              return test.finish();
+            },
+          ]
+        );
       }
-      var previousFailCount = config.storage && +config.storage.getItem('qunit-test-' + this.module.name + '-' + this.testName);
+      var previousFailCount =
+        config.storage && +config.storage.getItem('qunit-test-' + this.module.name + '-' + this.testName);
 
       // Prioritize previously failed tests, detected from storage
       var prioritize = config.reorder && !!previousFailCount;
@@ -2992,9 +3217,10 @@
     },
     pushResult: function pushResult(resultInfo) {
       if (this !== config.current) {
-        var message = resultInfo && resultInfo.message || '';
-        var testName = this && this.testName || '';
-        var error = 'Assertion occurred after test finished.\n' + '> Test: ' + testName + '\n' + '> Message: ' + message + '\n';
+        var message = (resultInfo && resultInfo.message) || '';
+        var testName = (this && this.testName) || '';
+        var error =
+          'Assertion occurred after test finished.\n' + '> Test: ' + testName + '\n' + '> Message: ' + message + '\n';
         throw new Error(error);
       }
 
@@ -3008,7 +3234,7 @@
         testId: this.testId,
         negative: resultInfo.negative || false,
         runtime: Math.round(performance.now() - this.started),
-        todo: !!this.todo
+        todo: !!this.todo,
       };
       if (hasOwn$1.call(resultInfo, 'expected')) {
         details.expected = resultInfo.expected;
@@ -3022,7 +3248,7 @@
       this.logAssertion(details);
       this.assertions.push({
         result: !!resultInfo.result,
-        message: resultInfo.message
+        message: resultInfo.message,
       });
     },
     pushFailure: function pushFailure(message, source, actual) {
@@ -3033,7 +3259,7 @@
         result: false,
         message: message || 'error',
         actual: actual || null,
-        source: source
+        source: source,
       });
     },
     /**
@@ -3050,7 +3276,7 @@
         expected: details.expected,
         message: details.message,
         stack: details.source,
-        todo: details.todo
+        todo: details.todo,
       };
       this.testReport.pushAssertion(assertion);
       emit('assertion', assertion);
@@ -3130,7 +3356,7 @@
       var pauseId = this.nextPauseId++;
       var pause = {
         cancelled: false,
-        remaining: requiredCalls
+        remaining: requiredCalls,
       };
       test.pauses.set(pauseId, pause);
       function release() {
@@ -3138,13 +3364,22 @@
           return;
         }
         if (config.current === undefined) {
-          throw new Error('Unexpected release of async pause after tests finished.\n' + "> Test: ".concat(test.testName, " [async #").concat(pauseId, "]"));
+          throw new Error(
+            'Unexpected release of async pause after tests finished.\n' +
+              '> Test: '.concat(test.testName, ' [async #').concat(pauseId, ']')
+          );
         }
         if (config.current !== test) {
-          throw new Error('Unexpected release of async pause during a different test.\n' + "> Test: ".concat(test.testName, " [async #").concat(pauseId, "]"));
+          throw new Error(
+            'Unexpected release of async pause during a different test.\n' +
+              '> Test: '.concat(test.testName, ' [async #').concat(pauseId, ']')
+          );
         }
         if (pause.remaining <= 0) {
-          throw new Error('Tried to release async pause that was already released.\n' + "> Test: ".concat(test.testName, " [async #").concat(pauseId, "]"));
+          throw new Error(
+            'Tried to release async pause that was already released.\n' +
+              '> Test: '.concat(test.testName, ' [async #').concat(pauseId, ']')
+          );
         }
 
         // The `requiredCalls` parameter exists to support `assert.async(count)`
@@ -3169,7 +3404,10 @@
               config.timeout = null;
               pause.cancelled = true;
               test.pauses.delete(pauseId);
-              test.pushFailure("Test took longer than ".concat(timeout, "ms; test timed out."), sourceFromStacktrace(2));
+              test.pushFailure(
+                'Test took longer than '.concat(timeout, 'ms; test timed out.'),
+                sourceFromStacktrace(2)
+              );
               internalStart(test);
             };
           };
@@ -3192,7 +3430,13 @@
             then.call(promise, resolve);
           } else {
             var reject = function reject(error) {
-              var message = 'Promise rejected ' + (!phase ? 'during' : phase.replace(/Each$/, '')) + ' "' + _test.testName + '": ' + (error && error.message || error);
+              var message =
+                'Promise rejected ' +
+                (!phase ? 'during' : phase.replace(/Each$/, '')) +
+                ' "' +
+                _test.testName +
+                '": ' +
+                ((error && error.message) || error);
               _test.pushFailure(message, extractStacktrace(error, 0));
 
               // Else next test will carry the responsibility
@@ -3214,7 +3458,10 @@
       function moduleChainIdMatch(testModule, selectedId) {
         return (
           // undefined or empty array
-          !selectedId || !selectedId.length || inArray(testModule.moduleId, selectedId) || testModule.parentModule && moduleChainIdMatch(testModule.parentModule, selectedId)
+          !selectedId ||
+          !selectedId.length ||
+          inArray(testModule.moduleId, selectedId) ||
+          (testModule.parentModule && moduleChainIdMatch(testModule.parentModule, selectedId))
         );
       }
       if (!moduleChainIdMatch(this.module, config.moduleId)) {
@@ -3247,7 +3494,9 @@
       }
       var regexFilter = /^(!?)\/([\w\W]*)\/(i?$)/.exec(filter);
       var fullName = this.module.name + ': ' + this.testName;
-      return regexFilter ? this.regexFilter(!!regexFilter[1], regexFilter[2], regexFilter[3], fullName) : this.stringFilter(filter, fullName);
+      return regexFilter
+        ? this.regexFilter(!!regexFilter[1], regexFilter[2], regexFilter[3], fullName)
+        : this.stringFilter(filter, fullName);
     },
     regexFilter: function regexFilter(exclude, pattern, flags, fullName) {
       var regex = new RegExp(pattern, flags);
@@ -3269,7 +3518,7 @@
 
       // Otherwise, do the opposite
       return !include;
-    }
+    },
   };
   function pushFailure() {
     if (!config.current) {
@@ -3331,11 +3580,11 @@
   function test(testName, callback) {
     addTest({
       testName: testName,
-      callback: callback
+      callback: callback,
     });
   }
   function makeEachTestName(testName, argument) {
-    return "".concat(testName, " [").concat(argument, "]");
+    return ''.concat(testName, ' [').concat(argument, ']');
   }
   function runEach(data, eachFn) {
     if (Array.isArray(data)) {
@@ -3347,7 +3596,9 @@
         eachFn(data[key], key);
       }
     } else {
-      throw new Error("test.each() expects an array or object as input, but\nfound ".concat(_typeof(data), " instead."));
+      throw new Error(
+        'test.each() expects an array or object as input, but\nfound '.concat(_typeof(data), ' instead.')
+      );
     }
   }
   extend(test, {
@@ -3355,19 +3606,19 @@
       addTest({
         testName: testName,
         callback: callback,
-        todo: true
+        todo: true,
       });
     },
     skip: function skip(testName) {
       addTest({
         testName: testName,
-        skip: true
+        skip: true,
       });
     },
     only: function only(testName, callback) {
       addOnlyTest({
         testName: testName,
-        callback: callback
+        callback: callback,
       });
     },
     each: function each(testName, dataset, callback) {
@@ -3377,10 +3628,10 @@
           callback: callback,
           withData: true,
           stackOffset: 5,
-          data: data
+          data: data,
         });
       });
-    }
+    },
   });
   test.todo.each = function (testName, dataset, callback) {
     runEach(dataset, function (data, testKey) {
@@ -3390,7 +3641,7 @@
         todo: true,
         withData: true,
         stackOffset: 5,
-        data: data
+        data: data,
       });
     });
   };
@@ -3399,7 +3650,7 @@
       addTest({
         testName: makeEachTestName(testName, testKey),
         stackOffset: 5,
-        skip: true
+        skip: true,
       });
     });
   };
@@ -3410,7 +3661,7 @@
         callback: callback,
         withData: true,
         stackOffset: 5,
-        data: data
+        data: data,
       });
     });
   };
@@ -3474,19 +3725,23 @@
   // but must run during the last non-skipped test. When it runs,
   // there may be non-zero skipped tests left.
   function lastTestWithinModuleExecuted(module) {
-    return module.testsRun === collectTests(module).filter(function (test) {
-      return !test.skip;
-    }).length - 1;
+    return (
+      module.testsRun ===
+      collectTests(module).filter(function (test) {
+        return !test.skip;
+      }).length -
+        1
+    );
   }
   function incrementTestsRun(module) {
     module.testsRun++;
-    while (module = module.parentModule) {
+    while ((module = module.parentModule)) {
       module.testsRun++;
     }
   }
   function incrementTestsIgnored(module) {
     module.testsIgnored++;
-    while (module = module.parentModule) {
+    while ((module = module.parentModule)) {
       module.testsIgnored++;
     }
   }
@@ -3534,7 +3789,7 @@
     }
   }
 
-  var ConsoleReporter = /*#__PURE__*/function () {
+  var ConsoleReporter = /*#__PURE__*/ (function () {
     function ConsoleReporter(runner) {
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       _classCallCheck(this, ConsoleReporter);
@@ -3549,39 +3804,51 @@
       runner.on('testEnd', this.onTestEnd.bind(this));
       runner.on('runEnd', this.onRunEnd.bind(this));
     }
-    _createClass(ConsoleReporter, [{
-      key: "onError",
-      value: function onError(error) {
-        this.log('error', error);
-      }
-    }, {
-      key: "onRunStart",
-      value: function onRunStart(runStart) {
-        this.log('runStart', runStart);
-      }
-    }, {
-      key: "onTestStart",
-      value: function onTestStart(test) {
-        this.log('testStart', test);
-      }
-    }, {
-      key: "onTestEnd",
-      value: function onTestEnd(test) {
-        this.log('testEnd', test);
-      }
-    }, {
-      key: "onRunEnd",
-      value: function onRunEnd(runEnd) {
-        this.log('runEnd', runEnd);
-      }
-    }], [{
-      key: "init",
-      value: function init(runner, options) {
-        return new ConsoleReporter(runner, options);
-      }
-    }]);
+    _createClass(
+      ConsoleReporter,
+      [
+        {
+          key: 'onError',
+          value: function onError(error) {
+            this.log('error', error);
+          },
+        },
+        {
+          key: 'onRunStart',
+          value: function onRunStart(runStart) {
+            this.log('runStart', runStart);
+          },
+        },
+        {
+          key: 'onTestStart',
+          value: function onTestStart(test) {
+            this.log('testStart', test);
+          },
+        },
+        {
+          key: 'onTestEnd',
+          value: function onTestEnd(test) {
+            this.log('testEnd', test);
+          },
+        },
+        {
+          key: 'onRunEnd',
+          value: function onRunEnd(runEnd) {
+            this.log('runEnd', runEnd);
+          },
+        },
+      ],
+      [
+        {
+          key: 'init',
+          value: function init(runner, options) {
+            return new ConsoleReporter(runner, options);
+          },
+        },
+      ]
+    );
     return ConsoleReporter;
-  }();
+  })();
 
   var FORCE_COLOR,
     NODE_DISABLE_COLORS,
@@ -3597,7 +3864,11 @@
     isTTY = process.stdout && process.stdout.isTTY;
   }
   var $ = {
-    enabled: !NODE_DISABLE_COLORS && NO_COLOR == null && TERM !== 'dumb' && (FORCE_COLOR != null && FORCE_COLOR !== '0' || isTTY),
+    enabled:
+      !NODE_DISABLE_COLORS &&
+      NO_COLOR == null &&
+      TERM !== 'dumb' &&
+      ((FORCE_COLOR != null && FORCE_COLOR !== '0') || isTTY),
     // modifiers
     reset: init(0, 0),
     bold: init(1, 22),
@@ -3626,7 +3897,7 @@
     bgBlue: init(44, 49),
     bgMagenta: init(45, 49),
     bgCyan: init(46, 49),
-    bgWhite: init(47, 49)
+    bgWhite: init(47, 49),
   };
   function run(arr, str) {
     var i = 0,
@@ -3646,7 +3917,7 @@
   function chain(has, keys) {
     var ctx = {
       has: has,
-      keys: keys
+      keys: keys,
     };
     ctx.reset = $.reset.bind(ctx);
     ctx.bold = $.bold.bind(ctx);
@@ -3678,9 +3949,9 @@
   }
   function init(open, close) {
     var blk = {
-      open: "\x1B[".concat(open, "m"),
-      close: "\x1B[".concat(close, "m"),
-      rgx: new RegExp("\\x1b\\[".concat(close, "m"), 'g')
+      open: '\x1B['.concat(open, 'm'),
+      close: '\x1B['.concat(close, 'm'),
+      rgx: new RegExp('\\x1b\\['.concat(close, 'm'), 'g'),
     };
     return function (txt) {
       if (this !== void 0 && this.has !== void 0) {
@@ -3768,7 +4039,14 @@
       var rBool = /^(true|false|y|n|yes|no|on|off)$/i;
 
       // Is this a complex string?
-      if (value === '' || rSpecialJson.test(value) || rSpecialYaml.test(value[0]) || rUntrimmed.test(value) || rNumerical.test(value) || rBool.test(value)) {
+      if (
+        value === '' ||
+        rSpecialJson.test(value) ||
+        rSpecialYaml.test(value[0]) ||
+        rUntrimmed.test(value) ||
+        rNumerical.test(value) ||
+        rBool.test(value)
+      ) {
         if (!/\n/.test(value)) {
           // Complex one-line string, use JSON (quoted string)
           return JSON.stringify(value);
@@ -3784,11 +4062,13 @@
           // without any "Chomping" indicators.
           var lines = value
 
-          // Ignore the last new line, since we'll get that one for free
-          // with the straight-forward Block syntax.
-          .replace(/\n$/, '').split('\n').map(function (line) {
-            return prefix + line;
-          });
+            // Ignore the last new line, since we'll get that one for free
+            // with the straight-forward Block syntax.
+            .replace(/\n$/, '')
+            .split('\n')
+            .map(function (line) {
+              return prefix + line;
+            });
           return '|\n' + lines.join('\n');
         } else {
           // This has either no trailing new lines, or more than 1.
@@ -3817,7 +4097,10 @@
     if (ancestors.indexOf(object) !== -1) {
       return '[Circular]';
     }
-    var type = Object.prototype.toString.call(object).replace(/^\[.+\s(.+?)]$/, '$1').toLowerCase();
+    var type = Object.prototype.toString
+      .call(object)
+      .replace(/^\[.+\s(.+?)]$/, '$1')
+      .toLowerCase();
     var clone;
     switch (type) {
       case 'array':
@@ -3840,7 +4123,7 @@
     }
     return clone;
   }
-  var TapReporter = /*#__PURE__*/function () {
+  var TapReporter = /*#__PURE__*/ (function () {
     function TapReporter(runner) {
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       _classCallCheck(this, TapReporter);
@@ -3857,106 +4140,119 @@
       runner.on('testEnd', this.onTestEnd.bind(this));
       runner.on('runEnd', this.onRunEnd.bind(this));
     }
-    _createClass(TapReporter, [{
-      key: "onRunStart",
-      value: function onRunStart(_runSuite) {
-        this.log('TAP version 13');
-      }
-    }, {
-      key: "onError",
-      value: function onError(error) {
-        if (this.bailed) {
-          return;
-        }
-        this.bailed = true;
+    _createClass(
+      TapReporter,
+      [
+        {
+          key: 'onRunStart',
+          value: function onRunStart(_runSuite) {
+            this.log('TAP version 13');
+          },
+        },
+        {
+          key: 'onError',
+          value: function onError(error) {
+            if (this.bailed) {
+              return;
+            }
+            this.bailed = true;
 
-        // Imitate onTestEnd
-        // Skip this if we're past "runEnd" as it would look odd
-        if (!this.ended) {
-          this.testCount = this.testCount + 1;
-          this.log($.red("not ok ".concat(this.testCount, " global failure")));
-          this.logError(error);
-        }
-        this.log('Bail out! ' + errorString(error).split('\n')[0]);
-        if (this.ended) {
-          this.logError(error);
-        }
-      }
-    }, {
-      key: "onTestEnd",
-      value: function onTestEnd(test) {
-        var _this = this;
-        this.testCount = this.testCount + 1;
-        if (test.status === 'passed') {
-          this.log("ok ".concat(this.testCount, " ").concat(test.fullName.join(' > ')));
-        } else if (test.status === 'skipped') {
-          this.log($.yellow("ok ".concat(this.testCount, " # SKIP ").concat(test.fullName.join(' > '))));
-        } else if (test.status === 'todo') {
-          this.log($.cyan("not ok ".concat(this.testCount, " # TODO ").concat(test.fullName.join(' > '))));
-          test.errors.forEach(function (error) {
-            return _this.logAssertion(error, 'todo');
-          });
-        } else {
-          this.log($.red("not ok ".concat(this.testCount, " ").concat(test.fullName.join(' > '))));
-          test.errors.forEach(function (error) {
-            return _this.logAssertion(error);
-          });
-        }
-      }
-    }, {
-      key: "onRunEnd",
-      value: function onRunEnd(runSuite) {
-        this.ended = true;
-        this.log("1..".concat(runSuite.testCounts.total));
-        this.log("# pass ".concat(runSuite.testCounts.passed));
-        this.log($.yellow("# skip ".concat(runSuite.testCounts.skipped)));
-        this.log($.cyan("# todo ".concat(runSuite.testCounts.todo)));
-        this.log($.red("# fail ".concat(runSuite.testCounts.failed)));
-      }
-    }, {
-      key: "logAssertion",
-      value: function logAssertion(error, severity) {
-        var out = '  ---';
-        out += "\n  message: ".concat(prettyYamlValue(error.message || 'failed'));
-        out += "\n  severity: ".concat(prettyYamlValue(severity || 'failed'));
-        if (hasOwn.call(error, 'actual')) {
-          out += "\n  actual  : ".concat(prettyYamlValue(error.actual));
-        }
-        if (hasOwn.call(error, 'expected')) {
-          out += "\n  expected: ".concat(prettyYamlValue(error.expected));
-        }
-        if (error.stack) {
-          // Since stacks aren't user generated, take a bit of liberty by
-          // adding a trailing new line to allow a straight-forward YAML Blocks.
-          out += "\n  stack: ".concat(prettyYamlValue(error.stack + '\n'));
-        }
-        out += '\n  ...';
-        this.log(out);
-      }
-    }, {
-      key: "logError",
-      value: function logError(error) {
-        var out = '  ---';
-        out += "\n  message: ".concat(prettyYamlValue(errorString(error)));
-        out += "\n  severity: ".concat(prettyYamlValue('failed'));
-        if (error && error.stack) {
-          out += "\n  stack: ".concat(prettyYamlValue(error.stack + '\n'));
-        }
-        out += '\n  ...';
-        this.log(out);
-      }
-    }], [{
-      key: "init",
-      value: function init(runner, options) {
-        return new TapReporter(runner, options);
-      }
-    }]);
+            // Imitate onTestEnd
+            // Skip this if we're past "runEnd" as it would look odd
+            if (!this.ended) {
+              this.testCount = this.testCount + 1;
+              this.log($.red('not ok '.concat(this.testCount, ' global failure')));
+              this.logError(error);
+            }
+            this.log('Bail out! ' + errorString(error).split('\n')[0]);
+            if (this.ended) {
+              this.logError(error);
+            }
+          },
+        },
+        {
+          key: 'onTestEnd',
+          value: function onTestEnd(test) {
+            var _this = this;
+            this.testCount = this.testCount + 1;
+            if (test.status === 'passed') {
+              this.log('ok '.concat(this.testCount, ' ').concat(test.fullName.join(' > ')));
+            } else if (test.status === 'skipped') {
+              this.log($.yellow('ok '.concat(this.testCount, ' # SKIP ').concat(test.fullName.join(' > '))));
+            } else if (test.status === 'todo') {
+              this.log($.cyan('not ok '.concat(this.testCount, ' # TODO ').concat(test.fullName.join(' > '))));
+              test.errors.forEach(function (error) {
+                return _this.logAssertion(error, 'todo');
+              });
+            } else {
+              this.log($.red('not ok '.concat(this.testCount, ' ').concat(test.fullName.join(' > '))));
+              test.errors.forEach(function (error) {
+                return _this.logAssertion(error);
+              });
+            }
+          },
+        },
+        {
+          key: 'onRunEnd',
+          value: function onRunEnd(runSuite) {
+            this.ended = true;
+            this.log('1..'.concat(runSuite.testCounts.total));
+            this.log('# pass '.concat(runSuite.testCounts.passed));
+            this.log($.yellow('# skip '.concat(runSuite.testCounts.skipped)));
+            this.log($.cyan('# todo '.concat(runSuite.testCounts.todo)));
+            this.log($.red('# fail '.concat(runSuite.testCounts.failed)));
+          },
+        },
+        {
+          key: 'logAssertion',
+          value: function logAssertion(error, severity) {
+            var out = '  ---';
+            out += '\n  message: '.concat(prettyYamlValue(error.message || 'failed'));
+            out += '\n  severity: '.concat(prettyYamlValue(severity || 'failed'));
+            if (hasOwn.call(error, 'actual')) {
+              out += '\n  actual  : '.concat(prettyYamlValue(error.actual));
+            }
+            if (hasOwn.call(error, 'expected')) {
+              out += '\n  expected: '.concat(prettyYamlValue(error.expected));
+            }
+            if (error.stack) {
+              // Since stacks aren't user generated, take a bit of liberty by
+              // adding a trailing new line to allow a straight-forward YAML Blocks.
+              out += '\n  stack: '.concat(prettyYamlValue(error.stack + '\n'));
+            }
+            out += '\n  ...';
+            this.log(out);
+          },
+        },
+        {
+          key: 'logError',
+          value: function logError(error) {
+            var out = '  ---';
+            out += '\n  message: '.concat(prettyYamlValue(errorString(error)));
+            out += '\n  severity: '.concat(prettyYamlValue('failed'));
+            if (error && error.stack) {
+              out += '\n  stack: '.concat(prettyYamlValue(error.stack + '\n'));
+            }
+            out += '\n  ...';
+            this.log(out);
+          },
+        },
+      ],
+      [
+        {
+          key: 'init',
+          value: function init(runner, options) {
+            return new TapReporter(runner, options);
+          },
+        },
+      ]
+    );
     return TapReporter;
-  }();
+  })();
 
   var reporters = {
     console: ConsoleReporter,
-    tap: TapReporter
+    tap: TapReporter,
   };
 
   function makeAddGlobalHook(hookName) {
@@ -3969,7 +4265,7 @@
   }
   var hooks = {
     beforeEach: makeAddGlobalHook('beforeEach'),
-    afterEach: makeAddGlobalHook('afterEach')
+    afterEach: makeAddGlobalHook('afterEach'),
   };
 
   /**
@@ -3995,14 +4291,14 @@
     if (config.current) {
       config.current.assert.pushResult({
         result: false,
-        message: "global failure: ".concat(errorString(error)),
+        message: 'global failure: '.concat(errorString(error)),
         // We could let callers specify an offset to subtract a number of frames via
         // sourceFromStacktrace, in case they are a wrapper further away from the error
         // handler, and thus reduce some noise in the stack trace. However, we're not
         // doing this right now because it would almost never be used in practice given
         // the vast majority of error values will be Error objects, and thus have their
         // own stack trace already.
-        source: error && error.stack || sourceFromStacktrace(2)
+        source: (error && error.stack) || sourceFromStacktrace(2),
       });
     } else {
       // The "error" event was added in QUnit 2.17.
@@ -4037,7 +4333,9 @@
    * @return {bool} True if native error reporting should be suppressed.
    */
   function onWindowError(details) {
-    Logger.warn('QUnit.onError is deprecated and will be removed in QUnit 3.0.' + ' Please use QUnit.onUncaughtException instead.');
+    Logger.warn(
+      'QUnit.onError is deprecated and will be removed in QUnit 3.0.' + ' Please use QUnit.onUncaughtException instead.'
+    );
     if (config.current && config.current.ignoreGlobalErrors) {
       return true;
     }
@@ -4113,11 +4411,16 @@
       scheduleBegin();
     },
     onUnhandledRejection: function onUnhandledRejection(reason) {
-      Logger.warn('QUnit.onUnhandledRejection is deprecated and will be removed in QUnit 3.0.' + ' Please use QUnit.onUncaughtException instead.');
+      Logger.warn(
+        'QUnit.onUnhandledRejection is deprecated and will be removed in QUnit 3.0.' +
+          ' Please use QUnit.onUncaughtException instead.'
+      );
       onUncaughtException(reason);
     },
     extend: function extend$1() {
-      Logger.warn('QUnit.extend is deprecated and will be removed in QUnit 3.0.' + ' Please use Object.assign instead.');
+      Logger.warn(
+        'QUnit.extend is deprecated and will be removed in QUnit 3.0.' + ' Please use Object.assign instead.'
+      );
 
       // delegate to utility implementation, which does not warn and can be used elsewhere internally
       for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
@@ -4129,12 +4432,16 @@
       config.pageLoaded = true;
 
       // Initialize the configuration options
-      extend(config, {
-        started: 0,
-        updateRate: 1000,
-        autostart: true,
-        filter: ''
-      }, true);
+      extend(
+        config,
+        {
+          started: 0,
+          updateRate: 1000,
+          autostart: true,
+          filter: '',
+        },
+        true
+      );
       if (!runStarted) {
         config.blocking = false;
         if (config.autostart) {
@@ -4145,7 +4452,7 @@
     stack: function stack(offset) {
       offset = (offset || 0) + 2;
       return sourceFromStacktrace(offset);
-    }
+    },
   });
   registerLoggingCallbacks(QUnit);
   function scheduleBegin() {
@@ -4188,7 +4495,7 @@
           // Added in QUnit 1.16.0 for internal use by html-reporter,
           // but no longer used since QUnit 2.7.0.
           // @deprecated Kept unofficially to be removed in QUnit 3.0.
-          tests: config.modules[i].tests
+          tests: config.modules[i].tests,
         });
       }
     }
@@ -4197,7 +4504,7 @@
     emit('runStart', runSuite.start(true));
     runLoggingCallbacks('begin', {
       totalTests: Test.count,
-      modules: modulesLog
+      modules: modulesLog,
     }).then(unblockAndAdvanceQueue);
   }
   exportQUnit(QUnit);
@@ -4265,19 +4572,27 @@
     }
 
     // Add URL-parameter-mapped config values with UI form rendering data
-    QUnit.config.urlConfig.push({
-      id: 'hidepassed',
-      label: 'Hide passed tests',
-      tooltip: 'Only show tests and assertions that fail. Stored as query-strings.'
-    }, {
-      id: 'noglobals',
-      label: 'Check for Globals',
-      tooltip: 'Enabling this will test if any test introduces new properties on the ' + 'global object (`window` in Browsers). Stored as query-strings.'
-    }, {
-      id: 'notrycatch',
-      label: 'No try-catch',
-      tooltip: 'Enabling this will run tests outside of a try-catch block. Makes debugging ' + 'exceptions in IE reasonable. Stored as query-strings.'
-    });
+    QUnit.config.urlConfig.push(
+      {
+        id: 'hidepassed',
+        label: 'Hide passed tests',
+        tooltip: 'Only show tests and assertions that fail. Stored as query-strings.',
+      },
+      {
+        id: 'noglobals',
+        label: 'Check for Globals',
+        tooltip:
+          'Enabling this will test if any test introduces new properties on the ' +
+          'global object (`window` in Browsers). Stored as query-strings.',
+      },
+      {
+        id: 'notrycatch',
+        label: 'No try-catch',
+        tooltip:
+          'Enabling this will run tests outside of a try-catch block. Makes debugging ' +
+          'exceptions in IE reasonable. Stored as query-strings.',
+      }
+    );
     QUnit.begin(function () {
       var urlConfig = QUnit.config.urlConfig;
       for (var i = 0; i < urlConfig.length; i++) {
@@ -4316,41 +4631,57 @@
     }
   })();
 
-  var fuzzysort$1 = {exports: {}};
+  var fuzzysort$1 = { exports: {} };
 
   (function (module) {
     (function (root, UMD) {
-      if (module.exports) module.exports = UMD();else root.fuzzysort = UMD();
+      if (module.exports) module.exports = UMD();
+      else root.fuzzysort = UMD();
     })(commonjsGlobal, function UMD() {
       function fuzzysortNew(instanceOptions) {
         var fuzzysort = {
           single: function single(search, target, options) {
-            if (search == 'farzher') return {
-              target: "farzher was here (^-^*)/",
-              score: 0,
-              indexes: [0, 1, 2, 3, 4, 5, 6]
-            };
+            if (search == 'farzher')
+              return {
+                target: 'farzher was here (^-^*)/',
+                score: 0,
+                indexes: [0, 1, 2, 3, 4, 5, 6],
+              };
             if (!search) return null;
             if (!isObj(search)) search = fuzzysort.getPreparedSearch(search);
             if (!target) return null;
             if (!isObj(target)) target = fuzzysort.getPrepared(target);
-            var allowTypo = options && options.allowTypo !== undefined ? options.allowTypo : instanceOptions && instanceOptions.allowTypo !== undefined ? instanceOptions.allowTypo : true;
+            var allowTypo =
+              options && options.allowTypo !== undefined
+                ? options.allowTypo
+                : instanceOptions && instanceOptions.allowTypo !== undefined
+                ? instanceOptions.allowTypo
+                : true;
             var algorithm = allowTypo ? fuzzysort.algorithm : fuzzysort.algorithmNoTypo;
             return algorithm(search, target, search[0]);
           },
           go: function go(search, targets, options) {
-            if (search == 'farzher') return [{
-              target: "farzher was here (^-^*)/",
-              score: 0,
-              indexes: [0, 1, 2, 3, 4, 5, 6],
-              obj: targets ? targets[0] : null
-            }];
+            if (search == 'farzher')
+              return [
+                {
+                  target: 'farzher was here (^-^*)/',
+                  score: 0,
+                  indexes: [0, 1, 2, 3, 4, 5, 6],
+                  obj: targets ? targets[0] : null,
+                },
+              ];
             if (!search) return noResults;
             search = fuzzysort.prepareSearch(search);
             var searchLowerCode = search[0];
-            var threshold = options && options.threshold || instanceOptions && instanceOptions.threshold || -9007199254740991;
-            var limit = options && options.limit || instanceOptions && instanceOptions.limit || 9007199254740991;
-            var allowTypo = options && options.allowTypo !== undefined ? options.allowTypo : instanceOptions && instanceOptions.allowTypo !== undefined ? instanceOptions.allowTypo : true;
+            var threshold =
+              (options && options.threshold) || (instanceOptions && instanceOptions.threshold) || -9007199254740991;
+            var limit = (options && options.limit) || (instanceOptions && instanceOptions.limit) || 9007199254740991;
+            var allowTypo =
+              options && options.allowTypo !== undefined
+                ? options.allowTypo
+                : instanceOptions && instanceOptions.allowTypo !== undefined
+                ? instanceOptions.allowTypo
+                : true;
             var algorithm = allowTypo ? fuzzysort.algorithm : fuzzysort.algorithmNoTypo;
             var resultsLen = 0;
             var limitedCount = 0;
@@ -4409,7 +4740,7 @@
                   _nextBeginningIndexes: null,
                   score: result.score,
                   indexes: result.indexes,
-                  obj: obj
+                  obj: obj,
                 }; // hidden
 
                 if (resultsLen < limit) {
@@ -4450,20 +4781,29 @@
           goAsync: function goAsync(search, targets, options) {
             var canceled = false;
             var p = new Promise(function (resolve, reject) {
-              if (search == 'farzher') return resolve([{
-                target: "farzher was here (^-^*)/",
-                score: 0,
-                indexes: [0, 1, 2, 3, 4, 5, 6],
-                obj: targets ? targets[0] : null
-              }]);
+              if (search == 'farzher')
+                return resolve([
+                  {
+                    target: 'farzher was here (^-^*)/',
+                    score: 0,
+                    indexes: [0, 1, 2, 3, 4, 5, 6],
+                    obj: targets ? targets[0] : null,
+                  },
+                ]);
               if (!search) return resolve(noResults);
               search = fuzzysort.prepareSearch(search);
               var searchLowerCode = search[0];
               var q = fastpriorityqueue();
               var iCurrent = targets.length - 1;
-              var threshold = options && options.threshold || instanceOptions && instanceOptions.threshold || -9007199254740991;
-              var limit = options && options.limit || instanceOptions && instanceOptions.limit || 9007199254740991;
-              var allowTypo = options && options.allowTypo !== undefined ? options.allowTypo : instanceOptions && instanceOptions.allowTypo !== undefined ? instanceOptions.allowTypo : true;
+              var threshold =
+                (options && options.threshold) || (instanceOptions && instanceOptions.threshold) || -9007199254740991;
+              var limit = (options && options.limit) || (instanceOptions && instanceOptions.limit) || 9007199254740991;
+              var allowTypo =
+                options && options.allowTypo !== undefined
+                  ? options.allowTypo
+                  : instanceOptions && instanceOptions.allowTypo !== undefined
+                  ? instanceOptions.allowTypo
+                  : true;
               var algorithm = allowTypo ? fuzzysort.algorithm : fuzzysort.algorithmNoTypo;
               var resultsLen = 0;
               var limitedCount = 0;
@@ -4536,7 +4876,7 @@
                       _nextBeginningIndexes: null,
                       score: result.score,
                       indexes: result.indexes,
-                      obj: obj
+                      obj: obj,
                     }; // hidden
 
                     if (resultsLen < limit) {
@@ -4659,40 +4999,46 @@
             return result;
           },
           prepare: function prepare(target) {
-            if (!target) return {
-              target: '',
-              _targetLowerCodes: [0 /*this 0 doesn't make sense. here because an empty array causes the algorithm to deoptimize and run 50% slower!*/],
-              _nextBeginningIndexes: null,
-              score: null,
-              indexes: null,
-              obj: null
-            }; // hidden
+            if (!target)
+              return {
+                target: '',
+                _targetLowerCodes: [
+                  0 /*this 0 doesn't make sense. here because an empty array causes the algorithm to deoptimize and run 50% slower!*/,
+                ],
+                _nextBeginningIndexes: null,
+                score: null,
+                indexes: null,
+                obj: null,
+              }; // hidden
             return {
               target: target,
               _targetLowerCodes: fuzzysort.prepareLowerCodes(target),
               _nextBeginningIndexes: null,
               score: null,
               indexes: null,
-              obj: null
+              obj: null,
             }; // hidden
           },
 
           prepareSlow: function prepareSlow(target) {
-            if (!target) return {
-              target: '',
-              _targetLowerCodes: [0 /*this 0 doesn't make sense. here because an empty array causes the algorithm to deoptimize and run 50% slower!*/],
-              _nextBeginningIndexes: null,
-              score: null,
-              indexes: null,
-              obj: null
-            }; // hidden
+            if (!target)
+              return {
+                target: '',
+                _targetLowerCodes: [
+                  0 /*this 0 doesn't make sense. here because an empty array causes the algorithm to deoptimize and run 50% slower!*/,
+                ],
+                _nextBeginningIndexes: null,
+                score: null,
+                indexes: null,
+                obj: null,
+              }; // hidden
             return {
               target: target,
               _targetLowerCodes: fuzzysort.prepareLowerCodes(target),
               _nextBeginningIndexes: fuzzysort.prepareNextBeginningIndexes(target),
               score: null,
               indexes: null,
-              obj: null
+              obj: null,
             }; // hidden
           },
 
@@ -4739,7 +5085,16 @@
                 matchesSimple[matchesSimpleLen++] = targetI;
                 ++searchI;
                 if (searchI === searchLen) break;
-                searchLowerCode = searchLowerCodes[typoSimpleI === 0 ? searchI : typoSimpleI === searchI ? searchI + 1 : typoSimpleI === searchI - 1 ? searchI - 1 : searchI];
+                searchLowerCode =
+                  searchLowerCodes[
+                    typoSimpleI === 0
+                      ? searchI
+                      : typoSimpleI === searchI
+                      ? searchI + 1
+                      : typoSimpleI === searchI - 1
+                      ? searchI - 1
+                      : searchI
+                  ];
               }
               ++targetI;
               if (targetI >= targetLen) {
@@ -4775,42 +5130,55 @@
             var successStrict = false;
             var matchesStrictLen = 0;
             var nextBeginningIndexes = prepared._nextBeginningIndexes;
-            if (nextBeginningIndexes === null) nextBeginningIndexes = prepared._nextBeginningIndexes = fuzzysort.prepareNextBeginningIndexes(prepared.target);
-            var firstPossibleI = targetI = matchesSimple[0] === 0 ? 0 : nextBeginningIndexes[matchesSimple[0] - 1];
+            if (nextBeginningIndexes === null)
+              nextBeginningIndexes = prepared._nextBeginningIndexes = fuzzysort.prepareNextBeginningIndexes(
+                prepared.target
+              );
+            var firstPossibleI = (targetI = matchesSimple[0] === 0 ? 0 : nextBeginningIndexes[matchesSimple[0] - 1]);
 
             // Our target string successfully matched all characters in sequence!
             // Let's try a more advanced and strict test to improve the score
             // only count it as a match if it's consecutive or a beginning character!
-            if (targetI !== targetLen) for (;;) {
-              if (targetI >= targetLen) {
-                // We failed to find a good spot for this search char, go back to the previous search char and force it forward
-                if (searchI <= 0) {
-                  // We failed to push chars forward for a better match
-                  // transpose, starting from the beginning
-                  ++typoStrictI;
-                  if (typoStrictI > searchLen - 2) break;
-                  if (searchLowerCodes[typoStrictI] === searchLowerCodes[typoStrictI + 1]) continue; // doesn't make sense to transpose a repeat char
-                  targetI = firstPossibleI;
-                  continue;
-                }
-                --searchI;
-                var lastMatch = matchesStrict[--matchesStrictLen];
-                targetI = nextBeginningIndexes[lastMatch];
-              } else {
-                var isMatch = searchLowerCodes[typoStrictI === 0 ? searchI : typoStrictI === searchI ? searchI + 1 : typoStrictI === searchI - 1 ? searchI - 1 : searchI] === targetLowerCodes[targetI];
-                if (isMatch) {
-                  matchesStrict[matchesStrictLen++] = targetI;
-                  ++searchI;
-                  if (searchI === searchLen) {
-                    successStrict = true;
-                    break;
+            if (targetI !== targetLen)
+              for (;;) {
+                if (targetI >= targetLen) {
+                  // We failed to find a good spot for this search char, go back to the previous search char and force it forward
+                  if (searchI <= 0) {
+                    // We failed to push chars forward for a better match
+                    // transpose, starting from the beginning
+                    ++typoStrictI;
+                    if (typoStrictI > searchLen - 2) break;
+                    if (searchLowerCodes[typoStrictI] === searchLowerCodes[typoStrictI + 1]) continue; // doesn't make sense to transpose a repeat char
+                    targetI = firstPossibleI;
+                    continue;
                   }
-                  ++targetI;
+                  --searchI;
+                  var lastMatch = matchesStrict[--matchesStrictLen];
+                  targetI = nextBeginningIndexes[lastMatch];
                 } else {
-                  targetI = nextBeginningIndexes[targetI];
+                  var isMatch =
+                    searchLowerCodes[
+                      typoStrictI === 0
+                        ? searchI
+                        : typoStrictI === searchI
+                        ? searchI + 1
+                        : typoStrictI === searchI - 1
+                        ? searchI - 1
+                        : searchI
+                    ] === targetLowerCodes[targetI];
+                  if (isMatch) {
+                    matchesStrict[matchesStrictLen++] = targetI;
+                    ++searchI;
+                    if (searchI === searchLen) {
+                      successStrict = true;
+                      break;
+                    }
+                    ++targetI;
+                  } else {
+                    targetI = nextBeginningIndexes[targetI];
+                  }
                 }
               }
-            }
             {
               // tally up the score & keep track of matches for highlighting later
               if (successStrict) {
@@ -4871,35 +5239,39 @@
             var successStrict = false;
             var matchesStrictLen = 0;
             var nextBeginningIndexes = prepared._nextBeginningIndexes;
-            if (nextBeginningIndexes === null) nextBeginningIndexes = prepared._nextBeginningIndexes = fuzzysort.prepareNextBeginningIndexes(prepared.target);
+            if (nextBeginningIndexes === null)
+              nextBeginningIndexes = prepared._nextBeginningIndexes = fuzzysort.prepareNextBeginningIndexes(
+                prepared.target
+              );
             targetI = matchesSimple[0] === 0 ? 0 : nextBeginningIndexes[matchesSimple[0] - 1];
 
             // Our target string successfully matched all characters in sequence!
             // Let's try a more advanced and strict test to improve the score
             // only count it as a match if it's consecutive or a beginning character!
-            if (targetI !== targetLen) for (;;) {
-              if (targetI >= targetLen) {
-                // We failed to find a good spot for this search char, go back to the previous search char and force it forward
-                if (searchI <= 0) break; // We failed to push chars forward for a better match
+            if (targetI !== targetLen)
+              for (;;) {
+                if (targetI >= targetLen) {
+                  // We failed to find a good spot for this search char, go back to the previous search char and force it forward
+                  if (searchI <= 0) break; // We failed to push chars forward for a better match
 
-                --searchI;
-                var lastMatch = matchesStrict[--matchesStrictLen];
-                targetI = nextBeginningIndexes[lastMatch];
-              } else {
-                var isMatch = searchLowerCodes[searchI] === targetLowerCodes[targetI];
-                if (isMatch) {
-                  matchesStrict[matchesStrictLen++] = targetI;
-                  ++searchI;
-                  if (searchI === searchLen) {
-                    successStrict = true;
-                    break;
-                  }
-                  ++targetI;
+                  --searchI;
+                  var lastMatch = matchesStrict[--matchesStrictLen];
+                  targetI = nextBeginningIndexes[lastMatch];
                 } else {
-                  targetI = nextBeginningIndexes[targetI];
+                  var isMatch = searchLowerCodes[searchI] === targetLowerCodes[targetI];
+                  if (isMatch) {
+                    matchesStrict[matchesStrictLen++] = targetI;
+                    ++searchI;
+                    if (searchI === searchLen) {
+                      successStrict = true;
+                      break;
+                    }
+                    ++targetI;
+                  } else {
+                    targetI = nextBeginningIndexes[targetI];
+                  }
                 }
               }
-            }
             {
               // tally up the score & keep track of matches for highlighting later
               if (successStrict) {
@@ -4945,8 +5317,9 @@
             for (var i = 0; i < targetLen; ++i) {
               var targetCode = target.charCodeAt(i);
               var isUpper = targetCode >= 65 && targetCode <= 90;
-              var isAlphanum = isUpper || targetCode >= 97 && targetCode <= 122 || targetCode >= 48 && targetCode <= 57;
-              var isBeginning = isUpper && !wasUpper || !wasAlphanum || !isAlphanum;
+              var isAlphanum =
+                isUpper || (targetCode >= 97 && targetCode <= 122) || (targetCode >= 48 && targetCode <= 57);
+              var isBeginning = (isUpper && !wasUpper) || !wasAlphanum || !isAlphanum;
               wasUpper = isUpper;
               wasAlphanum = isAlphanum;
               if (isBeginning) beginningIndexes[beginningIndexesLen++] = i;
@@ -4970,26 +5343,29 @@
             return nextBeginningIndexes;
           },
           cleanup: cleanup,
-          new: fuzzysortNew
+          new: fuzzysortNew,
         };
         return fuzzysort;
       } // fuzzysortNew
 
       // This stuff is outside fuzzysortNew, because it's shared with instances of fuzzysort.new()
       var isNode = typeof commonjsRequire !== 'undefined' && typeof window === 'undefined';
-      var MyMap = typeof Map === 'function' ? Map : function () {
-        var s = Object.create(null);
-        this.get = function (k) {
-          return s[k];
-        };
-        this.set = function (k, val) {
-          s[k] = val;
-          return this;
-        };
-        this.clear = function () {
-          s = Object.create(null);
-        };
-      };
+      var MyMap =
+        typeof Map === 'function'
+          ? Map
+          : function () {
+              var s = Object.create(null);
+              this.get = function (k) {
+                return s[k];
+              };
+              this.set = function (k, val) {
+                s[k] = val;
+                return this;
+              };
+              this.clear = function () {
+                s = Object.create(null);
+              };
+            };
       var preparedCache = new MyMap();
       var preparedSearchCache = new MyMap();
       var noResults = [];
@@ -5039,32 +5415,38 @@
           o = 0,
           e = {};
         function n() {
-          for (var e = 0, n = r[e], c = 1; c < o;) {
+          for (var e = 0, n = r[e], c = 1; c < o; ) {
             var f = c + 1;
-            e = c, f < o && r[f].score < r[c].score && (e = f), r[e - 1 >> 1] = r[e], c = 1 + (e << 1);
+            (e = c), f < o && r[f].score < r[c].score && (e = f), (r[(e - 1) >> 1] = r[e]), (c = 1 + (e << 1));
           }
-          for (var a = e - 1 >> 1; e > 0 && n.score < r[a].score; a = (e = a) - 1 >> 1) {
+          for (var a = (e - 1) >> 1; e > 0 && n.score < r[a].score; a = ((e = a) - 1) >> 1) {
             r[e] = r[a];
           }
           r[e] = n;
         }
-        return e.add = function (e) {
-          var n = o;
-          r[o++] = e;
-          for (var c = n - 1 >> 1; n > 0 && e.score < r[c].score; c = (n = c) - 1 >> 1) {
-            r[n] = r[c];
-          }
-          r[n] = e;
-        }, e.poll = function () {
-          if (0 !== o) {
-            var e = r[0];
-            return r[0] = r[--o], n(), e;
-          }
-        }, e.peek = function (e) {
-          if (0 !== o) return r[0];
-        }, e.replaceTop = function (o) {
-          r[0] = o, n();
-        }, e;
+        return (
+          (e.add = function (e) {
+            var n = o;
+            r[o++] = e;
+            for (var c = (n - 1) >> 1; n > 0 && e.score < r[c].score; c = ((n = c) - 1) >> 1) {
+              r[n] = r[c];
+            }
+            r[n] = e;
+          }),
+          (e.poll = function () {
+            if (0 !== o) {
+              var e = r[0];
+              return (r[0] = r[--o]), n(), e;
+            }
+          }),
+          (e.peek = function (e) {
+            if (0 !== o) return r[0];
+          }),
+          (e.replaceTop = function (o) {
+            (r[0] = o), n();
+          }),
+          e
+        );
       };
       var q = fastpriorityqueue(); // reuse this, except for async, it needs to make its own
 
@@ -5085,7 +5467,7 @@
   var stats = {
     failedTests: [],
     defined: 0,
-    completed: 0
+    completed: 0,
   };
 
   // Escape text for attribute or text content.
@@ -5123,7 +5505,7 @@
       filter: undefined,
       module: undefined,
       moduleId: undefined,
-      testId: undefined
+      testId: undefined,
     });
     var dropdownData = null;
     function trim(string) {
@@ -5154,7 +5536,7 @@
       }
     }
     function toggleClass(elem, name, force) {
-      if (force || typeof force === 'undefined' && !hasClass(elem, name)) {
+      if (force || (typeof force === 'undefined' && !hasClass(elem, name))) {
         addClass(elem, name);
       } else {
         removeClass(elem, name);
@@ -5203,30 +5585,74 @@
         if (typeof val === 'string') {
           val = {
             id: val,
-            label: val
+            label: val,
           };
         }
         var escaped = escapeText(val.id);
         var escapedTooltip = escapeText(val.tooltip);
         if (!val.value || typeof val.value === 'string') {
-          urlConfigHtml += "<label for='qunit-urlconfig-" + escaped + "' title='" + escapedTooltip + "'><input id='qunit-urlconfig-" + escaped + "' name='" + escaped + "' type='checkbox'" + (val.value ? " value='" + escapeText(val.value) + "'" : '') + (config[val.id] ? " checked='checked'" : '') + " title='" + escapedTooltip + "' />" + escapeText(val.label) + '</label>';
+          urlConfigHtml +=
+            "<label for='qunit-urlconfig-" +
+            escaped +
+            "' title='" +
+            escapedTooltip +
+            "'><input id='qunit-urlconfig-" +
+            escaped +
+            "' name='" +
+            escaped +
+            "' type='checkbox'" +
+            (val.value ? " value='" + escapeText(val.value) + "'" : '') +
+            (config[val.id] ? " checked='checked'" : '') +
+            " title='" +
+            escapedTooltip +
+            "' />" +
+            escapeText(val.label) +
+            '</label>';
         } else {
-          urlConfigHtml += "<label for='qunit-urlconfig-" + escaped + "' title='" + escapedTooltip + "'>" + val.label + ": </label><select id='qunit-urlconfig-" + escaped + "' name='" + escaped + "' title='" + escapedTooltip + "'><option></option>";
+          urlConfigHtml +=
+            "<label for='qunit-urlconfig-" +
+            escaped +
+            "' title='" +
+            escapedTooltip +
+            "'>" +
+            val.label +
+            ": </label><select id='qunit-urlconfig-" +
+            escaped +
+            "' name='" +
+            escaped +
+            "' title='" +
+            escapedTooltip +
+            "'><option></option>";
           if (Array.isArray(val.value)) {
             for (var j = 0; j < val.value.length; j++) {
               escaped = escapeText(val.value[j]);
-              urlConfigHtml += "<option value='" + escaped + "'" + (config[val.id] === val.value[j] ? (selection = true) && " selected='selected'" : '') + '>' + escaped + '</option>';
+              urlConfigHtml +=
+                "<option value='" +
+                escaped +
+                "'" +
+                (config[val.id] === val.value[j] ? (selection = true) && " selected='selected'" : '') +
+                '>' +
+                escaped +
+                '</option>';
             }
           } else {
             for (var _j in val.value) {
               if (hasOwn.call(val.value, _j)) {
-                urlConfigHtml += "<option value='" + escapeText(_j) + "'" + (config[val.id] === _j ? (selection = true) && " selected='selected'" : '') + '>' + escapeText(val.value[_j]) + '</option>';
+                urlConfigHtml +=
+                  "<option value='" +
+                  escapeText(_j) +
+                  "'" +
+                  (config[val.id] === _j ? (selection = true) && " selected='selected'" : '') +
+                  '>' +
+                  escapeText(val.value[_j]) +
+                  '</option>';
               }
             }
           }
           if (config[val.id] && !selection) {
             escaped = escapeText(config[val.id]);
-            urlConfigHtml += "<option value='" + escaped + "' selected='selected' disabled='disabled'>" + escaped + '</option>';
+            urlConfigHtml +=
+              "<option value='" + escaped + "' selected='selected' disabled='disabled'>" + escaped + '</option>';
           }
           urlConfigHtml += '</select>';
         }
@@ -5271,7 +5697,7 @@
             var _iterator = _createForOfIteratorHelper(hiddenTests),
               _step;
             try {
-              for (_iterator.s(); !(_step = _iterator.n()).done;) {
+              for (_iterator.s(); !(_step = _iterator.n()).done; ) {
                 var hiddenTest = _step.value;
                 tests.removeChild(hiddenTest);
               }
@@ -5320,7 +5746,7 @@
         moduleId: _toConsumableArray(dropdownData.selectedMap.keys()),
         // Remove module and testId filter
         module: undefined,
-        testId: undefined
+        testId: undefined,
       });
     }
     function toolbarUrlConfigContainer() {
@@ -5358,7 +5784,18 @@
       return filter;
     }
     function createModuleListItem(moduleId, name, checked) {
-      return '<li><label class="clickable' + (checked ? ' checked' : '') + '"><input type="checkbox" ' + 'value="' + escapeText(moduleId) + '"' + (checked ? ' checked="checked"' : '') + ' />' + escapeText(name) + '</label></li>';
+      return (
+        '<li><label class="clickable' +
+        (checked ? ' checked' : '') +
+        '"><input type="checkbox" ' +
+        'value="' +
+        escapeText(moduleId) +
+        '"' +
+        (checked ? ' checked="checked"' : '') +
+        ' />' +
+        escapeText(name) +
+        '</label></li>'
+      );
     }
 
     /**
@@ -5387,8 +5824,11 @@
         options: beginDetails.modules.slice(),
         selectedMap: new StringMap(),
         isDirty: function isDirty() {
-          return _toConsumableArray(dropdownData.selectedMap.keys()).sort().join(',') !== _toConsumableArray(initialSelected.keys()).sort().join(',');
-        }
+          return (
+            _toConsumableArray(dropdownData.selectedMap.keys()).sort().join(',') !==
+            _toConsumableArray(initialSelected.keys()).sort().join(',')
+          );
+        },
       };
       if (config.moduleId.length) {
         // The module dropdown is seeded with the runtime configuration of the last run.
@@ -5512,14 +5952,14 @@
           results = dropdownData.options.map(function (obj) {
             // Fake empty results. https://github.com/farzher/fuzzysort/issues/41
             return {
-              obj: obj
+              obj: obj,
             };
           });
         } else {
           results = fuzzysort.go(searchText, dropdownData.options, {
             limit: 1000,
             key: 'name',
-            allowTypo: true
+            allowTypo: true,
           });
         }
         return moduleListHtml(results);
@@ -5542,7 +5982,7 @@
       // Avoid any dropdown rendering here as this is used by toolbarModuleFilter()
       // during the initial render, which should not delay test execution.
       function selectionChange(evt) {
-        var checkbox = evt && evt.target || null;
+        var checkbox = (evt && evt.target) || null;
         if (checkbox) {
           // Update internal state
           if (checkbox.checked) {
@@ -5554,7 +5994,9 @@
           // Update UI state
           toggleClass(checkbox.parentNode, 'checked', checkbox.checked);
         }
-        var textForm = dropdownData.selectedMap.size ? dropdownData.selectedMap.size + ' ' + (dropdownData.selectedMap.size === 1 ? 'module' : 'modules') : 'All modules';
+        var textForm = dropdownData.selectedMap.size
+          ? dropdownData.selectedMap.size + ' ' + (dropdownData.selectedMap.size === 1 ? 'module' : 'modules')
+          : 'All modules';
         moduleSearch.placeholder = textForm;
         moduleSearch.title = 'Type to search through and reduce the list.';
         resetButton.disabled = !dropdownData.isDirty();
@@ -5601,7 +6043,10 @@
         result.id = 'qunit-testresult';
         result.className = 'result';
         tests.parentNode.insertBefore(result, tests);
-        result.innerHTML = '<div id="qunit-testresult-display">Running...<br />&#160;</div>' + '<div id="qunit-testresult-controls"></div>' + '<div class="clearfix"></div>';
+        result.innerHTML =
+          '<div id="qunit-testresult-display">Running...<br />&#160;</div>' +
+          '<div id="qunit-testresult-controls"></div>' +
+          '<div class="clearfix"></div>';
         controls = id('qunit-testresult-controls');
       }
       if (controls) {
@@ -5613,7 +6058,13 @@
       if (!testId || testId.length <= 0) {
         return '';
       }
-      return "<div id='qunit-filteredTest'>Rerunning selected tests: " + escapeText(testId.join(', ')) + " <a id='qunit-clearFilter' href='" + escapeText(unfilteredUrl) + "'>Run all tests</a></div>";
+      return (
+        "<div id='qunit-filteredTest'>Rerunning selected tests: " +
+        escapeText(testId.join(', ')) +
+        " <a id='qunit-clearFilter' href='" +
+        escapeText(unfilteredUrl) +
+        "'>Run all tests</a></div>"
+      );
     }
     function appendUserAgent() {
       var userAgent = id('qunit-userAgent');
@@ -5638,7 +6089,15 @@
 
         // Since QUnit 1.3, these are created automatically if the page
         // contains id="qunit".
-        qunit.innerHTML = "<h1 id='qunit-header'>" + escapeText(document.title) + '</h1>' + "<h2 id='qunit-banner'></h2>" + "<div id='qunit-testrunner-toolbar' role='navigation'></div>" + appendFilteredTest() + "<h2 id='qunit-userAgent'></h2>" + "<ol id='qunit-tests'></ol>";
+        qunit.innerHTML =
+          "<h1 id='qunit-header'>" +
+          escapeText(document.title) +
+          '</h1>' +
+          "<h2 id='qunit-banner'></h2>" +
+          "<div id='qunit-testrunner-toolbar' role='navigation'></div>" +
+          appendFilteredTest() +
+          "<h2 id='qunit-userAgent'></h2>" +
+          "<ol id='qunit-tests'></ol>";
       }
       appendHeader();
       appendBanner();
@@ -5661,7 +6120,7 @@
         var rerunTrigger = document.createElement('a');
         rerunTrigger.innerHTML = 'Rerun';
         rerunTrigger.href = setUrl({
-          testId: testId
+          testId: testId,
         });
         testBlock.id = 'qunit-test-output-' + testId;
         testBlock.appendChild(rerunTrigger);
@@ -5692,16 +6151,39 @@
         return '';
       }
       var href = setUrl({
-        testId: failedTests
+        testId: failedTests,
       });
-      return ["<br /><a href='" + escapeText(href) + "'>", failedTests.length === 1 ? 'Rerun 1 failed test' : 'Rerun ' + failedTests.length + ' failed tests', '</a>'].join('');
+      return [
+        "<br /><a href='" + escapeText(href) + "'>",
+        failedTests.length === 1 ? 'Rerun 1 failed test' : 'Rerun ' + failedTests.length + ' failed tests',
+        '</a>',
+      ].join('');
     }
     QUnit.on('runEnd', function (runEnd) {
       var banner = id('qunit-banner');
       var tests = id('qunit-tests');
       var abortButton = id('qunit-abort-tests-button');
       var assertPassed = config.stats.all - config.stats.bad;
-      var html = [runEnd.testCounts.total, ' tests completed in ', runEnd.runtime, ' milliseconds, with ', runEnd.testCounts.failed, ' failed, ', runEnd.testCounts.skipped, ' skipped, and ', runEnd.testCounts.todo, ' todo.<br />', "<span class='passed'>", assertPassed, "</span> assertions of <span class='total'>", config.stats.all, "</span> passed, <span class='failed'>", config.stats.bad, '</span> failed.', getRerunFailedHtml(stats.failedTests)].join('');
+      var html = [
+        runEnd.testCounts.total,
+        ' tests completed in ',
+        runEnd.runtime,
+        ' milliseconds, with ',
+        runEnd.testCounts.failed,
+        ' failed, ',
+        runEnd.testCounts.skipped,
+        ' skipped, and ',
+        runEnd.testCounts.todo,
+        ' todo.<br />',
+        "<span class='passed'>",
+        assertPassed,
+        "</span> assertions of <span class='total'>",
+        config.stats.all,
+        "</span> passed, <span class='failed'>",
+        config.stats.bad,
+        '</span> failed.',
+        getRerunFailedHtml(stats.failedTests),
+      ].join('');
       var test;
       var assertLi;
       var assertList;
@@ -5734,7 +6216,10 @@
         // Show ✖ for good, ✔ for bad suite result in title
         // use escape sequences in case file gets loaded with non-utf-8
         // charset
-        document.title = [runEnd.status === 'failed' ? "\u2716" : "\u2714", document.title.replace(/^[\u2714\u2716] /i, '')].join(' ');
+        document.title = [
+          runEnd.status === 'failed' ? '\u2716' : '\u2714',
+          document.title.replace(/^[\u2714\u2716] /i, ''),
+        ].join(' ');
       }
 
       // Scroll back to top to show results
@@ -5760,12 +6245,20 @@
       if (running) {
         addClass(running, 'running');
         bad = QUnit.config.reorder && details.previousFailure;
-        running.innerHTML = [getProgressHtml(stats), bad ? 'Rerunning previously failed test: <br />' : 'Running: ', getNameHtml(details.name, details.module), getRerunFailedHtml(stats.failedTests)].join('');
+        running.innerHTML = [
+          getProgressHtml(stats),
+          bad ? 'Rerunning previously failed test: <br />' : 'Running: ',
+          getNameHtml(details.name, details.module),
+          getRerunFailedHtml(stats.failedTests),
+        ].join('');
       }
     });
     function stripHtml(string) {
       // Strip tags, html entity and whitespaces
-      return string.replace(/<\/?[^>]+(>|$)/g, '').replace(/&quot;/g, '').replace(/\s+/g, '');
+      return string
+        .replace(/<\/?[^>]+(>|$)/g, '')
+        .replace(/&quot;/g, '')
+        .replace(/\s+/g, '');
     }
     QUnit.log(function (details) {
       var testItem = id('qunit-test-output-' + details.testId);
@@ -5790,7 +6283,8 @@
           expected = QUnit.dump.parse(details.expected);
         }
         actual = QUnit.dump.parse(details.actual);
-        message += "<table><tr class='test-expected'><th>Expected: </th><td><pre>" + escapeText(expected) + '</pre></td></tr>';
+        message +=
+          "<table><tr class='test-expected'><th>Expected: </th><td><pre>" + escapeText(expected) + '</pre></td></tr>';
         if (actual !== expected) {
           message += "<tr class='test-actual'><th>Result: </th><td><pre>" + escapeText(actual) + '</pre></td></tr>';
           if (typeof details.actual === 'number' && typeof details.expected === 'number') {
@@ -5809,20 +6303,39 @@
             message += "<tr class='test-diff'><th>Diff: </th><td><pre>" + diff + '</pre></td></tr>';
           }
         } else if (expected.indexOf('[object Array]') !== -1 || expected.indexOf('[object Object]') !== -1) {
-          message += "<tr class='test-message'><th>Message: </th><td>" + 'Diff suppressed as the depth of object is more than current max depth (' + QUnit.config.maxDepth + ').<p>Hint: Use <code>QUnit.dump.maxDepth</code> to ' + " run with a higher max depth or <a href='" + escapeText(setUrl({
-            maxDepth: -1
-          })) + "'>" + 'Rerun</a> without max depth.</p></td></tr>';
+          message +=
+            "<tr class='test-message'><th>Message: </th><td>" +
+            'Diff suppressed as the depth of object is more than current max depth (' +
+            QUnit.config.maxDepth +
+            ').<p>Hint: Use <code>QUnit.dump.maxDepth</code> to ' +
+            " run with a higher max depth or <a href='" +
+            escapeText(
+              setUrl({
+                maxDepth: -1,
+              })
+            ) +
+            "'>" +
+            'Rerun</a> without max depth.</p></td></tr>';
         } else {
-          message += "<tr class='test-message'><th>Message: </th><td>" + 'Diff suppressed as the expected and actual results have an equivalent' + ' serialization</td></tr>';
+          message +=
+            "<tr class='test-message'><th>Message: </th><td>" +
+            'Diff suppressed as the expected and actual results have an equivalent' +
+            ' serialization</td></tr>';
         }
         if (details.source) {
-          message += "<tr class='test-source'><th>Source: </th><td><pre>" + escapeText(details.source) + '</pre></td></tr>';
+          message +=
+            "<tr class='test-source'><th>Source: </th><td><pre>" + escapeText(details.source) + '</pre></td></tr>';
         }
         message += '</table>';
 
         // This occurs when pushFailure is set and we have an extracted stack trace
       } else if (!details.result && details.source) {
-        message += '<table>' + "<tr class='test-source'><th>Source: </th><td><pre>" + escapeText(details.source) + '</pre></td></tr>' + '</table>';
+        message +=
+          '<table>' +
+          "<tr class='test-source'><th>Source: </th><td><pre>" +
+          escapeText(details.source) +
+          '</pre></td></tr>' +
+          '</table>';
       }
       var assertList = testItem.getElementsByTagName('ol')[0];
       var assertLi = document.createElement('li');
@@ -5926,7 +6439,12 @@
       var message = escapeText(errorString(error));
       message = "<span class='test-message'>" + message + '</span>';
       if (error && error.stack) {
-        message += '<table>' + "<tr class='test-source'><th>Source: </th><td><pre>" + escapeText(error.stack) + '</pre></td></tr>' + '</table>';
+        message +=
+          '<table>' +
+          "<tr class='test-source'><th>Source: </th><td><pre>" +
+          escapeText(error.stack) +
+          '</pre></td></tr>' +
+          '</table>';
       }
       var assertList = testItem.getElementsByTagName('ol')[0];
       var assertLi = document.createElement('li');
@@ -5940,9 +6458,9 @@
 
     // Avoid readyState issue with phantomjs
     // Ref: #818
-    var usingPhantom = function (p) {
+    var usingPhantom = (function (p) {
       return p && p.version && p.version.major > 0;
-    }(window$1.phantom);
+    })(window$1.phantom);
     if (usingPhantom) {
       console$1.warn('Support for PhantomJS is deprecated and will be removed in QUnit 3.0.');
     }
@@ -5966,7 +6484,10 @@
         for (var _len = arguments.length, args = new Array(_len > 5 ? _len - 5 : 0), _key = 5; _key < _len; _key++) {
           args[_key - 5] = arguments[_key];
         }
-        ret = originalWindowOnError.call.apply(originalWindowOnError, [this, message, fileName, lineNumber, columnNumber, errorObj].concat(args));
+        ret = originalWindowOnError.call.apply(
+          originalWindowOnError,
+          [this, message, fileName, lineNumber, columnNumber, errorObj].concat(args)
+        );
       }
 
       // Treat return value as window.onerror itself does,
@@ -5989,7 +6510,7 @@
         // get a full stack trace if it's available.
         var error = errorObj || new Error(message);
         if (!error.stack && fileName && lineNumber) {
-          error.stack = "".concat(fileName, ":").concat(lineNumber);
+          error.stack = ''.concat(fileName, ':').concat(lineNumber);
         }
         QUnit.onUncaughtException(error);
       }
@@ -6028,7 +6549,7 @@
    * Usage: QUnit.diff(expected, actual)
    *
    */
-  QUnit.diff = function () {
+  QUnit.diff = (function () {
     function DiffMatchPatch() {}
 
     //  DIFF FUNCTIONS
@@ -6157,7 +6678,11 @@
            * <ins>A</del>X<ins>C</ins><del>D</del>
            * <ins>A</ins><del>B</del>X<del>C</del>
            */
-          if (lastequality && (preIns && preDel && postIns && postDel || lastequality.length < 2 && preIns + preDel + postIns + postDel === 3)) {
+          if (
+            lastequality &&
+            ((preIns && preDel && postIns && postDel) ||
+              (lastequality.length < 2 && preIns + preDel + postIns + postDel === 3))
+          ) {
             // Duplicate record.
             diffs.splice(equalities[equalitiesLength - 1], 0, [DIFF_DELETE, lastequality]);
 
@@ -6264,7 +6789,10 @@
       pointermid = pointermax;
       pointerend = 0;
       while (pointermin < pointermid) {
-        if (text1.substring(text1.length - pointermid, text1.length - pointerend) === text2.substring(text2.length - pointermid, text2.length - pointerend)) {
+        if (
+          text1.substring(text1.length - pointermid, text1.length - pointerend) ===
+          text2.substring(text2.length - pointermid, text2.length - pointerend)
+        ) {
           pointermin = pointermid;
           pointerend = pointermin;
         } else {
@@ -6302,7 +6830,11 @@
       i = longtext.indexOf(shorttext);
       if (i !== -1) {
         // Shorter text is inside the longer text (speedup).
-        diffs = [[DIFF_INSERT, longtext.substring(0, i)], [DIFF_EQUAL, shorttext], [DIFF_INSERT, longtext.substring(i + shorttext.length)]];
+        diffs = [
+          [DIFF_INSERT, longtext.substring(0, i)],
+          [DIFF_EQUAL, shorttext],
+          [DIFF_INSERT, longtext.substring(i + shorttext.length)],
+        ];
 
         // Swap insertions for deletions if diff is reversed.
         if (text1.length > text2.length) {
@@ -6313,7 +6845,10 @@
       if (shorttext.length === 1) {
         // Single character string.
         // After the previous speedup, the character can't be an equality.
-        return [[DIFF_DELETE, text1], [DIFF_INSERT, text2]];
+        return [
+          [DIFF_DELETE, text1],
+          [DIFF_INSERT, text2],
+        ];
       }
 
       // Check to see if the problem can be split in two.
@@ -6373,7 +6908,15 @@
        * @private
        */
       function diffHalfMatchI(longtext, shorttext, i) {
-        var seed, j, bestCommon, prefixLength, suffixLength, bestLongtextA, bestLongtextB, bestShorttextA, bestShorttextB;
+        var seed,
+          j,
+          bestCommon,
+          prefixLength,
+          suffixLength,
+          bestLongtextA,
+          bestLongtextB,
+          bestShorttextA,
+          bestShorttextB;
 
         // Start with a 1/4 length substring at position i as a seed.
         seed = longtext.substring(i, i + Math.floor(longtext.length / 4));
@@ -6509,7 +7052,29 @@
      * @private
      */
     DiffMatchPatch.prototype.diffBisect = function (text1, text2, deadline) {
-      var text1Length, text2Length, maxD, vOffset, vLength, v1, v2, x, delta, front, k1start, k1end, k2start, k2end, k2Offset, k1Offset, x1, x2, y1, y2, d, k1, k2;
+      var text1Length,
+        text2Length,
+        maxD,
+        vOffset,
+        vLength,
+        v1,
+        v2,
+        x,
+        delta,
+        front,
+        k1start,
+        k1end,
+        k2start,
+        k2end,
+        k2Offset,
+        k1Offset,
+        x1,
+        x2,
+        y1,
+        y2,
+        d,
+        k1,
+        k2;
 
       // Cache the text lengths to prevent multiple calls.
       text1Length = text1.length;
@@ -6549,7 +7114,7 @@
         // Walk the front path one step.
         for (k1 = -d + k1start; k1 <= d - k1end; k1 += 2) {
           k1Offset = vOffset + k1;
-          if (k1 === -d || k1 !== d && v1[k1Offset - 1] < v1[k1Offset + 1]) {
+          if (k1 === -d || (k1 !== d && v1[k1Offset - 1] < v1[k1Offset + 1])) {
             x1 = v1[k1Offset + 1];
           } else {
             x1 = v1[k1Offset - 1] + 1;
@@ -6582,13 +7147,17 @@
         // Walk the reverse path one step.
         for (k2 = -d + k2start; k2 <= d - k2end; k2 += 2) {
           k2Offset = vOffset + k2;
-          if (k2 === -d || k2 !== d && v2[k2Offset - 1] < v2[k2Offset + 1]) {
+          if (k2 === -d || (k2 !== d && v2[k2Offset - 1] < v2[k2Offset + 1])) {
             x2 = v2[k2Offset + 1];
           } else {
             x2 = v2[k2Offset - 1] + 1;
           }
           y2 = x2 - k2;
-          while (x2 < text1Length && y2 < text2Length && text1.charAt(text1Length - x2 - 1) === text2.charAt(text2Length - y2 - 1)) {
+          while (
+            x2 < text1Length &&
+            y2 < text2Length &&
+            text1.charAt(text1Length - x2 - 1) === text2.charAt(text2Length - y2 - 1)
+          ) {
             x2++;
             y2++;
           }
@@ -6618,7 +7187,10 @@
 
       // Diff took too long and hit the deadline or
       // number of diffs equals number of characters, no commonality at all.
-      return [[DIFF_DELETE, text1], [DIFF_INSERT, text2]];
+      return [
+        [DIFF_DELETE, text1],
+        [DIFF_INSERT, text2],
+      ];
     };
 
     /**
@@ -6685,7 +7257,11 @@
 
           // Eliminate an equality that is smaller or equal to the edits on both
           // sides of it.
-          if (lastequality && lastequality.length <= Math.max(lengthInsertions1, lengthDeletions1) && lastequality.length <= Math.max(lengthInsertions2, lengthDeletions2)) {
+          if (
+            lastequality &&
+            lastequality.length <= Math.max(lengthInsertions1, lengthDeletions1) &&
+            lastequality.length <= Math.max(lengthInsertions2, lengthDeletions2)
+          ) {
             // Duplicate record.
             diffs.splice(equalities[equalitiesLength - 1], 0, [DIFF_DELETE, lastequality]);
 
@@ -6866,7 +7442,7 @@
       return {
         chars1: chars1,
         chars2: chars2,
-        lineArray: lineArray
+        lineArray: lineArray,
       };
     };
 
@@ -6919,7 +7495,10 @@
                 // Factor out any common prefixes.
                 var commonlength = this.diffCommonPrefix(textInsert, textDelete);
                 if (commonlength !== 0) {
-                  if (pointer - countDelete - countInsert > 0 && diffs[pointer - countDelete - countInsert - 1][0] === DIFF_EQUAL) {
+                  if (
+                    pointer - countDelete - countInsert > 0 &&
+                    diffs[pointer - countDelete - countInsert - 1][0] === DIFF_EQUAL
+                  ) {
                     diffs[pointer - countDelete - countInsert - 1][1] += textInsert.substring(0, commonlength);
                   } else {
                     diffs.splice(0, 0, [DIFF_EQUAL, textInsert.substring(0, commonlength)]);
@@ -6944,7 +7523,12 @@
               } else if (countInsert === 0) {
                 diffs.splice(pointer - countDelete, countDelete + countInsert, [DIFF_DELETE, textDelete]);
               } else {
-                diffs.splice(pointer - countDelete - countInsert, countDelete + countInsert, [DIFF_DELETE, textDelete], [DIFF_INSERT, textInsert]);
+                diffs.splice(
+                  pointer - countDelete - countInsert,
+                  countDelete + countInsert,
+                  [DIFF_DELETE, textDelete],
+                  [DIFF_INSERT, textInsert]
+                );
               }
               pointer = pointer - countDelete - countInsert + (countDelete ? 1 : 0) + (countInsert ? 1 : 0) + 1;
             } else if (pointer !== 0 && diffs[pointer - 1][0] === DIFF_EQUAL) {
@@ -6980,7 +7564,9 @@
           // This is a single edit surrounded by equalities.
           if (position === diffs[pointer - 1][1]) {
             // Shift the edit over the previous equality.
-            diffs[pointer][1] = diffs[pointer - 1][1] + diffs[pointer][1].substring(0, diffs[pointer][1].length - diffs[pointer - 1][1].length);
+            diffs[pointer][1] =
+              diffs[pointer - 1][1] +
+              diffs[pointer][1].substring(0, diffs[pointer][1].length - diffs[pointer - 1][1].length);
             diffs[pointer + 1][1] = diffs[pointer - 1][1] + diffs[pointer + 1][1];
             diffs.splice(pointer - 1, 1);
             changes = true;
@@ -7008,6 +7594,5 @@
       text = diff.diffPrettyHtml(output);
       return text;
     };
-  }();
-
+  })();
 })();

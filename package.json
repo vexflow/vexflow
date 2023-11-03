@@ -122,7 +122,7 @@
     "generate:current": "grunt generate:current",
     "generate:reference": "grunt generate:reference",
     "diff:reference": "grunt diff:reference",
-    "lint": "eslint --ext .ts,.js src/ tests/"
+    "lint": "eslint --fix --ext .ts,.js src/ tests/"
   },
   "homepage": "https://vexflow.com/",
   "keywords": [
