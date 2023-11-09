@@ -212,7 +212,7 @@ export class Stem extends Element {
     // Draw the stem
     ctx.save();
     this.applyStyle();
-    ctx.openGroup('stem', this.getAttribute('id'), { pointerBBox: true });
+    ctx.openGroup('stem', this.getAttribute('id'));
     ctx.beginPath();
     ctx.setLineWidth(Stem.WIDTH);
     ctx.moveTo(stemX, stemY - stemletYOffset + yBaseOffset);

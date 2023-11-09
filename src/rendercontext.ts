@@ -11,10 +11,6 @@ export interface TextMeasure {
   height: number;
 }
 
-export interface GroupAttributes {
-  pointerBBox: boolean;
-}
-
 export abstract class RenderContext {
   static get CATEGORY(): string {
     return Category.RenderContext;
@@ -34,6 +30,7 @@ export abstract class RenderContext {
   abstract resize(width: number, height: number): this;
   abstract fillRect(x: number, y: number, width: number, height: number): this;
   abstract clearRect(x: number, y: number, width: number, height: number): this;
+  abstract pointerRect(x: number, y: number, width: number, height: number): this;
   abstract beginPath(): this;
   abstract moveTo(x: number, y: number): this;
   abstract lineTo(x: number, y: number): this;
@@ -55,7 +52,7 @@ export abstract class RenderContext {
   abstract save(): this;
   abstract restore(): this;
   // eslint-disable-next-line
-  abstract openGroup(cls?: string, id?: string, attrs?: GroupAttributes): any;
+  abstract openGroup(cls?: string, id?: string): any;
   abstract closeGroup(): void;
   abstract openRotation(angleDegrees: number, x: number, y: number): void;
   abstract closeRotation(): void;

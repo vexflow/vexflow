@@ -2,7 +2,7 @@
 // MIT License
 
 import { Font, FontInfo } from './font';
-import { GroupAttributes, RenderContext, TextMeasure } from './rendercontext';
+import { RenderContext, TextMeasure } from './rendercontext';
 import { globalObject, warn } from './util';
 import { isHTMLCanvas } from './web';
 
@@ -105,7 +105,7 @@ export class CanvasContext extends RenderContext {
   }
 
   // eslint-disable-next-line
-  openGroup(cls?: string, id?: string, attrs?: GroupAttributes): any {
+  openGroup(cls?: string, id?: string): any {
     // Containers not implemented.
   }
 
@@ -213,6 +213,11 @@ export class CanvasContext extends RenderContext {
 
   fillRect(x: number, y: number, width: number, height: number): this {
     this.context2D.fillRect(x, y, width, height);
+    return this;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  pointerRect(x: number, y: number, width: number, height: number): this {
     return this;
   }
 

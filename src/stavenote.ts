@@ -1118,7 +1118,7 @@ export class StaveNote extends StemmableNote {
     const ctx = this.checkContext();
     this.#noteHeads.forEach((notehead) => {
       notehead.applyStyle(ctx);
-      ctx.openGroup('notehead', notehead.getAttribute('id'), { pointerBBox: true });
+      ctx.openGroup('notehead', notehead.getAttribute('id'));
       notehead.setContext(ctx).draw();
       this.drawModifiers(notehead);
       ctx.closeGroup();
@@ -1218,6 +1218,8 @@ export class StaveNote extends StemmableNote {
     if (shouldRenderStem) this.drawStem();
     this.drawNoteHeads();
     this.drawFlag();
+    const bb = this.getBoundingBox();
+    ctx.pointerRect(bb.getX(), bb.getY(), bb.getW(), bb.getH());
     ctx.closeGroup();
     this.restoreStyle();
     this.setRendered();
