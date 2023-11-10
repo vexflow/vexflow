@@ -49,7 +49,7 @@ const { argv } = process;
 
 if (argv.length >= 5) {
   for (let i = 4; i < argv.length; i++) {
-    const arg = argv[i].toLowerCase();
+    const arg = argv[i];
     const value = arg.split('=')[1];
     const intValue = parseInt(value);
     if (arg.startsWith('--fonts=')) {
@@ -113,21 +113,15 @@ if (!global.QUnit) {
   QUMock.assertions.test = { module: { name: '' } };
 }
 
-// The entry point to the VexFlow tests has evolved over time. :-)
-// In 3.0.9, vexflow-tests.js contained only the test code. The core library was in vexflow-debug.js.
-// While migrating to TypeScript in 2021, we realized the vexflow-tests.js included the core library.
-//   Thus, only vexflow-tests.js is used (and vexflow-debug.js is redundant).
-//   See: https://github.com/0xfe/vexflow/pull/1074
-// In 4.0.0, this file was renamed to vexflow-debug-with-tests.js for clarity.
-//   It includes both the VexFlow library and the test code.
-// We use file detection to determine which file(s) to include.
-const vexflowDebugWithTestsJS = path.resolve(__dirname, path.join(scriptDir, 'vexflow-debug-with-tests.js'));
-if (fs.existsSync(vexflowDebugWithTestsJS)) {
-  // console.log('Generating Images for version >= 5.0.0');
-  global.VexFlow = require(vexflowDebugWithTestsJS);
+// vexflow-debug-with-tests.js includes both the VexFlow library and the test code.
+const vexflowDebugWithTestsJS = path.resolve(__dirname, path.join(scriptDir, 'cjs', 'vexflow-debug-with-tests.js'));
+if (!fs.existsSync(vexflowDebugWithTestsJS)) {
+  console.log('Cannot find', vexflowDebugWithTestsJS);
+  console.log('Aborting');
+  process.exit(1);
 }
+global.VexFlow = require(vexflowDebugWithTestsJS);
 
-// 4.0.0
 // vexflow_test_helpers uses this to write out image files.
 global.VexFlow.Test.shims = { fs };
 
@@ -144,6 +138,3 @@ fs.mkdirSync(VFT.NODE_IMAGEDIR, { recursive: true });
 
 // Run all tests.
 VFT.run(runOptions);
-
-// During the 3.0.9 => 4.0.0 migration, run() was briefly renamed to runTests().
-// VFT.runTests();
