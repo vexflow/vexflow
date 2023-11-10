@@ -19,8 +19,11 @@ registerFont(path.join(fontsDir, 'bravura/bravura.otf'), { family: 'Bravura' });
 registerFont(path.join(fontsDir, 'academico/academico.otf'), { family: 'Academico' });
 registerFont(path.join(fontsDir, 'petaluma/petaluma.otf'), { family: 'Petaluma' });
 registerFont(path.join(fontsDir, 'petalumascript/petalumascript.otf'), { family: 'Petaluma Script' });
+registerFont(path.join(fontsDir, 'leland/leland.otf'), { family: 'Leland' });
+registerFont(path.join(fontsDir, 'edwin/edwin-roman.otf'), { family: 'Edwin' });
+registerFont(path.join(fontsDir, 'gonville/gonville.otf'), { family: 'Gonville' });
+registerFont(path.join(fontsDir, 'gonvillesmufl/gonvillesmufl.otf'), { family: 'GonvilleSmufl' });
 registerFont(path.join(fontsDir, 'sebastian/sebastian.otf'), { family: 'Sebastian' });
-registerFont(path.join(fontsDir, 'gonvillesmufl/gonvillesmufl.otf'), { family: 'Gonville' });
 registerFont(path.join(fontsDir, 'finaleash/finaleash.otf'), { family: 'Finale Ash' });
 
 const dom = new JSDOM(`<!DOCTYPE html><body><div id="qunit-tests"></div></body>`);
@@ -40,7 +43,7 @@ const runOptions = {
 // For example:
 //   node generate_images_jsdom.js SCRIPT_DIR IMAGE_OUTPUT_DIR --fonts=petaluma
 //   node generate_images_jsdom.js SCRIPT_DIR IMAGE_OUTPUT_DIR --fonts=bravura,gonville
-const ALL_FONTS = ['Bravura', 'Gonville', 'Petaluma', 'Finale Ash', 'Sebastian'];
+const ALL_FONTS = ['Bravura', 'Petaluma', 'Finale Ash', 'Sebastian', 'Gonville', 'GonvilleSmufl'];
 let fontStacksToTest = ALL_FONTS;
 const { argv } = process;
 
@@ -51,6 +54,7 @@ if (argv.length >= 5) {
     const intValue = parseInt(value);
     if (arg.startsWith('--fonts=')) {
       const fontsList = value.split(',');
+      // Create an array of font names with the first letter in upper case.
       fontStacksToTest = fontsList.map((fontName) => fontName.charAt(0).toUpperCase() + fontName.slice(1));
     } else if (arg.startsWith('--jobs=')) {
       runOptions.jobs = intValue;

@@ -1,101 +1,97 @@
 <!doctype html>
-<!-- 
-// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
-// MIT License
-// 
-// @author Ron B. Yeh
-  
-  Build VexFlow by running `grunt`.
-  Once `vexflow-debug.js` has been created, open this file locally in your browser.
-  This inspector uses the FontFace API to load OTF files directly.
-  It is possible that some of the glyphs shown here are NOT included with VexFlow.
-  Click a glyph to log some information to the console.
-
-  TODO: Improve support for the Gonville font. Use https://fontdrop.info/ to inspect
-  the Gonville OTF, and then add more unicode codepoint ranges for missing glyphs.
-  Also, figure out the mapping from Gonville glyphs to SMuFL glyphs.
--->
-
 <html>
-  <style>
-    body {
-      color: #ccc;
-      background-color: #222;
-      margin: 20px 20px 100px 20px;
-      font:
-        16px system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        'Segoe UI',
-        Roboto,
-        Ubuntu,
-        'Helvetica Neue',
-        Arial,
-        sans-serif;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <!-- 
+      Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+      MIT License
+      
+      @author Ron B. Yeh
+    
+      Open this file locally in your browser.
+      This inspector uses the FontFace API to load OTF files directly.
+      Click a glyph to log some information to the console.
+    -->
+    <style>
+      body {
+        color: #ccc;
+        background-color: #222;
+        margin: 20px 20px 100px 20px;
+        font:
+          16px system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          Roboto,
+          Ubuntu,
+          'Helvetica Neue',
+          Arial,
+          sans-serif;
+      }
 
-    .choose-font {
-      text-align: center;
-      margin-bottom: 10px;
-    }
+      .choose-font {
+        text-align: center;
+        margin-bottom: 10px;
+      }
 
-    .choose-font button {
-      background-color: rgba(0, 0, 0, 0);
-      cursor: pointer;
-      border: 0px;
-      color: #8ac4f8;
-      font:
-        20px system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        'Segoe UI',
-        Roboto,
-        Ubuntu,
-        'Helvetica Neue',
-        Arial,
-        sans-serif;
-      padding: 8px 10px;
-    }
+      .choose-font button {
+        background-color: rgba(0, 0, 0, 0);
+        cursor: pointer;
+        border: 0px;
+        color: #8ac4f8;
+        font:
+          20px system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          Roboto,
+          Ubuntu,
+          'Helvetica Neue',
+          Arial,
+          sans-serif;
+        padding: 8px 10px;
+      }
 
-    .choose-font button:active {
-      background-color: rgba(0, 45, 80, 0.6);
-    }
+      .choose-font button:active {
+        background-color: rgba(0, 45, 80, 0.6);
+      }
 
-    .item {
-      color: #111;
-      background-color: #f3f3f3;
-      min-width: 100px;
-      float: left;
-      display: table;
-      margin: 10px;
-      padding: 0px;
-      line-height: 3.2;
-      font-size: 60px;
-      text-align: center;
-      cursor: pointer;
-    }
+      .item {
+        color: #111;
+        background-color: #f3f3f3;
+        min-width: 100px;
+        float: left;
+        display: table;
+        margin: 10px;
+        padding: 0px;
+        line-height: 3.2;
+        font-size: 60px;
+        text-align: center;
+        cursor: pointer;
+      }
 
-    .item:hover {
-      background-color: #d0eeff;
-      color: #000;
-    }
+      .item:hover {
+        background-color: #d0eeff;
+        color: #000;
+      }
 
-    #info {
-      float: left;
-      margin-left: 10px;
-    }
+      #info {
+        float: left;
+        margin-left: 10px;
+      }
 
-    #curr-glyph-info {
-      position: fixed;
-      background-color: rgba(20, 20, 20, 0.8);
-      padding: 8px;
-      display: none;
-    }
+      #curr-glyph-info {
+        position: fixed;
+        background-color: rgba(20, 20, 20, 0.8);
+        padding: 8px;
+        display: none;
+      }
 
-    .clear {
-      clear: both;
-    }
-  </style>
+      .clear {
+        clear: both;
+      }
+    </style>
+  </head>
   <body>
     <div class="choose-font"></div>
     <div id="info">&nbsp;</div>
@@ -128,6 +124,7 @@
         'Finale Broadway',
         'Finale Jazz',
         'Finale Maestro',
+        'Gonville',
         'GonvilleSmufl',
         'Gootville',
         'Gootville Text',

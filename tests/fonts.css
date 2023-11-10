@@ -237,7 +237,22 @@
 
 /***************************************/
 
+/* Gonville */
+/* Note: We do not use local('Gonville') because it is possible that the locally installed Gonville is not SMuFL compliant. */
+
+@font-face {
+  font-family: 'Gonville';
+  font-style: normal;
+  font-display: block;
+  font-weight: 400;
+  src:
+    url(../node_modules/@vexflow-fonts/gonville/gonville.woff2) format('woff2');
+}
+
+/***************************************/
+
 /* GonvilleSmufl */
+/* TODO: Remove this! */
 
 @font-face {
   font-family: 'GonvilleSmufl';
