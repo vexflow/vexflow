@@ -51,8 +51,6 @@ const TWO_PI = 2 * Math.PI;
 export interface State {
   state: Attributes;
   attributes: Attributes;
-  shadowAttributes: Attributes;
-  lineWidth: number;
 }
 
 /**
@@ -67,9 +65,7 @@ export class SVGContext extends RenderContext {
   height: number = 0;
   path: string;
   pen: { x: number; y: number };
-  lineWidth: number;
   attributes: Attributes;
-  shadowAttributes: Attributes;
   state: Attributes;
   stateStack: State[];
 
@@ -104,10 +100,9 @@ export class SVGContext extends RenderContext {
 
     this.path = '';
     this.pen = { x: NaN, y: NaN };
-    this.lineWidth = 1.0;
 
     const defaultFontAttributes = {
-      'font-family': Metrics.get('fontFamily'),
+      'font-family': Metrics.get('fontFamily') as string,
       'font-size': '10pt',
       'font-weight': FontWeight.NORMAL,
       'font-style': FontStyle.NORMAL,
@@ -120,21 +115,18 @@ export class SVGContext extends RenderContext {
     };
 
     this.attributes = {
-      'stroke-width': 0.3,
+      'stroke-width': 1.0,
       'stroke-dasharray': 'none',
       fill: 'black',
       stroke: 'black',
+      shadowBlur: 0,
+      shadowColor: 'black',
       ...defaultFontAttributes,
     };
 
     this.groupAttributes = [];
     this.applyAttributes(svg, this.attributes);
     this.groupAttributes.push({ ...this.attributes });
-
-    this.shadowAttributes = {
-      width: 0,
-      color: 'black',
-    };
 
     this.stateStack = [];
   }
@@ -214,7 +206,7 @@ export class SVGContext extends RenderContext {
   }
 
   setShadowColor(color: string): this {
-    this.shadowAttributes.color = color;
+    this.attributes.shadowColor = color;
     return this;
   }
 
@@ -224,7 +216,7 @@ export class SVGContext extends RenderContext {
    * @returns this
    */
   setShadowBlur(blur: number): this {
-    this.shadowAttributes.width = blur;
+    this.attributes.shadowBlur = blur;
     return this;
   }
 
@@ -234,7 +226,6 @@ export class SVGContext extends RenderContext {
    */
   setLineWidth(width: number): this {
     this.attributes['stroke-width'] = width;
-    this.lineWidth = width;
     return this;
   }
 
@@ -370,7 +361,7 @@ export class SVGContext extends RenderContext {
     }
 
     const rectangle = this.create('rect');
-    attributes = attributes ?? { fill: 'none', 'stroke-width': this.lineWidth, stroke: 'black' };
+    attributes = attributes ?? { fill: 'none', 'stroke-width': this.attributes['stroke-width'], stroke: 'black' };
     x = this.round(x);
     y = this.round(y);
     width = this.round(width);
@@ -508,11 +499,10 @@ export class SVGContext extends RenderContext {
   }
 
   #getShadowStyle(): string {
-    const sa = this.shadowAttributes;
     // A CSS drop-shadow filter blur looks different than a canvas shadowBlur
     // of the same radius, so we scale the drop-shadow radius here to make it
     // look close to the canvas shadow.
-    return `filter: drop-shadow(0 0 ${(sa.width as number) / 1.5}px ${sa.color})`;
+    return `filter: drop-shadow(0 0 ${(this.attributes.shadowBlur as number) / 1.5}px ${this.attributes.shadowColor})`;
   }
 
   fill(attributes?: Attributes): this {
@@ -522,7 +512,7 @@ export class SVGContext extends RenderContext {
     }
 
     attributes.d = this.path;
-    if ((this.shadowAttributes.width as number) > 0) {
+    if ((this.attributes.shadowBlur as number) > 0) {
       attributes.style = this.#getShadowStyle();
     }
 
@@ -536,10 +526,9 @@ export class SVGContext extends RenderContext {
     const attributes: Attributes = {
       ...this.attributes,
       fill: 'none',
-      'stroke-width': this.lineWidth,
       d: this.path,
     };
-    if ((this.shadowAttributes.width as number) > 0) {
+    if ((this.attributes.shadowBlur as number) > 0) {
       attributes.style = this.#getShadowStyle();
     }
 
@@ -581,60 +570,20 @@ export class SVGContext extends RenderContext {
     return this;
   }
 
-  // TODO: State should be deep-copied.
   save(): this {
     this.stateStack.push({
-      state: {
-        'font-family': this.state['font-family'],
-        'font-weight': this.state['font-weight'],
-        'font-style': this.state['font-style'],
-        'font-size': this.state['font-size'],
-        scale: this.state.scale,
-      },
-      attributes: {
-        'font-family': this.attributes['font-family'],
-        'font-weight': this.attributes['font-weight'],
-        'font-style': this.attributes['font-style'],
-        'font-size': this.attributes['font-size'],
-        fill: this.attributes.fill,
-        stroke: this.attributes.stroke,
-        'stroke-width': this.attributes['stroke-width'],
-        'stroke-dasharray': this.attributes['stroke-dasharray'],
-      },
-      shadowAttributes: {
-        width: this.shadowAttributes.width,
-        color: this.shadowAttributes.color,
-      },
-      lineWidth: this.lineWidth,
+      state: structuredClone(this.state),
+      attributes: structuredClone(this.attributes),
     });
     return this;
   }
 
-  // TODO: State should be deep-restored.
   restore(): this {
     const savedState = this.stateStack.pop();
     if (savedState) {
       const state = savedState;
-      this.state['font-family'] = state.state['font-family'];
-      this.state['font-weight'] = state.state['font-weight'];
-      this.state['font-style'] = state.state['font-style'];
-      this.state['font-size'] = state.state['font-size'];
-      this.state.scale = state.state.scale;
-
-      this.attributes['font-family'] = state.attributes['font-family'];
-      this.attributes['font-weight'] = state.attributes['font-weight'];
-      this.attributes['font-style'] = state.attributes['font-style'];
-      this.attributes['font-size'] = state.attributes['font-size'];
-
-      this.attributes.fill = state.attributes.fill;
-      this.attributes.stroke = state.attributes.stroke;
-      this.attributes['stroke-width'] = state.attributes['stroke-width'];
-      this.attributes['stroke-dasharray'] = state.attributes['stroke-dasharray'];
-
-      this.shadowAttributes.width = state.shadowAttributes.width;
-      this.shadowAttributes.color = state.shadowAttributes.color;
-
-      this.lineWidth = state.lineWidth;
+      this.state = structuredClone(state.state);
+      this.attributes = structuredClone(state.attributes);
     }
     return this;
   }
