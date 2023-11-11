@@ -59,10 +59,8 @@ export class Bend extends Modifier {
   protected phrase: BendPhrase[];
 
   public renderOptions: {
-    lineWidth: number;
     releaseWidth: number;
     bendWidth: number;
-    lineStyle: string;
   };
 
   /**
@@ -101,11 +99,10 @@ export class Bend extends Modifier {
     this.xShift = 0;
     this.tap = '';
     this.renderOptions = {
-      lineWidth: 1.5,
-      lineStyle: '#777777',
       bendWidth: 8,
       releaseWidth: 8,
     };
+    this.setStyle({ lineWidth: 1.5, strokeStyle: '#777777', fillStyle: '#777777' });
 
     this.phrase = phrase;
 
@@ -161,6 +158,7 @@ export class Bend extends Modifier {
     const ctx = this.checkContext();
     const note = this.checkAttachedNote();
     this.setRendered();
+    this.applyStyle();
 
     const start = note.getModifierStartXY(Modifier.Position.RIGHT, this.index);
     start.x += 3;
@@ -178,27 +176,17 @@ export class Bend extends Modifier {
       const cpX = x + width;
       const cpY = y;
 
-      ctx.save();
       ctx.beginPath();
-      ctx.setLineWidth(this.renderOptions.lineWidth);
-      ctx.setStrokeStyle(this.renderOptions.lineStyle);
-      ctx.setFillStyle(this.renderOptions.lineStyle);
       ctx.moveTo(x, y);
       ctx.quadraticCurveTo(cpX, cpY, x + width, height);
       ctx.stroke();
-      ctx.restore();
     };
 
     const renderRelease = (x: number, y: number, width: number, height: number) => {
-      ctx.save();
       ctx.beginPath();
-      ctx.setLineWidth(this.renderOptions.lineWidth);
-      ctx.setStrokeStyle(this.renderOptions.lineStyle);
-      ctx.setFillStyle(this.renderOptions.lineStyle);
       ctx.moveTo(x, height);
       ctx.quadraticCurveTo(x + width, height, x + width, y);
       ctx.stroke();
-      ctx.restore();
     };
 
     const renderArrowHead = (x: number, y: number, direction: number) => {
@@ -214,11 +202,9 @@ export class Bend extends Modifier {
     };
 
     const renderText = (x: number, text: string) => {
-      ctx.save();
       ctx.setFont(this.fontInfo);
       const renderX = x - ctx.measureText(text).width / 2;
       ctx.fillText(text, renderX, annotationY);
-      ctx.restore();
     };
 
     let lastBend = undefined;
@@ -277,5 +263,6 @@ export class Bend extends Modifier {
     } else if (lastBend.type === Bend.DOWN) {
       renderArrowHead(lastBend.x + lastDrawnWidth, start.y, -1);
     }
+    this.restoreStyle();
   }
 }
