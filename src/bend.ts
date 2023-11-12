@@ -102,7 +102,7 @@ export class Bend extends Modifier {
       bendWidth: 8,
       releaseWidth: 8,
     };
-    this.setStyle({ lineWidth: 1.5, strokeStyle: '#777777', fillStyle: '#777777' });
+    this.setStyle({ lineWidth: 1.0, strokeStyle: 'black', fillStyle: 'black' });
 
     this.phrase = phrase;
 
