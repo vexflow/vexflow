@@ -45,19 +45,19 @@ function drawOrnaments(options: TestOptions, contextBuilder: ContextBuilder): vo
   const stave = new Stave(10, 30, 700);
   stave.setContext(ctx).draw();
   const notes = [
-    new StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
   ];
 
   notes[0].addModifier(new Ornament('mordent'), 0);
