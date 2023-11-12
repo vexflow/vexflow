@@ -125,7 +125,7 @@ const SVG_TEST_CONFIG = {
     // 'Finale Ash',
     // 'Finale Broadway',
     // 'Finale Maestro',
-    // 'Gonville',
+    'Gonville',
     // 'Gootville',
     // 'Leland',
     // 'Leipzig',
