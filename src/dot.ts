@@ -163,9 +163,9 @@ export class Dot extends Modifier {
       start.y = note.getStemExtents().baseY;
     }
 
-    const x = start.x;
-    const y = start.y + this.dotShiftY * lineSpace;
+    this.x = start.x;
+    this.y = start.y + this.dotShiftY * lineSpace;
 
-    this.renderText(ctx, x, y);
+    this.renderText(ctx, 0, 0);
   }
 }

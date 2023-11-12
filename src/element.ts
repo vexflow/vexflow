@@ -340,7 +340,7 @@ export class Element {
 
   /** Get the boundingBox. */
   getBoundingBox(): BoundingBox {
-    return new BoundingBox(0, -this.textMetrics.actualBoundingBoxAscent, this.width, this.height);
+    return new BoundingBox(this.x, this.y - this.textMetrics.actualBoundingBoxAscent, this.width, this.height);
   }
 
   /** Return the context, such as an SVGContext or CanvasContext object. */

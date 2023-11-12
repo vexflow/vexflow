@@ -270,12 +270,12 @@ export class Ornament extends Modifier {
       this.yShift += this.getHeight();
     }
 
-    this.renderText(
-      ctx,
+    this.x =
       glyphX -
-        (this.position === ModifierPosition.ABOVE || this.position === ModifierPosition.BELOW ? this.width * 0.5 : 0),
-      glyphY
-    );
+      (this.position === ModifierPosition.ABOVE || this.position === ModifierPosition.BELOW ? this.width * 0.5 : 0);
+    this.y = glyphY;
+
+    this.renderText(ctx, 0, 0);
 
     if (this.accidentalUpper) {
       glyphY -= this.getHeight() + this.renderOptions.accidentalUpperPadding;

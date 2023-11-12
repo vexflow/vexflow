@@ -27,6 +27,7 @@ import { Stem } from '../src/stem';
 import { StringNumber } from '../src/stringnumber';
 import { Stroke } from '../src/strokes';
 import { TickContext } from '../src/tickcontext';
+import { Ornament } from '../src';
 
 const StaveNoteTests = {
   Start(): void {
@@ -467,16 +468,16 @@ function drawBoundingBoxes(options: TestOptions, contextBuilder: ContextBuilder)
   ];
   options.assert.expect(noteStructs.length * 2);
 
+  const notes: StaveNote[] = [];
   for (let i = 0; i < noteStructs.length; ++i) {
-    const note = draw(
-      staveNote(noteStructs[i]),
-      stave,
-      ctx,
-      (i + 1) * 25,
-      true /* drawBoundingBox */,
-      false /* addModifierContext */
-    );
+    notes.push(staveNote(noteStructs[i]));
+  }
+  notes[2].addModifier(new Ornament('tr'), 0);
+  notes[2].addModifier(new Accidental('b'), 0);
+  Dot.buildAndAttach([notes[2]], { all: true });
 
+  for (let i = 0; i < noteStructs.length; ++i) {
+    const note = draw(notes[i], stave, ctx, (i + 1) * 25, true /* drawBoundingBox */, false /* addModifierContext */);
     options.assert.ok(note.getX() > 0, 'Note ' + i + ' has X value');
     options.assert.ok(note.getYs().length > 0, 'Note ' + i + ' has Y values');
   }
