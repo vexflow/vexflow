@@ -278,7 +278,7 @@ export class Font {
     'Finale Jazz Text': 'finalejazztext/finalejazztext.woff2',
     'Finale Maestro': 'finalemaestro/finalemaestro.woff2',
     'Finale Maestro Text': 'finalemaestrotext/finalemaestrotext-regular.woff2',
-    GonvilleSmufl: 'gonvillesmufl/gonvillesmufl.woff2',
+    Gonville: 'gonville/gonville.woff2',
     Gootville: 'gootville/gootville.woff2',
     'Gootville Text': 'gootvilletext/gootvilletext.woff2',
     Leipzig: 'leipzig/leipzig.woff2',

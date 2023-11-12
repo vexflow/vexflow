@@ -146,7 +146,7 @@ const NODE_TEST_CONFIG = {
   backend: Renderer.Backends.CANVAS,
   tagName: 'canvas',
   testType: 'NodeCanvas',
-  fontStacks: ['Bravura', 'Petaluma', 'Leland', 'Gonville', 'GonvilleSmufl'],
+  fontStacks: ['Bravura', 'Petaluma', 'Leland', 'Gonville'],
 };
 
 interface Test {
@@ -218,7 +218,6 @@ export class VexFlowTests {
     'Finale Broadway': ['Finale Broadway', 'Finale Broadway Text'],
     'Finale Maestro': ['Finale Maestro', 'Finale Maestro Text'],
     Gonville: ['Gonville', 'Academico'],
-    GonvilleSmufl: ['GonvilleSmufl', 'Academico'],
     Gootville: ['Gootville', 'Edwin'],
     Leland: ['Leland', 'Edwin'],
     Leipzig: ['Leipzig', 'Academico'],
