@@ -54,6 +54,10 @@ export interface ElementStyle {
    * Line width, 1.0 by default.
    */
   lineWidth?: number;
+  /**
+   * See: [SVG `stroke-dasharray` attribute](https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/stroke-dasharray)
+   */
+  lineDash?: string;
 }
 
 /**
@@ -220,6 +224,8 @@ export class Element {
     if (style.fillStyle) context.setFillStyle(style.fillStyle);
     if (style.strokeStyle) context.setStrokeStyle(style.strokeStyle);
     if (style.lineWidth) context.setLineWidth(style.lineWidth);
+    if (style.lineDash) context.setLineDash(style.lineDash.split(' ').map(Number));
+
     return this;
   }
 

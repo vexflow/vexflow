@@ -79,7 +79,7 @@ const simple = createTest(
           { x: 0, y: 20 },
         ],
       },
-    });
+    }).setStyle({ lineDash: '10 10' });
   }
 );
 
@@ -109,7 +109,7 @@ const rounded = createTest(
           { x: 0, y: 50 },
         ],
       },
-    });
+    }).setStyle({ lineDash: '20' });;
   }
 );
 
