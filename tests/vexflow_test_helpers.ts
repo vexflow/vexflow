@@ -120,7 +120,19 @@ const SVG_TEST_CONFIG = {
   backend: Renderer.Backends.SVG,
   tagName: 'div',
   testType: 'SVG',
-  fontStacks: ['Bravura'],
+  fontStacks: [
+    'Bravura',
+    // 'Finale Ash',
+    // 'Finale Broadway',
+    // 'Finale Maestro',
+    // 'Gonville',
+    // 'Gootville',
+    // 'Leland',
+    // 'Leipzig',
+    // 'MuseJazz',
+    'Petaluma',
+    // 'Sebastian',
+  ],
 };
 
 const SVG_TEXT_CONFIG = {
