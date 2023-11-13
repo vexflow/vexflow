@@ -614,6 +614,9 @@ export class StaveNote extends StemmableNote {
       const bbFlag = this.flag.getBoundingBox();
       boundingBox.mergeWith(bbFlag.move(flagX, flagY));
     }
+    for (let i = 0; i < this.modifiers.length; i++) {
+      boundingBox.mergeWith(this.modifiers[i].getBoundingBox());
+    }
     return boundingBox;
   }
 
