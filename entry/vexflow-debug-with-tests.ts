@@ -41,8 +41,7 @@ const fontLoadPromises = [
   fontBravura,
   fontAcademico,
   fontAcademicoBold,
-  // PENDING SMuFL-compliant Gonville
-  // fontGonville,
+  fontGonville,
   fontPetaluma,
   fontPetalumaScript,
 ];
