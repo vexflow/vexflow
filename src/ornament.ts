@@ -8,6 +8,7 @@ import { Metrics } from './metrics';
 import { Modifier, ModifierPosition } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { Note } from './note';
+import { Stem } from './stem';
 import { StemmableNote } from './stemmablenote';
 import { Tables } from './tables';
 import { Category } from './typeguard';
@@ -70,6 +71,15 @@ export class Ornament extends Modifier {
         leftShift += ornament.width + Ornament.minPadding;
       } else if (ornament.position === ModifierPosition.ABOVE) {
         width = Math.max(ornament.getWidth(), width);
+        const note = ornament.getNote() as StemmableNote;
+        let curTop = note.getLineNumber(true) + state.topTextLine;
+        const stem = note.getStem();
+        if (stem && note.getStemDirection() === Stem.UP) {
+          curTop += Math.abs(stem.getHeight()) / Tables.STAVE_LINE_DISTANCE;
+        }
+        const numLines = note.getStave()?.getNumLines() ?? 0;
+        // make sure that the ornaments stay above the staff
+        if (curTop < numLines) state.topTextLine += numLines - curTop;
         ornament.setTextLine(state.topTextLine);
         state.topTextLine += increment;
       } else {
