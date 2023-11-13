@@ -125,7 +125,7 @@ const SVG_TEST_CONFIG = {
     // 'Finale Ash',
     // 'Finale Broadway',
     // 'Finale Maestro',
-    // 'Gonville',
+    'Gonville',
     // 'Gootville',
     // 'Leland',
     // 'Leipzig',
@@ -146,7 +146,7 @@ const NODE_TEST_CONFIG = {
   backend: Renderer.Backends.CANVAS,
   tagName: 'canvas',
   testType: 'NodeCanvas',
-  fontStacks: ['Bravura', 'Gonville', 'Petaluma', 'Leland'],
+  fontStacks: ['Bravura', 'Petaluma', 'Leland', 'Gonville'],
 };
 
 interface Test {
@@ -217,7 +217,7 @@ export class VexFlowTests {
     'Finale Ash': ['Finale Ash', 'Finale Ash Text'],
     'Finale Broadway': ['Finale Broadway', 'Finale Broadway Text'],
     'Finale Maestro': ['Finale Maestro', 'Finale Maestro Text'],
-    Gonville: ['GonvilleSmufl', 'Academico'],
+    Gonville: ['Gonville', 'Academico'],
     Gootville: ['Gootville', 'Edwin'],
     Leland: ['Leland', 'Edwin'],
     Leipzig: ['Leipzig', 'Academico'],
@@ -226,6 +226,8 @@ export class VexFlowTests {
     Sebastian: ['Sebastian', 'Nepomuk'],
   };
 
+  // Used by generate_images_jsdom.js.
+  // TODO: Rename to JSDOM_FONT_STACKS?
   static set NODE_FONT_STACKS(fontStacks: string[]) {
     NODE_TEST_CONFIG.fontStacks = fontStacks;
   }

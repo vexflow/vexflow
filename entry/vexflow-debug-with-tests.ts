@@ -21,8 +21,7 @@ import { Font } from '../src/font';
 import { Academico } from '../src/fonts/academico';
 import { AcademicoBold } from '../src/fonts/academicobold';
 import { Bravura } from '../src/fonts/bravura';
-// PENDING SMuFL-compliant Gonville
-// import { Gonville } from '../src/fonts/gonville';
+import { Gonville } from '../src/fonts/gonville';
 import { Petaluma } from '../src/fonts/petaluma';
 import { PetalumaScript } from '../src/fonts/petalumascript';
 
@@ -34,8 +33,7 @@ const swapBold = { display: 'swap', weight: 'bold' };
 const fontBravura = Font.load('Bravura', Bravura, block);
 const fontAcademico = Font.load('Academico', Academico, swap);
 const fontAcademicoBold = Font.load('Academico', AcademicoBold, swapBold);
-// PENDING SMuFL-compliant Gonville
-// const fontGonvilleSmufl = Font.load('Gonville', Gonville, block);
+const fontGonville = Font.load('Gonville', Gonville, block);
 const fontPetaluma = Font.load('Petaluma', Petaluma, block);
 const fontPetalumaScript = Font.load('Petaluma Script', PetalumaScript, swap);
 
@@ -43,8 +41,7 @@ const fontLoadPromises = [
   fontBravura,
   fontAcademico,
   fontAcademicoBold,
-  // PENDING SMuFL-compliant Gonville
-  // fontGonville,
+  fontGonville,
   fontPetaluma,
   fontPetalumaScript,
 ];

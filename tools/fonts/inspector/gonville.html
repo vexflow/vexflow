@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!--
+      This glyph inspector is derived from the MIT-licensed opentype.js glyph inspector:
+      https://opentype.js.org/glyph-inspector.html
+     -->
+    <script src="../../../node_modules/opentype.js/dist/opentype.js"></script>
+    <!-- wawoff2 is globally loaded as 'Module' -->
+    <script src="https://unpkg.com/wawoff2@2.0.1/build/decompress_binding.js"></script>
+    <script>
+      Module['onRuntimeInitialized'] = function () {
+        // wawoff2 wasm has finished loading.
+      };
+    </script>
+    <style>
+      body {
+        font:
+          14px Helvetica,
+          sans-serif;
+        line-height: 1.4;
+        min-width: 1020px;
+        color: #333;
+        background-color: #fff;
+        margin: 0 0 50px 0;
+        padding: 0;
+      }
+
+      .container {
+        width: 95vw;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .text-input {
+        font-size: 24px;
+        padding: 5px;
+        width: 930px;
+        display: block;
+      }
+
+      canvas.text {
+        border: 1px solid #ddd;
+        box-shadow: 1px 0 5px rgba(0, 0, 0, 0.2);
+        margin-bottom: 5px;
+      }
+
+      .wrapper {
+        border: 1px solid #ddd;
+        margin: 0 5px 10px 0;
+        float: left;
+      }
+
+      .wrapper canvas {
+        display: inline-block;
+      }
+
+      .wrapper span {
+        text-align: center;
+        background: #ddd;
+        display: block;
+      }
+
+      #message {
+        position: relative;
+        top: -3px;
+        background: red;
+        color: white;
+        padding: 1px 5px;
+        font-weight: bold;
+        border-radius: 2px;
+        display: none;
+        clear: both;
+      }
+
+      .message {
+        clear: both;
+        font-style: oblique;
+      }
+
+      #glyphs {
+        width: 950px;
+      }
+
+      #file {
+        float: left;
+        font-size: 11px;
+        color: #999;
+      }
+
+      .info {
+        float: right;
+        font-size: 11px;
+        color: #999;
+      }
+
+      h1 {
+        margin: 5px 0;
+      }
+
+      hr {
+        clear: both;
+        border: none;
+        border-bottom: 1px solid #ccc;
+        margin: 20px 0 20px 0;
+        padding: 0;
+      }
+
+      label {
+        font-weight: bold;
+        font-size: 12px;
+        display: inline-block;
+        margin-right: 10px;
+      }
+
+      label input[type='range'] {
+        vertical-align: middle;
+      }
+
+      a {
+        text-decoration: none;
+        color: #44d;
+      }
+
+      /* Font Inspector */
+
+      #font-data h3 {
+        font-weight: normal;
+        margin: 0;
+        cursor: pointer;
+        background-color: #f8f8f8;
+        clear: both;
+      }
+
+      #font-data h3.expanded::before {
+        font-size: 85%;
+        content: '▼ ';
+      }
+
+      #font-data h3.collapsed::before {
+        font-size: 85%;
+        content: '► ';
+      }
+
+      #font-data h3.collapsed + dl,
+      #font-data h3.collapsed + .data-content {
+        display: none;
+      }
+
+      #font-data h4 {
+        margin: 1em 1em 0 2em;
+      }
+
+      #font-data dl {
+        margin-top: 0;
+        padding-left: 2em;
+        color: #707070;
+      }
+
+      #font-data dt {
+        float: left;
+      }
+
+      #font-data dd {
+        margin-left: 12em;
+        word-break: break-all;
+        max-height: 100px;
+        overflow-y: auto;
+      }
+
+      #font-data .langtag {
+        font-size: 85%;
+        color: #999;
+        white-space: nowrap;
+      }
+
+      #font-data .langname {
+        padding-right: 0.5em;
+      }
+
+      #file {
+        float: left;
+        font-size: 11px;
+        color: #999;
+      }
+
+      /* Glyph Inspector */
+
+      #pagination span {
+        margin: 0 0.3em;
+        color: #505050;
+        cursor: pointer;
+      }
+
+      #pagination span.page-selected {
+        font-weight: bold;
+        color: black;
+      }
+
+      canvas.item {
+        float: left;
+        border: solid 1px #a0a0a0;
+        margin-right: -1px;
+        margin-bottom: -1px;
+        cursor: pointer;
+      }
+
+      canvas.item:hover {
+        background-color: #e0e0e0;
+      }
+
+      #glyph-list-end {
+        clear: both;
+        height: 20px;
+      }
+
+      #glyph-display {
+        float: left;
+        border: solid 1px #a0a0a0;
+        position: relative;
+        width: 500px;
+        height: 500px;
+      }
+
+      #glyph,
+      glyph-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+      #glyph-data {
+        margin-left: 20px;
+      }
+      #glyph-data dl {
+        margin: 0;
+      }
+      #glyph-data dt {
+      }
+      #glyph-data dd {
+        margin-left: 12em;
+      }
+
+      #glyph-contours {
+        flex: 1 1 0;
+        overflow: auto;
+      }
+
+      #glyph-data pre {
+        font-size: 11px;
+      }
+      pre:not(.contour) {
+        margin: 0;
+      }
+      pre.contour {
+        margin: 0 0 1em 2em;
+        border-bottom: solid 1px #a0a0a0;
+      }
+      span.oncurve {
+        color: blue;
+      }
+      span.offcurve {
+        color: red;
+      }
+
+      .disabled {
+        color: gray;
+      }
+    </style>
+  </head>
+  <body>
+    <form class="container" name="demo">
+      <input id="file" type="file" />
+      <output class="info" name="fontname"></output>
+      <div id="message"></div>
+
+      <hr />
+
+      <div>
+        Glyphs <span id="pagination"></span>
+        <br />
+        <div id="glyph-list-end"></div>
+      </div>
+      <div style="position: relative">
+        <div id="glyph-display">
+          <canvas id="glyph-bg" width="500" height="500"></canvas>
+          <canvas id="glyph" width="500" height="500"></canvas>
+        </div>
+        <div id="glyph-data"></div>
+        <div style="clear: both"></div>
+      </div>
+
+      <hr />
+    </form>
+
+    <script>
+      const form = document.forms.demo;
+
+      var cellCount = 100,
+        cellWidth = 44,
+        cellHeight = 40,
+        cellMarginTop = 1,
+        cellMarginBottom = 8,
+        cellMarginLeftRight = 1,
+        glyphMargin = 5,
+        pixelRatio = window.devicePixelRatio || 1;
+
+      var pageSelected, font, fontScale, fontSize, fontBaseline, glyphScale, glyphSize, glyphBaseline;
+
+      function enableHighDPICanvas(canvas) {
+        if (typeof canvas === 'string') {
+          canvas = document.getElementById(canvas);
+        }
+        var pixelRatio = window.devicePixelRatio || 1;
+        if (pixelRatio === 1) return;
+        var oldWidth = canvas.width;
+        var oldHeight = canvas.height;
+        canvas.width = oldWidth * pixelRatio;
+        canvas.height = oldHeight * pixelRatio;
+        canvas.style.width = oldWidth + 'px';
+        canvas.style.height = oldHeight + 'px';
+        canvas.getContext('2d').scale(pixelRatio, pixelRatio);
+      }
+
+      function showErrorMessage(message) {
+        var el = document.getElementById('message');
+        if (!message || message.trim().length === 0) {
+          el.style.display = 'none';
+        } else {
+          el.style.display = 'block';
+        }
+        el.innerHTML = message;
+      }
+
+      function pathCommandToString(cmd) {
+        var str =
+          '<strong>' +
+          cmd.type +
+          '</strong> ' +
+          (cmd.x !== undefined ? 'x=' + cmd.x + ' y=' + cmd.y + ' ' : '') +
+          (cmd.x1 !== undefined ? 'x1=' + cmd.x1 + ' y1=' + cmd.y1 + ' ' : '') +
+          (cmd.x2 !== undefined ? 'x2=' + cmd.x2 + ' y2=' + cmd.y2 : '');
+        return str;
+      }
+
+      function contourToString(contour) {
+        return (
+          '<pre class="contour">' +
+          contour
+            .map(function (point) {
+              return (
+                '<span class="' + (point.onCurve ? 'on' : 'off') + 'curve">x=' + point.x + ' y=' + point.y + '</span>'
+              );
+            })
+            .join('\n') +
+          '</pre>'
+        );
+      }
+
+      function formatUnicode(unicode) {
+        unicode = unicode.toString(16);
+        if (unicode.length > 4) {
+          return ('000000' + unicode.toUpperCase()).substr(-6);
+        } else {
+          return ('0000' + unicode.toUpperCase()).substr(-4);
+        }
+      }
+
+      function displayGlyphData(glyphIndex) {
+        const font = window.font;
+        var container = document.getElementById('glyph-data');
+        if (glyphIndex < 0) {
+          container.innerHTML = '';
+          return;
+        }
+        var glyph = font.glyphs.get(glyphIndex),
+          html = '<dl>';
+        html += '<dt>name</dt><dd>' + glyph.name + '</dd>';
+
+        if (glyph.unicodes.length > 0) {
+          html += '<dt>unicode</dt><dd>' + glyph.unicodes.map(formatUnicode).join(', ') + '</dd>';
+        }
+        html += '<dt>index</dt><dd>' + glyph.index + '</dd>';
+
+        if (glyph.xMin !== 0 || glyph.xMax !== 0 || glyph.yMin !== 0 || glyph.yMax !== 0) {
+          html +=
+            '<dt>xMin</dt><dd>' +
+            glyph.xMin +
+            '</dd>' +
+            '<dt>xMax</dt><dd>' +
+            glyph.xMax +
+            '</dd>' +
+            '<dt>yMin</dt><dd>' +
+            glyph.yMin +
+            '</dd>' +
+            '<dt>yMax</dt><dd>' +
+            glyph.yMax +
+            '</dd>';
+        }
+        html += '<dt>advanceWidth</dt><dd>' + glyph.advanceWidth + '</dd>';
+        if (glyph.leftSideBearing !== undefined) {
+          html += '<dt>leftSideBearing</dt><dd>' + glyph.leftSideBearing + '</dd>';
+        }
+        html += '</dl>';
+        if (glyph.numberOfContours > 0) {
+          var contours = glyph.getContours();
+          html += 'contours:<div id="glyph-contours">' + contours.map(contourToString).join('\n') + '</div>';
+        } else if (glyph.isComposite) {
+          html +=
+            '<br>This composite glyph is a combination of :<ul><li>' +
+            glyph.components
+              .map(function (component) {
+                if (component.matchedPoints === undefined) {
+                  return 'glyph ' + component.glyphIndex + ' at dx=' + component.dx + ', dy=' + component.dy;
+                } else {
+                  return 'glyph ' + component.glyphIndex + ' at matchedPoints=[' + component.matchedPoints + ']';
+                }
+              })
+              .join('</li><li>') +
+            '</li></ul>';
+        } else if (glyph.path) {
+          html += 'path:<br><pre>  ' + glyph.path.commands.map(pathCommandToString).join('\n  ') + '\n</pre>';
+        }
+        container.innerHTML = html;
+      }
+
+      var arrowLength = 10,
+        arrowAperture = 4;
+
+      function drawArrow(ctx, x1, y1, x2, y2) {
+        var dx = x2 - x1,
+          dy = y2 - y1,
+          segmentLength = Math.sqrt(dx * dx + dy * dy),
+          unitx = dx / segmentLength,
+          unity = dy / segmentLength,
+          basex = x2 - arrowLength * unitx,
+          basey = y2 - arrowLength * unity,
+          normalx = arrowAperture * unity,
+          normaly = -arrowAperture * unitx;
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(basex + normalx, basey + normaly);
+        ctx.lineTo(basex - normalx, basey - normaly);
+        ctx.lineTo(x2, y2);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      /**
+       * This function is Path.prototype.draw with an arrow
+       * at the end of each contour.
+       */
+      function drawPathWithArrows(ctx, path) {
+        var i, cmd, x1, y1, x2, y2;
+        var arrows = [];
+        ctx.beginPath();
+        for (i = 0; i < path.commands.length; i += 1) {
+          cmd = path.commands[i];
+          if (cmd.type === 'M') {
+            if (x1 !== undefined) {
+              arrows.push([ctx, x1, y1, x2, y2]);
+            }
+            ctx.moveTo(cmd.x, cmd.y);
+          } else if (cmd.type === 'L') {
+            ctx.lineTo(cmd.x, cmd.y);
+            x1 = x2;
+            y1 = y2;
+          } else if (cmd.type === 'C') {
+            ctx.bezierCurveTo(cmd.x1, cmd.y1, cmd.x2, cmd.y2, cmd.x, cmd.y);
+            x1 = cmd.x2;
+            y1 = cmd.y2;
+          } else if (cmd.type === 'Q') {
+            ctx.quadraticCurveTo(cmd.x1, cmd.y1, cmd.x, cmd.y);
+            x1 = cmd.x1;
+            y1 = cmd.y1;
+          } else if (cmd.type === 'Z') {
+            arrows.push([ctx, x1, y1, x2, y2]);
+            ctx.closePath();
+          }
+          x2 = cmd.x;
+          y2 = cmd.y;
+        }
+        if (path.fill) {
+          ctx.fillStyle = path.fill;
+          ctx.fill();
+        }
+        if (path.stroke) {
+          ctx.strokeStyle = path.stroke;
+          ctx.lineWidth = path.strokeWidth;
+          ctx.stroke();
+        }
+        ctx.fillStyle = '#000000';
+        arrows.forEach(function (arrow) {
+          drawArrow.apply(null, arrow);
+        });
+      }
+
+      function displayGlyph(glyphIndex) {
+        var canvas = document.getElementById('glyph'),
+          ctx = canvas.getContext('2d'),
+          width = canvas.width / pixelRatio,
+          height = canvas.height / pixelRatio;
+        ctx.clearRect(0, 0, width, height);
+        if (glyphIndex < 0) return;
+        var glyph = window.font.glyphs.get(glyphIndex),
+          glyphWidth = glyph.advanceWidth * glyphScale,
+          xmin = (width - glyphWidth) / 2,
+          xmax = (width + glyphWidth) / 2,
+          x0 = xmin,
+          markSize = 10;
+
+        ctx.fillStyle = '#606060';
+        ctx.fillRect(xmin - markSize + 1, glyphBaseline, markSize, 1);
+        ctx.fillRect(xmin, glyphBaseline, 1, markSize);
+        ctx.fillRect(xmax, glyphBaseline, markSize, 1);
+        ctx.fillRect(xmax, glyphBaseline, 1, markSize);
+        ctx.textAlign = 'center';
+        ctx.fillText('0', xmin, glyphBaseline + markSize + 10);
+        ctx.fillText(glyph.advanceWidth, xmax, glyphBaseline + markSize + 10);
+
+        ctx.fillStyle = '#000000';
+        var path = glyph.getPath(x0, glyphBaseline, glyphSize);
+        path.fill = '#808080';
+        path.stroke = '#000000';
+        path.strokeWidth = 1.5;
+        drawPathWithArrows(ctx, path);
+        glyph.drawPoints(ctx, x0, glyphBaseline, glyphSize);
+      }
+
+      function renderGlyphItem(canvas, glyphIndex) {
+        var cellMarkSize = 4;
+        var ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, cellWidth, cellHeight);
+        if (glyphIndex >= window.font.numGlyphs) return;
+
+        ctx.fillStyle = '#606060';
+        ctx.font = '9px sans-serif';
+        ctx.fillText(glyphIndex, 1, cellHeight - 1);
+        var glyph = window.font.glyphs.get(glyphIndex),
+          glyphWidth = glyph.advanceWidth * fontScale,
+          xmin = (cellWidth - glyphWidth) / 2,
+          xmax = (cellWidth + glyphWidth) / 2,
+          x0 = xmin;
+
+        ctx.fillStyle = '#a0a0a0';
+        ctx.fillRect(xmin - cellMarkSize + 1, fontBaseline, cellMarkSize, 1);
+        ctx.fillRect(xmin, fontBaseline, 1, cellMarkSize);
+        ctx.fillRect(xmax, fontBaseline, cellMarkSize, 1);
+        ctx.fillRect(xmax, fontBaseline, 1, cellMarkSize);
+
+        ctx.fillStyle = '#000000';
+        glyph.draw(ctx, x0, fontBaseline, fontSize);
+      }
+
+      function displayGlyphPage(pageNum) {
+        pageSelected = pageNum;
+        document.getElementById('p' + pageNum).className = 'page-selected';
+        var firstGlyph = pageNum * cellCount;
+        for (var i = 0; i < cellCount; i++) {
+          renderGlyphItem(document.getElementById('g' + i), firstGlyph + i);
+        }
+      }
+
+      // The user chose a glyph range to view (e.g., 100-199).
+      function pageSelect(event) {
+        document.getElementsByClassName('page-selected')[0].className = '';
+        // event.target.id is of the form p0, p1, etc.
+        const pageNumber = +event.target.id.substr(1);
+        displayGlyphPage(pageNumber);
+      }
+
+      function initGlyphDisplay(font) {
+        console.log(font);
+        const glyphBackgroundCanvas = document.getElementById('glyph-bg'),
+          w = glyphBackgroundCanvas.width / pixelRatio,
+          h = glyphBackgroundCanvas.height / pixelRatio,
+          glyphW = w - glyphMargin * 2,
+          glyphH = h - glyphMargin * 2,
+          head = font.tables.head,
+          maxHeight = head.yMax - head.yMin,
+          ctx = glyphBackgroundCanvas.getContext('2d');
+
+        glyphScale = Math.min(glyphW / (head.xMax - head.xMin), glyphH / maxHeight);
+        glyphSize = glyphScale * font.unitsPerEm;
+        glyphBaseline = glyphMargin + (glyphH * head.yMax) / maxHeight;
+
+        function hline(text, yunits) {
+          const ypx = glyphBaseline - yunits * glyphScale;
+          ctx.fillText(text, 2, ypx + 3);
+          ctx.fillRect(80, ypx, w, 1);
+        }
+
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = '#a0a0a0';
+        hline('Baseline', 0);
+        hline('yMax', font.tables.head.yMax);
+        hline('yMin', font.tables.head.yMin);
+      }
+
+      function onFontLoaded(font) {
+        window.font = font;
+
+        var w = cellWidth - cellMarginLeftRight * 2,
+          h = cellHeight - cellMarginTop - cellMarginBottom,
+          head = font.tables.head,
+          maxHeight = head.yMax - head.yMin;
+        fontScale = Math.min(w / (head.xMax - head.xMin), h / maxHeight);
+        fontSize = fontScale * font.unitsPerEm;
+        fontBaseline = cellMarginTop + (h * head.yMax) / maxHeight;
+
+        var pagination = document.getElementById('pagination');
+        pagination.innerHTML = '';
+        var fragment = document.createDocumentFragment();
+        var numPages = Math.ceil(font.numGlyphs / cellCount);
+        for (var i = 0; i < numPages; i++) {
+          var link = document.createElement('span');
+          var lastIndex = Math.min(font.numGlyphs - 1, (i + 1) * cellCount - 1);
+          link.textContent = i * cellCount + '-' + lastIndex;
+          link.id = 'p' + i;
+          link.addEventListener('click', pageSelect, false);
+          fragment.appendChild(link);
+          // A white space allows to break very long lines into multiple lines.
+          // This is needed for fonts with thousands of glyphs.
+          fragment.appendChild(document.createTextNode(' '));
+        }
+        pagination.appendChild(fragment);
+
+        initGlyphDisplay(font);
+        displayGlyphPage(0);
+        displayGlyph(-1);
+        displayGlyphData(-1);
+      }
+
+      function cellSelect(event) {
+        if (!window.font) return;
+        const firstGlyphIndex = pageSelected * cellCount;
+        const cellIndex = +event.target.id.substr(1);
+        const glyphIndex = firstGlyphIndex + cellIndex;
+        if (glyphIndex < window.font.numGlyphs) {
+          console.log(glyphIndex);
+          displayGlyph(glyphIndex);
+          displayGlyphData(glyphIndex);
+        }
+      }
+
+      function prepareGlyphList() {
+        var marker = document.getElementById('glyph-list-end'),
+          parent = marker.parentElement;
+        for (var i = 0; i < cellCount; i++) {
+          var canvas = document.createElement('canvas');
+          canvas.width = cellWidth;
+          canvas.height = cellHeight;
+          canvas.className = 'item';
+          canvas.id = 'g' + i;
+          canvas.addEventListener('click', cellSelect, false);
+          enableHighDPICanvas(canvas);
+          parent.insertBefore(canvas, marker);
+        }
+      }
+
+      const loadScript = (src) =>
+        new Promise((onload, onerror) =>
+          document.head.append(Object.assign(document.createElement('script'), { src, onload, onerror }))
+        );
+
+      async function display(file, name) {
+        form.fontname.innerText = name;
+        const isWoff2 = name.endsWith('.woff2');
+        try {
+          file.arrayBuffer().then((data) => {
+            if (isWoff2) {
+              const array = Module.decompress(data);
+              data = array.buffer.slice(array.byteOffset, array.byteLength + array.byteOffset);
+            }
+            const parsedFont = opentype.parse(data);
+            onFontLoaded(parsedFont);
+            showErrorMessage('');
+          });
+        } catch (err) {
+          showErrorMessage(err.toString());
+        }
+      }
+
+      enableHighDPICanvas('glyph-bg');
+      enableHighDPICanvas('glyph');
+
+      prepareGlyphList();
+
+      // const fontFileName = '../../../node_modules/@vexflow-fonts/bravura/bravura.otf';
+      const fontFileName = '../../../node_modules/@vexflow-fonts/bravura/bravura.woff2';
+      // const fontFileName = '../../../node_modules/@vexflow-fonts/gonville/gonville.otf';
+      // const fontFileName = '../../../node_modules/@vexflow-fonts/gonville/gonville.woff';
+      // const fontFileName = '../../../node_modules/@vexflow-fonts/gonville/gonville.woff2';
+      fetch(fontFileName).then((file) => {
+        display(file, fontFileName);
+      });
+    </script>
+    <script>
+      function rememberSelectedGlyph() {
+        localStorage.setItem('selectedGlyph', '');
+      }
+    </script>
+  </body>
+</html>

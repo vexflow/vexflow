@@ -11,7 +11,7 @@ onmessage = function (e) {
   postMessage('VexFlow BUILD: ' + JSON.stringify(VexFlow.BUILD));
 
   function draw() {
-    const fonts = ['Bravura', 'GonvilleSmufl', 'Petaluma', 'Leland'];
+    const fonts = ['Bravura', 'Gonville', 'Petaluma', 'Leland'];
     const randomFont = fonts[Math.floor(Math.random() * fonts.length)];
     VexFlow.setFonts(randomFont);
 
@@ -41,5 +41,5 @@ onmessage = function (e) {
   }
 
   // We need to make sure the SMuFL fonts are loaded before VexFlow does any drawing.
-  VexFlow.loadFonts('Bravura', 'Petaluma', 'GonvilleSmufl', 'Leland').then(draw);
+  Vex.Flow.loadFonts('Bravura', 'Petaluma', 'Gonville', 'Leland').then(draw);
 };

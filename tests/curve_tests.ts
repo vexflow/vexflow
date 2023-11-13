@@ -109,7 +109,7 @@ const rounded = createTest(
           { x: 0, y: 50 },
         ],
       },
-    }).setStyle({ lineDash: '20' });;
+    }).setStyle({ lineDash: '20' });
   }
 );
 

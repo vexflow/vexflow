@@ -135,9 +135,9 @@ async function step3() {
 }
 
 async function step4() {
-  VF.setFonts('GonvilleSmufl', 'Academico');
+  VF.setFonts('Gonville', 'Academico');
   console.log('The current music font stack is:', VF.getFonts());
-  fs.writeFileSync('output/score_gonvillesmufl.svg', svgScore('GonvilleSmufl'));
+  fs.writeFileSync('output/score_gonville.svg', svgScore('Gonville'));
 
   console.log('\n==================================\n');
   console.log('>>> Leland...');

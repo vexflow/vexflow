@@ -47,7 +47,7 @@
       console.log('VexFlow BUILD ' + JSON.stringify(VF.BUILD));
 
       // Load the specified fonts from the jsdelivr CDN.
-      await VF.loadFonts('Bravura', 'GonvilleSmufl', 'Petaluma', 'Leland', 'Sebastian');
+      await VF.loadFonts('Bravura', 'Gonville', 'Petaluma', 'Leland', 'Sebastian');
 
       function drawScoreInDiv(elementId) {
         const factory = new VF.Factory({ renderer: { elementId, width: 500, height: 130 } });
@@ -70,9 +70,9 @@
       VF.setFonts('Bravura, Academico');
       drawScoreInDiv('outputBravura');
 
-      // Gonville does not declare a preferred text font.
+      // Gonville does not declare a preferred text font, so we just use Academico.
       // https://github.com/steinbergmedia/petaluma/tree/master/redist/otf
-      VF.setFonts('GonvilleSmufl, Academico');
+      VF.setFonts('Gonville, Academico');
       drawScoreInDiv('outputGonville');
 
       // https://github.com/steinbergmedia/petaluma/tree/master/redist/otf

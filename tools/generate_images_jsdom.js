@@ -19,8 +19,10 @@ registerFont(path.join(fontsDir, 'bravura/bravura.otf'), { family: 'Bravura' });
 registerFont(path.join(fontsDir, 'academico/academico.otf'), { family: 'Academico' });
 registerFont(path.join(fontsDir, 'petaluma/petaluma.otf'), { family: 'Petaluma' });
 registerFont(path.join(fontsDir, 'petalumascript/petalumascript.otf'), { family: 'Petaluma Script' });
+registerFont(path.join(fontsDir, 'leland/leland.otf'), { family: 'Leland' });
+registerFont(path.join(fontsDir, 'edwin/edwin-roman.otf'), { family: 'Edwin' });
+registerFont(path.join(fontsDir, 'gonville/gonville.otf'), { family: 'Gonville' });
 registerFont(path.join(fontsDir, 'sebastian/sebastian.otf'), { family: 'Sebastian' });
-registerFont(path.join(fontsDir, 'gonvillesmufl/gonvillesmufl.otf'), { family: 'Gonville' });
 registerFont(path.join(fontsDir, 'finaleash/finaleash.otf'), { family: 'Finale Ash' });
 
 const dom = new JSDOM(`<!DOCTYPE html><body><div id="qunit-tests"></div></body>`);
@@ -40,17 +42,18 @@ const runOptions = {
 // For example:
 //   node generate_images_jsdom.js SCRIPT_DIR IMAGE_OUTPUT_DIR --fonts=petaluma
 //   node generate_images_jsdom.js SCRIPT_DIR IMAGE_OUTPUT_DIR --fonts=bravura,gonville
-const ALL_FONTS = ['Bravura', 'Gonville', 'Petaluma', 'Finale Ash', 'Sebastian'];
+const ALL_FONTS = ['Bravura', 'Petaluma', 'Finale Ash', 'Sebastian', 'Gonville'];
 let fontStacksToTest = ALL_FONTS;
 const { argv } = process;
 
 if (argv.length >= 5) {
   for (let i = 4; i < argv.length; i++) {
-    const arg = argv[i].toLowerCase();
+    const arg = argv[i];
     const value = arg.split('=')[1];
     const intValue = parseInt(value);
     if (arg.startsWith('--fonts=')) {
       const fontsList = value.split(',');
+      // Create an array of font names with the first letter in upper case.
       fontStacksToTest = fontsList.map((fontName) => fontName.charAt(0).toUpperCase() + fontName.slice(1));
     } else if (arg.startsWith('--jobs=')) {
       runOptions.jobs = intValue;
@@ -109,21 +112,15 @@ if (!global.QUnit) {
   QUMock.assertions.test = { module: { name: '' } };
 }
 
-// The entry point to the VexFlow tests has evolved over time. :-)
-// In 3.0.9, vexflow-tests.js contained only the test code. The core library was in vexflow-debug.js.
-// While migrating to TypeScript in 2021, we realized the vexflow-tests.js included the core library.
-//   Thus, only vexflow-tests.js is used (and vexflow-debug.js is redundant).
-//   See: https://github.com/0xfe/vexflow/pull/1074
-// In 4.0.0, this file was renamed to vexflow-debug-with-tests.js for clarity.
-//   It includes both the VexFlow library and the test code.
-// We use file detection to determine which file(s) to include.
-const vexflowDebugWithTestsJS = path.resolve(__dirname, path.join(scriptDir, 'vexflow-debug-with-tests.js'));
-if (fs.existsSync(vexflowDebugWithTestsJS)) {
-  // console.log('Generating Images for version >= 5.0.0');
-  global.VexFlow = require(vexflowDebugWithTestsJS);
+// vexflow-debug-with-tests.js includes both the VexFlow library and the test code.
+const vexflowDebugWithTestsJS = path.resolve(__dirname, path.join(scriptDir, 'cjs', 'vexflow-debug-with-tests.js'));
+if (!fs.existsSync(vexflowDebugWithTestsJS)) {
+  console.log('Cannot find', vexflowDebugWithTestsJS);
+  console.log('Aborting');
+  process.exit(1);
 }
+global.VexFlow = require(vexflowDebugWithTestsJS);
 
-// 4.0.0
 // vexflow_test_helpers uses this to write out image files.
 global.VexFlow.Test.shims = { fs };
 
@@ -140,6 +137,3 @@ fs.mkdirSync(VFT.NODE_IMAGEDIR, { recursive: true });
 
 // Run all tests.
 VFT.run(runOptions);
-
-// During the 3.0.9 => 4.0.0 migration, run() was briefly renamed to runTests().
-// VFT.runTests();
