@@ -340,7 +340,12 @@ export class Element {
 
   /** Get the boundingBox. */
   getBoundingBox(): BoundingBox {
-    return new BoundingBox(this.x, this.y - this.textMetrics.actualBoundingBoxAscent, this.width, this.height);
+    return new BoundingBox(
+      this.x + this.xShift,
+      this.y + this.yShift - this.textMetrics.actualBoundingBoxAscent,
+      this.width,
+      this.height
+    );
   }
 
   /** Return the context, such as an SVGContext or CanvasContext object. */
@@ -663,14 +668,14 @@ export class Element {
 
   setOriginX(x: number): void {
     const bbox = this.getBoundingBox();
-    const originX = Math.abs(bbox.getX() / bbox.getW());
+    const originX = Math.abs((bbox.getX() - this.xShift) / bbox.getW());
     const xShift = (x - originX) * bbox.getW();
     this.xShift = -xShift;
   }
 
   setOriginY(y: number): void {
     const bbox = this.getBoundingBox();
-    const originY = Math.abs(bbox.getY() / bbox.getH());
+    const originY = Math.abs((bbox.getY() - this.yShift) / bbox.getH());
     const yShift = (y - originY) * bbox.getH();
     this.yShift = -yShift;
   }

@@ -18,7 +18,8 @@ const ChordSymbolTests = {
   Start(): void {
     QUnit.module('ChordSymbol');
     const run = VexFlowTests.runTests;
-    run('Chord Symbol With Modifiers', withModifiers);
+    run('Bounding Box', withModifiers, { bbox: true });
+    run('Chord Symbol With Modifiers', withModifiers, { bbox: false });
     run('Chord Symbol Font Size Tests', fontSize);
     run('Chord Symbol Kerning Tests', kern);
     run('Top Chord Symbols', top);
@@ -100,6 +101,11 @@ function withModifiers(options: TestOptions): void {
   );
   draw(chords, 40);
 
+  // Render bounding boxes
+  if (options.params.bbox === true) {
+    chords.forEach((element) => VexFlowTests.drawBoundingBox(f.getContext(), element));
+  }
+
   chords = [];
   chords.push(
     f
@@ -125,6 +131,11 @@ function withModifiers(options: TestOptions): void {
   );
   draw(chords, 140);
 
+  // Render bounding boxes
+  if (options.params.bbox === true) {
+    chords.forEach((element) => VexFlowTests.drawBoundingBox(f.getContext(), element));
+  }
+
   chords = [
     f.ChordSymbol({ fontSize: 10 }).addGlyphOrText('Ab').addGlyphOrText('7(#11b9)', superscript),
     f.ChordSymbol({ fontSize: 14 }).addGlyphOrText('C#').addGlyphOrText('7(#11b9)', superscript),
@@ -132,6 +143,11 @@ function withModifiers(options: TestOptions): void {
     f.ChordSymbol({ fontSize: 18 }).addGlyphOrText('C#').addGlyphOrText('7(#11b9)', superscript),
   ];
   draw(chords, 240);
+
+  // Render bounding boxes
+  if (options.params.bbox === true) {
+    chords.forEach((element) => VexFlowTests.drawBoundingBox(f.getContext(), element));
+  }
 
   options.assert.ok(true, 'Font Size Chord Symbol');
 }

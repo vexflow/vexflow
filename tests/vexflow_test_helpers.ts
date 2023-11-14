@@ -3,7 +3,7 @@
 //
 // VexFlow Test Support Library
 
-import { ContextBuilder, Factory, RenderContext, Renderer, VexFlow } from '../src/index';
+import { ContextBuilder, Element, Factory, RenderContext, Renderer, VexFlow } from '../src/index';
 
 import { Metrics } from '../src/metrics';
 import { globalObject } from '../src/util';
@@ -410,6 +410,13 @@ export class VexFlowTests {
     legend('#DDD', 'Formatter Shift');
 
     ctx.restore();
+  }
+
+  static drawBoundingBox(ctx: RenderContext, el: Element) {
+    const bb = el.getBoundingBox();
+    ctx.beginPath();
+    ctx.rect(bb.getX(), bb.getY(), bb.getW(), bb.getH());
+    ctx.stroke();
   }
 }
 
