@@ -376,7 +376,8 @@ export class Articulation extends Modifier {
     }
 
     L(`Rendering articulation at (x: ${x}, y: ${y})`);
-
-    this.renderText(ctx, x, y);
+    this.x = x;
+    this.y = y;
+    this.renderText(ctx, 0, 0);
   }
 }

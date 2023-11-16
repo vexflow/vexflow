@@ -28,8 +28,9 @@ const AccidentalTests = {
     QUnit.module('Accidental');
     QUnit.test('Automatic Accidentals - Simple Tests', autoAccidentalWorking);
     const run = VexFlowTests.runTests;
+    run('Bounding Box', basic, { drawBoundingBox: true });
     run('Accidental Padding', formatAccidentalSpaces);
-    run('Basic', basic);
+    run('Basic', basic, { drawBoundingBox: false });
     run('Stem Down', basicStemDown);
     run('Cautionary Accidental', cautionary);
     run('Accidental Arrangement Special Cases', specialCases);
@@ -280,6 +281,14 @@ function basic(options: TestOptions): void {
   });
 
   f.draw();
+
+  // Render bounding boxes
+  if (options.params.drawBoundingBox === true) {
+    notes.forEach((note) => {
+      const elements = note.getModifiersByType('Accidental');
+      elements.forEach((element) => VexFlowTests.drawBoundingBox(f.getContext(), element));
+    });
+  }
 
   VexFlowTests.plotLegendForNoteWidth(f.getContext(), 480, 140);
 

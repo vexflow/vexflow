@@ -9,6 +9,7 @@
 //
 // See `tests/chordsymbol_tests.ts` for usage examples.
 
+import { BoundingBox } from './boundingbox';
 import { Element } from './element';
 import { Font } from './font';
 import { Glyphs } from './glyphs';
@@ -452,11 +453,22 @@ export class ChordSymbol extends Modifier {
 
     this.symbolBlocks.forEach((symbol) => {
       L('Rendering Text: ', symbol.getText(), x + symbol.getXShift(), y + symbol.getYShift());
-
-      symbol.renderText(ctx, x, y);
+      symbol.setX(x);
+      symbol.setY(y);
+      symbol.renderText(ctx, 0, 0);
     });
     ctx.closeGroup();
     this.restoreStyle();
     ctx.restore();
   }
+
+  // Get the `BoundingBox` for the entire chord
+  getBoundingBox(): BoundingBox {
+    const boundingBox = this.symbolBlocks[0].getBoundingBox();
+    for (let i = 1; i < this.symbolBlocks.length; i++) {
+      boundingBox.mergeWith(this.symbolBlocks[i].getBoundingBox());
+    }
+    return boundingBox;
+  }
+
 }

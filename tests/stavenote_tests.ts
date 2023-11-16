@@ -19,6 +19,7 @@ import { Fraction } from '../src/fraction';
 import { FretHandFinger } from '../src/frethandfinger';
 import { Modifier, ModifierPosition } from '../src/modifier';
 import { ModifierContext } from '../src/modifiercontext';
+import { Ornament } from '../src/ornament';
 import { RenderContext } from '../src/rendercontext';
 import { ContextBuilder } from '../src/renderer';
 import { Stave } from '../src/stave';
@@ -27,7 +28,6 @@ import { Stem } from '../src/stem';
 import { StringNumber } from '../src/stringnumber';
 import { Stroke } from '../src/strokes';
 import { TickContext } from '../src/tickcontext';
-import { Ornament } from '../src';
 
 const StaveNoteTests = {
   Start(): void {

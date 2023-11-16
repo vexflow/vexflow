@@ -25,18 +25,19 @@ const ArticulationTests = {
   Start(): void {
     QUnit.module('Articulation');
     const run = VexFlowTests.runTests;
-    run('Articulation - Vertical Placement', verticalPlacement);
-    run('Articulation - Vertical Placement (Glyph codes)', verticalPlacement2);
-    run('Articulation - Staccato/Staccatissimo', drawArticulations, { sym1: 'a.', sym2: 'av' });
-    run('Articulation - Accent/Tenuto', drawArticulations, { sym1: 'a>', sym2: 'a-' });
-    run('Articulation - Marcato/L.H. Pizzicato', drawArticulations, { sym1: 'a^', sym2: 'a+' });
-    run('Articulation - Snap Pizzicato/Fermata', drawArticulations, { sym1: 'ao', sym2: 'ao' });
-    run('Articulation - Up-stroke/Down-Stroke', drawArticulations, { sym1: 'a|', sym2: 'am' });
-    run('Articulation - Fermata Above/Below', drawFermata, { sym1: 'a@a', sym2: 'a@u' });
-    run('Articulation - Fermata Short Above/Below', drawFermata, { sym1: 'a@as', sym2: 'a@us' });
-    run('Articulation - Fermata Long Above/Below', drawFermata, { sym1: 'a@al', sym2: 'a@ul' });
-    run('Articulation - Fermata Very Long Above/Below', drawFermata, { sym1: 'a@avl', sym2: 'a@uvl' });
-    run('Articulation - Inline/Multiple', drawArticulations2, { sym1: 'a.', sym2: 'a.' });
+    run('Bounding Box', verticalPlacement, { drawBoundingBox: true });
+    run('Vertical Placement', verticalPlacement, { drawBoundingBox: false });
+    run('Vertical Placement (Glyph codes)', verticalPlacement2);
+    run('Staccato/Staccatissimo', drawArticulations, { sym1: 'a.', sym2: 'av' });
+    run('Accent/Tenuto', drawArticulations, { sym1: 'a>', sym2: 'a-' });
+    run('Marcato/L.H. Pizzicato', drawArticulations, { sym1: 'a^', sym2: 'a+' });
+    run('Snap Pizzicato/Fermata', drawArticulations, { sym1: 'ao', sym2: 'ao' });
+    run('Up-stroke/Down-Stroke', drawArticulations, { sym1: 'a|', sym2: 'am' });
+    run('Fermata Above/Below', drawFermata, { sym1: 'a@a', sym2: 'a@u' });
+    run('Fermata Short Above/Below', drawFermata, { sym1: 'a@as', sym2: 'a@us' });
+    run('Fermata Long Above/Below', drawFermata, { sym1: 'a@al', sym2: 'a@ul' });
+    run('Fermata Very Long Above/Below', drawFermata, { sym1: 'a@avl', sym2: 'a@uvl' });
+    run('Inline/Multiple', drawArticulations2, { sym1: 'a.', sym2: 'a.' });
     run('TabNote Articulation', tabNotes, { sym1: 'a.', sym2: 'a.' });
   },
 };
@@ -240,6 +241,15 @@ function verticalPlacement(options: TestOptions, contextBuilder: ContextBuilder)
   ];
 
   Formatter.FormatAndDraw(ctx, stave, notes);
+
+  // Render bounding boxes
+  if (options.params.drawBoundingBox === true) {
+    notes.forEach((note) => {
+      const elements = note.getModifiersByType('Articulation');
+      elements.forEach((element) => VexFlowTests.drawBoundingBox(ctx, element));
+    });
+  }
+
   options.assert.ok(true, ' Annotation Placement');
 }
 

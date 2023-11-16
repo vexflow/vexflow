@@ -285,7 +285,9 @@ export class Annotation extends Modifier {
     }
 
     L('Rendering annotation: ', this.text, x, y);
-    this.renderText(ctx, x, y);
+    this.x = x;
+    this.y = y;
+    this.renderText(ctx, 0, 0);
     ctx.closeGroup();
     this.restoreStyle();
   }
