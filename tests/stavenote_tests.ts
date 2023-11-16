@@ -9,7 +9,6 @@
 import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
-import { Ornament } from '../src';
 import { Accidental } from '../src/accidental';
 import { Annotation, AnnotationVerticalJustify } from '../src/annotation';
 import { Articulation } from '../src/articulation';
@@ -20,6 +19,7 @@ import { Fraction } from '../src/fraction';
 import { FretHandFinger } from '../src/frethandfinger';
 import { Modifier, ModifierPosition } from '../src/modifier';
 import { ModifierContext } from '../src/modifiercontext';
+import { Ornament } from '../src/ornament';
 import { RenderContext } from '../src/rendercontext';
 import { ContextBuilder } from '../src/renderer';
 import { Stave } from '../src/stave';

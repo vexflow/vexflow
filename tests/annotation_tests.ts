@@ -33,8 +33,8 @@ const AnnotationTests = {
   Start(): void {
     QUnit.module('Annotation');
     const run = VexFlowTests.runTests;
-    run('Bounding Box', placement, { bbox: true });
-    run('Placement', placement, { bbox: false });
+    run('Bounding Box', placement, { drawBoundingBox: true });
+    run('Placement', placement, { drawBoundingBox: false });
     run('Lyrics', lyrics);
     run('Simple Annotation', simple);
     run('Styled Annotation', styling);
@@ -300,7 +300,7 @@ function placement(options: TestOptions, contextBuilder: ContextBuilder): void {
   Formatter.FormatAndDraw(ctx, stave, notes);
 
   // Render bounding boxes
-  if (options.params.bbox === true) {
+  if (options.params.drawBoundingBox === true) {
     notes.forEach((note) => {
       const elements = note.getModifiersByType('Annotation');
       elements.forEach((element) => VexFlowTests.drawBoundingBox(ctx, element));

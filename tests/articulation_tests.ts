@@ -25,8 +25,8 @@ const ArticulationTests = {
   Start(): void {
     QUnit.module('Articulation');
     const run = VexFlowTests.runTests;
-    run('Bounding Box', verticalPlacement, { bbox: true });
-    run('Vertical Placement', verticalPlacement, { bbox: false });
+    run('Bounding Box', verticalPlacement, { drawBoundingBox: true });
+    run('Vertical Placement', verticalPlacement, { drawBoundingBox: false });
     run('Vertical Placement (Glyph codes)', verticalPlacement2);
     run('Staccato/Staccatissimo', drawArticulations, { sym1: 'a.', sym2: 'av' });
     run('Accent/Tenuto', drawArticulations, { sym1: 'a>', sym2: 'a-' });
@@ -243,7 +243,7 @@ function verticalPlacement(options: TestOptions, contextBuilder: ContextBuilder)
   Formatter.FormatAndDraw(ctx, stave, notes);
 
   // Render bounding boxes
-  if (options.params.bbox === true) {
+  if (options.params.drawBoundingBox === true) {
     notes.forEach((note) => {
       const elements = note.getModifiersByType('Articulation');
       elements.forEach((element) => VexFlowTests.drawBoundingBox(ctx, element));

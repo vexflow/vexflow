@@ -18,8 +18,8 @@ const ChordSymbolTests = {
   Start(): void {
     QUnit.module('ChordSymbol');
     const run = VexFlowTests.runTests;
-    run('Bounding Box', withModifiers, { bbox: true });
-    run('Chord Symbol With Modifiers', withModifiers, { bbox: false });
+    run('Bounding Box', withModifiers, { drawBoundingBox: true });
+    run('Chord Symbol With Modifiers', withModifiers, { drawBoundingBox: false });
     run('Chord Symbol Font Size Tests', fontSize);
     run('Chord Symbol Kerning Tests', kern);
     run('Top Chord Symbols', top);
@@ -102,7 +102,7 @@ function withModifiers(options: TestOptions): void {
   draw(chords, 40);
 
   // Render bounding boxes
-  if (options.params.bbox === true) {
+  if (options.params.drawBoundingBox === true) {
     chords.forEach((element) => VexFlowTests.drawBoundingBox(f.getContext(), element));
   }
 
@@ -132,7 +132,7 @@ function withModifiers(options: TestOptions): void {
   draw(chords, 140);
 
   // Render bounding boxes
-  if (options.params.bbox === true) {
+  if (options.params.drawBoundingBox === true) {
     chords.forEach((element) => VexFlowTests.drawBoundingBox(f.getContext(), element));
   }
 
@@ -145,7 +145,7 @@ function withModifiers(options: TestOptions): void {
   draw(chords, 240);
 
   // Render bounding boxes
-  if (options.params.bbox === true) {
+  if (options.params.drawBoundingBox === true) {
     chords.forEach((element) => VexFlowTests.drawBoundingBox(f.getContext(), element));
   }
 
