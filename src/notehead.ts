@@ -127,16 +127,6 @@ export class NoteHead extends Note {
     return x + (this.displaced ? (this.width - displacementStemAdjustment) * this.stemDirection : 0);
   }
 
-  /** Get the `BoundingBox` for the `NoteHead`. */
-  getBoundingBox(): BoundingBox {
-    return new BoundingBox(
-      this.getAbsoluteX() - this.textMetrics.actualBoundingBoxLeft,
-      this.y - this.textMetrics.actualBoundingBoxAscent,
-      this.width,
-      this.height
-    );
-  }
-
   /** Set notehead to a provided `stave`. */
   setStave(stave: Stave): this {
     const line = this.getLine();
@@ -163,7 +153,7 @@ export class NoteHead extends Note {
     this.setRendered();
 
     L("Drawing note head '", this.noteType, this.duration, "' at", this.x, this.y);
-
-    this.renderText(ctx, this.getAbsoluteX() - this.x, 0);
+    this.x = this.getAbsoluteX();
+    this.renderText(ctx, 0, 0);
   }
 }
