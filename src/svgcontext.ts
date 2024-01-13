@@ -5,7 +5,7 @@
 import { Element } from './element';
 import { Font, FontInfo, FontStyle, FontWeight } from './font';
 import { Metrics } from './metrics';
-import { GroupAttributes, RenderContext, TextMeasure } from './rendercontext';
+import { RenderContext, TextMeasure } from './rendercontext';
 import { Tables } from './tables';
 import { normalizeAngle, prefix, RuntimeError } from './util';
 
@@ -92,6 +92,7 @@ export class SVGContext extends RenderContext {
 
     // Create a SVG element and add it to the container element.
     const svg = this.create('svg');
+    svg.setAttribute('pointer-events', 'none');
     this.element.appendChild(svg);
     this.svg = svg;
 
@@ -152,7 +153,7 @@ export class SVGContext extends RenderContext {
   }
 
   // Allow grouping elements in containers for interactivity.
-  openGroup(cls?: string, id?: string, attrs?: GroupAttributes): SVGGElement {
+  openGroup(cls?: string, id?: string): SVGGElement {
     const group = this.create('g');
     this.groups.push(group);
     this.parent.appendChild(group);
@@ -160,9 +161,6 @@ export class SVGContext extends RenderContext {
     if (cls) group.setAttribute('class', prefix(cls));
     if (id) group.setAttribute('id', prefix(id));
 
-    if (attrs && attrs.pointerBBox) {
-      group.setAttribute('pointer-events', 'bounding-box');
-    }
     this.applyAttributes(group, this.attributes);
     this.groupAttributes.push({ ...this.groupAttributes[this.groupAttributes.length - 1], ...this.attributes });
     return group;
@@ -373,6 +371,12 @@ export class SVGContext extends RenderContext {
 
   fillRect(x: number, y: number, width: number, height: number): this {
     const attributes = { fill: this.attributes.fill, stroke: 'none' };
+    this.rect(x, y, width, height, attributes);
+    return this;
+  }
+
+  pointerRect(x: number, y: number, width: number, height: number): this {
+    const attributes = { opacity: '0', 'pointer-events': 'auto' };
     this.rect(x, y, width, height, attributes);
     return this;
   }
