@@ -470,5 +470,4 @@ export class ChordSymbol extends Modifier {
     }
     return boundingBox;
   }
-
 }
