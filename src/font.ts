@@ -309,11 +309,11 @@ export class Font {
 
     // If url is not specified, we load the font from the jsDelivr CDN.
     if (url === undefined) {
-      const allFiles = Font.FILES;
-      if (!(fontName in allFiles)) {
+      const files = Font.FILES;
+      if (!(fontName in files)) {
         return Promise.reject(new Error(`Font ${fontName} not found in Font.FILES`));
       }
-      url = Font.HOST_URL + allFiles[fontName];
+      url = Font.HOST_URL + files[fontName];
     }
 
     const fontFace = new FontFace(fontName, `url(${url})`, descriptors);
@@ -331,5 +331,13 @@ export class Font {
     }
     fontFaceSet?.add(fontFace);
     return fontFaceLoadPromise;
+  }
+
+  static getURLForFont(fontName: string): string | undefined {
+    const files = Font.FILES;
+    if (!(fontName in files)) {
+      return undefined;
+    }
+    return Font.HOST_URL + files[fontName];
   }
 }
