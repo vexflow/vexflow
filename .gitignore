@@ -20,6 +20,8 @@ ruby_sess.*
 # Jetbrains
 .idea/.gitignore
 .idea/VexFlow.iml
+.idea/vexflow5.iml
+.idea/copilot
 .idea/encodings.xml
 .idea/misc.xml
 .idea/modules.xml

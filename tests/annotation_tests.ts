@@ -7,27 +7,31 @@
 //       Did a previous version of the API accept a number as the fourth argument?
 //       We removed the fourth argument from all of our test cases.
 
-import { VexFlow } from '../src/vexflow';
-import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
+import {VexFlow} from '../src/vexflow';
+import {TestOptions, VexFlowTests} from './vexflow_test_helpers';
 
-import { Annotation, AnnotationVerticalJustify } from '../src/annotation';
-import { Articulation } from '../src/articulation';
-import { Beam } from '../src/beam';
-import { Bend } from '../src/bend';
-import { ElementStyle } from '../src/element';
-import { Formatter } from '../src/formatter';
-import { Metrics } from '../src/metrics';
-import { ModifierPosition } from '../src/modifier';
-import { Registry } from '../src/registry';
-import { ContextBuilder } from '../src/renderer';
-import { Stave } from '../src/stave';
-import { StaveNote, StaveNoteStruct } from '../src/stavenote';
-import { Stem } from '../src/stem';
-import { TabNote, TabNoteStruct } from '../src/tabnote';
-import { TabStave } from '../src/tabstave';
-import { Tickable } from '../src/tickable';
-import { Vibrato } from '../src/vibrato';
-import { Voice } from '../src/voice';
+import {
+  Annotation,
+  AnnotationHorizontalJustify,
+  AnnotationVerticalJustify
+} from '../src/annotation';
+import {Articulation} from '../src/articulation';
+import {Beam} from '../src/beam';
+import {Bend} from '../src/bend';
+import {ElementStyle} from '../src/element';
+import {Formatter} from '../src/formatter';
+import {Metrics} from '../src/metrics';
+import {ModifierPosition} from '../src/modifier';
+import {Registry} from '../src/registry';
+import {ContextBuilder} from '../src/renderer';
+import {Stave} from '../src/stave';
+import {StaveNote, StaveNoteStruct} from '../src/stavenote';
+import {Stem} from '../src/stem';
+import {TabNote, TabNoteStruct} from '../src/tabnote';
+import {TabStave} from '../src/tabstave';
+import {Tickable} from '../src/tickable';
+import {Vibrato} from '../src/vibrato';
+import {Voice} from '../src/voice';
 
 const AnnotationTests = {
   Start(): void {
@@ -81,12 +85,13 @@ function lyrics(options: TestOptions): void {
     });
 
     // Add lyrics under the first row.
-    ['hand,', 'and', 'me', 'pears', 'lead', 'the'].forEach((text, ix) => {
+    ['Handily', 'and', 'me', 'Pears', 'lead', 'the'].forEach((text, ix) => {
       const verse = Math.floor(ix / 3);
       const noteGroupID = 'n' + (ix % 3);
       const noteGroup = registry.getElementById(noteGroupID) as Tickable;
       const lyricsAnnotation = f.Annotation({ text }).setFontSize(fontSize);
       lyricsAnnotation.setPosition(ModifierPosition.BELOW);
+      if (ix % 3 === 0) lyricsAnnotation.setJustification(AnnotationHorizontalJustify.LEFT);
       noteGroup.addModifier(lyricsAnnotation, verse);
     });
 
