@@ -40,75 +40,304 @@
         color: #9af;
       }
 
+      .canvas-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-gap: 20px;
+        text-align: left;
+      }
+
       canvas {
         border: 1px solid black;
         background-color: #ddd;
         display: block;
+        margin-top: 5px;
         margin-bottom: 20px;
       }
 
       div#glyphs {
-        display: flex;
-        justify-content: left;
         align-items: center;
         font-family: monospace;
+        width: 1000px;
         font-size: 1.3em;
-        width: 100%;
         padding: 10px 20px;
         box-sizing: border-box;
         border: 1px solid #ccc;
         min-height: 50px;
+        max-height: 200px;
         background-color: #ccc;
-        color: #000;
+        color: #888;
+        overflow: auto;
       }
 
-      div#glyphs span.selected {
-        color: #000;
+      div#glyphs div {
+        margin: 6px 0;
+      }
+
+      div#glyphs .selected {
+        color: #f00;
         text-decoration: underline;
       }
 
-      div#glyphs span.not-selected {
-        color: #888;
+      h1 {
+        margin-bottom: 0;
       }
     </style>
   </head>
+
   <body>
     <p>
       This page demonstrates how we can use <a href="https://opentype.js.org/">opentype.js</a> to draw a glyph onto a
-      <code>&lt;canvas&gt;</code>. We load Bravura and Gonville and Petaluma. Enter a comma-separated list of SMuFL
-      glyph names below. Cycle through the glyphs with the keyboard arrow keys.
+      <code>&lt;canvas&gt;</code>. We load Bravura, Gonville, and Petaluma. Cycle through the glyphs with the keyboard
+      arrow keys.
     </p>
-    <div id="glyphs" contenteditable="true"></div>
+    <div id="glyphs"></div>
     <br /><br />
-    <canvas id="bravura-output" width="1000" height="400"></canvas>
-    <canvas id="gonville-output" width="1000" height="400"></canvas>
-    <canvas id="petaluma-output" width="1000" height="400"></canvas>
+    <div class="canvas-container">
+      <div>
+        <h1>Bravura</h1>
+        <canvas id="bravura-output" width="1000" height="400"></canvas>
+      </div>
+      <div>
+        <h1>Petaluma</h1>
+        <canvas id="petaluma-output" width="1000" height="400"></canvas>
+      </div>
+      <div>
+        <h1>Gonville</h1>
+        <canvas id="gonville-output" width="1000" height="400"></canvas>
+      </div>
+      <!--
+    <div>
+      <h1>Gonville Dev</h1>
+      <canvas id="gonvilledev-output" width="1000" height="400"></canvas>
+    </div>
+    --></div>
     <script type="module">
-      let currentGlyphIndex = 0;
+      let currentGlyphIndex = parseInt(localStorage.getItem('currentGlyphIndex')) ?? 0;
+
+      const includeGonvilleDev = false;
+
       let glyphNames = [];
       const DEFAULT_GLYPH_NAMES = [
-        'augmentationDot',
-        'articStaccatoAbove',
-        'articStaccatoBelow',
-        'noteheadDiamondBlack',
+        // "bracketTop",
+        // "bracketBottom",
+        // "segno",
+        // "coda",
+        // "codaSquare",
+        // "segnoSerpent1",
+        // "gClef",
+        // "gClef8vbOld",
+        // "gClef8vbCClef",
+        // "cClef",
+        // "cClefCombining",
+        // "fClef",
+        // "unpitchedPercussionClef1",
+        // "unpitchedPercussionClef2",
+        // "sixStringTabClef", // 6stringTabClef
+        // "fourStringTabClef", // 4stringTabClef
+        // "gClefChange",
+        // "cClefChange",
+        // "fClefChange",
+        // "timeSig0",
+        // "timeSig1",
+        // "timeSig2",
+        // "timeSig3",
+        // "timeSig4",
+        // "timeSig5",
+        // "timeSig6",
+        // "timeSig7",
+        // "timeSig8",
+        // "timeSig9",
+        // "timeSigCommon",
+        // "timeSigCutCommon",
+        // "timeSigPlus",
+        // "timeSigPlusSmall",
+        // "timeSigMinus",
+        // "timeSigParensLeftSmall",
+        // "timeSigParensRightSmall",
+        // "timeSigParensLeft",
+        // "timeSigParensRight",
+        // "noteheadDoubleWhole",
+        // "noteheadWhole",
+        // "noteheadHalf",
+        // "noteheadBlack",
+        // "noteheadXWhole",
+        // "noteheadXHalf",
+        // "noteheadXBlack",
+        // "noteheadCircleX",
+        // "noteheadTriangleUpWhole",
+        // "noteheadTriangleUpHalf",
+        // "noteheadTriangleUpWhite",
+        // "noteheadTriangleUpBlack",
+        // "noteheadDiamondWhole",
+        // "noteheadDiamondHalf",
+        // "noteheadDiamondBlack",
+        'augmentationDot', // FIX ORIGIN IN GONVILLE.
+        // "tremolo1",
+        // "flag8thUp",
+        // "flag8thDown",
+        // "flag16thUp",
+        // "flag16thDown",
+        // "flag32ndUp",
+        // "flag32ndDown",
+        // "flag64thUp",
+        // "flag64thDown",
+        // "flag128thUp",
+        // "flag128thDown",
+        // "flag256thUp",
+        // "flag256thDown",
+        // "flag512thUp",
+        // "flag512thDown",
+        // "flag1024thUp",
+        // "flag1024thDown",
+        // "accidentalFlat",
+        // "accidentalNatural",
+        // "accidentalSharp",
+        // "accidentalDoubleSharp",
+        // "accidentalDoubleFlat",
+        // "accidentalParensLeft",
+        // "accidentalParensRight",
+        // "accidentalQuarterToneFlatArrowUp", // MAYBE NUDGE ORIGIN TO THE LEFT?
+        // "accidentalThreeQuarterTonesFlatArrowDown", // MAYBE NUDGE ORIGIN TO THE LEFT?
+        // "accidentalQuarterToneSharpNaturalArrowUp", // MAYBE NUDGE ORIGIN TO THE RIGHT?
+        // "accidentalQuarterToneFlatNaturalArrowDown",
+        // "accidentalThreeQuarterTonesSharpArrowUp",
+        // "accidentalQuarterToneSharpArrowDown",
+        // "accidentalQuarterToneFlatStein",
+        // "accidentalThreeQuarterTonesFlatZimmermann",
+        // "accidentalQuarterToneSharpStein",
+        // "accidentalThreeQuarterTonesSharpStein",
+        // "accidentalBuyukMucennebFlat",
+        // "accidentalBakiyeFlat",
+        // "accidentalKomaSharp",
+        // "accidentalKucukMucennebSharp",
+        // "accidentalBuyukMucennebSharp",
+        // "articAccentAbove",
+        // "articAccentBelow",
+        'articStaccatoAbove', // FIX ORIGIN IN GONVILLE.
+        'articStaccatoBelow', // FIX ORIGIN IN GONVILLE.
+        'articTenutoAbove', // FIX ORIGIN IN GONVILLE.
+        'articTenutoBelow', // FIX ORIGIN IN GONVILLE.
+        // "articStaccatissimoAbove",
+        // "articStaccatissimoBelow",
+        // "articMarcatoAbove",
+        // "articMarcatoBelow",
+        // "fermataAbove",
+        // "fermataBelow",
+        // "fermataVeryShortAbove",
+        // "fermataVeryShortBelow",
+        // "fermataShortAbove",
+        // "fermataShortBelow",
+        // "fermataLongAbove",
+        // "fermataLongBelow",
+        // "fermataVeryLongAbove",
+        // "fermataVeryLongBelow",
+        // "fermataLongHenzeAbove",
+        // "fermataLongHenzeBelow",
+        // "fermataShortHenzeAbove",
+        // "fermataShortHenzeBelow",
+        // "breathMarkComma",
+        // "breathMarkTick",
+        // "breathMarkUpbow",
+        // "caesura",
+        // "caesuraCurved",
+        // "restMaxima",
+        // "restLonga",
+        // "restDoubleWhole",
+        // "restWhole",
+        // "restHalf",
+        // "restQuarter",
+        // "rest8th",
+        // "rest16th",
+        // "rest32nd",
+        // "rest64th",
+        // "rest128th",
+        // "rest256th",
+        // "rest512th",
+        'rest1024th', // NUDGE ORIGIN DOWN, SO THAT ONLY 3 BUMPS ARE BELOW THE ORIGIN?
+        // "restQuarterOld",
+        'restDoubleWholeLegerLine', // NUDGE ORIGIN UP
+        // "restWholeLegerLine",
+        // "restHalfLegerLine",
+        // "restQuarterZ",
+        // "dynamicPiano",
+        'dynamicMezzo', // NUDGE ORIGIN RIGHT, TO THE FOOT OF THE M
+        'dynamicForte', // NUDGE ORIGIN RIGHT
+        'dynamicRinforzando', // NUDGE ORIGIN RIGHT
+        'dynamicSforzando', // NUDGE ORIGIN RIGHT
+        'dynamicZ', // NUDGE ORIGIN RIGHT
+        'dynamicNiente', // NUDGE ORIGIN RIGHT
+        // "graceNoteSlashStemUp",
+        // "graceNoteSlashStemDown",
+        // "ornamentTrill",
+        // "ornamentTurn",
+        // "ornamentTurnInverted",
+        // "ornamentTurnSlash",
+        // "ornamentShortTrill",
+        // "ornamentMordent",
+        // "ornamentTremblement",
+        // "ornamentHaydn",
+        // "ornamentPrecompAppoggTrill",
+        // "ornamentPrecompSlideTrillDAnglebert",
+        // "ornamentPrecompSlideTrillBach",
+        // "ornamentPrecompTrillSuffixDandrieu",
+        // "ornamentPrecompTrillWithMordent",
+        // "ornamentPrecompDoubleCadenceUpperPrefix",
+        // "ornamentPrecompDoubleCadenceUpperPrefixTurn",
+        // "ornamentPrecompTrillLowerSuffix",
+        // "stringsDownBow",
+        // "stringsUpBow",
+        // "stringsHarmonic",
+        // "pluckedSnapPizzicatoBelow",
+        // "pluckedSnapPizzicatoAbove",
+        // "pluckedLeftHandPizzicato",
+        // "keyboardPedalPed",
+        'keyboardPedalP',
+        'keyboardPedalE',
+        'keyboardPedalD', // NUDGE ORIGIN RIGHT SO IT TOUCHES THE ROUND PART OF THE LOWERCASE d
         'keyboardPedalDot',
-        'accdnCombDot',
-        /*
-        'gClef',
-        'fClef',
-        'noteheadWhole',
-        'flag8thUp',
-        */
+        'keyboardPedalUp', // NUDGE ORIGIN UP
+        // "pictChokeCymbal",
+        // "accdnCombRH3RanksEmpty",
+        // "accdnCombRH4RanksEmpty",
+        // "accdnCombLH2RanksEmpty",
+        // "accdnCombLH3RanksEmptySquare",
+        'accdnCombDot', // FIX ORIGIN IN GONVILLE.
+        // "accdnPush",
+        // "accdnPull",
+        'wiggleArpeggiatoUp', // PETALUMA IS BUGGY?
+        'wiggleArpeggiatoDown', // FLIP THIS GLYPH IN GONVILLE. PETALUMA IS BUGGY?
+        // "arrowBlackUp",
+        // "arrowBlackDown",
+        // "arrowheadBlackUp",
+        // "arrowheadBlackRight",
+        // "arrowheadBlackDown",
+        // "arrowheadBlackLeft",
+        // "arrowheadOpenUp",
+        // "arrowheadOpenRight",
+        // "arrowheadOpenDown",
+        // "arrowheadOpenLeft",
       ];
 
       const originOffset = [200, 200];
 
       const fontNames = ['Bravura', 'Gonville', 'Petaluma'];
+      const fontURLs = [];
+      for (let fontName of fontNames) {
+        fontURLs.push(VexFlow.Font.getURLForFont(fontName));
+      }
+
+      // Build Gonville from source. Call it 'GonvilleDev'. Serve it with `npx serve` at localhost:3000.
+      if (includeGonvilleDev) {
+        fontNames.push('GonvilleDev');
+        fontURLs.push('http://localhost:3000/build/gonville/gonville-smufl.woff2');
+      }
 
       const fonts = {};
 
-      function loadFont(fontName) {
-        const fontURL = VexFlow.Font.getURLForFont(fontName);
+      function loadFont(fontIndex) {
+        const fontName = fontNames[fontIndex];
+        const fontURL = fontURLs[fontIndex];
         return fetch(fontURL)
           .then((response) => response.arrayBuffer())
           .then((compressedArrayBuffer) => {
@@ -130,15 +359,11 @@
       }
 
       wawoff2IsReady.then((wawoff2) => {
-        loadFont('Bravura').then((ctx) => {
-          updateGlyphCanvases();
-        });
-        loadFont('Petaluma').then((ctx) => {
-          updateGlyphCanvases();
-        });
-        loadFont('Gonville').then((ctx) => {
-          updateGlyphCanvases();
-        });
+        for (let fontIndex = 0; fontIndex < fontNames.length; fontIndex++) {
+          loadFont(fontIndex).then((ctx) => {
+            updateGlyphCanvases();
+          });
+        }
       });
 
       function draw(glyph, ctx, fontName, size = 72) {
@@ -171,7 +396,6 @@
 
       function doubleCanvasIfHighDPI(canvas, ctx) {
         const ratio = window.devicePixelRatio;
-        console.log(ratio);
         if (ratio > 1) {
           const canvasWidth = canvas.width;
           const canvasHeight = canvas.height;
@@ -187,21 +411,28 @@
 
       function setupKeyboardHandlers() {
         document.addEventListener('keydown', (e) => {
-          if (e.key === 'ArrowLeft') {
+          if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
             currentGlyphIndex--;
-          } else if (e.key === 'ArrowRight') {
+          } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
             currentGlyphIndex++;
           }
-          if (currentGlyphIndex < 0) {
-            currentGlyphIndex = 0;
-          } else if (currentGlyphIndex >= glyphNames.length) {
-            currentGlyphIndex = glyphNames.length - 1;
-          }
-          updateGlyphsInputTextBox();
-          updateGlyphCanvases();
+
+          itemSelected();
         });
       }
 
+      function itemSelected() {
+        if (currentGlyphIndex < 0) {
+          currentGlyphIndex = 0;
+        } else if (currentGlyphIndex >= glyphNames.length) {
+          currentGlyphIndex = glyphNames.length - 1;
+        }
+        localStorage.setItem('currentGlyphIndex', currentGlyphIndex);
+        updateGlyphsInputTextBox();
+        updateGlyphCanvases();
+      }
+
+      // NOT USED YET
       function saveGlyphNames() {
         localStorage.setItem('glyphNames', glyphNames.join(','));
       }
@@ -217,16 +448,36 @@
         updateGlyphsInputTextBox();
       }
 
+      function itemDivClicked(event, itemIndex) {
+        const text = event.target.innerHTML;
+        navigator.clipboard
+          .writeText(text)
+          .then(() => {
+            console.log(text + 'copied to clipboard successfully');
+          })
+          .catch((err) => {
+            console.error('Could not copy text: ', err);
+          });
+        currentGlyphIndex = itemIndex;
+        itemSelected();
+      }
+
+      window.itemDivClicked = itemDivClicked;
+
       function updateGlyphsInputTextBox() {
         const items = glyphNames.map((item, index) => {
-          if (index === currentGlyphIndex) {
-            return '<span class="selected">' + item + '</span>';
-          } else {
-            return '<span class="not-selected">' + item + '</span>';
-          }
+          const isSelected = index === currentGlyphIndex;
+          const selectedClass = isSelected ? 'class="selected"' : '';
+          return '<div ' + selectedClass + ' onclick="itemDivClicked(event, ' + index + ')">' + item + '</div>';
         });
 
-        document.getElementById('glyphs').innerHTML = items.join(',&nbsp;');
+        const glyphsDIV = document.getElementById('glyphs');
+        glyphsDIV.innerHTML = items.join('');
+
+        setTimeout(() => {
+          const selectedDIV = document.querySelector('#glyphs .selected');
+          selectedDIV?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 1000);
       }
 
       function updateGlyphCanvases() {
@@ -251,7 +502,6 @@
           const glyphObject = font.charToGlyph(glyph);
           const boundingBox = glyphObject.getBoundingBox();
           const height = boundingBox.y2 - boundingBox.y1;
-          console.log(height);
           if (height > heightOfTallestGlyph) {
             heightOfTallestGlyph = height;
           }
@@ -276,8 +526,8 @@
         }
       }
 
-      loadGlyphNames();
       setupKeyboardHandlers();
+      loadGlyphNames();
     </script>
   </body>
 </html>
