@@ -200,10 +200,10 @@ export class ChordSymbol extends Modifier {
       if (symbol.getReportWidth()) {
         if (isStemmableNote(note)) {
           const glyphWidth = note.getGlyphWidth();
-          if (symbol.getHorizontal() === ChordSymbolHorizontalJustify.LEFT) {
+          if (symbol.getHorizontal() === ChordSymbolHorizontalJustify.RIGHT) {
             maxLeftGlyphWidth = Math.max(glyphWidth, maxLeftGlyphWidth);
             leftWidth = Math.max(leftWidth, width) + ChordSymbol.minPadding;
-          } else if (symbol.getHorizontal() === ChordSymbolHorizontalJustify.RIGHT) {
+          } else if (symbol.getHorizontal() === ChordSymbolHorizontalJustify.LEFT) {
             maxRightGlyphWidth = Math.max(glyphWidth, maxRightGlyphWidth);
             rightWidth = Math.max(rightWidth, width);
           } else {

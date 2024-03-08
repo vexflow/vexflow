@@ -88,10 +88,10 @@ export class Annotation extends Modifier {
       const glyphWidth = note.getGlyphWidth();
       // Get the text width from the font metrics.
       const textWidth = annotation.getWidth();
-      if (annotation.horizontalJustification === AnnotationHorizontalJustify.LEFT) {
+      if (annotation.horizontalJustification === AnnotationHorizontalJustify.RIGHT) {
         maxLeftGlyphWidth = Math.max(glyphWidth, maxLeftGlyphWidth);
         leftWidth = Math.max(leftWidth, textWidth) + Annotation.minAnnotationPadding;
-      } else if (annotation.horizontalJustification === AnnotationHorizontalJustify.RIGHT) {
+      } else if (annotation.horizontalJustification === AnnotationHorizontalJustify.LEFT) {
         maxRightGlyphWidth = Math.max(glyphWidth, maxRightGlyphWidth);
         rightWidth = Math.max(rightWidth, textWidth);
       } else {

@@ -27,6 +27,7 @@ const ChordSymbolTests = {
     run('Bottom Chord Symbols', bottom);
     run('Bottom Stem Down Chord Symbols', bottomStemDown);
     run('Double Bottom Chord Symbols', doubleBottom);
+    run('Wide Chord Symbols', wide);
   },
 };
 
@@ -485,6 +486,39 @@ function doubleBottom(options: TestOptions): void {
   draw(chords1, chords2, 10);
   options.assert.ok(true, '2 Bottom Chord Symbol');
 }
+
+function wide(options: TestOptions): void {
+  const f = VexFlowTests.makeFactory(options, 300 * 1.5, 680);
+  const ctx = f.getContext();
+  ctx.scale(1.5, 1.5);
+
+  function draw(chord1: ChordSymbol, chord2: ChordSymbol, y: number) {
+    const stave = new Stave(10, y, 250).addClef('treble').setContext(ctx).draw();
+
+    const notes = [
+      note(f, ['e/4', 'a/4', 'd/5'], 'h', chord1).addModifier(new Accidental('b'), 0),
+      note(f, ['c/4', 'e/4', 'B/4'], 'h', chord2),
+    ];
+    Formatter.FormatAndDraw(ctx, stave, notes);
+  }
+
+  let chord1 = f.ChordSymbol().addText('FrogToad7').setHorizontal('left').addGlyphOrText('(#11b9)', superscript);
+  let chord2 = f.ChordSymbol({ hJustify: 'left' }).addText('CToShiningC').addGlyphSuperscript('majorSeventh');
+  draw(chord1, chord2, 40);
+
+  chord1 = f
+    .ChordSymbol({ hJustify: 'right' })
+    .addText('FrogToad7')
+    .setHorizontal('left')
+    .addGlyphOrText('#11', superscript)
+    .addGlyphOrText('b9', subscript);
+  chord2 = f.ChordSymbol({ hJustify: 'left' }).addText('CToShiningC').addTextSuperscript('Maj.');
+  draw(chord1, chord2, 240);
+
+  options.assert.ok(true, 'Wide Chord Symbols');
+}
+
+
 
 VexFlowTests.register(ChordSymbolTests);
 export { ChordSymbolTests };
