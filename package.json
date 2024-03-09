@@ -110,7 +110,7 @@
     "terser-webpack-plugin": "^5.3.9",
     "ts-loader": "^9.5.0",
     "tsc-watch": "^6.0.4",
-    "typescript": "^5.2.2",
+    "typescript": "^5.4.2",
     "webpack": "^5.89.0"
   },
   "scripts": {
