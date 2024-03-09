@@ -7,31 +7,27 @@
 //       Did a previous version of the API accept a number as the fourth argument?
 //       We removed the fourth argument from all of our test cases.
 
-import {VexFlow} from '../src/vexflow';
-import {TestOptions, VexFlowTests} from './vexflow_test_helpers';
+import { VexFlow } from '../src/vexflow';
+import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
-import {
-  Annotation,
-  AnnotationHorizontalJustify,
-  AnnotationVerticalJustify
-} from '../src/annotation';
-import {Articulation} from '../src/articulation';
-import {Beam} from '../src/beam';
-import {Bend} from '../src/bend';
-import {ElementStyle} from '../src/element';
-import {Formatter} from '../src/formatter';
-import {Metrics} from '../src/metrics';
-import {ModifierPosition} from '../src/modifier';
-import {Registry} from '../src/registry';
-import {ContextBuilder} from '../src/renderer';
-import {Stave} from '../src/stave';
-import {StaveNote, StaveNoteStruct} from '../src/stavenote';
-import {Stem} from '../src/stem';
-import {TabNote, TabNoteStruct} from '../src/tabnote';
-import {TabStave} from '../src/tabstave';
-import {Tickable} from '../src/tickable';
-import {Vibrato} from '../src/vibrato';
-import {Voice} from '../src/voice';
+import { Annotation, AnnotationHorizontalJustify, AnnotationVerticalJustify } from '../src/annotation';
+import { Articulation } from '../src/articulation';
+import { Beam } from '../src/beam';
+import { Bend } from '../src/bend';
+import { ElementStyle } from '../src/element';
+import { Formatter } from '../src/formatter';
+import { Metrics } from '../src/metrics';
+import { ModifierPosition } from '../src/modifier';
+import { Registry } from '../src/registry';
+import { ContextBuilder } from '../src/renderer';
+import { Stave } from '../src/stave';
+import { StaveNote, StaveNoteStruct } from '../src/stavenote';
+import { Stem } from '../src/stem';
+import { TabNote, TabNoteStruct } from '../src/tabnote';
+import { TabStave } from '../src/tabstave';
+import { Tickable } from '../src/tickable';
+import { Vibrato } from '../src/vibrato';
+import { Voice } from '../src/voice';
 
 const AnnotationTests = {
   Start(): void {

@@ -518,7 +518,5 @@ function wide(options: TestOptions): void {
   options.assert.ok(true, 'Wide Chord Symbols');
 }
 
-
-
 VexFlowTests.register(ChordSymbolTests);
 export { ChordSymbolTests };
