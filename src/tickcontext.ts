@@ -7,7 +7,7 @@
 import { Fraction } from './fraction';
 import { NoteMetrics } from './note';
 import { Tickable } from './tickable';
-import {RuntimeError, sumArray} from './util';
+import { RuntimeError, sumArray } from './util';
 
 export interface TickContextMetrics extends NoteMetrics {
   totalLeftPx: number;
@@ -72,7 +72,7 @@ export class TickContext {
     this.maxTicks = new Fraction(0, 1);
     this.maxTickable = undefined; // Biggest tickable
     this.minTicks = undefined; // this can remain null if all tickables have ignoreTicks
-    this.minTickable = undefined; // smallest tickable.
+    this.minTickable = undefined;
 
     this.padding = 1; // padding on each side (width += padding * 2)
     this.x = 0;
