@@ -314,6 +314,15 @@ export class TickContext {
    * more space than they should.
    */
   getDeviationCost(): number {
-    return sumArray(this.getTickables().map((t) => t.getFormatterMetrics().space.deviation));
+    return sumArray(this.tickables.map((t) => t.getFormatterMetrics().space.deviation));
+  }
+
+  /**
+   * Like getDeviationCost, but averages the cost of space deviations so that TickContexts
+   * with more Tickables are not weighted more heavily.
+   */
+  getAverageDeviationCost(): number {
+    if (!this.tickables.length) return 0;
+    return this.getDeviationCost() / this.tickables.length;
   }
 }

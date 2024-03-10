@@ -147,7 +147,7 @@ function getRestLineForNextNoteGroup(
     }
   }
 
-  // Locate the mid point between two lines.
+  // Locate the midpoint between two lines.
   if (compare && currRestLine !== nextRestLine) {
     const top = Math.max(currRestLine, nextRestLine);
     const bot = Math.min(currRestLine, nextRestLine);
@@ -1006,7 +1006,7 @@ export class Formatter {
       context.move(shift, prevContext, nextContext);
 
       // Q(msac): Should the cost by normalized by the number
-      // of tickables at this position?
+      // of tickables at this position?  If so, switch this to getAverageDeviationCost()
       const cost = -context.getDeviationCost();
       if (cost > 0) {
         shift = -Math.min(context.getFormatterMetrics().freedom.right, Math.abs(cost));
