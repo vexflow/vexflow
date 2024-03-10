@@ -2,6 +2,7 @@
 // @author: Taehoon Moon 2014
 // MIT License
 
+import { BoundingBox } from './boundingbox';
 import { Clef } from './clef';
 import { Note } from './note';
 import { Category } from './typeguard';
@@ -44,7 +45,12 @@ export class ClefNote extends Note {
     const ctx = this.checkContext();
 
     this.setRendered();
+    this.clef.setX(this.getAbsoluteX());
+    this.clef.setY(stave.getYForLine(this.clef.line));
+    this.clef.renderText(ctx, 0, 0);
+  }
 
-    this.clef.renderText(ctx, this.getAbsoluteX() - this.x, stave.getYForLine(this.clef.line));
+  getBoundingBox(): BoundingBox {
+    return this.clef.getBoundingBox();
   }
 }

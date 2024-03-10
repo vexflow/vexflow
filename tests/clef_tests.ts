@@ -10,11 +10,12 @@ const ClefTests = {
     QUnit.module('Clef');
     const run = VexFlowTests.runTests;
     run('Bounding Box', draw, { drawBoundingBox: true });
+    run('Bounding Box Clef Change', drawClefChange, { drawBoundingBox: true });
     run('Clef Test', draw, { drawBoundingBox: false });
     run('Clef End Test', drawEnd);
     run('Small Clef Test', drawSmall);
     run('Small Clef End Test', drawSmallEnd);
-    run('Clef Change Test', drawClefChange);
+    run('Clef Change Test', drawClefChange, { drawBoundingBox: false });
   },
 };
 
@@ -145,6 +146,10 @@ function drawClefChange(options: TestOptions): void {
   const voice = f.Voice({ time: '12/4' }).addTickables(notes);
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
   f.draw();
+  // Render bounding boxes
+  if (options.params.drawBoundingBox === true) {
+    notes.forEach((element) => VexFlowTests.drawBoundingBox(f.getContext(), element));
+  }
   options.assert.ok(true, 'all pass');
 }
 

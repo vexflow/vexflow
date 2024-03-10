@@ -17,6 +17,7 @@ const GlyphNoteTests = {
     QUnit.module('GlyphNote');
     const run = VexFlowTests.runTests;
     run('GlyphNote with ChordSymbols', chordChanges, { debug: false, noPadding: false });
+    run('Bounding Box', chordChanges, { debug: false, noPadding: false, drawBoundingBox: true });
     run('GlyphNote Positioning', basic, { debug: false, noPadding: false });
     run('GlyphNote No Stave Padding', basic, { debug: true, noPadding: true });
     run('GlyphNote RepeatNote', repeatNote, { debug: false, noPadding: true });
@@ -61,6 +62,14 @@ function chordChanges(options: TestOptions): void {
   system.addStave({ voices: [voice], debugNoteMetrics: options.params.debug });
   system.addConnector().setType(StaveConnector.type.BRACKET);
   f.draw();
+
+  // Render bounding boxes
+  if (options.params.drawBoundingBox === true) {
+    notes.forEach((note) => {
+      VexFlowTests.drawBoundingBox(f.getContext(), note);
+    });
+  }
+
   Registry.disableDefaultRegistry();
   options.assert.ok(true);
 }
