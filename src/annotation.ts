@@ -209,7 +209,7 @@ export class Annotation extends Modifier {
 
   /**
    * Set horizontal justification.
-   * @param justification value in `Annotation.Justify`.
+   * @param just value in `Annotation.Justify`.
    */
   setJustification(just: string | AnnotationHorizontalJustify): this {
     this.horizontalJustification = typeof just === 'string' ? Annotation.HorizontalJustifyString[just] : just;
