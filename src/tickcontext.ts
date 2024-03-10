@@ -7,7 +7,7 @@
 import { Fraction } from './fraction';
 import { NoteMetrics } from './note';
 import { Tickable } from './tickable';
-import { RuntimeError } from './util';
+import {RuntimeError, sumArray} from './util';
 
 export interface TickContextMetrics extends NoteMetrics {
   totalLeftPx: number;
@@ -20,10 +20,16 @@ export interface TickContextOptions {
 
 /**
  * TickContext formats abstract tickable objects, such as notes, chords, tabs, etc.
+ *
+ * It has a public attribute of `tContexts` which is a parent array of the TickContexts
+ * in which this TickContext belongs.
  */
 export class TickContext {
   protected readonly tickID: number;
   protected readonly tickables: Tickable[];
+  // because we do Object.keys(tickablesByVoice).forEach, the record has to be
+  // typed as Record<string, Tickable>, but the key is actually a number.
+  // TODO(msac): convert to a Map() object later, which allows numeric keys.
   protected readonly tickablesByVoice: Record<string, Tickable>;
   protected currentTick: Fraction;
   protected maxTicks: Fraction;
@@ -49,6 +55,9 @@ export class TickContext {
   protected width: number;
   protected formatterMetrics: { freedom: { left: number; right: number } };
 
+  /**
+   * Get the next TickContext from another TickContext, from the `.tContexts` array.
+   */
   static getNextContext(tContext: TickContext): TickContext | undefined {
     const contexts = tContext.tContexts;
     const index = contexts.indexOf(tContext);
@@ -57,20 +66,20 @@ export class TickContext {
   }
 
   constructor(options?: TickContextOptions) {
-    this.tickID = options && options.tickID ? options.tickID : 0;
+    this.tickID = options?.tickID ?? 0;
     this.currentTick = new Fraction(0, 1);
 
     this.maxTicks = new Fraction(0, 1);
     this.maxTickable = undefined; // Biggest tickable
-    this.minTicks = undefined; // this can remian null if all tickables have ignoreTicks
-    this.minTickable = undefined;
+    this.minTicks = undefined; // this can remain null if all tickables have ignoreTicks
+    this.minTickable = undefined; // smallest tickable.
 
     this.padding = 1; // padding on each side (width += padding * 2)
     this.x = 0;
     this.xBase = 0; // base x position without xOffset
     this.xOffset = 0; // xBase and xOffset are an alternative way to describe x (x = xB + xO)
     this.tickables = []; // Notes, tabs, chords, lyrics.
-    this.tickablesByVoice = {}; // Tickables indexed by voice number
+    this.tickablesByVoice = {}; // Tickables indexed by voice number (as string)
 
     // Formatting metrics
     this.notePx = 0; // width of widest note in this context
@@ -83,7 +92,7 @@ export class TickContext {
     this.totalRightPx = 0; // Total right pixels
     this.tContexts = []; // Parent array of tick contexts
 
-    this.width = 0;
+    this.width = 0; // in pixels
     this.formatterMetrics = {
       // The freedom of a tickcontext is the distance it can move without colliding
       // with neighboring elements. A formatter can set these values during its
@@ -276,5 +285,35 @@ export class TickContext {
 
   getFormatterMetrics(): { freedom: { left: number; right: number } } {
     return this.formatterMetrics;
+  }
+
+  /**
+   * Move this tick context by `shift` pixels rightward, and adjust the
+   * freedom on adjacent tickcontexts.
+   * @param shift pixels to shift rightward.
+   * @param prev the previous TickContext, whose right freedom will be increased by `shift`.
+   * @param next the next TickContext, whose left freedom will be decreased by `shift`.
+   */
+  move(shift: number, prev?: TickContext, next?: TickContext): void {
+    this.setX(this.getX() + shift);
+    this.getFormatterMetrics().freedom.left += shift;
+    this.getFormatterMetrics().freedom.right -= shift;
+
+    if (prev) prev.getFormatterMetrics().freedom.right += shift;
+    if (next) next.getFormatterMetrics().freedom.left -= shift;
+  }
+
+  /**
+   * Return the total cost of space deviations from formatter metrics for
+   * each tickable in the context.  Used by formatters.
+   *
+   * Since FormatterMetrics.space.deviation is the amount each tickable is smaller
+   * (negative) or wider (positive) than the mean amount of space allocated to that
+   * duration, a negative return value means the tickables at this position are on average
+   * getting less space than they should, while a positive number means they are getting
+   * more space than they should.
+   */
+  getDeviationCost(): number {
+    return sumArray(this.getTickables().map((t) => t.getFormatterMetrics().space.deviation));
   }
 }

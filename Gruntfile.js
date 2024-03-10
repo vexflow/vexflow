@@ -19,6 +19,10 @@ DEVELOP
 
 grunt watch
   - FAST: Watch for changes and produces the debug CJS libraries in build/cjs/.
+  - Deletes the reference images and anything else in build first.
+
+grunt webpack:watchDebug
+  - Same as grunt watch without deleting the build directory first.
 
 grunt watch:esm
   - FAST: Watch for changes and build the ESM libraries in build/esm/.
