@@ -697,5 +697,4 @@ export abstract class Note extends Tickable {
     }
     return boundingBox;
   }
-
 }
