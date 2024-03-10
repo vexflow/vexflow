@@ -37,8 +37,6 @@
   "license": "MIT",
   "files": [
     "build",
-    "src",
-    "entry",
     "tests/flow.html",
     "tests/flow.css",
     "tests/qunit/qunit.css",
