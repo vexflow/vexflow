@@ -6,6 +6,7 @@ import { Modifier } from './modifier';
 import { ModifierContext, ModifierContextState } from './modifiercontext';
 import { Tables } from './tables';
 import { Category } from './typeguard';
+import { RuntimeError } from './util';
 
 export interface VibratoRenderOptions {
   code: number;
@@ -68,8 +69,12 @@ export class Vibrato extends Modifier {
   setVibratoWidth(width: number): this {
     this.renderOptions.width = width;
     this.text = String.fromCodePoint(this.renderOptions.code);
+    const myWidth = this.getWidth();
+    if (!myWidth) {
+      throw new RuntimeError('Cannot set vibrato width if width is 0');
+    }
 
-    const items = Math.round(this.renderOptions.width / this.getWidth());
+    const items = Math.round(this.renderOptions.width / myWidth);
     for (let i = 1; i < items; i++) {
       this.text += String.fromCodePoint(this.renderOptions.code);
     }

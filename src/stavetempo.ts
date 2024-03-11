@@ -18,7 +18,7 @@ export interface StaveTempoOptions {
   parenthesis?: boolean;
   /**
    * Indicates the graphical note type to use in a metronome mark.
-   * see: `StaveTempo.#durationToCode`.
+   * see: `StaveTempo.durationToCode`.
    */
   duration?: string;
   /**
@@ -33,7 +33,7 @@ export interface StaveTempoOptions {
   /**
    * Indicates the graphical note type to use at the right of the equation
    *  in a metronome mark.
-   * see: `StaveTempo.#durationToCode`.
+   * see: `StaveTempo.durationToCode`.
    */
   duration2?: string;
   /**
@@ -59,7 +59,7 @@ export class StaveTempo extends StaveModifier {
     this.setYShift(shiftY);
   }
 
-  #durationToCode: Record<string, string> = {
+  protected durationToCode: Record<string, string> = {
     '1/4': Glyphs.metNoteDoubleWholeSquare,
     long: Glyphs.metNoteDoubleWholeSquare,
     '1/2': Glyphs.metNoteDoubleWhole,
@@ -120,7 +120,7 @@ export class StaveTempo extends StaveModifier {
     }
 
     if (duration) {
-      el.setText(this.#durationToCode[duration]);
+      el.setText(this.durationToCode[duration]);
       el.renderText(ctx, x + this.xShift, y + this.yShift);
       x += el.getWidth() + 3;
       if (dots) {
@@ -135,7 +135,7 @@ export class StaveTempo extends StaveModifier {
       elText.renderText(ctx, x + this.xShift, y + this.yShift);
       x += elText.getWidth() + 3;
       if (duration2) {
-        el.setText(this.#durationToCode[duration2]);
+        el.setText(this.durationToCode[duration2]);
         el.renderText(ctx, x + this.xShift, y + this.yShift);
         x += el.getWidth() + 3;
         if (dots2) {

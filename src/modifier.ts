@@ -61,8 +61,8 @@ export class Modifier extends Element {
   protected textLine: number;
   protected position: ModifierPosition;
 
-  #spacingFromNextModifier: number;
-  #modifierContext?: ModifierContext;
+  protected spacingFromNextModifier: number;
+  protected modifierContext?: ModifierContext;
 
   constructor() {
     super();
@@ -72,7 +72,7 @@ export class Modifier extends Element {
     // The `textLine` is reserved space above or below a stave.
     this.textLine = 0;
     this.position = Modifier.Position.LEFT;
-    this.#spacingFromNextModifier = 0;
+    this.spacingFromNextModifier = 0;
   }
 
   /** Called when position changes. */
@@ -122,17 +122,17 @@ export class Modifier extends Element {
 
   /** Get `ModifierContext`. */
   getModifierContext(): ModifierContext | undefined {
-    return this.#modifierContext;
+    return this.modifierContext;
   }
 
   /** Check and get `ModifierContext`. */
   checkModifierContext(): ModifierContext {
-    return defined(this.#modifierContext, 'NoModifierContext', 'Modifier Context Required');
+    return defined(this.modifierContext, 'NoModifierContext', 'Modifier Context Required');
   }
 
   /** Every modifier must be part of a `ModifierContext`. */
   setModifierContext(c: ModifierContext): this {
-    this.#modifierContext = c;
+    this.modifierContext = c;
     return this;
   }
 
@@ -165,12 +165,12 @@ export class Modifier extends Element {
 
   /** Set spacing from next modifier. */
   setSpacingFromNextModifier(x: number): void {
-    this.#spacingFromNextModifier = x;
+    this.spacingFromNextModifier = x;
   }
 
   /** Get spacing from next modifier. */
   getSpacingFromNextModifier(): number {
-    return this.#spacingFromNextModifier;
+    return this.spacingFromNextModifier;
   }
 
   /**

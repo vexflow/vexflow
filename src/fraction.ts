@@ -14,8 +14,8 @@ export class Fraction {
   }
 
   // Cached objects for comparisons.
-  static #fractionA = new Fraction();
-  static #fractionB = new Fraction();
+  private static fractionA = new Fraction();
+  private static fractionB = new Fraction();
 
   /**
    * GCD: Greatest common divisor using the Euclidean algorithm.
@@ -127,22 +127,22 @@ export class Fraction {
 
   /** Simplify both sides and check if they are equal. */
   equals(compare: Fraction | number): boolean {
-    const a = Fraction.#fractionA.copy(compare).simplify();
-    const b = Fraction.#fractionB.copy(this).simplify();
+    const a = Fraction.fractionA.copy(compare).simplify();
+    const b = Fraction.fractionB.copy(this).simplify();
 
     return a.numerator === b.numerator && a.denominator === b.denominator;
   }
 
   /** Greater than operator. */
   greaterThan(compare: Fraction | number): boolean {
-    const a = Fraction.#fractionA.copy(this);
+    const a = Fraction.fractionA.copy(this);
     a.subtract(compare);
     return a.numerator > 0;
   }
 
   /** Greater than or equals operator. */
   greaterThanEquals(compare: Fraction | number): boolean {
-    const a = Fraction.#fractionA.copy(this);
+    const a = Fraction.fractionA.copy(this);
     a.subtract(compare);
     return a.numerator >= 0;
   }
@@ -171,12 +171,12 @@ export class Fraction {
     }
   }
 
-  /** Return the integer component (eg. 5/2 => 2). */
+  /** Return the integer component (e.g. 5/2 => 2). */
   quotient(): number {
     return Math.floor(this.numerator / this.denominator);
   }
 
-  /** Return the remainder component (eg. 5/2 => 1). */
+  /** Return the remainder component (e.g. 5/2 => 1). */
   remainder(): number {
     return this.numerator % this.denominator;
   }
@@ -188,21 +188,21 @@ export class Fraction {
     return this;
   }
 
-  /** Return a raw string representation (eg. "5/2"). */
+  /** Return a raw string representation (e.g. "5/2"). */
   toString(): string {
     return `${this.numerator}/${this.denominator}`;
   }
 
-  /** Return a simplified string respresentation. */
+  /** Return a simplified string representation. */
   toSimplifiedString(): string {
-    return Fraction.#fractionA.copy(this).simplify().toString();
+    return Fraction.fractionA.copy(this).simplify().toString();
   }
 
   /** Return string representation in mixed form. */
   toMixedString(): string {
     let s = '';
     const q = this.quotient();
-    const f = Fraction.#fractionA.copy(this);
+    const f = Fraction.fractionA.copy(this);
 
     if (q < 0) {
       f.makeAbs();

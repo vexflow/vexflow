@@ -90,7 +90,7 @@ export class SVGContext extends RenderContext {
 
     this.precision = Math.pow(10, Tables.RENDER_PRECISION_PLACES);
 
-    // Create a SVG element and add it to the container element.
+    // Create an SVG element and add it to the container element.
     const svg = this.create('svg');
     svg.setAttribute('pointer-events', 'none');
     this.element.appendChild(svg);
@@ -281,7 +281,7 @@ export class SVGContext extends RenderContext {
     // style.width / style.height properties that are applied to
     // the SVG object from our internal conception of the SVG
     // width/height.  This would allow us to create automatically
-    // scaling SVG's that filled their containers, for instance.
+    // scaling SVGs that filled their containers, for instance.
     //
     // As this isn't implemented in Canvas contexts,
     // I've left as is for now, but in using the viewBox to
@@ -502,7 +502,7 @@ export class SVGContext extends RenderContext {
     return this;
   }
 
-  #getShadowStyle(): string {
+  protected getShadowStyle(): string {
     // A CSS drop-shadow filter blur looks different than a canvas shadowBlur
     // of the same radius, so we scale the drop-shadow radius here to make it
     // look close to the canvas shadow.
@@ -517,7 +517,7 @@ export class SVGContext extends RenderContext {
 
     attributes.d = this.path;
     if ((this.attributes.shadowBlur as number) > 0) {
-      attributes.style = this.#getShadowStyle();
+      attributes.style = this.getShadowStyle();
     }
 
     this.applyAttributes(path, attributes);
@@ -533,7 +533,7 @@ export class SVGContext extends RenderContext {
       d: this.path,
     };
     if ((this.attributes.shadowBlur as number) > 0) {
-      attributes.style = this.#getShadowStyle();
+      attributes.style = this.getShadowStyle();
     }
 
     this.applyAttributes(path, attributes);

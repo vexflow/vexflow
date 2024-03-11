@@ -10,7 +10,7 @@ import { Stave } from './stave';
 import { StaveModifierPosition } from './stavemodifier';
 import { Tables } from './tables';
 import { Category, isBarline } from './typeguard';
-import { defined } from './util';
+import { defined, RuntimeError } from './util';
 
 export interface MultimeasureRestRenderOptions {
   /** Extracted by Factory.MultiMeasureRest() and passed to the MultiMeasureRest constructor. */
@@ -64,10 +64,10 @@ export class MultiMeasureRest extends Element {
 
   protected stave?: Stave;
 
-  #hasPaddingLeft = false;
-  #hasPaddingRight = false;
-  #hasLineThickness = false;
-  #hasSymbolSpacing = false;
+  protected hasPaddingLeft = false;
+  protected hasPaddingRight = false;
+  protected hasLineThickness = false;
+  protected hasSymbolSpacing = false;
 
   /**
    *
@@ -88,10 +88,10 @@ export class MultiMeasureRest extends Element {
     }
 
     // Keep track of whether these four options were provided.
-    this.#hasPaddingLeft = typeof options.paddingLeft === 'number';
-    this.#hasPaddingRight = typeof options.paddingRight === 'number';
-    this.#hasLineThickness = typeof options.lineThickness === 'number';
-    this.#hasSymbolSpacing = typeof options.symbolSpacing === 'number';
+    this.hasPaddingLeft = typeof options.paddingLeft === 'number';
+    this.hasPaddingRight = typeof options.paddingRight === 'number';
+    this.hasLineThickness = typeof options.lineThickness === 'number';
+    this.hasSymbolSpacing = typeof options.symbolSpacing === 'number';
 
     this.renderOptions = {
       useSymbols: false,
@@ -138,7 +138,11 @@ export class MultiMeasureRest extends Element {
     const el = new Element();
     el.setText(txt);
     // Add middle bars until the right padding is reached
-    for (let i = 1; (i + 2) * el.getWidth() + left <= right; i++) {
+    const elWidth = el.getWidth();
+    if (!elWidth) {
+      throw new RuntimeError('Cannot drawLine if width is 0');
+    }
+    for (let i = 1; (i + 2) * elWidth + left <= right; i++) {
       txt += '\ue4f0'; /*restHBarMiddle*/
     }
     txt += '\ue4f1'; /*restHBarRight*/
@@ -202,10 +206,10 @@ export class MultiMeasureRest extends Element {
     }
 
     const options = this.renderOptions;
-    if (this.#hasPaddingLeft) {
+    if (this.hasPaddingLeft) {
       left = stave.getX() + options.paddingLeft;
     }
-    if (this.#hasPaddingRight) {
+    if (this.hasPaddingRight) {
       right = stave.getX() + stave.getWidth() - options.paddingRight;
     }
 

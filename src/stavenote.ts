@@ -110,7 +110,7 @@ export class StaveNote extends StemmableNote {
 
     for (let i = 0; i < notes.length; i++) {
       // Formatting uses sortedKeyProps to calculate line and minL.
-      const props = notes[i].#sortedKeyProps;
+      const props = notes[i].sortedKeyProps;
       const line = props[0].keyProps.line;
       let minL = props[props.length - 1].keyProps.line;
       const stemDirection = notes[i].getStemDirection();
@@ -121,10 +121,10 @@ export class StaveNote extends StemmableNote {
       if (notes[i].isRest()) {
         maxL =
           line +
-          Math.ceil(notes[i].#noteHeads[0].getTextMetrics().actualBoundingBoxAscent / Tables.STAVE_LINE_DISTANCE);
+          Math.ceil(notes[i]._noteHeads[0].getTextMetrics().actualBoundingBoxAscent / Tables.STAVE_LINE_DISTANCE);
         minL =
           line -
-          Math.ceil(notes[i].#noteHeads[0].getTextMetrics().actualBoundingBoxDescent / Tables.STAVE_LINE_DISTANCE);
+          Math.ceil(notes[i]._noteHeads[0].getTextMetrics().actualBoundingBoxDescent / Tables.STAVE_LINE_DISTANCE);
       } else {
         maxL =
           stemDirection === 1 ? props[props.length - 1].keyProps.line + stemMax : props[props.length - 1].keyProps.line;
@@ -212,8 +212,8 @@ export class StaveNote extends StemmableNote {
           //If we are sharing a line and in the same voice, only then offset one note
           const lineDiff = Math.abs(noteU.line - noteL.line);
           if (noteU.note.hasStem() && noteL.note.hasStem()) {
-            const noteUHead = noteU.note.#sortedKeyProps[0].keyProps.code;
-            const noteLHead = noteL.note.#sortedKeyProps[noteL.note.#sortedKeyProps.length - 1].keyProps.code;
+            const noteUHead = noteU.note.sortedKeyProps[0].keyProps.code;
+            const noteLHead = noteL.note.sortedKeyProps[noteL.note.sortedKeyProps.length - 1].keyProps.code;
             if (
               // If unison is not configured, shift
               !Tables.UNISON ||
@@ -376,10 +376,10 @@ export class StaveNote extends StemmableNote {
   protected useDefaultHeadX: boolean;
   protected ledgerLineStyle: ElementStyle;
 
-  #noteHeads: NoteHead[];
+  private _noteHeads: NoteHead[];
 
   // Sorted variant of keyProps used internally.
-  #sortedKeyProps: { keyProps: KeyProps; index: number }[] = [];
+  private sortedKeyProps: { keyProps: KeyProps; index: number }[] = [];
 
   constructor(noteStruct: StaveNoteStruct) {
     super(noteStruct);
@@ -404,7 +404,7 @@ export class StaveNote extends StemmableNote {
     this.useDefaultHeadX = false;
 
     // Drawing
-    this.#noteHeads = [];
+    this._noteHeads = [];
     this.modifiers = [];
 
     this.renderOptions = {
@@ -430,9 +430,9 @@ export class StaveNote extends StemmableNote {
     super.reset();
 
     // Save prior noteHead styles & reapply them after making new noteheads.
-    const noteHeadStyles = this.#noteHeads.map((noteHead) => noteHead.getStyle());
+    const noteHeadStyles = this._noteHeads.map((noteHead) => noteHead.getStyle());
     this.buildNoteHeads();
-    this.#noteHeads.forEach((noteHead, index) => {
+    this._noteHeads.forEach((noteHead, index) => {
       const noteHeadStyle = noteHeadStyles[index];
       if (noteHeadStyle) noteHead.setStyle(noteHeadStyle);
     });
@@ -463,7 +463,7 @@ export class StaveNote extends StemmableNote {
 
   // Builds a `NoteHead` for each key in the note
   buildNoteHeads(): NoteHead[] {
-    this.#noteHeads = [];
+    this._noteHeads = [];
     const stemDirection = this.getStemDirection();
     const keys = this.getKeys();
 
@@ -489,7 +489,7 @@ export class StaveNote extends StemmableNote {
 
     for (let i = start; i !== end; i += step) {
       // Building noteheads rely on sortedKeNotes in order to calculate the displacements
-      const noteProps = this.#sortedKeyProps[i].keyProps;
+      const noteProps = this.sortedKeyProps[i].keyProps;
       const line = noteProps.line;
 
       // Keep track of last line with a note head, so that consecutive heads
@@ -519,9 +519,9 @@ export class StaveNote extends StemmableNote {
       notehead.fontInfo = this.fontInfo;
 
       this.addChildElement(notehead);
-      this.#noteHeads[this.#sortedKeyProps[i].index] = notehead;
+      this._noteHeads[this.sortedKeyProps[i].index] = notehead;
     }
-    return this.#noteHeads;
+    return this._noteHeads;
   }
 
   // Automatically sets the stem direction based on the keys in the note
@@ -532,8 +532,8 @@ export class StaveNote extends StemmableNote {
   calculateOptimalStemDirection(): number {
     // Figure out optimal stem direction based on given notes
     // minLine & maxLine rely on sortedKeyProps
-    this.minLine = this.#sortedKeyProps[0].keyProps.line;
-    this.maxLine = this.#sortedKeyProps[this.keyProps.length - 1].keyProps.line;
+    this.minLine = this.sortedKeyProps[0].keyProps.line;
+    this.maxLine = this.sortedKeyProps[this.keyProps.length - 1].keyProps.line;
 
     const MIDDLE_LINE = 3;
     const decider = (this.minLine + this.maxLine) / 2;
@@ -587,15 +587,15 @@ export class StaveNote extends StemmableNote {
     // Sort the notes from lowest line to highest line in sortedKeyProps
     // Warn no longer required as keyProps remains unsorted
     this.keyProps.forEach((keyProps, index) => {
-      this.#sortedKeyProps.push({ keyProps, index });
+      this.sortedKeyProps.push({ keyProps, index });
     });
-    this.#sortedKeyProps.sort((a, b) => a.keyProps.line - b.keyProps.line);
+    this.sortedKeyProps.sort((a, b) => a.keyProps.line - b.keyProps.line);
   }
 
   // Get the `BoundingBox` for the entire note
   getBoundingBox(): BoundingBox {
     const boundingBox = new BoundingBox(this.getAbsoluteX(), this.ys[0], 0, 0);
-    this.#noteHeads.forEach((notehead) => {
+    this._noteHeads.forEach((notehead) => {
       boundingBox.mergeWith(notehead.getBoundingBox());
     });
     const { yTop, yBottom } = this.getNoteHeadBounds();
@@ -696,7 +696,7 @@ export class StaveNote extends StemmableNote {
   setStave(stave: Stave): this {
     super.setStave(stave);
 
-    const ys = this.#noteHeads.map((notehead) => {
+    const ys = this._noteHeads.map((notehead) => {
       notehead.setStave(stave);
       return notehead.getY();
     });
@@ -787,7 +787,7 @@ export class StaveNote extends StemmableNote {
 
     // addtional y shifts for rests
     let restShift = 0;
-    switch (this.#noteHeads[index].getText()) {
+    switch (this._noteHeads[index].getText()) {
       case Glyphs.restDoubleWhole:
       case Glyphs.restWhole:
         restShift += 0.5;
@@ -853,7 +853,7 @@ export class StaveNote extends StemmableNote {
   // `style` is an `object` with the following properties: `shadowColor`,
   // `shadowBlur`, `fillStyle`, `strokeStyle`
   setKeyStyle(index: number, style: ElementStyle): this {
-    this.#noteHeads[index].setStyle(style);
+    this._noteHeads[index].setStyle(style);
     return this;
   }
 
@@ -946,7 +946,7 @@ export class StaveNote extends StemmableNote {
     let highestNonDisplacedLine = highestLine;
     let lowestNonDisplacedLine = lowestLine;
 
-    this.#noteHeads.forEach((notehead) => {
+    this._noteHeads.forEach((notehead) => {
       const line: number = notehead.getLine();
       const y = notehead.getY();
 
@@ -999,7 +999,7 @@ export class StaveNote extends StemmableNote {
   }
 
   get noteHeads(): NoteHead[] {
-    return this.#noteHeads.slice();
+    return this._noteHeads.slice();
   }
 
   // Draw the ledger lines between the stave and the highest/lowest keys
@@ -1072,7 +1072,7 @@ export class StaveNote extends StemmableNote {
     for (let i = 0; i < this.modifiers.length; i++) {
       const modifier = this.modifiers[i];
       const index = modifier.checkIndex();
-      const notehead = this.#noteHeads[index];
+      const notehead = this._noteHeads[index];
       if (notehead === noteheadParam) {
         const noteheadStyle = notehead.getStyle();
         notehead.applyStyle(ctx, noteheadStyle);
@@ -1119,7 +1119,7 @@ export class StaveNote extends StemmableNote {
   // Draw the NoteHeads
   drawNoteHeads(): void {
     const ctx = this.checkContext();
-    this.#noteHeads.forEach((notehead) => {
+    this._noteHeads.forEach((notehead) => {
       notehead.applyStyle(ctx);
       ctx.openGroup('notehead', notehead.getAttribute('id'));
       notehead.setContext(ctx).draw();
@@ -1204,7 +1204,7 @@ export class StaveNote extends StemmableNote {
     const shouldRenderStem = this.hasStem() && !this.beam;
 
     // Format note head x positions
-    this.#noteHeads.forEach((notehead) => notehead.setX(xBegin));
+    this._noteHeads.forEach((notehead) => notehead.setX(xBegin));
 
     if (this.stem) {
       // Format stem x positions

@@ -9,7 +9,7 @@
     <div id="font-preload">
       <!--
         Preload fonts and styles for testing.
-        The empty tags <b></b>, <i></i>, and <span style="font-weight: xxx"></span> are for loading different font weights/styles. 
+        The empty tags <b></b>, <i></i>, and <span style="font-weight: xxx"></span> are for loading different font weights/styles.
       -->
       <span style="font-family: Academico"><b></b></span>
       <span style="font-family: Bravura"></span>
@@ -48,6 +48,8 @@
     <script>
       QUnit.config.autostart = false;
       QUnit.config.noglobals = true;
+      // uncomment below to detect infinite loops in tests.
+      // QUnit.testStart(d => console.log(d.name, d.module));
       VexFlow.Test.run();
       QUnit.start();
     </script>
