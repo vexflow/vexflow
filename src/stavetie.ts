@@ -24,11 +24,14 @@ export class StaveTie extends Element {
   }
 
   public renderOptions: {
-    cp2: number;
+    cp1: number; // Curve control point 1
+    cp2: number; // Curve control point 2
+    shortTieCutoff: number; // below this we use short control points
+    cp1Short: number;
+    cp2Short: number;
+    firstXShift: number;
     lastXShift: number;
     tieSpacing: number;
-    cp1: number;
-    firstXShift: number;
     textShiftX: number;
     yShift: number;
   };
@@ -57,12 +60,31 @@ export class StaveTie extends Element {
     this.renderOptions = {
       cp1: 8, // Curve control point 1
       cp2: 12, // Curve control point 2
+      shortTieCutoff: 10,
+      cp1Short: 2,
+      cp2Short: 8,
       textShiftX: 0,
       firstXShift: 0,
       lastXShift: 0,
       yShift: 7,
       tieSpacing: 0,
     };
+  }
+
+  /**
+   * Returns either the direction explicitly set with setDirection, or
+   * a logical direction based on lastNote or firstNote.
+   */
+  getDirection(): number {
+    if (this.direction !== undefined && this.direction !== null) {
+      return this.direction;
+    } else if (this.notes.lastNote) {
+      return this.notes.lastNote.getStemDirection();
+    } else if (this.notes.firstNote) {
+      return this.notes.firstNote.getStemDirection();
+    } else {
+      return 0;
+    }
   }
 
   setDirection(direction: number): this {
@@ -115,9 +137,10 @@ export class StaveTie extends Element {
     let cp1 = this.renderOptions.cp1;
     let cp2 = this.renderOptions.cp2;
 
-    if (Math.abs(params.lastX - params.firstX) < 10) {
-      cp1 = 2;
-      cp2 = 8;
+    if (Math.abs(params.lastX - params.firstX) < this.renderOptions.shortTieCutoff) {
+      // do not get super exaggerated curves for very short ties
+      cp1 = this.renderOptions.cp1Short;
+      cp2 = this.renderOptions.cp2Short;
     }
 
     const firstXShift = this.renderOptions.firstXShift;
@@ -180,53 +203,95 @@ export class StaveTie extends Element {
     return this.notes;
   }
 
+  /**
+   * Returns the X position in pixels that the tie will be drawn starting from;
+   * ideally from the firstNote, alternatively from the lastNote, or 0 if all else fails.
+   */
+  getFirstX(): number {
+    if (this.notes.firstNote) {
+      return this.notes.firstNote.getTieRightX() + this.renderOptions.tieSpacing;
+    } else if (this.notes.lastNote) {
+      return this.notes.lastNote.checkStave().getTieStartX();
+    } else {
+      return 0;
+    }
+  }
+
+  /**
+   * Returns the X position in pixels that the tie will be drawn ending at;
+   * ideally from the firstNote, alternatively from the lastNote, or 0 if all else fails.
+   */
+  getLastX(): number {
+    if (this.notes.lastNote) {
+      return this.notes.lastNote.getTieLeftX() + this.renderOptions.tieSpacing;
+    } else if (this.notes.firstNote) {
+      return this.notes.firstNote.checkStave().getTieEndX();
+    } else {
+      return 0;
+    }
+  }
+
+  /**
+   * Get the Y positions of the places where a tie needs to be drawn starting from.
+   */
+  getFirstYs(): number[] {
+    if (this.notes.firstNote) {
+      return this.notes.firstNote.getYs();
+    } else if (this.notes.lastNote) {
+      return this.notes.lastNote.getYs();
+    } else {
+      return [0];
+    }
+  }
+
+  /**
+   * Get the Y positions of the places where a tie needs to be drawn ending at.
+   */
+  getLastYs(): number[] {
+    if (this.notes.lastNote) {
+      return this.notes.lastNote.getYs();
+    } else if (this.notes.firstNote) {
+      return this.notes.firstNote.getYs();
+    } else {
+      return [0];
+    }
+  }
+
+  /**
+   * If a tie has firstNote and not lastNote, or vice-versa, then their
+   * firstIndexes and lastIndexes need to be equal to each other.
+   *
+   * Does nothing if both notes.firstNote and notes.lastNote are defined (or
+   * if neither are)
+   *
+   * (Note that after doing so they share a common Array object, so any change
+   * to one will affect the other; this behavior may change in a future release)
+   */
+  synchronizeIndexes(): void {
+    if (this.notes.firstNote && this.notes.lastNote) {
+      return;
+    } else if (!this.notes.firstNote && !this.notes.lastNote) {
+      return;
+    } else if (this.notes.firstNote) {
+      this.notes.lastIndexes = this.notes.firstIndexes;
+    } else {
+      // this.notes.lastNote defined, but not firstNote
+      this.notes.firstIndexes = this.notes.lastIndexes;
+    }
+  }
+
   draw(): boolean {
     this.checkContext();
     this.setRendered();
-
-    const firstNote = this.notes.firstNote;
-    const lastNote = this.notes.lastNote;
-
-    // Provide some default values so the compiler doesn't complain.
-    // firstX and lastX are in pixels.
-    let firstX = 0;
-    let lastX = 0;
-    let firstYs: number[] = [0];
-    let lastYs: number[] = [0];
-    let stemDirection = 0;
-
-    if (firstNote) {
-      firstX = firstNote.getTieRightX() + this.renderOptions.tieSpacing;
-      stemDirection = firstNote.getStemDirection();
-      firstYs = firstNote.getYs();
-    } else if (lastNote) {
-      const stave = lastNote.checkStave();
-      firstX = stave.getTieStartX();
-      firstYs = lastNote.getYs();
-      this.notes.firstIndexes = this.notes.lastIndexes;
-    }
-
-    if (lastNote) {
-      lastX = lastNote.getTieLeftX() + this.renderOptions.tieSpacing;
-      stemDirection = lastNote.getStemDirection();
-      lastYs = lastNote.getYs();
-    } else if (firstNote) {
-      const stave = firstNote.checkStave();
-      lastX = stave.getTieEndX();
-      lastYs = firstNote.getYs();
-      this.notes.lastIndexes = this.notes.firstIndexes;
-    }
-
-    if (this.direction) {
-      stemDirection = this.direction;
-    }
-
+    this.synchronizeIndexes();
+    const firstX = this.getFirstX();
+    const lastX = this.getLastX();
     this.renderTie({
       firstX,
       lastX,
-      firstYs,
-      lastYs,
-      direction: stemDirection,
+      firstYs: this.getFirstYs(),
+      lastYs: this.getLastYs(),
+      direction: this.getDirection(), // note: not this.direction
     });
 
     this.renderTieText(firstX, lastX);

@@ -24,6 +24,7 @@ const StaveTieTests = {
     run('No Start Note', noStartNote2);
     run('Set Direction Down', setDirectionDown);
     run('Set Direction Up', setDirectionUp);
+    run('Tie Algorithms', tieAlgorithms);
   },
 };
 
@@ -134,6 +135,35 @@ const setDirectionUp = createTest(['(cb4 e#4 a4)/2, (d4 e4 f4)', { stem: 'down' 
     options: { direction: Stem.UP },
   });
 });
+
+function tieAlgorithms(options: TestOptions): void {
+  const factory = VexFlowTests.makeFactory(options, 300);
+  const stave = factory.Stave();
+  const score = factory.EasyScore();
+  const [n0, n1] = score.notes('(c4 e4 g4)/2, (c4 e4 g4)', { stem: 'up' });
+  const voice = score.voice([n0, n1]);
+  const tie1 = factory.StaveTie({
+    from: n0,
+    to: n1,
+    firstIndexes: [0],
+    lastIndexes: [0],
+  });
+  const tie2 = factory.StaveTie({
+    from: n0,
+    to: n1,
+    firstIndexes: [1, 2],
+    lastIndexes: [1, 2],
+    options: { direction: Stem.DOWN },
+  });
+  factory.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+  factory.draw();
+  options.assert.equal(tie1.getDirection(), Stem.UP);
+  options.assert.equal(tie2.getDirection(), Stem.DOWN);
+  options.assert.ok(tie1.getFirstX() < tie1.getLastX());
+  n1.setStemDirection(Stem.DOWN);
+  options.assert.equal(tie1.getDirection(), Stem.DOWN);
+  options.assert.equal(tie2.getDirection(), Stem.DOWN);
+}
 
 VexFlowTests.register(StaveTieTests);
 export { StaveTieTests };

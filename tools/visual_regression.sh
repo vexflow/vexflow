@@ -15,6 +15,8 @@
 #    ./tools/generate_images.js reference      ./build/images/reference
 #    ./tools/generate_images.js releases/3.0.9 ./build/images/3.0.9
 #
+#  (You may need to include "node " before "./tools".)
+#
 #  Run the visual regression tests against the reference images.
 #
 #    ./tools/visual_regression.sh ( reference | 3.0.9 | X.Y.Z ) [prefix]
