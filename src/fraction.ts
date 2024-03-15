@@ -42,7 +42,11 @@ export class Fraction {
     return (a * b) / Fraction.GCD(a, b);
   }
 
-  /** Lowest common multiple for more than two numbers. */
+  /** Lowest common multiple for more than two numbers.
+   *
+   * Note that the `args` array will be manipulated and shortened recursively during
+   * computation.
+   */
   static LCMM(args: number[]): number {
     if (args.length === 0) {
       return 0;
@@ -103,7 +107,7 @@ export class Fraction {
     return this.set(u, lcm);
   }
 
-  /** Substract value of another fraction. */
+  /** Subtract value of another fraction. */
   subtract(param1: Fraction | number = 0, param2: number = 1): this {
     const [otherNumerator, otherDenominator] = getNumeratorAndDenominator(param1, param2);
     const lcm = Fraction.LCM(this.denominator, otherDenominator);

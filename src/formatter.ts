@@ -39,7 +39,7 @@ export interface FormatterOptions {
 }
 
 export interface FormatParams {
-  alignRests?: boolean;
+  alignRests?: boolean; // align rests vertically with neighboring notes.
   stave?: Stave;
   context?: RenderContext;
   autoBeam?: boolean;
@@ -147,7 +147,7 @@ function getRestLineForNextNoteGroup(
     }
   }
 
-  // Locate the mid point between two lines.
+  // Locate the midpoint between two lines.
   if (compare && currRestLine !== nextRestLine) {
     const top = Math.max(currRestLine, nextRestLine);
     const bot = Math.min(currRestLine, nextRestLine);
@@ -189,7 +189,7 @@ export class Formatter {
   protected modifierContexts: AlignmentModifierContexts[];
   protected voices: Voice[];
   protected lossHistory: number[];
-  protected durationStats: Record<string, { mean: number; count: number }>;
+  protected durationStats: Record<string, { mean: number; count: number; total: number }>;
 
   /**
    * Helper function to layout "notes" one after the other without
@@ -198,11 +198,11 @@ export class Formatter {
   static SimpleFormat(notes: Tickable[], x = 0, { paddingBetween = 10 } = {}): void {
     notes.reduce((accumulator, note) => {
       note.addToModifierContext(new ModifierContext());
-      const tick = new TickContext().addTickable(note).preFormat();
-      const metrics = tick.getMetrics();
-      tick.setX(accumulator + metrics.totalLeftPx);
+      const tickContext = new TickContext().addTickable(note).preFormat();
+      const metrics = tickContext.getMetrics();
+      tickContext.setX(accumulator + metrics.totalLeftPx);
 
-      return accumulator + tick.getWidth() + metrics.totalRightPx + paddingBetween;
+      return accumulator + tickContext.getWidth() + metrics.totalRightPx + paddingBetween;
     }, x);
   }
 
@@ -442,7 +442,7 @@ export class Formatter {
   }
 
   /**
-   * Find all the rests in each of the `voices` and align them to neighboring notes.
+   * Find all the rests in each of the `voices` and align them vertically to neighboring notes.
    *
    * @param voices
    * @param alignAllNotes If `false`, only align rests within beamed groups of notes. If `true`, align all rests.
@@ -922,10 +922,11 @@ export class Formatter {
     function updateStats(duration: string, space: number) {
       const stats = durationStats[duration];
       if (stats === undefined) {
-        durationStats[duration] = { mean: space, count: 1 };
+        durationStats[duration] = { mean: space, count: 1, total: space };
       } else {
         stats.count += 1;
-        stats.mean = (stats.mean + space) / 2;
+        stats.total += space;
+        stats.mean = stats.total / stats.count;
       }
     }
 
@@ -982,8 +983,9 @@ export class Formatter {
    * the overall "loss" (or cost) of this layout, and repositions tickcontexts in an
    * attempt to reduce the cost. You can call this method multiple times until it finds
    * and oscillates around a global minimum.
+   * @param options parameters for tuning, currently just "alpha".
    * @param options[alpha] the "learning rate" for the formatter. It determines how much of a shift
-   * the formatter should make based on its cost function.
+   * the formatter should make based on its cost function.  Defaults to 0.5.
    */
   tune(options?: { alpha?: number }): number {
     const contexts = this.tickContexts;
@@ -993,17 +995,7 @@ export class Formatter {
 
     const alpha = options?.alpha ?? 0.5;
 
-    // Move `current` tickcontext by `shift` pixels, and adjust the freedom
-    // on adjacent tickcontexts.
-    function move(current: TickContext, shift: number, prev?: TickContext, next?: TickContext) {
-      current.setX(current.getX() + shift);
-      current.getFormatterMetrics().freedom.left += shift;
-      current.getFormatterMetrics().freedom.right -= shift;
-
-      if (prev) prev.getFormatterMetrics().freedom.right += shift;
-      if (next) next.getFormatterMetrics().freedom.left -= shift;
-    }
-
+    // function `move` moved to tickcontext.
     let shift = 0;
     this.totalShift = 0;
     contexts.list.forEach((tick, index, list) => {
@@ -1011,10 +1003,11 @@ export class Formatter {
       const prevContext = index > 0 ? contexts.map[list[index - 1]] : undefined;
       const nextContext = index < list.length - 1 ? contexts.map[list[index + 1]] : undefined;
 
-      move(context, shift, prevContext, nextContext);
+      context.move(shift, prevContext, nextContext);
 
-      const cost = -sumArray(context.getTickables().map((t) => t.getFormatterMetrics().space.deviation));
-
+      // Q(msac): Should the cost by normalized by the number
+      // of tickables at this position?  If so, switch this to getAverageDeviationCost()
+      const cost = -context.getDeviationCost();
       if (cost > 0) {
         shift = -Math.min(context.getFormatterMetrics().freedom.right, Math.abs(cost));
       } else if (cost < 0) {
@@ -1067,7 +1060,7 @@ export class Formatter {
    * Voices are full justified to fit in `justifyWidth` pixels.
    *
    * Set `options.context` to the rendering context. Set `options.alignRests`
-   * to true to enable rest alignment.
+   * to true to enable rest vertical alignment.
    */
   format(voices: Voice[], justifyWidth?: number, options?: FormatParams): this {
     const opts = {
