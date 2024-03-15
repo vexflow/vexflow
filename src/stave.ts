@@ -564,7 +564,7 @@ export class Stave extends Element {
     const noPosition = position === undefined;
     const noCategory = category === undefined;
     if (noPosition && noCategory) {
-      return this.modifiers;
+      return this.modifiers; // Should this be [...this.modifiers]?
     } else if (noPosition) {
       // A category was provided.
       return this.modifiers.filter((m: StaveModifier) => category === m.getCategory());
@@ -717,13 +717,10 @@ export class Stave extends Element {
 
     // Draw the modifiers (bar lines, coda, segno, repeat brackets, etc.)
     for (let i = 0; i < this.modifiers.length; i++) {
-      const modifier = this.modifiers[i];
-      // Only draw modifier if it has a draw function
-      if (typeof modifier.draw === 'function') {
-        modifier.applyStyle(ctx);
-        modifier.draw(this, this.getModifierXShift(i));
-        modifier.restoreStyle(ctx);
-      }
+      const modifier: StaveModifier = this.modifiers[i];
+      modifier.applyStyle(ctx);
+      modifier.draw(this, this.getModifierXShift(i));
+      modifier.restoreStyle(ctx);
     }
 
     // Render measure numbers
