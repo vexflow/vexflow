@@ -88,16 +88,16 @@ export class Element {
   }
 
   /** Canvas used to measure text. See measureText(): TextMetrics. */
-  static #txtCanvas?: HTMLCanvasElement | OffscreenCanvas;
+  private static txtCanvas?: HTMLCanvasElement | OffscreenCanvas;
 
   // Note: Canvas is node-canvas.
   // https://www.npmjs.com/package/canvas
   static setTextMeasurementCanvas(canvas: HTMLCanvasElement | OffscreenCanvas /* | Canvas */): void {
-    Element.#txtCanvas = canvas;
+    Element.txtCanvas = canvas;
   }
 
   static getTextMeasurementCanvas(): HTMLCanvasElement | OffscreenCanvas | undefined {
-    let txtCanvas: HTMLCanvasElement | OffscreenCanvas | undefined = Element.#txtCanvas;
+    let txtCanvas: HTMLCanvasElement | OffscreenCanvas | undefined = Element.txtCanvas;
     // Create the canvas element that will be used to measure text.
     if (!txtCanvas) {
       if (typeof document !== 'undefined') {
@@ -105,23 +105,23 @@ export class Element {
       } else if (typeof OffscreenCanvas !== 'undefined') {
         txtCanvas = new OffscreenCanvas(300, 150);
       }
-      Element.#txtCanvas = txtCanvas;
+      Element.txtCanvas = txtCanvas;
     }
     return txtCanvas;
   }
 
-  #context?: RenderContext;
-  #attrs: ElementAttributes;
+  private context?: RenderContext;
+  protected attrs: ElementAttributes;
 
   protected rendered: boolean;
   protected style?: ElementStyle;
   protected registry?: Registry;
 
-  #fontInfo: Required<FontInfo>;
-  #fontScale: number;
-  #text = '';
-  #metricsValid = false;
-  #textMetrics: TextMetrics = {
+  protected _fontInfo: Required<FontInfo>;
+  protected fontScale: number;
+  protected _text = '';
+  protected metricsValid = false;
+  protected _textMetrics: TextMetrics = {
     fontBoundingBoxAscent: 0,
     fontBoundingBoxDescent: 0,
     actualBoundingBoxAscent: 0,
@@ -136,23 +136,23 @@ export class Element {
     ideographicBaseline: 0,
   };
 
-  #height: number = 0;
-  #width: number = 0;
+  protected _height: number = 0;
+  protected _width: number = 0;
   protected xShift: number = 0;
   protected yShift: number = 0;
   protected x: number = 0;
   protected y: number = 0;
 
   constructor(category?: string) {
-    this.#attrs = {
+    this.attrs = {
       id: Element.newID(),
       type: category ?? (<typeof Element>this.constructor).CATEGORY,
       class: '',
     };
 
     this.rendered = false;
-    this.#fontInfo = Metrics.getFontInfo(this.#attrs.type);
-    this.#fontScale = Metrics.get(`${this.#attrs.type}.fontScale`);
+    this._fontInfo = Metrics.getFontInfo(this.attrs.type);
+    this.fontScale = Metrics.get(`${this.attrs.type}.fontScale`);
 
     // If a default registry exist, then register with it right away.
     Registry.getDefaultRegistry()?.register(this);
@@ -173,7 +173,7 @@ export class Element {
   }
 
   getCategory(): string {
-    return this.#attrs.type;
+    return this.attrs.type;
   }
 
   /**
@@ -184,7 +184,7 @@ export class Element {
    * element.setStyle({ fillStyle: 'red', strokeStyle: 'red' });
    * element.draw();
    * ```
-   * Note: If the element draws additional sub-elements (ie.: Modifiers in a Stave),
+   * Note: If the element draws additional sub-elements (i.e.: Modifiers in a Stave),
    * the style can be applied to all of them by means of the context:
    * ```typescript
    * element.setStyle({ fillStyle: 'red', strokeStyle: 'red' });
@@ -217,7 +217,7 @@ export class Element {
 
   /** Apply the element style to `context`. */
   applyStyle(
-    context: RenderContext | undefined = this.#context,
+    context: RenderContext | undefined = this.context,
     style: ElementStyle | undefined = this.getStyle()
   ): this {
     if (!style) return this;
@@ -236,7 +236,7 @@ export class Element {
 
   /** Restore the style of `context`. */
   restoreStyle(
-    context: RenderContext | undefined = this.#context,
+    context: RenderContext | undefined = this.context,
     style: ElementStyle | undefined = this.getStyle()
   ): this {
     if (!style) return this;
@@ -246,7 +246,7 @@ export class Element {
   }
 
   /**
-   * Draw the element and all its sub-elements (ie.: Modifiers in a Stave)
+   * Draw the element and all its sub-elements (i.e.: Modifiers in a Stave)
    * with the element's style (see `getStyle()` and `setStyle()`)
    */
   drawWithStyle(): void {
@@ -263,17 +263,17 @@ export class Element {
 
   /** Check if it has a class label (An element can have multiple class labels). */
   hasClass(className: string): boolean {
-    if (!this.#attrs.class) return false;
-    return this.#attrs.class?.split(' ').indexOf(className) !== -1;
+    if (!this.attrs.class) return false;
+    return this.attrs.class?.split(' ').indexOf(className) !== -1;
   }
 
   /** Add a class label (An element can have multiple class labels). */
   addClass(className: string): this {
     if (this.hasClass(className)) return this;
-    if (!this.#attrs.class) this.#attrs.class = `${className}`;
-    else this.#attrs.class = `${this.#attrs.class} ${className}`;
+    if (!this.attrs.class) this.attrs.class = `${className}`;
+    else this.attrs.class = `${this.attrs.class} ${className}`;
     this.registry?.onUpdate({
-      id: this.#attrs.id,
+      id: this.attrs.id,
       name: 'class',
       value: className,
       oldValue: undefined,
@@ -284,13 +284,13 @@ export class Element {
   /** Remove a class label (An element can have multiple class labels). */
   removeClass(className: string): this {
     if (!this.hasClass(className)) return this;
-    const arr = this.#attrs.class?.split(' ');
+    const arr = this.attrs.class?.split(' ');
     if (arr) {
       arr.splice(arr.indexOf(className));
-      this.#attrs.class = arr.join(' ');
+      this.attrs.class = arr.join(' ');
     }
     this.registry?.onUpdate({
-      id: this.#attrs.id,
+      id: this.attrs.id,
       name: 'class',
       value: undefined,
       oldValue: className,
@@ -317,27 +317,27 @@ export class Element {
 
   /** Return the element attributes. */
   getAttributes(): ElementAttributes {
-    return this.#attrs;
+    return this.attrs;
   }
 
   /** Return an attribute, such as 'id', 'type' or 'class'. */
   // eslint-disable-next-line
   getAttribute(name: string): any {
-    return this.#attrs[name];
+    return this.attrs[name];
   }
 
   /** Return associated SVGElement. */
   getSVGElement(suffix: string = ''): SVGElement | undefined {
-    const id = prefix(this.#attrs.id + suffix);
+    const id = prefix(this.attrs.id + suffix);
     const element = document.getElementById(id);
     if (element) return element as unknown as SVGElement;
   }
 
   /** Set an attribute such as 'id', 'class', or 'type'. */
   setAttribute(name: string, value: string | undefined): this {
-    const oldID = this.#attrs.id;
-    const oldValue = this.#attrs[name];
-    this.#attrs[name] = value;
+    const oldID = this.attrs.id;
+    const oldValue = this.attrs[name];
+    this.attrs[name] = value;
     // Register with old id to support id changes.
     this.registry?.onUpdate({ id: oldID, name, value, oldValue });
     return this;
@@ -355,18 +355,18 @@ export class Element {
 
   /** Return the context, such as an SVGContext or CanvasContext object. */
   getContext(): RenderContext | undefined {
-    return this.#context;
+    return this.context;
   }
 
   /** Set the context to an SVGContext or CanvasContext object */
   setContext(context?: RenderContext): this {
-    this.#context = context;
+    this.context = context;
     return this;
   }
 
   /** Validate and return the rendering context. */
   checkContext(): RenderContext {
-    return defined(this.#context, 'NoContext', 'No rendering context attached to instance.');
+    return defined(this.context, 'NoContext', 'No rendering context attached to instance.');
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -382,7 +382,7 @@ export class Element {
 
   /** Returns the CSS compatible font string for the text font. */
   get font(): string {
-    return Font.toCSSString(this.#fontInfo);
+    return Font.toCSSString(this._fontInfo);
   }
 
   /**
@@ -401,25 +401,25 @@ export class Element {
    * Each Element subclass may specify its own default by overriding the static `TEXT_FONT` property.
    */
   setFont(font?: string | FontInfo, size?: string | number, weight?: string | number, style?: string): this {
-    const defaultTextFont: Required<FontInfo> = Metrics.getFontInfo(this.#attrs.type);
+    const defaultTextFont: Required<FontInfo> = Metrics.getFontInfo(this.attrs.type);
 
     const fontIsObject = typeof font === 'object';
     const fontIsString = typeof font === 'string';
     const sizeWeightStyleAreUndefined = size === undefined && weight === undefined && style === undefined;
 
-    this.#metricsValid = false;
+    this.metricsValid = false;
     if (fontIsObject) {
       // `font` is case 1) a FontInfo object
-      this.#fontInfo = { ...defaultTextFont, ...font };
+      this._fontInfo = { ...defaultTextFont, ...font };
     } else if (fontIsString && sizeWeightStyleAreUndefined) {
       // `font` is case 2) CSS font shorthand.
-      this.#fontInfo = Font.fromCSSString(font);
+      this._fontInfo = Font.fromCSSString(font);
     } else {
       // `font` is case 3) a font family string (e.g., 'Times New Roman').
       // The other parameters represent the size, weight, and style.
       // It is okay for `font` to be undefined while one or more of the other arguments is provided.
       // Following CSS conventions, unspecified params are reset to the default.
-      this.#fontInfo = Font.validate(
+      this._fontInfo = Font.validate(
         font ?? defaultTextFont.family,
         size ?? defaultTextFont.size,
         weight ?? defaultTextFont.weight,
@@ -434,14 +434,14 @@ export class Element {
    * 'bold 10pt Arial'.
    */
   getFont(): string {
-    return Font.toCSSString(this.#fontInfo);
+    return Font.toCSSString(this._fontInfo);
   }
 
   /** Return a copy of the current FontInfo object. */
   get fontInfo(): Required<FontInfo> {
     // We can cast to Required<FontInfo> here, because
     // we just called resetFont() above to ensure this.fontInfo is set.
-    return this.#fontInfo;
+    return this._fontInfo;
   }
 
   /** Set the current FontInfo object. */
@@ -465,7 +465,7 @@ export class Element {
   }
 
   getFontScale(): number {
-    return this.#fontScale;
+    return this.fontScale;
   }
 
   /**
@@ -526,8 +526,8 @@ export class Element {
   }
 
   get width(): number {
-    if (!this.#metricsValid) this.measureText();
-    return this.#width;
+    if (!this.metricsValid) this.measureText();
+    return this._width;
   }
 
   /** Set element width. */
@@ -537,8 +537,8 @@ export class Element {
   }
 
   set width(width: number) {
-    if (!this.#metricsValid) this.measureText();
-    this.#width = width;
+    if (!this.metricsValid) this.measureText();
+    this._width = width;
   }
 
   /** Set the X coordinate. */
@@ -591,27 +591,28 @@ export class Element {
   }
 
   set text(text: string) {
-    this.#metricsValid = false;
-    this.#text = text;
+    this.metricsValid = false;
+    this._text = text;
   }
 
   /** Get element text. */
   getText(): string {
-    return this.#text;
+    return this._text;
   }
 
   get text(): string {
-    return this.#text;
+    return this._text;
   }
 
   /** Render the element text. */
   renderText(ctx: RenderContext, xPos: number, yPos: number): void {
     ctx.save();
-    ctx.setFont(this.#fontInfo);
-    ctx.fillText(this.#text, xPos + this.x + this.xShift, yPos + this.y + this.yShift);
+    ctx.setFont(this._fontInfo);
+    ctx.fillText(this._text, xPos + this.x + this.xShift, yPos + this.y + this.yShift);
     this.children.forEach((child) => {
-      ctx.setFont(child.#fontInfo);
-      ctx.fillText(child.#text, xPos + child.x + child.xShift, yPos + child.y + child.yShift);
+      // changed -- do not look at private attributes of children.
+      ctx.setFont(child.fontInfo);
+      ctx.fillText(child.text, xPos + child.x + child.xShift, yPos + child.y + child.yShift);
     });
     ctx.restore();
   }
@@ -624,14 +625,14 @@ export class Element {
     if (!context) {
       // eslint-disable-next-line no-console
       console.warn('Element: No context for txtCanvas. Returning empty text metrics.');
-      return this.#textMetrics;
+      return this._textMetrics;
     }
-    context.font = Font.toCSSString(Font.validate(this.#fontInfo));
-    this.#textMetrics = context.measureText(this.#text);
-    this.#height = this.#textMetrics.actualBoundingBoxAscent + this.#textMetrics.actualBoundingBoxDescent;
-    this.#width = this.#textMetrics.width;
-    this.#metricsValid = true;
-    return this.#textMetrics;
+    context.font = Font.toCSSString(Font.validate(this.fontInfo));
+    this._textMetrics = context.measureText(this.text);
+    this._height = this._textMetrics.actualBoundingBoxAscent + this._textMetrics.actualBoundingBoxDescent;
+    this._width = this._textMetrics.width;
+    this.metricsValid = true;
+    return this._textMetrics;
   }
 
   /** Measure the text using the FontInfo related with key. */
@@ -652,8 +653,8 @@ export class Element {
   }
 
   get textMetrics(): TextMetrics {
-    if (!this.#metricsValid) this.measureText();
-    return this.#textMetrics;
+    if (!this.metricsValid) this.measureText();
+    return this._textMetrics;
   }
 
   /** Get the text height. */
@@ -662,13 +663,13 @@ export class Element {
   }
 
   get height() {
-    if (!this.#metricsValid) this.measureText();
-    return this.#height;
+    if (!this.metricsValid) this.measureText();
+    return this._height;
   }
 
   set height(height: number) {
-    if (!this.#metricsValid) this.measureText();
-    this.#height = height;
+    if (!this.metricsValid) this.measureText();
+    this._height = height;
   }
 
   setOriginX(x: number): void {

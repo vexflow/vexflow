@@ -232,11 +232,11 @@ export class VexFlowTests {
     NODE_TEST_CONFIG.fontStacks = fontStacks;
   }
 
-  static #NEXT_TEST_ID = 0;
+  private static NEXT_TEST_ID = 0;
 
   /** Return a unique ID for a test. */
   static generateTestID(prefix: string): string {
-    return prefix + '_' + VexFlowTests.#NEXT_TEST_ID++;
+    return prefix + '_' + VexFlowTests.NEXT_TEST_ID++;
   }
 
   /**
