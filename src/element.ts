@@ -129,6 +129,11 @@ export class Element {
     actualBoundingBoxLeft: 0,
     actualBoundingBoxRight: 0,
     width: 0,
+    alphabeticBaseline: 0,
+    emHeightAscent: 0,
+    emHeightDescent: 0,
+    hangingBaseline: 0,
+    ideographicBaseline: 0,
   };
 
   #height: number = 0;

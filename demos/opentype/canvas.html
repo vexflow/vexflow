@@ -79,6 +79,10 @@
         text-decoration: underline;
       }
 
+      div#gonvilledev-container {
+        display: none;
+      }
+
       h1 {
         margin-bottom: 0;
       }
@@ -96,241 +100,249 @@
     <div class="canvas-container">
       <div>
         <h1>Bravura</h1>
-        <canvas id="bravura-output" width="1000" height="400"></canvas>
+        <canvas id="bravura-output" width="1000" height="600"></canvas>
       </div>
       <div>
         <h1>Petaluma</h1>
-        <canvas id="petaluma-output" width="1000" height="400"></canvas>
+        <canvas id="petaluma-output" width="1000" height="600"></canvas>
       </div>
       <div>
         <h1>Gonville</h1>
-        <canvas id="gonville-output" width="1000" height="400"></canvas>
+        <canvas id="gonville-output" width="1000" height="600"></canvas>
       </div>
-      <!--
-    <div>
-      <h1>Gonville Dev</h1>
-      <canvas id="gonvilledev-output" width="1000" height="400"></canvas>
+      <div id="gonvilledev-container">
+        <h1>Gonville Dev</h1>
+        <canvas id="gonvilledev-output" width="1000" height="600"></canvas>
+      </div>
     </div>
-    --></div>
     <script type="module">
-      let currentGlyphIndex = parseInt(localStorage.getItem('currentGlyphIndex')) ?? 0;
+      const showGonvilleDev = false;
 
-      const includeGonvilleDev = false;
+      let currentGlyphIndex = parseInt(localStorage.getItem('currentGlyphIndex')) ?? 0;
 
       let glyphNames = [];
       const DEFAULT_GLYPH_NAMES = [
-        // "bracketTop",
-        // "bracketBottom",
-        // "segno",
-        // "coda",
-        // "codaSquare",
-        // "segnoSerpent1",
-        // "gClef",
-        // "gClef8vbOld",
-        // "gClef8vbCClef",
-        // "cClef",
-        // "cClefCombining",
-        // "fClef",
-        // "unpitchedPercussionClef1",
-        // "unpitchedPercussionClef2",
-        // "sixStringTabClef", // 6stringTabClef
-        // "fourStringTabClef", // 4stringTabClef
-        // "gClefChange",
-        // "cClefChange",
-        // "fClefChange",
-        // "timeSig0",
-        // "timeSig1",
-        // "timeSig2",
-        // "timeSig3",
-        // "timeSig4",
-        // "timeSig5",
-        // "timeSig6",
-        // "timeSig7",
-        // "timeSig8",
-        // "timeSig9",
-        // "timeSigCommon",
-        // "timeSigCutCommon",
-        // "timeSigPlus",
-        // "timeSigPlusSmall",
-        // "timeSigMinus",
-        // "timeSigParensLeftSmall",
-        // "timeSigParensRightSmall",
-        // "timeSigParensLeft",
-        // "timeSigParensRight",
-        // "noteheadDoubleWhole",
-        // "noteheadWhole",
-        // "noteheadHalf",
-        // "noteheadBlack",
-        // "noteheadXWhole",
-        // "noteheadXHalf",
-        // "noteheadXBlack",
-        // "noteheadCircleX",
-        // "noteheadTriangleUpWhole",
-        // "noteheadTriangleUpHalf",
-        // "noteheadTriangleUpWhite",
-        // "noteheadTriangleUpBlack",
-        // "noteheadDiamondWhole",
-        // "noteheadDiamondHalf",
-        // "noteheadDiamondBlack",
-        'augmentationDot', // FIX ORIGIN IN GONVILLE.
-        // "tremolo1",
-        // "flag8thUp",
-        // "flag8thDown",
-        // "flag16thUp",
-        // "flag16thDown",
-        // "flag32ndUp",
-        // "flag32ndDown",
-        // "flag64thUp",
-        // "flag64thDown",
-        // "flag128thUp",
-        // "flag128thDown",
-        // "flag256thUp",
-        // "flag256thDown",
-        // "flag512thUp",
-        // "flag512thDown",
-        // "flag1024thUp",
-        // "flag1024thDown",
-        // "accidentalFlat",
-        // "accidentalNatural",
-        // "accidentalSharp",
-        // "accidentalDoubleSharp",
-        // "accidentalDoubleFlat",
-        // "accidentalParensLeft",
-        // "accidentalParensRight",
-        // "accidentalQuarterToneFlatArrowUp", // MAYBE NUDGE ORIGIN TO THE LEFT?
-        // "accidentalThreeQuarterTonesFlatArrowDown", // MAYBE NUDGE ORIGIN TO THE LEFT?
-        // "accidentalQuarterToneSharpNaturalArrowUp", // MAYBE NUDGE ORIGIN TO THE RIGHT?
-        // "accidentalQuarterToneFlatNaturalArrowDown",
-        // "accidentalThreeQuarterTonesSharpArrowUp",
-        // "accidentalQuarterToneSharpArrowDown",
-        // "accidentalQuarterToneFlatStein",
-        // "accidentalThreeQuarterTonesFlatZimmermann",
-        // "accidentalQuarterToneSharpStein",
-        // "accidentalThreeQuarterTonesSharpStein",
-        // "accidentalBuyukMucennebFlat",
-        // "accidentalBakiyeFlat",
-        // "accidentalKomaSharp",
-        // "accidentalKucukMucennebSharp",
-        // "accidentalBuyukMucennebSharp",
-        // "articAccentAbove",
-        // "articAccentBelow",
-        'articStaccatoAbove', // FIX ORIGIN IN GONVILLE.
-        'articStaccatoBelow', // FIX ORIGIN IN GONVILLE.
-        'articTenutoAbove', // FIX ORIGIN IN GONVILLE.
-        'articTenutoBelow', // FIX ORIGIN IN GONVILLE.
-        // "articStaccatissimoAbove",
-        // "articStaccatissimoBelow",
-        // "articMarcatoAbove",
-        // "articMarcatoBelow",
-        // "fermataAbove",
-        // "fermataBelow",
-        // "fermataVeryShortAbove",
-        // "fermataVeryShortBelow",
-        // "fermataShortAbove",
-        // "fermataShortBelow",
-        // "fermataLongAbove",
-        // "fermataLongBelow",
-        // "fermataVeryLongAbove",
-        // "fermataVeryLongBelow",
-        // "fermataLongHenzeAbove",
-        // "fermataLongHenzeBelow",
-        // "fermataShortHenzeAbove",
-        // "fermataShortHenzeBelow",
-        // "breathMarkComma",
-        // "breathMarkTick",
-        // "breathMarkUpbow",
-        // "caesura",
-        // "caesuraCurved",
-        // "restMaxima",
-        // "restLonga",
-        // "restDoubleWhole",
-        // "restWhole",
-        // "restHalf",
-        // "restQuarter",
-        // "rest8th",
-        // "rest16th",
-        // "rest32nd",
-        // "rest64th",
-        // "rest128th",
-        // "rest256th",
-        // "rest512th",
-        'rest1024th', // NUDGE ORIGIN DOWN, SO THAT ONLY 3 BUMPS ARE BELOW THE ORIGIN?
-        // "restQuarterOld",
-        'restDoubleWholeLegerLine', // NUDGE ORIGIN UP
-        // "restWholeLegerLine",
-        // "restHalfLegerLine",
-        // "restQuarterZ",
-        // "dynamicPiano",
-        'dynamicMezzo', // NUDGE ORIGIN RIGHT, TO THE FOOT OF THE M
-        'dynamicForte', // NUDGE ORIGIN RIGHT
+        // 'bracketTop',
+        // 'bracketBottom',
+        // 'segno',
+        // 'coda',
+        // 'codaSquare',
+        // 'segnoSerpent1',
+        // 'gClef',
+        // 'gClef8vbOld',
+        // 'gClef8vbCClef',
+        // 'cClef',
+        // 'cClefCombining',
+        // 'fClef',
+        // 'unpitchedPercussionClef1',
+        // 'unpitchedPercussionClef2',
+        // 'sixStringTabClef', // 6stringTabClef
+        // 'fourStringTabClef', // 4stringTabClef
+        // 'gClefChange',
+        // 'cClefChange',
+        // 'fClefChange',
+        // 'timeSig0',
+        // 'timeSig1',
+        // 'timeSig2',
+        // 'timeSig3',
+        // 'timeSig4',
+        // 'timeSig5',
+        // 'timeSig6',
+        // 'timeSig7',
+        // 'timeSig8',
+        // 'timeSig9',
+        // 'timeSigCommon',
+        // 'timeSigCutCommon',
+        // 'timeSigPlus',
+        // 'timeSigPlusSmall',
+        // 'timeSigMinus',
+        // 'timeSigParensLeftSmall',
+        // 'timeSigParensRightSmall',
+        // 'timeSigParensLeft',
+        // 'timeSigParensRight',
+        // 'noteheadDoubleWhole',
+        // 'noteheadWhole',
+        // 'noteheadHalf',
+        // 'noteheadBlack',
+        // 'noteheadXWhole',
+        // 'noteheadXHalf',
+        // 'noteheadXBlack',
+        // 'noteheadCircleX',
+        // 'noteheadTriangleUpWhole',
+        // 'noteheadTriangleUpHalf',
+        // 'noteheadTriangleUpWhite',
+        // 'noteheadTriangleUpBlack',
+        // 'noteheadDiamondWhole',
+        // 'noteheadDiamondHalf',
+        // 'noteheadDiamondBlack',
+        'augmentationDot', // MOVE ORIGIN LEFT
+        // 'tremolo1',
+        // 'flag8thUp',
+        // 'flag8thDown',
+        // 'flag16thUp',
+        // 'flag16thDown',
+        // 'flag32ndUp',
+        // 'flag32ndDown',
+        // 'flag64thUp',
+        // 'flag64thDown',
+        // 'flag128thUp',
+        // 'flag128thDown',
+        // 'flag256thUp',
+        // 'flag256thDown',
+        // 'flag512thUp',
+        // 'flag512thDown',
+        // 'flag1024thUp',
+        // 'flag1024thDown',
+        // 'accidentalFlat',
+        // 'accidentalNatural',
+        // 'accidentalSharp',
+        // 'accidentalDoubleSharp',
+        // 'accidentalDoubleFlat',
+        // 'accidentalParensLeft',
+        // 'accidentalParensRight',
+        'accidentalQuarterToneFlatArrowUp', // MOVE ORIGIN LEFT
+        'accidentalThreeQuarterTonesFlatArrowDown', // MOVE ORIGIN LEFT
+        'accidentalQuarterToneSharpNaturalArrowUp', // MOVE ORIGIN RIGHT
+        // 'accidentalQuarterToneFlatNaturalArrowDown',
+        // 'accidentalThreeQuarterTonesSharpArrowUp',
+        // 'accidentalQuarterToneSharpArrowDown',
+        // 'accidentalQuarterToneFlatStein',
+        // 'accidentalThreeQuarterTonesFlatZimmermann',
+        // 'accidentalQuarterToneSharpStein',
+        // 'accidentalThreeQuarterTonesSharpStein',
+        // 'accidentalBuyukMucennebFlat',
+        // 'accidentalBakiyeFlat',
+        // 'accidentalKomaSharp',
+        // 'accidentalKucukMucennebSharp',
+        // 'accidentalBuyukMucennebSharp',
+        // 'articAccentAbove',
+        // 'articAccentBelow',
+        'articStaccatoAbove', // MOVE ORIGIN DOWN
+        'articStaccatoBelow', // MOVE ORIGIN UP
+        'articTenutoAbove', // MOVE ORIGIN DOWN
+        'articTenutoBelow', // MOVE ORIGIN UP
+        // 'articStaccatissimoAbove',
+        // 'articStaccatissimoBelow',
+        // 'articMarcatoAbove',
+        // 'articMarcatoBelow',
+        // 'fermataAbove',
+        // 'fermataBelow',
+        // 'fermataVeryShortAbove',
+        // 'fermataVeryShortBelow',
+        // 'fermataShortAbove',
+        // 'fermataShortBelow',
+        // 'fermataLongAbove',
+        // 'fermataLongBelow',
+        // 'fermataVeryLongAbove',
+        // 'fermataVeryLongBelow',
+        // 'fermataLongHenzeAbove',
+        // 'fermataLongHenzeBelow',
+        // 'fermataShortHenzeAbove',
+        // 'fermataShortHenzeBelow',
+        // 'breathMarkComma',
+        // 'breathMarkTick',
+        // 'breathMarkUpbow',
+        // 'caesura',
+        // 'caesuraCurved',
+        // 'restMaxima',
+        // 'restLonga',
+        // 'restDoubleWhole',
+        // 'restWhole',
+        // 'restHalf',
+        // 'restQuarter',
+        // 'rest8th',
+        // 'rest16th',
+        // 'rest32nd',
+        // 'rest64th',
+        // 'rest128th',
+        // 'rest256th',
+        // 'rest512th',
+        'rest1024th', // MOVE ORIGIN DOWN, SO THAT ONLY 3 BUMPS ARE BELOW THE ORIGIN.
+        // 'restQuarterOld',
+        'restDoubleWholeLegerLine', // MOVE ORIGIN UP
+        // 'restWholeLegerLine',
+        // 'restHalfLegerLine',
+        // 'restQuarterZ',
+        // 'dynamicPiano',
+        'dynamicMezzo', // MOVE ORIGIN RIGHT, TO THE FOOT OF THE M
+        'dynamicForte', // MOVE ORIGIN RIGHT
         'dynamicRinforzando', // NUDGE ORIGIN RIGHT
-        'dynamicSforzando', // NUDGE ORIGIN RIGHT
-        'dynamicZ', // NUDGE ORIGIN RIGHT
-        'dynamicNiente', // NUDGE ORIGIN RIGHT
-        // "graceNoteSlashStemUp",
-        // "graceNoteSlashStemDown",
-        // "ornamentTrill",
-        // "ornamentTurn",
-        // "ornamentTurnInverted",
-        // "ornamentTurnSlash",
-        // "ornamentShortTrill",
-        // "ornamentMordent",
-        // "ornamentTremblement",
-        // "ornamentHaydn",
-        // "ornamentPrecompAppoggTrill",
-        // "ornamentPrecompSlideTrillDAnglebert",
-        // "ornamentPrecompSlideTrillBach",
-        // "ornamentPrecompTrillSuffixDandrieu",
-        // "ornamentPrecompTrillWithMordent",
-        // "ornamentPrecompDoubleCadenceUpperPrefix",
-        // "ornamentPrecompDoubleCadenceUpperPrefixTurn",
-        // "ornamentPrecompTrillLowerSuffix",
-        // "stringsDownBow",
-        // "stringsUpBow",
-        // "stringsHarmonic",
-        // "pluckedSnapPizzicatoBelow",
-        // "pluckedSnapPizzicatoAbove",
-        // "pluckedLeftHandPizzicato",
-        // "keyboardPedalPed",
-        'keyboardPedalP',
-        'keyboardPedalE',
-        'keyboardPedalD', // NUDGE ORIGIN RIGHT SO IT TOUCHES THE ROUND PART OF THE LOWERCASE d
-        'keyboardPedalDot',
-        'keyboardPedalUp', // NUDGE ORIGIN UP
-        // "pictChokeCymbal",
-        // "accdnCombRH3RanksEmpty",
-        // "accdnCombRH4RanksEmpty",
-        // "accdnCombLH2RanksEmpty",
-        // "accdnCombLH3RanksEmptySquare",
-        'accdnCombDot', // FIX ORIGIN IN GONVILLE.
-        // "accdnPush",
-        // "accdnPull",
-        'wiggleArpeggiatoUp', // PETALUMA IS BUGGY?
-        'wiggleArpeggiatoDown', // FLIP THIS GLYPH IN GONVILLE. PETALUMA IS BUGGY?
-        // "arrowBlackUp",
-        // "arrowBlackDown",
-        // "arrowheadBlackUp",
-        // "arrowheadBlackRight",
-        // "arrowheadBlackDown",
-        // "arrowheadBlackLeft",
-        // "arrowheadOpenUp",
-        // "arrowheadOpenRight",
-        // "arrowheadOpenDown",
-        // "arrowheadOpenLeft",
+        'dynamicSforzando', // MOVE ORIGIN RIGHT
+        'dynamicZ', // MOVE ORIGIN RIGHT
+        'dynamicNiente', // MOVE ORIGIN RIGHT
+        // 'graceNoteSlashStemUp',
+        // 'graceNoteSlashStemDown',
+        // 'ornamentTrill',
+        // 'ornamentTurn',
+        // 'ornamentTurnInverted',
+        // 'ornamentTurnSlash',
+        // 'ornamentShortTrill',
+        // 'ornamentMordent',
+        // 'ornamentTremblement',
+        // 'ornamentHaydn',
+        // 'ornamentPrecompAppoggTrill',
+        // 'ornamentPrecompSlideTrillDAnglebert',
+        // 'ornamentPrecompSlideTrillBach',
+        // 'ornamentPrecompTrillSuffixDandrieu',
+        // 'ornamentPrecompTrillWithMordent',
+        // 'ornamentPrecompDoubleCadenceUpperPrefix',
+        // 'ornamentPrecompDoubleCadenceUpperPrefixTurn',
+        // 'ornamentPrecompTrillLowerSuffix',
+        // 'stringsDownBow',
+        // 'stringsUpBow',
+        // 'stringsHarmonic',
+        // 'pluckedSnapPizzicatoBelow',
+        // 'pluckedSnapPizzicatoAbove',
+        // 'pluckedLeftHandPizzicato',
+        // 'keyboardPedalPed',
+        // 'keyboardPedalP',
+        // 'keyboardPedalE',
+        'keyboardPedalD', // MOVE ORIGIN RIGHT SO IT TOUCHES THE ROUND PART OF THE LOWERCASE d
+        // 'keyboardPedalDot',
+        'keyboardPedalUp', // MOVE ORIGIN UP
+        // 'pictChokeCymbal',
+        // 'accdnCombRH3RanksEmpty',
+        // 'accdnCombRH4RanksEmpty',
+        // 'accdnCombLH2RanksEmpty',
+        // 'accdnCombLH3RanksEmptySquare',
+        'accdnCombDot', // MOVE ORIGIN DOWN
+        // 'accdnPush',
+        // 'accdnPull',
+        'wiggleArpeggiatoUp', // IS PETALUMA BUGGY?
+        'wiggleArpeggiatoDown', // FLIP THIS GLYPH. IS PETALUMA BUGGY?
+        // 'arrowBlackUp',
+        // 'arrowBlackDown',
+        // 'arrowheadBlackUp',
+        // 'arrowheadBlackRight',
+        // 'arrowheadBlackDown',
+        // 'arrowheadBlackLeft',
+        // 'arrowheadOpenUp',
+        // 'arrowheadOpenRight',
+        // 'arrowheadOpenDown',
+        // 'arrowheadOpenLeft',
       ];
 
-      const originOffset = [200, 200];
+      const originOffset = [200, 350];
 
+      // You might have to purge the jsDelivr CDN cache to make the updated font available sooner:
+      // https://www.jsdelivr.com/tools/purge
+      // For example, you can submit this URL:
+      // https://cdn.jsdelivr.net/npm/@vexflow-fonts/gonville/gonville.woff2
       const fontNames = ['Bravura', 'Gonville', 'Petaluma'];
       const fontURLs = [];
       for (let fontName of fontNames) {
+        console.log(VexFlow.Font.getURLForFont(fontName));
         fontURLs.push(VexFlow.Font.getURLForFont(fontName));
       }
 
-      // Build Gonville from source. Call it 'GonvilleDev'. Serve it with `npx serve` at localhost:3000.
-      if (includeGonvilleDev) {
+      // Build Gonville from source and put it in the vexflow/build/ directory.
+      // Serve it with `npx serve` at localhost:3000.
+      // Here, we load it and call it 'GonvilleDev'.
+      if (showGonvilleDev) {
+        document.getElementById('gonvilledev-container').style.display = 'block';
+
         fontNames.push('GonvilleDev');
-        fontURLs.push('http://localhost:3000/build/gonville/gonville-smufl.woff2');
+        fontURLs.push('http://localhost:3000/build/gonville/gonville.woff2?' + Math.random());
       }
 
       const fonts = {};

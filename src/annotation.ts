@@ -209,7 +209,7 @@ export class Annotation extends Modifier {
 
   /**
    * Set horizontal justification.
-   * @param justification value in `Annotation.Justify`.
+   * @param just value in `Annotation.Justify`.
    */
   setJustification(just: string | AnnotationHorizontalJustify): this {
     this.horizontalJustification = typeof just === 'string' ? Annotation.HorizontalJustifyString[just] : just;
@@ -224,10 +224,6 @@ export class Annotation extends Modifier {
     const start = note.getModifierStartXY(ModifierPosition.ABOVE, this.index);
 
     this.setRendered();
-
-    // Apply style might not save context, if this.style is undefined, so we
-    // still need to save context state just before this, since we will be
-    // changing ctx parameters below.
     this.applyStyle();
     ctx.openGroup('annotation', this.getAttribute('id'));
 

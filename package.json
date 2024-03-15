@@ -1,6 +1,6 @@
 {
-  "name": "vxflw-early-access",
-  "version": "5.0.0-alpha.11",
+  "name": "vexflow",
+  "version": "5.0.0-alpha.3",
   "description": "A JavaScript library for rendering music notation and guitar tablature.",
   "exports": {
     ".": {
@@ -37,8 +37,6 @@
   "license": "MIT",
   "files": [
     "build",
-    "src",
-    "entry",
     "tests/flow.html",
     "tests/flow.css",
     "tests/qunit/qunit.css",
@@ -110,7 +108,7 @@
     "terser-webpack-plugin": "^5.3.9",
     "ts-loader": "^9.5.0",
     "tsc-watch": "^6.0.4",
-    "typescript": "^5.2.2",
+    "typescript": "^5.4.2",
     "webpack": "^5.89.0"
   },
   "scripts": {

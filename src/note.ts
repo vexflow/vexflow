@@ -2,6 +2,7 @@
 // MIT License
 
 import { Beam } from './beam';
+import { BoundingBox } from './boundingbox';
 import { Fraction } from './fraction';
 import { Glyphs } from './glyphs';
 import { Metrics } from './metrics';
@@ -686,5 +687,14 @@ export abstract class Note extends Tickable {
   // Get the properties for all the keys in the note
   getKeyProps(): KeyProps[] {
     return this.keyProps;
+  }
+
+  // Get the `BoundingBox` for the entire note
+  getBoundingBox(): BoundingBox {
+    const boundingBox = super.getBoundingBox();
+    for (let i = 0; i < this.modifiers.length; i++) {
+      boundingBox.mergeWith(this.modifiers[i].getBoundingBox());
+    }
+    return boundingBox;
   }
 }
