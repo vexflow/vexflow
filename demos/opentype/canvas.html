@@ -498,6 +498,8 @@
         if (loadedFonts.length < fontNames.length) {
           console.log('Not all fonts are loaded yet.');
           return;
+        } else {
+          console.log('All fonts are loaded!');
         }
 
         const glyph = VexFlow.Glyphs[glyphNames[currentGlyphIndex]];
