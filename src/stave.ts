@@ -4,7 +4,7 @@
 import { BoundingBox, Bounds } from './boundingbox';
 import { Clef } from './clef';
 import { Element, ElementStyle } from './element';
-import { KeySignature } from './keysignature';
+import { KeySignature, KeySpec } from './keysignature';
 import { Metrics } from './metrics';
 import { Barline, BarlineType } from './stavebarline';
 import { StaveModifier, StaveModifierPosition } from './stavemodifier';
@@ -442,7 +442,7 @@ export class Stave extends Element {
     return this.endClef;
   }
 
-  setKeySignature(keySpec: string, cancelKeySpec?: string, position?: number): this {
+  setKeySignature(keySpec: KeySpec, cancelKeySpec?: string, position?: number): this {
     if (position === undefined) {
       position = StaveModifierPosition.BEGIN;
     }
@@ -457,7 +457,7 @@ export class Stave extends Element {
     return this;
   }
 
-  setEndKeySignature(keySpec: string, cancelKeySpec?: string): this {
+  setEndKeySignature(keySpec: KeySpec, cancelKeySpec?: string): this {
     this.setKeySignature(keySpec, cancelKeySpec, StaveModifierPosition.END);
     return this;
   }
@@ -485,14 +485,16 @@ export class Stave extends Element {
   /**
    * Add a key signature to the stave.
    *
-   * Example:
-   * `stave.addKeySignature('Db');`
-   * @param keySpec new key specification `[A-G][b|#]?`
+   * @example
+   * ```
+   * stave.addKeySignature('Db')
+   * ```
+   * @param keySpec new key specification `[A-G][b|#]?m?`
    * @param cancelKeySpec
    * @param position
    * @returns
    */
-  addKeySignature(keySpec: string, cancelKeySpec?: string, position?: number): this {
+  addKeySignature(keySpec: KeySpec, cancelKeySpec?: string, position?: number): this {
     if (position === undefined) {
       position = StaveModifierPosition.BEGIN;
     }

@@ -13,6 +13,38 @@ import { Tables } from './tables';
 import { Category } from './typeguard';
 import { defined } from './util';
 
+export type KeySpec =
+  | 'C'
+  | 'Am'
+  | 'F'
+  | 'Dm'
+  | 'Bb'
+  | 'Gm'
+  | 'Eb'
+  | 'Cm'
+  | 'Ab'
+  | 'Fm'
+  | 'Db'
+  | 'Bbm'
+  | 'Gb'
+  | 'Ebm'
+  | 'Cb'
+  | 'Abm'
+  | 'G'
+  | 'Em'
+  | 'D'
+  | 'Bm'
+  | 'A'
+  | 'F#m'
+  | 'E'
+  | 'C#m'
+  | 'B'
+  | 'G#m'
+  | 'F#'
+  | 'D#m'
+  | 'C#'
+  | 'A#m';
+
 export class KeySignature extends StaveModifier {
   static get CATEGORY(): string {
     return Category.KeySignature;
@@ -23,11 +55,10 @@ export class KeySignature extends StaveModifier {
   protected formatted?: boolean;
   protected cancelKeySpec?: string;
   protected accList: { type: string; line: number }[] = [];
-  protected keySpec?: string;
+  protected keySpec?: KeySpec;
   protected alterKeySpec?: string[];
 
-  // Create a new Key Signature based on a `keySpec`
-  constructor(keySpec: string, cancelKeySpec?: string, alterKeySpec?: string[]) {
+  constructor(keySpec: KeySpec, cancelKeySpec?: string, alterKeySpec?: string[]) {
     super();
 
     this.setKeySig(keySpec, cancelKeySpec, alterKeySpec);
@@ -170,7 +201,7 @@ export class KeySignature extends StaveModifier {
     return this.width;
   }
 
-  setKeySig(keySpec: string, cancelKeySpec?: string, alterKeySpec?: string[]): this {
+  setKeySig(keySpec: KeySpec, cancelKeySpec?: string, alterKeySpec?: string[]): this {
     this.formatted = false;
     this.keySpec = keySpec;
     this.cancelKeySpec = cancelKeySpec;

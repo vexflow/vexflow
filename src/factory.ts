@@ -20,6 +20,7 @@ import { GhostNote } from './ghostnote';
 import { GlyphNote, GlyphNoteOptions } from './glyphnote';
 import { GraceNote, GraceNoteStruct } from './gracenote';
 import { GraceNoteGroup } from './gracenotegroup';
+import { KeySpec } from './keysignature';
 import { KeySigNote } from './keysignote';
 import { ModifierContext } from './modifiercontext';
 import { MultiMeasureRest, MultimeasureRestRenderOptions } from './multimeasurerest';
@@ -296,7 +297,7 @@ export class Factory {
     return timeSigNote;
   }
 
-  KeySigNote(params: { key: string; cancelKey?: string; alterKey?: string[] }): KeySigNote {
+  KeySigNote(params: { key: KeySpec; cancelKey?: string; alterKey?: string[] }): KeySigNote {
     const keySigNote = new KeySigNote(params.key, params.cancelKey, params.alterKey);
     if (this.stave) keySigNote.setStave(this.stave);
     keySigNote.setContext(this.context);

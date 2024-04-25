@@ -444,7 +444,7 @@ export const MAJOR_KEYS = [
   'B',
   'F#',
   'C#',
-];
+] as const;
 export const MINOR_KEYS = [
   'Am',
   'Dm',
@@ -461,4 +461,4 @@ export const MINOR_KEYS = [
   'G#m',
   'D#m',
   'A#m',
-];
+] as const;

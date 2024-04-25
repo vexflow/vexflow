@@ -171,7 +171,7 @@ function keysCanceledForEachClef(options: TestOptions, contextBuilder: ContextBu
   const scale = 0.8;
   const w = fontWidths();
   const keyPadding = 10;
-  const keys = ['C#', 'Cb'];
+  const keys = ['C#', 'Cb'] as const;
   const flatsKey = [7, 14];
   const sharpsKey = [14, 7];
   const natsKey = [7, 7];

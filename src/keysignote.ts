@@ -1,7 +1,7 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // @author: Mark Meeus 2019
 
-import { KeySignature } from './keysignature';
+import { KeySignature, KeySpec } from './keysignature';
 import { ModifierContext } from './modifiercontext';
 import { Note } from './note';
 import { Category } from './typeguard';
@@ -13,7 +13,7 @@ export class KeySigNote extends Note {
 
   protected keySignature: KeySignature;
 
-  constructor(keySpec: string, cancelKeySpec?: string, alterKeySpec?: string[]) {
+  constructor(keySpec: KeySpec, cancelKeySpec?: string, alterKeySpec?: string[]) {
     super({ duration: 'b' });
 
     this.keySignature = new KeySignature(keySpec, cancelKeySpec, alterKeySpec);
