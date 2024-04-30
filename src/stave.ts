@@ -442,7 +442,7 @@ export class Stave extends Element {
     return this.endClef;
   }
 
-  setKeySignature(keySpec: KeySpec, cancelKeySpec?: string, position?: number): this {
+  setKeySignature(keySpec: KeySpec, cancelKeySpec?: KeySpec, position?: number): this {
     if (position === undefined) {
       position = StaveModifierPosition.BEGIN;
     }
@@ -457,7 +457,7 @@ export class Stave extends Element {
     return this;
   }
 
-  setEndKeySignature(keySpec: KeySpec, cancelKeySpec?: string): this {
+  setEndKeySignature(keySpec: KeySpec, cancelKeySpec?: KeySpec): this {
     this.setKeySignature(keySpec, cancelKeySpec, StaveModifierPosition.END);
     return this;
   }
@@ -494,7 +494,7 @@ export class Stave extends Element {
    * @param position
    * @returns
    */
-  addKeySignature(keySpec: KeySpec, cancelKeySpec?: string, position?: number): this {
+  addKeySignature(keySpec: KeySpec, cancelKeySpec?: KeySpec, position?: number): this {
     if (position === undefined) {
       position = StaveModifierPosition.BEGIN;
     }

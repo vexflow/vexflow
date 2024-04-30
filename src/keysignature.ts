@@ -58,7 +58,7 @@ export class KeySignature extends StaveModifier {
   protected keySpec?: KeySpec;
   protected alterKeySpec?: string[];
 
-  constructor(keySpec: KeySpec, cancelKeySpec?: string, alterKeySpec?: string[]) {
+  constructor(keySpec: KeySpec, cancelKeySpec?: KeySpec, alterKeySpec?: string[]) {
     super();
 
     this.setKeySig(keySpec, cancelKeySpec, alterKeySpec);

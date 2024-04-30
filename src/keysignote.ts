@@ -13,7 +13,7 @@ export class KeySigNote extends Note {
 
   protected keySignature: KeySignature;
 
-  constructor(keySpec: KeySpec, cancelKeySpec?: string, alterKeySpec?: string[]) {
+  constructor(keySpec: KeySpec, cancelKeySpec?: KeySpec, alterKeySpec?: string[]) {
     super({ duration: 'b' });
 
     this.keySignature = new KeySignature(keySpec, cancelKeySpec, alterKeySpec);

@@ -297,7 +297,7 @@ export class Factory {
     return timeSigNote;
   }
 
-  KeySigNote(params: { key: KeySpec; cancelKey?: string; alterKey?: string[] }): KeySigNote {
+  KeySigNote(params: { key: KeySpec; cancelKey?: KeySpec; alterKey?: string[] }): KeySigNote {
     const keySigNote = new KeySigNote(params.key, params.cancelKey, params.alterKey);
     if (this.stave) keySigNote.setStave(this.stave);
     keySigNote.setContext(this.context);
