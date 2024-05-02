@@ -656,7 +656,7 @@ export class Stave extends Element {
           widths.right = layoutMetrics.xMax ?? 0;
           widths.paddingRight = layoutMetrics.paddingRight ?? 0;
         }
-        widths.left = -layoutMetrics.xMin ?? 0;
+        widths.left = -(layoutMetrics.xMin ?? 0);
         widths.paddingLeft = layoutMetrics.paddingLeft ?? 0;
 
         if (i === endModifiers.length - 1) {
