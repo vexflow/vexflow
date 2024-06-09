@@ -19,6 +19,7 @@ const TabStaveTests = {
 function draw(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 400, 160);
   const stave = new TabStave(10, 10, 300);
+  stave.setMeasure(1);
   stave.setNumLines(6);
   stave.setContext(ctx);
   stave.draw();
