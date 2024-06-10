@@ -196,6 +196,10 @@ export const MetricsDefaults: Record<string, any> = {
     fontWeight: 'bold',
   },
 
+  TabStave: {
+    fontSize: 8,
+  },
+
   TabTie: {
     fontSize: 10,
   },
