@@ -32,7 +32,7 @@ const PedalMarkingTests = {
 };
 
 /**
- * Every test below uses this to set up the score and two staves/voices.
+ * Tests below uses this to set up the score and two staves with one voice.
  */
 function createTest(makePedal: (f: Factory, v1: Tickable[], v2: Tickable[]) => void) {
   return (options: TestOptions) => {
@@ -55,6 +55,9 @@ function createTest(makePedal: (f: Factory, v1: Tickable[], v2: Tickable[]) => v
   };
 }
 
+/**
+ * Tests below use this to set up the score and two staves with two voices.
+ */
 function createTest2(makePedal: (f: Factory, v1: Tickable[], v2: Tickable[]) => void) {
   return (options: TestOptions) => {
     const f = VexFlowTests.makeFactory(options, 550, 200);

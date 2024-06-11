@@ -18,7 +18,7 @@ function L(...args: any[]) {
 /**
  * Draws a pedal glyph with the provided `name` on a rendering `context`
  * at the coordinates `x` and `y. Takes into account the glyph data
- * coordinate shifts.
+ * coordinate shifts. Returns the width of the glyph.
  */
 function drawPedalGlyph(name: string, ctx: RenderContext, x: number, y: number): number {
   const glyph = new Element(PedalMarking.CATEGORY);
@@ -174,7 +174,7 @@ export class PedalMarking extends Element {
       const prevNoteIsSame = notes[index - 1] === note;
 
       let xShift = 0;
- 
+
       if (isPedalDepressed) {
         // Adjustment for release+depress
         xShift = prevNoteIsSame ? 5 : 0;
@@ -189,6 +189,7 @@ export class PedalMarking extends Element {
             // Render the Ped glyph in position
             textWidth = drawPedalGlyph('pedalDepress', ctx, x, y);
           }
+          // Adjust the xShift for the next note
           xShift = textWidth / 2 + Tables.STAVE_LINE_DISTANCE / 2 + this.renderOptions.textMarginRight;
         } else {
           // Draw start bracket
@@ -199,14 +200,24 @@ export class PedalMarking extends Element {
           ctx.closePath();
         }
       } else {
-        // Get the current note index and the total notes in the voice
+        // Get the current note index and the total notes in the associated voice
         const noteNdx = note.getVoice().getTickables().indexOf(note);
         const voiceNotes = note.getVoice().getTickables().length;
-        // Get the shift to next note's x position or endd of stave
-        const nextNoteShift = noteNdx + 1 < voiceNotes ? note.getVoice().getTickables()[noteNdx+1].getAbsoluteX() - x : (note.getStave()?.getX() ?? 0) + (note.getStave()?.getWidth() ?? 0) - x;
+        // Get the shift for the next note
+        const nextNoteShift =
+          noteNdx + 1 < voiceNotes ? 
+          // If the next note is in the same voice, use the x position of the next note
+          note.getVoice().getTickables()[noteNdx+1].getAbsoluteX() - x :
+          // If this is the last note is the voice, use the x position of the next stave
+          (note.getStave()?.getX() ?? 0) + (note.getStave()?.getWidth() ?? 0) - x;
         // Adjustment for release+depress
-        xShift = nextNoteIsSame ? -5 : nextNoteShift - (notes[index + 1]?textWidth / 2:0) - 5;
-        
+        xShift = 
+          nextNoteIsSame ?
+          // If the next note is the same, leave 5 points of space
+          -5 :
+          // Otherwise, shift to the right by half the text width
+          nextNoteShift - (notes[index + 1]?textWidth / 2:0) - 5;
+
         // Draw end bracket
         ctx.beginPath();
         ctx.moveTo(prevX, prevY);
