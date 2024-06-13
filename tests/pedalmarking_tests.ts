@@ -64,12 +64,12 @@ function createTest2(makePedal: (f: Factory, v1: Tickable[], v2: Tickable[]) => 
     const score = f.EasyScore();
 
     const stave0 = f.Stave({ width: 250 }).addClef('treble');
-    const voice0 = score.voice(score.notes('b4/4, b4, b4, b4[stem="down"]', { stem: 'up' }));
-    const voice0b = score.voice(score.notes('b5/4, b5, b5, b5[stem="down"]', { stem: 'up' }));
+    const voice0 = score.voice(score.notes('b4/4, b4, b4, b4', { stem: 'down' }));
+    const voice0b = score.voice(score.notes('b5/4, b5, b5, b5', { stem: 'up' }));
     f.Formatter().joinVoices([voice0, voice0b]).formatToStave([voice0, voice0b], stave0);
 
     const stave1 = f.Stave({ width: 260, x: 250 });
-    const voice1 = score.voice(score.notes('c4/4, c4, c4, c4', { stem: 'up' }));
+    const voice1 = score.voice(score.notes('c4/4, c4, c4, c4', { stem: 'down' }));
     const voice1b = score.voice(score.notes('c5/4, c5, c5, c5/16, c5/16, c5/16, c5/16', { stem: 'up' }));
     f.Formatter().joinVoices([voice1, voice1b]).formatToStave([voice1, voice1b], stave1);
 
