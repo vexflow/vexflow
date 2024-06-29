@@ -163,9 +163,9 @@ function formatAccidentalSpaces(options: TestOptions): void {
       duration: '8d',
     }).addModifier(new Accidental('##'), 0),
     new StaveNote({
-      keys: ['b/4'],
+      keys: ['Bb/4','Bn/4'],
       duration: '16',
-    }).addModifier(new Accidental('b'), 0),
+    }).addModifier(new Accidental('b'), 0).addModifier(new Accidental('n'), 0),
     new StaveNote({
       keys: ['f/3'],
       duration: '8',
@@ -203,9 +203,9 @@ function formatAccidentalSpaces(options: TestOptions): void {
       duration: '16',
     }),
     new StaveNote({
-      keys: ['d/4'],
+      keys: ['Db/4','Dn/4'],
       duration: 'q',
-    }),
+    }).addModifier(new Accidental('b'), 0).addModifier(new Accidental('n'), 0),
   ];
   Dot.buildAndAttach([notes[0]], { all: true });
   const beams = Beam.generateBeams(notes);
