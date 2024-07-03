@@ -162,6 +162,7 @@ function formatAccidentalSpaces(options: TestOptions): void {
       keys: ['e##/5'],
       duration: '8d',
     }).addModifier(new Accidental('##'), 0),
+    // test that unisons with different accidentals layout properly with stems down
     new StaveNote({
       keys: ['Bb/4','Bn/4'],
       duration: '16',
@@ -202,6 +203,7 @@ function formatAccidentalSpaces(options: TestOptions): void {
       keys: ['g/4'],
       duration: '16',
     }),
+    // test that unisons with different accidentals layout properly with stems up
     new StaveNote({
       keys: ['Db/4','Dn/4'],
       duration: 'q',
