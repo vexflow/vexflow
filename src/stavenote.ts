@@ -569,6 +569,7 @@ export class StaveNote extends StemmableNote {
       if (lastLine === undefined) {
         lastLine = line;
       } else {
+        // < 1 means == 0.5 (second) or 0.0 (unison)
         if (Math.abs(lastLine - line) < 1) {
           this.displaced = true;
           props.displaced = true;
