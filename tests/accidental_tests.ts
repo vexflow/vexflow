@@ -334,7 +334,15 @@ function genAccidentals(): string[] {
   }
   // Spartan Sagittal multi-shaft accidentals
   for (let u = 0xe310; u <= 0xe335; u++) {
-    accs.push(String.fromCodePoint(u));
+    switch (u) {  // exclude unused smufls
+      case 0xe31a:
+      case 0xe31b:
+      case 0xe31e:
+      case 0xe31f:
+        break;
+      default:
+        accs.push(String.fromCodePoint(u));
+    }
   }
   // Athenian Sagittal extension (medium precision) accidentals
   for (let u = 0xe340; u <= 0xe367; u++) {
@@ -386,22 +394,23 @@ function genAccidentals(): string[] {
 const accidentals: string[] = genAccidentals();
 
 function cautionary(options: TestOptions): void {
-  const staveCount = 21;
+  const staveCount = 20;
+  const notesPerStave = 22;
   const scale = 0.85;
-  const staveWidth = 840;
+  const staveWidth = 900;
+  const staveHeight = 75;
   let i = 0;
   let j = 0;
-  const f = VexFlowTests.makeFactory(options, staveWidth + 10, 175 * staveCount + 10);
+  const f = VexFlowTests.makeFactory(options, staveWidth + 10, staveHeight * staveCount + 10);
   f.getContext().scale(scale, scale);
 
   const accids = Object.values(accidentals).filter((accid) => accid !== '{' && accid !== '}');
-  const mod = Math.round(accids.length / staveCount);
   for (i = 0; i < staveCount; ++i) {
-    const stave = f.Stave({ x: 0, y: 10 + 100 * i, width: staveWidth / scale });
+    const stave = f.Stave({ x: 0, y: 10 + staveHeight / scale * i, width: staveWidth / scale });
     const score = f.EasyScore();
     const rowMap = [];
-    for (j = 0; j < mod && j + i * staveCount < accids.length; ++j) {
-      rowMap.push(accids[j + i * staveCount]);
+    for (j = 0; j < notesPerStave && (j + i * notesPerStave) < accids.length; ++j) {
+      rowMap.push(accids[j + i * notesPerStave]);
     }
     const notes = rowMap.map((accidType: string) =>
       f
