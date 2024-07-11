@@ -346,8 +346,6 @@ export class SVGContext extends RenderContext {
       this.svg.removeChild(this.svg.lastChild);
     }
 
-    // Replace the viewbox attribute we just removed.
-    this.scale(this.state.scaleX as number, this.state.scaleY as number);
   }
 
   // ## Rectangles:
