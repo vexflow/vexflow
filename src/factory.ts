@@ -528,7 +528,7 @@ export class Factory {
     return beam;
   }
 
-  Curve(params: { from: Note; to: Note; options: CurveOptions }): Curve {
+  Curve(params: { from: Note | undefined; to: Note | undefined; options: CurveOptions }): Curve {
     const curve = new Curve(params.from, params.to, params.options).setContext(this.context);
     this.renderQ.push(curve);
     return curve;

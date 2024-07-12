@@ -16,6 +16,7 @@ export interface CurveOptions {
   position?: string | number;
   positionEnd?: string | number;
   invert?: boolean;
+  openingDirection?: 'up' | 'down' | 'auto';
 }
 
 export enum CurvePosition {
@@ -29,8 +30,8 @@ export class Curve extends Element {
   }
 
   public renderOptions: Required<CurveOptions>;
-  protected from: Note;
-  protected to: Note;
+  protected from?: Note;
+  protected to?: Note;
 
   static get Position(): typeof CurvePosition {
     return CurvePosition;
@@ -49,7 +50,7 @@ export class Curve extends Element {
   //    cps: List of control points
   //    xShift: pixels to shift
   //    yShift: pixels to shift
-  constructor(from: Note, to: Note, options: CurveOptions) {
+  constructor(from: Note | undefined, to: Note | undefined, options: CurveOptions) {
     super();
 
     this.renderOptions = {
@@ -63,14 +64,14 @@ export class Curve extends Element {
         { x: 0, y: 10 },
         { x: 0, y: 10 },
       ],
+      openingDirection: 'auto',
       ...options,
     };
 
-    this.from = from;
-    this.to = to;
+    this.setNotes(from, to);
   }
 
-  setNotes(from: Note, to: Note): this {
+  setNotes(from: Note | undefined, to: Note | undefined): this {
     if (!from && !to) {
       throw new RuntimeError('BadArguments', 'Curve needs to have either `from` or `to` set.');
     }
@@ -168,9 +169,9 @@ export class Curve extends Element {
       stemDirection = firstNote.getStemDirection();
       firstY = firstNote.getStemExtents()[metric];
     } else {
-      const stave = lastNote.checkStave();
+      const stave = lastNote!.checkStave();
       firstX = stave.getTieStartX();
-      firstY = lastNote.getStemExtents()[metric];
+      firstY = lastNote!.getStemExtents()[metric];
     }
 
     if (lastNote) {
@@ -178,11 +179,18 @@ export class Curve extends Element {
       stemDirection = lastNote.getStemDirection();
       lastY = lastNote.getStemExtents()[endMetric];
     } else {
-      const stave = firstNote.checkStave();
+      const stave = firstNote!.checkStave();
       lastX = stave.getTieEndX();
-      lastY = firstNote.getStemExtents()[endMetric];
+      lastY = firstNote!.getStemExtents()[endMetric];
     }
 
+    if (this.renderOptions.openingDirection === 'up') {
+      stemDirection = -1;
+    }
+    if (this.renderOptions.openingDirection === 'down') {
+      stemDirection = 1;
+    }
+    
     this.renderCurve({
       firstX,
       lastX,
