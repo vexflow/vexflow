@@ -1,7 +1,8 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 
-import { Element } from './element';
+import { Element, ElementStyle } from './element';
+import { Metrics } from './metrics';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { Category, isTabNote } from './typeguard';
@@ -57,6 +58,20 @@ export class Bend extends Modifier {
 
   protected tap: string;
   protected phrase: BendPhrase[];
+  
+  protected styleLine: ElementStyle = Metrics.getStyle('Bend.line');;
+  
+  /** Set the element style used for rendering the lines. */
+  setStyleLine(style: ElementStyle): this {
+    this.styleLine = {...this.styleLine, ...style};
+    return this;
+  }
+
+  /** Get the element style used for rendering the lines. */
+  getStyleLine(): ElementStyle {
+    return this.styleLine;
+  }
+
 
   public renderOptions: {
     releaseWidth: number;
@@ -95,15 +110,14 @@ export class Bend extends Modifier {
    */
   constructor(phrase: BendPhrase[]) {
     super();
-
+  
     this.xShift = 0;
     this.tap = '';
     this.renderOptions = {
       bendWidth: 8,
       releaseWidth: 8,
     };
-    this.setStyle({ lineWidth: 1.0, strokeStyle: 'black', fillStyle: 'black' });
-
+  
     this.phrase = phrase;
 
     this.updateWidth();
@@ -175,18 +189,22 @@ export class Bend extends Modifier {
     const renderBend = (x: number, y: number, width: number, height: number) => {
       const cpX = x + width;
       const cpY = y;
-
+      
+      this.applyStyle(ctx, this.styleLine);
       ctx.beginPath();
       ctx.moveTo(x, y);
       ctx.quadraticCurveTo(cpX, cpY, x + width, height);
       ctx.stroke();
+      this.restoreStyle(ctx, this.styleLine);
     };
 
     const renderRelease = (x: number, y: number, width: number, height: number) => {
+      this.applyStyle(ctx, this.styleLine);
       ctx.beginPath();
       ctx.moveTo(x, height);
       ctx.quadraticCurveTo(x + width, height, x + width, y);
       ctx.stroke();
+      this.restoreStyle(ctx, this.styleLine);
     };
 
     const renderArrowHead = (x: number, y: number, direction: number) => {
