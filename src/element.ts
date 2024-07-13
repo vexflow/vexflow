@@ -114,7 +114,7 @@ export class Element {
   protected attrs: ElementAttributes;
 
   protected rendered: boolean;
-  protected style?: ElementStyle;
+  protected style: ElementStyle = {};
   protected registry?: Registry;
 
   protected _fontInfo: Required<FontInfo>;
@@ -152,6 +152,7 @@ export class Element {
 
     this.rendered = false;
     this._fontInfo = Metrics.getFontInfo(this.attrs.type);
+    this.style = Metrics.getStyle(this.attrs.type);
     this.fontScale = Metrics.get(`${this.attrs.type}.fontScale`);
 
     // If a default registry exist, then register with it right away.
@@ -198,7 +199,7 @@ export class Element {
    * element.drawWithStyle();
    * ```
    */
-  setStyle(style: ElementStyle | undefined): this {
+  setStyle(style: ElementStyle): this {
     this.style = style;
     return this;
   }
@@ -211,16 +212,16 @@ export class Element {
   }
 
   /** Get the element style used for rendering. */
-  getStyle(): ElementStyle | undefined {
+  getStyle(): ElementStyle {
     return this.style;
   }
 
   /** Apply the element style to `context`. */
   applyStyle(
     context: RenderContext | undefined = this.context,
-    style: ElementStyle | undefined = this.getStyle()
+    style: ElementStyle = this.getStyle()
   ): this {
-    if (!style) return this;
+    if (Object.keys(style).length == 0) return this;
     if (!context) return this;
 
     context.save();
@@ -237,9 +238,9 @@ export class Element {
   /** Restore the style of `context`. */
   restoreStyle(
     context: RenderContext | undefined = this.context,
-    style: ElementStyle | undefined = this.getStyle()
+    style: ElementStyle = this.getStyle()
   ): this {
-    if (!style) return this;
+    if (Object.keys(style).length == 0) return this;
     if (!context) return this;
     context.restore();
     return this;

@@ -28,7 +28,6 @@ export interface StaveOptions {
   spaceBelowStaffLn?: number;
   spaceAboveStaffLn?: number;
   verticalBarWidth?: number;
-  fillStyle?: string;
   leftBar?: boolean;
   rightBar?: boolean;
   spacingBetweenLinesPx?: number;
@@ -100,7 +99,6 @@ export class Stave extends Element {
     this.options = {
       verticalBarWidth: 10, // Width around vertical bar end-marker
       numLines: 5,
-      fillStyle: '#999999',
       leftBar: true, // draw vertical bar on left
       rightBar: true, // draw vertical bar on right
       spacingBetweenLinesPx: Tables.STAVE_LINE_DISTANCE, // in pixels
@@ -183,11 +181,11 @@ export class Stave extends Element {
   }
 
   getTopLineTopY(): number {
-    return this.getYForLine(0) - Tables.STAVE_LINE_THICKNESS / 2;
+    return this.getYForLine(0) - (this.getStyle().lineWidth ?? 1) / 2;
   }
 
   getBottomLineBottomY(): number {
-    return this.getYForLine(this.getNumLines() - 1) + Tables.STAVE_LINE_THICKNESS / 2;
+    return this.getYForLine(this.getNumLines() - 1) + (this.getStyle().lineWidth ?? 1) / 2;
   }
 
   setX(x: number): this {
@@ -211,15 +209,6 @@ export class Stave extends Element {
     // reset the x position of the end barline (TODO(0xfe): This makes no sense)
     // this.modifiers[1].setX(this.endX);
     return this;
-  }
-
-  getStyle(): ElementStyle {
-    return {
-      fillStyle: this.options.fillStyle,
-      strokeStyle: this.options.fillStyle, // yes, this is correct for legacy compatibility
-      lineWidth: Tables.STAVE_LINE_THICKNESS,
-      ...super.getStyle(),
-    };
   }
 
   /**

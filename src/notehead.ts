@@ -84,7 +84,7 @@ export class NoteHead extends Note {
       this.text = noteStruct.customGlyphCode;
     }
 
-    this.setStyle(noteStruct.style);
+    this.setStyle(noteStruct.style??{});
     this.slashed = noteStruct.slashed || false;
 
     this.renderOptions = {

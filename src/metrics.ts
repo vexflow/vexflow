@@ -1,17 +1,52 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 
+import { ElementStyle } from './element';
 import { FontInfo } from './font';
 
 export class Metrics {
+  protected static cacheStyle = new Map<string, ElementStyle>;
+  protected static cacheFont = new Map<string, Required<FontInfo>>;
   /** Use the provided key to look up a FontInfo in CommonMetrics. **/
-  static getFontInfo(key: string): Required<FontInfo> {
-    return {
-      family: Metrics.get(`${key}.fontFamily`),
-      size: Metrics.get(`${key}.fontSize`) * Metrics.get(`${key}.fontScale`),
-      weight: Metrics.get(`${key}.fontWeight`),
-      style: Metrics.get(`${key}.fontStyle`),
-    };
+  static clear(key?: string) {
+    if (key) {
+      this.cacheFont.delete(key);
+      this.cacheStyle.delete(key);
+    } else {
+      this.cacheFont.clear();
+      this.cacheStyle.clear();
+    }
   }
+
+  static getFontInfo(key: string): Required<FontInfo> {
+    let font= this.cacheFont.get(key);
+    if (!font) {
+      font = {
+        family: Metrics.get(`${key}.fontFamily`),
+        size: Metrics.get(`${key}.fontSize`) * Metrics.get(`${key}.fontScale`),
+        weight: Metrics.get(`${key}.fontWeight`),
+        style: Metrics.get(`${key}.fontStyle`),
+      };
+      this.cacheFont.set(key, font);
+    }
+    return structuredClone(font);  
+  }
+
+  static getStyle(key: string): ElementStyle {
+    let style= this.cacheStyle.get(key);
+    if (!style) {
+      style = {
+        fillStyle: Metrics.get(`${key}.fillStyle`),
+        strokeStyle: Metrics.get(`${key}.strokeStyle`),
+        lineWidth: Metrics.get(`${key}.lineWidth`),
+        lineDash: Metrics.get(`${key}.lineDash`),
+        shadowBlur: Metrics.get(`${key}.shadowBlur`),
+        shadowColor: Metrics.get(`${key}.shadowColor`),
+      };
+      this.cacheStyle.set(key, style);
+    }
+    return structuredClone(style); 
+  }
+
 
   /**
    * Use the provided key to look up a value in CommonMetrics.
@@ -76,6 +111,10 @@ export const MetricsDefaults: Record<string, any> = {
 
   Bend: {
     fontSize: 10,
+    line: {  
+      strokeStyle: '#777777',
+      lineWidth: 1,
+    },  
   },
 
   ChordSymbol: {
@@ -127,6 +166,7 @@ export const MetricsDefaults: Record<string, any> = {
   },
 
   Stave: {
+    strokeStyle: '#999999',
     fontSize: 8,
     padding: 12,
     endPaddingMax: 10,
@@ -197,6 +237,7 @@ export const MetricsDefaults: Record<string, any> = {
   },
 
   TabStave: {
+    strokeStyle: '#999999',
     fontSize: 8,
   },
 

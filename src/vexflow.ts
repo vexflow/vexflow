@@ -249,6 +249,7 @@ export class VexFlow {
   static setFonts(...fontNames: string[]): void {
     // Convert the array of font names into an array of Font objects.
     MetricsDefaults.fontFamily = fontNames.join(',');
+    Metrics.clear();
   }
 
   static getFonts(): string[] {
@@ -320,11 +321,14 @@ export class VexFlow {
   }
 
   static get STAVE_LINE_THICKNESS(): number {
-    return Tables.STAVE_LINE_THICKNESS;
+    return MetricsDefaults.Stave.lineWidth;
   }
 
   static set STAVE_LINE_THICKNESS(value: number) {
-    Tables.STAVE_LINE_THICKNESS = value;
+    MetricsDefaults.Stave.lineWidth = value;
+    MetricsDefaults.TabStave.lineWidth = value;
+    Metrics.clear('Stave');
+    Metrics.clear('TabStave');
   }
 
   static get STEM_HEIGHT(): number {
