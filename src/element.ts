@@ -200,13 +200,13 @@ export class Element {
    * ```
    */
   setStyle(style: ElementStyle): this {
-    this.style = {...this.style, ...style};
+    this.style = style;
     return this;
   }
 
   /** Set the element & associated children style used for rendering. */
   setGroupStyle(style: ElementStyle): this {
-    this.style = {...this.style, ...style};
+    this.style = style;
     this.children.forEach((child) => child.setGroupStyle(style));
     return this;
   }

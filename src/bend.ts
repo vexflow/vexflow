@@ -63,7 +63,7 @@ export class Bend extends Modifier {
   
   /** Set the element style used for rendering the lines. */
   setStyleLine(style: ElementStyle): this {
-    this.styleLine = {...this.styleLine, ...style};
+    this.styleLine = style;
     return this;
   }
 
@@ -71,7 +71,6 @@ export class Bend extends Modifier {
   getStyleLine(): ElementStyle {
     return this.styleLine;
   }
-
 
   public renderOptions: {
     releaseWidth: number;
@@ -110,7 +109,7 @@ export class Bend extends Modifier {
    */
   constructor(phrase: BendPhrase[]) {
     super();
-  
+
     this.xShift = 0;
     this.tap = '';
     this.renderOptions = {
