@@ -81,7 +81,7 @@ const parseArgs = () => {
   });
 
   backends = backends ?? {
-    pptr: true,
+    jsdom: true,
   };
 
   return { childArgs, backends, parallel };

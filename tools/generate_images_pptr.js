@@ -278,7 +278,7 @@ const launchTestPage = async (jobs, job) => {
 
       if (!data.includes('completed in')) {
         progress(`${job}/${jobs}: ${data}`);
-        page.waitForTimeout(200);
+        //page.waitForTimeout(200);
       } else {
         progress(`${job}/${jobs}: ${data}`);
         const ret = await genImages();
