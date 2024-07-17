@@ -58,9 +58,9 @@ export class Bend extends Modifier {
 
   protected tap: string;
   protected phrase: BendPhrase[];
-  
-  protected styleLine: ElementStyle = Metrics.getStyle('Bend.line');;
-  
+
+  protected styleLine: ElementStyle = Metrics.getStyle('Bend.line');
+
   /** Set the element style used for rendering the lines. */
   setStyleLine(style: ElementStyle): this {
     this.styleLine = style;
@@ -116,7 +116,7 @@ export class Bend extends Modifier {
       bendWidth: 8,
       releaseWidth: 8,
     };
-  
+
     this.phrase = phrase;
 
     this.updateWidth();
@@ -188,7 +188,7 @@ export class Bend extends Modifier {
     const renderBend = (x: number, y: number, width: number, height: number) => {
       const cpX = x + width;
       const cpY = y;
-      
+
       this.applyStyle(ctx, this.styleLine);
       ctx.beginPath();
       ctx.moveTo(x, y);

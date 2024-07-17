@@ -217,10 +217,7 @@ export class Element {
   }
 
   /** Apply the element style to `context`. */
-  applyStyle(
-    context: RenderContext | undefined = this.context,
-    style: ElementStyle = this.getStyle()
-  ): this {
+  applyStyle(context: RenderContext | undefined = this.context, style: ElementStyle = this.getStyle()): this {
     if (Object.keys(style).length == 0) return this;
     if (!context) return this;
 
@@ -236,10 +233,7 @@ export class Element {
   }
 
   /** Restore the style of `context`. */
-  restoreStyle(
-    context: RenderContext | undefined = this.context,
-    style: ElementStyle = this.getStyle()
-  ): this {
+  restoreStyle(context: RenderContext | undefined = this.context, style: ElementStyle = this.getStyle()): this {
     if (Object.keys(style).length == 0) return this;
     if (!context) return this;
     context.restore();

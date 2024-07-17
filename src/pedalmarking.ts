@@ -186,11 +186,11 @@ export class PedalMarking extends Element {
         const voiceNotes = note.getVoice().getTickables().length;
         // Get the absolute x position of the end of the current note
         const noteEndX =
-          noteNdx + 1 < voiceNotes ? 
-          // If the next note is in the same voice, use the x position of the next note
-          note.getVoice().getTickables()[noteNdx+1].getAbsoluteX() :
-          // If this is the last note is the voice, use the x position of the next stave
-          (note.getStave()?.getX() ?? 0) + (note.getStave()?.getWidth() ?? 0);
+          noteNdx + 1 < voiceNotes
+            ? // If the next note is in the same voice, use the x position of the next note
+              note.getVoice().getTickables()[noteNdx + 1].getAbsoluteX()
+            : // If this is the last note is the voice, use the x position of the next stave
+              (note.getStave()?.getX() ?? 0) + (note.getStave()?.getWidth() ?? 0);
 
         // Draw end bracket
         ctx.beginPath();
@@ -232,11 +232,11 @@ export class PedalMarking extends Element {
         const voiceNotes = note.getVoice().getTickables().length;
         // Get the shift for the next note
         const noteEndX =
-          noteNdx + 1 < voiceNotes ? 
-          // If the next note is in the same voice, use the x position of the next note
-          note.getVoice().getTickables()[noteNdx+1].getAbsoluteX() :
-          // If this is the last note is the voice, use the x position of the next stave
-          (note.getStave()?.getX() ?? 0) + (note.getStave()?.getWidth() ?? 0) ;
+          noteNdx + 1 < voiceNotes
+            ? // If the next note is in the same voice, use the x position of the next note
+              note.getVoice().getTickables()[noteNdx + 1].getAbsoluteX()
+            : // If this is the last note is the voice, use the x position of the next stave
+              (note.getStave()?.getX() ?? 0) + (note.getStave()?.getWidth() ?? 0);
         textWidth = ctx.measureText(this.releaseText).width;
         ctx.fillText(this.releaseText, noteEndX - textWidth, y);
       }
