@@ -4,8 +4,8 @@ import { ElementStyle } from './element';
 import { FontInfo } from './font';
 
 export class Metrics {
-  protected static cacheStyle = new Map<string, ElementStyle>;
-  protected static cacheFont = new Map<string, Required<FontInfo>>;
+  protected static cacheStyle = new Map<string, ElementStyle>();
+  protected static cacheFont = new Map<string, Required<FontInfo>>();
   /** Use the provided key to look up a FontInfo in CommonMetrics. **/
   static clear(key?: string) {
     if (key) {
@@ -18,7 +18,7 @@ export class Metrics {
   }
 
   static getFontInfo(key: string): Required<FontInfo> {
-    let font= this.cacheFont.get(key);
+    let font = this.cacheFont.get(key);
     if (!font) {
       font = {
         family: Metrics.get(`${key}.fontFamily`),
@@ -28,11 +28,11 @@ export class Metrics {
       };
       this.cacheFont.set(key, font);
     }
-    return structuredClone(font);  
+    return structuredClone(font);
   }
 
   static getStyle(key: string): ElementStyle {
-    let style= this.cacheStyle.get(key);
+    let style = this.cacheStyle.get(key);
     if (!style) {
       style = {
         fillStyle: Metrics.get(`${key}.fillStyle`),
@@ -44,9 +44,8 @@ export class Metrics {
       };
       this.cacheStyle.set(key, style);
     }
-    return structuredClone(style); 
+    return structuredClone(style);
   }
-
 
   /**
    * Use the provided key to look up a value in CommonMetrics.
@@ -111,10 +110,10 @@ export const MetricsDefaults: Record<string, any> = {
 
   Bend: {
     fontSize: 10,
-    line: {  
+    line: {
       strokeStyle: '#777777',
       lineWidth: 1,
-    },  
+    },
   },
 
   ChordSymbol: {

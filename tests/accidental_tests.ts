@@ -164,9 +164,11 @@ function formatAccidentalSpaces(options: TestOptions): void {
     }).addModifier(new Accidental('##'), 0),
     // test that unisons with different accidentals layout properly with stems down
     new StaveNote({
-      keys: ['Bb/4','Bn/4'],
+      keys: ['Bb/4', 'Bn/4'],
       duration: '16',
-    }).addModifier(new Accidental('b'), 0).addModifier(new Accidental('n'), 0),
+    })
+      .addModifier(new Accidental('b'), 0)
+      .addModifier(new Accidental('n'), 0),
     new StaveNote({
       keys: ['f/3'],
       duration: '8',
@@ -205,9 +207,11 @@ function formatAccidentalSpaces(options: TestOptions): void {
     }),
     // test that unisons with different accidentals layout properly with stems up
     new StaveNote({
-      keys: ['Db/4','Dn/4'],
+      keys: ['Db/4', 'Dn/4'],
       duration: 'q',
-    }).addModifier(new Accidental('b'), 0).addModifier(new Accidental('n'), 0),
+    })
+      .addModifier(new Accidental('b'), 0)
+      .addModifier(new Accidental('n'), 0),
   ];
   Dot.buildAndAttach([notes[0]], { all: true });
   const beams = Beam.generateBeams(notes);

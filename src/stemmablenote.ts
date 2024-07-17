@@ -62,7 +62,7 @@ export abstract class StemmableNote extends Note {
         // if codeFlagUp is undefined, codePoint will be 0
         this.getStemDirection() === Stem.DOWN
           ? String.fromCodePoint((glyphProps.codeFlagUp?.codePointAt(0) ?? -1) + 1)
-          : glyphProps.codeFlagUp ?? Glyphs.null;
+          : (glyphProps.codeFlagUp ?? Glyphs.null);
 
       this.flag.setText(flagCode);
       this.flag.fontInfo = this.fontInfo;
