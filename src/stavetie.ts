@@ -153,6 +153,7 @@ export class StaveTie extends Element {
     const firstIndexes = this.notes.firstIndexes!;
     // eslint-disable-next-line
     const lastIndexes = this.notes.lastIndexes!;
+    ctx.save();
     this.applyStyle();
     ctx.openGroup('stavetie', this.getAttribute('id'));
     for (let i = 0; i < firstIndexes.length; ++i) {
@@ -176,7 +177,7 @@ export class StaveTie extends Element {
       ctx.fill();
     }
     ctx.closeGroup();
-    this.restoreStyle();
+    ctx.restore();
   }
 
   /**

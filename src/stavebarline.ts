@@ -133,6 +133,7 @@ export class Barline extends StaveModifier {
     const ctx = stave.checkContext();
     this.setRendered();
 
+    ctx.save();
     this.applyStyle(ctx);
     ctx.openGroup('stavebarline', this.getAttribute('id'));
     switch (this.type) {
@@ -166,7 +167,7 @@ export class Barline extends StaveModifier {
         break;
     }
     ctx.closeGroup();
-    this.restoreStyle(ctx);
+    ctx.restore();
   }
 
   drawVerticalBar(stave: Stave, x: number, doubleBar?: boolean): void {

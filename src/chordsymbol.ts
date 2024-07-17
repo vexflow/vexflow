@@ -458,7 +458,6 @@ export class ChordSymbol extends Modifier {
       symbol.renderText(ctx, 0, 0);
     });
     ctx.closeGroup();
-    this.restoreStyle();
     ctx.restore();
   }
 

@@ -209,6 +209,7 @@ export class TimeSignature extends StaveModifier {
   drawAt(ctx: RenderContext, stave: Stave, x: number): void {
     this.setRendered();
 
+    ctx.save();
     this.applyStyle(ctx);
     ctx.openGroup('timesignature', this.getAttribute('id'));
     if (this.isNumeric) {
@@ -224,6 +225,6 @@ export class TimeSignature extends StaveModifier {
       this.renderText(ctx, x - this.x, stave.getYForLine(this.line));
     }
     ctx.closeGroup();
-    this.restoreStyle(ctx);
+    ctx.restore();
   }
 }

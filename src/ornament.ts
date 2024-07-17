@@ -225,6 +225,7 @@ export class Ornament extends Modifier {
 
     const stave = note.checkStave();
 
+    ctx.save();
     this.applyStyle();
     ctx.openGroup('ornament', this.getAttribute('id'));
 
@@ -296,6 +297,6 @@ export class Ornament extends Modifier {
       );
     }
     ctx.closeGroup();
-    this.restoreStyle();
+    ctx.restore();
   }
 }

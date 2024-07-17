@@ -157,6 +157,7 @@ export class TextNote extends Note {
     }
 
     const y = stave.getYForLine(this.line + -3);
+    ctx.save();
     this.applyStyle(ctx);
     this.renderText(ctx, x, y);
 
@@ -170,6 +171,6 @@ export class TextNote extends Note {
       this.subscript.renderText(ctx, x + this.width + 2, y + height / 2.2 - 1);
     }
 
-    this.restoreStyle(ctx);
+    ctx.restore();
   }
 }

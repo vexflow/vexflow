@@ -334,9 +334,10 @@ export class StaveLine extends Element {
 
     // Draw the text
     const color = renderOptions.color;
+    ctx.save();
     this.applyStyle(ctx, { fillStyle: color, strokeStyle: color });
     this.renderText(ctx, x, y);
-    this.restoreStyle(ctx);
+    ctx.restore();
 
     return this;
   }
