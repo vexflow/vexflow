@@ -185,10 +185,10 @@ export class Curve extends Element {
     }
 
     if (this.renderOptions.openingDirection === 'up') {
-      stemDirection = -1;
+      stemDirection = 1;
     }
     if (this.renderOptions.openingDirection === 'down') {
-      stemDirection = 1;
+      stemDirection = -1;
     }
     
     this.renderCurve({
