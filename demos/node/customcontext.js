@@ -195,4 +195,4 @@ context.setFont('Arial', 10).setBackgroundFillStyle('#eed');
 const stave = new VF.Stave(10, 40, 400);
 stave.addClef('treble');
 stave.addTimeSignature('4/4');
-stave.setContext(context).draw();
+stave.setContext(context).drawWithStyle();

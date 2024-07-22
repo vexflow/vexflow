@@ -41,6 +41,6 @@ export class KeySigNote extends Note {
     this.setRendered();
     this.keySignature.setX(this.getAbsoluteX());
     this.keySignature.setContext(ctx);
-    this.keySignature.draw();
+    this.keySignature.drawWithStyle();
   }
 }

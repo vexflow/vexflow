@@ -80,7 +80,7 @@ function multiVoiceSingleDraw(options: TestOptions): void {
 }
 
 /**
- * Call Factory.draw() twice. It should look identical to the multiVoice test case above.
+ * Call Factory.drawWithStyle() twice. It should look identical to the multiVoice test case above.
  */
 function multiVoiceDoubleDraw(options: TestOptions): void {
   multiVoiceHelper(options, 2);

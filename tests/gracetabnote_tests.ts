@@ -35,7 +35,7 @@ const graceTabNote = (noteStruct: TabNoteStruct) => new GraceTabNote(noteStruct)
  */
 function setupContext(opts: TestOptions, ctxBuilder: ContextBuilder): { context: RenderContext; stave: TabStave } {
   const context = ctxBuilder(opts.elementId, 350, 140);
-  const stave = new TabStave(10, 10, 350).addTabGlyph().setContext(context).draw();
+  const stave = new TabStave(10, 10, 350).addTabGlyph().setContext(context).drawWithStyle();
   return { context, stave };
 }
 

@@ -43,7 +43,7 @@ function tieNotes(notes: TabNote[], indexes: number[], stave: TabStave, ctx: Ren
   );
 
   tie.setContext(ctx);
-  tie.draw();
+  tie.drawWithStyle();
 }
 
 function setupContext(options: TestOptions, width?: number): { context: RenderContext; stave: TabStave } {
@@ -52,7 +52,7 @@ function setupContext(options: TestOptions, width?: number): { context: RenderCo
   context.scale(0.9, 0.9);
 
   context.font = '10pt Arial';
-  const stave = new TabStave(10, 10, width || 350).addTabGlyph().setContext(context).draw();
+  const stave = new TabStave(10, 10, width || 350).addTabGlyph().setContext(context).drawWithStyle();
 
   return { context, stave };
 }
@@ -131,7 +131,7 @@ function multiTest(options: TestOptions, buildTabSlide: (notes: TieNotes) => Tab
     lastIndexes: [0],
   })
     .setContext(context)
-    .draw();
+    .drawWithStyle();
 
   options.assert.ok(true, 'Single note');
 
@@ -142,7 +142,7 @@ function multiTest(options: TestOptions, buildTabSlide: (notes: TieNotes) => Tab
     lastIndexes: [0, 1],
   })
     .setContext(context)
-    .draw();
+    .drawWithStyle();
 
   options.assert.ok(true, 'Chord');
 
@@ -153,7 +153,7 @@ function multiTest(options: TestOptions, buildTabSlide: (notes: TieNotes) => Tab
     lastIndexes: [0],
   })
     .setContext(context)
-    .draw();
+    .drawWithStyle();
 
   options.assert.ok(true, 'Single note high-fret');
 
@@ -164,7 +164,7 @@ function multiTest(options: TestOptions, buildTabSlide: (notes: TieNotes) => Tab
     lastIndexes: [0, 1],
   })
     .setContext(context)
-    .draw();
+    .drawWithStyle();
 
   options.assert.ok(true, 'Chord high-fret');
 }

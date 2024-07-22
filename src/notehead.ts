@@ -4,6 +4,7 @@
 import { ElementStyle } from './element';
 import { Note, NoteStruct } from './note';
 import { Stave } from './stave';
+import { StaveNote } from './stavenote';
 import { Stem } from './stem';
 import { Category } from './typeguard';
 import { defined, log } from './util';
@@ -150,9 +151,12 @@ export class NoteHead extends Note {
   draw(): void {
     const ctx = this.checkContext();
     this.setRendered();
+    ctx.openGroup('notehead', this.getAttribute('id'));
 
     L("Drawing note head '", this.noteType, this.duration, "' at", this.x, this.y);
     this.x = this.getAbsoluteX();
     this.renderText(ctx, 0, 0);
+    (this.parent as StaveNote)?.drawModifiers(this);
+    ctx.closeGroup();
   }
 }

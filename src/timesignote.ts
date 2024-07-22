@@ -40,6 +40,8 @@ export class TimeSigNote extends Note {
     const ctx = this.checkContext();
     this.setRendered();
 
+    ctx.openGroup('timesignote', this.getAttribute('id'));
     this.timeSig.drawAt(ctx, stave, this.getAbsoluteX());
+    ctx.closeGroup();
   }
 }

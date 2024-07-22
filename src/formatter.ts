@@ -295,8 +295,8 @@ export class Formatter {
       .formatToStave([voice], stave, { alignRests: options.alignRests, stave });
 
     // Render the voice and beams to the stave.
-    voice.setStave(stave).draw(ctx, stave);
-    beams.forEach((beam) => beam.setContext(ctx).draw());
+    voice.setContext(ctx).setStave(stave).drawWithStyle();
+    beams.forEach((beam) => beam.setContext(ctx).drawWithStyle());
 
     // Return the bounding box of the voice.
     return voice.getBoundingBox();
@@ -353,10 +353,10 @@ export class Formatter {
     // Render voices and beams to staves.
     notevoice.draw(ctx, stave);
     tabvoice.draw(ctx, tabstave);
-    beams.forEach((beam) => beam.setContext(ctx).draw());
+    beams.forEach((beam) => beam.setContext(ctx).drawWithStyle());
 
     // Draw a connector between tab and note staves.
-    new StaveConnector(stave, tabstave).setContext(ctx).draw();
+    new StaveConnector(stave, tabstave).setContext(ctx).drawWithStyle();
   }
 
   /**

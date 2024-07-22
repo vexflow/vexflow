@@ -85,9 +85,4 @@ export class StaveModifier extends Element {
   getLayoutMetrics(): LayoutMetrics | undefined {
     return this.layoutMetrics;
   }
-
-  // eslint-disable-next-line
-  draw(...args: any[]): void {
-    // DO NOTHING.
-  }
 }

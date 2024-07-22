@@ -94,14 +94,12 @@ export class GraceNote extends StaveNote {
       // FIXME: avoid staff lines, ledger lines or others.
 
       const ctx = this.checkContext();
-      ctx.save();
       ctx.setLineWidth(1 * scale); // FIXME: use more appropriate value.
       ctx.beginPath();
       ctx.moveTo(slashBBox.x1, slashBBox.y1);
       ctx.lineTo(slashBBox.x2, slashBBox.y2);
       ctx.closePath();
       ctx.stroke();
-      ctx.restore();
     }
   }
 

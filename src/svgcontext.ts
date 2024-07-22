@@ -345,7 +345,6 @@ export class SVGContext extends RenderContext {
     while (this.svg.lastChild) {
       this.svg.removeChild(this.svg.lastChild);
     }
-
   }
 
   // ## Rectangles:

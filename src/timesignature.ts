@@ -203,15 +203,14 @@ export class TimeSignature extends StaveModifier {
     const stave = this.checkStave();
     const ctx = stave.checkContext();
     this.setRendered();
+    ctx.openGroup('timesignature', this.getAttribute('id'));
     this.drawAt(ctx, stave, this.x);
+    ctx.closeGroup();
   }
 
   drawAt(ctx: RenderContext, stave: Stave, x: number): void {
     this.setRendered();
 
-    ctx.save();
-    this.applyStyle(ctx);
-    ctx.openGroup('timesignature', this.getAttribute('id'));
     if (this.isNumeric) {
       let startX = x + this.topStartX;
       let y = 0;
@@ -224,7 +223,5 @@ export class TimeSignature extends StaveModifier {
     } else {
       this.renderText(ctx, x - this.x, stave.getYForLine(this.line));
     }
-    ctx.closeGroup();
-    ctx.restore();
   }
 }

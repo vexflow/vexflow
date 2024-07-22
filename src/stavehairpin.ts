@@ -93,7 +93,7 @@ export class StaveHairpin extends Element {
       .setContext(ctx)
       .setRenderOptions(hairpinOptions)
       .setPosition(position)
-      .draw();
+      .drawWithStyle();
   }
 
   /**

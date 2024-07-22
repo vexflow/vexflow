@@ -210,8 +210,6 @@ export class Stem extends Element {
     const stemletYOffset = this.isStemlet ? stemHeight - this.stemletHeight * this.stemDirection : 0;
 
     // Draw the stem
-    ctx.save();
-    this.applyStyle();
     ctx.openGroup('stem', this.getAttribute('id'));
     ctx.beginPath();
     ctx.setLineWidth(Stem.WIDTH);
@@ -219,6 +217,5 @@ export class Stem extends Element {
     ctx.lineTo(stemX, stemY - stemHeight - this.renderHeightAdjustment * stemDirection);
     ctx.stroke();
     ctx.closeGroup();
-    ctx.restore();
   }
 }

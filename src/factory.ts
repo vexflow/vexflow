@@ -683,12 +683,12 @@ export class Factory {
   draw(): void {
     const ctx = this.context;
     this.systems.forEach((s) => s.setContext(ctx).format());
-    this.staves.forEach((s) => s.setContext(ctx).draw());
-    this.voices.forEach((v) => v.setContext(ctx).draw());
+    this.staves.forEach((s) => s.setContext(ctx).drawWithStyle());
+    this.voices.forEach((v) => v.setContext(ctx).drawWithStyle());
     this.renderQ.forEach((e) => {
-      if (!e.isRendered()) e.setContext(ctx).draw();
+      if (!e.isRendered()) e.setContext(ctx).drawWithStyle();
     });
-    this.systems.forEach((s) => s.setContext(ctx).draw());
+    this.systems.forEach((s) => s.setContext(ctx).drawWithStyle());
     this.reset();
   }
 }

@@ -75,7 +75,7 @@ function stave(options: TestOptions): void {
     f.StaveNote({ keys: ['e/4'], stemDirection: 1, duration: '4' }),
     f.StaveNote({ keys: ['f/4'], stemDirection: 1, duration: '8' }),
 
-    // voice.draw() test.
+    // voice.drawWithStyle() test.
     f.TextDynamics({ text: 'sfz', duration: '16' }).setStyle(FS('blue')),
 
     // GhostNote modifiers test.
@@ -114,7 +114,7 @@ function tab(options: TestOptions, contextBuilder: ContextBuilder): void {
   ctx.font = '10pt Arial';
   const stave = new TabStave(10, 10, 450).addTabGlyph();
   stave.getModifiers()[2].setStyle(FS('blue'));
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
 
   const tabNote = (noteStruct: TabNoteStruct) => new TabNote(noteStruct);
 

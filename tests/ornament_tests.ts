@@ -43,7 +43,7 @@ function drawOrnaments(options: TestOptions, contextBuilder: ContextBuilder): vo
   const ctx = contextBuilder(options.elementId, 750, 195);
 
   const stave = new Stave(10, 30, 700);
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
   const notes = [
     new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
     new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
@@ -85,7 +85,7 @@ function drawOrnamentsDisplaced(options: TestOptions, contextBuilder: ContextBui
   const ctx = contextBuilder(options.elementId, 750, 195);
 
   const stave = new Stave(10, 30, 700);
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
   const notes = [
     new StaveNote({ keys: ['a/5'], duration: '4', stemDirection: -1 }),
     new StaveNote({ keys: ['a/5'], duration: '4', stemDirection: -1 }),
@@ -130,7 +130,7 @@ const addDelayedTurns = (f: Factory) => {
   const context = f.getContext();
 
   const stave = f.Stave({ x: 10, y: 30, width: 500 });
-  stave.setContext(context).draw();
+  stave.setContext(context).drawWithStyle();
 
   const notes = [
     f.StaveNote({ keys: ['a/4'], duration: '4', stemDirection: 1 }),
@@ -204,7 +204,7 @@ function drawOrnamentsDelayedMultipleVoices(options: TestOptions, contextBuilder
   formatter.joinVoices([voice2]);
   formatter.format([voice1, voice2], formatWidth);
 
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
   voice1.draw(ctx, stave);
   voice2.draw(ctx, stave);
 }
@@ -217,7 +217,7 @@ function drawOrnamentsStacked(options: TestOptions): void {
   const ctx = f.getContext();
 
   const stave = f.Stave({ x: 10, y: 30, width: 500 });
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
   const notes = [
     f.StaveNote({ keys: ['a/4'], duration: '4', stemDirection: 1 }),
     f.StaveNote({ keys: ['a/4'], duration: '4', stemDirection: 1 }),
@@ -247,7 +247,7 @@ function drawOrnamentsWithAccidentals(options: TestOptions): void {
   const ctx = f.getContext();
 
   const stave = f.Stave({ x: 10, y: 60, width: 600 });
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
   const notes = [
     f.StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
     f.StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
@@ -295,7 +295,7 @@ function jazzOrnaments(options: TestOptions): void {
       return n;
     };
 
-    const stave = new Stave(x, y, width).addClef('treble').setContext(ctx).draw();
+    const stave = new Stave(x, y, width).addClef('treble').setContext(ctx).drawWithStyle();
 
     const notes = [
       note(keys, '4d', modifiers[0], stemDirection),
@@ -316,7 +316,7 @@ function jazzOrnaments(options: TestOptions): void {
     voice.addTickables(notes);
     const formatter = new Formatter().joinVoices([voice]);
     formatter.format([voice], width - Stave.defaultPadding - clefWidth);
-    stave.setContext(ctx).draw();
+    stave.setContext(ctx).drawWithStyle();
     voice.draw(ctx, stave);
   }
 
