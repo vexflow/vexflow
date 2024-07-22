@@ -153,8 +153,6 @@ export class StaveTie extends Element {
     const firstIndexes = this.notes.firstIndexes!;
 
     const lastIndexes = this.notes.lastIndexes!;
-    ctx.save();
-    this.applyStyle();
     ctx.openGroup('stavetie', this.getAttribute('id'));
     for (let i = 0; i < firstIndexes.length; ++i) {
       const cpX = (params.lastX + lastXShift + (params.firstX + firstXShift)) / 2;
@@ -177,7 +175,6 @@ export class StaveTie extends Element {
       ctx.fill();
     }
     ctx.closeGroup();
-    ctx.restore();
   }
 
   /**
@@ -190,10 +187,8 @@ export class StaveTie extends Element {
     centerX -= ctx.measureText(this.text).width / 2;
     const stave = this.notes.firstNote?.checkStave() ?? this.notes.lastNote?.checkStave();
     if (stave) {
-      ctx.save();
       ctx.setFont(this.fontInfo);
       ctx.fillText(this.text, centerX + this.renderOptions.textShiftX, stave.getYForTopText() - 1);
-      ctx.restore();
     }
   }
 

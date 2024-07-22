@@ -40,7 +40,7 @@ const stave = new VF.Stave(10, 40, 400);
 stave.addClef('treble').addTimeSignature('4/4');
 
 // Connect it to the rendering context and draw!
-stave.setContext(context).draw();
+stave.setContext(context).drawWithStyle();
 
 const svg = div.innerHTML.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ');
 

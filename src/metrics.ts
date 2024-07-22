@@ -209,6 +209,10 @@ export const MetricsDefaults: Record<string, any> = {
     fontSize: 10,
   },
 
+  Stem: {
+    strokeStyle: 'black',
+  },
+
   StringNumber: {
     fontSize: 10,
     fontWeight: 'bold',

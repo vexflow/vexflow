@@ -838,10 +838,10 @@ export class StaveNote extends StemmableNote {
   }
 
   setFlagStyle(style: ElementStyle): void {
-    this.flagStyle = style;
+    this.flag.setStyle(style);
   }
   getFlagStyle(): ElementStyle | undefined {
-    return this.flagStyle;
+    return this.flag.getStyle();
   }
 
   /** Get the glyph width. */
@@ -1076,12 +1076,8 @@ export class StaveNote extends StemmableNote {
       const index = modifier.checkIndex();
       const notehead = this._noteHeads[index];
       if (notehead === noteheadParam) {
-        const noteheadStyle = notehead.getStyle();
-        ctx.save();
-        notehead.applyStyle(ctx, noteheadStyle);
         modifier.setContext(ctx);
         modifier.drawWithStyle();
-        ctx.restore();
       }
     }
   }
@@ -1113,10 +1109,10 @@ export class StaveNote extends StemmableNote {
             yBottom - noteStemHeight + this.flag.getTextMetrics().actualBoundingBoxAscent;
 
       // Draw the Flag
-      ctx.save();
-      this.applyStyle(ctx, this.flagStyle);
-      this.flag.renderText(ctx, flagX, flagY);
-      ctx.restore();
+      this.flag.draw = (): void => {
+        this.flag.renderText(ctx, flagX, flagY);
+      };
+      this.flag.setContext(ctx).drawWithStyle();
     }
   }
 
@@ -1124,13 +1120,7 @@ export class StaveNote extends StemmableNote {
   drawNoteHeads(): void {
     const ctx = this.checkContext();
     this._noteHeads.forEach((notehead) => {
-      ctx.save();
-      notehead.applyStyle(ctx);
-      ctx.openGroup('notehead', notehead.getAttribute('id'));
-      notehead.setContext(ctx).draw();
-      this.drawModifiers(notehead);
-      ctx.closeGroup();
-      ctx.restore();
+      notehead.setContext(ctx).drawWithStyle();
     });
   }
 
@@ -1151,7 +1141,7 @@ export class StaveNote extends StemmableNote {
     }
 
     if (this.stem) {
-      this.stem.setContext(ctx).draw();
+      this.stem.setContext(ctx).drawWithStyle();
     }
   }
 
@@ -1220,8 +1210,6 @@ export class StaveNote extends StemmableNote {
     L('Rendering ', this.isChord() ? 'chord :' : 'note :', this.keys);
 
     // Apply the overall style -- may be contradicted by local settings:
-    ctx.save();
-    this.applyStyle();
     ctx.openGroup('stavenote', this.getAttribute('id'));
     this.drawLedgerLines();
     if (shouldRenderStem) this.drawStem();
@@ -1230,7 +1218,6 @@ export class StaveNote extends StemmableNote {
     const bb = this.getBoundingBox();
     ctx.pointerRect(bb.getX(), bb.getY(), bb.getW(), bb.getH());
     ctx.closeGroup();
-    ctx.restore();
     this.setRendered();
   }
 }

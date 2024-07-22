@@ -261,7 +261,7 @@ export class StaveLine extends Element {
   }
 
   // Renders the `StaveLine` on the context
-  draw(): this {
+  draw(): void {
     const ctx = this.checkContext();
     this.setRendered();
 
@@ -269,7 +269,6 @@ export class StaveLine extends Element {
     const lastNote = this.lastNote;
     const renderOptions = this.renderOptions;
 
-    ctx.save();
     this.applyLineStyle();
 
     // Cycle through each set of indexes and draw lines
@@ -307,8 +306,6 @@ export class StaveLine extends Element {
       this.drawArrowLine(ctx, startPosition, endPosition);
     });
 
-    ctx.restore();
-
     // Determine the x coordinate where to start the text
     const textWidth = this.width;
     const justification = renderOptions.textJustification;
@@ -334,11 +331,7 @@ export class StaveLine extends Element {
 
     // Draw the text
     const color = renderOptions.color;
-    ctx.save();
     this.applyStyle(ctx, { fillStyle: color, strokeStyle: color });
     this.renderText(ctx, x, y);
-    ctx.restore();
-
-    return this;
   }
 }

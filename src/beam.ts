@@ -913,7 +913,7 @@ export class Beam extends Element {
       if (stem) {
         const stemX = note.getStemX();
         stem.setNoteHeadXBounds(stemX, stemX);
-        stem.setContext(ctx).draw();
+        stem.setContext(ctx).drawWithStyle();
       }
     }, this);
   }
@@ -991,12 +991,9 @@ export class Beam extends Element {
       this.postFormat();
     }
 
-    this.drawStems(ctx);
-    ctx.save();
-    this.applyStyle();
     ctx.openGroup('beam', this.getAttribute('id'));
+    this.drawStems(ctx);
     this.drawBeamLines(ctx);
     ctx.closeGroup();
-    ctx.restore();
   }
 }
