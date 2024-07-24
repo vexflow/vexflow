@@ -992,10 +992,11 @@ export class Beam extends Element {
     }
 
     this.drawStems(ctx);
+    ctx.save();
     this.applyStyle();
     ctx.openGroup('beam', this.getAttribute('id'));
     this.drawBeamLines(ctx);
     ctx.closeGroup();
-    this.restoreStyle();
+    ctx.restore();
   }
 }

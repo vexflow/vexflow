@@ -90,6 +90,7 @@ export class Curve extends Element {
 
   renderCurve(params: { lastY: number; lastX: number; firstY: number; firstX: number; direction: number }): void {
     const ctx = this.checkContext();
+    ctx.save();
     this.applyStyle();
 
     const xShift = this.renderOptions.xShift;
@@ -129,7 +130,7 @@ export class Curve extends Element {
     ctx.stroke();
     ctx.closePath();
     if (!this.style?.lineDash) ctx.fill();
-    this.restoreStyle();
+    ctx.restore();
   }
 
   draw(): boolean {

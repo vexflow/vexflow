@@ -351,9 +351,10 @@ export class TabNote extends StemmableNote {
             this.getStemY() - this.checkStem().getHeight() + this.getStemExtension();
 
       // Draw the Flag
+      context.save();
       this.applyStyle(context, this.flagStyle);
       this.flag.renderText(context, flagX, flagY);
-      this.restoreStyle(context, this.flagStyle);
+      context.restore();
     }
   }
 
@@ -430,6 +431,7 @@ export class TabNote extends StemmableNote {
     this.setRendered();
     const renderStem = this.beam === undefined && this.renderOptions.drawStem;
 
+    ctx.save();
     this.applyStyle();
     ctx.openGroup('tabnote', this.getAttribute('id'));
     this.drawPositions();
@@ -444,6 +446,6 @@ export class TabNote extends StemmableNote {
     this.drawFlag();
     this.drawModifiers();
     ctx.closeGroup();
-    this.restoreStyle();
+    ctx.restore();
   }
 }

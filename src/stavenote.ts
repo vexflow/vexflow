@@ -1048,6 +1048,7 @@ export class StaveNote extends StemmableNote {
     };
 
     const style = { ...stave.getDefaultLedgerLineStyle(), ...this.getLedgerLineStyle() };
+    ctx.save();
     this.applyStyle(ctx, style);
 
     // Draw ledger lines below the staff:
@@ -1064,7 +1065,7 @@ export class StaveNote extends StemmableNote {
       drawLedgerLine(stave.getYForNote(line), normal, displaced);
     }
 
-    this.restoreStyle(ctx, style);
+    ctx.restore();
   }
 
   // Draw all key modifiers
@@ -1076,10 +1077,11 @@ export class StaveNote extends StemmableNote {
       const notehead = this._noteHeads[index];
       if (notehead === noteheadParam) {
         const noteheadStyle = notehead.getStyle();
+        ctx.save();
         notehead.applyStyle(ctx, noteheadStyle);
         modifier.setContext(ctx);
         modifier.drawWithStyle();
-        notehead.restoreStyle(ctx, noteheadStyle);
+        ctx.restore();
       }
     }
   }
@@ -1111,9 +1113,10 @@ export class StaveNote extends StemmableNote {
             yBottom - noteStemHeight + this.flag.getTextMetrics().actualBoundingBoxAscent;
 
       // Draw the Flag
+      ctx.save();
       this.applyStyle(ctx, this.flagStyle);
       this.flag.renderText(ctx, flagX, flagY);
-      this.restoreStyle(ctx, this.flagStyle);
+      ctx.restore();
     }
   }
 
@@ -1121,12 +1124,13 @@ export class StaveNote extends StemmableNote {
   drawNoteHeads(): void {
     const ctx = this.checkContext();
     this._noteHeads.forEach((notehead) => {
+      ctx.save();
       notehead.applyStyle(ctx);
       ctx.openGroup('notehead', notehead.getAttribute('id'));
       notehead.setContext(ctx).draw();
       this.drawModifiers(notehead);
       ctx.closeGroup();
-      notehead.restoreStyle(ctx);
+      ctx.restore();
     });
   }
 
@@ -1216,6 +1220,7 @@ export class StaveNote extends StemmableNote {
     L('Rendering ', this.isChord() ? 'chord :' : 'note :', this.keys);
 
     // Apply the overall style -- may be contradicted by local settings:
+    ctx.save();
     this.applyStyle();
     ctx.openGroup('stavenote', this.getAttribute('id'));
     this.drawLedgerLines();
@@ -1225,7 +1230,7 @@ export class StaveNote extends StemmableNote {
     const bb = this.getBoundingBox();
     ctx.pointerRect(bb.getX(), bb.getY(), bb.getW(), bb.getH());
     ctx.closeGroup();
-    this.restoreStyle();
+    ctx.restore();
     this.setRendered();
   }
 }

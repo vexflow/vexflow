@@ -218,10 +218,7 @@ export class Element {
 
   /** Apply the element style to `context`. */
   applyStyle(context: RenderContext | undefined = this.context, style: ElementStyle = this.getStyle()): this {
-    if (Object.keys(style).length == 0) return this;
     if (!context) return this;
-
-    context.save();
     if (style.shadowColor) context.setShadowColor(style.shadowColor);
     if (style.shadowBlur) context.setShadowBlur(style.shadowBlur);
     if (style.fillStyle) context.setFillStyle(style.fillStyle);
@@ -232,23 +229,16 @@ export class Element {
     return this;
   }
 
-  /** Restore the style of `context`. */
-  restoreStyle(context: RenderContext | undefined = this.context, style: ElementStyle = this.getStyle()): this {
-    if (Object.keys(style).length == 0) return this;
-    if (!context) return this;
-    context.restore();
-    return this;
-  }
-
   /**
    * Draw the element and all its sub-elements (i.e.: Modifiers in a Stave)
    * with the element's style (see `getStyle()` and `setStyle()`)
    */
   drawWithStyle(): void {
-    this.checkContext();
+    const ctx = this.checkContext();
+    ctx.save();
     this.applyStyle();
     this.draw();
-    this.restoreStyle();
+    ctx.restore();
   }
 
   /** Draw an element. */

@@ -680,6 +680,7 @@ export class Stave extends Element {
     const ctx = this.checkContext();
     this.setRendered();
 
+    ctx.save();
     this.applyStyle();
     ctx.openGroup('stave', this.getAttribute('id'));
     if (!this.formatted) this.format();
@@ -702,14 +703,15 @@ export class Stave extends Element {
     }
 
     ctx.closeGroup();
-    this.restoreStyle();
+    ctx.restore();
 
     // Draw the modifiers (bar lines, coda, segno, repeat brackets, etc.)
     for (let i = 0; i < this.modifiers.length; i++) {
       const modifier: StaveModifier = this.modifiers[i];
+      ctx.save();
       modifier.applyStyle(ctx);
       modifier.draw(this, this.getModifierXShift(i));
-      modifier.restoreStyle(ctx);
+      ctx.restore();
     }
 
     // Render measure numbers
