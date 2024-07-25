@@ -40,7 +40,7 @@ function drawHairpin(
   if (options) {
     hairpin.setRenderOptions(options);
   }
-  hairpin.draw();
+  hairpin.drawWithStyle();
 }
 
 /**

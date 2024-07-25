@@ -33,7 +33,7 @@ function showOneNote(note1: StaveNote, stave: Stave, ctx: RenderContext, x: numb
   const modifierContext = new ModifierContext();
   note1.setStave(stave).addToModifierContext(modifierContext);
   new TickContext().addTickable(note1).preFormat().setX(x);
-  note1.setContext(ctx).draw();
+  note1.setContext(ctx).drawWithStyle();
   Note.plotMetrics(ctx, note1, 140);
 }
 
@@ -42,7 +42,7 @@ function basic(options: TestOptions, contextBuilder: ContextBuilder): void {
 
   const stave = new Stave(10, 10, 975);
   stave.setContext(ctx);
-  stave.draw();
+  stave.drawWithStyle();
 
   const notes = [
     new StaveNote({ keys: ['c/4', 'e/4', 'a/4', 'b/4'], duration: 'w' }),
@@ -94,7 +94,7 @@ function basic(options: TestOptions, contextBuilder: ContextBuilder): void {
     }
   }
 
-  beam.setContext(ctx).draw();
+  beam.setContext(ctx).drawWithStyle();
 
   VexFlowTests.plotLegendForNoteWidth(ctx, 890, 140);
 
@@ -104,7 +104,7 @@ function basic(options: TestOptions, contextBuilder: ContextBuilder): void {
 function multiVoice(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 750, 300);
 
-  const stave = new Stave(30, 45, 700).setContext(ctx).draw();
+  const stave = new Stave(30, 45, 700).setContext(ctx).drawWithStyle();
 
   const notes1 = [
     new StaveNote({ keys: ['c/4', 'e/4', 'a/4'], duration: '2', stemDirection: -1 }),

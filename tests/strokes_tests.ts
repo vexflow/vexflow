@@ -301,7 +301,7 @@ function drawTabStrokes(options: TestOptions): void {
 
   f.Formatter().joinVoices([tabVoice2]).formatToStave([tabVoice2], stave2);
 
-  f.draw();
+  f.drawWithStyle();
 
   options.assert.ok(true, 'Strokes Tab test');
 }
@@ -431,7 +431,7 @@ function notesWithTab(options: TestOptions): void {
   f.draw();
 
   beams.forEach(function (beam) {
-    beam.setContext(f.getContext()).draw();
+    beam.setContext(f.getContext()).drawWithStyle();
   });
 
   options.assert.ok(true);

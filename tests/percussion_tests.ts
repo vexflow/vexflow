@@ -43,7 +43,7 @@ const PercussionTests = {
 
 function draw(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 400, 120);
-  new Stave(10, 10, 300).addClef('percussion').setContext(ctx).draw();
+  new Stave(10, 10, 300).addClef('percussion').setContext(ctx).drawWithStyle();
   options.assert.ok(true);
 }
 
@@ -53,7 +53,7 @@ function draw(options: TestOptions, contextBuilder: ContextBuilder): void {
 function showNote(struct: StaveNoteStruct, stave: Stave, ctx: RenderContext, x: number): StaveNote {
   const staveNote = new StaveNote(struct).setStave(stave);
   new TickContext().addTickable(staveNote).preFormat().setX(x);
-  staveNote.setContext(ctx).draw();
+  staveNote.setContext(ctx).drawWithStyle();
   return staveNote;
 }
 
@@ -81,7 +81,10 @@ function drawNotes(options: TestOptions, contextBuilder: ContextBuilder): void {
 
   // Draw two staves, one with up-stems and one with down-stems.
   for (let h = 0; h < 2; ++h) {
-    const stave = new Stave(10, 10 + h * 120, notes.length * 25 + 75).addClef('percussion').setContext(ctx).draw();
+    const stave = new Stave(10, 10 + h * 120, notes.length * 25 + 75)
+      .addClef('percussion')
+      .setContext(ctx)
+      .drawWithStyle();
 
     for (let i = 0; i < notes.length; ++i) {
       const note = notes[i];

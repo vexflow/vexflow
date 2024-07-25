@@ -59,7 +59,7 @@ function createThreeVoicesTest(
     factory.draw();
 
     for (let i = 0; i < beams.length; i++) {
-      beams[i].setContext(factory.getContext()).draw();
+      beams[i].setContext(factory.getContext()).drawWithStyle();
     }
 
     options.assert.ok(true);
@@ -154,7 +154,7 @@ function autoRestTwoVoices(options: TestOptions): void {
   f.draw();
 
   for (let i = 0; i < beams.length; i++) {
-    beams[i].setContext(f.getContext()).draw();
+    beams[i].setContext(f.getContext()).drawWithStyle();
   }
 
   options.assert.ok(true, 'Auto Adjust Rests - Two Voices');

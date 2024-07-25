@@ -106,7 +106,7 @@ function draw(
   }
 
   new TickContext().addTickable(note).preFormat().setX(x);
-  note.setContext(context).draw();
+  note.setContext(context).drawWithStyle();
 
   if (drawBoundingBox) {
     const bb = note.getBoundingBox();
@@ -349,7 +349,7 @@ function drawBasic(options: TestOptions, contextBuilder: ContextBuilder): void {
   const stave = new Stave(10, 30, 750);
   stave.setContext(ctx);
   stave.addClef(clef);
-  stave.draw();
+  stave.drawWithStyle();
 
   const lowerKeys = ['c/', 'e/', 'a/'];
   const higherKeys = ['c/', 'e/', 'a/'];
@@ -424,7 +424,7 @@ function drawBoundingBoxes(options: TestOptions, contextBuilder: ContextBuilder)
   const stave = new Stave(10, 30, 750);
   stave.setContext(ctx);
   stave.addClef(clef);
-  stave.draw();
+  stave.drawWithStyle();
 
   const lowerKeys = ['c/', 'e/', 'a/'];
   const higherKeys = ['c/', 'e/', 'a/'];
@@ -489,7 +489,7 @@ function drawBass(options: TestOptions, contextBuilder: ContextBuilder): void {
   const stave = new Stave(10, 10, 650);
   stave.setContext(ctx);
   stave.addClef('bass');
-  stave.draw();
+  stave.drawWithStyle();
 
   const noteStructs: StaveNoteStruct[] = [
     { clef: 'bass', keys: ['c/3', 'e/3', 'a/3'], duration: '1/2' },
@@ -529,7 +529,7 @@ function displacements(options: TestOptions, contextBuilder: ContextBuilder): vo
 
   const stave = new Stave(10, 10, 675);
   stave.setContext(ctx);
-  stave.draw();
+  stave.drawWithStyle();
 
   const noteStructs = [
     { keys: ['g/3', 'a/3', 'c/4', 'd/4', 'e/4'], duration: '1/2' },
@@ -565,7 +565,7 @@ function drawHarmonicAndMuted(options: TestOptions, contextBuilder: ContextBuild
   const ctx = contextBuilder(options.elementId, 1000, 180);
   const stave = new Stave(10, 10, 950);
   stave.setContext(ctx);
-  stave.draw();
+  stave.drawWithStyle();
 
   const noteStructs = [
     { keys: ['c/4', 'e/4', 'a/4'], duration: '1/2h' },
@@ -620,7 +620,7 @@ function drawSlash(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 700, 180);
   const stave = new Stave(10, 10, 650);
   stave.setContext(ctx);
-  stave.draw();
+  stave.drawWithStyle();
 
   const notes = [
     { keys: ['b/4'], duration: '1/2s', stemDirection: Stem.DOWN },
@@ -656,8 +656,8 @@ function drawSlash(options: TestOptions, contextBuilder: ContextBuilder): void {
 
   Formatter.FormatAndDraw(ctx, stave, staveNotes, false);
 
-  beam1.setContext(ctx).draw();
-  beam2.setContext(ctx).draw();
+  beam1.setContext(ctx).drawWithStyle();
+  beam2.setContext(ctx).drawWithStyle();
 
   options.assert.ok('Slash Note Heads');
 }
@@ -675,8 +675,8 @@ function drawKeyStyles(options: TestOptions, contextBuilder: ContextBuilder): vo
 
   new TickContext().addTickable(note).preFormat().setX(25);
 
-  stave.setContext(ctx).draw();
-  note.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
+  note.setContext(ctx).drawWithStyle();
 
   options.assert.ok(note.getX() > 0, 'Note has X value');
   options.assert.ok(note.getYs().length > 0, 'Note has Y values');
@@ -695,8 +695,8 @@ function drawNoteStyles(options: TestOptions, contextBuilder: ContextBuilder): v
 
   new TickContext().addTickable(note).preFormat().setX(25);
 
-  stave.setContext(ctx).draw();
-  note.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
+  note.setContext(ctx).drawWithStyle();
 
   options.assert.ok(note.getX() > 0, 'Note has X value');
   options.assert.ok(note.getYs().length > 0, 'Note has Y values');
@@ -715,8 +715,8 @@ function drawNoteStemStyles(options: TestOptions, contextBuilder: ContextBuilder
 
   new TickContext().addTickable(note).preFormat().setX(25);
 
-  stave.setContext(ctx).draw();
-  note.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
+  note.setContext(ctx).drawWithStyle();
 
   options.assert.ok('Note Stem Style');
 }
@@ -724,7 +724,7 @@ function drawNoteStemStyles(options: TestOptions, contextBuilder: ContextBuilder
 function drawNoteStemLengths(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 975, 150);
   const stave = new Stave(10, 10, 975);
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
 
   const keys = [
     'e/3',
@@ -788,8 +788,8 @@ function drawNoteStylesWithFlag(options: TestOptions, contextBuilder: ContextBui
 
   new TickContext().addTickable(note).preFormat().setX(25);
 
-  stave.setContext(ctx).draw();
-  note.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
+  note.setContext(ctx).drawWithStyle();
 
   options.assert.ok(note.getX() > 0, 'Note has X value');
   options.assert.ok(note.getYs().length > 0, 'Note has Y values');
@@ -800,7 +800,7 @@ function drawBeamStyles(options: TestOptions, contextBuilder: ContextBuilder): v
   const stave = new Stave(10, 10, 380);
   stave.setStyle({ strokeStyle: '#EEAAEE', lineWidth: 3 });
   stave.setContext(ctx);
-  stave.draw();
+  stave.drawWithStyle();
 
   const notes = [
     // beam1
@@ -853,10 +853,10 @@ function drawBeamStyles(options: TestOptions, contextBuilder: ContextBuilder): v
 
   Formatter.FormatAndDraw(ctx, stave, staveNotes, false);
 
-  beam1.setContext(ctx).draw();
-  beam2.setContext(ctx).draw();
-  beam3.setContext(ctx).draw();
-  beam4.setContext(ctx).draw();
+  beam1.setContext(ctx).drawWithStyle();
+  beam2.setContext(ctx).drawWithStyle();
+  beam3.setContext(ctx).drawWithStyle();
+  beam4.setContext(ctx).drawWithStyle();
 
   options.assert.ok('draw beam styles');
 }
@@ -884,7 +884,7 @@ function dotsAndFlagsStemUp(options: TestOptions, contextBuilder: ContextBuilder
   Dot.buildAndAttach(notes, { all: true });
   Dot.buildAndAttach([notes[5], notes[11]], { all: true });
 
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
 
   for (let i = 0; i < notes.length; ++i) {
     draw(notes[i], stave, ctx, i * 65);
@@ -915,7 +915,7 @@ function dotsAndFlagsStemDown(options: TestOptions, contextBuilder: ContextBuild
   ];
   Dot.buildAndAttach(staveNotes, { all: true });
 
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
 
   for (let i = 0; i < staveNotes.length; ++i) {
     draw(staveNotes[i], stave, ctx, i * 65);
@@ -947,13 +947,13 @@ function dotsAndBeamsUp(options: TestOptions, contextBuilder: ContextBuilder): v
 
   const beam = new Beam(staveNotes);
 
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
 
   for (let i = 0; i < staveNotes.length; ++i) {
     draw(staveNotes[i], stave, ctx, i * 65);
   }
 
-  beam.setContext(ctx).draw();
+  beam.setContext(ctx).drawWithStyle();
 
   options.assert.ok(true, 'Full Dot');
 }
@@ -980,13 +980,13 @@ function dotsAndBeamsDown(options: TestOptions, contextBuilder: ContextBuilder):
 
   const beam = new Beam(staveNotes);
 
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
 
   for (let i = 0; i < staveNotes.length; ++i) {
     draw(staveNotes[i], stave, ctx, i * 65);
   }
 
-  beam.setContext(ctx).draw();
+  beam.setContext(ctx).drawWithStyle();
 
   options.assert.ok(true, 'Full Dot');
 }

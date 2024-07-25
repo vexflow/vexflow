@@ -183,7 +183,7 @@ export class Element {
    * Example:
    * ```typescript
    * element.setStyle({ fillStyle: 'red', strokeStyle: 'red' });
-   * element.draw();
+   * element.drawWithStyle();
    * ```
    * Note: If the element draws additional sub-elements (i.e.: Modifiers in a Stave),
    * the style can be applied to all of them by means of the context:
@@ -191,7 +191,7 @@ export class Element {
    * element.setStyle({ fillStyle: 'red', strokeStyle: 'red' });
    * element.getContext().setFillStyle('red');
    * element.getContext().setStrokeStyle('red');
-   * element.draw();
+   * element.drawWithStyle();
    * ```
    * or using drawWithStyle:
    * ```typescript
@@ -233,12 +233,13 @@ export class Element {
    * Draw the element and all its sub-elements (i.e.: Modifiers in a Stave)
    * with the element's style (see `getStyle()` and `setStyle()`)
    */
-  drawWithStyle(): void {
+  drawWithStyle(): this {
     const ctx = this.checkContext();
     ctx.save();
-    this.applyStyle();
+    this.applyStyle(ctx);
     this.draw();
     ctx.restore();
+    return this;
   }
 
   /** Draw an element. */
