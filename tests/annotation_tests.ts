@@ -110,7 +110,7 @@ function simple(options: TestOptions, contextBuilder: ContextBuilder): void {
   ctx.scale(1.5, 1.5);
 
   ctx.font = '10pt Arial, sans-serif';
-  const stave = new TabStave(10, 10, 450).addTabGlyph().setContext(ctx).draw();
+  const stave = new TabStave(10, 10, 450).addTabGlyph().setContext(ctx).drawWithStyle();
 
   const notes = [
     tabNote({
@@ -134,7 +134,7 @@ function standard(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 500, 240);
   ctx.scale(1.5, 1.5);
 
-  const stave = new Stave(10, 10, 450).addClef('treble').setContext(ctx).draw();
+  const stave = new Stave(10, 10, 450).addClef('treble').setContext(ctx).drawWithStyle();
 
   const annotation = (text: string) =>
     new Annotation(text).setFont(Metrics.get('Annotation.fontFamily'), FONT_SIZE, 'normal', 'italic');
@@ -151,7 +151,7 @@ function standard(options: TestOptions, contextBuilder: ContextBuilder): void {
 function styling(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 500, 240);
   ctx.scale(1.5, 1.5);
-  const stave = new Stave(10, 10, 450).addClef('treble').setContext(ctx).draw();
+  const stave = new Stave(10, 10, 450).addClef('treble').setContext(ctx).drawWithStyle();
 
   const annotation = (text: string, style: ElementStyle) =>
     new Annotation(text).setFont(Metrics.get('Annotation.fontFamily'), FONT_SIZE, 'normal', 'italic').setStyle(style);
@@ -173,7 +173,7 @@ function harmonic(options: TestOptions, contextBuilder: ContextBuilder): void {
   ctx.scale(1.5, 1.5);
 
   ctx.font = '10pt Arial';
-  const stave = new TabStave(10, 10, 450).addClef('tab').setContext(ctx).draw();
+  const stave = new TabStave(10, 10, 450).addClef('tab').setContext(ctx).drawWithStyle();
 
   const notes = [
     tabNote({
@@ -202,7 +202,7 @@ function picking(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 500, 240);
 
   ctx.setFont(Metrics.get('fontFamily'), FONT_SIZE);
-  const stave = new TabStave(10, 10, 450).addClef('tab').setContext(ctx).draw();
+  const stave = new TabStave(10, 10, 450).addClef('tab').setContext(ctx).drawWithStyle();
 
   const annotation = (text: string) =>
     new Annotation(text).setFont(Metrics.get('Annotation.fontFamily'), FONT_SIZE, 'normal', 'italic');
@@ -242,7 +242,7 @@ function picking(options: TestOptions, contextBuilder: ContextBuilder): void {
 function placement(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 750, 300);
 
-  const stave = new Stave(10, 50, 750).addClef('treble').setContext(ctx).draw();
+  const stave = new Stave(10, 50, 750).addClef('treble').setContext(ctx).drawWithStyle();
 
   const annotation = (text: string, fontSize: number, vj: number) =>
     new Annotation(text).setFontSize(fontSize).setVerticalJustification(vj);
@@ -315,7 +315,7 @@ function bottom(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 500, 240);
   ctx.scale(1.5, 1.5);
 
-  const stave = new Stave(10, 10, 300).addClef('treble').setContext(ctx).draw();
+  const stave = new Stave(10, 10, 300).addClef('treble').setContext(ctx).drawWithStyle();
 
   const annotation = (text: string) =>
     new Annotation(text).setFontSize(FONT_SIZE).setVerticalJustification(Annotation.VerticalJustify.BOTTOM);
@@ -335,7 +335,7 @@ function bottomWithBeam(options: TestOptions, contextBuilder: ContextBuilder): v
   const ctx = contextBuilder(options.elementId, 500, 240);
   ctx.scale(1.5, 1.5);
 
-  const stave = new Stave(10, 10, 300).addClef('treble').setContext(ctx).draw();
+  const stave = new Stave(10, 10, 300).addClef('treble').setContext(ctx).drawWithStyle();
 
   const notes = [
     new StaveNote({ keys: ['a/3'], duration: '8' }).addModifier(
@@ -355,7 +355,7 @@ function bottomWithBeam(options: TestOptions, contextBuilder: ContextBuilder): v
   const beam = new Beam(notes.slice(1));
 
   Formatter.FormatAndDraw(ctx, stave, notes);
-  beam.setContext(ctx).draw();
+  beam.setContext(ctx).drawWithStyle();
   options.assert.ok(true, 'Bottom Annotation with Beams');
 }
 
@@ -370,7 +370,7 @@ function justificationStemUp(options: TestOptions, contextBuilder: ContextBuilde
       .setVerticalJustification(vJustification);
 
   for (let v = 1; v <= 4; ++v) {
-    const stave = new Stave(10, (v - 1) * 150 + 40, 400).addClef('treble').setContext(ctx).draw();
+    const stave = new Stave(10, (v - 1) * 150 + 40, 400).addClef('treble').setContext(ctx).drawWithStyle();
 
     const notes = [
       staveNote({ keys: ['c/3'], duration: 'q' }).addModifier(annotation('Text', 1, v), 0),
@@ -396,7 +396,7 @@ function justificationStemDown(options: TestOptions, contextBuilder: ContextBuil
       .setVerticalJustification(vJustification);
 
   for (let v = 1; v <= 4; ++v) {
-    const stave = new Stave(10, (v - 1) * 150 + 40, 400).addClef('treble').setContext(ctx).draw();
+    const stave = new Stave(10, (v - 1) * 150 + 40, 400).addClef('treble').setContext(ctx).drawWithStyle();
     const notes = [
       staveNote({ keys: ['c/3'], duration: 'q', stemDirection: -1 }).addModifier(annotation('Text', 1, v), 0),
       staveNote({ keys: ['c/4', 'e/4', 'c/5'], duration: 'q', stemDirection: -1 }).addModifier(
@@ -417,7 +417,7 @@ function tabNotes(options: TestOptions, contextBuilder: ContextBuilder): void {
   ctx.font = '10pt Arial, sans-serif';
   const stave = new TabStave(10, 10, 550);
   stave.setContext(ctx);
-  stave.draw();
+  stave.drawWithStyle();
 
   const specs = [
     {

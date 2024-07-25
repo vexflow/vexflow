@@ -87,7 +87,7 @@ function draw(options: TestOptions, contextBuilder: ContextBuilder): void {
   ctx.font = '10pt Arial';
   const stave = new TabStave(10, 10, 550);
   stave.setContext(ctx);
-  stave.draw();
+  stave.drawWithStyle();
 
   const notes = [
     { positions: [{ str: 6, fret: 6 }], duration: '4' },
@@ -145,7 +145,7 @@ function draw(options: TestOptions, contextBuilder: ContextBuilder): void {
     const tickContext = new TickContext();
     tickContext.addTickable(tabNote).preFormat().setX(x);
     tabNote.setContext(ctx).setStave(stave);
-    tabNote.draw();
+    tabNote.drawWithStyle();
     return tabNote;
   }
 
@@ -163,7 +163,7 @@ function drawStemsUp(options: TestOptions, contextBuilder: ContextBuilder): void
   ctx.font = '10pt Arial';
   const stave = new TabStave(10, 30, 550);
   stave.setContext(ctx);
-  stave.draw();
+  stave.drawWithStyle();
 
   const specs: TabNoteStruct[] = [
     {
@@ -235,7 +235,7 @@ function drawStemsDown(options: TestOptions, contextBuilder: ContextBuilder): vo
   ctx.font = '10pt Arial';
   const stave = new TabStave(10, 10, 550);
   stave.setContext(ctx);
-  stave.draw();
+  stave.drawWithStyle();
 
   const specs: TabNoteStruct[] = [
     {
@@ -308,7 +308,7 @@ function drawStemsUpThrough(options: TestOptions, contextBuilder: ContextBuilder
   ctx.font = '10pt Arial';
   const stave = new TabStave(10, 30, 550);
   stave.setContext(ctx);
-  stave.draw();
+  stave.drawWithStyle();
 
   const specs: TabNoteStruct[] = [
     {
@@ -382,7 +382,7 @@ function drawStemsDownThrough(options: TestOptions, contextBuilder: ContextBuild
   ctx.font = '10pt Arial';
   const stave = new TabStave(10, 10, 550, { numLines: 8 });
   stave.setContext(ctx);
-  stave.draw();
+  stave.drawWithStyle();
 
   const specs: TabNoteStruct[] = [
     {
@@ -461,7 +461,7 @@ function drawStemsDotted(options: TestOptions, contextBuilder: ContextBuilder): 
   ctx.font = '10pt Arial';
   const stave = new TabStave(10, 10, 550);
   stave.setContext(ctx);
-  stave.draw();
+  stave.drawWithStyle();
 
   const specs: TabNoteStruct[] = [
     {

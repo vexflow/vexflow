@@ -133,7 +133,7 @@ function rightJustify(options: TestOptions): void {
 
     const voice = getTickables(time, n, duration, duration2);
     formatter.joinVoices([voice]).formatToStave([voice], stave);
-    stave.draw();
+    stave.drawWithStyle();
     voice.draw(f.getContext(), stave);
   };
   renderTest({ numBeats: 4, beatValue: 4, resolution: 4 * 4096 }, 3, '4', '2', 10, 300);
@@ -214,11 +214,11 @@ function noteHeadPadding(options: TestOptions): void {
   const staveWidth = width + Stave.defaultPadding;
   const stave1 = f.Stave({ y: 50, width: staveWidth });
   const stave2 = f.Stave({ y: 150, width: staveWidth });
-  stave1.draw();
-  stave2.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
   voice1.draw(f.getContext(), stave1);
   voice2.draw(f.getContext(), stave2);
-  beams.forEach((b) => b.setContext(f.getContext()).draw());
+  beams.forEach((b) => b.setContext(f.getContext()).drawWithStyle());
   options.assert.ok(true);
 }
 
@@ -244,8 +244,8 @@ function longMeasureProblems(options: TestOptions): void {
   formatter.format([voice1, voice2], width);
   const stave1 = f.Stave({ y: 50, width: width + Stave.defaultPadding });
   const stave2 = f.Stave({ y: 200, width: width + Stave.defaultPadding });
-  stave1.draw();
-  stave2.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
   voice1.draw(f.getContext(), stave1);
   voice2.draw(f.getContext(), stave2);
   options.assert.ok(true);
@@ -271,11 +271,11 @@ function accidentalJustification(options: TestOptions): void {
   const stave21 = f.Stave({ y: 130, width: width + Stave.defaultPadding });
   formatter.format([voice11, voice21], width);
   const ctx = f.getContext();
-  stave11.setContext(ctx).draw();
-  stave21.setContext(ctx).draw();
+  stave11.setContext(ctx).drawWithStyle();
+  stave21.setContext(ctx).drawWithStyle();
   voice11.draw(ctx, stave11);
   voice21.draw(ctx, stave21);
-  beams.forEach((b) => b.setContext(ctx).draw());
+  beams.forEach((b) => b.setContext(ctx).drawWithStyle());
   options.assert.ok(true);
 }
 
@@ -308,13 +308,13 @@ function unalignedNoteDurations1(options: TestOptions): void {
   const stave11 = f.Stave({ y: 20, width: width + Stave.defaultPadding });
   const stave21 = f.Stave({ y: 130, width: width + Stave.defaultPadding });
   formatter.format([voice11, voice21], width);
-  stave11.setContext(ctx).draw();
-  stave21.setContext(ctx).draw();
+  stave11.setContext(ctx).drawWithStyle();
+  stave21.setContext(ctx).drawWithStyle();
   voice11.draw(ctx, stave11);
   voice21.draw(ctx, stave21);
 
-  beams21.forEach((b) => b.setContext(ctx).draw());
-  beams11.forEach((b) => b.setContext(ctx).draw());
+  beams21.forEach((b) => b.setContext(ctx).drawWithStyle());
+  beams11.forEach((b) => b.setContext(ctx).drawWithStyle());
 
   options.assert.ok(voice11.getTickables()[1].getX() > voice21.getTickables()[1].getX());
 }
@@ -361,8 +361,8 @@ function unalignedNoteDurations2(options: TestOptions): void {
   formatter.format([voice1, voice2], width);
   const stave1 = new Stave(10, 40, width + Stave.defaultPadding);
   const stave2 = new Stave(10, 100, width + Stave.defaultPadding);
-  stave1.setContext(context).draw();
-  stave2.setContext(context).draw();
+  stave1.setContext(context).drawWithStyle();
+  stave2.setContext(context).drawWithStyle();
   voice1.draw(context, stave1);
   voice2.draw(context, stave2);
 
@@ -430,10 +430,10 @@ function alignedMixedElements(options: TestOptions): void {
 
   Formatter.FormatAndDraw(context, stave, notes);
   Formatter.FormatAndDraw(context, stave2, notes2);
-  stave.setContext(context).draw();
-  stave2.setContext(context).draw();
-  tuplet.setContext(context).draw();
-  tuplet2.setContext(context).draw();
+  stave.setContext(context).drawWithStyle();
+  stave2.setContext(context).drawWithStyle();
+  tuplet.setContext(context).drawWithStyle();
+  tuplet2.setContext(context).drawWithStyle();
 
   options.assert.ok(true);
 }
@@ -562,10 +562,10 @@ function multiStaves(options: TestOptions): void {
     type: 'brace',
   });
   for (let i = 0; i < staves.length; ++i) {
-    staves[i].setContext(ctx).draw();
+    staves[i].setContext(ctx).drawWithStyle();
     voices[i].draw(ctx, staves[i]);
   }
-  beams.forEach((beam) => beam.setContext(ctx).draw());
+  beams.forEach((beam) => beam.setContext(ctx).drawWithStyle());
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // Draw 3 more staves (one measure each).
@@ -598,11 +598,11 @@ function multiStaves(options: TestOptions): void {
     new Beam(notes32.slice(3, 6), true),
   ];
   for (let i = 0; i < staves.length; ++i) {
-    staves[i].setContext(ctx).draw();
+    staves[i].setContext(ctx).drawWithStyle();
     voices[i].draw(ctx, staves[i]);
     voices[i].getTickables().forEach((note) => Note.plotMetrics(ctx, note, staveYs[i] - 20));
   }
-  beams.forEach((beam) => beam.setContext(ctx).draw());
+  beams.forEach((beam) => beam.setContext(ctx).drawWithStyle());
   options.assert.ok(true);
 }
 
@@ -873,10 +873,10 @@ function annotations(options: TestOptions): void {
     const fmt = new Formatter({ softmaxFactor: sm.sm, maxIterations: 2 }).joinVoices([voice1]);
     fmt.format([voice1], sm.width - 11);
 
-    stave.setContext(context).draw();
+    stave.setContext(context).drawWithStyle();
     voice1.draw(context, stave);
 
-    beams.forEach((b) => b.setContext(context).draw());
+    beams.forEach((b) => b.setContext(context).drawWithStyle());
   });
 
   options.assert.ok(true);

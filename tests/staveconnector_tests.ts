@@ -44,9 +44,9 @@ function drawSingle(options: TestOptions, contextBuilder: ContextBuilder): void 
   const connector = new StaveConnector(stave1, stave2);
   connector.setType(StaveConnector.type.SINGLE);
   connector.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  connector.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  connector.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -62,9 +62,9 @@ function drawSingle4pxStaveLines(options: TestOptions, contextBuilder: ContextBu
   const connector = new StaveConnector(stave1, stave2);
   connector.setType(StaveConnector.type.SINGLE);
   connector.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  connector.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  connector.drawWithStyle();
   VexFlow.STAVE_LINE_THICKNESS = oldThickness;
 
   options.assert.ok(true, 'all pass');
@@ -82,10 +82,10 @@ function drawSingleBoth(options: TestOptions, contextBuilder: ContextBuilder): v
   const connector2 = new StaveConnector(stave1, stave2);
   connector2.setType(StaveConnector.type.SINGLE_RIGHT);
   connector2.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  connector1.draw();
-  connector2.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  connector1.drawWithStyle();
+  connector2.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -103,10 +103,10 @@ function drawDouble(options: TestOptions, contextBuilder: ContextBuilder): void 
   line.setType(StaveConnector.type.SINGLE);
   connector.setContext(ctx);
   line.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  connector.draw();
-  line.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  connector.drawWithStyle();
+  line.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -125,10 +125,10 @@ function drawBrace(options: TestOptions, contextBuilder: ContextBuilder): void {
   line.setType(StaveConnector.type.SINGLE);
   connector.setContext(ctx);
   line.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  connector.draw();
-  line.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  connector.drawWithStyle();
+  line.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -146,10 +146,10 @@ function drawBraceWide(options: TestOptions, contextBuilder: ContextBuilder): vo
   line.setType(StaveConnector.type.SINGLE);
   connector.setContext(ctx);
   line.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  connector.draw();
-  line.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  connector.drawWithStyle();
+  line.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -167,10 +167,10 @@ function drawBracket(options: TestOptions, contextBuilder: ContextBuilder): void
   line.setType(StaveConnector.type.SINGLE);
   connector.setContext(ctx);
   line.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  connector.draw();
-  line.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  connector.drawWithStyle();
+  line.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -187,9 +187,9 @@ function drawRepeatBegin(options: TestOptions, contextBuilder: ContextBuilder): 
   const line = new StaveConnector(stave1, stave2);
   line.setType(StaveConnector.type.BOLD_DOUBLE_LEFT);
   line.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  line.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  line.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -206,9 +206,9 @@ function drawRepeatEnd(options: TestOptions, contextBuilder: ContextBuilder): vo
   const line = new StaveConnector(stave1, stave2);
   line.setType(StaveConnector.type.BOLD_DOUBLE_RIGHT);
   line.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  line.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  line.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -225,9 +225,9 @@ function drawThinDouble(options: TestOptions, contextBuilder: ContextBuilder): v
   const line = new StaveConnector(stave1, stave2);
   line.setType(StaveConnector.type.THIN_DOUBLE);
   line.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  line.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  line.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -264,14 +264,14 @@ function drawRepeatAdjacent(options: TestOptions, contextBuilder: ContextBuilder
   connector2.setType(StaveConnector.type.BOLD_DOUBLE_RIGHT);
   connector3.setType(StaveConnector.type.BOLD_DOUBLE_LEFT);
   connector4.setType(StaveConnector.type.BOLD_DOUBLE_RIGHT);
-  stave1.draw();
-  stave2.draw();
-  stave3.draw();
-  stave4.draw();
-  connector1.draw();
-  connector2.draw();
-  connector3.draw();
-  connector4.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  stave3.drawWithStyle();
+  stave4.drawWithStyle();
+  connector1.drawWithStyle();
+  connector2.drawWithStyle();
+  connector3.drawWithStyle();
+  connector4.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -328,15 +328,15 @@ function drawRepeatOffset2(options: TestOptions, contextBuilder: ContextBuilder)
   connector1.setXShift(stave1.getModifierXShift());
   connector3.setXShift(stave3.getModifierXShift());
 
-  stave1.draw();
-  stave2.draw();
-  stave3.draw();
-  stave4.draw();
-  connector1.draw();
-  connector2.draw();
-  connector3.draw();
-  connector4.draw();
-  connector5.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  stave3.drawWithStyle();
+  stave4.drawWithStyle();
+  connector1.drawWithStyle();
+  connector2.drawWithStyle();
+  connector3.drawWithStyle();
+  connector4.drawWithStyle();
+  connector5.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -396,15 +396,15 @@ function drawRepeatOffset(options: TestOptions, contextBuilder: ContextBuilder):
   connector1.setXShift(stave1.getModifierXShift());
   connector3.setXShift(stave3.getModifierXShift());
 
-  stave1.draw();
-  stave2.draw();
-  stave3.draw();
-  stave4.draw();
-  connector1.draw();
-  connector2.draw();
-  connector3.draw();
-  connector4.draw();
-  connector5.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  stave3.drawWithStyle();
+  stave4.drawWithStyle();
+  connector1.drawWithStyle();
+  connector2.drawWithStyle();
+  connector3.drawWithStyle();
+  connector4.drawWithStyle();
+  connector5.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -445,18 +445,18 @@ function drawCombined(options: TestOptions, contextBuilder: ContextBuilder): voi
   connBracket.setContext(ctx);
   connNone.setContext(ctx);
   connBrace.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  stave3.draw();
-  stave4.draw();
-  stave5.draw();
-  stave6.draw();
-  stave7.draw();
-  connSingle.draw();
-  connDouble.draw();
-  connBracket.draw();
-  connNone.draw();
-  connBrace.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  stave3.drawWithStyle();
+  stave4.drawWithStyle();
+  stave5.drawWithStyle();
+  stave6.drawWithStyle();
+  stave7.drawWithStyle();
+  connSingle.drawWithStyle();
+  connDouble.drawWithStyle();
+  connBracket.drawWithStyle();
+  connNone.drawWithStyle();
+  connBrace.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
