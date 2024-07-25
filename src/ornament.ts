@@ -225,8 +225,6 @@ export class Ornament extends Modifier {
 
     const stave = note.checkStave();
 
-    ctx.save();
-    this.applyStyle();
     ctx.openGroup('ornament', this.getAttribute('id'));
 
     // Get initial coordinates for the modifier position
@@ -297,6 +295,5 @@ export class Ornament extends Modifier {
       );
     }
     ctx.closeGroup();
-    ctx.restore();
   }
 }

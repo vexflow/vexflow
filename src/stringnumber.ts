@@ -239,7 +239,6 @@ export class StringNumber extends Modifier {
         throw new RuntimeError('InvalidPosition', `The position ${this.position} is invalid`);
     }
 
-    ctx.save();
     if (this.drawCircle) {
       ctx.beginPath();
       ctx.arc(dotX, dotY, this.radius, 0, Math.PI * 2, false);
@@ -280,7 +279,5 @@ export class StringNumber extends Modifier {
           break;
       }
     }
-
-    ctx.restore();
   }
 }

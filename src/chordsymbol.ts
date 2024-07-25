@@ -403,9 +403,6 @@ export class ChordSymbol extends Modifier {
     const note = this.checkAttachedNote() as StemmableNote;
     this.setRendered();
 
-    // We're changing context parameters. Save current state.
-    ctx.save();
-    this.applyStyle();
     ctx.openGroup('chordsymbol', this.getAttribute('id'));
 
     const start = note.getModifierStartXY(Modifier.Position.ABOVE, this.index);
@@ -458,7 +455,6 @@ export class ChordSymbol extends Modifier {
       symbol.renderText(ctx, 0, 0);
     });
     ctx.closeGroup();
-    ctx.restore();
   }
 
   // Get the `BoundingBox` for the entire chord

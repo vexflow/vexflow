@@ -170,9 +170,9 @@ export class GraceNoteGroup extends Modifier {
     this.alignSubNotesWithNote(this.getGraceNotes(), note); // Modifier function
 
     // Draw grace notes.
-    this.graceNotes.forEach((graceNote) => graceNote.setContext(ctx).draw());
+    this.graceNotes.forEach((graceNote) => graceNote.setContext(ctx).drawWithStyle());
     // Draw beams.
-    this.beams.forEach((beam) => beam.setContext(ctx).draw());
+    this.beams.forEach((beam) => beam.setContext(ctx).drawWithStyle());
 
     if (this.showSlur) {
       // Create and draw slur.
@@ -188,7 +188,7 @@ export class GraceNoteGroup extends Modifier {
 
       this.slur.renderOptions.cp2 = 12;
       this.slur.renderOptions.yShift = (isStavenote ? 7 : 5) + this.renderOptions.slurYShift;
-      this.slur.setContext(ctx).draw();
+      this.slur.setContext(ctx).drawWithStyle();
     }
   }
 }

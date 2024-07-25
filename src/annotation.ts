@@ -224,8 +224,6 @@ export class Annotation extends Modifier {
     const start = note.getModifierStartXY(ModifierPosition.ABOVE, this.index);
 
     this.setRendered();
-    ctx.save();
-    this.applyStyle();
     ctx.openGroup('annotation', this.getAttribute('id'));
 
     const textWidth = this.getWidth();
@@ -286,6 +284,5 @@ export class Annotation extends Modifier {
     this.y = y;
     this.renderText(ctx, 0, 0);
     ctx.closeGroup();
-    ctx.restore();
   }
 }
