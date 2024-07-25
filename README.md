@@ -27,7 +27,7 @@ The quickest way to add VexFlow to a web page is via a `<script>` tag.
 <div id="output"></div>
 
 <!-- Load library -->
-<script src="https://cdn.jsdelivr.net/npm/vxflw-early-access@alpha/build/cjs/vexflow.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vexflow@5.0.0-alpha.4/build/cjs/vexflow.js"></script>
 
 <script>
   document.fonts.ready.then(() => {
@@ -37,15 +37,15 @@ The quickest way to add VexFlow to a web page is via a `<script>` tag.
 </script>
 ```
 
-The URL above includes a version number <code>vxflw-early-access@x.y.z</code>. Specifying a particular version is good practice, to prevent rare issues with a future update breaking your deployment. During development &amp; testing, feel free to use the latest release by omitting the version number: https://cdn.jsdelivr.net/npm/vxflw-early-access/build/cjs/vexflow.js
+The URL above includes a version number <code>vexflow@x.y.z</code>. Specifying a particular version is good practice, to prevent rare issues with a future update breaking your deployment. During development &amp; testing, feel free to use the latest release by omitting the version number: https://cdn.jsdelivr.net/npm/vexflow/build/cjs/vexflow.js
 
 If your project uses a bundler, you can install VexFlow from npm:
 
 ```sh
-npm install vxflw-early-access
+npm install vexflow
 ```
 
-Read our detailed guide on [integrating with VexFlow.](https://github.com/0xfe/vexflow/wiki/VexFlow-4-Tutorial)
+Read our detailed guide on [integrating with VexFlow.](https://vexflow.github.io/vexflow-examples/tutorial)
 
 ## Factory (with EasyScore)
 
@@ -73,13 +73,13 @@ system
 vf.draw();
 ```
 
-[See it running here.](https://vexflow.github.io/vexflow-examples/static/step0)
+[See it running here.](https://vexflow.github.io/vexflow-examples/getting-started)
 
 [Learn more about EasyScore here.](https://github.com/0xfe/vexflow/wiki/Using-EasyScore)
 
 ## Native API
 
-If you need more control, you can use the low-level VexFlow API. Below, we render a stave using SVG. [See a running example of the low-level API here.](https://jsfiddle.net/5zgf03un/)
+If you need more control, you can use the low-level VexFlow API. Below, we render a stave using SVG. [See a running example of the low-level API here.](https://vexflow.github.io/vexflow-examples/getting-started)
 
 ```javascript
 const { Renderer, Stave } = VexFlow;
