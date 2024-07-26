@@ -52,7 +52,9 @@ export class Repetition extends StaveModifier {
     return this;
   }
 
-  draw(stave: Stave, x: number): this {
+  draw(): void {
+    const stave = this.checkStave();
+    const x = stave.getModifierXShift(this.getPosition());
     this.setRendered();
 
     switch (this.symbolType) {
@@ -95,8 +97,6 @@ export class Repetition extends StaveModifier {
       default:
         break;
     }
-
-    return this;
   }
 
   drawCodaFixed(stave: Stave, x: number): this {

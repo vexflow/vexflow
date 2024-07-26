@@ -1,7 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // @author: Taehoon Moon 2014
 
-import { Stave } from './stave';
 import { StaveModifier, StaveModifierPosition } from './stavemodifier';
 import { TextJustification, TextNote } from './textnote';
 import { Category } from './typeguard';
@@ -28,7 +27,8 @@ export class StaveText extends StaveModifier {
     this.justification = options.justification ?? TextNote.Justification.CENTER;
   }
 
-  draw(stave: Stave): this {
+  draw(): void {
+    const stave = this.checkStave();
     const ctx = stave.checkContext();
     this.setRendered();
 
@@ -64,6 +64,5 @@ export class StaveText extends StaveModifier {
     }
 
     this.renderText(ctx, x, y + 4);
-    return this;
   }
 }
