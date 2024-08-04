@@ -186,6 +186,8 @@ export const MetricsDefaults: Record<string, any> = {
   StaveSection: {
     fontSize: 10,
     fontWeight: 'bold',
+    lineWidth: 2,
+    padding: 2,
   },
 
   StaveTempo: {

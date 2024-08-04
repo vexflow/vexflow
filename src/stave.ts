@@ -271,11 +271,11 @@ export class Stave extends Element {
 
   // Section functions
   setSection(section: string, y: number, xOffset = 0, fontSize?: number, drawRect = true) {
-    const staveSection = new StaveSection(section, this.x + xOffset, y, drawRect);
+    const staveSection = new StaveSection(section).setYShift(y).setXShift(xOffset).setDrawRect(drawRect);
     if (fontSize) {
       staveSection.setFontSize(fontSize);
     }
-    this.modifiers.push(staveSection);
+    this.addModifier(staveSection);
     return this;
   }
 
@@ -788,7 +788,7 @@ export class Stave extends Element {
 
     // Make sure the defaults are present in case an incomplete set of
     //  configuration options were supplied.
-    // eslint-disable-next-line
+
     for (const lineConfig in linesConfiguration) {
       // Allow '{}' to be used if the caller just wants the default for a particular node.
       if (linesConfiguration[lineConfig].visible === undefined) {
