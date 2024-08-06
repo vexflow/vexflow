@@ -152,7 +152,7 @@ function drawMultipleMeasures(options: TestOptions, contextBuilder: ContextBuild
   const staveBar1 = new Stave(10, 50, 200);
   staveBar1.setBegBarType(BarlineType.REPEAT_BEGIN);
   staveBar1.setEndBarType(BarlineType.DOUBLE);
-  staveBar1.addModifier(new StaveSection('A').setFontSize(options.params?.fontSize).setDrawRect(false));
+  staveBar1.setSection('A', 0, 0, options.params?.fontSize, false);
   staveBar1.addClef('treble').setContext(ctx).draw();
   const notesBar1 = [
     new StaveNote({ keys: ['c/4'], duration: 'q' }),
@@ -581,7 +581,7 @@ function drawVoltaModifier(options: TestOptions, contextBuilder: ContextBuilder)
   mm1.addClef('treble');
   mm1.addKeySignature('A');
   mm1.setMeasure(1);
-  mm1.addModifier(new StaveSection('A'));
+  mm1.setSection('A', 0);
   mm1.setContext(ctx).draw();
   const notesmm1 = [new StaveNote({ keys: ['c/4'], duration: 'w' })];
   // Helper function to justify and draw a 4/4 voice
@@ -606,7 +606,7 @@ function drawVoltaModifier(options: TestOptions, contextBuilder: ContextBuilder)
   mm3.addClef('treble');
   mm3.addKeySignature('B');
   mm3.setMeasure(3);
-  mm3.addModifier(new StaveSection('B'));
+  mm3.setSection('B', 0);
   mm3.setContext(ctx).draw();
   const notesmm3 = [new StaveNote({ keys: ['c/4'], duration: 'w' })];
   Formatter.FormatAndDraw(ctx, mm3, notesmm3);
@@ -618,7 +618,7 @@ function drawVoltaModifier(options: TestOptions, contextBuilder: ContextBuilder)
   mm4.addClef('treble');
   mm4.addKeySignature('A');
   mm4.setMeasure(4);
-  mm4.addModifier(new StaveSection('C'));
+  mm4.setSection('C', 0);
   mm4.setContext(ctx).draw();
   const notesmm4 = [new StaveNote({ keys: ['c/4'], duration: 'w' })];
   Formatter.FormatAndDraw(ctx, mm4, notesmm4);
