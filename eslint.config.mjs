@@ -68,7 +68,18 @@ export default [{
         "@typescript-eslint/no-inferrable-types": "off",
 
         "simple-import-sort/imports": ["warn", {
-            groups: [["^.*/vex.*$"], ["^.*/index$"], ["^\\u0000"], ["^@?\\w"], ["^"], ["^\\."]],
+            groups: [
+                // Any import that starts with vex goes next.
+                ["^.*/vex.*$"],
+                // Imports of the index.ts file next.
+                ["^.*/index$"],
+                // The rest are just the defaults for the eslint-plugin-simple-import-sort plugin:
+                // Search for "default groups" here: https://github.com/lydell/eslint-plugin-simple-import-sort
+                ["^\\u0000"],
+                ["^@?\\w"],
+                ["^"],
+                ["^\\."]
+            ],
         }],
     },
 }, ...compat.extends("eslint:recommended", "prettier").map(config => ({
@@ -77,6 +88,7 @@ export default [{
 })), {
     files: ["**/Gruntfile.js", "{demos,tools}/**/*.{js,cjs,mjs}"],
 
+    // Disable some eslint rules in the Gruntfile, demos/*, tools/*.
     rules: {
         "no-console": "off",
         "no-unused-vars": "off",
