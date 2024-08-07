@@ -140,7 +140,7 @@ export class Tuplet extends Element {
    * Set whether or not the bracket is drawn.
    */
   setBracketed(bracketed: boolean): this {
-    this.options.bracketed = !!bracketed;
+    this.options.bracketed = bracketed;
     return this;
   }
 
@@ -148,7 +148,7 @@ export class Tuplet extends Element {
    * Set whether or not the ratio is shown.
    */
   setRatioed(ratioed: boolean): this {
-    this.options.ratioed = !!ratioed;
+    this.options.ratioed = ratioed;
     return this;
   }
 
