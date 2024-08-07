@@ -69,7 +69,7 @@ function simpleAuto(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beaming Applicator Test');
 }
@@ -91,7 +91,7 @@ function simpleAutoWithOverflowGroup(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beaming Applicator Test');
 }
@@ -110,7 +110,7 @@ function evenGroupStemDirections(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.equal(beams[0].getStemDirection(), Stem.UP);
   options.assert.equal(beams[1].getStemDirection(), Stem.UP);
@@ -143,7 +143,7 @@ function oddGroupStemDirections(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beaming Applicator Test');
 }
@@ -164,7 +164,7 @@ function oddBeamGroups(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beam Applicator Test');
 }
@@ -182,7 +182,7 @@ function moreSimple0(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beam Applicator Test');
 }
@@ -203,7 +203,7 @@ function moreSimple1(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beam Applicator Test');
 }
@@ -226,7 +226,7 @@ function breakBeamsOnRests(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beam Applicator Test');
 }
@@ -250,7 +250,7 @@ function beamAcrossAllRestsWithStemlets(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beam Applicator Test');
 }
@@ -273,7 +273,7 @@ function beamAcrossAllRests(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beam Applicator Test');
 }
@@ -297,7 +297,7 @@ function beamAcrossMiddleRests(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beam Applicator Test');
 }
@@ -330,7 +330,7 @@ function maintainStemDirections(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beam Applicator Test');
 }
@@ -362,7 +362,7 @@ function maintainStemDirectionsBeamAcrossRests(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beam Applicator Test');
 }
@@ -384,7 +384,7 @@ function groupWithUnbeamableNote(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beam Applicator Test');
 }
@@ -406,7 +406,7 @@ function groupWithUnbeamableNote1(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beam Applicator Test');
 }
@@ -438,7 +438,7 @@ function autoOddBeamGroups(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beam Applicator Test');
 }
@@ -473,7 +473,7 @@ function customBeamGroups(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beam Applicator Test');
 }
@@ -511,7 +511,7 @@ function simpleTuplets(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beam Applicator Test');
 }
@@ -531,7 +531,7 @@ function moreSimpleTuplets(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beam Applicator Test');
 }
@@ -549,7 +549,7 @@ function moreBeaming(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beam Applicator Test');
 }
@@ -567,7 +567,7 @@ function beamingWithSeveralGroups1(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beam Applicator Test');
 }
@@ -585,7 +585,7 @@ function beamingWithSeveralGroupsOverflow(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beam Applicator Test');
 }
@@ -605,7 +605,7 @@ function beamingWithSeveralGroupsOverflow2(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beam Applicator Test');
 }
@@ -623,7 +623,7 @@ function beamingWithSeveralGroupsOverflow3(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Auto Beam Applicator Test');
 }
@@ -650,7 +650,7 @@ function secondaryBreaks1(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Duration-Based Secondary Breaks Test');
 }
@@ -680,7 +680,7 @@ function secondaryBreaks2(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Duration-Based Secondary Breaks Test');
 }
@@ -710,7 +710,7 @@ function flatBeamsUp(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Flat Beams Up Test');
 }
@@ -735,7 +735,7 @@ function flatBeamsDown(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Flat Beams Down Test');
 }
@@ -757,7 +757,7 @@ function flatBeamsMixed(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Flat Beams Mixed Direction Test');
 }
@@ -784,7 +784,7 @@ function flatBeamsUpUniform(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Flat Beams Up (uniform) Test');
 }
@@ -810,7 +810,7 @@ function flatBeamsDownUniform(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Flat Beams Down (uniform) Test');
 }
@@ -837,7 +837,7 @@ function flatBeamsUpBounds(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Flat Beams Up (uniform) Test');
 }
@@ -869,7 +869,7 @@ function flatBeamsDownBounds(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'Flat Beams Down (uniform) Test');
 }

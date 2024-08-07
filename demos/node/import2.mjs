@@ -61,7 +61,7 @@ function svgScore(fontName) {
     new StaveNote({ keys: ['c/4', 'e/4', 'c/5'], duration: 'h' }),
   ];
 
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
   Formatter.FormatAndDraw(ctx, stave, notes);
 
   // const svg = div.innerHTML.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ');

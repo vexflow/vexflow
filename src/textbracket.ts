@@ -161,9 +161,6 @@ export class TextBracket extends Element {
 
     const bracketHeight = this.renderOptions.bracketHeight * this.position;
 
-    ctx.save();
-    this.applyStyle(ctx);
-
     // Draw text
     this.textElement.renderText(ctx, start.x, start.y);
 
@@ -225,7 +222,5 @@ export class TextBracket extends Element {
       ctx.stroke();
       ctx.closePath();
     }
-
-    ctx.restore();
   }
 }

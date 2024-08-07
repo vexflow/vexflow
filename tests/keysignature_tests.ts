@@ -92,9 +92,9 @@ function majorKeys(options: TestOptions, contextBuilder: ContextBuilder): void {
   }
 
   stave1.setContext(ctx);
-  stave1.draw();
+  stave1.drawWithStyle();
   stave2.setContext(ctx);
-  stave2.draw();
+  stave2.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -156,13 +156,13 @@ function majorKeysCanceled(options: TestOptions, contextBuilder: ContextBuilder)
   }
 
   stave1.setContext(ctx);
-  stave1.draw();
+  stave1.drawWithStyle();
   stave2.setContext(ctx);
-  stave2.draw();
+  stave2.drawWithStyle();
   stave3.setContext(ctx);
-  stave3.draw();
+  stave3.drawWithStyle();
   stave4.setContext(ctx);
-  stave4.draw();
+  stave4.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -197,7 +197,7 @@ function keysCanceledForEachClef(options: TestOptions, contextBuilder: ContextBu
       stave.addKeySignature(cancelKey);
       stave.addKeySignature(key, cancelKey);
       stave.addKeySignature(key);
-      stave.setContext(ctx).draw();
+      stave.setContext(ctx).drawWithStyle();
       tx += width;
     });
     tx = x;
@@ -248,13 +248,13 @@ function majorKeysAltered(options: TestOptions, contextBuilder: ContextBuilder):
   }
 
   stave1.setContext(ctx);
-  stave1.draw();
+  stave1.drawWithStyle();
   stave2.setContext(ctx);
-  stave2.draw();
+  stave2.drawWithStyle();
   stave3.setContext(ctx);
-  stave3.draw();
+  stave3.drawWithStyle();
   stave4.setContext(ctx);
-  stave4.draw();
+  stave4.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -284,9 +284,9 @@ function minorKeys(options: TestOptions, contextBuilder: ContextBuilder): void {
   }
 
   stave1.setContext(ctx);
-  stave1.draw();
+  stave1.drawWithStyle();
   stave2.setContext(ctx);
-  stave2.draw();
+  stave2.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -306,8 +306,8 @@ function endKeyWithClef(options: TestOptions, contextBuilder: ContextBuilder): v
   const stave2 = new Stave(10, 90, 350);
   stave2.setKeySignature('Cb').setClef('bass').setEndClef('treble').setEndKeySignature('G');
 
-  stave1.setContext(ctx).draw();
-  stave2.setContext(ctx).draw();
+  stave1.setContext(ctx).drawWithStyle();
+  stave2.setContext(ctx).drawWithStyle();
   options.assert.ok(true, 'all pass');
 }
 
@@ -333,9 +333,9 @@ function staveHelper(options: TestOptions, contextBuilder: ContextBuilder): void
   }
 
   stave1.setContext(ctx);
-  stave1.draw();
+  stave1.drawWithStyle();
   stave2.setContext(ctx);
-  stave2.draw();
+  stave2.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }

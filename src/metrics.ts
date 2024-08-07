@@ -188,6 +188,7 @@ export const MetricsDefaults: Record<string, any> = {
     fontWeight: 'bold',
     lineWidth: 2,
     padding: 2,
+    strokeStyle: 'black',
   },
 
   StaveTempo: {
@@ -206,6 +207,10 @@ export const MetricsDefaults: Record<string, any> = {
 
   StaveTie: {
     fontSize: 10,
+  },
+
+  Stem: {
+    strokeStyle: 'black',
   },
 
   StringNumber: {

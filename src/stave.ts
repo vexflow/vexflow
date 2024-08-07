@@ -676,12 +676,10 @@ export class Stave extends Element {
   /**
    * All drawing functions below need the context to be set.
    */
-  draw(): this {
+  draw(): void {
     const ctx = this.checkContext();
     this.setRendered();
 
-    ctx.save();
-    this.applyStyle();
     ctx.openGroup('stave', this.getAttribute('id'));
     if (!this.formatted) this.format();
 
@@ -703,27 +701,22 @@ export class Stave extends Element {
     }
 
     ctx.closeGroup();
-    ctx.restore();
 
     // Draw the modifiers (bar lines, coda, segno, repeat brackets, etc.)
     for (let i = 0; i < this.modifiers.length; i++) {
       const modifier: StaveModifier = this.modifiers[i];
-      ctx.save();
-      modifier.applyStyle(ctx);
-      modifier.draw(this, this.getModifierXShift(i));
-      ctx.restore();
+      modifier.setContext(ctx);
+      modifier.setStave(this);
+      modifier.drawWithStyle();
     }
 
     // Render measure numbers
     if (this.measure > 0) {
-      ctx.save();
       ctx.setFont(this.fontInfo);
       const textWidth = ctx.measureText('' + this.measure).width;
       y = this.getYForTopText(0) + 3;
       ctx.fillText('' + this.measure, this.x - textWidth / 2, y);
-      ctx.restore();
     }
-    return this;
   }
 
   getVerticalBarWidth(): number {

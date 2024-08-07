@@ -32,7 +32,7 @@ function drawSlash(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 350, 180);
   const stave = new Stave(10, 10, 350);
   stave.setContext(ctx);
-  stave.draw();
+  stave.drawWithStyle();
 
   const notes: StaveNoteStruct[] = [
     { keys: ['b/4'], duration: 'ws', stemDirection: -1 },
@@ -51,7 +51,7 @@ function drawSlash(options: TestOptions, contextBuilder: ContextBuilder): void {
       .addTickable(staveNote)
       .preFormat()
       .setX((i + 1) * 25);
-    staveNote.setContext(ctx).draw();
+    staveNote.setContext(ctx).drawWithStyle();
 
     options.assert.ok(staveNote.getX() > 0, 'Note ' + i + ' has X value');
     options.assert.ok(staveNote.getYs().length > 0, 'Note ' + i + ' has Y values');
@@ -69,7 +69,7 @@ function drawBasic(options: TestOptions, contextBuilder: ContextBuilder): void {
   staveBar1.addClef('treble');
   staveBar1.addTimeSignature('4/4');
   staveBar1.addKeySignature('C');
-  staveBar1.setContext(ctx).draw();
+  staveBar1.setContext(ctx).drawWithStyle();
 
   const notesBar1 = [new StaveNote({ keys: ['b/4'], duration: '1s', stemDirection: -1 })];
 
@@ -80,7 +80,7 @@ function drawBasic(options: TestOptions, contextBuilder: ContextBuilder): void {
   const staveBar2 = new Stave(staveBar1.getWidth() + staveBar1.getX(), staveBar1.getY(), 120);
   staveBar2.setBegBarType(BarlineType.SINGLE);
   staveBar2.setEndBarType(BarlineType.SINGLE);
-  staveBar2.setContext(ctx).draw();
+  staveBar2.setContext(ctx).drawWithStyle();
 
   // bar 2
   const notesBar2 = [
@@ -93,7 +93,7 @@ function drawBasic(options: TestOptions, contextBuilder: ContextBuilder): void {
 
   // bar 3 - juxtaposing second bar next to first bar
   const staveBar3 = new Stave(staveBar2.getWidth() + staveBar2.getX(), staveBar2.getY(), 170);
-  staveBar3.setContext(ctx).draw();
+  staveBar3.setContext(ctx).drawWithStyle();
 
   // bar 3
   const notesBar3 = [
@@ -124,7 +124,7 @@ function drawBasic(options: TestOptions, contextBuilder: ContextBuilder): void {
 
   // bar 4 - juxtaposing second bar next to first bar
   const staveBar4 = new Stave(staveBar3.getWidth() + staveBar3.getX(), staveBar3.getY(), 200);
-  staveBar4.setContext(ctx).draw();
+  staveBar4.setContext(ctx).drawWithStyle();
 
   // bar 4
   const notesBar4 = [
@@ -185,7 +185,7 @@ function drawBeamedSlashNotes(options: TestOptions, contextBuilder: ContextBuild
   staveBar1.addClef('treble');
   staveBar1.addTimeSignature('4/4');
   staveBar1.addKeySignature('C');
-  staveBar1.setContext(ctx).draw();
+  staveBar1.setContext(ctx).drawWithStyle();
 
   // bar 4
   const notesBar1Part1 = [
@@ -243,8 +243,8 @@ function drawBeamedSlashNotes(options: TestOptions, contextBuilder: ContextBuild
   Formatter.FormatAndDraw(ctx, staveBar1, notesBar1);
 
   // Render beams
-  beam1.setContext(ctx).draw();
-  beam2.setContext(ctx).draw();
+  beam1.setContext(ctx).drawWithStyle();
+  beam2.setContext(ctx).drawWithStyle();
 
   options.assert.expect(0);
 }
@@ -259,7 +259,7 @@ function drawSlashAndBeamAndRests(options: TestOptions, contextBuilder: ContextB
   staveBar1.addClef('treble');
   staveBar1.addTimeSignature('4/4');
   staveBar1.addKeySignature('F');
-  staveBar1.setContext(ctx).draw();
+  staveBar1.setContext(ctx).drawWithStyle();
 
   // bar 1
   const notesBar1Part1 = [
@@ -313,11 +313,11 @@ function drawSlashAndBeamAndRests(options: TestOptions, contextBuilder: ContextB
   Formatter.FormatAndDraw(ctx, staveBar1, notesBar1Part1.concat(notesBar1Part2));
 
   // Render beams
-  beam1.setContext(ctx).draw();
+  beam1.setContext(ctx).drawWithStyle();
 
   // bar 2 - juxtaposing second bar next to first bar
   const staveBar2 = new Stave(staveBar1.getWidth() + staveBar1.getX(), staveBar1.getY(), 220);
-  staveBar2.setContext(ctx).draw();
+  staveBar2.setContext(ctx).drawWithStyle();
 
   const notesBar2 = [
     new StaveNote({
@@ -344,7 +344,7 @@ function drawSixtenthWithScratches(options: TestOptions, contextBuilder: Context
   staveBar1.addClef('treble');
   staveBar1.addTimeSignature('4/4');
   staveBar1.addKeySignature('F');
-  staveBar1.setContext(ctx).draw();
+  staveBar1.setContext(ctx).drawWithStyle();
 
   // bar 1
   const notesBar1Part1 = [
@@ -403,8 +403,8 @@ function drawSixtenthWithScratches(options: TestOptions, contextBuilder: Context
   Formatter.FormatAndDraw(ctx, staveBar1, notesBar1Part1.concat(notesBar1Part2));
 
   // Render beams
-  beam1.setContext(ctx).draw();
-  beam2.setContext(ctx).draw();
+  beam1.setContext(ctx).drawWithStyle();
+  beam2.setContext(ctx).drawWithStyle();
 
   options.assert.expect(0);
 }
@@ -419,7 +419,7 @@ function drawThirtySecondWithScratches(options: TestOptions, contextBuilder: Con
   staveBar1.addClef('treble');
   staveBar1.addTimeSignature('4/4');
   staveBar1.addKeySignature('F');
-  staveBar1.setContext(ctx).draw();
+  staveBar1.setContext(ctx).drawWithStyle();
 
   // bar 1
   const notesBar1Part1 = [
@@ -474,7 +474,7 @@ function drawThirtySecondWithScratches(options: TestOptions, contextBuilder: Con
   Formatter.FormatAndDraw(ctx, staveBar1, notesBar1Part1);
 
   // Render beams
-  beam1.setContext(ctx).draw();
+  beam1.setContext(ctx).drawWithStyle();
 
   options.assert.expect(0);
 }

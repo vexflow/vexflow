@@ -56,8 +56,6 @@ export class GlyphNote extends Note {
     const stave = this.checkStave();
     const ctx = stave.checkContext();
     this.setRendered();
-    ctx.save();
-    this.applyStyle(ctx);
     ctx.openGroup('glyphNote', this.getAttribute('id'));
 
     this.x = this.isCenterAligned() ? this.getAbsoluteX() - this.getWidth() / 2 : this.getAbsoluteX();
@@ -65,6 +63,5 @@ export class GlyphNote extends Note {
     this.renderText(ctx, 0, 0);
     this.drawModifiers();
     ctx.closeGroup();
-    ctx.restore();
   }
 }

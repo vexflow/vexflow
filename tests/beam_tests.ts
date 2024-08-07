@@ -672,7 +672,7 @@ function autoTabBeams(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'All objects have been drawn');
 }

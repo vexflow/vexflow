@@ -52,7 +52,9 @@ export class Repetition extends StaveModifier {
     return this;
   }
 
-  draw(stave: Stave, x: number): this {
+  draw(): this {
+    const stave = this.checkStave();
+    const x = stave.getModifierXShift(this.getPosition());
     this.setRendered();
 
     switch (this.symbolType) {

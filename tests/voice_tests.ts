@@ -88,7 +88,7 @@ function full(options: TestOptions, contextBuilder: ContextBuilder): void {
 
   new Formatter().joinVoices([voice]).formatToStave([voice], stave);
 
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
   voice.draw(ctx);
   const bb = voice.getBoundingBox();
   if (bb) {

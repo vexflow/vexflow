@@ -81,6 +81,7 @@ export class Element {
 
   // Element objects keep a list of children that they are responsible for.
   // Children inherit the style from their parents (see: setGroupStyle(s)).
+  protected parent?: Element;
   protected children: Element[] = [];
   protected static ID: number = 1000;
   protected static newID(): string {
@@ -169,6 +170,8 @@ export class Element {
    * Note that StaveNote calls setGroupStyle() when setStyle() is called.
    */
   addChildElement(child: Element): this {
+    if (child.parent) throw new RuntimeError('Element', 'Draw not defined');
+    child.parent = this;
     this.children.push(child);
     return this;
   }
@@ -183,7 +186,7 @@ export class Element {
    * Example:
    * ```typescript
    * element.setStyle({ fillStyle: 'red', strokeStyle: 'red' });
-   * element.draw();
+   * element.drawWithStyle();
    * ```
    * Note: If the element draws additional sub-elements (i.e.: Modifiers in a Stave),
    * the style can be applied to all of them by means of the context:
@@ -191,7 +194,7 @@ export class Element {
    * element.setStyle({ fillStyle: 'red', strokeStyle: 'red' });
    * element.getContext().setFillStyle('red');
    * element.getContext().setStrokeStyle('red');
-   * element.draw();
+   * element.drawWithStyle();
    * ```
    * or using drawWithStyle:
    * ```typescript
@@ -233,12 +236,13 @@ export class Element {
    * Draw the element and all its sub-elements (i.e.: Modifiers in a Stave)
    * with the element's style (see `getStyle()` and `setStyle()`)
    */
-  drawWithStyle(): void {
+  drawWithStyle(): this {
     const ctx = this.checkContext();
     ctx.save();
-    this.applyStyle();
+    this.applyStyle(ctx);
     this.draw();
     ctx.restore();
+    return this;
   }
 
   /** Draw an element. */
@@ -591,7 +595,6 @@ export class Element {
 
   /** Render the element text. */
   renderText(ctx: RenderContext, xPos: number, yPos: number): void {
-    ctx.save();
     ctx.setFont(this._fontInfo);
     ctx.fillText(this._text, xPos + this.x + this.xShift, yPos + this.y + this.yShift);
     this.children.forEach((child) => {
@@ -599,7 +602,6 @@ export class Element {
       ctx.setFont(child.fontInfo);
       ctx.fillText(child.text, xPos + child.x + child.xShift, yPos + child.y + child.yShift);
     });
-    ctx.restore();
   }
 
   /** Measure the text using the textFont. */

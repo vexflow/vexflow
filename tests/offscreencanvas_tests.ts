@@ -40,7 +40,7 @@ function simpleTest(assert: Assert): void {
   // Render to the OffscreenCavans.
   const stave = new Stave(10, 50, 200);
   stave.setEndBarType(BarlineType.END);
-  stave.addClef('treble').setContext(ctx).draw();
+  stave.addClef('treble').setContext(ctx).drawWithStyle();
   const notes = [
     new StaveNote({ keys: ['c/4'], duration: 'q' }),
     new StaveNote({ keys: ['d/4'], duration: 'q' }),
