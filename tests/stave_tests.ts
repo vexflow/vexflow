@@ -20,6 +20,7 @@ import { Barline, BarlineType } from '../src/stavebarline';
 import { StaveModifier } from '../src/stavemodifier';
 import { StaveNote } from '../src/stavenote';
 import { Repetition } from '../src/staverepetition';
+import { StaveSection } from '../src/stavesection';
 import { StaveTempoOptions } from '../src/stavetempo';
 import { VoltaType } from '../src/stavevolta';
 import { TextJustification } from '../src/textnote';
@@ -165,7 +166,7 @@ function drawMultipleMeasures(options: TestOptions, contextBuilder: ContextBuild
 
   // bar 2 - juxtaposing second bar next to first bar
   const staveBar2 = new Stave(staveBar1.getWidth() + staveBar1.getX(), staveBar1.getY(), 300);
-  staveBar2.setSection('B', 0, 0, options.params?.fontSize);
+  staveBar2.addModifier(new StaveSection('B').setFontSize(options.params?.fontSize));
   staveBar2.setEndBarType(BarlineType.END);
   staveBar2.setContext(ctx).draw();
 
@@ -481,7 +482,7 @@ function drawVolta(options: TestOptions, contextBuilder: ContextBuilder): void {
   mm1.addClef('treble');
   mm1.addKeySignature('A');
   mm1.setMeasure(1);
-  mm1.setSection('A', 0);
+  mm1.addModifier(new StaveSection('A'));
   mm1.setContext(ctx).draw();
   const notesmm1 = [new StaveNote({ keys: ['c/4'], duration: 'w' })];
   // Helper function to justify and draw a 4/4 voice
@@ -537,7 +538,7 @@ function drawVolta(options: TestOptions, contextBuilder: ContextBuilder): void {
   // bar 7 - juxtapose seventh measure
   const mm7 = new Stave(mm6.getWidth() + mm6.getX(), mm1.getY(), 60);
   mm7.setMeasure(7);
-  mm7.setSection('B', 0);
+  mm7.addModifier(new StaveSection('B').setPadding(4));
   mm7.setContext(ctx).draw();
   const notesmm7 = [new StaveNote({ keys: ['b/4'], duration: 'w' })];
   // Helper function to justify and draw a 4/4 voice
@@ -630,7 +631,7 @@ function drawVoltaModifier(options: TestOptions, contextBuilder: ContextBuilder)
   mm5.addClef('treble');
   mm5.addKeySignature('A');
   mm5.setMeasure(5);
-  mm5.setSection('D', 0);
+  mm5.addModifier(new StaveSection('D'));
   mm5.setContext(ctx).draw();
   const notesmm5 = [new StaveNote({ keys: ['c/4'], duration: 'w' })];
   Formatter.FormatAndDraw(ctx, mm5, notesmm5);
@@ -640,7 +641,7 @@ function drawVoltaModifier(options: TestOptions, contextBuilder: ContextBuilder)
   // mm5.addModifier(new Repetition(Repetition.type.DS, mm4.getX() + mm4.getWidth(), 50), StaveModifierPosition.RIGHT);
   mm6.setRepetitionType(Repetition.type.DS);
   mm6.setMeasure(6);
-  mm6.setSection('E', 0);
+  mm6.addModifier(new StaveSection('E'));
   mm6.setContext(ctx).draw();
   const notesmm6 = [new StaveNote({ keys: ['c/4'], duration: 'w' })];
   Formatter.FormatAndDraw(ctx, mm6, notesmm6);
