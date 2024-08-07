@@ -44,7 +44,7 @@ function setupContext(options: TestOptions, w: number = 0, h: number = 0): { con
 
   context.setFont('Arial', VexFlowTests.Font.size);
 
-  const stave = new TabStave(10, 10, w || 350).addTabGlyph().setContext(context).draw();
+  const stave = new TabStave(10, 10, w || 350).addTabGlyph().setContext(context).drawWithStyle();
 
   return { context, stave };
 }
@@ -70,7 +70,7 @@ function tieNotes(notes: Note[], indexes: number[], stave: Stave, ctx: RenderCon
   );
 
   tie.setContext(ctx);
-  tie.draw();
+  tie.drawWithStyle();
 }
 
 /**
@@ -149,7 +149,7 @@ function multiTest(options: TestOptions, createTabTie: (notes: TieNotes) => TabT
     lastIndexes: [0],
   })
     .setContext(context)
-    .draw();
+    .drawWithStyle();
 
   options.assert.ok(true, 'Single note');
 
@@ -160,7 +160,7 @@ function multiTest(options: TestOptions, createTabTie: (notes: TieNotes) => TabT
     lastIndexes: [0, 1],
   })
     .setContext(context)
-    .draw();
+    .drawWithStyle();
 
   options.assert.ok(true, 'Chord');
 
@@ -171,7 +171,7 @@ function multiTest(options: TestOptions, createTabTie: (notes: TieNotes) => TabT
     lastIndexes: [0],
   })
     .setContext(context)
-    .draw();
+    .drawWithStyle();
 
   options.assert.ok(true, 'Single note high-fret');
 
@@ -182,7 +182,7 @@ function multiTest(options: TestOptions, createTabTie: (notes: TieNotes) => TabT
     lastIndexes: [0, 1],
   })
     .setContext(context)
-    .draw();
+    .drawWithStyle();
 
   options.assert.ok(true, 'Chord high-fret');
 }
@@ -219,7 +219,7 @@ function continuous(options: TestOptions, contextBuilder: ContextBuilder): void 
     lastIndexes: [0],
   })
     .setContext(context)
-    .draw();
+    .drawWithStyle();
 
   TabTie.createPulloff({
     firstNote: notes[1],
@@ -228,7 +228,7 @@ function continuous(options: TestOptions, contextBuilder: ContextBuilder): void 
     lastIndexes: [0],
   })
     .setContext(context)
-    .draw();
+    .drawWithStyle();
   options.assert.ok(true, 'Continuous Hammeron');
 }
 

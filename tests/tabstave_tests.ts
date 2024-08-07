@@ -22,7 +22,7 @@ function draw(options: TestOptions, contextBuilder: ContextBuilder): void {
   stave.setMeasure(1);
   stave.setNumLines(6);
   stave.setContext(ctx);
-  stave.draw();
+  stave.drawWithStyle();
 
   options.assert.equal(stave.getYForNote(0), 127, 'getYForNote(0)');
   options.assert.equal(stave.getYForLine(5), 127, 'getYForLine(5)');

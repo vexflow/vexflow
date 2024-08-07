@@ -345,7 +345,7 @@ function drawAccidentals(options: TestOptions): void {
     .setContext(ctx)
     .setEndBarType(BarlineType.DOUBLE)
     .addClef('treble')
-    .draw();
+    .drawWithStyle();
   voice.draw(ctx, stave);
   options.assert.ok(true, 'String Number');
 }

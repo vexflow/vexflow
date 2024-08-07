@@ -30,7 +30,7 @@ function simple(options: TestOptions, contextBuilder: ContextBuilder): void {
   ctx.scale(1.5, 1.5);
 
   ctx.font = '10pt Arial';
-  const stave = new TabStave(10, 10, 450).addTabGlyph().setContext(ctx).draw();
+  const stave = new TabStave(10, 10, 450).addTabGlyph().setContext(ctx).drawWithStyle();
 
   const notes = [
     tabNote({
@@ -60,7 +60,7 @@ function harsh(options: TestOptions, contextBuilder: ContextBuilder): void {
   ctx.scale(1.5, 1.5);
 
   ctx.font = '10pt Arial';
-  const stave = new TabStave(10, 10, 450).addTabGlyph().setContext(ctx).draw();
+  const stave = new TabStave(10, 10, 450).addTabGlyph().setContext(ctx).drawWithStyle();
 
   const notes = [
     tabNote({
@@ -85,7 +85,7 @@ function withBend(options: TestOptions, contextBuilder: ContextBuilder): void {
   ctx.scale(1.3, 1.3);
 
   ctx.setFont(Metrics.get('fontFamily'), VexFlowTests.Font.size);
-  const stave = new TabStave(10, 10, 450).addTabGlyph().setContext(ctx).draw();
+  const stave = new TabStave(10, 10, 450).addTabGlyph().setContext(ctx).drawWithStyle();
 
   const notes = [
     tabNote({
