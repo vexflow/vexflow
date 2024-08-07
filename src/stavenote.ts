@@ -457,7 +457,7 @@ export class StaveNote extends StemmableNote {
 
   // Builds a `Stem` for the note
   buildStem(): this {
-    this.setStem(new Stem({ hide: !!this.isRest() }));
+    this.setStem(new Stem({ hide: this.isRest() }));
     return this;
   }
 
