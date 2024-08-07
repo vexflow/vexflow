@@ -68,7 +68,7 @@ export class EasyScoreGrammar implements Grammar {
   CHORD(): Rule {
     return {
       expect: [this.LPAREN, this.NOTES, this.RPAREN],
-      // eslint-disable-next-line
+
       run: (state) => this.builder.addChord(state!.matches[1] as Match[]),
     };
   }
@@ -87,7 +87,6 @@ export class EasyScoreGrammar implements Grammar {
     return {
       expect: [this.NOTENAME, this.ACCIDENTAL, this.OCTAVE],
       run: (state) => {
-        // eslint-disable-next-line
         const s = state!;
         this.builder.addSingleNote(s.matches[0] as string, s.matches[1] as string, s.matches[2] as string);
       },
@@ -104,7 +103,7 @@ export class EasyScoreGrammar implements Grammar {
     return {
       expect: [this.DOT],
       zeroOrMore: true,
-      // eslint-disable-next-line
+
       run: (state) => this.builder.setNoteDots(state!.matches),
     };
   }
@@ -112,7 +111,7 @@ export class EasyScoreGrammar implements Grammar {
     return {
       expect: [this.SLASH, this.MAYBESLASH, this.TYPES],
       maybe: true,
-      // eslint-disable-next-line
+
       run: (state) => this.builder.setNoteType(state!.matches[2] as string),
     };
   }
@@ -120,7 +119,7 @@ export class EasyScoreGrammar implements Grammar {
     return {
       expect: [this.SLASH, this.DURATIONS],
       maybe: true,
-      // eslint-disable-next-line
+
       run: (state) => this.builder.setNoteDuration(state!.matches[1] as string),
     };
   }
@@ -141,7 +140,7 @@ export class EasyScoreGrammar implements Grammar {
 
     return {
       expect: [this.KEY, this.EQUALS, this.VAL],
-      // eslint-disable-next-line
+
       run: (state) => this.builder.addNoteOption(state!.matches[0] as string, unquote(state!.matches[2] as string)),
     };
   }
@@ -467,7 +466,6 @@ export class EasyScore {
    * @returns this
    */
   setOptions(options: EasyScoreOptions): this {
-    // eslint-disable-next-line
     const factory = options.factory!; // ! operator, because options.factory was set in Factory.EasyScore().
     const builder = options.builder ?? new Builder(factory);
 

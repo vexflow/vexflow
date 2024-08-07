@@ -495,7 +495,6 @@ export class Formatter {
 
     this.createTickContexts(voices);
 
-    // eslint-disable-next-line
     const { list: contextList, map: contextMap } = this.tickContexts!;
     this.minTotalWidth = 0;
 
@@ -600,12 +599,12 @@ export class Formatter {
         if (!(staveTickToContextMap ? staveTickToContextMap[integerTicks] : undefined)) {
           const newContext = new ModifierContext();
           contexts.push(newContext);
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
           staveTickToContextMap![integerTicks] = newContext;
         }
 
         // Add this tickable to the TickContext.
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         tickable.addToModifierContext(staveTickToContextMap![integerTicks]);
         ticksUsed.add(tickable.getTicks());
       });
@@ -1088,7 +1087,6 @@ export class Formatter {
   formatToStave(voices: Voice[], stave: Stave, optionsParam?: FormatParams): this {
     const options: FormatParams = { context: stave.getContext(), ...optionsParam };
 
-    // eslint-disable-next-line
     const justifyWidth = stave.getNoteEndX() - stave.getNoteStartX() - Stave.defaultPadding;
     L('Formatting voices to width: ', justifyWidth);
     return this.format(voices, justifyWidth, options);

@@ -39,7 +39,6 @@ const tabNote = (noteStruct: TabNoteStruct) => new TabNote(noteStruct);
  * Helper function to create a RenderContext and TabStave.
  */
 function setupContext(options: TestOptions, w: number = 0, h: number = 0): { context: RenderContext; stave: TabStave } {
-  // eslint-disable-next-line
   const context = options.contextBuilder!(options.elementId, w || 350, h || 160);
 
   context.setFont('Arial', VexFlowTests.Font.size);
