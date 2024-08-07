@@ -149,9 +149,9 @@ export class StaveTie extends Element {
 
     // setNotes(...) verified that firstIndexes and lastIndexes are not undefined.
     // As a result, we use the ! non-null assertion operator here.
-    // eslint-disable-next-line
+
     const firstIndexes = this.notes.firstIndexes!;
-    // eslint-disable-next-line
+
     const lastIndexes = this.notes.lastIndexes!;
     ctx.save();
     this.applyStyle();

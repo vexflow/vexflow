@@ -92,7 +92,7 @@ function simple(options: TestOptions): void {
   f.draw();
 
   const xs = mmRests[0].getXs();
-  // eslint-disable-next-line
+
   const strY = mmRests[0].getStave()!.getYForLine(-0.5);
   const str = 'TACET';
   const context = f.getContext();
@@ -127,7 +127,7 @@ function staveWithModifiers(options: TestOptions): void {
 
   params.forEach((param) => {
     const staveOptions = param[0];
-    // eslint-disable-next-line
+
     const staveParams = staveOptions.params!;
     const mmrestParams = param[1];
 

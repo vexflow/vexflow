@@ -600,7 +600,7 @@ export class StaveNote extends StemmableNote {
       boundingBox.mergeWith(notehead.getBoundingBox());
     });
     const { yTop, yBottom } = this.getNoteHeadBounds();
-    // eslint-disable-next-line
+
     const noteStemHeight = this.stem!.getHeight();
     const flagX = this.getStemX() - Tables.STEM_WIDTH / 2;
     const flagY =
@@ -1102,7 +1102,7 @@ export class StaveNote extends StemmableNote {
 
     if (this.shouldDrawFlag()) {
       const { yTop, yBottom } = this.getNoteHeadBounds();
-      // eslint-disable-next-line
+
       const noteStemHeight = this.stem!.getHeight();
       const flagX = this.getStemX() - Tables.STEM_WIDTH / 2;
       const flagY =

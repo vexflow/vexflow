@@ -94,7 +94,6 @@ export class TabSlide extends TabTie {
       throw new RuntimeError('BadSlide', 'Invalid slide direction');
     }
 
-    // eslint-disable-next-line
     const firstIndexes = this.notes.firstIndexes!;
     for (let i = 0; i < firstIndexes.length; ++i) {
       const slideY = firstYs[firstIndexes[i]] + this.renderOptions.yShift;

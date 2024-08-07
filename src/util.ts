@@ -112,7 +112,7 @@ export function sumArray(arr: number[]): number {
  * Take `arr` and return a new array consisting of the sorted, unique'd,
  * contents of arr. Does not modify `arr`.
  */
-// eslint-disable-next-line
+
 /*
   static sortAndUnique(arr: any[], cmp: any, eq: any): any[] {
     if (arr.length > 1) {
