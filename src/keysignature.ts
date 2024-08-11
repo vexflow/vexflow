@@ -8,6 +8,7 @@
 
 import { BoundingBox } from './boundingbox';
 import { Element } from './element';
+import { Glyphs } from './glyphs';
 import { Stave } from './stave';
 import { StaveModifier, StaveModifierPosition } from './stavemodifier';
 import { Tables } from './tables';
@@ -49,11 +50,16 @@ export class KeySignature extends StaveModifier {
     glyph.setText(code);
 
     // Determine spacing between current accidental and the next accidental
-    const extraWidth = 1;
+    let extraWidth = 1;
     // Place the glyph on the stave
     glyph.setYShift(stave.getYForLine(acc.line));
     if (this.children.length > 0) {
       const prevGlyph = this.children[this.children.length - 1];
+      if (
+        (prevGlyph.getText() === Glyphs.accidentalNatural || glyph.getText() === Glyphs.accidentalNatural) &&
+        Math.abs(glyph.getYShift() - prevGlyph.getYShift()) < 10
+      )
+        extraWidth = 2;
       glyph.setXShift(prevGlyph.getXShift() + prevGlyph.getWidth() + extraWidth);
     }
     this.children.push(glyph);
