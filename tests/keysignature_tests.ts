@@ -93,6 +93,10 @@ function majorKeys(options: TestOptions, contextBuilder: ContextBuilder): void {
 
   stave1.setContext(ctx);
   stave1.drawWithStyle();
+  stave1.getModifiers().forEach((modifier) => {
+    VexFlowTests.drawBoundingBox(ctx, modifier);
+  });
+
   stave2.setContext(ctx);
   stave2.drawWithStyle();
 
