@@ -97,7 +97,7 @@ export const MetricsDefaults: Record<string, any> = {
       fontSize: 20,
     },
     grace: {
-      fontSize: 25,
+      fontSize: 20,
     },
     noteheadAccidentalPadding: 1,
     leftPadding: 2,
