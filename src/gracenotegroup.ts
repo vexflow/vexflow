@@ -53,7 +53,7 @@ export class GraceNoteGroup extends Modifier {
 
     const groupList = [];
     let prevNote = null;
-    let shiftL = 0;
+    let shift = 0;
 
     for (let i = 0; i < gracenoteGroups.length; ++i) {
       const gracenoteGroup = gracenoteGroups[i];
@@ -64,19 +64,23 @@ export class GraceNoteGroup extends Modifier {
       if (isStavenote && note !== prevNote) {
         // Iterate through all notes to get the displaced pixels
         for (let n = 0; n < note.keys.length; ++n) {
-          shiftL = Math.max(note.getLeftDisplacedHeadPx(), shiftL);
+          shift = Math.max(note.getLeftDisplacedHeadPx(), shift);
         }
         prevNote = note;
       }
 
-      groupList.push({ shift: shiftL, gracenoteGroup, spacing });
+      groupList.push({ shift: shift, gracenoteGroup, spacing });
     }
 
     // If first note left shift in case it is displaced
     let groupShift = groupList[0].shift;
     let formatWidth;
+    let right = false;
+    let left = false;
     for (let i = 0; i < groupList.length; ++i) {
       const gracenoteGroup = groupList[i].gracenoteGroup;
+      if (gracenoteGroup.position === Modifier.Position.RIGHT) right = true;
+      else left = true;
       gracenoteGroup.preFormat();
       formatWidth = gracenoteGroup.getWidth() + groupList[i].spacing;
       groupShift = Math.max(formatWidth, groupShift);
@@ -90,7 +94,8 @@ export class GraceNoteGroup extends Modifier {
       );
     }
 
-    state.leftShift += groupShift;
+    if (right) state.rightShift += groupShift;
+    if (left) state.leftShift += groupShift;
     return true;
   }
 
@@ -167,7 +172,7 @@ export class GraceNoteGroup extends Modifier {
 
     L('Drawing grace note group for:', note);
 
-    this.alignSubNotesWithNote(this.getGraceNotes(), note); // Modifier function
+    this.alignSubNotesWithNote(this.getGraceNotes(), note, this.position); // Modifier function
 
     // Draw grace notes.
     this.graceNotes.forEach((graceNote) => graceNote.setContext(ctx).drawWithStyle());
