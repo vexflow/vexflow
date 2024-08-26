@@ -199,13 +199,15 @@ export class Modifier extends Element {
   }
 
   // aligns sub notes of NoteSubGroup (or GraceNoteGroup) to the main note with correct x-offset
-  alignSubNotesWithNote(subNotes: Note[], note: Note): void {
+  alignSubNotesWithNote(subNotes: Note[], note: Note, position = Modifier.Position.LEFT): void {
     // Shift over the tick contexts of each note
     const tickContext = note.getTickContext();
     const metrics = tickContext.getMetrics();
     const stave = note.getStave();
     const subNoteXOffset =
-      tickContext.getX() - metrics.modLeftPx - metrics.modRightPx + this.getSpacingFromNextModifier();
+      position === Modifier.Position.RIGHT
+        ? tickContext.getX() + this.getSpacingFromNextModifier() * subNotes.length + 10
+        : tickContext.getX() - metrics.modLeftPx - metrics.modRightPx + this.getSpacingFromNextModifier();
 
     subNotes.forEach((subNote) => {
       const subTickContext = subNote.getTickContext();

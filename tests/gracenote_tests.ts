@@ -7,6 +7,7 @@
 
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
+import { ModifierPosition } from '../src';
 import { Accidental } from '../src/accidental';
 import { Annotation } from '../src/annotation';
 import { Articulation } from '../src/articulation';
@@ -99,7 +100,7 @@ function basic(options: TestOptions): void {
       .addModifier(f.GraceNoteGroup({ notes: gracenotes3 }).beamNotes(), 0),
     f
       .StaveNote({ keys: ['a/4'], duration: '4', autoStem: true })
-      .addModifier(f.GraceNoteGroup({ notes: gracenotes4 }).beamNotes(), 0),
+      .addModifier(f.GraceNoteGroup({ notes: gracenotes4 }).beamNotes().setPosition(ModifierPosition.RIGHT), 0),
   ];
 
   const voice = f.Voice().setStrict(false).addTickables(notes);
