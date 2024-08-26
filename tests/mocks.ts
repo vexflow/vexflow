@@ -22,7 +22,6 @@ class MockTickable extends Tickable {
   }
 
   getX(): number {
-    // eslint-disable-next-line
     return this.tickContext!.getX();
   }
 

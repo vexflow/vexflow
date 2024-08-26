@@ -338,11 +338,12 @@ function genAccidentals(): string[] {
   }
   // Spartan Sagittal multi-shaft accidentals
   for (let u = 0xe310; u <= 0xe335; u++) {
-    switch (u) {  // exclude unused smufls
+    switch (u) {
       case 0xe31a:
       case 0xe31b:
       case 0xe31e:
       case 0xe31f:
+        // Exclude unused SMuFL glyphs.
         break;
       default:
         accs.push(String.fromCodePoint(u));
@@ -410,10 +411,10 @@ function cautionary(options: TestOptions): void {
 
   const accids = Object.values(accidentals).filter((accid) => accid !== '{' && accid !== '}');
   for (i = 0; i < staveCount; ++i) {
-    const stave = f.Stave({ x: 0, y: 10 + staveHeight / scale * i, width: staveWidth / scale });
+    const stave = f.Stave({ x: 0, y: 10 + (staveHeight / scale) * i, width: staveWidth / scale });
     const score = f.EasyScore();
     const rowMap = [];
-    for (j = 0; j < notesPerStave && (j + i * notesPerStave) < accids.length; ++j) {
+    for (j = 0; j < notesPerStave && j + i * notesPerStave < accids.length; ++j) {
       rowMap.push(accids[j + i * notesPerStave]);
     }
     const notes = rowMap.map((accidType: string) =>
