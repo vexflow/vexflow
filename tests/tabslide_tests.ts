@@ -47,7 +47,6 @@ function tieNotes(notes: TabNote[], indexes: number[], stave: TabStave, ctx: Ren
 }
 
 function setupContext(options: TestOptions, width?: number): { context: RenderContext; stave: TabStave } {
-  // eslint-disable-next-line
   const context = options.contextBuilder!(options.elementId, 350, 140);
   context.scale(0.9, 0.9);
 

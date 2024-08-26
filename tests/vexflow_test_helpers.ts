@@ -43,7 +43,7 @@ if (!global.$) {
     } else if (param.startsWith('<')) {
       // Extract the tag name: e.g., <div/> => div
       // Assume param.match returns something (! operator).
-      // eslint-disable-next-line
+
       const tagName = param.match(/[A-Za-z]+/g)![0];
       element = document.createElement(tagName);
     } else {
