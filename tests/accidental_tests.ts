@@ -338,13 +338,12 @@ function genAccidentals(): string[] {
   }
   // Spartan Sagittal multi-shaft accidentals
   for (let u = 0xe310; u <= 0xe335; u++) {
-    switch (
-      u // exclude unused smufls
-    ) {
+    switch (u) {
       case 0xe31a:
       case 0xe31b:
       case 0xe31e:
       case 0xe31f:
+        // Exclude unused SMuFL glyphs.
         break;
       default:
         accs.push(String.fromCodePoint(u));
