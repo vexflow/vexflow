@@ -58,8 +58,9 @@ export class KeySignature extends StaveModifier {
       if (
         (prevGlyph.getText() === Glyphs.accidentalNatural || glyph.getText() === Glyphs.accidentalNatural) &&
         Math.abs(glyph.getYShift() - prevGlyph.getYShift()) < 10
-      )
+      ) {
         extraWidth = 2;
+      }
       glyph.setXShift(prevGlyph.getXShift() + prevGlyph.getWidth() + extraWidth);
     }
     this.children.push(glyph);
@@ -133,8 +134,11 @@ export class KeySignature extends StaveModifier {
   // Calculate the width and height for the entire signature
   protected calculateDimensions(): void {
     let boundingBox: BoundingBox;
-    if (this.children.length > 0) boundingBox = this.children[0].getBoundingBox();
-    else boundingBox = new BoundingBox(this.x + this.xShift, this.y + this.yShift, 0, 0);
+    if (this.children.length > 0) {
+      boundingBox = this.children[0].getBoundingBox();
+    } else {
+      boundingBox = new BoundingBox(this.x + this.xShift, this.y + this.yShift, 0, 0);
+    }
     this.children.forEach((glyph) => {
       boundingBox.mergeWith(glyph.getBoundingBox());
     });
