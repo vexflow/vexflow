@@ -223,10 +223,10 @@ function formatAccidentalSpaces(options: TestOptions): void {
   const formatter = new Formatter({ softmaxFactor }).joinVoices([voice]);
   const width = formatter.preCalculateMinTotalWidth([voice]);
   const stave = new Stave(10, 40, width + 20);
-  stave.setContext(context).draw();
+  stave.setContext(context).drawWithStyle();
   formatter.format([voice], width);
   voice.draw(context, stave);
-  beams.forEach((b) => b.setContext(context).draw());
+  beams.forEach((b) => b.setContext(context).drawWithStyle());
 
   notes.forEach((note) => Note.plotMetrics(context, note, 30));
 
@@ -338,7 +338,9 @@ function genAccidentals(): string[] {
   }
   // Spartan Sagittal multi-shaft accidentals
   for (let u = 0xe310; u <= 0xe335; u++) {
-    switch (u) {
+    switch (
+      u // exclude unused smufls
+    ) {
       case 0xe31a:
       case 0xe31b:
       case 0xe31e:
@@ -554,8 +556,8 @@ function multiVoice(options: TestOptions): void {
 
     new TickContext().addTickable(note1).addTickable(note2).preFormat().setX(x);
 
-    note1.setContext(ctx).draw();
-    note2.setContext(ctx).draw();
+    note1.setContext(ctx).drawWithStyle();
+    note2.setContext(ctx).drawWithStyle();
 
     Note.plotMetrics(ctx, note1, 180);
     Note.plotMetrics(ctx, note2, 15);
@@ -566,7 +568,7 @@ function multiVoice(options: TestOptions): void {
   const stave = f.Stave({ x: 10, y: 45, width: 420 });
   const ctx = f.getContext();
 
-  stave.draw();
+  stave.drawWithStyle();
 
   let note1 = f
     .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], duration: '2', stemDirection: -1 })

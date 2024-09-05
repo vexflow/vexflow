@@ -65,7 +65,7 @@ function withModifiers(options: TestOptions): void {
     const voiceW = formatter.preCalculateMinTotalWidth([voice]);
     const staffW = voiceW + Stave.defaultPadding + getGlyphWidth(0xe050 /*gClef*/);
     formatter.format([voice], voiceW);
-    const staff = f.Stave({ x: 10, y, width: staffW }).addClef('treble').draw();
+    const staff = f.Stave({ x: 10, y, width: staffW }).addClef('treble').drawWithStyle();
     voice.draw(ctx, staff);
   }
 
@@ -247,7 +247,7 @@ function kern(options: TestOptions): void {
   ctx.scale(1.5, 1.5);
 
   function draw(chords: ChordSymbol[], y: number) {
-    const stave = f.Stave({ x: 10, y, width: 450 }).addClef('treble').setContext(ctx).draw();
+    const stave = f.Stave({ x: 10, y, width: 450 }).addClef('treble').setContext(ctx).drawWithStyle();
 
     const notes = [
       note(f, ['C/4'], 'q', chords[0]),
@@ -306,7 +306,7 @@ function top(options: TestOptions): void {
     factory.StaveNote({ keys, duration, stemDirection: direction }).addModifier(chordSymbol, 0);
 
   function draw(c1: ChordSymbol, c2: ChordSymbol, y: number) {
-    const stave = f.Stave({ x: 10, y, width: 450 }).addClef('treble').setContext(ctx).draw();
+    const stave = f.Stave({ x: 10, y, width: 450 }).addClef('treble').setContext(ctx).drawWithStyle();
     const notes = [
       note(f, ['e/4', 'a/4', 'd/5'], 'h', c1, 1).addModifier(new Accidental('b'), 0),
       note(f, ['c/5', 'e/5', 'c/6'], 'h', c2, -1),
@@ -349,7 +349,7 @@ function topJustify(options: TestOptions): void {
   ctx.scale(1.5, 1.5);
 
   function draw(chord1: ChordSymbol, chord2: ChordSymbol, y: number) {
-    const stave = new Stave(10, y, 450).addClef('treble').setContext(ctx).draw();
+    const stave = new Stave(10, y, 450).addClef('treble').setContext(ctx).drawWithStyle();
 
     const notes = [
       note(f, ['e/4', 'a/4', 'd/5'], 'h', chord1).addModifier(new Accidental('b'), 0),
@@ -397,7 +397,7 @@ function bottom(options: TestOptions): void {
   ctx.scale(1.5, 1.5);
 
   function draw(chords: ChordSymbol[], y: number) {
-    const stave = new Stave(10, y, 400).addClef('treble').setContext(ctx).draw();
+    const stave = new Stave(10, y, 400).addClef('treble').setContext(ctx).drawWithStyle();
 
     const notes = [
       note(f, ['c/4', 'f/4', 'a/4'], 'q', chords[0]),
@@ -429,7 +429,7 @@ function bottomStemDown(options: TestOptions): void {
     const note = (keys: string[], duration: string, chordSymbol: ChordSymbol) =>
       new StaveNote({ keys, duration, stemDirection: -1 }).addModifier(chordSymbol, 0);
 
-    const stave = new Stave(10, y, 400).addClef('treble').setContext(ctx).draw();
+    const stave = new Stave(10, y, 400).addClef('treble').setContext(ctx).drawWithStyle();
     const notes = [
       note(['c/4', 'f/4', 'a/4'], 'q', chords[0]),
       note(['c/4', 'e/4', 'b/4'], 'q', chords[1]).addModifier(new Accidental('b'), 2),
@@ -460,7 +460,7 @@ function doubleBottom(options: TestOptions): void {
     const note = (keys: string[], duration: string, chordSymbol1: ChordSymbol, chordSymbol2: ChordSymbol) =>
       new StaveNote({ keys, duration }).addModifier(chordSymbol1, 0).addModifier(chordSymbol2, 0);
 
-    const stave = f.Stave({ x: 10, y, width: 450 }).addClef('treble').setContext(ctx).draw();
+    const stave = f.Stave({ x: 10, y, width: 450 }).addClef('treble').setContext(ctx).drawWithStyle();
     const notes = [
       note(['c/4', 'f/4', 'a/4'], 'q', chords[0], chords2[0]),
       note(['c/4', 'e/4', 'b/4'], 'q', chords[1], chords2[1]).addModifier(f.Accidental({ type: 'b' }), 2),
@@ -493,7 +493,7 @@ function wide(options: TestOptions): void {
   ctx.scale(1.5, 1.5);
 
   function draw(chord1: ChordSymbol, chord2: ChordSymbol, y: number) {
-    const stave = new Stave(10, y, 250).addClef('treble').setContext(ctx).draw();
+    const stave = new Stave(10, y, 250).addClef('treble').setContext(ctx).drawWithStyle();
 
     const notes = [
       note(f, ['e/4', 'a/4', 'd/5'], 'h', chord1).addModifier(new Accidental('b'), 0),

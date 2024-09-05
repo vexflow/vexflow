@@ -87,9 +87,9 @@ function keys(options: TestOptions, contextBuilder: ContextBuilder): void {
 
   for (i = 0; i < clefs.length; i++) {
     staves[i].setContext(ctx);
-    staves[i].draw();
+    staves[i].drawWithStyle();
     staves[i + clefs.length].setContext(ctx);
-    staves[i + clefs.length].draw();
+    staves[i + clefs.length].drawWithStyle();
   }
   options.assert.ok(true, 'all pass');
 }
@@ -123,13 +123,13 @@ function staveHelper(options: TestOptions, contextBuilder: ContextBuilder): void
   }
 
   stave1.setContext(ctx);
-  stave1.draw();
+  stave1.drawWithStyle();
   stave2.setContext(ctx);
-  stave2.draw();
+  stave2.drawWithStyle();
   stave3.setContext(ctx);
-  stave3.draw();
+  stave3.drawWithStyle();
   stave4.setContext(ctx);
-  stave4.draw();
+  stave4.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }

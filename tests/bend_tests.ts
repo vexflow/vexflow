@@ -40,7 +40,7 @@ function doubleBends(options: TestOptions, contextBuilder: ContextBuilder): void
   ctx.scale(1.5, 1.5);
 
   ctx.font = '10pt Arial';
-  const stave = new TabStave(10, 10, 450).addClef('tab').setContext(ctx).draw();
+  const stave = new TabStave(10, 10, 450).addClef('tab').setContext(ctx).drawWithStyle();
 
   const notes = [
     note({
@@ -81,7 +81,7 @@ function doubleBendsWithRelease(options: TestOptions, contextBuilder: ContextBui
   ctx.scale(1.0, 1.0);
   ctx.setBackgroundFillStyle('#FFF');
   ctx.setFont('Arial', VexFlowTests.Font.size);
-  const stave = new TabStave(10, 10, 550).addClef('tab').setContext(ctx).draw();
+  const stave = new TabStave(10, 10, 550).addClef('tab').setContext(ctx).drawWithStyle();
 
   const notes = [
     note({
@@ -163,7 +163,7 @@ function reverseBends(options: TestOptions, contextBuilder: ContextBuilder): voi
 
   ctx.setFont('10pt Arial');
 
-  const stave = new TabStave(10, 10, 450).addClef('tab').setContext(ctx).draw();
+  const stave = new TabStave(10, 10, 450).addClef('tab').setContext(ctx).drawWithStyle();
 
   const notes = [
     note({
@@ -203,7 +203,7 @@ function reverseBends(options: TestOptions, contextBuilder: ContextBuilder): voi
       .preFormat()
       .setX(75 * i);
 
-    note.setStave(stave).setContext(ctx).draw();
+    note.setStave(stave).setContext(ctx).drawWithStyle();
     Note.plotMetrics(ctx, note, 140);
     options.assert.ok(true, 'Bend ' + i);
   }
@@ -214,7 +214,7 @@ function bendPhrase(options: TestOptions, contextBuilder: ContextBuilder): void 
   ctx.scale(1.5, 1.5);
 
   ctx.font = Metrics.get('Bend.fontSize') + Metrics.get('Bend.fontFamily'); // Optionally use constants defined in Font.
-  const stave = new TabStave(10, 10, 450).addClef('tab').setContext(ctx).draw();
+  const stave = new TabStave(10, 10, 450).addClef('tab').setContext(ctx).drawWithStyle();
 
   const phrase1 = [
     { type: Bend.UP, text: 'Full' },
@@ -241,7 +241,7 @@ function bendPhrase(options: TestOptions, contextBuilder: ContextBuilder): void 
       .preFormat()
       .setX(75 * i);
 
-    note.setStave(stave).setContext(ctx).draw();
+    note.setStave(stave).setContext(ctx).drawWithStyle();
     Note.plotMetrics(ctx, note, 140);
     options.assert.ok(true, 'Bend ' + i);
   }
@@ -252,7 +252,7 @@ function whackoBends(options: TestOptions, contextBuilder: ContextBuilder): void
   ctx.scale(1.0, 1.0);
   ctx.setBackgroundFillStyle('#FFF');
   ctx.setFont('Arial', VexFlowTests.Font.size);
-  const stave = new TabStave(10, 10, 350).addClef('tab').setContext(ctx).draw();
+  const stave = new TabStave(10, 10, 350).addClef('tab').setContext(ctx).drawWithStyle();
 
   const phrase1 = [
     { type: Bend.UP, text: 'Full' },

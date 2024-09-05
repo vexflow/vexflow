@@ -63,7 +63,7 @@ function drawArticulations(options: TestOptions): void {
       .Stave({ x, y, width: nwidth + Stave.defaultPadding })
       .setEndBarType(barline)
       .setContext(ctx)
-      .draw();
+      .drawWithStyle();
     voices.forEach((voice) => voice.draw(ctx, stave));
     return stave.getWidth();
   };
@@ -148,7 +148,7 @@ function drawFermata(options: TestOptions): void {
       .Stave({ x, y, width: nwidth + Stave.defaultPadding })
       .setEndBarType(barline)
       .setContext(ctx)
-      .draw();
+      .drawWithStyle();
     voices.forEach((voice) => voice.draw(ctx, stave));
     return stave.getWidth();
   };
@@ -187,7 +187,7 @@ function verticalPlacement(options: TestOptions, contextBuilder: ContextBuilder)
   const ctx = contextBuilder(options.elementId, 750, 300);
 
   const staveNote = (noteStruct: StaveNoteStruct) => new StaveNote(noteStruct);
-  const stave = new Stave(10, 50, 750).addClef('treble').setContext(ctx).draw();
+  const stave = new Stave(10, 50, 750).addClef('treble').setContext(ctx).drawWithStyle();
 
   const notes = [
     staveNote({ keys: ['f/4'], duration: 'q' })
@@ -257,7 +257,7 @@ function verticalPlacement2(options: TestOptions, contextBuilder: ContextBuilder
   const ctx = contextBuilder(options.elementId, 750, 300);
 
   const staveNote = (noteStruct: StaveNoteStruct) => new StaveNote(noteStruct);
-  const stave = new Stave(10, 50, 750).addClef('treble').setContext(ctx).draw();
+  const stave = new Stave(10, 50, 750).addClef('treble').setContext(ctx).drawWithStyle();
 
   const notes = [
     staveNote({ keys: ['f/4'], duration: 'q' })
@@ -324,7 +324,7 @@ function drawArticulations2(options: TestOptions): void {
   ctx.scale(scale, scale);
 
   // bar 1
-  const stave1 = new Stave(10, 50, 500).setContext(ctx).draw();
+  const stave1 = new Stave(10, 50, 500).setContext(ctx).drawWithStyle();
   const notesBar1 = [
     f.StaveNote({ keys: ['c/4'], duration: '16', stemDirection: 1 }),
     f.StaveNote({ keys: ['d/4'], duration: '16', stemDirection: 1 }),
@@ -356,11 +356,11 @@ function drawArticulations2(options: TestOptions): void {
   const beam2 = new Beam(notesBar1.slice(8, 16));
   Formatter.FormatAndDraw(ctx, stave1, notesBar1);
 
-  beam1.setContext(ctx).draw();
-  beam2.setContext(ctx).draw();
+  beam1.setContext(ctx).drawWithStyle();
+  beam2.setContext(ctx).drawWithStyle();
 
   // bar 2 - juxtaposing second bar next to first bar
-  const stave2 = new Stave(510, 50, 500).setContext(ctx).draw();
+  const stave2 = new Stave(510, 50, 500).setContext(ctx).drawWithStyle();
   const notesBar2 = [
     f.StaveNote({ keys: ['f/3'], duration: '16', stemDirection: 1 }),
     f.StaveNote({ keys: ['g/3'], duration: '16', stemDirection: 1 }),
@@ -391,11 +391,11 @@ function drawArticulations2(options: TestOptions): void {
   const beam4 = new Beam(notesBar2.slice(8, 16));
   Formatter.FormatAndDraw(ctx, stave2, notesBar2);
 
-  beam3.setContext(ctx).draw();
-  beam4.setContext(ctx).draw();
+  beam3.setContext(ctx).drawWithStyle();
+  beam4.setContext(ctx).drawWithStyle();
 
   // bar 3 - juxtaposing second bar next to first bar
-  const stave3 = new Stave(1010, 50, 100).setContext(ctx).draw();
+  const stave3 = new Stave(1010, 50, 100).setContext(ctx).drawWithStyle();
   const notesBar3 = [f.StaveNote({ keys: ['c/4'], duration: 'w', stemDirection: 1 })];
   notesBar3[0].addModifier(new Articulation('a-').setPosition(3), 0);
   notesBar3[0].addModifier(new Articulation('a>').setPosition(3), 0);
@@ -404,7 +404,7 @@ function drawArticulations2(options: TestOptions): void {
   Formatter.FormatAndDraw(ctx, stave3, notesBar3);
 
   // bar 4 - juxtaposing second bar next to first bar
-  const stave4 = new Stave(1110, 50, 250).setContext(ctx).draw();
+  const stave4 = new Stave(1110, 50, 250).setContext(ctx).drawWithStyle();
   const notesBar4 = [
     f.StaveNote({ keys: ['c/5'], duration: 'q', stemDirection: -1 }),
     f.StaveNote({ keys: ['a/5'], duration: 'q', stemDirection: -1 }),
@@ -427,7 +427,7 @@ function tabNotes(options: TestOptions, contextBuilder: ContextBuilder): void {
   ctx.font = '10pt ' + Metrics.get('fontFamily');
   const stave = new TabStave(10, 10, 550);
   stave.setContext(ctx);
-  stave.draw();
+  stave.drawWithStyle();
 
   const specs = [
     {

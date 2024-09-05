@@ -47,7 +47,7 @@ function basic(options: TestOptions, contextBuilder: ContextBuilder): void {
   setContextStyle(ctx);
 
   const stave = new Stave(10, 0, 250).addClef('treble');
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
 
   const formatter = new Formatter();
   const voice = new Voice(VexFlow.TIME4_4).setStrict(false);
@@ -70,7 +70,7 @@ function basic(options: TestOptions, contextBuilder: ContextBuilder): void {
 function showNote(noteStruct: StaveNoteStruct, stave: Stave, ctx: RenderContext, x: number) {
   const note = new StaveNote(noteStruct).setStave(stave);
   new TickContext().addTickable(note).preFormat().setX(x);
-  note.setContext(ctx).draw();
+  note.setContext(ctx).drawWithStyle();
   return note;
 }
 
@@ -109,7 +109,7 @@ function variousHeads(options: TestOptions, contextBuilder: ContextBuilder): voi
     const stave = new Stave(10, 10 + staveNum * 120, notes.length * 25 + 75)
       .addClef('percussion')
       .setContext(ctx)
-      .draw();
+      .drawWithStyle();
 
     for (let i = 0; i < notes.length; ++i) {
       const note = notes[i];
@@ -178,7 +178,7 @@ function variousNoteHeads(options: TestOptions, contextBuilder: ContextBuilder):
     const stave = new Stave(10, 10 + staveNum * 120, notes.length * 25 + 75)
       .addClef('percussion')
       .setContext(ctx)
-      .draw();
+      .drawWithStyle();
 
     for (let i = 0; i < notes.length; ++i) {
       const note = notes[i];
@@ -205,7 +205,7 @@ function variousNoteHeads2(options: TestOptions, contextBuilder: ContextBuilder)
 
   const ctx = contextBuilder(options.elementId, notes.length * 25 + 100, 240);
 
-  const stave = new Stave(10, 10, notes.length * 25 + 75).addClef('percussion').setContext(ctx).draw();
+  const stave = new Stave(10, 10, notes.length * 25 + 75).addClef('percussion').setContext(ctx).drawWithStyle();
 
   for (let i = 0; i < notes.length; ++i) {
     const note = notes[i];
@@ -244,7 +244,10 @@ function drumChordHeads(options: TestOptions, contextBuilder: ContextBuilder): v
 
   // Draw two staves, one with up-stems and one with down-stems.
   for (let h = 0; h < 2; ++h) {
-    const stave = new Stave(10, 10 + h * 120, notes.length * 25 + 75).addClef('percussion').setContext(ctx).draw();
+    const stave = new Stave(10, 10 + h * 120, notes.length * 25 + 75)
+      .addClef('percussion')
+      .setContext(ctx)
+      .drawWithStyle();
 
     for (let i = 0; i < notes.length; ++i) {
       const note = notes[i];
@@ -263,7 +266,7 @@ function basicBoundingBoxes(options: TestOptions, contextBuilder: ContextBuilder
 
   // 250 is 450/1.8
   const stave = new Stave(10, 0, 250).addClef('treble');
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
 
   const formatter = new Formatter();
   const voice = new Voice(VexFlow.TIME4_4).setStrict(false);

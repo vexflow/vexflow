@@ -272,7 +272,7 @@ function textDynamics(options: TestOptions): void {
   const width = formatter.preCalculateMinTotalWidth([voice]);
   formatter.format([voice]);
   const stave = f.Stave({ y: 40, width: width + Stave.defaultPadding });
-  stave.draw();
+  stave.drawWithStyle();
   voice.draw(f.getContext(), stave);
   options.assert.ok(true);
 }
