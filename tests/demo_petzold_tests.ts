@@ -1,20 +1,20 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
-// Bach Demo
+// Demo - Petzold
 
 import { concat, TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { BarlineType, Factory, Registry, StaveNote } from '../src/index';
 
-const BachDemoTests = {
+const DemoPetzoldTests = {
   Start(): void {
-    QUnit.module('Bach Demo');
-    VexFlowTests.runTests('Minuet 1', minuet1);
+    QUnit.module('Demo - Petzold');
+    VexFlowTests.runTests('Minuet in G', minuetInG);
   },
 };
 
-function minuet1(options: TestOptions): void {
+function minuetInG(options: TestOptions): void {
   const registry = new Registry();
   Registry.enableDefaultRegistry(registry);
 
@@ -428,8 +428,8 @@ function minuet1(options: TestOptions): void {
   /* Done */
   f.draw();
   Registry.disableDefaultRegistry();
-  options.assert.ok(true, 'Bach Minuet 1');
+  options.assert.ok(true, 'Petzold Minuet in G');
 }
 
-VexFlowTests.register(BachDemoTests);
-export { BachDemoTests };
+VexFlowTests.register(DemoPetzoldTests);
+export { DemoPetzoldTests };
