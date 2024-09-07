@@ -4,7 +4,6 @@
 import { Element } from './element';
 import { Glyphs } from './glyphs';
 import { Metrics } from './metrics';
-import { Stave } from './stave';
 import { StaveModifier, StaveModifierPosition } from './stavemodifier';
 import { Category } from './typeguard';
 
@@ -96,7 +95,9 @@ export class StaveTempo extends StaveModifier {
     return this;
   }
 
-  draw(stave: Stave, shiftX: number): this {
+  draw(): void {
+    const stave = this.checkStave();
+    const shiftX = stave.getModifierXShift(this.getPosition());
     const ctx = stave.checkContext();
     this.setRendered();
 
@@ -156,7 +157,5 @@ export class StaveTempo extends StaveModifier {
         elText.renderText(ctx, x + this.xShift, y + this.yShift);
       }
     }
-
-    return this;
   }
 }

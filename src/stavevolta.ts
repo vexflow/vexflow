@@ -1,7 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // @author: Larry Kuhns 2011
 
-import { Stave } from './stave';
 import { StaveModifier } from './stavemodifier';
 import { Category } from './typeguard';
 
@@ -32,7 +31,9 @@ export class Volta extends StaveModifier {
     this.text = label;
   }
 
-  draw(stave: Stave, x: number): this {
+  draw(): void {
+    const stave = this.checkStave();
+    const x = stave.getModifierXShift(this.getPosition());
     const ctx = stave.checkContext();
     this.setRendered();
 
@@ -61,6 +62,5 @@ export class Volta extends StaveModifier {
     }
 
     ctx.fillRect(this.x + x, topY, width, 1);
-    return this;
   }
 }
