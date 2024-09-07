@@ -6,7 +6,9 @@
 // This file implements key signatures. A key signature sits on a stave
 // and indicates the notes with implicit accidentals.
 
+import { BoundingBox } from './boundingbox';
 import { Element } from './element';
+import { Glyphs } from './glyphs';
 import { Stave } from './stave';
 import { StaveModifier, StaveModifierPosition } from './stavemodifier';
 import { Tables } from './tables';
@@ -18,7 +20,6 @@ export class KeySignature extends StaveModifier {
     return Category.KeySignature;
   }
 
-  protected glyphs: Element[];
   protected paddingForced: boolean;
   protected formatted?: boolean;
   protected cancelKeySpec?: string;
@@ -32,27 +33,37 @@ export class KeySignature extends StaveModifier {
 
     this.setKeySig(keySpec, cancelKeySpec, alterKeySpec);
     this.setPosition(StaveModifierPosition.BEGIN);
-    this.glyphs = [];
+    this.children = [];
     this.paddingForced = false;
   }
 
   // Add an accidental glyph to the `KeySignature` instance which represents
   // the provided `acc`. If `nextAcc` is also provided, the appropriate
   // spacing will be included in the glyph's position
-  convertToGlyph(acc: { type: string; line: number }, nextAcc: { type: string; line: number }, stave: Stave): void {
+  protected convertToGlyph(
+    acc: { type: string; line: number },
+    nextAcc: { type: string; line: number },
+    stave: Stave
+  ): void {
     const code = Tables.accidentalCodes(acc.type);
     const glyph = new Element(Category.KeySignature);
     glyph.setText(code);
 
     // Determine spacing between current accidental and the next accidental
-    const extraWidth = 1;
+    let extraWidth = 1;
     // Place the glyph on the stave
     glyph.setYShift(stave.getYForLine(acc.line));
-    if (this.glyphs.length > 0) {
-      const prevGlyph = this.glyphs[this.glyphs.length - 1];
+    if (this.children.length > 0) {
+      const prevGlyph = this.children[this.children.length - 1];
+      const isNatural = (el: Element) => el.getText() === Glyphs.accidentalNatural;
+      const yShiftDiff = (el1: Element, el2: Element) => Math.abs(el2.getYShift() - el1.getYShift());
+
+      if ((isNatural(prevGlyph) || isNatural(glyph)) && yShiftDiff(prevGlyph, glyph) < 10) {
+        extraWidth = 2;
+      }
       glyph.setXShift(prevGlyph.getXShift() + prevGlyph.getWidth() + extraWidth);
     }
-    this.glyphs.push(glyph);
+    this.children.push(glyph);
 
     // Expand size of key signature
     this.width += glyph.getWidth() + extraWidth;
@@ -67,7 +78,10 @@ export class KeySignature extends StaveModifier {
     return this;
   }
 
-  convertToCancelAccList(spec: string): { type: string; accList: { type: string; line: number }[] } | undefined {
+  // Convert the `cancelKeySpec` into a list of naturals to be displayed
+  protected convertToCancelAccList(
+    spec: string
+  ): { type: string; accList: { type: string; line: number }[] } | undefined {
     // Get the accidental list for the cancelled key signature
     const cancelAccList = Tables.keySignature(spec);
 
@@ -102,6 +116,7 @@ export class KeySignature extends StaveModifier {
     };
   }
 
+  // Add this key signature to the start of a stave.
   addToStave(stave: Stave): this {
     this.paddingForced = true;
     stave.addModifier(this);
@@ -109,9 +124,32 @@ export class KeySignature extends StaveModifier {
     return this;
   }
 
+  // Get the `BoundingBox`
+  getBoundingBox(): BoundingBox {
+    if (!this.formatted) this.format();
+
+    return super.getBoundingBox();
+  }
+
+  // Calculate the width and height for the entire signature
+  protected calculateDimensions(): void {
+    let boundingBox: BoundingBox;
+    if (this.children.length > 0) {
+      boundingBox = this.children[0].getBoundingBox();
+    } else {
+      boundingBox = new BoundingBox(this.x + this.xShift, this.y + this.yShift, 0, 0);
+    }
+    this.children.forEach((glyph) => {
+      boundingBox.mergeWith(glyph.getBoundingBox());
+    });
+    this.width = boundingBox.getW();
+    this.height = boundingBox.getH();
+    this.y = boundingBox.getY();
+  }
+
   // Apply the accidental staff line placement based on the `clef` and
   // the  accidental `type` for the key signature ('# or 'b').
-  convertAccLines(clef: string, type?: string, accList = this.accList): void {
+  protected convertAccLines(clef: string, type?: string, accList = this.accList): void {
     let offset = 0.0; // if clef === "treble"
     let customLines; // when clef doesn't follow treble key sig shape
 
@@ -158,18 +196,21 @@ export class KeySignature extends StaveModifier {
     }
   }
 
+  // Get the padding required for this modifier
   getPadding(index: number): number {
     if (!this.formatted) this.format();
 
-    return this.glyphs.length === 0 || (!this.paddingForced && index < 2) ? 0 : this.padding;
+    return this.children.length === 0 || (!this.paddingForced && index < 2) ? 0 : this.padding;
   }
 
+  // Get the width of the modifier
   getWidth(): number {
-    if (!this.formatted) this.calculateWidth();
+    if (!this.formatted) this.format();
 
     return this.width;
   }
 
+  // Set the key signature to a specific key, ie: 'C' or 'Gm'
   setKeySig(keySpec: string, cancelKeySpec?: string, alterKeySpec?: string[]): this {
     this.formatted = false;
     this.keySpec = keySpec;
@@ -189,7 +230,8 @@ export class KeySignature extends StaveModifier {
     return this;
   }
 
-  convertToAlterAccList(alterKeySpec: string[]): void {
+  // Convert the `alterKeySpec` into a list of accidentals to be displayed
+  protected convertToAlterAccList(alterKeySpec: string[]): void {
     const max = Math.min(alterKeySpec.length, this.accList.length);
     for (let i = 0; i < max; ++i) {
       if (alterKeySpec[i]) {
@@ -198,11 +240,12 @@ export class KeySignature extends StaveModifier {
     }
   }
 
+  // Format and position the modifier
   format(): void {
     const stave = this.checkStave();
 
     this.width = 0;
-    this.glyphs = [];
+    this.children = [];
     this.accList = Tables.keySignature(defined(this.keySpec));
     const accList = this.accList;
     const firstAccidentalType = accList.length > 0 ? accList[0].type : undefined;
@@ -226,33 +269,11 @@ export class KeySignature extends StaveModifier {
       }
     }
 
+    this.calculateDimensions();
     this.formatted = true;
   }
 
-  protected calculateWidth(): void {
-    this.width = 0;
-    this.accList = Tables.keySignature(defined(this.keySpec));
-    if (this.cancelKeySpec) {
-      this.convertToCancelAccList(this.cancelKeySpec);
-    }
-    if (this.alterKeySpec) {
-      this.convertToAlterAccList(this.alterKeySpec);
-    }
-
-    if (this.accList.length > 0) {
-      for (let i = 0; i < this.accList.length; ++i) {
-        const code = Tables.accidentalCodes(this.accList[i].type);
-        const glyph = new Element(Category.KeySignature);
-        glyph.setText(code);
-        // Determine spacing between current accidental and the next accidental
-        const extraWidth = 1;
-
-        // Expand size of key signature
-        this.width += glyph.getWidth() + extraWidth;
-      }
-    }
-  }
-
+  // Render the key signature
   draw(): void {
     const stave = this.checkStave();
     const ctx = stave.checkContext();
@@ -263,8 +284,8 @@ export class KeySignature extends StaveModifier {
     ctx.save();
     this.applyStyle(ctx);
     ctx.openGroup('keysignature', this.getAttribute('id'));
-    for (let i = 0; i < this.glyphs.length; i++) {
-      const glyph = this.glyphs[i];
+    for (let i = 0; i < this.children.length; i++) {
+      const glyph = this.children[i];
       glyph.renderText(ctx, this.x, 0);
     }
     ctx.closeGroup();
