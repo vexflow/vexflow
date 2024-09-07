@@ -55,10 +55,10 @@ export class KeySignature extends StaveModifier {
     glyph.setYShift(stave.getYForLine(acc.line));
     if (this.children.length > 0) {
       const prevGlyph = this.children[this.children.length - 1];
-      if (
-        (prevGlyph.getText() === Glyphs.accidentalNatural || glyph.getText() === Glyphs.accidentalNatural) &&
-        Math.abs(glyph.getYShift() - prevGlyph.getYShift()) < 10
-      ) {
+      const isNatural = (el: Element) => el.getText() === Glyphs.accidentalNatural;
+      const yShiftDiff = (el1: Element, el2: Element) => Math.abs(el2.getYShift() - el1.getYShift());
+
+      if ((isNatural(prevGlyph) || isNatural(glyph)) && yShiftDiff(prevGlyph, glyph) < 10) {
         extraWidth = 2;
       }
       glyph.setXShift(prevGlyph.getXShift() + prevGlyph.getWidth() + extraWidth);
