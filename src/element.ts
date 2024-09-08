@@ -170,7 +170,7 @@ export class Element {
    * Note that StaveNote calls setGroupStyle() when setStyle() is called.
    */
   addChildElement(child: Element): this {
-    if (child.parent) throw new RuntimeError('Element', 'Draw not defined');
+    if (child.parent) throw new RuntimeError('Element', 'Parent already defined');
     child.parent = this;
     this.children.push(child);
     return this;
