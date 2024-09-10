@@ -20,6 +20,7 @@ export * from './element';
 export * from './factory';
 export * from './font';
 // Do not export './fonts/*' because they are used by the entry/* files.
+export * from './flag';
 export * from './formatter';
 export * from './fraction';
 export * from './frethandfinger';

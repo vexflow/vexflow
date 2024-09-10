@@ -4,7 +4,7 @@
 // `StemmableNote` is an abstract interface for notes with optional stems.
 // Examples of stemmable notes are `StaveNote` and `TabNote`
 
-import { Element } from './element';
+import { Flag } from './flag';
 import { Glyphs } from './glyphs';
 import { GlyphProps, Note, NoteStruct } from './note';
 import { Stem, StemOptions } from './stem';
@@ -20,7 +20,7 @@ export abstract class StemmableNote extends Note {
   stemDirection?: number;
   stem?: Stem;
 
-  protected flag = new Element();
+  protected flag = new Flag();
   protected stemExtensionOverride?: number;
 
   constructor(noteStruct: NoteStruct) {
@@ -41,7 +41,7 @@ export abstract class StemmableNote extends Note {
 
   setStem(stem: Stem): this {
     this.stem = stem;
-    this.addChildElement(stem);
+    this.addChild(stem);
     return this;
   }
 

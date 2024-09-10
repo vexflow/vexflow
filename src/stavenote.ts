@@ -518,7 +518,7 @@ export class StaveNote extends StemmableNote {
 
       notehead.fontInfo = this.fontInfo;
 
-      this.addChildElement(notehead);
+      this.addChild(notehead);
       this._noteHeads[this.sortedKeyProps[i].index] = notehead;
     }
     return this._noteHeads;
@@ -601,19 +601,17 @@ export class StaveNote extends StemmableNote {
     });
     const { yTop, yBottom } = this.getNoteHeadBounds();
 
-    const noteStemHeight = this.stem!.getHeight();
-    const flagX = this.getStemX() - Tables.STEM_WIDTH / 2;
-    const flagY =
-      this.getStemDirection() === Stem.DOWN
-        ? yTop - noteStemHeight - this.flag.getTextMetrics().actualBoundingBoxDescent
-        : yBottom - noteStemHeight + this.flag.getTextMetrics().actualBoundingBoxAscent;
-
     if (!this.isRest() && this.hasStem()) {
-      boundingBox.mergeWith(new BoundingBox(this.getAbsoluteX(), flagY, 0, 0));
+      const noteStemHeight = this.stem!.getHeight();
+      const stemY =
+        this.getStemDirection() === Stem.DOWN
+          ? yTop - noteStemHeight - this.flag.getTextMetrics().actualBoundingBoxDescent
+          : yBottom - noteStemHeight + this.flag.getTextMetrics().actualBoundingBoxAscent;
+      boundingBox.mergeWith(new BoundingBox(this.getAbsoluteX(), stemY, 0, 0));
     }
     if (this.hasFlag()) {
       const bbFlag = this.flag.getBoundingBox();
-      boundingBox.mergeWith(bbFlag.move(flagX, flagY));
+      boundingBox.mergeWith(bbFlag);
     }
     for (let i = 0; i < this.modifiers.length; i++) {
       boundingBox.mergeWith(this.modifiers[i].getBoundingBox());
@@ -1109,10 +1107,7 @@ export class StaveNote extends StemmableNote {
             yBottom - noteStemHeight + this.flag.getTextMetrics().actualBoundingBoxAscent;
 
       // Draw the Flag
-      this.flag.draw = (): void => {
-        this.flag.renderText(ctx, flagX, flagY);
-      };
-      this.flag.setContext(ctx).drawWithStyle();
+      this.flag.setContext(ctx).setX(flagX).setY(flagY).drawWithStyle();
     }
   }
 

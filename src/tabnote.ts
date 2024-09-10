@@ -351,10 +351,7 @@ export class TabNote extends StemmableNote {
             this.getStemY() - this.checkStem().getHeight() + this.getStemExtension();
 
       // Draw the Flag
-      this.flag.draw = (): void => {
-        this.flag.renderText(context, flagX, flagY);
-      };
-      this.flag.setContext(context).drawWithStyle();
+      this.flag.setContext(context).setX(flagX).setY(flagY).drawWithStyle();
     }
   }
 
