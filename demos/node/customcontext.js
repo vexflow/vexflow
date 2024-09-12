@@ -3,8 +3,7 @@
 // Run:
 //   node customcontext.js
 
-// const Vex = require('vexflow');
-const Vex = require('vxflw-early-access');
+const Vex = require('vexflow');
 const { createCanvas } = require('canvas');
 
 const VF = VexFlow;

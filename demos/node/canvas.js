@@ -10,9 +10,7 @@
 // Since we use a require(...) statement below, we will load the CJS bundle at build/cjs/vexflow.js
 // See the `exports` field in package.json for details.
 
-// const Vex = require('vexflow');
-// TODO: During V5 development, we call it vxflw-early-access. Rename it to vexflow before we release V5.
-const Vex = require('vxflw-early-access');
+const Vex = require('vexflow');
 
 const { createCanvas, registerFont } = require('canvas');
 

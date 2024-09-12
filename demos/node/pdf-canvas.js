@@ -4,9 +4,8 @@
 //   node pdf-canvas.js
 // Status:
 
-// const Vex = require('vexflow');
+const Vex = require('vexflow');
 // const Vex = require('vexflow/bravura');
-const Vex = require('vxflw-early-access');
 
 const fs = require('fs');
 const { JSDOM } = require('jsdom');

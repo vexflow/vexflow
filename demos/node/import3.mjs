@@ -2,22 +2,12 @@
 // Run:
 //   node import3.mjs
 
-/*
 import * as Vex0 from 'vexflow'; // the entire module, which looks like { default: ... }. Same as Vex3 below.
 import { default as Vex1 } from 'vexflow'; // extract the default export. Same as Vex0.default.
 import Vex2 from 'vexflow'; // default export. Same as Vex1 above.
 const Vex3 = await import('vexflow'); // dynamic import. The imported object is the same as Vex0 above.
 import { Vex } from 'vexflow'; // named export for convenience. Same as Vex0.default.Vex.
 import { StaveNote as StaveNoteAlias } from 'vexflow'; // provide an alias for the named import.
-*/
-
-// Before shipping V5, remove the next block that imports from 'vxflw-early-access'.
-import * as Vex0 from 'vxflw-early-access'; // the entire module, which looks like { default: ... }. Same as Vex3 below.
-import { default as Vex1 } from 'vxflw-early-access'; // extract the default export. Same as Vex0.default.
-import Vex2 from 'vxflw-early-access'; // default export. Same as Vex1 above.
-const Vex3 = await import('vxflw-early-access'); // dynamic import. The imported object is the same as Vex0 above.
-import { Vex } from 'vxflw-early-access'; // named export for convenience. Same as Vex0.default.Vex.
-import { StaveNote as StaveNoteAlias } from 'vxflw-early-access'; // provide an alias for the named import.
 
 console.log('All results below should be true.');
 
