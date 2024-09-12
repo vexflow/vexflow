@@ -15,8 +15,7 @@
 // Additionally, we could explore SVG <use> so we can define one template path and reuse it multiple times in one score.
 // See: https://developer.mozilla.org/en-US/docs/Web/SVG/Element/use
 
-// const Vex = require('vexflow');
-const Vex = require('vxflw-early-access');
+const Vex = require('vexflow');
 const { JSDOM } = require('jsdom');
 
 const VF = VexFlow;

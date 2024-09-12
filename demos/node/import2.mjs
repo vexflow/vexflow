@@ -105,8 +105,7 @@ async function step0() {
 }
 
 async function step1() {
-  // const { VexFlow } = await import('vexflow');
-  const { VexFlow } = await import('vxflw-early-access');
+  const { VexFlow } = await import('vexflow');
   VF = VexFlow;
 
   console.log('Loaded VexFlow Version: ', VF.BUILD.VERSION, ' Build: ', VF.BUILD.ID);

@@ -2,17 +2,14 @@
 // Run:
 //   node require2.js
 
-// const { VexFlow, Stave, StaveNote } = require('vexflow');
-// const Vex2 = require('vexflow');
-const { VexFlow, Stave, StaveNote } = require('vxflw-early-access');
-const Vex2 = require('vxflw-early-access');
+const { VexFlow, Stave, StaveNote } = require('vexflow');
+const Vex2 = require('vexflow');
 
 const Vex3 = require('../../build/cjs/vexflow-debug.js');
 const Vex4 = require('../../build/cjs/vexflow-debug-with-tests.js');
 
 // This only includes the Bravura & Academico fonts.
-// const Vex5 = require('vexflow/bravura');
-const Vex5 = require('vxflw-early-access/bravura');
+const Vex5 = require('vexflow/bravura');
 
 console.log(Vex2.StaveNote);
 console.log(Vex3.StaveNote);

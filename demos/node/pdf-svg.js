@@ -7,9 +7,8 @@
 //   VexFlow 5 broke this demo because the paths are no longer draw into the SVG context.
 //   Instead of JSDOM, we'll probably need to use Puppeteer or Playwright (https://playwright.dev/docs/api/class-playwright).
 
-// const Vex = require('vexflow');
+const Vex = require('vexflow');
 // const Vex = require('vexflow/bravura');
-const Vex = require('vxflw-early-access');
 
 const fs = require('fs');
 const { JSDOM } = require('jsdom');
