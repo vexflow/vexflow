@@ -351,10 +351,7 @@ export class TabNote extends StemmableNote {
             this.getStemY() - this.checkStem().getHeight() + this.getStemExtension();
 
       // Draw the Flag
-      context.save();
-      this.applyStyle(context, this.flagStyle);
-      this.flag.renderText(context, flagX, flagY);
-      context.restore();
+      this.flag.setContext(context).setX(flagX).setY(flagY).drawWithStyle();
     }
   }
 
@@ -386,7 +383,6 @@ export class TabNote extends StemmableNote {
       const unusedStrings = getUnusedStringGroups(numLines, stringsUsed);
       const stemLines = getPartialStemLines(stemY, unusedStrings, this.checkStave(), this.getStemDirection());
 
-      ctx.save();
       ctx.setLineWidth(Stem.WIDTH);
       stemLines.forEach((bounds) => {
         if (bounds.length === 0) return;
@@ -397,7 +393,6 @@ export class TabNote extends StemmableNote {
         ctx.stroke();
         ctx.closePath();
       });
-      ctx.restore();
     }
   }
 
@@ -431,8 +426,6 @@ export class TabNote extends StemmableNote {
     this.setRendered();
     const renderStem = this.beam === undefined && this.renderOptions.drawStem;
 
-    ctx.save();
-    this.applyStyle();
     ctx.openGroup('tabnote', this.getAttribute('id'));
     this.drawPositions();
     this.drawStemThrough();
@@ -440,12 +433,11 @@ export class TabNote extends StemmableNote {
     if (this.stem && renderStem) {
       const stemX = this.getStemX();
       this.stem.setNoteHeadXBounds(stemX, stemX);
-      this.stem.setContext(ctx).draw();
+      this.stem.setContext(ctx).drawWithStyle();
     }
 
     this.drawFlag();
     this.drawModifiers();
     ctx.closeGroup();
-    ctx.restore();
   }
 }

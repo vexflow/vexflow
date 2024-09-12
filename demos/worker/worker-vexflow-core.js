@@ -25,7 +25,7 @@ onmessage = function (e) {
     // Render to the OffscreenCavans.
     const stave = new Stave(15, 0, 300);
     stave.setEndBarType(BarlineType.END);
-    stave.addClef('treble').setContext(ctx).draw();
+    stave.addClef('treble').setContext(ctx).drawWithStyle();
 
     function makeRandomNote(duration = '4') {
       const notes = ['c/4', 'd/4', 'e/4', 'f/4', 'g/4', 'a/4', 'b/4', 'c/5', 'd/5', 'e/5'];

@@ -58,7 +58,7 @@ const stave = new Stave(10, 0, 190);
 stave.addClef('treble').addTimeSignature('4/4');
 
 // Connect it to the rendering context and draw!
-stave.setContext(context).draw();
+stave.setContext(context).drawWithStyle();
 
 const notes = [
   new StaveNote({ keys: ['c/4'], duration: 'q' }),

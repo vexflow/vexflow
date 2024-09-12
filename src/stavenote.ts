@@ -518,7 +518,7 @@ export class StaveNote extends StemmableNote {
 
       notehead.fontInfo = this.fontInfo;
 
-      this.addChildElement(notehead);
+      this.addChild(notehead);
       this._noteHeads[this.sortedKeyProps[i].index] = notehead;
     }
     return this._noteHeads;
@@ -601,19 +601,17 @@ export class StaveNote extends StemmableNote {
     });
     const { yTop, yBottom } = this.getNoteHeadBounds();
 
-    const noteStemHeight = this.stem!.getHeight();
-    const flagX = this.getStemX() - Tables.STEM_WIDTH / 2;
-    const flagY =
-      this.getStemDirection() === Stem.DOWN
-        ? yTop - noteStemHeight - this.flag.getTextMetrics().actualBoundingBoxDescent
-        : yBottom - noteStemHeight + this.flag.getTextMetrics().actualBoundingBoxAscent;
-
     if (!this.isRest() && this.hasStem()) {
-      boundingBox.mergeWith(new BoundingBox(this.getAbsoluteX(), flagY, 0, 0));
+      const noteStemHeight = this.stem!.getHeight();
+      const stemY =
+        this.getStemDirection() === Stem.DOWN
+          ? yTop - noteStemHeight - this.flag.getTextMetrics().actualBoundingBoxDescent
+          : yBottom - noteStemHeight + this.flag.getTextMetrics().actualBoundingBoxAscent;
+      boundingBox.mergeWith(new BoundingBox(this.getAbsoluteX(), stemY, 0, 0));
     }
     if (this.hasFlag()) {
       const bbFlag = this.flag.getBoundingBox();
-      boundingBox.mergeWith(bbFlag.move(flagX, flagY));
+      boundingBox.mergeWith(bbFlag);
     }
     for (let i = 0; i < this.modifiers.length; i++) {
       boundingBox.mergeWith(this.modifiers[i].getBoundingBox());
@@ -838,10 +836,10 @@ export class StaveNote extends StemmableNote {
   }
 
   setFlagStyle(style: ElementStyle): void {
-    this.flagStyle = style;
+    this.flag.setStyle(style);
   }
   getFlagStyle(): ElementStyle | undefined {
-    return this.flagStyle;
+    return this.flag.getStyle();
   }
 
   /** Get the glyph width. */
@@ -1076,12 +1074,8 @@ export class StaveNote extends StemmableNote {
       const index = modifier.checkIndex();
       const notehead = this._noteHeads[index];
       if (notehead === noteheadParam) {
-        const noteheadStyle = notehead.getStyle();
-        ctx.save();
-        notehead.applyStyle(ctx, noteheadStyle);
         modifier.setContext(ctx);
         modifier.drawWithStyle();
-        ctx.restore();
       }
     }
   }
@@ -1113,10 +1107,7 @@ export class StaveNote extends StemmableNote {
             yBottom - noteStemHeight + this.flag.getTextMetrics().actualBoundingBoxAscent;
 
       // Draw the Flag
-      ctx.save();
-      this.applyStyle(ctx, this.flagStyle);
-      this.flag.renderText(ctx, flagX, flagY);
-      ctx.restore();
+      this.flag.setContext(ctx).setX(flagX).setY(flagY).drawWithStyle();
     }
   }
 
@@ -1124,13 +1115,7 @@ export class StaveNote extends StemmableNote {
   drawNoteHeads(): void {
     const ctx = this.checkContext();
     this._noteHeads.forEach((notehead) => {
-      ctx.save();
-      notehead.applyStyle(ctx);
-      ctx.openGroup('notehead', notehead.getAttribute('id'));
-      notehead.setContext(ctx).draw();
-      this.drawModifiers(notehead);
-      ctx.closeGroup();
-      ctx.restore();
+      notehead.setContext(ctx).drawWithStyle();
     });
   }
 
@@ -1151,7 +1136,7 @@ export class StaveNote extends StemmableNote {
     }
 
     if (this.stem) {
-      this.stem.setContext(ctx).draw();
+      this.stem.setContext(ctx).drawWithStyle();
     }
   }
 
@@ -1220,8 +1205,6 @@ export class StaveNote extends StemmableNote {
     L('Rendering ', this.isChord() ? 'chord :' : 'note :', this.keys);
 
     // Apply the overall style -- may be contradicted by local settings:
-    ctx.save();
-    this.applyStyle();
     ctx.openGroup('stavenote', this.getAttribute('id'));
     this.drawLedgerLines();
     if (shouldRenderStem) this.drawStem();
@@ -1230,7 +1213,6 @@ export class StaveNote extends StemmableNote {
     const bb = this.getBoundingBox();
     ctx.pointerRect(bb.getX(), bb.getY(), bb.getW(), bb.getH());
     ctx.closeGroup();
-    ctx.restore();
     this.setRendered();
   }
 }

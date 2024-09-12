@@ -248,7 +248,6 @@ export class PedalMarking extends Element {
     const ctx = this.checkContext();
     this.setRendered();
 
-    ctx.save();
     ctx.setStrokeStyle(this.renderOptions.color);
     ctx.setFillStyle(this.renderOptions.color);
     ctx.setFont(this.font);
@@ -260,7 +259,5 @@ export class PedalMarking extends Element {
     } else if (this.type === PedalMarking.type.TEXT) {
       this.drawText();
     }
-
-    ctx.restore();
   }
 }

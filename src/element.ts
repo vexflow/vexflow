@@ -81,6 +81,7 @@ export class Element {
 
   // Element objects keep a list of children that they are responsible for.
   // Children inherit the style from their parents (see: setGroupStyle(s)).
+  protected parent?: Element;
   protected children: Element[] = [];
   protected static ID: number = 1000;
   protected static newID(): string {
@@ -160,7 +161,7 @@ export class Element {
   }
 
   /**
-   * Adds a child Element to the Element, which lets it inherit the
+   * Adds a child to the Element, which lets it inherit the
    * same style as the parent when setGroupStyle() is called.
    *
    * Examples of children are noteheads and stems.  Modifiers such
@@ -168,7 +169,9 @@ export class Element {
    *
    * Note that StaveNote calls setGroupStyle() when setStyle() is called.
    */
-  addChildElement(child: Element): this {
+  addChild(child: Element): this {
+    if (child.parent) throw new RuntimeError('Element', 'Parent already defined');
+    child.parent = this;
     this.children.push(child);
     return this;
   }
@@ -592,7 +595,6 @@ export class Element {
 
   /** Render the element text. */
   renderText(ctx: RenderContext, xPos: number, yPos: number): void {
-    ctx.save();
     ctx.setFont(this._fontInfo);
     ctx.fillText(this._text, xPos + this.x + this.xShift, yPos + this.y + this.yShift);
     this.children.forEach((child) => {
@@ -600,7 +602,6 @@ export class Element {
       ctx.setFont(child.fontInfo);
       ctx.fillText(child.text, xPos + child.x + child.xShift, yPos + child.y + child.yShift);
     });
-    ctx.restore();
   }
 
   /** Measure the text using the textFont. */

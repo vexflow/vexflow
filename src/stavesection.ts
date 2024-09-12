@@ -27,7 +27,7 @@ export class StaveSection extends StaveModifier {
     return this;
   }
 
-  draw(): this {
+  draw(): void {
     const stave = this.checkStave();
     const ctx = stave.checkContext();
     this.setRendered();
@@ -46,6 +46,5 @@ export class StaveSection extends StaveModifier {
       ctx.stroke();
     }
     this.renderText(ctx, this.xShift + this.padding, y - this.padding);
-    return this;
   }
 }
