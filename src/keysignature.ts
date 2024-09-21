@@ -124,6 +124,12 @@ export class KeySignature extends StaveModifier {
     return this;
   }
 
+  // Add this key signature to a stave.
+  setStave(stave: Stave): this {
+    this.formatted = false;
+    return super.setStave(stave);
+  }
+  
   // Get the `BoundingBox`
   getBoundingBox(): BoundingBox {
     if (!this.formatted) this.format();
@@ -242,7 +248,7 @@ export class KeySignature extends StaveModifier {
 
   // Format and position the modifier
   format(): void {
-    const stave = this.checkStave();
+    const stave = this.getStave() ?? new Stave(0,0,100);
 
     this.width = 0;
     this.children = [];
