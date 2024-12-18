@@ -110,7 +110,7 @@ export class Stave extends Element {
       ...options,
     };
     this.bounds = { x: this.x, y: this.y, w: this.width, h: 0 };
-    this.defaultLedgerLineStyle = { strokeStyle: '#444', lineWidth: 1.4 };
+    this.defaultLedgerLineStyle = { strokeStyle: '#444', lineWidth: 2 };
 
     this.resetLines();
 
@@ -181,11 +181,11 @@ export class Stave extends Element {
   }
 
   getTopLineTopY(): number {
-    return this.getYForLine(0) - (this.getStyle().lineWidth ?? 1) / 2;
+    return this.getYForLine(0);
   }
 
   getBottomLineBottomY(): number {
-    return this.getYForLine(this.getNumLines() - 1) + (this.getStyle().lineWidth ?? 1) / 2;
+    return this.getYForLine(this.getNumLines() - 1) + (this.getStyle().lineWidth ?? 1);
   }
 
   setX(x: number): this {
@@ -688,14 +688,17 @@ export class Stave extends Element {
     const x = this.x;
     let y;
 
+    const lineWidth = this.getStyle().lineWidth ?? 1;
+    const lineWidthCorrection = lineWidth % 2 === 0 ? 0 : 0.5;
+
     // Render lines
     for (let line = 0; line < numLines; line++) {
       y = this.getYForLine(line);
 
       if (this.options.lineConfig[line].visible) {
         ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + width, y);
+        ctx.moveTo(x, y + lineWidthCorrection);
+        ctx.lineTo(x + width, y + lineWidthCorrection);
         ctx.stroke();
       }
     }
