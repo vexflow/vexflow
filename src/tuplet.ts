@@ -296,7 +296,6 @@ export class Tuplet extends Element {
     const ctx = this.checkContext();
     let xPos = 0;
     let yPos = 0;
-    this.setRendered();
 
     // determine x value of left bound of tuplet
     const firstNote = this.notes[0] as StemmableNote;
@@ -315,6 +314,9 @@ export class Tuplet extends Element {
 
     const notationCenterX = xPos + this.width / 2;
     const notationStartX = notationCenterX - this.textElement.getWidth() / 2;
+
+    // start grouping
+    ctx.openGroup('tuplet', this.getAttribute('id'));
 
     // draw bracket if the tuplet is not beamed
     if (bracketed) {
@@ -335,5 +337,11 @@ export class Tuplet extends Element {
       notationStartX,
       yPos + this.textElement.getHeight() / 2 + (location === Tuplet.LOCATION_TOP ? -1 : 1) * textYOffset
     );
+
+    // Set up an interactive bounding box and finalize the tuplet rendering
+    const bb = this.getBoundingBox();
+    ctx.pointerRect(bb.getX(), bb.getY(), bb.getW(), bb.getH());
+    ctx.closeGroup();
+    this.setRendered();
   }
 }
