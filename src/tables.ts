@@ -59,7 +59,6 @@ const generateKeySignatures = (): KeySignatures => {
   return keySignatures;
 };
 
-
 const keySignatures: Record<string, KeySignature> = {
   ...generateKeySignatures(),
   C: { num: 0 },
@@ -521,7 +520,7 @@ export class Tables {
       throw new RuntimeError('BadKeySignature', `Bad key signature spec: '${spec}'`);
     }
 
-    if (!keySpec.accidental) {
+    if (!keySpec.acc) {
       return [];
     }
 
@@ -530,7 +529,6 @@ export class Tables {
       '#': [0, 1.5, -0.5, 1, 2.5, 0.5, 2],
     };
 
-    // Check if the accidental type exists in accidentalList
     const baseNotes = accidentalList[keySpec.acc];
     if (!baseNotes) {
       throw new RuntimeError('UnsupportedAccidental', `Unsupported accidental type: '${keySpec.acc}'`);
@@ -539,18 +537,15 @@ export class Tables {
     const accidentalCount = Math.min(keySpec.num, 7);
     const doubleAccidentalCount = Math.max(keySpec.num - 7, 0);
 
-    // Map the first `accidentalCount` notes as regular accidentals
-    const regularAccidentals = baseNotes.slice(doubleAccidentalCount, accidentalCount).map((line) => ({
+    const regularAccidentals = baseNotes.slice(doubleAccidentalCount, accidentalCount).map((line: number) => ({
       type: `${keySpec.acc}`,
       line,
     }));
 
-    // Map the last `doubleAccidentalCount` notes as double accidentals
     const doubleAccidentals = baseNotes
       .slice(0, doubleAccidentalCount)
-      .map((line) => ({ type: `${keySpec.acc}${keySpec.acc}`, line }));
+      .map((line: number) => ({ type: `${keySpec.acc}${keySpec.acc}`, line }));
 
-    // Combine regular and double accidentals
     return [...regularAccidentals, ...doubleAccidentals];
   }
 
