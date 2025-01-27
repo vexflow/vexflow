@@ -1,10 +1,10 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 
 import { Beam } from './beam';
 import { BoundingBox } from './boundingbox';
-import { Font } from './font';
 import { Fraction } from './fraction';
+import { Metrics } from './metrics';
 import { ModifierContext } from './modifiercontext';
 import { RenderContext } from './rendercontext';
 import { Stave } from './stave';
@@ -39,10 +39,10 @@ export interface FormatterOptions {
 }
 
 export interface FormatParams {
-  align_rests?: boolean;
+  alignRests?: boolean; // align rests vertically with neighboring notes.
   stave?: Stave;
   context?: RenderContext;
-  auto_beam?: boolean;
+  autoBeam?: boolean;
 }
 
 export interface AlignmentContexts<T> {
@@ -70,7 +70,7 @@ function createContexts<T>(
   makeContext: makeContextFn<T>,
   addToContext: addToContextFn<T>
 ): AlignmentContexts<T> {
-  if (voices.length == 0)
+  if (voices.length === 0)
     return {
       map: {},
       array: [],
@@ -118,7 +118,7 @@ function createContexts<T>(
 
 // eslint-disable-next-line
 function L(...args: any[]) {
-  if (Formatter.DEBUG) log('Vex.Flow.Formatter', args);
+  if (Formatter.DEBUG) log('VexFlow.Formatter', args);
 }
 
 /**
@@ -147,7 +147,7 @@ function getRestLineForNextNoteGroup(
     }
   }
 
-  // Locate the mid point between two lines.
+  // Locate the midpoint between two lines.
   if (compare && currRestLine !== nextRestLine) {
     const top = Math.max(currRestLine, nextRestLine);
     const bot = Math.min(currRestLine, nextRestLine);
@@ -173,7 +173,7 @@ function getRestLineForNextNoteGroup(
  * here (`FormatAndDraw`, `FormatAndDrawTab`) also serve as useful usage examples.
  */
 export class Formatter {
-  // To enable logging for this class. Set `Vex.Flow.Formatter.DEBUG` to `true`.
+  // To enable logging for this class. Set `VexFlow.Formatter.DEBUG` to `true`.
   static DEBUG: boolean = false;
   protected hasMinTotalWidth: boolean;
   protected minTotalWidth: number;
@@ -189,7 +189,7 @@ export class Formatter {
   protected modifierContexts: AlignmentModifierContexts[];
   protected voices: Voice[];
   protected lossHistory: number[];
-  protected durationStats: Record<string, { mean: number; count: number }>;
+  protected durationStats: Record<string, { mean: number; count: number; total: number }>;
 
   /**
    * Helper function to layout "notes" one after the other without
@@ -198,11 +198,11 @@ export class Formatter {
   static SimpleFormat(notes: Tickable[], x = 0, { paddingBetween = 10 } = {}): void {
     notes.reduce((accumulator, note) => {
       note.addToModifierContext(new ModifierContext());
-      const tick = new TickContext().addTickable(note).preFormat();
-      const metrics = tick.getMetrics();
-      tick.setX(accumulator + metrics.totalLeftPx);
+      const tickContext = new TickContext().addTickable(note).preFormat();
+      const metrics = tickContext.getMetrics();
+      tickContext.setX(accumulator + metrics.totalLeftPx);
 
-      return accumulator + tick.getWidth() + metrics.totalRightPx + paddingBetween;
+      return accumulator + tickContext.getWidth() + metrics.totalRightPx + paddingBetween;
     }, x);
   }
 
@@ -216,7 +216,7 @@ export class Formatter {
     options?: { stavePadding: number }
   ): void {
     options = {
-      stavePadding: Tables.currentMusicFont().lookupMetric('stave.padding'),
+      stavePadding: Metrics.get('Stave.padding'),
       ...options,
     };
 
@@ -232,7 +232,7 @@ export class Formatter {
     }
 
     ctx.save();
-    ctx.setFont(Font.SANS_SERIF, 8);
+    ctx.setFont(Metrics.get('fontFamily'), 8);
 
     contextGaps.gaps.forEach((gap) => {
       stroke(x + gap.x1, x + gap.x2, 'rgba(100,200,100,0.4)');
@@ -242,7 +242,7 @@ export class Formatter {
 
     ctx.setFillStyle('red');
     ctx.fillText(
-      `Loss: ${(formatter.totalCost || 0).toFixed(2)} Shift: ${(formatter.totalShift || 0).toFixed(
+      `Loss: ${(formatter.totalCost ?? 0).toFixed(2)} Shift: ${(formatter.totalShift ?? 0).toFixed(
         2
       )} Gap: ${contextGaps.total.toFixed(2)}`,
       x - 20,
@@ -258,13 +258,13 @@ export class Formatter {
    * @param stave the stave to which to draw (`Stave` or `TabStave`)
    * @param notes array of `Note` instances (`Note`, `TextNote`, `TabNote`, etc.)
    * @param params one of below:
-   *    * Setting `autobeam` only `(context, stave, notes, true)` or
-   *      `(ctx, stave, notes, {autobeam: true})`
-   *    * Setting `align_rests` a struct is needed `(context, stave, notes, {align_rests: true})`
+   *    * Setting `autoBeam` only `(context, stave, notes, true)` or
+   *      `(ctx, stave, notes, {autoBeam: true})`
+   *    * Setting `alignRests` a struct is needed `(context, stave, notes, {alignRests: true})`
    *    * Setting both a struct is needed `(context, stave, notes, {
-   *      autobeam: true, align_rests: true})`
-   *    * `autobeam` automatically generates beams for the notes.
-   *    * `align_rests` aligns rests with nearby notes.
+   *      autoBeam: true, alignRests: true})`
+   *    * `autoBeam` automatically generates beams for the notes.
+   *    * `alignRests` aligns rests with nearby notes.
    */
   static FormatAndDraw(
     ctx: RenderContext,
@@ -273,30 +273,30 @@ export class Formatter {
     params?: FormatParams | boolean
   ): BoundingBox | undefined {
     let options = {
-      auto_beam: false,
-      align_rests: false,
+      autoBeam: false,
+      alignRests: false,
     };
 
     if (typeof params === 'object') {
       options = { ...options, ...params };
     } else if (typeof params === 'boolean') {
-      options.auto_beam = params;
+      options.autoBeam = params;
     }
 
     // Start by creating a voice and adding all the notes to it.
     const voice = new Voice(Tables.TIME4_4).setMode(Voice.Mode.SOFT).addTickables(notes);
 
     // Then create beams, if requested.
-    const beams = options.auto_beam ? Beam.applyAndGetBeams(voice) : [];
+    const beams = options.autoBeam ? Beam.applyAndGetBeams(voice) : [];
 
     // Instantiate a `Formatter` and format the notes.
     new Formatter()
-      .joinVoices([voice]) // , { align_rests: options.align_rests })
-      .formatToStave([voice], stave, { align_rests: options.align_rests, stave });
+      .joinVoices([voice]) // , { alignRests: options.alignRests })
+      .formatToStave([voice], stave, { alignRests: options.alignRests, stave });
 
     // Render the voice and beams to the stave.
-    voice.setStave(stave).draw(ctx, stave);
-    beams.forEach((beam) => beam.setContext(ctx).draw());
+    voice.setContext(ctx).setStave(stave).drawWithStyle();
+    beams.forEach((beam) => beam.setContext(ctx).drawWithStyle());
 
     // Return the bounding box of the voice.
     return voice.getBoundingBox();
@@ -310,10 +310,10 @@ export class Formatter {
    * @param stave a `Stave` instance on which to render `Note`s.
    * @param notes array of `Note` instances for the stave (`Note`, `BarNote`, etc.)
    * @param tabnotes array of `Note` instances for the tab stave (`TabNote`, `BarNote`, etc.)
-   * @param autobeam automatically generate beams.
+   * @param autoBeam automatically generate beams.
    * @param params a configuration object:
-   *    * `autobeam` automatically generates beams for the notes.
-   *    * `align_rests` aligns rests with nearby notes.
+   *    * `autoBeam` automatically generates beams for the notes.
+   *    * `alignRests` aligns rests with nearby notes.
    */
   static FormatAndDrawTab(
     ctx: RenderContext,
@@ -321,18 +321,18 @@ export class Formatter {
     stave: Stave,
     tabnotes: TabNote[],
     notes: Tickable[],
-    autobeam: boolean,
+    autoBeam: boolean,
     params: FormatParams
   ): void {
     let opts = {
-      auto_beam: autobeam,
-      align_rests: false,
+      autoBeam,
+      alignRests: false,
     };
 
     if (typeof params === 'object') {
       opts = { ...opts, ...params };
     } else if (typeof params === 'boolean') {
-      opts.auto_beam = params;
+      opts.autoBeam = params;
     }
 
     // Create a `4/4` voice for `notes`.
@@ -342,21 +342,21 @@ export class Formatter {
     const tabvoice = new Voice(Tables.TIME4_4).setMode(Voice.Mode.SOFT).addTickables(tabnotes);
 
     // Then create beams, if requested.
-    const beams = opts.auto_beam ? Beam.applyAndGetBeams(notevoice) : [];
+    const beams = opts.autoBeam ? Beam.applyAndGetBeams(notevoice) : [];
 
     // Instantiate a `Formatter` and align tab and stave notes.
     new Formatter()
-      .joinVoices([notevoice]) // , { align_rests: opts.align_rests })
+      .joinVoices([notevoice]) // , { alignRests: opts.alignRests })
       .joinVoices([tabvoice])
-      .formatToStave([notevoice, tabvoice], stave, { align_rests: opts.align_rests });
+      .formatToStave([notevoice, tabvoice], stave, { alignRests: opts.alignRests });
 
     // Render voices and beams to staves.
     notevoice.draw(ctx, stave);
     tabvoice.draw(ctx, tabstave);
-    beams.forEach((beam) => beam.setContext(ctx).draw());
+    beams.forEach((beam) => beam.setContext(ctx).drawWithStyle());
 
     // Draw a connector between tab and note staves.
-    new StaveConnector(stave, tabstave).setContext(ctx).draw();
+    new StaveConnector(stave, tabstave).setContext(ctx).drawWithStyle();
   }
 
   /**
@@ -373,8 +373,8 @@ export class Formatter {
         }
 
         // If activated rests not on default can be rendered as specified.
-        const position = currTickable.getGlyphProps().position.toUpperCase();
-        if (position !== 'R/4' && position !== 'B/4') {
+        const line = currTickable.getLineForRest();
+        if (line !== 3) {
           return;
         }
 
@@ -442,7 +442,7 @@ export class Formatter {
   }
 
   /**
-   * Find all the rests in each of the `voices` and align them to neighboring notes.
+   * Find all the rests in each of the `voices` and align them vertically to neighboring notes.
    *
    * @param voices
    * @param alignAllNotes If `false`, only align rests within beamed groups of notes. If `true`, align all rests.
@@ -476,7 +476,7 @@ export class Formatter {
    * @returns the estimated width in pixels
    */
   preCalculateMinTotalWidth(voices: Voice[]): number {
-    const unalignedPadding = Tables.currentMusicFont().lookupMetric('stave.unalignedNotePadding');
+    const unalignedPadding = Metrics.get('Stave.unalignedNotePadding');
     // Calculate additional padding based on 3 methods:
     // 1) unaligned beats in voices, 2) variance of width, 3) variance of durations
     let unalignedCtxCount = 0;
@@ -495,7 +495,6 @@ export class Formatter {
 
     this.createTickContexts(voices);
 
-    // eslint-disable-next-line
     const { list: contextList, map: contextMap } = this.tickContexts!;
     this.minTotalWidth = 0;
 
@@ -574,7 +573,7 @@ export class Formatter {
 
   /** Create a `ModifierContext` for each tick in `voices`. */
   createModifierContexts(voices: Voice[]) {
-    if (voices.length == 0) return;
+    if (voices.length === 0) return;
     const resolutionMultiplier = Formatter.getResolutionMultiplier(voices);
 
     // Initialize tick maps.
@@ -600,12 +599,12 @@ export class Formatter {
         if (!(staveTickToContextMap ? staveTickToContextMap[integerTicks] : undefined)) {
           const newContext = new ModifierContext();
           contexts.push(newContext);
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
           staveTickToContextMap![integerTicks] = newContext;
         }
 
         // Add this tickable to the TickContext.
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         tickable.addToModifierContext(staveTickToContextMap![integerTicks]);
         ticksUsed.add(tickable.getTicks());
       });
@@ -828,10 +827,9 @@ export class Formatter {
       lastContext.getMetrics().notePx -
       lastContext.getMetrics().totalRightPx -
       firstContext.getMetrics().totalLeftPx;
-    const musicFont = Tables.currentMusicFont();
-    const configMinPadding = musicFont.lookupMetric('stave.endPaddingMin');
-    const configMaxPadding = musicFont.lookupMetric('stave.endPaddingMax');
-    const leftPadding = musicFont.lookupMetric('stave.padding');
+    const configMinPadding = Metrics.get('Stave.endPaddingMin');
+    const configMaxPadding = Metrics.get('Stave.endPaddingMax');
+    const leftPadding = Metrics.get('Stave.padding');
     let targetWidth = adjustedJustifyWidth;
     const distances = calculateIdealDistances(targetWidth);
     let actualWidth = shiftToIdealDistances(distances);
@@ -923,10 +921,11 @@ export class Formatter {
     function updateStats(duration: string, space: number) {
       const stats = durationStats[duration];
       if (stats === undefined) {
-        durationStats[duration] = { mean: space, count: 1 };
+        durationStats[duration] = { mean: space, count: 1, total: space };
       } else {
         stats.count += 1;
-        stats.mean = (stats.mean + space) / 2;
+        stats.total += space;
+        stats.mean = stats.total / stats.count;
       }
     }
 
@@ -983,8 +982,9 @@ export class Formatter {
    * the overall "loss" (or cost) of this layout, and repositions tickcontexts in an
    * attempt to reduce the cost. You can call this method multiple times until it finds
    * and oscillates around a global minimum.
+   * @param options parameters for tuning, currently just "alpha".
    * @param options[alpha] the "learning rate" for the formatter. It determines how much of a shift
-   * the formatter should make based on its cost function.
+   * the formatter should make based on its cost function.  Defaults to 0.5.
    */
   tune(options?: { alpha?: number }): number {
     const contexts = this.tickContexts;
@@ -994,17 +994,7 @@ export class Formatter {
 
     const alpha = options?.alpha ?? 0.5;
 
-    // Move `current` tickcontext by `shift` pixels, and adjust the freedom
-    // on adjacent tickcontexts.
-    function move(current: TickContext, shift: number, prev?: TickContext, next?: TickContext) {
-      current.setX(current.getX() + shift);
-      current.getFormatterMetrics().freedom.left += shift;
-      current.getFormatterMetrics().freedom.right -= shift;
-
-      if (prev) prev.getFormatterMetrics().freedom.right += shift;
-      if (next) next.getFormatterMetrics().freedom.left -= shift;
-    }
-
+    // function `move` moved to tickcontext.
     let shift = 0;
     this.totalShift = 0;
     contexts.list.forEach((tick, index, list) => {
@@ -1012,10 +1002,11 @@ export class Formatter {
       const prevContext = index > 0 ? contexts.map[list[index - 1]] : undefined;
       const nextContext = index < list.length - 1 ? contexts.map[list[index + 1]] : undefined;
 
-      move(context, shift, prevContext, nextContext);
+      context.move(shift, prevContext, nextContext);
 
-      const cost = -sumArray(context.getTickables().map((t) => t.getFormatterMetrics().space.deviation));
-
+      // Q(msac): Should the cost by normalized by the number
+      // of tickables at this position?  If so, switch this to getAverageDeviationCost()
+      const cost = -context.getDeviationCost();
       if (cost > 0) {
         shift = -Math.min(context.getFormatterMetrics().freedom.right, Math.abs(cost));
       } else if (cost < 0) {
@@ -1067,12 +1058,12 @@ export class Formatter {
    *
    * Voices are full justified to fit in `justifyWidth` pixels.
    *
-   * Set `options.context` to the rendering context. Set `options.align_rests`
-   * to true to enable rest alignment.
+   * Set `options.context` to the rendering context. Set `options.alignRests`
+   * to true to enable rest vertical alignment.
    */
   format(voices: Voice[], justifyWidth?: number, options?: FormatParams): this {
     const opts = {
-      align_rests: false,
+      alignRests: false,
       ...options,
     };
 
@@ -1082,7 +1073,7 @@ export class Formatter {
       this.voices.forEach((v) => v.setSoftmaxFactor(softmaxFactor));
     }
 
-    this.alignRests(voices, opts.align_rests);
+    this.alignRests(voices, opts.alignRests);
     this.createTickContexts(voices);
     this.preFormat(justifyWidth, opts.context, voices, opts.stave);
 
@@ -1096,7 +1087,6 @@ export class Formatter {
   formatToStave(voices: Voice[], stave: Stave, optionsParam?: FormatParams): this {
     const options: FormatParams = { context: stave.getContext(), ...optionsParam };
 
-    // eslint-disable-next-line
     const justifyWidth = stave.getNoteEndX() - stave.getNoteStartX() - Stave.defaultPadding;
     L('Formatting voices to width: ', justifyWidth);
     return this.format(voices, justifyWidth, options);

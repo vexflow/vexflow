@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- 
+      This page uses `vexflow-bravura.js`, which statically bundles the Bravura and Academico fonts.
+      You do not need to call `VexFlow.setFonts(...)`.
+    -->
+    <style>
+      html {
+        font-family: 'Academico', monospace, 'Georgia', serif;
+        font-size: 18px;
+      }
+
+      body {
+        margin: 20px;
+      }
+    </style>
+    <script src="../../build/cjs/vexflow-bravura.js"></script>
+  </head>
+  <body>
+    <p>
+      This page uses <b>vexflow-bravura.js</b>, which statically bundles the <b>Bravura</b> &amp;
+      <b>Academico</b> fonts. You do not need to call <b>VexFlow.setFonts(...)</b> because VexFlow will use 'Bravura,
+      Academico' by default.
+    </p>
+    <div id="output"></div>
+    <script type="module">
+      const factory = new VexFlow.Factory({ renderer: { elementId: 'output', width: 500, height: 200 } });
+      const score = factory.EasyScore();
+      const system = factory.System();
+      system
+        .addStave({
+          voices: [
+            score.voice(score.notes('C#5/q, B4, A4, G#4', { stem: 'up' })),
+            score.voice(score.notes('C#4/h, C#4', { stem: 'down' })),
+          ],
+        })
+        .addClef('treble')
+        .addTimeSignature('4/4');
+      factory.draw();
+    </script>
+  </body>
+</html>

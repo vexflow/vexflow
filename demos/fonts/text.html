@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- 
+      Summary: Sample of the text fonts available in VexFlow. This page doesn't use any VexFlow features.
+      Run: Open this html file in your web browser.
+    -->
+    <style>
+      html {
+        font-family: sans-serif;
+      }
+
+      body {
+        margin: 20px;
+      }
+
+      .text {
+        font-family: monospace;
+        font-size: 32px;
+        width: 80vw;
+        line-height: 1.6;
+        margin: auto;
+      }
+
+      button {
+        font-size: 18px;
+        padding: 10px;
+        cursor: pointer;
+      }
+
+      .space {
+        height: 30px;
+      }
+    </style>
+    <!-- 
+      In your browser's dev tools / network tab, you'll see that these index.css files are loaded immediately. 
+      However, the actual font files (*.woff2) are not loaded until the button is clicked.
+    -->
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/academico/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/edwin/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/finaleashtext/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/finalebroadwaytext/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/finalejazztext/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/finalemaestrotext/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/musejazztext/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/nepomuk/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/petalumascript/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/robotoslab/index.css" />
+  </head>
+  <body>
+    <button id="show-next-font" onclick="showNextFont()">SHOW NEXT FONT</button>
+    <div class="space"></div>
+    <div class="text">
+      This text is in <b><span id="font-name">monospace</span></b
+      >. <br /><br />
+      VexFlow is a music engraving library written in Typescript.<br />
+      Build scores quickly, like an engraving wizard.<br />The quick brown fox jumps over the lazy dog.<br /><br />Since
+      the default <b>@font-face</b> rule uses <b>font-display: swap</b>, you should consider using a fallback font that
+      is similar to your desired font (e.g., Georgia if you are trying to load Academico). The browser will briefly use
+      the fallback font before your desired font is fully loaded. Or, you can use <b>font-display: block</b> in your own
+      <b>@font-face</b>
+      rule to avoid the font change.
+    </div>
+    <script>
+      const fonts = [
+        'Academico',
+        'Edwin',
+        'Finale Ash Text',
+        'Finale Broadway Text',
+        'Finale Jazz Text',
+        'Finale Maestro Text',
+        'MuseJazz Text',
+        'Nepomuk',
+        'Petaluma Script',
+        'Roboto Slab',
+      ];
+      let index = 0;
+
+      function showNextFont() {
+        const fontName = fonts[index];
+        const textDIV = document.querySelector('.text');
+        textDIV.style.display = 'block';
+        textDIV.style.fontFamily = fontName;
+        document.querySelector('#font-name').innerText = fontName;
+        index = (index + 1) % fonts.length;
+        updateButtonLabel();
+      }
+
+      function updateButtonLabel() {
+        document.querySelector('#show-next-font').innerText = `SHOW NEXT FONT: ${fonts[index]}`;
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        updateButtonLabel();
+      });
+    </script>
+  </body>
+</html>

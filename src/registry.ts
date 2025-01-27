@@ -1,4 +1,5 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// MIT License
 // @author Mohit Cheppudira
 //
 // ## Description
@@ -24,7 +25,7 @@ import { RuntimeError } from './util';
 // for both multi-labeling (e.g., an element can have multiple classes)
 // and efficient lookup.
 class Index {
-  // [attribute_name][attribute_value][element_id] => Element
+  // [attributeName][attributeValue][elementId] => Element
   [key: string]: { [key: string]: { [key: string]: Element } };
   constructor() {
     this.id = {};
@@ -41,7 +42,7 @@ export interface RegistryUpdate {
 }
 
 export class Registry {
-  private static defaultRegistry?: Registry;
+  protected static defaultRegistry?: Registry;
 
   static getDefaultRegistry(): Registry | undefined {
     return Registry.defaultRegistry;
@@ -114,12 +115,12 @@ export class Registry {
   }
 
   getElementsByAttribute(attribute: string, value: string): Element[] {
-    const index_attr = this.index[attribute];
-    if (index_attr) {
-      const index_attr_val = index_attr[value];
-      if (index_attr_val) {
-        const keys = Object.keys(index_attr_val);
-        return keys.map((k) => index_attr_val[k]);
+    const indexAttr = this.index[attribute];
+    if (indexAttr) {
+      const indexAttrVal = indexAttr[value];
+      if (indexAttrVal) {
+        const keys = Object.keys(indexAttrVal);
+        return keys.map((k) => indexAttrVal[k]);
       }
     }
     return [];

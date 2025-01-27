@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // Clef Tests
@@ -9,17 +9,20 @@ const ClefTests = {
   Start(): void {
     QUnit.module('Clef');
     const run = VexFlowTests.runTests;
-    run('Clef Test', draw);
+    run('Bounding Box', draw, { drawBoundingBox: true });
+    run('Bounding Box Clef Change', drawClefChange, { drawBoundingBox: true });
+    run('Clef Test', draw, { drawBoundingBox: false });
     run('Clef End Test', drawEnd);
     run('Small Clef Test', drawSmall);
     run('Small Clef End Test', drawSmallEnd);
-    run('Clef Change Test', drawClefChange);
+    run('Clef Change Test', drawClefChange, { drawBoundingBox: false });
   },
 };
 
 function draw(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, 800, 120);
-  f.Stave()
+  const stave = f
+    .Stave()
     .addClef('treble')
     .addClef('treble', 'default', '8va')
     .addClef('treble', 'default', '8vb')
@@ -36,6 +39,13 @@ function draw(options: TestOptions): void {
     .addClef('french')
     .addEndClef('treble');
   f.draw();
+
+  // Render bounding boxes
+  if (options.params.drawBoundingBox === true) {
+    const elements = stave.getModifiers(undefined, 'Clef');
+    elements.forEach((element) => VexFlowTests.drawBoundingBox(f.getContext(), element));
+  }
+
   options.assert.ok(true, 'all pass');
 }
 
@@ -129,13 +139,17 @@ function drawClefChange(options: TestOptions): void {
     f.ClefNote({ type: 'french', options: { size: 'small' } }),
     f.StaveNote({ keys: ['c/4'], duration: '4', clef: 'french' }),
     f.ClefNote({ type: 'treble', options: { size: 'small', annotation: '8vb' } }),
-    f.StaveNote({ keys: ['c/4'], duration: '4', clef: 'treble', octave_shift: -1 }),
+    f.StaveNote({ keys: ['c/4'], duration: '4', clef: 'treble', octaveShift: -1 }),
     f.ClefNote({ type: 'treble', options: { size: 'small', annotation: '8va' } }),
-    f.StaveNote({ keys: ['c/4'], duration: '4', clef: 'treble', octave_shift: 1 }),
+    f.StaveNote({ keys: ['c/4'], duration: '4', clef: 'treble', octaveShift: 1 }),
   ];
   const voice = f.Voice({ time: '12/4' }).addTickables(notes);
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
   f.draw();
+  // Render bounding boxes
+  if (options.params.drawBoundingBox === true) {
+    notes.forEach((element) => VexFlowTests.drawBoundingBox(f.getContext(), element));
+  }
   options.assert.ok(true, 'all pass');
 }
 

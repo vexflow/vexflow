@@ -1,5 +1,5 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
-// Author Taehoon Moon 2014
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// @author: Taehoon Moon 2014
 
 import { ModifierContext } from './modifiercontext';
 import { Note } from './note';
@@ -17,10 +17,10 @@ export class TimeSigNote extends Note {
     super({ duration: 'b' });
 
     this.timeSig = new TimeSignature(timeSpec, customPadding);
-    this.setWidth(this.timeSig.getGlyph().getMetrics().width);
+    this.setWidth(this.timeSig.getWidth());
 
     // Note properties
-    this.ignore_ticks = true;
+    this.ignoreTicks = true;
   }
 
   /* Overridden to ignore */
@@ -40,13 +40,8 @@ export class TimeSigNote extends Note {
     const ctx = this.checkContext();
     this.setRendered();
 
-    const tsGlyph = this.timeSig.getGlyph();
-    if (!tsGlyph.getContext()) {
-      tsGlyph.setContext(ctx);
-    }
-
-    tsGlyph.setStave(stave);
-    tsGlyph.setYShift(stave.getYForLine(2) - stave.getYForGlyphs());
-    tsGlyph.renderToStave(this.getAbsoluteX());
+    ctx.openGroup('timesignote', this.getAttribute('id'));
+    this.timeSig.drawAt(ctx, stave, this.getAbsoluteX());
+    ctx.closeGroup();
   }
 }

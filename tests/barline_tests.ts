@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // Barline Tests
@@ -33,10 +33,10 @@ function simple(options: TestOptions): void {
   const stave = f.Stave();
 
   const notes = [
-    f.StaveNote({ keys: ['d/4', 'e/4', 'f/4'], stem_direction: -1, duration: '2' }),
+    f.StaveNote({ keys: ['d/4', 'e/4', 'f/4'], stemDirection: -1, duration: '2' }),
     f.BarNote({ type: 'single' }),
     f
-      .StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stem_direction: -1, duration: '2' })
+      .StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stemDirection: -1, duration: '2' })
       .addModifier(f.Accidental({ type: 'n' }), 0)
       .addModifier(f.Accidental({ type: '#' }), 1),
   ];
@@ -59,10 +59,10 @@ function style(options: TestOptions): void {
   const stave = f.Stave();
 
   const notes = [
-    f.StaveNote({ keys: ['d/4', 'e/4', 'f/4'], stem_direction: -1, duration: '2' }),
+    f.StaveNote({ keys: ['d/4', 'e/4', 'f/4'], stemDirection: -1, duration: '2' }),
     f.BarNote({ type: 'single' }),
     f
-      .StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stem_direction: -1, duration: '2' })
+      .StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stemDirection: -1, duration: '2' })
       .addModifier(f.Accidental({ type: 'n' }), 0)
       .addModifier(f.Accidental({ type: '#' }), 1),
   ];

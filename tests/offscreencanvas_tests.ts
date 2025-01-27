@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2021.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // OffscreenCanvas Tests
@@ -32,7 +32,7 @@ function simpleTest(assert: Assert): void {
   // eslint-disable-next-line
   // @ts-ignore
   const offscreenCtx: OffscreenCanvasRenderingContext2D = offscreenCanvas.getContext('2d');
-  if (offscreenCtx == null) {
+  if (offscreenCtx === null) {
     throw new Error("Couldn't create offscreen context");
   }
   const ctx = new CanvasContext(offscreenCtx);
@@ -40,7 +40,7 @@ function simpleTest(assert: Assert): void {
   // Render to the OffscreenCavans.
   const stave = new Stave(10, 50, 200);
   stave.setEndBarType(BarlineType.END);
-  stave.addClef('treble').setContext(ctx).draw();
+  stave.addClef('treble').setContext(ctx).drawWithStyle();
   const notes = [
     new StaveNote({ keys: ['c/4'], duration: 'q' }),
     new StaveNote({ keys: ['d/4'], duration: 'q' }),
@@ -55,7 +55,7 @@ function simpleTest(assert: Assert): void {
   canvas.width = offscreenCanvas.width;
   canvas.height = offscreenCanvas.height;
   const canvasCtx = canvas.getContext('2d');
-  if (canvasCtx == null) {
+  if (canvasCtx === null) {
     throw new Error("Couldn't create canvas context");
   }
   canvasCtx.drawImage(imgBmp, 0, 0);

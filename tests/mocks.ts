@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // TickContext Mocks
@@ -15,15 +15,13 @@ class MockTickable extends Tickable {
   ticks: Fraction = new Fraction(1, 1);
   voice?: Voice;
   stave?: Stave;
-  width: number = 0;
-  ignore_ticks: boolean = false;
+  ignoreTicks: boolean = false;
 
   init(): void {
     // DO NOTHING.
   }
 
   getX(): number {
-    // eslint-disable-next-line
     return this.tickContext!.getX();
   }
 
@@ -83,12 +81,12 @@ class MockTickable extends Tickable {
   }
 
   setIgnoreTicks(flag: boolean): this {
-    this.ignore_ticks = flag;
+    this.ignoreTicks = flag;
     return this;
   }
 
   shouldIgnoreTicks(): boolean {
-    return this.ignore_ticks;
+    return this.ignoreTicks;
   }
 
   preFormat(): void {

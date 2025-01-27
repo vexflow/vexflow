@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 
 import { RuntimeError } from './util';
@@ -26,15 +26,15 @@ export type RootValue = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 export type AccidentalValue = -2 | -1 | 0 | 1 | 2;
 
 export interface Key {
-  root_index: RootValue;
-  int_val: KeyValue;
+  rootIndex: RootValue;
+  intVal: KeyValue;
 }
 
 /** Music implements some standard music theory routines. */
 export class Music {
   /** Number of an canonical notes (12). */
   static get NUM_TONES(): number {
-    return this.canonical_notes.length;
+    return this.canonicalNotes.length;
   }
 
   /** Names of root notes ('c', 'd',...) */
@@ -43,12 +43,12 @@ export class Music {
   }
 
   /** Values of the root notes.*/
-  static get root_values(): KeyValue[] {
+  static get rootValues(): KeyValue[] {
     return [0, 2, 4, 5, 7, 9, 11];
   }
 
-  /** Indices of the root notes.*/
-  static get root_indices(): Record<string, RootValue> {
+  /** Indexes of the root notes.*/
+  static get rootIndexes(): Record<string, RootValue> {
     return {
       c: 0,
       d: 1,
@@ -61,17 +61,17 @@ export class Music {
   }
 
   /** Names of canonical notes ('c', 'c#', 'd',...). */
-  static get canonical_notes(): string[] {
+  static get canonicalNotes(): string[] {
     return ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b'];
   }
 
   /** Names of diatonic intervals ('unison', 'm2', 'M2',...). */
-  static get diatonic_intervals(): string[] {
+  static get diatonicIntervals(): string[] {
     return ['unison', 'm2', 'M2', 'm3', 'M3', 'p4', 'dim5', 'p5', 'm6', 'M6', 'b7', 'M7', 'octave'];
   }
 
   /** NoteAccidental associated to diatonic intervals. */
-  static get diatonic_accidentals(): Record<string, NoteAccidental> {
+  static get diatonicAccidentals(): Record<string, NoteAccidental> {
     return {
       unison: { note: 0, accidental: 0 },
       m2: { note: 1, accidental: -1 },
@@ -166,57 +166,57 @@ export class Music {
   /** Note values. */
   static get noteValues(): Record<string, Key> {
     return {
-      c: { root_index: 0, int_val: 0 },
-      cn: { root_index: 0, int_val: 0 },
-      'c#': { root_index: 0, int_val: 1 },
-      'c##': { root_index: 0, int_val: 2 },
-      cb: { root_index: 0, int_val: 11 },
-      cbb: { root_index: 0, int_val: 10 },
-      d: { root_index: 1, int_val: 2 },
-      dn: { root_index: 1, int_val: 2 },
-      'd#': { root_index: 1, int_val: 3 },
-      'd##': { root_index: 1, int_val: 4 },
-      db: { root_index: 1, int_val: 1 },
-      dbb: { root_index: 1, int_val: 0 },
-      e: { root_index: 2, int_val: 4 },
-      en: { root_index: 2, int_val: 4 },
-      'e#': { root_index: 2, int_val: 5 },
-      'e##': { root_index: 2, int_val: 6 },
-      eb: { root_index: 2, int_val: 3 },
-      ebb: { root_index: 2, int_val: 2 },
-      f: { root_index: 3, int_val: 5 },
-      fn: { root_index: 3, int_val: 5 },
-      'f#': { root_index: 3, int_val: 6 },
-      'f##': { root_index: 3, int_val: 7 },
-      fb: { root_index: 3, int_val: 4 },
-      fbb: { root_index: 3, int_val: 3 },
-      g: { root_index: 4, int_val: 7 },
-      gn: { root_index: 4, int_val: 7 },
-      'g#': { root_index: 4, int_val: 8 },
-      'g##': { root_index: 4, int_val: 9 },
-      gb: { root_index: 4, int_val: 6 },
-      gbb: { root_index: 4, int_val: 5 },
-      a: { root_index: 5, int_val: 9 },
-      an: { root_index: 5, int_val: 9 },
-      'a#': { root_index: 5, int_val: 10 },
-      'a##': { root_index: 5, int_val: 11 },
-      ab: { root_index: 5, int_val: 8 },
-      abb: { root_index: 5, int_val: 7 },
-      b: { root_index: 6, int_val: 11 },
-      bn: { root_index: 6, int_val: 11 },
-      'b#': { root_index: 6, int_val: 0 },
-      'b##': { root_index: 6, int_val: 1 },
-      bb: { root_index: 6, int_val: 10 },
-      bbb: { root_index: 6, int_val: 9 },
+      c: { rootIndex: 0, intVal: 0 },
+      cn: { rootIndex: 0, intVal: 0 },
+      'c#': { rootIndex: 0, intVal: 1 },
+      'c##': { rootIndex: 0, intVal: 2 },
+      cb: { rootIndex: 0, intVal: 11 },
+      cbb: { rootIndex: 0, intVal: 10 },
+      d: { rootIndex: 1, intVal: 2 },
+      dn: { rootIndex: 1, intVal: 2 },
+      'd#': { rootIndex: 1, intVal: 3 },
+      'd##': { rootIndex: 1, intVal: 4 },
+      db: { rootIndex: 1, intVal: 1 },
+      dbb: { rootIndex: 1, intVal: 0 },
+      e: { rootIndex: 2, intVal: 4 },
+      en: { rootIndex: 2, intVal: 4 },
+      'e#': { rootIndex: 2, intVal: 5 },
+      'e##': { rootIndex: 2, intVal: 6 },
+      eb: { rootIndex: 2, intVal: 3 },
+      ebb: { rootIndex: 2, intVal: 2 },
+      f: { rootIndex: 3, intVal: 5 },
+      fn: { rootIndex: 3, intVal: 5 },
+      'f#': { rootIndex: 3, intVal: 6 },
+      'f##': { rootIndex: 3, intVal: 7 },
+      fb: { rootIndex: 3, intVal: 4 },
+      fbb: { rootIndex: 3, intVal: 3 },
+      g: { rootIndex: 4, intVal: 7 },
+      gn: { rootIndex: 4, intVal: 7 },
+      'g#': { rootIndex: 4, intVal: 8 },
+      'g##': { rootIndex: 4, intVal: 9 },
+      gb: { rootIndex: 4, intVal: 6 },
+      gbb: { rootIndex: 4, intVal: 5 },
+      a: { rootIndex: 5, intVal: 9 },
+      an: { rootIndex: 5, intVal: 9 },
+      'a#': { rootIndex: 5, intVal: 10 },
+      'a##': { rootIndex: 5, intVal: 11 },
+      ab: { rootIndex: 5, intVal: 8 },
+      abb: { rootIndex: 5, intVal: 7 },
+      b: { rootIndex: 6, intVal: 11 },
+      bn: { rootIndex: 6, intVal: 11 },
+      'b#': { rootIndex: 6, intVal: 0 },
+      'b##': { rootIndex: 6, intVal: 1 },
+      bb: { rootIndex: 6, intVal: 10 },
+      bbb: { rootIndex: 6, intVal: 9 },
     };
   }
 
   protected isValidNoteValue(note: number): boolean {
-    return note >= 0 && note < Music.canonical_notes.length;
+    return note >= 0 && note < Music.canonicalNotes.length;
   }
 
   protected isValidIntervalValue(interval: number): boolean {
-    return interval >= 0 && interval < Music.diatonic_intervals.length;
+    return interval >= 0 && interval < Music.diatonicIntervals.length;
   }
 
   /** Return root and accidental associated to a note. */
@@ -283,7 +283,7 @@ export class Music {
     if (value === undefined) {
       throw new RuntimeError('BadArguments', `Invalid note name: ${noteString}`);
     }
-    return value.int_val;
+    return value.intVal;
   }
 
   /** Interval value associated to an interval name. */
@@ -300,7 +300,7 @@ export class Music {
     if (!this.isValidNoteValue(noteValue)) {
       throw new RuntimeError('BadArguments', `Invalid note value: ${noteValue}`);
     }
-    return Music.canonical_notes[noteValue];
+    return Music.canonicalNotes[noteValue];
   }
 
   /** Interval name associated to a value. */
@@ -308,7 +308,7 @@ export class Music {
     if (!this.isValidIntervalValue(intervalValue)) {
       throw new RuntimeError('BadArguments', `Invalid interval value: ${intervalValue}`);
     }
-    return Music.diatonic_intervals[intervalValue];
+    return Music.diatonicIntervals[intervalValue];
   }
 
   /**
@@ -338,12 +338,12 @@ export class Music {
       if (interval > 0) multiplier = -1;
 
       // Possibly wrap around. (Add +1 for modulo operator)
-      const reverse_interval = ((noteValue + 1 + (rootValue + 1)) % Music.NUM_TONES) * multiplier;
+      const reverseInterval = ((noteValue + 1 + (rootValue + 1)) % Music.NUM_TONES) * multiplier;
 
-      if (Math.abs(reverse_interval) > 2) {
+      if (Math.abs(reverseInterval) > 2) {
         throw new RuntimeError('BadArguments', `Notes not related: ${root}, ${noteValue})`);
       } else {
-        interval = reverse_interval;
+        interval = reverseInterval;
       }
     }
 
@@ -423,7 +423,7 @@ export class Music {
     if (!scaleName) throw new RuntimeError('BadArguments', 'Unsupported key type: ' + keySignature);
 
     const scale = this.getScaleTones(this.getNoteValue(keySigString), scaleName);
-    const noteLocation = Music.root_indices[keySigParts.root];
+    const noteLocation = Music.rootIndexes[keySigParts.root];
 
     const scaleMap = {} as Record<string, string>;
     for (let i = 0; i < Music.roots.length; ++i) {

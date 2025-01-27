@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- 
+      Run: Start a web server and load this page.
+      Summary: vexflow-core.js includes no music fonts, so we load fonts at runtime.
+      For example:
+        await VexFlow.loadFonts('Bravura');
+        VexFlow.setFonts('Bravura');
+      Open the developer console to verify that ONLY vexflow-core.js is loaded when this page is first displayed.
+    -->
+    <style>
+      html {
+        font: 16px sans-serif;
+      }
+      body {
+        margin: 20px;
+      }
+      #output {
+        min-height: 220px;
+        background-color: #fbfbf0;
+        margin-top: 20px;
+        border: 1px solid #ccc;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      To see the demo, start a web server and load this page (e.g., `npx http-server` and navigate to
+      <a href="http://127.0.0.1:8080/demos/fonts/async-await.html">http://127.0.0.1:8080/demos/fonts/async-await.html</a
+      >).
+    </p>
+    <p>
+      <b>vexflow-core.js</b> does not bundle any fonts, to allow your webpage to load a small initial bundle. It will
+      load fonts on demand when you call <code>await VexFlow.loadFonts(fontName1, fontName2, ...); </code>.
+    </p>
+    <p>
+      Open your browser's developer tools and choose one of the fonts below. You will see that a font module is
+      downloaded when needed:
+    </p>
+    <div>
+      <a href="#" onclick="chooseFont('Bravura')">Bravura</a> &nbsp;
+      <a href="#" onclick="chooseFont('Leland')">Leland</a> &nbsp;
+      <a href="#" onclick="chooseFont('Gonville')">Gonville</a> &nbsp;
+      <a href="#" onclick="chooseFont('Petaluma')">Petaluma</a> &nbsp;
+    </div>
+    <div id="output"></div>
+    <script src="../../build/cjs/vexflow-core.js"></script>
+    <script type="module">
+      async function chooseFont(fontName) {
+        const container = document.getElementById('output');
+        while (container.firstChild) {
+          container.removeChild(container.firstChild);
+        }
+
+        await VexFlow.loadFonts(fontName);
+        VexFlow.setFonts(fontName);
+
+        renderScore();
+      }
+
+      function renderScore() {
+        const factory = new VexFlow.Factory({ renderer: { elementId: 'output', width: 500, height: 200 } });
+        const score = factory.EasyScore();
+        const system = factory.System();
+        system
+          .addStave({
+            voices: [
+              score.voice(score.notes('C#5/q, B4, A4, G#4', { stem: 'up' })),
+              score.voice(score.notes('C#4/h, C#4', { stem: 'down' })),
+            ],
+          })
+          .addClef('treble')
+          .addTimeSignature('4/4');
+        factory.draw();
+      }
+      window.chooseFont = chooseFont;
+    </script>
+  </body>
+</html>

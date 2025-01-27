@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2021.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 
 import { FontInfo } from './font';
@@ -9,10 +9,6 @@ export interface TextMeasure {
   y: number;
   width: number;
   height: number;
-}
-
-export interface GroupAttributes {
-  pointerBBox: boolean;
 }
 
 export abstract class RenderContext {
@@ -34,6 +30,7 @@ export abstract class RenderContext {
   abstract resize(width: number, height: number): this;
   abstract fillRect(x: number, y: number, width: number, height: number): this;
   abstract clearRect(x: number, y: number, width: number, height: number): this;
+  abstract pointerRect(x: number, y: number, width: number, height: number): this;
   abstract beginPath(): this;
   abstract moveTo(x: number, y: number): this;
   abstract lineTo(x: number, y: number): this;
@@ -55,8 +52,11 @@ export abstract class RenderContext {
   abstract save(): this;
   abstract restore(): this;
   // eslint-disable-next-line
-  abstract openGroup(cls?: string, id?: string, attrs?: GroupAttributes): any;
+  abstract openGroup(cls?: string, id?: string): any;
   abstract closeGroup(): void;
+  abstract openRotation(angleDegrees: number, x: number, y: number): void;
+  abstract closeRotation(): void;
+
   // eslint-disable-next-line
   abstract add(child: any): void;
   abstract measureText(text: string): TextMeasure;
@@ -75,15 +75,6 @@ export abstract class RenderContext {
   }
   get font(): string {
     return this.getFont();
-  }
-
-  /**
-   * This is kept for backwards compatibility with 3.0.9.
-   * @deprecated use `setFont(...)` instead since it now supports CSS font shorthand.
-   */
-  setRawFont(f: string): this {
-    this.setFont(f);
-    return this;
   }
 }
 

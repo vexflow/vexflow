@@ -1,41 +1,50 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
+    <meta charset="UTF-8" />
     <style>
       body {
-        font: 16px Helvetica, Arial, sans-serif;
+        font-size: 16pt;
+        font-family: Helvetica, Arial, sans-serif;
       }
     </style>
   </head>
   <body>
     <div id="output"></div>
     <p>This page shows how to include VexFlow via an HTML &lt;script&gt; tag. View the source code.</p>
-    <p>VexFlow Build: <span id="info"></span></p>
+    <p><span id="info"></span></p>
     <p>See also: <a href="module.html">ES Modules</a></p>
-    <script src="../../build/cjs/vexflow.js"></script>
+    <script src="../../build/cjs/vexflow-core.js"></script>
     <script>
-      const { Factory } = Vex.Flow;
-      const { VERSION, ID, DATE } = Vex.Flow.BUILD;
-      document.querySelector('#info').innerText = VERSION + ' / ' + ID + ' / ' + DATE;
-
-      const factory = new Factory({
-        renderer: { elementId: 'output', width: 500, height: 200 },
+      VexFlow.loadFonts('Bravura', 'Academico').then(() => {
+        console.log('Fonts loaded!');
+        showScore();
       });
 
-      const score = factory.EasyScore();
-      const system = factory.System();
+      function showScore() {
+        const { Factory } = VexFlow;
+        const { VERSION, ID, DATE, INFO } = VexFlow.BUILD;
+        document.querySelector('#info').innerText = INFO + ' / ' + VERSION + ' / ' + ID + ' / ' + DATE;
 
-      system
-        .addStave({
-          voices: [
-            score.voice(score.notes('C#5/q, B4, A4, G#4', { stem: 'up' })),
-            score.voice(score.notes('C#4/h, C#4', { stem: 'down' })),
-          ],
-        })
-        .addClef('treble')
-        .addTimeSignature('4/4');
+        const factory = new Factory({
+          renderer: { elementId: 'output', width: 500, height: 200 },
+        });
 
-      factory.draw();
+        const score = factory.EasyScore();
+        const system = factory.System();
+
+        system
+          .addStave({
+            voices: [
+              score.voice(score.notes('C#5/q, B4, A4, G#4', { stem: 'up' })),
+              score.voice(score.notes('C#4/h, C#4', { stem: 'down' })),
+            ],
+          })
+          .addClef('treble')
+          .addTimeSignature('4/4');
+
+        factory.draw();
+      }
     </script>
   </body>
 </html>

@@ -1,8 +1,8 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
-// Author: Joshua Koo / @zz85
-// Author: @incompleteopus
+// @author Joshua Koo / @zz85
+// @author @incompleteopus
 
 import { Category } from './typeguard';
 import { RuntimeError } from './util';
@@ -14,9 +14,8 @@ export class Fraction {
   }
 
   // Cached objects for comparisons.
-  private static __staticFractionA = new Fraction();
-  private static __staticFractionB = new Fraction();
-  private static __staticFractionTmp = new Fraction();
+  private static fractionA = new Fraction();
+  private static fractionB = new Fraction();
 
   /**
    * GCD: Greatest common divisor using the Euclidean algorithm.
@@ -43,7 +42,11 @@ export class Fraction {
     return (a * b) / Fraction.GCD(a, b);
   }
 
-  /** Lowest common multiple for more than two numbers. */
+  /** Lowest common multiple for more than two numbers.
+   *
+   * Note that the `args` array will be manipulated and shortened recursively during
+   * computation.
+   */
   static LCMM(args: number[]): number {
     if (args.length === 0) {
       return 0;
@@ -104,7 +107,7 @@ export class Fraction {
     return this.set(u, lcm);
   }
 
-  /** Substract value of another fraction. */
+  /** Subtract value of another fraction. */
   subtract(param1: Fraction | number = 0, param2: number = 1): this {
     const [otherNumerator, otherDenominator] = getNumeratorAndDenominator(param1, param2);
     const lcm = Fraction.LCM(this.denominator, otherDenominator);
@@ -128,22 +131,22 @@ export class Fraction {
 
   /** Simplify both sides and check if they are equal. */
   equals(compare: Fraction | number): boolean {
-    const a = Fraction.__staticFractionA.copy(compare).simplify();
-    const b = Fraction.__staticFractionB.copy(this).simplify();
+    const a = Fraction.fractionA.copy(compare).simplify();
+    const b = Fraction.fractionB.copy(this).simplify();
 
     return a.numerator === b.numerator && a.denominator === b.denominator;
   }
 
   /** Greater than operator. */
   greaterThan(compare: Fraction | number): boolean {
-    const a = Fraction.__staticFractionB.copy(this);
+    const a = Fraction.fractionA.copy(this);
     a.subtract(compare);
     return a.numerator > 0;
   }
 
   /** Greater than or equals operator. */
   greaterThanEquals(compare: Fraction | number): boolean {
-    const a = Fraction.__staticFractionB.copy(this);
+    const a = Fraction.fractionA.copy(this);
     a.subtract(compare);
     return a.numerator >= 0;
   }
@@ -166,18 +169,18 @@ export class Fraction {
   /** Copy value of another fraction. */
   copy(other: Fraction | number): this {
     if (typeof other === 'number') {
-      return this.set(other, 1);
+      return this.set(other);
     } else {
       return this.set(other.numerator, other.denominator);
     }
   }
 
-  /** Return the integer component (eg. 5/2 => 2). */
+  /** Return the integer component (e.g. 5/2 => 2). */
   quotient(): number {
     return Math.floor(this.numerator / this.denominator);
   }
 
-  /** Return the remainder component (eg. 5/2 => 1). */
+  /** Return the remainder component (e.g. 5/2 => 1). */
   remainder(): number {
     return this.numerator % this.denominator;
   }
@@ -189,21 +192,21 @@ export class Fraction {
     return this;
   }
 
-  /** Return a raw string representation (eg. "5/2"). */
+  /** Return a raw string representation (e.g. "5/2"). */
   toString(): string {
     return `${this.numerator}/${this.denominator}`;
   }
 
-  /** Return a simplified string respresentation. */
+  /** Return a simplified string representation. */
   toSimplifiedString(): string {
-    return Fraction.__staticFractionTmp.copy(this).simplify().toString();
+    return Fraction.fractionA.copy(this).simplify().toString();
   }
 
   /** Return string representation in mixed form. */
   toMixedString(): string {
     let s = '';
     const q = this.quotient();
-    const f = Fraction.__staticFractionTmp.copy(this);
+    const f = Fraction.fractionA.copy(this);
 
     if (q < 0) {
       f.makeAbs();

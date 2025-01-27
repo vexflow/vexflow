@@ -1,8 +1,8 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 
 import { Font, FontInfo } from './font';
-import { GroupAttributes, RenderContext, TextMeasure } from './rendercontext';
+import { RenderContext, TextMeasure } from './rendercontext';
 import { globalObject, warn } from './util';
 import { isHTMLCanvas } from './web';
 
@@ -43,6 +43,7 @@ export class CanvasContext extends RenderContext {
   /**  The 2D rendering context from the Canvas API. Forward method calls to this object. */
   context2D: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 
+  curTransfrom: DOMMatrix;
   /**
    * The HTMLCanvasElement or OffscreenCanvas that is associated with the above context.
    * If there was no associated `<canvas>` element, just store the default WIDTH / HEIGHT.
@@ -85,6 +86,7 @@ export class CanvasContext extends RenderContext {
   constructor(context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D) {
     super();
     this.context2D = context;
+    this.curTransfrom = context.getTransform();
     if (!context.canvas) {
       this.canvas = {
         width: CanvasContext.WIDTH,
@@ -103,12 +105,23 @@ export class CanvasContext extends RenderContext {
   }
 
   // eslint-disable-next-line
-  openGroup(cls?: string, id?: string, attrs?: GroupAttributes): any {
+  openGroup(cls?: string, id?: string): any {
     // Containers not implemented.
   }
 
   closeGroup(): void {
     // Containers not implemented.
+  }
+
+  openRotation(angleDegrees: number, x: number, y: number) {
+    this.curTransfrom = this.context2D.getTransform();
+    this.context2D.translate(x, y);
+    this.context2D.rotate((angleDegrees * Math.PI) / 180);
+    this.context2D.translate(-x, -y);
+  }
+
+  closeRotation() {
+    this.context2D.setTransform(this.curTransfrom);
   }
 
   // eslint-disable-next-line
@@ -200,6 +213,11 @@ export class CanvasContext extends RenderContext {
 
   fillRect(x: number, y: number, width: number, height: number): this {
     this.context2D.fillRect(x, y, width, height);
+    return this;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  pointerRect(x: number, y: number, width: number, height: number): this {
     return this;
   }
 

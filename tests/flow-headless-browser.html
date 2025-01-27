@@ -1,16 +1,57 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <meta charset="UTF-8" />
+    <!-- fonts.css defines the music fonts via @font-face rules. -->
+    <link rel="stylesheet" href="fonts.css" type="text/css" media="screen" />
   </head>
   <body>
+    <div id="font-preload">
+      <!--
+        Preload fonts and styles for testing.
+        The empty tags <b></b>, <i></i>, and <span style="font-weight: xxx"></span> are for loading different font weights/styles.
+      -->
+      <span style="font-family: Academico"><b></b></span>
+      <span style="font-family: Bravura"></span>
+      <span style="font-family: Edwin">
+        <b></b><i></i><b><i></i></b>
+      </span>
+      <span style="font-family: Finale Ash"></span>
+      <span style="font-family: Finale Ash Text"></span>
+      <span style="font-family: Finale Broadway"></span>
+      <span style="font-family: Finale Broadway Text"></span>
+      <span style="font-family: Finale Jazz"></span>
+      <span style="font-family: Finale Jazz Text"></span>
+      <span style="font-family: Finale Maestro"></span>
+      <span style="font-family: Finale Maestro Text">
+        <b></b><i></i><b><i></i></b>
+      </span>
+      <span style="font-family: Gonville"></span>
+      <span style="font-family: Gootville"></span>
+      <span style="font-family: Leipzig"></span>
+      <span style="font-family: Leland"></span>
+      <span style="font-family: MuseJazz"></span>
+      <span style="font-family: MuseJazz Text"></span>
+      <span style="font-family: Nepomuk">
+        <b></b><i></i><b><i></i></b>
+      </span>
+      <span style="font-family: Petaluma"></span>
+      <span style="font-family: Petaluma Script"></span>
+      <span style="font-family: Roboto Slab">
+        <span style="font-weight: 500"></span><span style="font-weight: 700"></span>
+      </span>
+      <span style="font-family: Sebastian"></span>
+    </div>
     <div id="qunit-tests"></div>
     <script src="qunit/qunit.js"></script>
     <script src="../build/cjs/vexflow-debug-with-tests.js"></script>
     <script>
+      QUnit.config.autostart = false;
       QUnit.config.noglobals = true;
+      // uncomment below to detect infinite loops in tests.
+      // QUnit.testStart(d => console.log(d.name, d.module));
+      VexFlow.Test.run();
       QUnit.start();
-      Vex.Flow.Test.run();
     </script>
   </body>
 </html>

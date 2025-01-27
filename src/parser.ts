@@ -1,13 +1,13 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 //
 // A generic text parsing class for VexFlow.
 
 import { log, RuntimeError } from './util';
 
-// To enable logging for this class. Set `Vex.Flow.Parser.DEBUG` to `true`.
+// To enable logging for this class. Set `VexFlow.Parser.DEBUG` to `true`.
 // eslint-disable-next-line
 function L(...args: any[]): void {
-  if (Parser.DEBUG) log('Vex.Flow.Parser', args);
+  if (Parser.DEBUG) log('VexFlow.Parser', args);
 }
 
 const NO_ERROR_POS = -1;

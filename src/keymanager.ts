@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 //
 // ## Description
 //
@@ -39,8 +39,8 @@ export class KeyManager {
     this.keyString = this.keyParts.root;
     if (this.keyParts.accidental) this.keyString += this.keyParts.accidental;
 
-    const is_supported_type = Music.scaleTypes[this.keyParts.type];
-    if (!is_supported_type) {
+    const isSupportedType = Music.scaleTypes[this.keyParts.type];
+    if (!isSupportedType) {
       throw new RuntimeError('BadArguments', `Unsupported key type: ${this.key}`);
     }
 
@@ -53,7 +53,7 @@ export class KeyManager {
     this.scaleMapByValue = {};
     this.originalScaleMapByValue = {};
 
-    const noteLocation = Music.root_indices[this.keyParts.root];
+    const noteLocation = Music.rootIndexes[this.keyParts.root];
 
     for (let i = 0; i < Music.roots.length; ++i) {
       const index = (noteLocation + i) % Music.roots.length;
@@ -104,7 +104,7 @@ export class KeyManager {
 
     // Then search for a note of equivalent value in our altered scale
     const valueNote = this.scaleMapByValue[this.music.getNoteValue(note)];
-    if (valueNote != null) {
+    if (valueNote !== undefined) {
       return {
         note: valueNote,
         accidental: this.music.getNoteParts(valueNote).accidental,
@@ -114,7 +114,7 @@ export class KeyManager {
 
     // Then search for a note of equivalent value in the original scale
     const originalValueNote = this.originalScaleMapByValue[this.music.getNoteValue(note)];
-    if (originalValueNote != null) {
+    if (originalValueNote !== undefined) {
       this.scaleMap[modparts.root] = originalValueNote;
       delete this.scaleMapByValue[this.music.getNoteValue(scaleNote)];
       this.scaleMapByValue[this.music.getNoteValue(note)] = originalValueNote;

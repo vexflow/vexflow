@@ -1,10 +1,4 @@
-import { ChordSymbolMetrics } from './chordsymbol';
-import { ClefMetrics } from './clef';
-import { NoteHeadMetrics } from './notehead';
-import { OrnamentMetrics } from './ornament';
-import { StringNumberMetrics } from './stringnumber';
-import { TupletMetrics } from './tuplet';
-import { defined } from './util';
+import { Metrics } from './metrics';
 
 export interface FontInfo {
   /** CSS font-family, e.g., 'Arial', 'Helvetica Neue, Arial, sans-serif', 'Times, serif' */
@@ -23,59 +17,6 @@ export interface FontInfo {
   style?: string;
 }
 
-export type FontModule = { data: FontData; metrics: FontMetrics };
-
-export interface FontData {
-  glyphs: Record<string, FontGlyph>;
-  fontFamily?: string;
-  resolution: number;
-  generatedOn?: string;
-}
-
-/** Specified in the `xxx_metrics.ts` files. */
-// eslint-disable-next-line
-export interface FontMetrics extends Record<string, any> {
-  smufl: boolean;
-  stave?: Record<string, number>;
-  accidental?: Record<string, number>;
-  clef_default?: ClefMetrics;
-  clef_small?: ClefMetrics;
-  pedalMarking?: Record<string, Record<string, number>>;
-  digits?: Record<string, number>;
-  articulation?: Record<string, Record<string, number>>;
-  tremolo?: Record<string, Record<string, number>>;
-  chordSymbol?: ChordSymbolMetrics;
-  ornament?: Record<string, OrnamentMetrics>;
-  noteHead?: NoteHeadMetrics;
-  stringNumber?: StringNumberMetrics;
-  tuplet?: TupletMetrics;
-  glyphs: Record<
-    string,
-    {
-      point?: number;
-      shiftX?: number;
-      shiftY?: number;
-      scale?: number;
-      [key: string]: { point?: number; shiftX?: number; shiftY?: number; scale?: number } | number | undefined;
-    }
-  >;
-}
-
-export interface FontGlyph {
-  x_min: number;
-  x_max: number;
-  y_min?: number;
-  y_max?: number;
-  ha: number;
-  leftSideBearing?: number;
-  advanceWidth?: number;
-
-  // The o (outline) field is optional, because robotoslab_glyphs.ts & petalumascript_glyphs.ts
-  // do not include glyph outlines. We rely on *.woff files to provide the glyph outlines.
-  o?: string;
-  cached_outline?: number[];
-}
-
 export enum FontWeight {
   NORMAL = 'normal',
   BOLD = 'bold',
@@ -89,20 +30,9 @@ export enum FontStyle {
 // Internal <span></span> element for parsing CSS font shorthand strings.
 let fontParser: HTMLSpanElement;
 
-const Fonts: Record<string, Font> = {};
-
 export class Font {
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // STATIC MEMBERS
-
-  /** Default sans-serif font family. */
-  static SANS_SERIF: string = 'Arial, sans-serif';
-
-  /** Default serif font family. */
-  static SERIF: string = 'Times New Roman, serif';
-
-  /** Default font size in `pt`. */
-  static SIZE: number = 10;
 
   // CSS Font Sizes: 36pt == 48px == 3em == 300% == 0.5in
   /** Given a length (for units: pt, px, em, %, in, mm, cm) what is the scale factor to convert it to px? */
@@ -122,7 +52,7 @@ export class Font {
    * units (e.g., pt, em, %).
    * @returns the number of pixels that is equivalent to `fontSize`
    */
-  static convertSizeToPixelValue(fontSize: string | number = Font.SIZE): number {
+  static convertSizeToPixelValue(fontSize: string | number): number {
     if (typeof fontSize === 'number') {
       // Assume the numeric fontSize is specified in pt.
       return fontSize * Font.scaleToPxFrom.pt;
@@ -143,7 +73,7 @@ export class Font {
    * units (e.g., pt, em, %).
    * @returns the number of points that is equivalent to `fontSize`
    */
-  static convertSizeToPointValue(fontSize: string | number = Font.SIZE): number {
+  static convertSizeToPointValue(fontSize: string | number): number {
     if (typeof fontSize === 'number') {
       // Assume the numeric fontSize is specified in pt.
       return fontSize;
@@ -189,8 +119,8 @@ export class Font {
       family = f;
     }
 
-    family = family ?? Font.SANS_SERIF;
-    size = size ?? Font.SIZE + 'pt';
+    family = family ?? (Metrics.get('fontFamily') as string);
+    size = size ?? Metrics.get('fontSize') + 'pt';
     weight = weight ?? FontWeight.NORMAL;
     style = style ?? FontStyle.NORMAL;
 
@@ -259,7 +189,7 @@ export class Font {
     let size: string;
     const sz = fontInfo.size;
     if (sz === undefined) {
-      size = Font.SIZE + 'pt ';
+      size = Metrics.get('fontSize') + 'pt';
     } else if (typeof sz === 'number') {
       size = sz + 'pt ';
     } else {
@@ -267,7 +197,7 @@ export class Font {
       size = sz.trim() + ' ';
     }
 
-    const family: string = fontInfo.family ?? Font.SANS_SERIF;
+    const family: string = fontInfo.family ?? Metrics.get('fontFamily');
 
     return `${style}${weight}${size}${family}`;
   }
@@ -323,164 +253,91 @@ export class Font {
 
   /**
    * Customize this field to specify a different CDN for delivering web fonts.
-   * Alternative: https://cdn.jsdelivr.net/npm/vexflow-fonts@1.0.3/
-   * Or you can use your own host.
+   * Discussion on GDPR concerns:
+   * https://www.jsdelivr.com/blog/how-the-german-courts-ruling-on-google-fonts-affects-jsdelivr-and-why-it-is-safe-to-use/
+   *
+   * You can also self host, and specify your own server URL here.
    */
-  static WEB_FONT_HOST = 'https://unpkg.com/vexflow-fonts@1.0.3/';
+  static HOST_URL = 'https://cdn.jsdelivr.net/npm/@vexflow-fonts/';
 
   /**
-   * These font files will be loaded from the CDN specified by `Font.WEB_FONT_HOST` when
-   * `await Font.loadWebFonts()` is called. Customize this field to specify a different
-   * set of fonts to load. See: `Font.loadWebFonts()`.
+   * These font files will be loaded from the CDN specified by `Font.HOST_URL`.
+   * `await VexFlow.loadFonts()` loads all of the fonts below. Useful during debugging.
+   * `await VexFlow.loadFonts(FontName1, FontName2)` loads only the specified fonts.
    */
-  static WEB_FONT_FILES: Record<string /* fontName */, string /* fontPath */> = {
-    'Roboto Slab': 'robotoslab/RobotoSlab-Medium_2.001.woff',
-    PetalumaScript: 'petaluma/PetalumaScript_1.10_FS.woff',
+  static FILES: Record<string /* fontName */, string /* fontPath */> = {
+    Academico: 'academico/academico.woff2',
+    Bravura: 'bravura/bravura.woff2',
+    'Bravura Text': 'bravuratext/bravuratext.woff2',
+    Edwin: 'edwin/edwin-roman.woff2',
+    'Finale Ash': 'finaleash/finaleash.woff2',
+    'Finale Ash Text': 'finaleashtext/finaleashtext.woff2',
+    'Finale Broadway': 'finalebroadway/finalebroadway.woff2',
+    'Finale Broadway Text': 'finalebroadwaytext/finalebroadwaytext.woff2',
+    'Finale Jazz': 'finalejazz/finalejazz.woff2',
+    'Finale Jazz Text': 'finalejazztext/finalejazztext.woff2',
+    'Finale Maestro': 'finalemaestro/finalemaestro.woff2',
+    'Finale Maestro Text': 'finalemaestrotext/finalemaestrotext-regular.woff2',
+    Gonville: 'gonville/gonville.woff2',
+    Gootville: 'gootville/gootville.woff2',
+    'Gootville Text': 'gootvilletext/gootvilletext.woff2',
+    Leipzig: 'leipzig/leipzig.woff2',
+    Leland: 'leland/leland.woff2',
+    'Leland Text': 'lelandtext/lelandtext.woff2',
+    MuseJazz: 'musejazz/musejazz.woff2',
+    'MuseJazz Text': 'musejazztext/musejazztext.woff2',
+    Nepomuk: 'nepomuk/nepomuk.woff2',
+    Petaluma: 'petaluma/petaluma.woff2',
+    'Petaluma Script': 'petalumascript/petalumascript.woff2',
+    'Petaluma Text': 'petalumatext/petalumatext.woff2',
+    'Roboto Slab': 'robotoslab/robotoslab-regular-400.woff2',
+    Sebastian: 'sebastian/sebastian.woff2',
+    'Sebastian Text': 'sebastiantext/sebastiantext.woff2',
   };
 
   /**
-   * @param fontName
-   * @param woffURL The absolute or relative URL to the woff file.
-   * @param includeWoff2 If true, we assume that a woff2 file is in
-   * the same folder as the woff file, and will append a `2` to the url.
-   */
-  // Support distributions of the typescript compiler that do not yet include the FontFace API declarations.
-  // eslint-disable-next-line
-  // @ts-ignore
-  static async loadWebFont(fontName: string, woffURL: string, includeWoff2: boolean = true): Promise<FontFace> {
-    const woff2URL = includeWoff2 ? `url(${woffURL}2) format('woff2'), ` : '';
-    const woff1URL = `url(${woffURL}) format('woff')`;
-    const woffURLs = woff2URL + woff1URL;
-    // eslint-disable-next-line
-    // @ts-ignore
-    const fontFace = new FontFace(fontName, woffURLs);
-    await fontFace.load();
-    // eslint-disable-next-line
-    // @ts-ignore
-    document.fonts.add(fontFace);
-    return fontFace;
-  }
-
-  /**
-   * Load the web fonts that are used by ChordSymbol. For example, `flow.html` calls:
-   *   `await Vex.Flow.Font.loadWebFonts();`
-   * Alternatively, you may load web fonts with a stylesheet link (e.g., from Google Fonts),
-   * and a @font-face { font-family: ... } rule in your CSS.
-   * If you do not load either of these fonts, ChordSymbol will fall back to Times or Arial,
-   * depending on the current music engraving font.
+   * This method is asynchronous, so you should use await or .then() to wait for the fonts to load before proceeding.
    *
-   * You can customize `Font.WEB_FONT_HOST` and `Font.WEB_FONT_FILES` to load different fonts
-   * for your app.
-   */
-  static async loadWebFonts(): Promise<void> {
-    const host = Font.WEB_FONT_HOST;
-    const files = Font.WEB_FONT_FILES;
-    for (const fontName in files) {
-      const fontPath = files[fontName];
-      Font.loadWebFont(fontName, host + fontPath);
-    }
-  }
-
-  /**
    * @param fontName
-   * @param data optionally set the Font object's `.data` property.
-   *   This is usually done when setting up a font for the first time.
-   * @param metrics optionally set the Font object's `.metrics` property.
-   *   This is usually done when setting up a font for the first time.
-   * @returns a Font object with the given `fontName`.
-   *   Reuse an existing Font object if a matching one is found.
+   * @param url The absolute or relative URL to the woff2/otf file. It can also be a data URI.
+   * @param descriptors See: https://developer.mozilla.org/en-US/docs/Web/API/FontFace/FontFace#descriptors
    */
-  static load(fontName: string, data?: FontData, metrics?: FontMetrics): Font {
-    let font = Fonts[fontName];
-    if (!font) {
-      font = new Font(fontName);
-      Fonts[fontName] = font;
+  static async load(fontName: string, url?: string, descriptors?: Record<string, string>): Promise<FontFace> {
+    if (typeof FontFace === 'undefined') {
+      return Promise.reject(new Error('FontFace API is not available in this environment. Cannot load fonts.'));
     }
-    if (data) {
-      font.setData(data);
-    }
-    if (metrics) {
-      font.setMetrics(metrics);
-    }
-    return font;
-  }
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  // INSTANCE MEMBERS
-
-  protected name: string;
-  protected data?: FontData;
-  protected metrics?: FontMetrics;
-
-  /**
-   * Use `Font.load(fontName)` to get a Font object.
-   * Do not call this constructor directly.
-   */
-  private constructor(fontName: string) {
-    this.name = fontName;
-  }
-
-  getName(): string {
-    return this.name;
-  }
-
-  getData(): FontData {
-    return defined(this.data, 'FontError', 'Missing font data');
-  }
-
-  getMetrics(): FontMetrics {
-    return defined(this.metrics, 'FontError', 'Missing metrics');
-  }
-
-  setData(data: FontData): void {
-    this.data = data;
-  }
-
-  setMetrics(metrics: FontMetrics): void {
-    this.metrics = metrics;
-  }
-
-  hasData(): boolean {
-    return this.data !== undefined;
-  }
-
-  getResolution(): number {
-    return this.getData().resolution;
-  }
-
-  getGlyphs(): Record<string, FontGlyph> {
-    return this.getData().glyphs;
-  }
-
-  /**
-   * Use the provided key to look up a value in this font's metrics file (e.g., bravura_metrics.ts, petaluma_metrics.ts).
-   * @param key is a string separated by periods (e.g., stave.endPaddingMax, clef.lineCount.'5'.shiftY).
-   * @param defaultValue is returned if the lookup fails.
-   * @returns the retrieved value (or `defaultValue` if the lookup fails).
-   */
-  // eslint-disable-next-line
-  lookupMetric(key: string, defaultValue?: Record<string, any> | number): any {
-    const keyParts = key.split('.');
-
-    // Start with the top level font metrics object, and keep looking deeper into the object (via each part of the period-delimited key).
-    let currObj = this.getMetrics();
-    for (let i = 0; i < keyParts.length; i++) {
-      const keyPart = keyParts[i];
-      const value = currObj[keyPart];
-      if (value === undefined) {
-        // If the key lookup fails, we fall back to the defaultValue.
-        return defaultValue;
+    // If url is not specified, we load the font from the jsDelivr CDN.
+    if (url === undefined) {
+      const files = Font.FILES;
+      if (!(fontName in files)) {
+        return Promise.reject(new Error(`Font ${fontName} not found in Font.FILES`));
       }
-      // The most recent lookup succeeded, so we drill deeper into the object.
-      currObj = value;
+      url = Font.HOST_URL + files[fontName];
     }
 
-    // After checking every part of the key (i.e., the loop completed), return the most recently retrieved value.
-    return currObj;
+    const fontFace = new FontFace(fontName, `url(${url})`, descriptors);
+    const fontFaceLoadPromise = fontFace.load();
+
+    // https://developer.mozilla.org/en-US/docs/Web/API/FontFaceSet
+    let fontFaceSet;
+    if (typeof document !== 'undefined') {
+      fontFaceSet = document.fonts;
+    } else if (typeof self !== 'undefined' && 'fonts' in self) {
+      // Workers do not have a document object.
+      // https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope/fonts
+      // eslint-disable-next-line
+      fontFaceSet = self.fonts as any;
+    }
+    fontFaceSet?.add(fontFace);
+    return fontFaceLoadPromise;
   }
 
-  /** For debugging. */
-  toString(): string {
-    return '[' + this.name + ' Font]';
+  static getURLForFont(fontName: string): string | undefined {
+    const files = Font.FILES;
+    if (!(fontName in files)) {
+      return undefined;
+    }
+    return Font.HOST_URL + files[fontName];
   }
 }

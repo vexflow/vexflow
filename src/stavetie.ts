@@ -1,22 +1,21 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 //
 // This class implements varies types of ties between contiguous notes. The
 // ties include: regular ties, hammer ons, pull offs, and slides.
 
 import { Element } from './element';
-import { FontInfo } from './font';
 import { Note } from './note';
 import { Category } from './typeguard';
 import { RuntimeError } from './util';
 
-// For backwards compatibility with 3.0.9, first_note and/or last_note can be undefined or null.
+// For backwards compatibility with 3.0.9, firstNote and/or lastNote can be undefined or null.
 // We prefer undefined instead of null.
 // However, some of our test cases used to pass in null, so maybe there is client code relying on it.
 export interface TieNotes {
-  first_note?: Note | null;
-  last_note?: Note | null;
-  first_indices?: number[];
-  last_indices?: number[];
+  firstNote?: Note | null;
+  lastNote?: Note | null;
+  firstIndexes?: number[];
+  lastIndexes?: number[];
 }
 
 export class StaveTie extends Element {
@@ -24,20 +23,18 @@ export class StaveTie extends Element {
     return Category.StaveTie;
   }
 
-  /** Default text font. */
-  static TEXT_FONT: Required<FontInfo> = { ...Element.TEXT_FONT };
-
-  public render_options: {
-    cp2: number;
-    last_x_shift: number;
-    tie_spacing: number;
-    cp1: number;
-    first_x_shift: number;
-    text_shift_x: number;
-    y_shift: number;
+  public renderOptions: {
+    cp1: number; // Curve control point 1
+    cp2: number; // Curve control point 2
+    shortTieCutoff: number; // below this we use short control points
+    cp1Short: number;
+    cp2Short: number;
+    firstXShift: number;
+    lastXShift: number;
+    tieSpacing: number;
+    textShiftX: number;
+    yShift: number;
   };
-
-  protected text?: string;
 
   // notes is initialized by the constructor via this.setNotes(notes).
   protected notes!: TieNotes;
@@ -48,29 +45,46 @@ export class StaveTie extends Element {
    * @param notes is a struct that has:
    *
    *  {
-   *    first_note: Note,
-   *    last_note: Note,
-   *    first_indices: [n1, n2, n3],
-   *    last_indices: [n1, n2, n3]
+   *    firstNote: Note,
+   *    lastNote: Note,
+   *    firstIndexes: [n1, n2, n3],
+   *    lastIndexes: [n1, n2, n3]
    *  }
    *
    * @param text
    */
-  constructor(notes: TieNotes, text?: string) {
+  constructor(notes: TieNotes, text = '') {
     super();
     this.setNotes(notes);
     this.text = text;
-    this.render_options = {
+    this.renderOptions = {
       cp1: 8, // Curve control point 1
       cp2: 12, // Curve control point 2
-      text_shift_x: 0,
-      first_x_shift: 0,
-      last_x_shift: 0,
-      y_shift: 7,
-      tie_spacing: 0,
+      shortTieCutoff: 10,
+      cp1Short: 2,
+      cp2Short: 8,
+      textShiftX: 0,
+      firstXShift: 0,
+      lastXShift: 0,
+      yShift: 7,
+      tieSpacing: 0,
     };
+  }
 
-    this.resetFont();
+  /**
+   * Returns either the direction explicitly set with setDirection, or
+   * a logical direction based on lastNote or firstNote.
+   */
+  getDirection(): number {
+    if (this.direction !== undefined && this.direction !== null) {
+      return this.direction;
+    } else if (this.notes.lastNote) {
+      return this.notes.lastNote.getStemDirection();
+    } else if (this.notes.firstNote) {
+      return this.notes.firstNote.getStemDirection();
+    } else {
+      return 0;
+    }
   }
 
   setDirection(direction: number): this {
@@ -84,19 +98,19 @@ export class StaveTie extends Element {
    * @param {!Object} notes The notes to tie up.
    */
   setNotes(notes: TieNotes): this {
-    if (!notes.first_note && !notes.last_note) {
-      throw new RuntimeError('BadArguments', 'Tie needs to have either first_note or last_note set.');
+    if (!notes.firstNote && !notes.lastNote) {
+      throw new RuntimeError('BadArguments', 'Tie needs to have either firstNote or lastNote set.');
     }
 
-    if (!notes.first_indices) {
-      notes.first_indices = [0];
+    if (!notes.firstIndexes) {
+      notes.firstIndexes = [0];
     }
-    if (!notes.last_indices) {
-      notes.last_indices = [0];
+    if (!notes.lastIndexes) {
+      notes.lastIndexes = [0];
     }
 
-    if (notes.first_indices.length !== notes.last_indices.length) {
-      throw new RuntimeError('BadArguments', 'Tied notes must have same number of indices.');
+    if (notes.firstIndexes.length !== notes.lastIndexes.length) {
+      throw new RuntimeError('BadArguments', 'Tied notes must have same number of indexes.');
     }
 
     this.notes = notes;
@@ -107,75 +121,74 @@ export class StaveTie extends Element {
    * @return {boolean} Returns true if this is a partial bar.
    */
   isPartial(): boolean {
-    return !this.notes.first_note || !this.notes.last_note;
+    return !this.notes.firstNote || !this.notes.lastNote;
   }
 
-  renderTie(params: {
-    direction: number;
-    first_x_px: number;
-    last_x_px: number;
-    last_ys: number[];
-    first_ys: number[];
-  }): void {
-    if (params.first_ys.length === 0 || params.last_ys.length === 0) {
+  /**
+   * @param params.firstX is specified in pixels.
+   * @param params.lastX is specified in pixels.
+   */
+  renderTie(params: { direction: number; firstX: number; lastX: number; lastYs: number[]; firstYs: number[] }): void {
+    if (params.firstYs.length === 0 || params.lastYs.length === 0) {
       throw new RuntimeError('BadArguments', 'No Y-values to render');
     }
 
     const ctx = this.checkContext();
-    let cp1 = this.render_options.cp1;
-    let cp2 = this.render_options.cp2;
+    let cp1 = this.renderOptions.cp1;
+    let cp2 = this.renderOptions.cp2;
 
-    if (Math.abs(params.last_x_px - params.first_x_px) < 10) {
-      cp1 = 2;
-      cp2 = 8;
+    if (Math.abs(params.lastX - params.firstX) < this.renderOptions.shortTieCutoff) {
+      // do not get super exaggerated curves for very short ties
+      cp1 = this.renderOptions.cp1Short;
+      cp2 = this.renderOptions.cp2Short;
     }
 
-    const first_x_shift = this.render_options.first_x_shift;
-    const last_x_shift = this.render_options.last_x_shift;
-    const y_shift = this.render_options.y_shift * params.direction;
+    const firstXShift = this.renderOptions.firstXShift;
+    const lastXShift = this.renderOptions.lastXShift;
+    const yShift = this.renderOptions.yShift * params.direction;
 
-    // setNotes(...) verified that first_indices and last_indices are not undefined.
+    // setNotes(...) verified that firstIndexes and lastIndexes are not undefined.
     // As a result, we use the ! non-null assertion operator here.
-    // eslint-disable-next-line
-    const first_indices = this.notes.first_indices!;
-    // eslint-disable-next-line
-    const last_indices = this.notes.last_indices!;
-    this.applyStyle();
-    ctx.openGroup('stavetie', this.getAttribute('id'));
-    for (let i = 0; i < first_indices.length; ++i) {
-      const cp_x = (params.last_x_px + last_x_shift + (params.first_x_px + first_x_shift)) / 2;
-      const first_y_px = params.first_ys[first_indices[i]] + y_shift;
-      const last_y_px = params.last_ys[last_indices[i]] + y_shift;
 
-      if (isNaN(first_y_px) || isNaN(last_y_px)) {
-        throw new RuntimeError('BadArguments', 'Bad indices for tie rendering.');
+    const firstIndexes = this.notes.firstIndexes!;
+
+    const lastIndexes = this.notes.lastIndexes!;
+    ctx.openGroup('stavetie', this.getAttribute('id'));
+    for (let i = 0; i < firstIndexes.length; ++i) {
+      const cpX = (params.lastX + lastXShift + (params.firstX + firstXShift)) / 2;
+      // firstY and lastY are specified in pixels.
+      const firstY = params.firstYs[firstIndexes[i]] + yShift;
+      const lastY = params.lastYs[lastIndexes[i]] + yShift;
+
+      if (isNaN(firstY) || isNaN(lastY)) {
+        throw new RuntimeError('BadArguments', 'Bad indexes for tie rendering.');
       }
 
-      const top_cp_y = (first_y_px + last_y_px) / 2 + cp1 * params.direction;
-      const bottom_cp_y = (first_y_px + last_y_px) / 2 + cp2 * params.direction;
+      const topControlPointY = (firstY + lastY) / 2 + cp1 * params.direction;
+      const bottomControlPointY = (firstY + lastY) / 2 + cp2 * params.direction;
 
       ctx.beginPath();
-      ctx.moveTo(params.first_x_px + first_x_shift, first_y_px);
-      ctx.quadraticCurveTo(cp_x, top_cp_y, params.last_x_px + last_x_shift, last_y_px);
-      ctx.quadraticCurveTo(cp_x, bottom_cp_y, params.first_x_px + first_x_shift, first_y_px);
+      ctx.moveTo(params.firstX + firstXShift, firstY);
+      ctx.quadraticCurveTo(cpX, topControlPointY, params.lastX + lastXShift, lastY);
+      ctx.quadraticCurveTo(cpX, bottomControlPointY, params.firstX + firstXShift, firstY);
       ctx.closePath();
       ctx.fill();
     }
     ctx.closeGroup();
-    this.restoreStyle();
   }
 
-  renderText(first_x_px: number, last_x_px: number): void {
-    if (!this.text) return;
+  /**
+   * @param firstX specified in pixels
+   * @param lastX specified in pixels
+   */
+  renderTieText(firstX: number, lastX: number): void {
     const ctx = this.checkContext();
-    let center_x = (first_x_px + last_x_px) / 2;
-    center_x -= ctx.measureText(this.text).width / 2;
-    const stave = this.notes.first_note?.checkStave() ?? this.notes.last_note?.checkStave();
+    let centerX = (firstX + lastX) / 2;
+    centerX -= ctx.measureText(this.text).width / 2;
+    const stave = this.notes.firstNote?.checkStave() ?? this.notes.lastNote?.checkStave();
     if (stave) {
-      ctx.save();
-      ctx.setFont(this.textFont);
-      ctx.fillText(this.text, center_x + this.render_options.text_shift_x, stave.getYForTopText() - 1);
-      ctx.restore();
+      ctx.setFont(this.fontInfo);
+      ctx.fillText(this.text, centerX + this.renderOptions.textShiftX, stave.getYForTopText() - 1);
     }
   }
 
@@ -186,54 +199,98 @@ export class StaveTie extends Element {
     return this.notes;
   }
 
+  /**
+   * Returns the X position in pixels that the tie will be drawn starting from;
+   * ideally from the firstNote, alternatively from the lastNote, or 0 if all else fails.
+   */
+  getFirstX(): number {
+    if (this.notes.firstNote) {
+      return this.notes.firstNote.getTieRightX() + this.renderOptions.tieSpacing;
+    } else if (this.notes.lastNote) {
+      return this.notes.lastNote.checkStave().getTieStartX();
+    } else {
+      return 0;
+    }
+  }
+
+  /**
+   * Returns the X position in pixels that the tie will be drawn ending at;
+   * ideally from the firstNote, alternatively from the lastNote, or 0 if all else fails.
+   */
+  getLastX(): number {
+    if (this.notes.lastNote) {
+      return this.notes.lastNote.getTieLeftX() + this.renderOptions.tieSpacing;
+    } else if (this.notes.firstNote) {
+      return this.notes.firstNote.checkStave().getTieEndX();
+    } else {
+      return 0;
+    }
+  }
+
+  /**
+   * Get the Y positions of the places where a tie needs to be drawn starting from.
+   */
+  getFirstYs(): number[] {
+    if (this.notes.firstNote) {
+      return this.notes.firstNote.getYs();
+    } else if (this.notes.lastNote) {
+      return this.notes.lastNote.getYs();
+    } else {
+      return [0];
+    }
+  }
+
+  /**
+   * Get the Y positions of the places where a tie needs to be drawn ending at.
+   */
+  getLastYs(): number[] {
+    if (this.notes.lastNote) {
+      return this.notes.lastNote.getYs();
+    } else if (this.notes.firstNote) {
+      return this.notes.firstNote.getYs();
+    } else {
+      return [0];
+    }
+  }
+
+  /**
+   * If a tie has firstNote and not lastNote, or vice-versa, then their
+   * firstIndexes and lastIndexes need to be equal to each other.
+   *
+   * Does nothing if both notes.firstNote and notes.lastNote are defined (or
+   * if neither are)
+   *
+   * (Note that after doing so they share a common Array object, so any change
+   * to one will affect the other; this behavior may change in a future release)
+   */
+  synchronizeIndexes(): void {
+    if (this.notes.firstNote && this.notes.lastNote) {
+      return;
+    } else if (!this.notes.firstNote && !this.notes.lastNote) {
+      return;
+    } else if (this.notes.firstNote) {
+      this.notes.lastIndexes = this.notes.firstIndexes;
+    } else {
+      // this.notes.lastNote defined, but not firstNote
+      this.notes.firstIndexes = this.notes.lastIndexes;
+    }
+  }
+
   draw(): boolean {
     this.checkContext();
     this.setRendered();
-
-    const first_note = this.notes.first_note;
-    const last_note = this.notes.last_note;
-
-    // Provide some default values so the compiler doesn't complain.
-    let first_x_px = 0;
-    let last_x_px = 0;
-    let first_ys: number[] = [0];
-    let last_ys: number[] = [0];
-    let stem_direction = 0;
-    if (first_note) {
-      first_x_px = first_note.getTieRightX() + this.render_options.tie_spacing;
-      stem_direction = first_note.getStemDirection();
-      first_ys = first_note.getYs();
-    } else if (last_note) {
-      const stave = last_note.checkStave();
-      first_x_px = stave.getTieStartX();
-      first_ys = last_note.getYs();
-      this.notes.first_indices = this.notes.last_indices;
-    }
-
-    if (last_note) {
-      last_x_px = last_note.getTieLeftX() + this.render_options.tie_spacing;
-      stem_direction = last_note.getStemDirection();
-      last_ys = last_note.getYs();
-    } else if (first_note) {
-      const stave = first_note.checkStave();
-      last_x_px = stave.getTieEndX();
-      last_ys = first_note.getYs();
-      this.notes.last_indices = this.notes.first_indices;
-    }
-
-    if (this.direction) {
-      stem_direction = this.direction;
-    }
-
+    this.synchronizeIndexes();
+    const firstX = this.getFirstX();
+    const lastX = this.getLastX();
     this.renderTie({
-      first_x_px,
-      last_x_px,
-      first_ys,
-      last_ys,
-      direction: stem_direction,
+      firstX,
+      lastX,
+      firstYs: this.getFirstYs(),
+      lastYs: this.getLastYs(),
+      direction: this.getDirection(), // note: not this.direction
     });
 
-    this.renderText(first_x_px, last_x_px);
+    this.renderTieText(firstX, lastX);
     return true;
   }
 }

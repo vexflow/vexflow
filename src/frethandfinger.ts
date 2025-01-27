@@ -1,15 +1,13 @@
-// VexFlow - Music Engraving for HTML5
-// Copyright Mohit Muthanna 2010
-// Author Larry Kuhns 2013
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// @author Larry Kuhns 2013
 // Class to draws string numbers into the notation.
 
 import { Builder } from './easyscore';
-import { Font, FontInfo, FontStyle, FontWeight } from './font';
+import { Metrics } from './metrics';
 import { Modifier, ModifierPosition } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { StemmableNote } from './stemmablenote';
 import { Tables } from './tables';
-import { TextFormatter } from './textformatter';
 import { Category } from './typeguard';
 import { RuntimeError } from './util';
 
@@ -18,22 +16,15 @@ export class FretHandFinger extends Modifier {
     return Category.FretHandFinger;
   }
 
-  static TEXT_FONT: Required<FontInfo> = {
-    family: Font.SANS_SERIF,
-    size: 9,
-    weight: FontWeight.BOLD,
-    style: FontStyle.NORMAL,
-  };
-
   // Arrange fingerings inside a ModifierContext.
   static format(nums: FretHandFinger[], state: ModifierContextState): boolean {
-    const { left_shift, right_shift } = state;
-    const num_spacing = 1;
+    const { leftShift, rightShift } = state;
+    const numSpacing = 1;
 
     if (!nums || nums.length === 0) return false;
 
-    const nums_list = [];
-    let prev_note = null;
+    const numsList = [];
+    let prevNote = null;
     let shiftLeft = 0;
     let shiftRight = 0;
 
@@ -43,28 +34,27 @@ export class FretHandFinger extends Modifier {
       const pos = num.getPosition();
       const index = num.checkIndex();
       const props = note.getKeyProps()[index];
-      const textFormatter = TextFormatter.create(num.textFont);
-      const textHeight = textFormatter.maxHeight;
+      const textHeight = Metrics.get('FretHandFinger.fontSize');
       if (num.position === ModifierPosition.ABOVE) {
-        state.top_text_line += textHeight / Tables.STAVE_LINE_DISTANCE + 0.5;
+        state.topTextLine += textHeight / Tables.STAVE_LINE_DISTANCE + 0.5;
       }
       if (num.position === ModifierPosition.BELOW) {
-        state.text_line += textHeight / Tables.STAVE_LINE_DISTANCE + 0.5;
+        state.textLine += textHeight / Tables.STAVE_LINE_DISTANCE + 0.5;
       }
 
-      if (note !== prev_note) {
+      if (note !== prevNote) {
         for (let n = 0; n < note.keys.length; ++n) {
-          if (left_shift === 0) {
+          if (leftShift === 0) {
             shiftLeft = Math.max(note.getLeftDisplacedHeadPx(), shiftLeft);
           }
-          if (right_shift === 0) {
+          if (rightShift === 0) {
             shiftRight = Math.max(note.getRightDisplacedHeadPx(), shiftRight);
           }
         }
-        prev_note = note;
+        prevNote = note;
       }
 
-      nums_list.push({
+      numsList.push({
         note,
         num,
         pos,
@@ -75,7 +65,7 @@ export class FretHandFinger extends Modifier {
     }
 
     // Sort fingernumbers by line number.
-    nums_list.sort((a, b) => b.line - a.line);
+    numsList.sort((a, b) => b.line - a.line);
 
     let numShiftL = 0;
     let numShiftR = 0;
@@ -84,32 +74,32 @@ export class FretHandFinger extends Modifier {
     let lastLine = null;
     let lastNote = null;
 
-    for (let i = 0; i < nums_list.length; ++i) {
-      let num_shift = 0;
-      const { note, pos, num, line, shiftL, shiftR } = nums_list[i];
+    for (let i = 0; i < numsList.length; ++i) {
+      let numShift = 0;
+      const { note, pos, num, line, shiftL, shiftR } = numsList[i];
 
       // Reset the position of the string number every line.
       if (line !== lastLine || note !== lastNote) {
-        numShiftL = left_shift + shiftL;
-        numShiftR = right_shift + shiftR;
+        numShiftL = leftShift + shiftL;
+        numShiftR = rightShift + shiftR;
       }
 
-      const numWidth = num.getWidth() + num_spacing;
+      const numWidth = num.getWidth() + numSpacing;
       if (pos === Modifier.Position.LEFT) {
-        num.setXShift(left_shift + numShiftL);
-        num_shift = left_shift + numWidth; // spacing
-        xWidthL = num_shift > xWidthL ? num_shift : xWidthL;
+        num.setXShift(leftShift + numShiftL);
+        numShift = leftShift + numWidth; // spacing
+        xWidthL = numShift > xWidthL ? numShift : xWidthL;
       } else if (pos === Modifier.Position.RIGHT) {
         num.setXShift(numShiftR);
-        num_shift = shiftRight + numWidth; // spacing
-        xWidthR = num_shift > xWidthR ? num_shift : xWidthR;
+        numShift = shiftRight + numWidth; // spacing
+        xWidthR = numShift > xWidthR ? numShift : xWidthR;
       }
       lastLine = line;
       lastNote = note;
     }
 
-    state.left_shift += xWidthL;
-    state.right_shift += xWidthR;
+    state.leftShift += xWidthL;
+    state.rightShift += xWidthR;
 
     return true;
   }
@@ -126,39 +116,34 @@ export class FretHandFinger extends Modifier {
       .map((fingering: Modifier, index: number) => note.addModifier(fingering, index));
   }
 
-  protected finger: string;
-  protected x_offset: number;
-  protected y_offset: number;
+  protected xOffset: number;
+  protected yOffset: number;
 
   constructor(finger: string) {
     super();
 
-    this.finger = finger;
-    this.width = 7;
+    this.setFretHandFinger(finger);
     this.position = Modifier.Position.LEFT; // Default position above stem or note head
-    this.x_shift = 0;
-    this.y_shift = 0;
-    this.x_offset = 0; // Horizontal offset from default
-    this.y_offset = 0; // Vertical offset from default
-    this.resetFont();
+    this.xOffset = 0; // Horizontal offset from default
+    this.yOffset = 0; // Vertical offset from default
   }
 
   setFretHandFinger(finger: string): this {
-    this.finger = finger;
+    this.text = finger;
     return this;
   }
 
   getFretHandFinger(): string {
-    return this.finger;
+    return this.text;
   }
 
   setOffsetX(x: number): this {
-    this.x_offset = x;
+    this.xOffset = x;
     return this;
   }
 
   setOffsetY(y: number): this {
-    this.y_offset = y;
+    this.yOffset = y;
     return this;
   }
 
@@ -168,31 +153,28 @@ export class FretHandFinger extends Modifier {
     this.setRendered();
 
     const start = note.getModifierStartXY(this.position, this.index);
-    let dot_x = start.x + this.x_shift + this.x_offset;
-    let dot_y = start.y + this.y_shift + this.y_offset + 5;
+    let dotX = start.x + this.xOffset;
+    let dotY = start.y + this.yOffset + 5;
 
     switch (this.position) {
       case Modifier.Position.ABOVE:
-        dot_x -= 4;
-        dot_y -= 12;
+        dotX -= 4;
+        dotY -= 12;
         break;
       case Modifier.Position.BELOW:
-        dot_x -= 2;
-        dot_y += 10;
+        dotX -= 2;
+        dotY += 10;
         break;
       case Modifier.Position.LEFT:
-        dot_x -= this.width;
+        dotX -= this.width;
         break;
       case Modifier.Position.RIGHT:
-        dot_x += 1;
+        dotX += 1;
         break;
       default:
         throw new RuntimeError('InvalidPosition', `The position ${this.position} does not exist`);
     }
 
-    ctx.save();
-    ctx.setFont(this.textFont);
-    ctx.fillText('' + this.finger, dot_x, dot_y);
-    ctx.restore();
+    this.renderText(ctx, dotX, dotY);
   }
 }

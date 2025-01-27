@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 
 import { BoundingBox } from './boundingbox';
@@ -12,9 +12,9 @@ import { Category } from './typeguard';
 import { defined, RuntimeError, sumArray } from './util';
 
 export interface VoiceTime {
-  num_beats: number;
-  beat_value: number;
-  /** Defaults to `Flow.RESOLUTION` if not provided. */
+  numBeats: number;
+  beatValue: number;
+  /** Defaults to `VexFlow.RESOLUTION` if not provided. */
   resolution?: number;
 }
 
@@ -70,8 +70,8 @@ export class Voice extends Element {
       const match = time.match(/(\d+)\/(\d+)/);
       if (match) {
         voiceTime = {
-          num_beats: parseInt(match[1]),
-          beat_value: parseInt(match[2]),
+          numBeats: parseInt(match[1]),
+          beatValue: parseInt(match[2]),
         };
       }
     } else {
@@ -80,14 +80,14 @@ export class Voice extends Element {
 
     // Default time signature is 4/4.
     this.time = {
-      num_beats: 4,
-      beat_value: 4,
+      numBeats: 4,
+      beatValue: 4,
       resolution: Tables.RESOLUTION,
       ...voiceTime,
     };
 
     // Recalculate total ticks.
-    this.totalTicks = new Fraction(this.time.num_beats * (this.time.resolution / this.time.beat_value), 1);
+    this.totalTicks = new Fraction(this.time.numBeats * (this.time.resolution / this.time.beatValue), 1);
     // until tickables are added, the smallestTickCount is the same as the stated totalTicks duration.
     this.smallestTickCount = this.totalTicks.clone();
   }
@@ -144,8 +144,6 @@ export class Voice extends Element {
   /** Set the voice's stave. */
   setStave(stave: Stave): this {
     this.stave = stave;
-    // Reset the bounding box so we can reformat.
-    this.boundingBox = undefined;
     return this;
   }
 
@@ -154,21 +152,15 @@ export class Voice extends Element {
   }
 
   /** Get the bounding box for the voice. */
-  getBoundingBox(): BoundingBox | undefined {
-    if (!this.boundingBox) {
-      const stave = this.checkStave();
-      let boundingBox = undefined;
-      for (let i = 0; i < this.tickables.length; ++i) {
-        const tickable = this.tickables[i];
-        if (!tickable.getStave()) tickable.setStave(stave);
-        const bb = tickable.getBoundingBox();
-        if (bb) {
-          boundingBox = boundingBox ? boundingBox.mergeWith(bb) : bb;
-        }
-      }
-      this.boundingBox = boundingBox;
+  getBoundingBox(): BoundingBox {
+    const boundingBox = this.tickables[0].getBoundingBox();
+    for (let i = 1; i < this.tickables.length; ++i) {
+      const tickable = this.tickables[i];
+      if (!tickable.getStave() && this.stave) tickable.setStave(this.stave);
+      const bb = tickable.getBoundingBox();
+      boundingBox.mergeWith(bb);
     }
-    return this.boundingBox;
+    return boundingBox;
   }
 
   /** Set the voice mode to strict or soft. */
@@ -295,7 +287,6 @@ export class Voice extends Element {
   draw(context: RenderContext = this.checkContext(), stave?: Stave): void {
     stave = stave ?? this.stave;
     this.setRendered();
-    let boundingBox = undefined;
     for (let i = 0; i < this.tickables.length; ++i) {
       const tickable = this.tickables[i];
       // Set the stave if provided.
@@ -303,15 +294,9 @@ export class Voice extends Element {
         tickable.setStave(stave);
       }
       defined(tickable.getStave(), 'MissingStave', 'The voice cannot draw tickables without staves.');
-      const bb = tickable.getBoundingBox();
-      if (bb) {
-        boundingBox = boundingBox ? boundingBox.mergeWith(bb) : bb;
-      }
 
       tickable.setContext(context);
       tickable.drawWithStyle();
     }
-
-    this.boundingBox = boundingBox;
   }
 }

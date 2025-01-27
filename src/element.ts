@@ -1,13 +1,14 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
-// @author Mohit Cheppudira
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
+// @author Mohit Cheppudira
 
 import { BoundingBox } from './boundingbox';
-import { Font, FontInfo, FontStyle, FontWeight } from './font';
+import { Font, FontInfo } from './font';
+import { Metrics } from './metrics';
 import { Registry } from './registry';
 import { RenderContext } from './rendercontext';
 import { Category } from './typeguard';
-import { defined, prefix } from './util';
+import { defined, prefix, RuntimeError } from './util';
 
 /** Element attributes. */
 export interface ElementAttributes {
@@ -17,7 +18,7 @@ export interface ElementAttributes {
   class: string;
 }
 
-/** Element style */
+/** Element style. */
 export interface ElementStyle {
   /**
    * CSS color used for the shadow.
@@ -53,70 +54,114 @@ export interface ElementStyle {
    * Line width, 1.0 by default.
    */
   lineWidth?: number;
+  /**
+   * See: [SVG `stroke-dasharray` attribute](https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/stroke-dasharray)
+   */
+  lineDash?: string;
 }
 
 /**
  * Element implements a generic base class for VexFlow, with implementations
  * of general functions and properties that can be inherited by all VexFlow elements.
  *
- * The Element is an abstract class that needs to be subclassed to work. It handles
- * style and text-font properties for the Element and any child elements, along with
- * working with the Registry to create unique ids, but does not have any tools for
- * formatting x or y positions or connections to a Stave.
+ * The Element handles style and font properties for the Element and any child
+ * elements, along with working with the Registry to create unique ids.
+ *
+ * The `text` is a series of unicode characters (including SMuFL codes).
+ * The `textFont` property contains information required to style the text (i.e., font family, size, weight, and style).
+ * This font family is a comma separated list of fonts.
+ * The method `measureText` calculates the `textMetrics`, `boundingBox`, `height` and `width` of the `text`.
+ * The method `renderText(...)` will render the text using the provided context and coordinates,
+ * taking `xShift` and `yShift` into account.
  */
-export abstract class Element {
+export class Element {
   static get CATEGORY(): string {
     return Category.Element;
   }
 
-  // all Element objects keep a list of children that they are responsible and which
-  // inherit the style of their parents.
+  // Element objects keep a list of children that they are responsible for.
+  // Children inherit the style from their parents (see: setGroupStyle(s)).
+  protected parent?: Element;
   protected children: Element[] = [];
   protected static ID: number = 1000;
   protected static newID(): string {
     return `auto${Element.ID++}`;
   }
 
-  /**
-   * Default font for text. This is not related to music engraving. Instead, see `Flow.setMusicFont(...fontNames)`
-   * to customize the font for musical symbols placed on the score.
-   */
-  static TEXT_FONT: Required<FontInfo> = {
-    family: Font.SANS_SERIF,
-    size: Font.SIZE,
-    weight: FontWeight.NORMAL,
-    style: FontStyle.NORMAL,
-  };
+  /** Canvas used to measure text. See measureText(): TextMetrics. */
+  private static txtCanvas?: HTMLCanvasElement | OffscreenCanvas;
+
+  // Note: Canvas is node-canvas.
+  // https://www.npmjs.com/package/canvas
+  static setTextMeasurementCanvas(canvas: HTMLCanvasElement | OffscreenCanvas /* | Canvas */): void {
+    Element.txtCanvas = canvas;
+  }
+
+  static getTextMeasurementCanvas(): HTMLCanvasElement | OffscreenCanvas | undefined {
+    let txtCanvas: HTMLCanvasElement | OffscreenCanvas | undefined = Element.txtCanvas;
+    // Create the canvas element that will be used to measure text.
+    if (!txtCanvas) {
+      if (typeof document !== 'undefined') {
+        txtCanvas = document.createElement('canvas'); // Defaults to 300 x 150. See: https://www.w3.org/TR/2012/WD-html5-author-20120329/the-canvas-element.html#the-canvas-element
+      } else if (typeof OffscreenCanvas !== 'undefined') {
+        txtCanvas = new OffscreenCanvas(300, 150);
+      }
+      Element.txtCanvas = txtCanvas;
+    }
+    return txtCanvas;
+  }
 
   private context?: RenderContext;
+  protected attrs: ElementAttributes;
+
   protected rendered: boolean;
-  protected style?: ElementStyle;
-  private attrs: ElementAttributes;
-  protected boundingBox?: BoundingBox;
+  protected style: ElementStyle = {};
   protected registry?: Registry;
 
-  /**
-   * Some elements include text.
-   * The `textFont` property contains information required to style the text (i.e., font family, size, weight, and style).
-   * It is undefined by default, and can be set using `setFont(...)` or `resetFont()`.
-   */
-  protected textFont?: Required<FontInfo>;
+  protected _fontInfo: Required<FontInfo>;
+  protected fontScale: number;
+  protected _text = '';
+  protected metricsValid = false;
+  protected _textMetrics: TextMetrics = {
+    fontBoundingBoxAscent: 0,
+    fontBoundingBoxDescent: 0,
+    actualBoundingBoxAscent: 0,
+    actualBoundingBoxDescent: 0,
+    actualBoundingBoxLeft: 0,
+    actualBoundingBoxRight: 0,
+    width: 0,
+    alphabeticBaseline: 0,
+    emHeightAscent: 0,
+    emHeightDescent: 0,
+    hangingBaseline: 0,
+    ideographicBaseline: 0,
+  };
 
-  constructor() {
+  protected _height: number = 0;
+  protected _width: number = 0;
+  protected xShift: number = 0;
+  protected yShift: number = 0;
+  protected x: number = 0;
+  protected y: number = 0;
+
+  constructor(category?: string) {
     this.attrs = {
       id: Element.newID(),
-      type: this.getCategory(),
+      type: category ?? (<typeof Element>this.constructor).CATEGORY,
       class: '',
     };
 
     this.rendered = false;
+    this._fontInfo = Metrics.getFontInfo(this.attrs.type);
+    this.style = Metrics.getStyle(this.attrs.type);
+    this.fontScale = Metrics.get(`${this.attrs.type}.fontScale`);
 
     // If a default registry exist, then register with it right away.
     Registry.getDefaultRegistry()?.register(this);
   }
 
   /**
-   * Adds a child Element to the Element, which lets it inherit the
+   * Adds a child to the Element, which lets it inherit the
    * same style as the parent when setGroupStyle() is called.
    *
    * Examples of children are noteheads and stems.  Modifiers such
@@ -124,13 +169,15 @@ export abstract class Element {
    *
    * Note that StaveNote calls setGroupStyle() when setStyle() is called.
    */
-  addChildElement(child: Element): this {
+  addChild(child: Element): this {
+    if (child.parent) throw new RuntimeError('Element', 'Parent already defined');
+    child.parent = this;
     this.children.push(child);
     return this;
   }
 
   getCategory(): string {
-    return (<typeof Element>this.constructor).CATEGORY;
+    return this.attrs.type;
   }
 
   /**
@@ -139,15 +186,15 @@ export abstract class Element {
    * Example:
    * ```typescript
    * element.setStyle({ fillStyle: 'red', strokeStyle: 'red' });
-   * element.draw();
+   * element.drawWithStyle();
    * ```
-   * Note: If the element draws additional sub-elements (ie.: Modifiers in a Stave),
+   * Note: If the element draws additional sub-elements (i.e.: Modifiers in a Stave),
    * the style can be applied to all of them by means of the context:
    * ```typescript
    * element.setStyle({ fillStyle: 'red', strokeStyle: 'red' });
    * element.getContext().setFillStyle('red');
    * element.getContext().setStrokeStyle('red');
-   * element.draw();
+   * element.drawWithStyle();
    * ```
    * or using drawWithStyle:
    * ```typescript
@@ -155,7 +202,7 @@ export abstract class Element {
    * element.drawWithStyle();
    * ```
    */
-  setStyle(style: ElementStyle | undefined): this {
+  setStyle(style: ElementStyle): this {
     this.style = style;
     return this;
   }
@@ -168,60 +215,48 @@ export abstract class Element {
   }
 
   /** Get the element style used for rendering. */
-  getStyle(): ElementStyle | undefined {
+  getStyle(): ElementStyle {
     return this.style;
   }
 
   /** Apply the element style to `context`. */
-  applyStyle(
-    context: RenderContext | undefined = this.context,
-    style: ElementStyle | undefined = this.getStyle()
-  ): this {
-    if (!style) return this;
+  applyStyle(context: RenderContext | undefined = this.context, style: ElementStyle = this.getStyle()): this {
     if (!context) return this;
-
-    context.save();
     if (style.shadowColor) context.setShadowColor(style.shadowColor);
     if (style.shadowBlur) context.setShadowBlur(style.shadowBlur);
     if (style.fillStyle) context.setFillStyle(style.fillStyle);
     if (style.strokeStyle) context.setStrokeStyle(style.strokeStyle);
     if (style.lineWidth) context.setLineWidth(style.lineWidth);
-    return this;
-  }
+    if (style.lineDash) context.setLineDash(style.lineDash.split(' ').map(Number));
 
-  /** Restore the style of `context`. */
-  restoreStyle(
-    context: RenderContext | undefined = this.context,
-    style: ElementStyle | undefined = this.getStyle()
-  ): this {
-    if (!style) return this;
-    if (!context) return this;
-    context.restore();
     return this;
   }
 
   /**
-   * Draw the element and all its sub-elements (ie.: Modifiers in a Stave)
+   * Draw the element and all its sub-elements (i.e.: Modifiers in a Stave)
    * with the element's style (see `getStyle()` and `setStyle()`)
    */
-  drawWithStyle(): void {
-    this.checkContext();
-    this.applyStyle();
+  drawWithStyle(): this {
+    const ctx = this.checkContext();
+    ctx.save();
+    this.applyStyle(ctx);
     this.draw();
-    this.restoreStyle();
+    ctx.restore();
+    return this;
   }
 
   /** Draw an element. */
-  // eslint-disable-next-line
-  abstract draw(...args: any[]): void;
-
-  /** Check if it has a class label (An element can have multiple class labels).  */
-  hasClass(className: string): boolean {
-    if (!this.attrs.class) return false;
-    return this.attrs.class?.split(' ').indexOf(className) != -1;
+  draw(): void {
+    throw new RuntimeError('Element', 'Draw not defined');
   }
 
-  /** Add a class label (An element can have multiple class labels).  */
+  /** Check if it has a class label (An element can have multiple class labels). */
+  hasClass(className: string): boolean {
+    if (!this.attrs.class) return false;
+    return this.attrs.class?.split(' ').indexOf(className) !== -1;
+  }
+
+  /** Add a class label (An element can have multiple class labels). */
   addClass(className: string): this {
     if (this.hasClass(className)) return this;
     if (!this.attrs.class) this.attrs.class = `${className}`;
@@ -235,7 +270,7 @@ export abstract class Element {
     return this;
   }
 
-  /** Remove a class label (An element can have multiple class labels).  */
+  /** Remove a class label (An element can have multiple class labels). */
   removeClass(className: string): this {
     if (!this.hasClass(className)) return this;
     const arr = this.attrs.class?.split(' ');
@@ -298,8 +333,13 @@ export abstract class Element {
   }
 
   /** Get the boundingBox. */
-  getBoundingBox(): BoundingBox | undefined {
-    return this.boundingBox;
+  getBoundingBox(): BoundingBox {
+    return new BoundingBox(
+      this.x + this.xShift,
+      this.y + this.yShift - this.textMetrics.actualBoundingBoxAscent,
+      this.width,
+      this.height
+    );
   }
 
   /** Return the context, such as an SVGContext or CanvasContext object. */
@@ -331,7 +371,7 @@ export abstract class Element {
 
   /** Returns the CSS compatible font string for the text font. */
   get font(): string {
-    return Font.toCSSString(this.textFont);
+    return Font.toCSSString(this._fontInfo);
   }
 
   /**
@@ -350,32 +390,25 @@ export abstract class Element {
    * Each Element subclass may specify its own default by overriding the static `TEXT_FONT` property.
    */
   setFont(font?: string | FontInfo, size?: string | number, weight?: string | number, style?: string): this {
-    // Allow subclasses to override `TEXT_FONT`.
-    const defaultTextFont: Required<FontInfo> = (<typeof Element>this.constructor).TEXT_FONT;
+    const defaultTextFont: Required<FontInfo> = Metrics.getFontInfo(this.attrs.type);
 
     const fontIsObject = typeof font === 'object';
     const fontIsString = typeof font === 'string';
-    const fontIsUndefined = font === undefined;
     const sizeWeightStyleAreUndefined = size === undefined && weight === undefined && style === undefined;
 
+    this.metricsValid = false;
     if (fontIsObject) {
       // `font` is case 1) a FontInfo object
-      this.textFont = { ...defaultTextFont, ...font };
+      this._fontInfo = { ...defaultTextFont, ...font };
     } else if (fontIsString && sizeWeightStyleAreUndefined) {
       // `font` is case 2) CSS font shorthand.
-      this.textFont = Font.fromCSSString(font);
-    } else if (fontIsUndefined && sizeWeightStyleAreUndefined) {
-      // All arguments are undefined. Do not check for `arguments.length === 0`,
-      // which fails on the edge case: `setFont(undefined)`.
-      // TODO: See if we can remove this case entirely without introducing a visual diff.
-      // The else case below seems like it should be equivalent to this case.
-      this.textFont = { ...defaultTextFont };
+      this._fontInfo = Font.fromCSSString(font);
     } else {
       // `font` is case 3) a font family string (e.g., 'Times New Roman').
       // The other parameters represent the size, weight, and style.
       // It is okay for `font` to be undefined while one or more of the other arguments is provided.
       // Following CSS conventions, unspecified params are reset to the default.
-      this.textFont = Font.validate(
+      this._fontInfo = Font.validate(
         font ?? defaultTextFont.family,
         size ?? defaultTextFont.size,
         weight ?? defaultTextFont.weight,
@@ -390,30 +423,17 @@ export abstract class Element {
    * 'bold 10pt Arial'.
    */
   getFont(): string {
-    if (!this.textFont) {
-      this.resetFont();
-    }
-    return Font.toCSSString(this.textFont);
-  }
-
-  /**
-   * Reset the text font to the style indicated by the static `TEXT_FONT` property.
-   * Subclasses can call this to initialize `textFont` for the first time.
-   */
-  resetFont(): void {
-    this.setFont();
+    return Font.toCSSString(this._fontInfo);
   }
 
   /** Return a copy of the current FontInfo object. */
   get fontInfo(): Required<FontInfo> {
-    if (!this.textFont) {
-      this.resetFont();
-    }
     // We can cast to Required<FontInfo> here, because
-    // we just called resetFont() above to ensure this.textFont is set.
-    return { ...this.textFont } as Required<FontInfo>;
+    // we just called resetFont() above to ensure this.fontInfo is set.
+    return this._fontInfo;
   }
 
+  /** Set the current FontInfo object. */
   set fontInfo(fontInfo: FontInfo) {
     this.setFont(fontInfo);
   }
@@ -433,6 +453,10 @@ export abstract class Element {
     return this.fontSize;
   }
 
+  getFontScale(): number {
+    return this.fontScale;
+  }
+
   /**
    * The size is 1) a string of the form '10pt' or '16px', compatible with the CSS font-size property.
    *          or 2) a number, which is interpreted as a point size (i.e. 12 == '12pt').
@@ -441,9 +465,7 @@ export abstract class Element {
     this.setFontSize(size);
   }
 
-  /**
-   * @returns a CSS font-size string (e.g., '18pt', '12px', '1em').
-   */
+  /** @returns a CSS font-size string (e.g., '18pt', '12px', '1em'). */
   get fontSize(): string {
     let size = this.fontInfo.size;
     if (typeof size === 'number') {
@@ -452,27 +474,22 @@ export abstract class Element {
     return size;
   }
 
-  /**
-   * @returns the font size in `pt`.
-   */
+  /** @returns the font size in `pt`. */
   get fontSizeInPoints(): number {
     return Font.convertSizeToPointValue(this.fontSize);
   }
 
-  /**
-   * @returns the font size in `px`.
-   */
+  /** @returns the font size in `px`. */
   get fontSizeInPixels(): number {
     return Font.convertSizeToPixelValue(this.fontSize);
   }
 
-  /**
-   * @returns a CSS font-style string (e.g., 'italic').
-   */
+  /** @returns a CSS font-style string (e.g., 'italic'). */
   get fontStyle(): string {
     return this.fontInfo.style;
   }
 
+  /** Set the font style. */
   set fontStyle(style: string) {
     const fontInfo = this.fontInfo;
     this.setFont(fontInfo.family, fontInfo.size, fontInfo.weight, style);
@@ -486,8 +503,178 @@ export abstract class Element {
     return this.fontInfo.weight + '';
   }
 
+  /** Set the font weight. */
   set fontWeight(weight: string | number) {
     const fontInfo = this.fontInfo;
     this.setFont(fontInfo.family, fontInfo.size, weight, fontInfo.style);
+  }
+
+  /** Get element width. */
+  getWidth(): number {
+    return this.width;
+  }
+
+  get width(): number {
+    if (!this.metricsValid) this.measureText();
+    return this._width;
+  }
+
+  /** Set element width. */
+  setWidth(width: number): this {
+    this.width = width;
+    return this;
+  }
+
+  set width(width: number) {
+    if (!this.metricsValid) this.measureText();
+    this._width = width;
+  }
+
+  /** Set the X coordinate. */
+  setX(x: number): this {
+    this.x = x;
+    return this;
+  }
+
+  /** Get the X coordinate. */
+  getX(): number {
+    return this.x;
+  }
+  /** Get the Y coordinate. */
+  getY(): number {
+    return this.y;
+  }
+
+  /** Set the Y coordinate. */
+  setY(y: number): this {
+    this.y = y;
+    return this;
+  }
+
+  /** Shift element down `yShift` pixels. Negative values shift up. */
+  setYShift(yShift: number): this {
+    this.yShift = yShift;
+    return this;
+  }
+
+  /** Get shift element `yShift`. */
+  getYShift(): number {
+    return this.yShift;
+  }
+
+  /** Set shift element right `xShift` pixels. Negative values shift left. */
+  setXShift(xShift: number): this {
+    this.xShift = xShift;
+    return this;
+  }
+
+  /** Get shift element `xShift`. */
+  getXShift(): number {
+    return this.xShift;
+  }
+
+  /** Set element text. */
+  setText(text: string): this {
+    this.text = text;
+    return this;
+  }
+
+  set text(text: string) {
+    this.metricsValid = false;
+    this._text = text;
+  }
+
+  /** Get element text. */
+  getText(): string {
+    return this._text;
+  }
+
+  get text(): string {
+    return this._text;
+  }
+
+  /** Render the element text. */
+  renderText(ctx: RenderContext, xPos: number, yPos: number): void {
+    ctx.setFont(this._fontInfo);
+    ctx.fillText(this._text, xPos + this.x + this.xShift, yPos + this.y + this.yShift);
+    this.children.forEach((child) => {
+      // changed -- do not look at private attributes of children.
+      ctx.setFont(child.fontInfo);
+      ctx.fillText(child.text, xPos + child.x + child.xShift, yPos + child.y + child.yShift);
+    });
+  }
+
+  /** Measure the text using the textFont. */
+  measureText(): TextMetrics {
+    // TODO: What about SVG.getBBox()?
+    // https://developer.mozilla.org/en-US/docs/Web/API/SVGGraphicsElement/getBBox
+    const context = Element.getTextMeasurementCanvas()?.getContext('2d');
+    if (!context) {
+      // eslint-disable-next-line no-console
+      console.warn('Element: No context for txtCanvas. Returning empty text metrics.');
+      return this._textMetrics;
+    }
+    context.font = Font.toCSSString(Font.validate(this.fontInfo));
+    this._textMetrics = context.measureText(this.text);
+    this._height = this._textMetrics.actualBoundingBoxAscent + this._textMetrics.actualBoundingBoxDescent;
+    this._width = this._textMetrics.width;
+    this.metricsValid = true;
+    return this._textMetrics;
+  }
+
+  /** Measure the text using the FontInfo related with key. */
+  static measureWidth(text: string, key = ''): number {
+    const context = Element.getTextMeasurementCanvas()?.getContext('2d');
+    if (!context) {
+      // eslint-disable-next-line no-console
+      console.warn('Element: No context for txtCanvas. Returning empty text metrics.');
+      return 0;
+    }
+    context.font = Font.toCSSString(Metrics.getFontInfo(key));
+    return context.measureText(text).width;
+  }
+
+  /** Get the text metrics. */
+  getTextMetrics(): TextMetrics {
+    return this.textMetrics;
+  }
+
+  get textMetrics(): TextMetrics {
+    if (!this.metricsValid) this.measureText();
+    return this._textMetrics;
+  }
+
+  /** Get the text height. */
+  getHeight() {
+    return this.height;
+  }
+
+  get height() {
+    if (!this.metricsValid) this.measureText();
+    return this._height;
+  }
+
+  set height(height: number) {
+    if (!this.metricsValid) this.measureText();
+    this._height = height;
+  }
+
+  setOriginX(x: number): void {
+    const bbox = this.getBoundingBox();
+    const originX = Math.abs((bbox.getX() - this.xShift) / bbox.getW());
+    const xShift = (x - originX) * bbox.getW();
+    this.xShift = -xShift;
+  }
+
+  setOriginY(y: number): void {
+    const bbox = this.getBoundingBox();
+    const originY = Math.abs((bbox.getY() - this.yShift) / bbox.getH());
+    const yShift = (y - originY) * bbox.getH();
+    this.yShift = -yShift;
+  }
+
+  setOrigin(x: number, y: number): void {
+    this.setOriginX(x);
+    this.setOriginY(y);
   }
 }

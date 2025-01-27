@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // Style Tests
@@ -65,17 +65,17 @@ function stave(options: TestOptions): void {
 
   const notes = [
     f
-      .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stem_direction: 1, duration: '4' })
+      .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stemDirection: 1, duration: '4' })
       .addModifier(f.Accidental({ type: 'b' }), 0)
       .addModifier(f.Accidental({ type: '#' }), 1),
     f
-      .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stem_direction: 1, duration: '4' })
+      .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stemDirection: 1, duration: '4' })
       .addModifier(f.Accidental({ type: 'b' }), 0)
       .addModifier(f.Accidental({ type: '#' }), 1),
-    f.StaveNote({ keys: ['e/4'], stem_direction: 1, duration: '4' }),
-    f.StaveNote({ keys: ['f/4'], stem_direction: 1, duration: '8' }),
+    f.StaveNote({ keys: ['e/4'], stemDirection: 1, duration: '4' }),
+    f.StaveNote({ keys: ['f/4'], stemDirection: 1, duration: '8' }),
 
-    // voice.draw() test.
+    // voice.drawWithStyle() test.
     f.TextDynamics({ text: 'sfz', duration: '16' }).setStyle(FS('blue')),
 
     // GhostNote modifiers test.
@@ -114,7 +114,7 @@ function tab(options: TestOptions, contextBuilder: ContextBuilder): void {
   ctx.font = '10pt Arial';
   const stave = new TabStave(10, 10, 450).addTabGlyph();
   stave.getModifiers()[2].setStyle(FS('blue'));
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
 
   const tabNote = (noteStruct: TabNoteStruct) => new TabNote(noteStruct);
 
@@ -133,8 +133,8 @@ function tab(options: TestOptions, contextBuilder: ContextBuilder): void {
       ],
       duration: 'h',
     })
-      .addModifier(new Bend('Full').setStyle(FS('brown')), 0)
-      .addStroke(0, new Stroke(1, { all_voices: false }).setStyle(FS('blue'))),
+      .addModifier(new Bend([{ type: Bend.UP, text: 'Full' }]).setStyle(FS('brown')), 0)
+      .addStroke(0, new Stroke(1, { allVoices: false }).setStyle(FS('blue'))),
   ];
 
   Formatter.FormatAndDraw(ctx, stave, notes);

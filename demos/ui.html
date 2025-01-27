@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>UI</title>
+    <style>
+      /* Bravura */
+      @font-face {
+        font-family: 'Bravura';
+        font-style: normal;
+        font-display: block;
+        font-weight: 400;
+        src:
+          local('Bravura'),
+          url(../node_modules/@vexflow-fonts/bravura/bravura.woff2) format('woff2');
+      }
+
+      /* Bravura Text */
+      @font-face {
+        font-family: 'Bravura Text';
+        font-style: normal;
+        font-display: block;
+        font-weight: 400;
+        src:
+          local('Bravura Text'),
+          url(../node_modules/@vexflow-fonts/bravuratext/bravuratext.woff2) format('woff2');
+      }
+
+      svg {
+        width: 600px;
+        height: 600px;
+        border: 1px solid gray;
+      }
+
+      svg > text {
+        font-family: 'Bravura';
+        font-size: 80pt;
+      }
+    </style>
+  </head>
+  <body>
+    <span style="font-family: Bravura"></span>
+    <span style="font-family: Bravura Text"></span>
+    <svg>
+      <circle id="c" cx="100" cy="100" r="40" stroke="green" stroke-width="4" fill="yellow" />
+      <text id="t" x="30" y="200" fill="black" stroke="cyan">
+        &#xE560; &#xE1D7; &#xE050; &#xE062; &#xE080; &#xE081; &#xE082; &#xE083;
+      </text>
+    </svg>
+    <script type="module">
+      const fontFaceSet = await document.fonts.ready;
+      console.log(fontFaceSet);
+
+      const text = document.querySelector('#t');
+      text.addEventListener('mousemove', () => {
+        const gray = Math.random() * 255;
+        text.setAttribute('fill', `rgb(${gray}, ${gray}, ${gray})`);
+      });
+    </script>
+  </body>
+</html>

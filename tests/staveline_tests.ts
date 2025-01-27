@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // StaveLine Tests
@@ -6,7 +6,8 @@
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Dot } from '../src/dot';
-import { Font, FontStyle } from '../src/font';
+import { FontStyle } from '../src/font';
+import { Metrics } from '../src/metrics';
 
 const StaveLineTests = {
   Start(): void {
@@ -33,10 +34,10 @@ function simple0(options: TestOptions): void {
   f.StaveLine({
     from: notes[0],
     to: notes[1],
-    first_indices: [0],
-    last_indices: [0],
+    firstIndexes: [0],
+    lastIndexes: [0],
     options: {
-      font: { family: Font.SERIF, size: 12, style: FontStyle.ITALIC },
+      font: { family: Metrics.get('fontFamily'), size: 12, style: FontStyle.ITALIC },
       text: 'gliss.',
     },
   });
@@ -44,10 +45,10 @@ function simple0(options: TestOptions): void {
   const staveLine2 = f.StaveLine({
     from: notes[2],
     to: notes[3],
-    first_indices: [2, 1, 0],
-    last_indices: [0, 1, 2],
+    firstIndexes: [2, 1, 0],
+    lastIndexes: [0, 1, 2],
   });
-  staveLine2.render_options.line_dash = [10, 10];
+  staveLine2.renderOptions.lineDash = [10, 10];
 
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
 
@@ -61,14 +62,14 @@ function simple1(options: TestOptions): void {
   const stave = f.Stave().addClef('treble');
 
   const notes = [
-    f.StaveNote({ keys: ['c#/5', 'd/5'], duration: '4', clef: 'treble', stem_direction: -1 }),
+    f.StaveNote({ keys: ['c#/5', 'd/5'], duration: '4', clef: 'treble', stemDirection: -1 }),
     f.StaveNote({ keys: ['c/4'], duration: '4', clef: 'treble' }).addModifier(f.Accidental({ type: '#' }), 0),
     f.StaveNote({ keys: ['c/4', 'e/4', 'g/4'], duration: '4', clef: 'treble' }),
     f
       .StaveNote({ keys: ['f/4', 'a/4', 'c/5'], duration: '4', clef: 'treble' })
       .addModifier(f.Accidental({ type: '#' }), 2),
     f.StaveNote({ keys: ['c/4'], duration: '4', clef: 'treble' }).addModifier(f.Accidental({ type: '#' }), 0),
-    f.StaveNote({ keys: ['c#/5', 'd/5'], duration: '4', clef: 'treble', stem_direction: -1 }),
+    f.StaveNote({ keys: ['c#/5', 'd/5'], duration: '4', clef: 'treble', stemDirection: -1 }),
     f.StaveNote({ keys: ['c/4', 'd/4', 'g/4'], duration: '4', clef: 'treble' }),
     f
       .StaveNote({ keys: ['f/4', 'a/4', 'c/5'], duration: '4', clef: 'treble' })
@@ -81,67 +82,67 @@ function simple1(options: TestOptions): void {
   const staveLine0 = f.StaveLine({
     from: notes[0],
     to: notes[1],
-    first_indices: [0],
-    last_indices: [0],
+    firstIndexes: [0],
+    lastIndexes: [0],
     options: { text: 'Left' },
   });
 
   const staveLine4 = f.StaveLine({
     from: notes[2],
     to: notes[3],
-    first_indices: [1],
-    last_indices: [1],
+    firstIndexes: [1],
+    lastIndexes: [1],
     options: { text: 'Right' },
   });
 
   const staveLine1 = f.StaveLine({
     from: notes[4],
     to: notes[5],
-    first_indices: [0],
-    last_indices: [0],
+    firstIndexes: [0],
+    lastIndexes: [0],
     options: { text: 'Center' },
   });
 
   const staveLine2 = f.StaveLine({
     from: notes[6],
     to: notes[7],
-    first_indices: [1],
-    last_indices: [0],
+    firstIndexes: [1],
+    lastIndexes: [0],
   });
 
   const staveLine3 = f.StaveLine({
     from: notes[6],
     to: notes[7],
-    first_indices: [2],
-    last_indices: [2],
+    firstIndexes: [2],
+    lastIndexes: [2],
     options: { text: 'Top' },
   });
 
-  staveLine0.render_options.draw_end_arrow = true;
-  staveLine0.render_options.text_justification = 1;
-  staveLine0.render_options.text_position_vertical = 2;
+  staveLine0.renderOptions.drawEndArrow = true;
+  staveLine0.renderOptions.textJustification = 1;
+  staveLine0.renderOptions.textPositionVertical = 2;
 
-  staveLine1.render_options.draw_end_arrow = true;
-  staveLine1.render_options.arrowhead_length = 30;
-  staveLine1.render_options.line_width = 5;
-  staveLine1.render_options.text_justification = 2;
-  staveLine1.render_options.text_position_vertical = 2;
+  staveLine1.renderOptions.drawEndArrow = true;
+  staveLine1.renderOptions.arrowheadLength = 30;
+  staveLine1.renderOptions.lineWidth = 5;
+  staveLine1.renderOptions.textJustification = 2;
+  staveLine1.renderOptions.textPositionVertical = 2;
 
-  staveLine4.render_options.line_width = 2;
-  staveLine4.render_options.draw_end_arrow = true;
-  staveLine4.render_options.draw_start_arrow = true;
-  staveLine4.render_options.arrowhead_angle = 0.5;
-  staveLine4.render_options.arrowhead_length = 20;
-  staveLine4.render_options.text_justification = 3;
-  staveLine4.render_options.text_position_vertical = 2;
+  staveLine4.renderOptions.lineWidth = 2;
+  staveLine4.renderOptions.drawEndArrow = true;
+  staveLine4.renderOptions.drawStartArrow = true;
+  staveLine4.renderOptions.arrowheadAngle = 0.5;
+  staveLine4.renderOptions.arrowheadLength = 20;
+  staveLine4.renderOptions.textJustification = 3;
+  staveLine4.renderOptions.textPositionVertical = 2;
 
-  staveLine2.render_options.draw_start_arrow = true;
-  staveLine2.render_options.line_dash = [5, 4];
+  staveLine2.renderOptions.drawStartArrow = true;
+  staveLine2.renderOptions.lineDash = [5, 4];
 
-  staveLine3.render_options.draw_end_arrow = true;
-  staveLine3.render_options.draw_start_arrow = true;
-  staveLine3.render_options.color = 'red';
-  staveLine3.render_options.text_position_vertical = 1;
+  staveLine3.renderOptions.drawEndArrow = true;
+  staveLine3.renderOptions.drawStartArrow = true;
+  staveLine3.renderOptions.color = 'red';
+  staveLine3.renderOptions.textPositionVertical = 1;
 
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
 

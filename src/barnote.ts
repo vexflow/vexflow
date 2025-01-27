@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 
 import { ModifierContext } from './modifiercontext';
@@ -9,7 +9,7 @@ import { log } from './util';
 
 // eslint-disable-next-line
 function L(...args: any[]) {
-  if (BarNote.DEBUG) log('Vex.Flow.BarNote', args);
+  if (BarNote.DEBUG) log('VexFlow.BarNote', args);
 }
 
 /**
@@ -20,7 +20,7 @@ function L(...args: any[]) {
  * See `tests/barnote_tests.ts` for usage examples.
  */
 export class BarNote extends Note {
-  /** To enable logging for this class. Set `Vex.Flow.BarNote.DEBUG` to `true`. */
+  /** To enable logging for this class. Set `VexFlow.BarNote.DEBUG` to `true`. */
   static DEBUG: boolean = false;
 
   static get CATEGORY(): string {
@@ -51,7 +51,7 @@ export class BarNote extends Note {
     };
 
     // Tell the formatter that bar notes have no duration.
-    this.ignore_ticks = true;
+    this.ignoreTicks = true;
     this.setType(type);
     this.barline = new Barline(type);
   }
@@ -87,15 +87,11 @@ export class BarNote extends Note {
   draw(): void {
     const ctx = this.checkContext();
     L('Rendering bar line at: ', this.getAbsoluteX());
-    this.applyStyle(ctx);
-
-    ctx.openGroup('barnote', this.getAttribute('id'));
-    this.barline.setType(this.type);
-    this.barline.setX(this.getAbsoluteX());
-    this.barline.draw(this.checkStave());
-    ctx.closeGroup();
-
-    this.restoreStyle(ctx);
+    const barline = new Barline(this.type);
+    barline.setX(this.getAbsoluteX());
+    barline.setStave(this.checkStave());
+    barline.setContext(ctx);
+    barline.drawWithStyle();
     this.setRendered();
   }
 }

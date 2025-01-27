@@ -1,6 +1,6 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
-// Author: Taehoon Moon 2016
+// @author Taehoon Moon 2016
 //
 // NoteSubGroup Tests
 
@@ -40,14 +40,14 @@ function basic(options: TestOptions): void {
   const { createStaveNote, addAccidental, addSubGroup } = createShortcuts(f);
 
   const notes: StaveNote[] = [
-    { keys: ['f/5'], stem_direction: -1, duration: '4' },
-    { keys: ['d/4'], stem_direction: -1, duration: '4', clef: 'bass' },
-    { keys: ['g/4'], stem_direction: -1, duration: '4', clef: 'alto' },
-    { keys: ['a/4'], stem_direction: -1, duration: '4', clef: 'alto' },
-    { keys: ['c/4'], stem_direction: -1, duration: '4', clef: 'tenor' },
-    { keys: ['c/3'], stem_direction: +1, duration: '4', clef: 'tenor' },
-    { keys: ['d/4'], stem_direction: -1, duration: '4', clef: 'tenor' },
-    { keys: ['f/4'], stem_direction: -1, duration: '4', clef: 'tenor' },
+    { keys: ['f/5'], stemDirection: -1, duration: '4' },
+    { keys: ['d/4'], stemDirection: -1, duration: '4', clef: 'bass' },
+    { keys: ['g/4'], stemDirection: -1, duration: '4', clef: 'alto' },
+    { keys: ['a/4'], stemDirection: -1, duration: '4', clef: 'alto' },
+    { keys: ['c/4'], stemDirection: -1, duration: '4', clef: 'tenor' },
+    { keys: ['c/3'], stemDirection: +1, duration: '4', clef: 'tenor' },
+    { keys: ['d/4'], stemDirection: -1, duration: '4', clef: 'tenor' },
+    { keys: ['f/4'], stemDirection: -1, duration: '4', clef: 'tenor' },
   ].map(createStaveNote);
 
   addAccidental(notes[1], '#');
@@ -80,7 +80,7 @@ function multiVoiceSingleDraw(options: TestOptions): void {
 }
 
 /**
- * Call Factory.draw() twice. It should look identical to the multiVoice test case above.
+ * Call Factory.drawWithStyle() twice. It should look identical to the multiVoice test case above.
  */
 function multiVoiceDoubleDraw(options: TestOptions): void {
   multiVoiceHelper(options, 2);
@@ -97,17 +97,17 @@ function multiVoiceHelper(options: TestOptions, numDraws: number) {
   const { createStaveNote, addAccidental, addSubGroup } = createShortcuts(f);
 
   const notes1 = [
-    { keys: ['f/5'], stem_direction: 1, duration: '4' },
-    { keys: ['d/4'], stem_direction: 1, duration: '4', clef: 'bass' },
-    { keys: ['c/5'], stem_direction: 1, duration: '4', clef: 'alto' },
-    { keys: ['c/5'], stem_direction: 1, duration: '4', clef: 'soprano' },
+    { keys: ['f/5'], stemDirection: 1, duration: '4' },
+    { keys: ['d/4'], stemDirection: 1, duration: '4', clef: 'bass' },
+    { keys: ['c/5'], stemDirection: 1, duration: '4', clef: 'alto' },
+    { keys: ['c/5'], stemDirection: 1, duration: '4', clef: 'soprano' },
   ].map(createStaveNote);
 
   const notes2 = [
-    { keys: ['c/4'], stem_direction: -1, duration: '4' },
-    { keys: ['c/3'], stem_direction: -1, duration: '4', clef: 'bass' },
-    { keys: ['d/4'], stem_direction: -1, duration: '4', clef: 'alto' },
-    { keys: ['f/4'], stem_direction: -1, duration: '4', clef: 'soprano' },
+    { keys: ['c/4'], stemDirection: -1, duration: '4' },
+    { keys: ['c/3'], stemDirection: -1, duration: '4', clef: 'bass' },
+    { keys: ['d/4'], stemDirection: -1, duration: '4', clef: 'alto' },
+    { keys: ['f/4'], stemDirection: -1, duration: '4', clef: 'soprano' },
   ].map(createStaveNote);
 
   addAccidental(notes1[1], '#');
@@ -147,35 +147,35 @@ function multiStaff(options: TestOptions): void {
 
   const stave1 = f.Stave({ x: 15, y: 30, width: 500 }).setClef('treble');
   const notes1 = [
-    { keys: ['f/5'], stem_direction: 1, duration: '4' },
-    { keys: ['d/4'], stem_direction: 1, duration: '4', clef: 'bass' },
-    { keys: ['c/5'], stem_direction: 1, duration: '4', clef: 'alto' },
-    { keys: ['c/5'], stem_direction: 1, duration: '4', clef: 'soprano' },
+    { keys: ['f/5'], stemDirection: 1, duration: '4' },
+    { keys: ['d/4'], stemDirection: 1, duration: '4', clef: 'bass' },
+    { keys: ['c/5'], stemDirection: 1, duration: '4', clef: 'alto' },
+    { keys: ['c/5'], stemDirection: 1, duration: '4', clef: 'soprano' },
   ].map(createStaveNote);
 
   const notes2 = [
-    { keys: ['c/4'], stem_direction: -1, duration: '4' },
-    { keys: ['c/3'], stem_direction: -1, duration: '4', clef: 'bass' },
-    { keys: ['d/4'], stem_direction: -1, duration: '4', clef: 'alto' },
-    { keys: ['f/4'], stem_direction: -1, duration: '4', clef: 'soprano' },
+    { keys: ['c/4'], stemDirection: -1, duration: '4' },
+    { keys: ['c/3'], stemDirection: -1, duration: '4', clef: 'bass' },
+    { keys: ['d/4'], stemDirection: -1, duration: '4', clef: 'alto' },
+    { keys: ['f/4'], stemDirection: -1, duration: '4', clef: 'soprano' },
   ].map(createStaveNote);
 
   const stave2 = f.Stave({ x: 15, y: 150, width: 500 }).setClef('bass');
 
   const notes3 = [
-    { keys: ['e/3'], duration: '8', stem_direction: -1, clef: 'bass' },
-    { keys: ['g/4'], duration: '8', stem_direction: 1, clef: 'treble' },
-    { keys: ['d/4'], duration: '8', stem_direction: 1, clef: 'treble' },
-    { keys: ['f/4'], duration: '8', stem_direction: 1, clef: 'treble' },
-    { keys: ['c/4'], duration: '8', stem_direction: 1, clef: 'treble' },
-    { keys: ['g/3'], duration: '8', stem_direction: -1, clef: 'bass' },
-    { keys: ['d/3'], duration: '8', stem_direction: -1, clef: 'bass' },
-    { keys: ['f/3'], duration: '8', stem_direction: -1, clef: 'bass' },
+    { keys: ['e/3'], duration: '8', stemDirection: -1, clef: 'bass' },
+    { keys: ['g/4'], duration: '8', stemDirection: 1, clef: 'treble' },
+    { keys: ['d/4'], duration: '8', stemDirection: 1, clef: 'treble' },
+    { keys: ['f/4'], duration: '8', stemDirection: 1, clef: 'treble' },
+    { keys: ['c/4'], duration: '8', stemDirection: 1, clef: 'treble' },
+    { keys: ['g/3'], duration: '8', stemDirection: -1, clef: 'bass' },
+    { keys: ['d/3'], duration: '8', stemDirection: -1, clef: 'bass' },
+    { keys: ['f/3'], duration: '8', stemDirection: -1, clef: 'bass' },
   ].map(createStaveNote);
 
-  f.StaveConnector({ top_stave: stave1, bottom_stave: stave2, type: 'brace' });
-  f.StaveConnector({ top_stave: stave1, bottom_stave: stave2, type: 'singleLeft' });
-  f.StaveConnector({ top_stave: stave1, bottom_stave: stave2, type: 'singleRight' });
+  f.StaveConnector({ topStave: stave1, bottomStave: stave2, type: 'brace' });
+  f.StaveConnector({ topStave: stave1, bottomStave: stave2, type: 'singleLeft' });
+  f.StaveConnector({ topStave: stave1, bottomStave: stave2, type: 'singleRight' });
 
   f.Beam({ notes: notes3.slice(1, 4) });
   f.Beam({ notes: notes3.slice(5) });

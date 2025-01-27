@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- 
+      Summary: Preload fonts from the jsdelivr CDN, and render five staves (one in each music font).
+      Run: Open this html file in your web browser.
+
+      This page uses the <b>await</b> keyword to call an async function that returns after the requested fonts are loaded.
+
+      Call `VexFlow.setFonts(...)` before rendering your score.
+    -->
+    <style>
+      html {
+        font: 16px sans-serif;
+      }
+      body {
+        margin: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <p>This demo renders five staves, each with a different music engraving font.</p>
+    <h3><a href="https://github.com/steinbergmedia/bravura">Bravura</a></h3>
+    <div id="outputBravura"></div>
+    <h3><a href="https://www.chiark.greenend.org.uk/~sgtatham/gonville/">Gonville</a></h3>
+    <div id="outputGonville"></div>
+    <h3><a href="https://github.com/steinbergmedia/petaluma">Petaluma</a></h3>
+    <div id="outputPetaluma"></div>
+    <h3><a href="https://github.com/MuseScoreFonts/Leland">Leland</a></h3>
+    <div id="outputLeland"></div>
+    <h3><a href="https://github.com/fkretlow/sebastian/">Sebastian</a></h3>
+    <div id="outputSebastian"></div>
+    <p>View the source code for more information.</p>
+    <!--
+        To view this demo, open all.html in your web browser.
+        The standard VexFlow library (build/cjs/vexflow.js) is bundled with ZERO music fonts.
+        You can either load SMuFL fonts from your own server, or from the VexFlow fonts CDN (jsdelivr).
+        The build/cjs/*.js files are compatible with <script> tags.
+        The build/esm/*.js files are compatible with ESM import statements.
+    -->
+    <script src="../../build/cjs/vexflow-core.js"></script>
+    <script type="module">
+      const VF = VexFlow;
+
+      console.log(VF.BUILD);
+      console.log('VexFlow BUILD ' + JSON.stringify(VF.BUILD));
+
+      // Load the specified fonts from the jsdelivr CDN.
+      await VF.loadFonts('Bravura', 'Gonville', 'Petaluma', 'Leland', 'Sebastian');
+
+      function drawScoreInDiv(elementId) {
+        const factory = new VF.Factory({ renderer: { elementId, width: 500, height: 130 } });
+        const score = factory.EasyScore();
+        factory
+          .System()
+          .addStave({
+            voices: [
+              score.voice(score.notes('C#5/q, B4, A4, G#4', { stem: 'up' })),
+              score.voice(score.notes('C#4/h, C#4', { stem: 'down' })),
+            ],
+          })
+          .addClef('treble')
+          .addTimeSignature('4/4');
+        factory.draw();
+      }
+
+      // See textFontFamily in:
+      // https://github.com/steinbergmedia/bravura/blob/master/redist/bravura_metadata.json
+      VF.setFonts('Bravura, Academico');
+      drawScoreInDiv('outputBravura');
+
+      // Gonville does not declare a preferred text font, so we just use Academico.
+      // https://github.com/steinbergmedia/petaluma/tree/master/redist/otf
+      VF.setFonts('Gonville, Academico');
+      drawScoreInDiv('outputGonville');
+
+      // https://github.com/steinbergmedia/petaluma/tree/master/redist/otf
+      VF.setFonts('Petaluma, Petaluma Script');
+      drawScoreInDiv('outputPetaluma');
+
+      // https://github.com/MuseScoreFonts/Leland/blob/main/leland_metadata.json
+      VF.setFonts('Leland, Edwin');
+      drawScoreInDiv('outputLeland');
+
+      // https://github.com/fkretlow/sebastian/blob/master/fonts/Sebastian.json
+      VF.setFonts('Sebastian, Nepomuk');
+      drawScoreInDiv('outputSebastian');
+    </script>
+  </body>
+</html>

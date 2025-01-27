@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 
 import { Tables } from './tables';
@@ -32,7 +32,7 @@ export class Tuning {
 
   /** Return the note number associated to the note string. */
   noteToInteger(noteString: string): number {
-    return Tables.keyProperties(noteString).int_value ?? -1;
+    return Tables.keyProperties(noteString).intValue ?? -1;
   }
 
   /**

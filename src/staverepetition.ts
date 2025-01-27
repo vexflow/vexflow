@@ -1,24 +1,16 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
-// Author Larry Kuhns 2011
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// @author: Larry Kuhns 2011
 
-import { Font, FontInfo, FontStyle, FontWeight } from './font';
-import { Glyph } from './glyph';
+import { Glyphs } from './glyphs';
+import { Metrics } from './metrics';
 import { Stave } from './stave';
 import { StaveModifier } from './stavemodifier';
-import { Tables } from './tables';
 import { Category } from './typeguard';
 
 export class Repetition extends StaveModifier {
   static get CATEGORY(): string {
     return Category.Repetition;
   }
-
-  static TEXT_FONT: Required<FontInfo> = {
-    family: Font.SERIF,
-    size: Tables.NOTATION_FONT_SCALE / 3,
-    weight: FontWeight.BOLD,
-    style: FontStyle.NORMAL,
-  };
 
   static readonly type = {
     NONE: 1, // no coda or segno
@@ -36,36 +28,36 @@ export class Repetition extends StaveModifier {
     TO_CODA: 13, // To Coda at end of stave
   };
 
-  protected symbol_type: number;
+  protected symbolType: number;
 
-  protected x_shift: number;
-  protected y_shift: number;
+  protected xShift: number;
+  protected yShift: number;
 
-  constructor(type: number, x: number, y_shift: number) {
+  constructor(type: number, x: number, yShift: number) {
     super();
 
-    this.symbol_type = type;
+    this.symbolType = type;
     this.x = x;
-    this.x_shift = 0;
-    this.y_shift = y_shift;
-
-    this.resetFont();
+    this.xShift = 0;
+    this.yShift = yShift;
   }
 
   setShiftX(x: number): this {
-    this.x_shift = x;
+    this.xShift = x;
     return this;
   }
 
   setShiftY(y: number): this {
-    this.y_shift = y;
+    this.yShift = y;
     return this;
   }
 
-  draw(stave: Stave, x: number): this {
+  draw(): void {
+    const stave = this.checkStave();
+    const x = stave.getModifierXShift(this.getPosition());
     this.setRendered();
 
-    switch (this.symbol_type) {
+    switch (this.symbolType) {
       case Repetition.type.CODA_RIGHT:
         this.drawCodaFixed(stave, x + stave.getWidth());
         break;
@@ -73,10 +65,10 @@ export class Repetition extends StaveModifier {
         this.drawSymbolText(stave, x, 'Coda', true);
         break;
       case Repetition.type.SEGNO_LEFT:
-        this.drawSignoFixed(stave, x);
+        this.drawSegnoFixed(stave, x);
         break;
       case Repetition.type.SEGNO_RIGHT:
-        this.drawSignoFixed(stave, x + stave.getWidth());
+        this.drawSegnoFixed(stave, x + stave.getWidth());
         break;
       case Repetition.type.DC:
         this.drawSymbolText(stave, x, 'D.C.', false);
@@ -105,100 +97,51 @@ export class Repetition extends StaveModifier {
       default:
         break;
     }
-
-    return this;
   }
 
   drawCodaFixed(stave: Stave, x: number): this {
-    const y = stave.getYForTopText(stave.getNumLines()) + this.y_shift;
-    Glyph.renderGlyph(
-      stave.checkContext(),
-      this.x + x + this.x_shift,
-      y + Tables.currentMusicFont().lookupMetric('staveRepetition.coda.offsetY'),
-      40,
-      'coda',
-      { category: 'coda' }
-    );
+    const y = stave.getYForTopText(stave.getNumLines());
+    this.text = Glyphs.coda;
+    this.renderText(stave.checkContext(), x, y + Metrics.get('Repetition.coda.offsetY'));
     return this;
   }
 
-  drawSignoFixed(stave: Stave, x: number): this {
-    const y = stave.getYForTopText(stave.getNumLines()) + this.y_shift;
-    Glyph.renderGlyph(
-      stave.checkContext(),
-      this.x + x + this.x_shift,
-      y + Tables.currentMusicFont().lookupMetric('staveRepetition.segno.offsetY'),
-      30,
-      'segno',
-      { category: 'segno' }
-    );
+  drawSegnoFixed(stave: Stave, x: number): this {
+    const y = stave.getYForTopText(stave.getNumLines());
+    this.text = Glyphs.segno;
+    this.renderText(stave.checkContext(), x, y + Metrics.get('Repetition.segno.offsetY'));
     return this;
   }
 
-  drawSymbolText(stave: Stave, x: number, text: string, draw_coda: boolean): this {
+  drawSymbolText(stave: Stave, x: number, text: string, drawCoda: boolean): this {
     const ctx = stave.checkContext();
+    let textX = 0;
 
-    ctx.save();
-    ctx.setFont(this.textFont);
-
-    let text_x = 0;
-    let symbol_x = 0;
-    const modifierWidth = stave.getNoteStartX() - this.x;
-    switch (this.symbol_type) {
-      // To the left with symbol
+    this.text = text;
+    if (drawCoda) {
+      this.text += ' \ue048' /*coda*/;
+    }
+    this.setFont(Metrics.getFontInfo('Repetition.text'));
+    switch (this.symbolType) {
+      // To the left
       case Repetition.type.CODA_LEFT:
         // Offset Coda text to right of stave beginning
-        text_x = this.x + stave.getVerticalBarWidth();
-        symbol_x =
-          text_x +
-          ctx.measureText(text).width +
-          Tables.currentMusicFont().lookupMetric('staveRepetition.symbolText.offsetX');
+        textX = stave.getVerticalBarWidth();
         break;
-      // To the right without symbol
+      // To the right
       case Repetition.type.DC:
       case Repetition.type.DC_AL_FINE:
       case Repetition.type.DS:
       case Repetition.type.DS_AL_FINE:
       case Repetition.type.FINE:
-        text_x =
-          this.x +
-          x +
-          this.x_shift +
-          stave.getWidth() -
-          Tables.currentMusicFont().lookupMetric('staveRepetition.symbolText.spacing') -
-          modifierWidth -
-          ctx.measureText(text).width;
-        break;
-      // To the right with symbol
       default:
-        text_x =
-          this.x +
-          x +
-          this.x_shift +
-          stave.getWidth() -
-          Tables.currentMusicFont().lookupMetric('staveRepetition.symbolText.spacing') -
-          modifierWidth -
-          ctx.measureText(text).width -
-          Tables.currentMusicFont().lookupMetric('staveRepetition.symbolText.offsetX');
-        symbol_x =
-          text_x +
-          ctx.measureText(text).width +
-          Tables.currentMusicFont().lookupMetric('staveRepetition.symbolText.offsetX');
-        break;
+        textX =
+          x - (stave.getNoteStartX() - this.x) + stave.getWidth() - this.width - Metrics.get('Repetition.text.offsetX');
     }
 
-    const y =
-      stave.getYForTopText(stave.getNumLines()) +
-      this.y_shift +
-      Tables.currentMusicFont().lookupMetric('staveRepetition.symbolText.offsetY');
-    if (draw_coda) {
-      Glyph.renderGlyph(ctx, symbol_x, y, Font.convertSizeToPointValue(this.textFont?.size) * 2, 'coda', {
-        category: 'coda',
-      });
-    }
+    const y = stave.getYForTopText(stave.getNumLines()) + Metrics.get('Repetition.text.offsetY');
 
-    ctx.fillText(text, text_x, y + 5);
-    ctx.restore();
+    this.renderText(ctx, textX, y);
 
     return this;
   }

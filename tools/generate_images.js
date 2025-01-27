@@ -64,7 +64,7 @@ const parseArgs = () => {
           });
         break;
       case '--parallel':
-        if (value && !Number.isNaN(intValue)) {
+        if (value && !Number.isNaN(intValue) && intValue > 0) {
           parallel = intValue;
         } else {
           log(`invalid value for --parallel: ${value}`, 'error');
@@ -80,45 +80,31 @@ const parseArgs = () => {
     }
   });
 
-  backends = backends || {
-    pptr: true,
+  backends = backends ?? {
+    jsdom: true,
   };
 
-  return {
-    childArgs,
-    backends,
-    parallel: parallel <= 1 ? 1 : parallel,
-  };
+  return { childArgs, backends, parallel };
 };
 
 const resolveJobsOption = (verIn) => {
   let numTests = NaN;
-  let pptrJobs = 1;
-  let ver = verIn;
+  let ver = 'build';
 
   let jsFileName;
-  ['cjs', ''].some((dir) => {
-    const tVer = `${verIn}${dir.length ? '/' : ''}${dir}`;
-    const tJsFileName = `../${tVer}/vexflow-debug-with-tests.js`;
-    if (fs.existsSync(path.resolve(__dirname, tJsFileName))) {
-      ver = tVer;
-      jsFileName = tJsFileName;
-      return true;
-    }
-    return false;
-  });
+  const tJsFileName = `../${verIn}/cjs/vexflow-debug-with-tests.js`;
+  if (fs.existsSync(path.resolve(__dirname, tJsFileName))) {
+    ver = verIn;
+    jsFileName = tJsFileName;
+  }
 
   if (jsFileName) {
     try {
-      global.Vex = require(jsFileName);
-      if (global.Vex) {
-        const { Flow } = global.Vex;
-        if (Flow) {
-          const { Test } = Flow;
-          if (Test && Test.tests && Test.parseJobOptions) {
-            numTests = Test.tests.length;
-            pptrJobs = Math.ceil(numTests / 10);
-          }
+      global.VexFlow = require(jsFileName);
+      if (global.VexFlow) {
+        const { Test } = VexFlow;
+        if (Test && Test.tests && Test.parseJobOptions) {
+          numTests = Test.tests.length;
         }
       }
     } catch (e) {
@@ -133,7 +119,7 @@ const resolveJobsOption = (verIn) => {
 
   return {
     numTests,
-    pptrJobs,
+    pptrJobs: 8,
     ver,
   };
 };
@@ -141,25 +127,22 @@ const resolveJobsOption = (verIn) => {
 const appMain = async () => {
   const options = parseArgs();
   const { childArgs, backends, parallel } = options;
+
   const { numTests, pptrJobs, ver } = resolveJobsOption(childArgs.ver);
   const { imageDir, args } = childArgs;
 
-  console.log(numTests, pptrJobs, ver);
+  const jobs = Math.min(pptrJobs, parallel);
 
   const backendDefs = {
     jsdom: {
-      path: './tools/generate_png_images.js',
-      getArgs: () => {
-        return [`../${ver}`, imageDir].concat(args);
-      },
-      jobs: numTests ? Math.min(pptrJobs, parallel) : 1,
+      path: './tools/generate_images_jsdom.js',
+      args: [`../${ver}`, imageDir].concat(args),
+      jobs,
     },
     pptr: {
       path: './tools/generate_images_pptr.js',
-      getArgs: () => {
-        return [ver, imageDir].concat(args);
-      },
-      jobs: parallel <= 1 ? 1 : pptrJobs,
+      args: [ver, imageDir].concat(args),
+      jobs,
     },
   };
 
@@ -167,10 +150,7 @@ const appMain = async () => {
     const proc = `${key}:${ver}_${backend}_${job}/${jobs}`;
     log(`${proc} start`);
     const backendDef = backendDefs[backend];
-    const child = spawn(
-      childArgs.argv0,
-      [backendDef.path].concat(backendDef.getArgs(), [`--jobs=${jobs}`, `--job=${job}`])
-    );
+    const child = spawn(childArgs.argv0, [backendDef.path].concat(backendDef.args, [`--jobs=${jobs}`, `--job=${job}`]));
     return new Promise((resolve) => {
       child.stdout.on('data', (data) => {
         process.stdout.write(data);
@@ -195,8 +175,8 @@ const appMain = async () => {
         numTests,
         pptrJobs,
         backends,
-        jsdom_jobs: backendDefs.jsdom.jobs,
-        pptr_jobs: backendDefs.pptr.jobs,
+        jsdomNumJobs: backendDefs.jsdom.jobs,
+        pptrNumJobs: backendDefs.pptr.jobs,
       })
     );
 

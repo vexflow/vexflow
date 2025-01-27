@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // Accidental Tests
@@ -9,8 +9,8 @@ import { Accidental } from '../src/accidental';
 import { Beam } from '../src/beam';
 import { Dot } from '../src/dot';
 import { Factory } from '../src/factory';
-import { Flow } from '../src/flow';
 import { Formatter } from '../src/formatter';
+import { Glyphs } from '../src/glyphs';
 import { Modifier } from '../src/modifier';
 import { ModifierContext } from '../src/modifiercontext';
 import { Note } from '../src/note';
@@ -28,14 +28,15 @@ const AccidentalTests = {
     QUnit.module('Accidental');
     QUnit.test('Automatic Accidentals - Simple Tests', autoAccidentalWorking);
     const run = VexFlowTests.runTests;
+    run('Bounding Box', basic, { drawBoundingBox: true });
     run('Accidental Padding', formatAccidentalSpaces);
-    run('Basic', basic);
+    run('Basic', basic, { drawBoundingBox: false });
     run('Stem Down', basicStemDown);
     run('Cautionary Accidental', cautionary);
     run('Accidental Arrangement Special Cases', specialCases);
     run('Multi Voice', multiVoice);
     run('Microtonal', microtonal);
-    run('Microtonal (Iranian)', microtonal_iranian);
+    run('Microtonal (Iranian)', microtonalIranian);
     run('Sagittal', sagittal);
     run('Automatic Accidentals', automaticAccidentals0);
     run('Automatic Accidentals - C major scale in Ab', automaticAccidentals1);
@@ -161,10 +162,13 @@ function formatAccidentalSpaces(options: TestOptions): void {
       keys: ['e##/5'],
       duration: '8d',
     }).addModifier(new Accidental('##'), 0),
+    // test that unisons with different accidentals layout properly with stems down
     new StaveNote({
-      keys: ['b/4'],
+      keys: ['Bb/4', 'Bn/4'],
       duration: '16',
-    }).addModifier(new Accidental('b'), 0),
+    })
+      .addModifier(new Accidental('b'), 0)
+      .addModifier(new Accidental('n'), 0),
     new StaveNote({
       keys: ['f/3'],
       duration: '8',
@@ -201,25 +205,28 @@ function formatAccidentalSpaces(options: TestOptions): void {
       keys: ['g/4'],
       duration: '16',
     }),
+    // test that unisons with different accidentals layout properly with stems up
     new StaveNote({
-      keys: ['d/4'],
+      keys: ['Db/4', 'Dn/4'],
       duration: 'q',
-    }),
+    })
+      .addModifier(new Accidental('b'), 0)
+      .addModifier(new Accidental('n'), 0),
   ];
   Dot.buildAndAttach([notes[0]], { all: true });
   const beams = Beam.generateBeams(notes);
   const voice = new Voice({
-    num_beats: 4,
-    beat_value: 4,
+    numBeats: 4,
+    beatValue: 4,
   });
   voice.addTickables(notes);
   const formatter = new Formatter({ softmaxFactor }).joinVoices([voice]);
   const width = formatter.preCalculateMinTotalWidth([voice]);
   const stave = new Stave(10, 40, width + 20);
-  stave.setContext(context).draw();
+  stave.setContext(context).drawWithStyle();
   formatter.format([voice], width);
   voice.draw(context, stave);
-  beams.forEach((b) => b.setContext(context).draw());
+  beams.forEach((b) => b.setContext(context).drawWithStyle());
 
   notes.forEach((note) => Note.plotMetrics(context, note, 30));
 
@@ -281,32 +288,140 @@ function basic(options: TestOptions): void {
 
   f.draw();
 
+  // Render bounding boxes
+  if (options.params.drawBoundingBox === true) {
+    notes.forEach((note) => {
+      const elements = note.getModifiersByType('Accidental');
+      elements.forEach((element) => VexFlowTests.drawBoundingBox(f.getContext(), element));
+    });
+  }
+
   VexFlowTests.plotLegendForNoteWidth(f.getContext(), 480, 140);
 
   options.assert.ok(true, 'Full Accidental');
 }
 
+function genAccidentals(): string[] {
+  const accs = ['#', '##', 'b', 'bb', 'n', '{', '}', 'db', 'd', '++', '+', '+-'];
+  accs.push('bs', 'bss', 'o', 'k', 'bbs', '++-', 'ashs', 'afhf');
+  // Standard accidentals (12-EDO)
+  for (let u = 0xe260; u <= 0xe269; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Gould arrow quartertone accidentals (24-EDO)
+  for (let u = 0xe270; u <= 0xe27b; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Stein-Zimmermann accidentals (24-EDO)
+  for (let u = 0xe280; u <= 0xe285; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Extended Stein-Zimmermann accidentals
+  for (let u = 0xe290; u <= 0xe29c; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Sims accidentals (72-EDO)
+  for (let u = 0xe2a0; u <= 0xe2a5; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Johnston accidentals (just intonation)
+  for (let u = 0xe2b0; u <= 0xe2b7; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Extended Helmholtz-Ellis accidentals (just intonation)
+  for (let u = 0xe2c0; u <= 0xe2fb; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Spartan Sagittal single-shaft accidentals
+  for (let u = 0xe300; u <= 0xe30f; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Spartan Sagittal multi-shaft accidentals
+  for (let u = 0xe310; u <= 0xe335; u++) {
+    switch (
+      u // exclude unused smufls
+    ) {
+      case 0xe31a:
+      case 0xe31b:
+      case 0xe31e:
+      case 0xe31f:
+        // Exclude unused SMuFL glyphs.
+        break;
+      default:
+        accs.push(String.fromCodePoint(u));
+    }
+  }
+  // Athenian Sagittal extension (medium precision) accidentals
+  for (let u = 0xe340; u <= 0xe367; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Trojan Sagittal extension (12-EDO relative) accidentals
+  for (let u = 0xe370; u <= 0xe387; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Promethean Sagittal extension (high precision) single-shaft accidentals
+  for (let u = 0xe390; u <= 0xe3ad; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Promethean Sagittal extension (high precision) multi-shaft accidentals
+  for (let u = 0xe3b0; u <= 0xe3ef; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Herculean Sagittal extension (very high precision) accidental diacritics
+  for (let u = 0xe3f0; u <= 0xe3f3; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Olympian Sagittal extension (extreme precision) accidental diacritics
+  for (let u = 0xe3f4; u <= 0xe3f7; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Wyschnegradsky accidentals (72-EDO)
+  for (let u = 0xe420; u <= 0xe435; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Arel-Ezgi-Uzdilek (AEU) accidentals
+  for (let u = 0xe440; u <= 0xe447; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Turkish folk music accidentals
+  for (let u = 0xe450; u <= 0xe457; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Persian accidentals
+  for (let u = 0xe460; u <= 0xe461; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  // Other accidentals
+  for (let u = 0xe470; u <= 0xe48f; u++) {
+    accs.push(String.fromCodePoint(u));
+  }
+  return accs;
+}
+
+const accidentals: string[] = genAccidentals();
+
 function cautionary(options: TestOptions): void {
-  const staveCount = 12;
+  const staveCount = 20;
+  const notesPerStave = 22;
   const scale = 0.85;
-  const staveWidth = 840;
+  const staveWidth = 900;
+  const staveHeight = 75;
   let i = 0;
   let j = 0;
-  const f = VexFlowTests.makeFactory(options, staveWidth + 10, 175 * staveCount + 10);
+  const f = VexFlowTests.makeFactory(options, staveWidth + 10, staveHeight * staveCount + 10);
   f.getContext().scale(scale, scale);
 
-  const accids = Object.keys(Flow.accidentalMap).filter((accid) => accid !== '{' && accid !== '}');
-  const mod = Math.round(accids.length / staveCount);
+  const accids = Object.values(accidentals).filter((accid) => accid !== '{' && accid !== '}');
   for (i = 0; i < staveCount; ++i) {
-    const stave = f.Stave({ x: 0, y: 10 + 200 * i, width: staveWidth / scale });
+    const stave = f.Stave({ x: 0, y: 10 + (staveHeight / scale) * i, width: staveWidth / scale });
     const score = f.EasyScore();
     const rowMap = [];
-    for (j = 0; j < mod && j + i * staveCount < accids.length; ++j) {
-      rowMap.push(accids[j + i * staveCount]);
+    for (j = 0; j < notesPerStave && j + i * notesPerStave < accids.length; ++j) {
+      rowMap.push(accids[j + i * notesPerStave]);
     }
     const notes = rowMap.map((accidType: string) =>
       f
-        .StaveNote({ keys: ['a/4'], duration: '4', stem_direction: Stem.UP })
+        .StaveNote({ keys: ['a/4'], duration: '4', stemDirection: Stem.UP })
         .addModifier(f.Accidental({ type: accidType }), 0)
     );
     const voice = score.voice(notes, { time: rowMap.length + '/4' });
@@ -390,12 +505,12 @@ function basicStemDown(options: TestOptions): void {
 
   const notes = [
     f
-      .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], duration: 'w', stem_direction: -1 })
+      .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], duration: 'w', stemDirection: -1 })
       .addModifier(accid('b'), 0)
       .addModifier(accid('#'), 1),
 
     f
-      .StaveNote({ keys: ['d/4', 'e/4', 'f/4', 'a/4', 'c/5', 'e/5', 'g/5'], duration: '2', stem_direction: -1 })
+      .StaveNote({ keys: ['d/4', 'e/4', 'f/4', 'a/4', 'c/5', 'e/5', 'g/5'], duration: '2', stemDirection: -1 })
       .addModifier(accid('##'), 0)
       .addModifier(accid('n'), 1)
       .addModifier(accid('bb'), 2)
@@ -405,7 +520,7 @@ function basicStemDown(options: TestOptions): void {
       .addModifier(accid('bb'), 6),
 
     f
-      .StaveNote({ keys: ['f/4', 'g/4', 'a/4', 'b/4', 'c/5', 'e/5', 'g/5'], duration: '16', stem_direction: -1 })
+      .StaveNote({ keys: ['f/4', 'g/4', 'a/4', 'b/4', 'c/5', 'e/5', 'g/5'], duration: '16', stemDirection: -1 })
       .addModifier(accid('n'), 0)
       .addModifier(accid('#'), 1)
       .addModifier(accid('#'), 2)
@@ -441,8 +556,8 @@ function multiVoice(options: TestOptions): void {
 
     new TickContext().addTickable(note1).addTickable(note2).preFormat().setX(x);
 
-    note1.setContext(ctx).draw();
-    note2.setContext(ctx).draw();
+    note1.setContext(ctx).drawWithStyle();
+    note2.setContext(ctx).drawWithStyle();
 
     Note.plotMetrics(ctx, note1, 180);
     Note.plotMetrics(ctx, note2, 15);
@@ -453,17 +568,17 @@ function multiVoice(options: TestOptions): void {
   const stave = f.Stave({ x: 10, y: 45, width: 420 });
   const ctx = f.getContext();
 
-  stave.draw();
+  stave.drawWithStyle();
 
   let note1 = f
-    .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], duration: '2', stem_direction: -1 })
+    .StaveNote({ keys: ['c/4', 'e/4', 'a/4'], duration: '2', stemDirection: -1 })
     .addModifier(accid('b'), 0)
     .addModifier(accid('n'), 1)
     .addModifier(accid('#'), 2)
     .setStave(stave);
 
   let note2 = f
-    .StaveNote({ keys: ['d/5', 'a/5', 'b/5'], duration: '2', stem_direction: 1 })
+    .StaveNote({ keys: ['d/5', 'a/5', 'b/5'], duration: '2', stemDirection: 1 })
     .addModifier(accid('b'), 0)
     .addModifier(accid('bb'), 1)
     .addModifier(accid('##'), 2)
@@ -472,28 +587,28 @@ function multiVoice(options: TestOptions): void {
   showNotes(note1, note2, stave, ctx, 60);
 
   note1 = f
-    .StaveNote({ keys: ['c/4', 'e/4', 'c/5'], duration: '2', stem_direction: -1 })
+    .StaveNote({ keys: ['c/4', 'e/4', 'c/5'], duration: '2', stemDirection: -1 })
     .addModifier(accid('b'), 0)
     .addModifier(accid('n'), 1)
     .addModifier(accid('#'), 2)
     .setStave(stave);
 
   note2 = f
-    .StaveNote({ keys: ['d/5', 'a/5', 'b/5'], duration: '4', stem_direction: 1 })
+    .StaveNote({ keys: ['d/5', 'a/5', 'b/5'], duration: '4', stemDirection: 1 })
     .addModifier(accid('b'), 0)
     .setStave(stave);
 
   showNotes(note1, note2, stave, ctx, 150);
 
   note1 = f
-    .StaveNote({ keys: ['d/4', 'c/5', 'd/5'], duration: '2', stem_direction: -1 })
+    .StaveNote({ keys: ['d/4', 'c/5', 'd/5'], duration: '2', stemDirection: -1 })
     .addModifier(accid('b'), 0)
     .addModifier(accid('n'), 1)
     .addModifier(accid('#'), 2)
     .setStave(stave);
 
   note2 = f
-    .StaveNote({ keys: ['d/5', 'a/5', 'b/5'], duration: '4', stem_direction: 1 })
+    .StaveNote({ keys: ['d/5', 'a/5', 'b/5'], duration: '4', stemDirection: 1 })
     .addModifier(accid('b'), 0)
     .setStave(stave);
 
@@ -570,7 +685,7 @@ function microtonal(options: TestOptions): void {
   options.assert.ok(true, 'Microtonal Accidental');
 }
 
-function microtonal_iranian(options: TestOptions): void {
+function microtonalIranian(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, 700, 240);
   const accid = makeNewAccid(f);
   const ctx = f.getContext();
@@ -640,56 +755,66 @@ function sagittal(options: TestOptions): void {
   const ctx = f.getContext();
   f.Stave({ x: 10, y: 10, width: 650 });
 
+  // Use these SMUFL glyphs.
+  const {
+    accSagittal11LargeDiesisDown,
+    accSagittal11MediumDiesisUp,
+    accSagittal35LargeDiesisDown,
+    accSagittal5CommaDown,
+    accSagittal7CommaDown,
+    accSagittalFlat7CDown,
+  } = Glyphs;
+
   const notes = [
     f
       .StaveNote({ keys: ['d/4', 'f/4', 'b/4', 'b/4'], duration: '4' })
-      .addModifier(accid('accSagittal11MediumDiesisUp'), 1)
-      .addModifier(accid('accSagittal5CommaDown'), 2)
+      .addModifier(accid(accSagittal11MediumDiesisUp), 1)
+      .addModifier(accid(accSagittal5CommaDown), 2)
       .addModifier(accid('b'), 3)
-      .addModifier(accid('accSagittal7CommaDown'), 3),
+      .addModifier(accid(accSagittal7CommaDown), 3),
 
     f
       .StaveNote({ keys: ['d/4', 'f/4', 'a/4', 'b/4'], duration: '4' })
-      .addModifier(accid('accSagittal35LargeDiesisDown'), 2),
+      .addModifier(accid(accSagittal35LargeDiesisDown), 2),
 
-    f.StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'c/5'], duration: '8' }).addModifier(accid('accSagittal5CommaDown'), 1),
+    f.StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'c/5'], duration: '8' }).addModifier(accid(accSagittal5CommaDown), 1),
 
     f
       .StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'b/4'], duration: '8' })
       .addModifier(accid('b'), 1)
-      .addModifier(accid('accSagittal7CommaDown'), 1)
-      .addModifier(accid('accSagittal11LargeDiesisDown'), 3),
+      .addModifier(accid(accSagittal7CommaDown), 1)
+      .addModifier(accid(accSagittal11LargeDiesisDown), 3),
 
     f
       .StaveNote({ keys: ['d/4', 'f/4', 'b/4', 'b/4'], duration: '4' })
-      .addModifier(accid('accSagittal11MediumDiesisUp'), 1)
-      .addModifier(accid('accSagittal5CommaDown'), 2)
-      .addModifier(accid('accSagittalFlat7CDown'), 3),
+      .addModifier(accid(accSagittal11MediumDiesisUp), 1)
+      .addModifier(accid(accSagittal5CommaDown), 2)
+      .addModifier(accid(accSagittalFlat7CDown), 3),
 
     f
       .StaveNote({ keys: ['d/4', 'f/4', 'a/4', 'b/4'], duration: '4' })
-      .addModifier(accid('accSagittal35LargeDiesisDown'), 2),
+      .addModifier(accid(accSagittal35LargeDiesisDown), 2),
 
-    f.StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'c/5'], duration: '8' }).addModifier(accid('accSagittal5CommaDown'), 1),
+    f.StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'c/5'], duration: '8' }).addModifier(accid(accSagittal5CommaDown), 1),
 
     f
       .StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'b/4'], duration: '8' })
-      .addModifier(accid('accSagittalFlat7CDown'), 1)
-      .addModifier(accid('accSagittal11LargeDiesisDown'), 3),
+      .addModifier(accid(accSagittalFlat7CDown), 1)
+      .addModifier(accid(accSagittal11LargeDiesisDown), 3),
   ];
 
   f.StaveTie({
     from: notes[0],
     to: notes[1],
-    first_indices: [0, 1],
-    last_indices: [0, 1],
+    firstIndexes: [0, 1],
+    lastIndexes: [0, 1],
   });
 
   f.StaveTie({
     from: notes[0],
     to: notes[1],
-    first_indices: [3],
-    last_indices: [3],
+    firstIndexes: [3],
+    lastIndexes: [3],
     options: {
       direction: Stem.DOWN,
     },
@@ -698,15 +823,15 @@ function sagittal(options: TestOptions): void {
   f.StaveTie({
     from: notes[4],
     to: notes[5],
-    first_indices: [0, 1],
-    last_indices: [0, 1],
+    firstIndexes: [0, 1],
+    lastIndexes: [0, 1],
   });
 
   f.StaveTie({
     from: notes[4],
     to: notes[5],
-    first_indices: [3],
-    last_indices: [3],
+    firstIndexes: [3],
+    lastIndexes: [3],
     options: {
       direction: Stem.DOWN,
     },
@@ -720,9 +845,6 @@ function sagittal(options: TestOptions): void {
   notes.forEach((note, index) => {
     Note.plotMetrics(f.getContext(), note, 140);
     options.assert.ok(note.getModifiersByType('Accidental').length > 0, 'Note ' + index + ' has accidentals');
-    note.getModifiersByType('Accidental').forEach((accid: Modifier, index: number) => {
-      options.assert.ok(accid.getWidth() > 0, 'Accidental ' + index + ' has set width');
-    });
   });
 
   f.draw();
@@ -844,14 +966,14 @@ function automaticAccidentalsMultiVoiceInline(options: TestOptions): void {
   const stave = f.Stave().addKeySignature('Ab');
 
   const notes0 = [
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['d/4'], duration: '4', stem_direction: -1 },
-    { keys: ['e/4'], duration: '4', stem_direction: -1 },
-    { keys: ['f/4'], duration: '4', stem_direction: -1 },
-    { keys: ['g/4'], duration: '4', stem_direction: -1 },
-    { keys: ['a/4'], duration: '4', stem_direction: -1 },
-    { keys: ['b/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['d/4'], duration: '4', stemDirection: -1 },
+    { keys: ['e/4'], duration: '4', stemDirection: -1 },
+    { keys: ['f/4'], duration: '4', stemDirection: -1 },
+    { keys: ['g/4'], duration: '4', stemDirection: -1 },
+    { keys: ['a/4'], duration: '4', stemDirection: -1 },
+    { keys: ['b/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
   ].map(f.StaveNote.bind(f));
 
   const notes1 = [
@@ -902,14 +1024,14 @@ function automaticAccidentalsMultiVoiceOffset(options: TestOptions): void {
   const stave = f.Stave().addKeySignature('Cb');
 
   const notes0 = [
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['d/4'], duration: '4', stem_direction: -1 },
-    { keys: ['e/4'], duration: '4', stem_direction: -1 },
-    { keys: ['f/4'], duration: '4', stem_direction: -1 },
-    { keys: ['g/4'], duration: '4', stem_direction: -1 },
-    { keys: ['a/4'], duration: '4', stem_direction: -1 },
-    { keys: ['b/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['d/4'], duration: '4', stemDirection: -1 },
+    { keys: ['e/4'], duration: '4', stemDirection: -1 },
+    { keys: ['f/4'], duration: '4', stemDirection: -1 },
+    { keys: ['g/4'], duration: '4', stemDirection: -1 },
+    { keys: ['a/4'], duration: '4', stemDirection: -1 },
+    { keys: ['b/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
   ].map(f.StaveNote.bind(f));
 
   const notes1 = [
@@ -961,15 +1083,15 @@ function automaticAccidentalsCornerCases1(options: TestOptions): void {
   const stave = f.Stave().addKeySignature('C');
 
   const notes0 = [
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/4'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/4'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
   ].map(f.StaveNote.bind(f));
 
   const voice0 = f.Voice().setMode(Voice.Mode.SOFT).addTickables(notes0);
@@ -998,24 +1120,24 @@ function automaticAccidentalsCornerCases2(options: TestOptions): void {
   const stave = f.Stave().addKeySignature('C');
 
   const notes0 = [
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/4'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/5'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/4'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/4'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/5'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/4'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
   ].map(f.StaveNote.bind(f));
 
   const voice0 = f.Voice().setMode(Voice.Mode.SOFT).addTickables(notes0);
@@ -1053,15 +1175,15 @@ function automaticAccidentalsCornerCases3(options: TestOptions): void {
   const stave = f.Stave().addKeySignature('C#');
 
   const notes0 = [
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/4'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/4'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
   ].map(f.StaveNote.bind(f));
 
   const voice0 = f.Voice().setMode(Voice.Mode.SOFT).addTickables(notes0);
@@ -1090,24 +1212,24 @@ function automaticAccidentalsCornerCases4(options: TestOptions): void {
   const stave = f.Stave().addKeySignature('C#');
 
   const notes0 = [
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c#/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/4'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/5'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/4'], duration: '4', stem_direction: -1 },
-    { keys: ['cb/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
-    { keys: ['c/4'], duration: '4', stem_direction: -1 },
-    { keys: ['c/5'], duration: '4', stem_direction: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c#/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/4'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/5'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/4'], duration: '4', stemDirection: -1 },
+    { keys: ['cb/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
+    { keys: ['c/4'], duration: '4', stemDirection: -1 },
+    { keys: ['c/5'], duration: '4', stemDirection: -1 },
   ].map(f.StaveNote.bind(f));
 
   const voice0 = f.Voice().setMode(Voice.Mode.SOFT).addTickables(notes0);
@@ -1186,9 +1308,6 @@ function factoryAPI(options: TestOptions): void {
 
   notes.forEach((n, i) => {
     options.assert.ok(n.getModifiersByType('Accidental').length > 0, 'Note ' + i + ' has accidentals');
-    n.getModifiersByType('Accidental').forEach((accid: Modifier, i: number) => {
-      options.assert.ok(accid.getWidth() > 0, 'Accidental ' + i + ' has set width');
-    });
   });
 
   f.draw();

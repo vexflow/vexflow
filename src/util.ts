@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 
 // Note: Keep this module free of imports to reduce the chance of circular dependencies.
@@ -64,11 +64,11 @@ function roundN(x: number, n: number): number {
 
 /** Locate the mid point between stave lines. Returns a fractional line if a space. */
 export function midLine(a: number, b: number): number {
-  let mid_line = b + (a - b) / 2;
-  if (mid_line % 2 > 0) {
-    mid_line = roundN(mid_line * 10, 5) / 10;
+  let midLine = b + (a - b) / 2;
+  if (midLine % 2 > 0) {
+    midLine = roundN(midLine * 10, 5) / 10;
   }
-  return mid_line;
+  return midLine;
 }
 
 /**
@@ -77,6 +77,14 @@ export function midLine(a: number, b: number): number {
  */
 export function prefix(text: string): string {
   return `vf-${text}`;
+}
+
+/**
+ * @param s
+ * @returns `s` with the first letter capitalized.
+ */
+export function upperFirst(s: string = ''): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 /**
@@ -96,3 +104,66 @@ export function normalizeAngle(a: number): number {
 export function sumArray(arr: number[]): number {
   return arr.reduce((a, b) => a + b, 0);
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Moved from vex.ts to util.ts.
+
+/**
+ * Take `arr` and return a new array consisting of the sorted, unique'd,
+ * contents of arr. Does not modify `arr`.
+ */
+
+/*
+  static sortAndUnique(arr: any[], cmp: any, eq: any): any[] {
+    if (arr.length > 1) {
+      const newArr = [];
+      let last;
+      arr.sort(cmp);
+
+      for (let i = 0; i < arr.length; ++i) {
+        if (i === 0 || !eq(arr[i], last)) {
+          newArr.push(arr[i]);
+        }
+        last = arr[i];
+      }
+
+      return newArr;
+    } else {
+      return [].concat(arr); // 
+    }
+  }
+  */
+
+// Get the 2D Canvas context from DOM element with id `canvasId`.
+/*
+  static getCanvasContext(canvasId: string): RenderingContext {
+    if (!canvasId) {
+      throw new RuntimeError('BadArgument', 'Invalid canvas selector: ' + canvasId);
+    }
+
+    const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+    if (!(canvas && canvas.getContext)) {
+      throw new RuntimeError('UnsupportedBrowserError', 'This browser does not support HTML5 Canvas');
+    }
+
+    return canvas.getContext('2d') as RenderingContext;
+  }
+  */
+
+/** Benchmark. Run function `f` once and report time elapsed shifted by `s` milliseconds. */
+/*
+  static benchmark(s: any, f: any): void {
+    const startTime = new Date().getTime();
+    f();
+    const elapsed = new Date().getTime() - startTime;
+    log(s, elapsed + 'ms');
+  }
+  */
+
+// Get stack trace.
+/*
+  static stackTrace(): string | undefined {
+    const err = new Error();
+    return err.stack;
+  }
+  */

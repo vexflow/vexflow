@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
+const { exit } = require('process');
 
 const { argv } = process;
 
@@ -41,6 +42,7 @@ const options = {
   IMAGE_OUTPUT_DIR: argv[3],
   TIMEOUT: 60 * 1000, // 60 seconds.
 };
+
 const args = process.argv.slice(4);
 // console.log(args);
 args.forEach((str) => {
@@ -96,7 +98,7 @@ const savePNGData = (filename, pngDataURL) => {
 };
 
 const launch = async (query, jobInfo) => {
-  const browser = await puppeteer.launch({ headless: "new", devtools: false });
+  const browser = await puppeteer.launch({ headless: 'new', devtools: false });
   const page = await browser.newPage();
   page.on('error', (msg) => {
     jobLog(msg, 'error', jobInfo);
@@ -106,10 +108,16 @@ const launch = async (query, jobInfo) => {
     jobLog(msg.toString(), 'pageerror', jobInfo);
     process.exit(1);
   });
+  // This is useful during development.
+  // page.on('console', (message) => {
+  //   console.log(`  >> ${message.text()}`);
+  // });
+
   await page.goto('file://' + path.join(process.cwd(), `tests/flow.html${query ? query : ''}`)).catch((error) => {
     log(error);
     process.exit(3);
   });
+
   return {
     browser,
     page,
@@ -196,7 +204,7 @@ const launchTestPage = async (jobs, job) => {
 
     const doIt = async (elmDef) => {
       result = 'error';
-      const filename = `${options.IMAGE_OUTPUT_DIR}/pptr-${elmDef.nameStr}`;
+      const filename = `${options.IMAGE_OUTPUT_DIR}/${elmDef.nameStr}`;
       try {
         let data;
         const { type } = elmDef;
@@ -270,7 +278,7 @@ const launchTestPage = async (jobs, job) => {
 
       if (!data.includes('completed in')) {
         progress(`${job}/${jobs}: ${data}`);
-        page.waitForTimeout(200);
+        //page.waitForTimeout(200);
       } else {
         progress(`${job}/${jobs}: ${data}`);
         const ret = await genImages();

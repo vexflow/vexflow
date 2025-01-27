@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // Curve Tests
@@ -15,6 +15,8 @@ const CurveTests = {
     QUnit.module('Curve');
     const run = VexFlowTests.runTests;
     run('Simple Curve', simple);
+    run('Opening Direction - up', openingDirUp);
+    run('Opening Direction - down', openingDirDown);
     run('Rounded Curve', rounded);
     run('Thick Thin Curves', thickThin);
     run('Top Curve', top);
@@ -79,6 +81,50 @@ const simple = createTest(
           { x: 0, y: 20 },
         ],
       },
+    }).setStyle({ lineDash: '10 10' });
+  }
+);
+
+const openingDirUp = createTest(
+  ['c4/8, f5, d5, g5', { stem: 'up' }], // beamGroup1
+  ['d6/8, f5, d5, g5', { stem: 'down' }], // beamGroup2
+  (f, notes) => {
+    f.Curve({
+      from: notes[0],
+      to: notes[3],
+      options: {
+        openingDirection: 'up',
+      },
+    });
+
+    f.Curve({
+      from: notes[4],
+      to: notes[7],
+      options: {
+        openingDirection: 'up',
+      },
+    });
+  }
+);
+
+const openingDirDown = createTest(
+  ['c4/8, f5, d5, g5', { stem: 'up' }], // beamGroup1
+  ['d6/8, f5, d5, g5', { stem: 'down' }], // beamGroup2
+  (f, notes) => {
+    f.Curve({
+      from: notes[0],
+      to: notes[3],
+      options: {
+        openingDirection: 'down',
+      },
+    });
+
+    f.Curve({
+      from: notes[4],
+      to: notes[7],
+      options: {
+        openingDirection: 'down',
+      },
     });
   }
 );
@@ -91,8 +137,8 @@ const rounded = createTest(
       from: notes[0],
       to: notes[3],
       options: {
-        x_shift: -10,
-        y_shift: 30,
+        xShift: -10,
+        yShift: 30,
         cps: [
           { x: 0, y: 20 },
           { x: 0, y: 50 },
@@ -109,7 +155,7 @@ const rounded = createTest(
           { x: 0, y: 50 },
         ],
       },
-    });
+    }).setStyle({ lineDash: '20' });
   }
 );
 
@@ -122,8 +168,8 @@ const thickThin = createTest(
       to: notes[3],
       options: {
         thickness: 10,
-        x_shift: -10,
-        y_shift: 30,
+        xShift: -10,
+        yShift: 30,
         cps: [
           { x: 0, y: 20 },
           { x: 0, y: 50 },
@@ -153,10 +199,10 @@ const top = createTest(
       from: notes[0],
       to: notes[7],
       options: {
-        x_shift: -3,
-        y_shift: 10,
+        xShift: -3,
+        yShift: 10,
         position: CurvePosition.NEAR_TOP,
-        position_end: CurvePosition.NEAR_HEAD,
+        positionEnd: CurvePosition.NEAR_HEAD,
         cps: [
           { x: 0, y: 20 },
           { x: 40, y: 80 },

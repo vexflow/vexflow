@@ -1,6 +1,6 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
-// Author: Balazs Forian-Szabo
+// @author Balazs Forian-Szabo
 //
 // VibratoBracket Tests
 
@@ -51,7 +51,7 @@ const withoutEndNote = createTest('c4/4, c4, c4, c4', (factory, notes) => {
   factory.VibratoBracket({
     from: notes[2] as Note,
     to: null,
-    options: { line: 2, harsh: true },
+    options: { line: 2, code: 0xeae2 },
   });
 });
 
@@ -59,7 +59,7 @@ const withoutStartNote = createTest('c4/4, c4, c4, c4', (factory, notes) => {
   factory.VibratoBracket({
     from: null,
     to: notes[2] as Note,
-    options: { line: 2, harsh: true },
+    options: { line: 2, code: 0xeae2 },
   });
 });
 

@@ -1,0 +1,122 @@
+<!--
+To view this page, you need to run a local web server from vexflow/ source root directory.
+Otherwise, font loading will be blocked by CORS policy.
+  npx http-server -p 8080
+  Navigate to:
+    http://127.0.0.1:8080/demos/node/font-load-1.html
+Summary:
+  This demo does not use the VexFlow library.
+  It demonstrates the basic idea of preloading font files and declaring CSS @font-face rules.
+-->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="preload" href="../../node_modules/@vexflow-fonts/academico/academico.woff2" as="font" crossorigin />
+    <link rel="preload" href="../../node_modules/@vexflow-fonts/bravura/bravura.otf" as="font" crossorigin />
+    <link rel="preload" href="../../node_modules/@vexflow-fonts/petaluma/petaluma.woff2" as="font" crossorigin />
+    <link
+      rel="preload"
+      href="../../node_modules/@vexflow-fonts/petalumascript/petalumascript.otf"
+      as="font"
+      crossorigin
+    />
+    <style>
+      html {
+        font-family: sans-serif;
+        font-size: 18px;
+        background-color: #222;
+        color: #ddd;
+        margin: 20px;
+      }
+
+      @font-face {
+        font-family: 'Academico';
+        font-style: normal;
+        font-display: swap;
+        src: url(../../node_modules/@vexflow-fonts/academico/academico.woff2) format('woff2');
+      }
+
+      @font-face {
+        font-family: 'Bravura';
+        font-style: normal;
+        font-display: block;
+        font-weight: 400;
+        src: url(../../node_modules/@vexflow-fonts/bravura/bravura.otf) format('woff2');
+      }
+
+      @font-face {
+        font-family: 'Petaluma';
+        font-style: normal;
+        font-display: block;
+        font-weight: 400;
+        src: url(../../node_modules/@vexflow-fonts/petaluma/petaluma.woff2) format('woff2');
+      }
+
+      @font-face {
+        font-family: 'Petaluma Script';
+        font-style: normal;
+        font-display: swap;
+        font-weight: 400;
+        src: url(../../node_modules/@vexflow-fonts/petalumascript/petalumascript.otf) format('woff2');
+      }
+
+      img,
+      canvas {
+        border: 1px solid #666;
+        width: 600px;
+        height: 400px;
+        background-color: #fff;
+      }
+
+      div {
+        font-family: Bravura, 'Petaluma Script';
+        font-size: 60px;
+        color: #333;
+        border: 1px solid #666;
+        width: 600px;
+        background-color: #fff;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+    </style>
+  </head>
+  <body>
+    <p>CANVAS</p>
+    <canvas width="1200" height="800"></canvas>
+    <p>CANVAS → IMG</p>
+    <img />
+    <p>DIV</p>
+    <div>
+      &#xE560; &#xE1D7; &#xE050; &#xE062; &#xE080; &#xE081; &#xE082; &#xE083; &#xE084; &#xE08A; &#xE08B; &#xE1D2;
+      &#xE1D3; &#xE1D4; &#xE1D5; &#xE1D6; &#xE1D7; &#xE1D8; &#xE1D9; &#xE1DA; &#xE1DB; &#xE1DC; &#xE1DD; &#xE1DE;
+      &#xE1DF; &#xE1E0; &#xE1E1; &#xE1E2; &#xE1E7; &#xE260; &#xE261; &#xE262; &#xE263; &#xE264; &#xE245; &#xE269;
+      &#xE002; &#xE0A2; &#xE1F6; &#xE014; &#xE030; &#xE032; &#xE1FE; &#xE1FF; &#xE200; &#xE201; &#xE202; &#xE203; Hello
+      World
+    </div>
+    <script type="module">
+      // Only proceed after all fonts have loaded.
+      const fontFaceSet = await document.fonts.ready;
+      const canvas = document.querySelector('canvas');
+      const ctx = canvas.getContext('2d');
+      const musicSymbols = '\ue050 \ue062'; // treble clef and bass clef
+      let x = 20;
+      let y = 150;
+      ctx.font = '100px Bravura';
+      ctx.fillText(musicSymbols, x, y);
+      y += 180;
+      ctx.font = '60px Academico';
+      ctx.fillText('This is Academico.', x, y);
+      y += 180;
+      ctx.font = '100px Petaluma';
+      ctx.fillText(musicSymbols, x, y);
+      y += 180;
+      ctx.font = '60px Petaluma Script';
+      ctx.fillText('This is Petaluma Script.', x, y);
+
+      // render the canvas's contents to an IMG tag.
+      const img = document.querySelector('img');
+      img.src = canvas.toDataURL();
+    </script>
+  </body>
+</html>

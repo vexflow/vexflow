@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // Beam Tests
@@ -11,7 +11,6 @@ import {
   AnnotationVerticalJustify,
   Beam,
   Dot,
-  Font,
   FontStyle,
   FontWeight,
   StaveNoteStruct,
@@ -20,6 +19,8 @@ import {
   TabNoteStruct,
   Voice,
 } from '../src/index';
+
+import { Metrics } from '../src/metrics';
 
 const BeamTests = {
   Start(): void {
@@ -503,7 +504,7 @@ function tabBeamsUp(options: TestOptions): void {
 
   const notes = specs.map((struct) => {
     const tabNote = f.TabNote(struct);
-    tabNote.render_options.draw_stem = true;
+    tabNote.renderOptions.drawStem = true;
     return tabNote;
   });
 
@@ -522,11 +523,11 @@ function tabBeamsUp(options: TestOptions): void {
 
 function tabBeamsDown(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, 600, 250);
-  const stave = f.TabStave({ options: { num_lines: 10 } });
+  const stave = f.TabStave({ options: { numLines: 10 } });
 
   const specs: TabNoteStruct[] = [
     {
-      stem_direction: -1,
+      stemDirection: -1,
       positions: [
         { str: 3, fret: 6 },
         { str: 4, fret: 25 },
@@ -534,7 +535,7 @@ function tabBeamsDown(options: TestOptions): void {
       duration: '4',
     },
     {
-      stem_direction: -1,
+      stemDirection: -1,
       positions: [
         { str: 2, fret: 10 },
         { str: 5, fret: 12 },
@@ -542,7 +543,7 @@ function tabBeamsDown(options: TestOptions): void {
       duration: '8dd',
     },
     {
-      stem_direction: -1,
+      stemDirection: -1,
       positions: [
         { str: 1, fret: 6 },
         { str: 4, fret: 5 },
@@ -550,7 +551,7 @@ function tabBeamsDown(options: TestOptions): void {
       duration: '8',
     },
     {
-      stem_direction: -1,
+      stemDirection: -1,
       positions: [
         { str: 1, fret: 6 },
         { str: 4, fret: 5 },
@@ -558,7 +559,7 @@ function tabBeamsDown(options: TestOptions): void {
       duration: '16',
     },
     {
-      stem_direction: -1,
+      stemDirection: -1,
       positions: [
         { str: 1, fret: 6 },
         { str: 4, fret: 5 },
@@ -566,7 +567,7 @@ function tabBeamsDown(options: TestOptions): void {
       duration: '32',
     },
     {
-      stem_direction: -1,
+      stemDirection: -1,
       positions: [
         { str: 1, fret: 6 },
         { str: 4, fret: 5 },
@@ -574,26 +575,26 @@ function tabBeamsDown(options: TestOptions): void {
       duration: '64',
     },
     {
-      stem_direction: -1,
+      stemDirection: -1,
       positions: [
         { str: 1, fret: 6 },
         { str: 4, fret: 5 },
       ],
       duration: '128',
     },
-    { stem_direction: -1, positions: [{ str: 1, fret: 6 }], duration: '8' },
-    { stem_direction: -1, positions: [{ str: 1, fret: 6 }], duration: '8' },
-    { stem_direction: -1, positions: [{ str: 1, fret: 6 }], duration: '8' },
-    { stem_direction: -1, positions: [{ str: 7, fret: 6 }], duration: '8' },
-    { stem_direction: -1, positions: [{ str: 7, fret: 6 }], duration: '8' },
-    { stem_direction: -1, positions: [{ str: 10, fret: 6 }], duration: '8' },
-    { stem_direction: -1, positions: [{ str: 10, fret: 6 }], duration: '8' },
+    { stemDirection: -1, positions: [{ str: 1, fret: 6 }], duration: '8' },
+    { stemDirection: -1, positions: [{ str: 1, fret: 6 }], duration: '8' },
+    { stemDirection: -1, positions: [{ str: 1, fret: 6 }], duration: '8' },
+    { stemDirection: -1, positions: [{ str: 7, fret: 6 }], duration: '8' },
+    { stemDirection: -1, positions: [{ str: 7, fret: 6 }], duration: '8' },
+    { stemDirection: -1, positions: [{ str: 10, fret: 6 }], duration: '8' },
+    { stemDirection: -1, positions: [{ str: 10, fret: 6 }], duration: '8' },
   ];
 
   const notes = specs.map((struct) => {
     const tabNote = f.TabNote(struct);
-    tabNote.render_options.draw_stem = true;
-    tabNote.render_options.draw_dots = true;
+    tabNote.renderOptions.drawStem = true;
+    tabNote.renderOptions.drawDots = true;
     return tabNote;
   });
 
@@ -659,8 +660,8 @@ function autoTabBeams(options: TestOptions): void {
 
   const notes = specs.map((struct) => {
     const tabNote = f.TabNote(struct);
-    tabNote.render_options.draw_stem = true;
-    tabNote.render_options.draw_dots = true;
+    tabNote.renderOptions.drawStem = true;
+    tabNote.renderOptions.drawDots = true;
     return tabNote;
   });
 
@@ -671,12 +672,12 @@ function autoTabBeams(options: TestOptions): void {
 
   f.draw();
 
-  beams.forEach((beam) => beam.setContext(f.getContext()).draw());
+  beams.forEach((beam) => beam.setContext(f.getContext()).drawWithStyle());
 
   options.assert.ok(true, 'All objects have been drawn');
 }
 
-// This tests makes sure the auto_stem functionality is works.
+// This tests makes sure the autoStem functionality is works.
 // TabNote stems within a beam group should end up normalized
 function tabBeamsAutoStem(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, 600, 300);
@@ -689,7 +690,7 @@ function tabBeamsAutoStem(options: TestOptions): void {
         { str: 4, fret: 5 },
       ],
       duration: '8',
-      stem_direction: -1,
+      stemDirection: -1,
     },
     {
       positions: [
@@ -697,7 +698,7 @@ function tabBeamsAutoStem(options: TestOptions): void {
         { str: 4, fret: 5 },
       ],
       duration: '8',
-      stem_direction: 1,
+      stemDirection: 1,
     },
     {
       positions: [
@@ -705,7 +706,7 @@ function tabBeamsAutoStem(options: TestOptions): void {
         { str: 4, fret: 5 },
       ],
       duration: '16',
-      stem_direction: -1,
+      stemDirection: -1,
     },
     {
       positions: [
@@ -713,22 +714,22 @@ function tabBeamsAutoStem(options: TestOptions): void {
         { str: 4, fret: 5 },
       ],
       duration: '16',
-      stem_direction: 1,
+      stemDirection: 1,
     },
-    { positions: [{ str: 1, fret: 6 }], duration: '32', stem_direction: 1 },
-    { positions: [{ str: 1, fret: 6 }], duration: '32', stem_direction: -1 },
-    { positions: [{ str: 1, fret: 6 }], duration: '32', stem_direction: -1 },
-    { positions: [{ str: 6, fret: 6 }], duration: '32', stem_direction: -1 },
-    { positions: [{ str: 6, fret: 6 }], duration: '16', stem_direction: 1 },
-    { positions: [{ str: 6, fret: 6 }], duration: '16', stem_direction: 1 },
-    { positions: [{ str: 6, fret: 6 }], duration: '16', stem_direction: 1 },
-    { positions: [{ str: 6, fret: 6 }], duration: '16', stem_direction: -1 },
+    { positions: [{ str: 1, fret: 6 }], duration: '32', stemDirection: 1 },
+    { positions: [{ str: 1, fret: 6 }], duration: '32', stemDirection: -1 },
+    { positions: [{ str: 1, fret: 6 }], duration: '32', stemDirection: -1 },
+    { positions: [{ str: 6, fret: 6 }], duration: '32', stemDirection: -1 },
+    { positions: [{ str: 6, fret: 6 }], duration: '16', stemDirection: 1 },
+    { positions: [{ str: 6, fret: 6 }], duration: '16', stemDirection: 1 },
+    { positions: [{ str: 6, fret: 6 }], duration: '16', stemDirection: 1 },
+    { positions: [{ str: 6, fret: 6 }], duration: '16', stemDirection: -1 },
   ];
 
   const notes = specs.map((struct) => {
     const tabNote = f.TabNote(struct);
-    tabNote.render_options.draw_stem = true;
-    tabNote.render_options.draw_dots = true;
+    tabNote.renderOptions.drawStem = true;
+    tabNote.renderOptions.drawDots = true;
     return tabNote;
   });
 
@@ -751,27 +752,27 @@ function complexWithAnnotation(options: TestOptions): void {
   const stave = factory.Stave({ y: 40 });
 
   const s1: StaveNoteStruct[] = [
-    { keys: ['e/4'], duration: '128', stem_direction: 1 },
-    { keys: ['d/4'], duration: '16', stem_direction: 1 },
-    { keys: ['e/4'], duration: '8', stem_direction: 1 },
-    { keys: ['c/4', 'g/4'], duration: '32', stem_direction: 1 },
-    { keys: ['c/4'], duration: '32', stem_direction: 1 },
-    { keys: ['c/4'], duration: '32', stem_direction: 1 },
-    { keys: ['c/4'], duration: '32', stem_direction: 1 },
+    { keys: ['e/4'], duration: '128', stemDirection: 1 },
+    { keys: ['d/4'], duration: '16', stemDirection: 1 },
+    { keys: ['e/4'], duration: '8', stemDirection: 1 },
+    { keys: ['c/4', 'g/4'], duration: '32', stemDirection: 1 },
+    { keys: ['c/4'], duration: '32', stemDirection: 1 },
+    { keys: ['c/4'], duration: '32', stemDirection: 1 },
+    { keys: ['c/4'], duration: '32', stemDirection: 1 },
   ];
 
   const s2: StaveNoteStruct[] = [
-    { keys: ['e/5'], duration: '128', stem_direction: -1 },
-    { keys: ['d/5'], duration: '16', stem_direction: -1 },
-    { keys: ['e/5'], duration: '8', stem_direction: -1 },
-    { keys: ['c/5', 'g/5'], duration: '32', stem_direction: -1 },
-    { keys: ['c/5'], duration: '32', stem_direction: -1 },
-    { keys: ['c/5'], duration: '32', stem_direction: -1 },
-    { keys: ['c/5'], duration: '32', stem_direction: -1 },
+    { keys: ['e/5'], duration: '128', stemDirection: -1 },
+    { keys: ['d/5'], duration: '16', stemDirection: -1 },
+    { keys: ['e/5'], duration: '8', stemDirection: -1 },
+    { keys: ['c/5', 'g/5'], duration: '32', stemDirection: -1 },
+    { keys: ['c/5'], duration: '32', stemDirection: -1 },
+    { keys: ['c/5'], duration: '32', stemDirection: -1 },
+    { keys: ['c/5'], duration: '32', stemDirection: -1 },
   ];
 
   const font = {
-    family: Font.SERIF,
+    family: Metrics.get('Annotation.fontFamily'),
     size: 14,
     weight: FontWeight.BOLD,
     style: FontStyle.ITALIC,
@@ -806,23 +807,23 @@ function complexWithArticulation(options: TestOptions): void {
   const stave = f.Stave({ y: 40 });
 
   const s1: StaveNoteStruct[] = [
-    { keys: ['e/4'], duration: '128', stem_direction: 1 },
-    { keys: ['d/4'], duration: '16', stem_direction: 1 },
-    { keys: ['e/4'], duration: '8', stem_direction: 1 },
-    { keys: ['c/4', 'g/4'], duration: '32', stem_direction: 1 },
-    { keys: ['c/4'], duration: '32', stem_direction: 1 },
-    { keys: ['c/4'], duration: '32', stem_direction: 1 },
-    { keys: ['c/4'], duration: '32', stem_direction: 1 },
+    { keys: ['e/4'], duration: '128', stemDirection: 1 },
+    { keys: ['d/4'], duration: '16', stemDirection: 1 },
+    { keys: ['e/4'], duration: '8', stemDirection: 1 },
+    { keys: ['c/4', 'g/4'], duration: '32', stemDirection: 1 },
+    { keys: ['c/4'], duration: '32', stemDirection: 1 },
+    { keys: ['c/4'], duration: '32', stemDirection: 1 },
+    { keys: ['c/4'], duration: '32', stemDirection: 1 },
   ];
 
   const s2: StaveNoteStruct[] = [
-    { keys: ['e/5'], duration: '128', stem_direction: -1 },
-    { keys: ['d/5'], duration: '16', stem_direction: -1 },
-    { keys: ['e/5'], duration: '8', stem_direction: -1 },
-    { keys: ['c/5', 'g/5'], duration: '32', stem_direction: -1 },
-    { keys: ['c/5'], duration: '32', stem_direction: -1 },
-    { keys: ['c/5'], duration: '32', stem_direction: -1 },
-    { keys: ['c/5'], duration: '32', stem_direction: -1 },
+    { keys: ['e/5'], duration: '128', stemDirection: -1 },
+    { keys: ['d/5'], duration: '16', stemDirection: -1 },
+    { keys: ['e/5'], duration: '8', stemDirection: -1 },
+    { keys: ['c/5', 'g/5'], duration: '32', stemDirection: -1 },
+    { keys: ['c/5'], duration: '32', stemDirection: -1 },
+    { keys: ['c/5'], duration: '32', stemDirection: -1 },
+    { keys: ['c/5'], duration: '32', stemDirection: -1 },
   ];
 
   const notes1 = s1.map((struct) =>
@@ -849,23 +850,23 @@ function complexWithArticulation2(options: TestOptions): void {
   const system = f.System();
 
   const s1: StaveNoteStruct[] = [
-    { keys: ['e/4'], duration: '128', stem_direction: 1 },
-    { keys: ['d/4'], duration: '16', stem_direction: 1 },
-    { keys: ['e/4'], duration: '8', stem_direction: 1 },
-    { keys: ['c/4', 'g/4'], duration: '32', stem_direction: 1 },
-    { keys: ['c/4'], duration: '32', stem_direction: 1 },
-    { keys: ['c/4'], duration: '32', stem_direction: 1 },
-    { keys: ['c/4'], duration: '32', stem_direction: 1 },
+    { keys: ['e/4'], duration: '128', stemDirection: 1 },
+    { keys: ['d/4'], duration: '16', stemDirection: 1 },
+    { keys: ['e/4'], duration: '8', stemDirection: 1 },
+    { keys: ['c/4', 'g/4'], duration: '32', stemDirection: 1 },
+    { keys: ['c/4'], duration: '32', stemDirection: 1 },
+    { keys: ['c/4'], duration: '32', stemDirection: 1 },
+    { keys: ['c/4'], duration: '32', stemDirection: 1 },
   ];
 
   const s2: StaveNoteStruct[] = [
-    { keys: ['e/5'], duration: '128', stem_direction: -1 },
-    { keys: ['d/5'], duration: '16', stem_direction: -1 },
-    { keys: ['e/5'], duration: '8', stem_direction: -1 },
-    { keys: ['c/5', 'g/5'], duration: '32', stem_direction: -1 },
-    { keys: ['c/5'], duration: '32', stem_direction: -1 },
-    { keys: ['c/5'], duration: '32', stem_direction: -1 },
-    { keys: ['c/5'], duration: '32', stem_direction: -1 },
+    { keys: ['e/5'], duration: '128', stemDirection: -1 },
+    { keys: ['d/5'], duration: '16', stemDirection: -1 },
+    { keys: ['e/5'], duration: '8', stemDirection: -1 },
+    { keys: ['c/5', 'g/5'], duration: '32', stemDirection: -1 },
+    { keys: ['c/5'], duration: '32', stemDirection: -1 },
+    { keys: ['c/5'], duration: '32', stemDirection: -1 },
+    { keys: ['c/5'], duration: '32', stemDirection: -1 },
   ];
 
   const notes1 = s1.map((struct) =>

@@ -1,11 +1,19 @@
-// node customcontext.js
+// Summary: A custom VexFlow.RenderContext implementation.
+//   This is a stub for demonstration purposes. It prints method calls and arguments via console.log().
+// Run:
+//   node customcontext.js
 
 const Vex = require('vexflow');
+const { createCanvas } = require('canvas');
 
-const VF = Vex.Flow;
+const VF = VexFlow;
 
-// A custom Vex.Flow.RenderContext implementation.
-// This is just a stub for demonstration purposes that console.logs method calls and arguments.
+// In VexFlow 4, this demo worked fine without the line of code below.
+// VexFlow 5 requires a hidden canvas for measuring font glyphs.
+// Call VexFlow.Element.setTextMeasurementCanvas(...) with an object that conforms to the Canvas API.
+// Here, we use node-canvas.
+VF.Element.setTextMeasurementCanvas(createCanvas(300, 150));
+
 class CustomContext extends VF.RenderContext {
   constructor() {
     super();
@@ -186,4 +194,4 @@ context.setFont('Arial', 10).setBackgroundFillStyle('#eed');
 const stave = new VF.Stave(10, 40, 400);
 stave.addClef('treble');
 stave.addTimeSignature('4/4');
-stave.setContext(context).draw();
+stave.setContext(context).drawWithStyle();

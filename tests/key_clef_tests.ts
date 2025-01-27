@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // Clef Key Signature Tests
@@ -6,7 +6,8 @@
 
 import { MAJOR_KEYS, MINOR_KEYS, TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
-import { Glyph } from '../src/glyph';
+import { Element } from '../src/element';
+import { Glyphs } from '../src/glyphs';
 import { KeySignature } from '../src/keysignature';
 import { ContextBuilder } from '../src/renderer';
 import { Stave } from '../src/stave';
@@ -23,12 +24,11 @@ const ClefKeySignatureTests = {
 };
 
 const fontWidths = () => {
-  const glyphScale = 39; // default font scale
-  const sharpWidth = Glyph.getWidth('accidentalSharp', glyphScale) + 1;
-  const flatWidth = Glyph.getWidth('accidentalFlat', glyphScale) + 1;
+  const sharpWidth = Element.measureWidth(Glyphs.accidentalSharp) + 1;
+  const flatWidth = Element.measureWidth(Glyphs.accidentalFlat) + 1;
   const ksPadding = 10; // hard-coded in keysignature.ts
-  const naturalWidth = Glyph.getWidth('accidentalNatural', glyphScale) + 2;
-  const clefWidth = Glyph.getWidth('gClef', glyphScale); // widest clef
+  const naturalWidth = Element.measureWidth(Glyphs.accidentalNatural) + 2;
+  const clefWidth = Element.measureWidth(Glyphs.gClef); // widest clef
   return { sharpWidth, flatWidth, naturalWidth, clefWidth, ksPadding };
 };
 
@@ -87,9 +87,9 @@ function keys(options: TestOptions, contextBuilder: ContextBuilder): void {
 
   for (i = 0; i < clefs.length; i++) {
     staves[i].setContext(ctx);
-    staves[i].draw();
+    staves[i].drawWithStyle();
     staves[i + clefs.length].setContext(ctx);
-    staves[i + clefs.length].draw();
+    staves[i + clefs.length].drawWithStyle();
   }
   options.assert.ok(true, 'all pass');
 }
@@ -123,13 +123,13 @@ function staveHelper(options: TestOptions, contextBuilder: ContextBuilder): void
   }
 
   stave1.setContext(ctx);
-  stave1.draw();
+  stave1.drawWithStyle();
   stave2.setContext(ctx);
-  stave2.draw();
+  stave2.drawWithStyle();
   stave3.setContext(ctx);
-  stave3.draw();
+  stave3.drawWithStyle();
   stave4.setContext(ctx);
-  stave4.draw();
+  stave4.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }

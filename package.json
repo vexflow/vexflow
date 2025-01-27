@@ -1,6 +1,6 @@
 {
-  "name": "vexflow4",
-  "version": "4.2.6",
+  "name": "vexflow",
+  "version": "5.0.0-beta.0",
   "description": "A JavaScript library for rendering music notation and guitar tablature.",
   "exports": {
     ".": {
@@ -8,50 +8,15 @@
       "require": "./build/cjs/vexflow.js",
       "import": "./build/esm/entry/vexflow.js"
     },
-    "./bravura": {
-      "types": "./build/types/entry/vexflow-bravura.d.ts",
-      "require": "./build/cjs/vexflow-bravura.js",
-      "import": "./build/esm/entry/vexflow-bravura.js"
-    },
-    "./gonville": {
-      "types": "./build/types/entry/vexflow-gonville.d.ts",
-      "require": "./build/cjs/vexflow-gonville.js",
-      "import": "./build/esm/entry/vexflow-gonville.js"
-    },
-    "./leland": {
-      "types": "./build/types/entry/vexflow-leland.d.ts",
-      "require": "./build/cjs/vexflow-leland.js",
-      "import": "./build/esm/entry/vexflow-leland.js"
-    },
-    "./petaluma": {
-      "types": "./build/types/entry/vexflow-petaluma.d.ts",
-      "require": "./build/cjs/vexflow-petaluma.js",
-      "import": "./build/esm/entry/vexflow-petaluma.js"
-    },
     "./core": {
       "types": "./build/types/entry/vexflow-core.d.ts",
       "require": "./build/cjs/vexflow-core.js",
       "import": "./build/esm/entry/vexflow-core.js"
     },
-    "./font/bravura": {
-      "types": "./build/types/entry/vexflow-font-bravura.d.ts",
-      "require": "./build/cjs/vexflow-font-bravura.js",
-      "import": "./build/esm/entry/vexflow-font-bravura.js"
-    },
-    "./font/gonville": {
-      "types": "./build/types/entry/vexflow-font-gonville.d.ts",
-      "require": "./build/cjs/vexflow-font-gonville.js",
-      "import": "./build/esm/entry/vexflow-font-gonville.js"
-    },
-    "./font/petaluma": {
-      "types": "./build/types/entry/vexflow-font-petaluma.d.ts",
-      "require": "./build/cjs/vexflow-font-petaluma.js",
-      "import": "./build/esm/entry/vexflow-font-petaluma.js"
-    },
-    "./font/custom": {
-      "types": "./build/types/entry/vexflow-font-custom.d.ts",
-      "require": "./build/cjs/vexflow-font-custom.js",
-      "import": "./build/esm/entry/vexflow-font-custom.js"
+    "./bravura": {
+      "types": "./build/types/entry/vexflow-bravura.d.ts",
+      "require": "./build/cjs/vexflow-bravura.js",
+      "import": "./build/esm/entry/vexflow-bravura.js"
     }
   },
   "main": "./build/cjs/vexflow.js",
@@ -62,69 +27,93 @@
   "jsdelivr": "./build/cjs/vexflow.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/0xfe/vexflow.git"
+    "url": "https://github.com/vexflow/vexflow.git"
   },
   "author": {
-    "name": "Mohit Muthanna Cheppudira",
+    "name": "VexFlow Authors",
     "email": "mohit@muthanna.com",
-    "url": "https://muthanna.com/"
+    "url": "https://github.com/vexflow/vexflow/"
   },
   "license": "MIT",
   "files": [
     "build",
-    "src",
-    "entry",
     "tests/flow.html",
     "tests/flow.css",
     "tests/qunit/qunit.css",
     "tests/qunit/qunit.js",
-    "releases/vexflow-min.js",
-    "releases/vexflow-debug.js",
     "AUTHORS.md"
   ],
   "bugs": {
-    "url": "https://github.com/0xfe/vexflow/issues"
+    "url": "https://github.com/vexflow/vexflow/issues"
   },
   "devDependencies": {
-    "@types/qunit": "^2.19.5",
-    "@types/node": "^18.16.3",
-    "@typescript-eslint/eslint-plugin": "^5.59.2",
-    "@typescript-eslint/parser": "^5.59.2",
+    "@eslint/compat": "^1.1.1",
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^9.10.0",
+    "@types/node": "^22.5.4",
+    "@types/qunit": "^2.19.10",
+    "@typescript-eslint/eslint-plugin": "^8.4.0",
+    "@typescript-eslint/parser": "^8.4.0",
+    "@vexflow-fonts/academico": "^1.0.1",
+    "@vexflow-fonts/bravura": "^1.0.2",
+    "@vexflow-fonts/bravuratext": "^1.0.0",
+    "@vexflow-fonts/edwin": "^1.0.1",
+    "@vexflow-fonts/finaleash": "^1.0.1",
+    "@vexflow-fonts/finaleashtext": "^1.0.1",
+    "@vexflow-fonts/finalebroadway": "^1.0.0",
+    "@vexflow-fonts/finalebroadwaytext": "^1.0.0",
+    "@vexflow-fonts/finalejazz": "^1.0.0",
+    "@vexflow-fonts/finalejazztext": "^1.0.0",
+    "@vexflow-fonts/finalemaestro": "^1.0.0",
+    "@vexflow-fonts/finalemaestrotext": "^1.0.0",
+    "@vexflow-fonts/gonville": "1.0.0",
+    "@vexflow-fonts/gootville": "^1.0.1",
+    "@vexflow-fonts/gootvilletext": "^1.0.1",
+    "@vexflow-fonts/leipzig": "^1.0.1",
+    "@vexflow-fonts/leland": "^1.0.1",
+    "@vexflow-fonts/lelandtext": "^1.0.1",
+    "@vexflow-fonts/musejazz": "^1.0.1",
+    "@vexflow-fonts/musejazztext": "^1.0.1",
+    "@vexflow-fonts/nepomuk": "^1.0.1",
+    "@vexflow-fonts/petaluma": "^1.0.1",
+    "@vexflow-fonts/petalumascript": "^1.0.0",
+    "@vexflow-fonts/petalumatext": "^1.0.1",
+    "@vexflow-fonts/robotoslab": "^1.0.0",
+    "@vexflow-fonts/sebastian": "^1.0.1",
+    "@vexflow-fonts/sebastiantext": "^1.0.0",
     "canvas": "^2.11.2",
     "circular-dependency-plugin": "^5.2.2",
-    "concurrently": "^8.0.1",
-    "eslint": "^8.39.0",
-    "eslint-config-prettier": "^8.8.0",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-simple-import-sort": "^10.0.0",
-    "fork-ts-checker-webpack-plugin": "^8.0.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.30.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "fork-ts-checker-webpack-plugin": "^9.0.2",
+    "globals": "^15.9.0",
     "grunt": "^1.6.1",
-    "grunt-cli": "^1.4.3",
+    "grunt-cli": "^1.5.0",
     "grunt-contrib-clean": "^2.0.1",
     "grunt-contrib-copy": "^1.0.0",
-    "grunt-contrib-qunit": "^7.0.0",
-    "grunt-eslint": "^24.0.1",
-    "grunt-webpack": "^5.0.0",
-    "jsdom": "^21.1.2",
+    "grunt-contrib-qunit": "^10.1.1",
+    "grunt-eslint": "^25.0.0",
+    "grunt-webpack": "^7.0.0",
+    "jsdom": "^25.0.0",
     "jspdf": "^2.5.1",
-    "npm": "^9.6.5",
     "opener": "^1.5.2",
     "opentype.js": "^1.3.4",
-    "prettier": "^2.8.8",
-    "puppeteer": "^19.11.1",
-    "qunit": "^2.19.4",
+    "prettier": "^3.3.3",
+    "puppeteer": "^23.3.0",
+    "qunit": "^2.22.0",
     "recursive-copy": "^2.0.14",
-    "release-it": "^15.10.2",
-    "sharp": "^0.32.1",
+    "release-it": "^17.6.0",
     "string-replace-loader": "^3.1.0",
-    "svg2pdf.js": "^2.2.1",
-    "terser-webpack-plugin": "^5.3.7",
-    "ts-loader": "^9.4.2",
-    "tsc-watch": "^6.0.4",
-    "typedoc": "^0.24.6",
-    "typescript": "^5.0.4",
-    "webpack": "^5.81.0"
+    "svg2pdf.js": "^2.2.4",
+    "terser-webpack-plugin": "^5.3.10",
+    "ts-loader": "^9.5.1",
+    "tsc-watch": "^6.2.0",
+    "typescript": "^5.5.4",
+    "webpack": "^5.94.0"
   },
   "scripts": {
     "start": "grunt",
@@ -134,7 +123,8 @@
     "test:reference:cache": "grunt test:reference:cache",
     "generate:current": "grunt generate:current",
     "generate:reference": "grunt generate:reference",
-    "diff:reference": "grunt diff:reference"
+    "diff:reference": "grunt diff:reference",
+    "lint": "grunt eslint"
   },
   "homepage": "https://vexflow.com/",
   "keywords": [

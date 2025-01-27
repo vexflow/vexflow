@@ -1,11 +1,12 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // StringNumber Tests
 
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
-import { Glyph } from '../src/glyph';
+import { Element } from '../src/element';
+import { Glyphs } from '../src/glyphs';
 import { Renderer } from '../src/renderer';
 import { Stave } from '../src/stave';
 import { BarlineType } from '../src/stavebarline';
@@ -275,14 +276,13 @@ function multi(options: TestOptions): void {
 
 function drawAccidentals(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, 750);
-  const glyphScale = 39; // default font scale
-  const clefWidth = Glyph.getWidth('gClef', glyphScale); // widest clef
+  const clefWidth = Element.measureWidth(Glyphs.gClef); // widest clef
 
   const notes = [
-    f.StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'c/5', 'e/5', 'g/5'], stem_direction: 1, duration: '4' }),
-    f.StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'd/5', 'e/5', 'g/5'], stem_direction: 1, duration: '4' }),
-    f.StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'd/5', 'e/5', 'g/5'], stem_direction: -1, duration: '4' }),
-    f.StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'd/5', 'e/5', 'g/5'], stem_direction: -1, duration: '4' }),
+    f.StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'c/5', 'e/5', 'g/5'], stemDirection: 1, duration: '4' }),
+    f.StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'd/5', 'e/5', 'g/5'], stemDirection: 1, duration: '4' }),
+    f.StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'd/5', 'e/5', 'g/5'], stemDirection: -1, duration: '4' }),
+    f.StaveNote({ keys: ['c/4', 'e/4', 'g/4', 'd/5', 'e/5', 'g/5'], stemDirection: -1, duration: '4' }),
   ];
 
   notes[0]
@@ -345,7 +345,7 @@ function drawAccidentals(options: TestOptions): void {
     .setContext(ctx)
     .setEndBarType(BarlineType.DOUBLE)
     .addClef('treble')
-    .draw();
+    .drawWithStyle();
   voice.draw(ctx, stave);
   options.assert.ok(true, 'String Number');
 }

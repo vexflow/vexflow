@@ -1,1 +1,0 @@
-The fonts in this directory can be found in https://makemusic.zendesk.com/hc/en-us/articles/1500013053461-MakeMusic-Fonts-and-Licensing-Information (.msi file)

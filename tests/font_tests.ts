@@ -1,15 +1,14 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // Font Tests
 
+import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Accidental } from '../src/accidental';
 import { Bend } from '../src/bend';
 import { CanvasContext } from '../src/canvascontext';
-import { Element } from '../src/element';
-import { Flow } from '../src/flow';
 import { Font, FontStyle, FontWeight } from '../src/font';
 import { PedalMarking } from '../src/pedalmarking';
 import { StaveNote } from '../src/stavenote';
@@ -46,37 +45,35 @@ function setFont(assert: Assert): void {
   assert.equal(ctx.font, 'italic 100px PetalumaScript');
 
   const voice = new Voice();
-  // Many elements do not override the default Element.TEXT_FONT.
-  assert.propEqual(voice.fontInfo, Element.TEXT_FONT);
   voice.setFont('bold 32pt Arial');
   const fontInfo = voice.fontInfo;
   assert.equal(fontInfo?.size, '32pt');
 
   const flat = new Accidental('b');
-  // eslint-disable-next-line
-  // @ts-ignore access a protected member for testing purposes.
-  assert.equal(flat.textFont, undefined); // The internal instance variable .textFont is undefined by default.
   // Add italic to the default font as defined in Element.TEXT_FONT (since Accidental does not override TEXT_FONT).
-  flat.setFont(undefined, undefined, undefined, FontStyle.ITALIC);
-  assert.equal(flat.getFont(), 'italic 10pt Arial, sans-serif');
+  flat.setFont(undefined, undefined, undefined, 'italic');
+  assert.equal(flat.getFont(), 'italic 30pt Bravura,Academico');
   // Anything that is not set will be reset to the defaults.
-  flat.setFont(undefined, undefined, FontWeight.BOLD, undefined);
-  assert.equal(flat.getFont(), 'bold 10pt Arial, sans-serif');
-  flat.setFont(undefined, undefined, FontWeight.BOLD, FontStyle.ITALIC);
-  assert.equal(flat.getFont(), 'italic bold 10pt Arial, sans-serif');
-  flat.setFont(undefined, undefined, FontWeight.BOLD, 'oblique');
-  assert.equal(flat.getFont(), 'oblique bold 10pt Arial, sans-serif');
+  flat.setFont(undefined, undefined, 'bold', undefined);
+  assert.equal(flat.getFont(), 'bold 30pt Bravura,Academico');
+  flat.setFont(undefined, undefined, 'bold', 'italic');
+  assert.equal(flat.getFont(), 'italic bold 30pt Bravura,Academico');
+  flat.setFont(undefined, undefined, 'bold', 'oblique');
+  assert.equal(flat.getFont(), 'oblique bold 30pt Bravura,Academico');
   // '' is equivalent to 'normal'. Neither will be included in the CSS font string.
   flat.setFont(undefined, undefined, 'normal', '');
-  assert.equal(flat.getFont(), '10pt Arial, sans-serif');
+  assert.equal(flat.getFont(), '30pt Bravura,Academico');
 }
 
 function fontParsing(assert: Assert): void {
-  const b = new Bend('1/2', true);
+  const b = new Bend([
+    { type: Bend.UP, text: '1/2' },
+    { type: Bend.DOWN, text: '' },
+  ]);
   const bFont = b.fontInfo;
   // Check the default font.
-  assert.equal(bFont?.family, Font.SANS_SERIF);
-  assert.equal(bFont?.size, Font.SIZE);
+  assert.equal(bFont?.family, 'Bravura,Academico');
+  assert.equal(bFont?.size, 10);
   assert.equal(bFont?.weight, FontWeight.NORMAL);
   assert.equal(bFont?.style, FontStyle.NORMAL);
 
@@ -112,13 +109,13 @@ function fontSizes(assert: Assert): void {
 
   {
     const pedal = new PedalMarking([]);
-    assert.equal(pedal.getFont(), 'italic bold 12pt Times New Roman, serif');
-    assert.equal(pedal.fontSizeInPoints, 12);
-    assert.equal(pedal.fontSizeInPixels, 16);
+    assert.equal(pedal.getFont(), '30pt Bravura,Academico');
+    assert.equal(pedal.fontSizeInPoints, 30);
+    assert.equal(pedal.fontSizeInPixels, 40);
     const doubledSizePx = pedal.fontSizeInPixels * 2; // Double the font size.
-    assert.equal(doubledSizePx, 32);
+    assert.equal(doubledSizePx, 80);
     const doubledSizePt = Font.scaleSize(pedal.fontSizeInPoints, 2); // Double the font size.
-    assert.equal(doubledSizePt, 24);
+    assert.equal(doubledSizePt, 60);
 
     assert.equal(Font.scaleSize('1.5em', 3), '4.5em');
   }
@@ -130,15 +127,12 @@ function setTextFontToGeorgia(options: TestOptions): void {
   const score = factory.EasyScore();
 
   const voice1 = score.voice([
-    factory.StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stem_direction: -1, duration: 'h' }),
-    factory.StaveNote({ keys: ['d/4', 'f/4'], stem_direction: -1, duration: 'q' }),
-    factory.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stem_direction: -1, duration: 'q' }),
+    factory.StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stemDirection: -1, duration: 'h' }),
+    factory.StaveNote({ keys: ['d/4', 'f/4'], stemDirection: -1, duration: 'q' }),
+    factory.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stemDirection: -1, duration: 'q' }),
   ]);
 
-  const defaultFont = TextNote.TEXT_FONT;
-
-  // Set the default before we instantiate TextNote objects with the factory.
-  TextNote.TEXT_FONT = {
+  const georgiaFont = {
     family: 'Georgia, Courier New, serif',
     size: 14,
     weight: 'bold',
@@ -148,7 +142,8 @@ function setTextFontToGeorgia(options: TestOptions): void {
   const voice2 = score.voice([
     factory
       .TextNote({ text: 'Here are some fun lyrics...', duration: 'w' })
-      .setJustification(TextNote.Justification.LEFT),
+      .setJustification(TextNote.Justification.LEFT)
+      .setFont(georgiaFont),
   ]);
 
   const formatter = factory.Formatter();
@@ -156,21 +151,19 @@ function setTextFontToGeorgia(options: TestOptions): void {
 
   factory.draw();
 
-  // Restore the previous default, or else it will affect the rest of the tests.
-  TextNote.TEXT_FONT = defaultFont;
   options.assert.ok(true);
 }
 function setMusicFontToPetaluma(options: TestOptions): void {
-  Flow.setMusicFont('Petaluma');
+  VexFlow.setFonts('Petaluma');
 
   const factory = VexFlowTests.makeFactory(options, 400, 200);
   const stave = factory.Stave({ y: 40 });
   const score = factory.EasyScore();
 
   const voice = score.voice([
-    factory.StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stem_direction: -1, duration: 'h' }),
-    factory.StaveNote({ keys: ['d/4', 'f/4'], stem_direction: -1, duration: 'q' }),
-    factory.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stem_direction: -1, duration: 'q' }),
+    factory.StaveNote({ keys: ['c/4', 'e/4', 'a/4'], stemDirection: -1, duration: 'h' }),
+    factory.StaveNote({ keys: ['d/4', 'f/4'], stemDirection: -1, duration: 'q' }),
+    factory.StaveNote({ keys: ['c/4', 'f/4', 'a/4'], stemDirection: -1, duration: 'q' }),
   ]);
 
   const formatter = factory.Formatter();

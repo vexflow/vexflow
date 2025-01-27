@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // GlyphNote Tests
@@ -6,7 +6,7 @@
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { ChordSymbol } from '../src/chordsymbol';
-import { Glyph } from '../src/glyph';
+import { Glyphs } from '../src/glyphs';
 import { Note } from '../src/note';
 import { Registry } from '../src/registry';
 import { StaveConnector } from '../src/staveconnector';
@@ -17,6 +17,7 @@ const GlyphNoteTests = {
     QUnit.module('GlyphNote');
     const run = VexFlowTests.runTests;
     run('GlyphNote with ChordSymbols', chordChanges, { debug: false, noPadding: false });
+    run('Bounding Box', chordChanges, { debug: false, noPadding: false, drawBoundingBox: true });
     run('GlyphNote Positioning', basic, { debug: false, noPadding: false });
     run('GlyphNote No Stave Padding', basic, { debug: true, noPadding: true });
     run('GlyphNote RepeatNote', repeatNote, { debug: false, noPadding: true });
@@ -38,13 +39,13 @@ function chordChanges(options: TestOptions): void {
   const score = f.EasyScore();
 
   const notes = [
-    f.GlyphNote(new Glyph('repeatBarSlash', 40), { duration: 'q' }),
-    f.GlyphNote(new Glyph('repeatBarSlash', 40), { duration: 'q' }),
-    f.GlyphNote(new Glyph('repeatBarSlash', 40), { duration: 'q' }),
-    f.GlyphNote(new Glyph('repeatBarSlash', 40), { duration: 'q' }),
+    f.GlyphNote(Glyphs.repeatBarSlash, { duration: 'q' }),
+    f.GlyphNote(Glyphs.repeatBarSlash, { duration: 'q' }),
+    f.GlyphNote(Glyphs.repeatBarSlash, { duration: 'q' }),
+    f.GlyphNote(Glyphs.repeatBarSlash, { duration: 'q' }),
   ];
   const chord1 = f
-    .ChordSymbol({ reportWidth: false })
+    .ChordSymbol()
     .addText('F7')
     .setHorizontal('left')
     .addGlyphOrText('(#11b9)', { symbolModifier: ChordSymbol.symbolModifiers.SUPERSCRIPT });
@@ -61,6 +62,14 @@ function chordChanges(options: TestOptions): void {
   system.addStave({ voices: [voice], debugNoteMetrics: options.params.debug });
   system.addConnector().setType(StaveConnector.type.BRACKET);
   f.draw();
+
+  // Render bounding boxes
+  if (options.params.drawBoundingBox === true) {
+    notes.forEach((note) => {
+      VexFlowTests.drawBoundingBox(f.getContext(), note);
+    });
+  }
+
   Registry.disableDefaultRegistry();
   options.assert.ok(true);
 }
@@ -84,13 +93,13 @@ function basic(options: TestOptions): void {
   const newStave = (voice: Voice) => system.addStave({ voices: [voice], debugNoteMetrics: options.params.debug });
 
   const voices: Note[][] = [
-    [f.GlyphNote(new Glyph('repeat1Bar', 40), { duration: 'q' }, { line: 4 })],
-    [f.GlyphNote(new Glyph('repeat2Bars', 40), { duration: 'q', align_center: true })],
+    [f.GlyphNote(Glyphs.repeat1Bar, { duration: 'q' }, { line: 4 })],
+    [f.GlyphNote(Glyphs.repeat2Bars, { duration: 'q', alignCenter: true })],
     [
-      f.GlyphNote(new Glyph('repeatBarSlash', 40), { duration: '16' }),
-      f.GlyphNote(new Glyph('repeatBarSlash', 40), { duration: '16' }),
-      f.GlyphNote(new Glyph('repeat4Bars', 40), { duration: '16' }),
-      f.GlyphNote(new Glyph('repeatBarSlash', 40), { duration: '16' }),
+      f.GlyphNote(Glyphs.repeatBarSlash, { duration: '16' }),
+      f.GlyphNote(Glyphs.repeatBarSlash, { duration: '16' }),
+      f.GlyphNote(Glyphs.repeat4Bars, { duration: '16' }),
+      f.GlyphNote(Glyphs.repeatBarSlash, { duration: '16' }),
     ],
   ];
 

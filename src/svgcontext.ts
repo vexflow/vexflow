@@ -1,9 +1,11 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 // @author Gregory Ristow (2015)
 
+import { Element } from './element';
 import { Font, FontInfo, FontStyle, FontWeight } from './font';
-import { GroupAttributes, RenderContext, TextMeasure } from './rendercontext';
+import { Metrics } from './metrics';
+import { RenderContext, TextMeasure } from './rendercontext';
 import { Tables } from './tables';
 import { normalizeAngle, prefix, RuntimeError } from './util';
 
@@ -49,65 +51,13 @@ const TWO_PI = 2 * Math.PI;
 export interface State {
   state: Attributes;
   attributes: Attributes;
-  shadow_attributes: Attributes;
-  lineWidth: number;
-}
-
-class MeasureTextCache {
-  protected txt?: SVGTextElement;
-
-  // The cache is keyed first by the text string, then by the font attributes
-  // joined together.
-  protected cache: Record<string, Record<string, TextMeasure>> = {};
-
-  lookup(text: string, svg: SVGSVGElement, attributes: Attributes): TextMeasure {
-    let entries = this.cache[text];
-    if (entries === undefined) {
-      entries = {};
-      this.cache[text] = entries;
-    }
-
-    const family = attributes['font-family'];
-    const size = attributes['font-size'];
-    const weight = attributes['font-weight'];
-    const style = attributes['font-style'];
-
-    const key = `${family}%${size}%${weight}%${style}`;
-    let entry = entries[key];
-    if (entry === undefined) {
-      entry = this.measureImpl(text, svg, attributes);
-      entries[key] = entry;
-    }
-    return entry;
-  }
-
-  measureImpl(text: string, svg: SVGSVGElement, attributes: Attributes): TextMeasure {
-    let txt = this.txt;
-    if (!txt) {
-      // Create the SVG text element that will be used to measure text in the event
-      // of a cache miss.
-      txt = document.createElementNS(SVG_NS, 'text');
-      this.txt = txt;
-    }
-
-    txt.textContent = text;
-    if (attributes['font-family']) txt.setAttributeNS(null, 'font-family', attributes['font-family']);
-    if (attributes['font-size']) txt.setAttributeNS(null, 'font-size', `${attributes['font-size']}`);
-    if (attributes['font-style']) txt.setAttributeNS(null, 'font-style', attributes['font-style']);
-    if (attributes['font-weight']) txt.setAttributeNS(null, 'font-weight', `${attributes['font-weight']}`);
-    svg.appendChild(txt);
-    const bbox = txt.getBBox();
-    svg.removeChild(txt);
-
-    return { x: bbox.x, y: bbox.y, width: bbox.width, height: bbox.height };
-  }
 }
 
 /**
  * SVG rendering context with an API similar to CanvasRenderingContext2D.
  */
 export class SVGContext extends RenderContext {
-  protected static measureTextCache = new MeasureTextCache();
+  protected static measureTextElement = new Element();
 
   element: HTMLElement; // the parent DOM object
   svg: SVGSVGElement;
@@ -115,11 +65,9 @@ export class SVGContext extends RenderContext {
   height: number = 0;
   path: string;
   pen: { x: number; y: number };
-  lineWidth: number;
   attributes: Attributes;
-  shadow_attributes: Attributes;
   state: Attributes;
-  state_stack: State[];
+  stateStack: State[];
 
   // Always points to the current group.
   // Calls to add() or openGroup() will append the new element to `this.parent`.
@@ -142,8 +90,9 @@ export class SVGContext extends RenderContext {
 
     this.precision = Math.pow(10, Tables.RENDER_PRECISION_PLACES);
 
-    // Create a SVG element and add it to the container element.
+    // Create an SVG element and add it to the container element.
     const svg = this.create('svg');
+    svg.setAttribute('pointer-events', 'none');
     this.element.appendChild(svg);
     this.svg = svg;
 
@@ -152,11 +101,10 @@ export class SVGContext extends RenderContext {
 
     this.path = '';
     this.pen = { x: NaN, y: NaN };
-    this.lineWidth = 1.0;
 
     const defaultFontAttributes = {
-      'font-family': Font.SANS_SERIF,
-      'font-size': Font.SIZE + 'pt',
+      'font-family': Metrics.get('fontFamily') as string,
+      'font-size': '10pt',
       'font-weight': FontWeight.NORMAL,
       'font-style': FontStyle.NORMAL,
     };
@@ -168,10 +116,12 @@ export class SVGContext extends RenderContext {
     };
 
     this.attributes = {
-      'stroke-width': 0.3,
+      'stroke-width': 1.0,
       'stroke-dasharray': 'none',
       fill: 'black',
       stroke: 'black',
+      shadowBlur: 0,
+      shadowColor: 'black',
       ...defaultFontAttributes,
     };
 
@@ -179,12 +129,7 @@ export class SVGContext extends RenderContext {
     this.applyAttributes(svg, this.attributes);
     this.groupAttributes.push({ ...this.attributes });
 
-    this.shadow_attributes = {
-      width: 0,
-      color: 'black',
-    };
-
-    this.state_stack = [];
+    this.stateStack = [];
   }
 
   protected round(n: number): number {
@@ -208,7 +153,7 @@ export class SVGContext extends RenderContext {
   }
 
   // Allow grouping elements in containers for interactivity.
-  openGroup(cls?: string, id?: string, attrs?: GroupAttributes): SVGGElement {
+  openGroup(cls?: string, id?: string): SVGGElement {
     const group = this.create('g');
     this.groups.push(group);
     this.parent.appendChild(group);
@@ -216,9 +161,6 @@ export class SVGContext extends RenderContext {
     if (cls) group.setAttribute('class', prefix(cls));
     if (id) group.setAttribute('id', prefix(id));
 
-    if (attrs && attrs.pointerBBox) {
-      group.setAttribute('pointer-events', 'bounding-box');
-    }
     this.applyAttributes(group, this.attributes);
     this.groupAttributes.push({ ...this.groupAttributes[this.groupAttributes.length - 1], ...this.attributes });
     return group;
@@ -228,6 +170,14 @@ export class SVGContext extends RenderContext {
     this.groups.pop();
     this.groupAttributes.pop();
     this.parent = this.groups[this.groups.length - 1];
+  }
+
+  openRotation(angleDegrees: number, x: number, y: number) {
+    this.openGroup().setAttribute('transform', `translate(${x},${y}) rotate(${angleDegrees}) translate(-${x},-${y})`);
+  }
+
+  closeRotation() {
+    this.closeGroup();
   }
 
   add(elem: SVGElement): void {
@@ -254,7 +204,7 @@ export class SVGContext extends RenderContext {
   }
 
   setShadowColor(color: string): this {
-    this.shadow_attributes.color = color;
+    this.attributes.shadowColor = color;
     return this;
   }
 
@@ -264,7 +214,7 @@ export class SVGContext extends RenderContext {
    * @returns this
    */
   setShadowBlur(blur: number): this {
-    this.shadow_attributes.width = blur;
+    this.attributes.shadowBlur = blur;
     return this;
   }
 
@@ -274,7 +224,6 @@ export class SVGContext extends RenderContext {
    */
   setLineWidth(width: number): this {
     this.attributes['stroke-width'] = width;
-    this.lineWidth = width;
     return this;
   }
 
@@ -332,7 +281,7 @@ export class SVGContext extends RenderContext {
     // style.width / style.height properties that are applied to
     // the SVG object from our internal conception of the SVG
     // width/height.  This would allow us to create automatically
-    // scaling SVG's that filled their containers, for instance.
+    // scaling SVGs that filled their containers, for instance.
     //
     // As this isn't implemented in Canvas contexts,
     // I've left as is for now, but in using the viewBox to
@@ -352,11 +301,11 @@ export class SVGContext extends RenderContext {
    * 1 arg: string in the "x y w h" format
    * 4 args: x:number, y:number, w:number, h:number
    */
-  setViewBox(viewBox_or_minX: string | number, minY?: number, width?: number, height?: number): void {
-    if (typeof viewBox_or_minX === 'string') {
-      this.svg.setAttribute('viewBox', viewBox_or_minX);
+  setViewBox(viewBoxOrMinX: string | number, minY?: number, width?: number, height?: number): void {
+    if (typeof viewBoxOrMinX === 'string') {
+      this.svg.setAttribute('viewBox', viewBoxOrMinX);
     } else {
-      const viewBoxString = viewBox_or_minX + ' ' + minY + ' ' + width + ' ' + height;
+      const viewBoxString = viewBoxOrMinX + ' ' + minY + ' ' + width + ' ' + height;
       this.svg.setAttribute('viewBox', viewBoxString);
     }
   }
@@ -371,7 +320,7 @@ export class SVGContext extends RenderContext {
       }
       if (
         attributes[attrName] &&
-        (this.groupAttributes.length == 0 ||
+        (this.groupAttributes.length === 0 ||
           attributes[attrName] != this.groupAttributes[this.groupAttributes.length - 1][attrName])
       )
         element.setAttributeNS(null, attrName, attributes[attrName] as string);
@@ -396,9 +345,6 @@ export class SVGContext extends RenderContext {
     while (this.svg.lastChild) {
       this.svg.removeChild(this.svg.lastChild);
     }
-
-    // Replace the viewbox attribute we just removed.
-    this.scale(this.state.scaleX as number, this.state.scaleY as number);
   }
 
   // ## Rectangles:
@@ -410,7 +356,7 @@ export class SVGContext extends RenderContext {
     }
 
     const rectangle = this.create('rect');
-    attributes = attributes ?? { fill: 'none', 'stroke-width': this.lineWidth, stroke: 'black' };
+    attributes = attributes ?? { fill: 'none', 'stroke-width': this.attributes['stroke-width'], stroke: 'black' };
     x = this.round(x);
     y = this.round(y);
     width = this.round(width);
@@ -422,6 +368,12 @@ export class SVGContext extends RenderContext {
 
   fillRect(x: number, y: number, width: number, height: number): this {
     const attributes = { fill: this.attributes.fill, stroke: 'none' };
+    this.rect(x, y, width, height, attributes);
+    return this;
+  }
+
+  pointerRect(x: number, y: number, width: number, height: number): this {
+    const attributes = { opacity: '0', 'pointer-events': 'auto' };
     this.rect(x, y, width, height, attributes);
     return this;
   }
@@ -547,12 +499,11 @@ export class SVGContext extends RenderContext {
     return this;
   }
 
-  private getShadowStyle(): string {
-    const sa = this.shadow_attributes;
+  protected getShadowStyle(): string {
     // A CSS drop-shadow filter blur looks different than a canvas shadowBlur
     // of the same radius, so we scale the drop-shadow radius here to make it
     // look close to the canvas shadow.
-    return `filter: drop-shadow(0 0 ${(sa.width as number) / 1.5}px ${sa.color})`;
+    return `filter: drop-shadow(0 0 ${(this.attributes.shadowBlur as number) / 1.5}px ${this.attributes.shadowColor})`;
   }
 
   fill(attributes?: Attributes): this {
@@ -562,7 +513,7 @@ export class SVGContext extends RenderContext {
     }
 
     attributes.d = this.path;
-    if ((this.shadow_attributes.width as number) > 0) {
+    if ((this.attributes.shadowBlur as number) > 0) {
       attributes.style = this.getShadowStyle();
     }
 
@@ -576,10 +527,9 @@ export class SVGContext extends RenderContext {
     const attributes: Attributes = {
       ...this.attributes,
       fill: 'none',
-      'stroke-width': this.lineWidth,
       d: this.path,
     };
-    if ((this.shadow_attributes.width as number) > 0) {
+    if ((this.attributes.shadowBlur as number) > 0) {
       attributes.style = this.getShadowStyle();
     }
 
@@ -590,7 +540,15 @@ export class SVGContext extends RenderContext {
 
   // ## Text Methods:
   measureText(text: string): TextMeasure {
-    return SVGContext.measureTextCache.lookup(text, this.svg, this.attributes);
+    SVGContext.measureTextElement.setText(text);
+    SVGContext.measureTextElement.setFont(
+      this.attributes['font-family'],
+      this.attributes['font-size'],
+      this.attributes['font-weight'],
+      this.attributes['font-style']
+    );
+    const bb = SVGContext.measureTextElement.getBoundingBox();
+    return { x: bb.x, y: bb.y, width: bb.w, height: bb.h };
   }
 
   fillText(text: string, x: number, y: number): this {
@@ -613,60 +571,20 @@ export class SVGContext extends RenderContext {
     return this;
   }
 
-  // TODO: State should be deep-copied.
   save(): this {
-    this.state_stack.push({
-      state: {
-        'font-family': this.state['font-family'],
-        'font-weight': this.state['font-weight'],
-        'font-style': this.state['font-style'],
-        'font-size': this.state['font-size'],
-        scale: this.state.scale,
-      },
-      attributes: {
-        'font-family': this.attributes['font-family'],
-        'font-weight': this.attributes['font-weight'],
-        'font-style': this.attributes['font-style'],
-        'font-size': this.attributes['font-size'],
-        fill: this.attributes.fill,
-        stroke: this.attributes.stroke,
-        'stroke-width': this.attributes['stroke-width'],
-        'stroke-dasharray': this.attributes['stroke-dasharray'],
-      },
-      shadow_attributes: {
-        width: this.shadow_attributes.width,
-        color: this.shadow_attributes.color,
-      },
-      lineWidth: this.lineWidth,
+    this.stateStack.push({
+      state: structuredClone(this.state),
+      attributes: structuredClone(this.attributes),
     });
     return this;
   }
 
-  // TODO: State should be deep-restored.
   restore(): this {
-    const savedState = this.state_stack.pop();
+    const savedState = this.stateStack.pop();
     if (savedState) {
       const state = savedState;
-      this.state['font-family'] = state.state['font-family'];
-      this.state['font-weight'] = state.state['font-weight'];
-      this.state['font-style'] = state.state['font-style'];
-      this.state['font-size'] = state.state['font-size'];
-      this.state.scale = state.state.scale;
-
-      this.attributes['font-family'] = state.attributes['font-family'];
-      this.attributes['font-weight'] = state.attributes['font-weight'];
-      this.attributes['font-style'] = state.attributes['font-style'];
-      this.attributes['font-size'] = state.attributes['font-size'];
-
-      this.attributes.fill = state.attributes.fill;
-      this.attributes.stroke = state.attributes.stroke;
-      this.attributes['stroke-width'] = state.attributes['stroke-width'];
-      this.attributes['stroke-dasharray'] = state.attributes['stroke-dasharray'];
-
-      this.shadow_attributes.width = state.shadow_attributes.width;
-      this.shadow_attributes.color = state.shadow_attributes.color;
-
-      this.lineWidth = state.lineWidth;
+      this.state = structuredClone(state.state);
+      this.attributes = structuredClone(state.attributes);
     }
     return this;
   }

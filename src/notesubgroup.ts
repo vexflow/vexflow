@@ -1,5 +1,5 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
-// Author Taehoon Moon 2016
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// @author: Taehoon Moon 2016
 //
 // ## Description
 //
@@ -32,7 +32,7 @@ export class NoteSubGroup extends Modifier {
       width += group.getWidth();
     }
 
-    state.left_shift += width;
+    state.leftShift += width;
     return true;
   }
 
@@ -53,8 +53,8 @@ export class NoteSubGroup extends Modifier {
 
     this.formatter = new Formatter();
     this.voice = new Voice({
-      num_beats: 4,
-      beat_value: 4,
+      numBeats: 4,
+      beatValue: 4,
       resolution: Tables.RESOLUTION,
     }).setStrict(false);
 

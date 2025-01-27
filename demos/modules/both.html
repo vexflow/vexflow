@@ -1,36 +1,34 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
-    <style></style>
+    <meta charset="UTF-8" />
   </head>
   <body>
     <p>Take a look at the source code. Output is logged to the developer console.</p>
     <!-- ES Module -->
     <script type="module">
-      // import { Vex, Flow, StaveNote } from '../../build/esm/entry/vexflow.js';
-      import { Vex, Flow, StaveNote } from '../../build/esm/entry/vexflow-debug.js';
-      // import { Vex, Flow, StaveNote, ArticulationTests } from '../../build/esm/entry/vexflow-debug-with-tests.js';
-      // import { Vex, Flow, StaveNote } from '../../build/esm/entry/vexflow-bravura.js';
-      // import { Vex, Flow, StaveNote } from '../../build/esm/entry/vexflow-gonville.js';
-      // import { Vex, Flow, StaveNote } from '../../build/esm/entry/vexflow-petaluma.js';
-      // import { Vex, Flow, StaveNote } from '../../build/esm/entry/vexflow-core.js';
-      console.log(Vex);
-      console.log(Flow);
+      // import { VexFlow, StaveNote } from '../../build/esm/entry/vexflow.js';
+      import { VexFlow, StaveNote } from '../../build/esm/entry/vexflow-debug.js';
+      // import { VexFlow, StaveNote, ArticulationTests } from '../../build/esm/entry/vexflow-debug-with-tests.js';
+      // import { VexFlow, StaveNote } from '../../build/esm/entry/vexflow-bravura.js';
+      // import { VexFlow, StaveNote } from '../../build/esm/entry/vexflow-gonville.js';
+      // import { VexFlow, StaveNote } from '../../build/esm/entry/vexflow-petaluma.js';
+      // import { VexFlow, StaveNote } from '../../build/esm/entry/vexflow-core.js';
+      console.log('ESM');
+      console.log(VexFlow);
       console.log(StaveNote);
     </script>
 
-    <!-- CJS: The script tags below assign their default export to window.Vex. -->
+    <!-- CJS: The script tags below assign their default export to window.VexFlow. -->
     <!-- <script src="../../build/cjs/vexflow.js"></script> -->
     <script src="../../build/cjs/vexflow-debug.js"></script>
     <!-- <script src="../../build/cjs/vexflow-debug-with-tests.js"></script> -->
     <!-- <script src="../../build/cjs/vexflow-bravura.js"></script> -->
-    <!-- <script src="../../build/cjs/vexflow-gonville.js"></script> -->
-    <!-- <script src="../../build/cjs/vexflow-petaluma.js"></script> -->
     <!-- <script src="../../build/cjs/vexflow-core.js"></script> -->
     <script>
-      const { Vex, Flow, StaveNote } = window.Vex;
-      console.log(Vex);
-      console.log(Flow);
+      console.log('CJS');
+      const { StaveNote } = VexFlow;
+      console.log(VexFlow);
       console.log(StaveNote);
     </script>
   </body>

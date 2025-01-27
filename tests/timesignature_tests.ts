@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // TimeSignature Tests
@@ -31,13 +31,13 @@ function parser(assert: Assert): void {
   const timeSig = new TimeSignature();
   assert.equal(timeSig.getTimeSpec(), '4/4', 'default time signature is 4/4');
 
-  const mustFail = ['asdf', '123/', '/10', '/', '4567', 'C+', '1+', '+1', '(3+', '+3)', '()', '(+)'];
+  const mustFail = ['asdf', '123/', '/10', '/', 'C+'];
   mustFail.forEach((invalidString) => {
-    assert.throws(() => timeSig.parseTimeSpec(invalidString), /BadTimeSignature/);
+    assert.throws(() => new TimeSignature(invalidString), /BadTimeSignature/);
   });
 
   const mustPass = ['4/4', '10/12', '1/8', '1234567890/1234567890', 'C', 'C|', '+'];
-  mustPass.forEach((validString) => timeSig.parseTimeSpec(validString));
+  mustPass.forEach((validString) => new TimeSignature(validString));
 
   timeSig.setTimeSig('4/4');
   assert.equal(timeSig.getIsNumeric(), true, '4/4 is numeric');
@@ -60,6 +60,7 @@ function basic(options: TestOptions, contextBuilder: ContextBuilder): void {
     .addTimeSignature('6/8')
     .addTimeSignature('C')
     .addTimeSignature('C|')
+    .addTimeSignature('3')
     .addEndTimeSignature('2/2')
     .addEndTimeSignature('3/4')
     .addEndTimeSignature('4/4')
@@ -68,7 +69,7 @@ function basic(options: TestOptions, contextBuilder: ContextBuilder): void {
     .addEndTimeSignature('C')
     .addEndTimeSignature('C|')
     .setContext(ctx)
-    .draw();
+    .drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -82,7 +83,7 @@ function big(options: TestOptions, contextBuilder: ContextBuilder): void {
     .addTimeSignature('1234567/890')
     .addTimeSignature('987/654321')
     .setContext(ctx)
-    .draw();
+    .drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -90,7 +91,7 @@ function big(options: TestOptions, contextBuilder: ContextBuilder): void {
 function additive(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 400, 120);
 
-  new Stave(10, 10, 300).addTimeSignature('2+3+2/8').setContext(ctx).draw();
+  new Stave(10, 10, 300).addTimeSignature('2+3+2/8').setContext(ctx).drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -98,7 +99,12 @@ function additive(options: TestOptions, contextBuilder: ContextBuilder): void {
 function alternating(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 400, 120);
 
-  new Stave(10, 10, 300).addTimeSignature('6/8').addTimeSignature('+').addTimeSignature('3/4').setContext(ctx).draw();
+  new Stave(10, 10, 300)
+    .addTimeSignature('6/8')
+    .addTimeSignature('+')
+    .addTimeSignature('3/4')
+    .setContext(ctx)
+    .drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -106,7 +112,12 @@ function alternating(options: TestOptions, contextBuilder: ContextBuilder): void
 function interchangeable(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 400, 120);
 
-  new Stave(10, 10, 300).addTimeSignature('3/4').addTimeSignature('-').addTimeSignature('2/4').setContext(ctx).draw();
+  new Stave(10, 10, 300)
+    .addTimeSignature('3/4')
+    .addTimeSignature('-')
+    .addTimeSignature('2/4')
+    .setContext(ctx)
+    .drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -121,7 +132,7 @@ function agregate(options: TestOptions, contextBuilder: ContextBuilder): void {
     .addTimeSignature('+')
     .addTimeSignature('5/4')
     .setContext(ctx)
-    .draw();
+    .drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -134,7 +145,7 @@ function complex(options: TestOptions, contextBuilder: ContextBuilder): void {
     .addTimeSignature('+')
     .addTimeSignature('3/8')
     .setContext(ctx)
-    .draw();
+    .drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -149,15 +160,15 @@ function multiple(options: TestOptions, contextBuilder: ContextBuilder): void {
     .addClef('percussion')
     .addTimeSignature('4/4', 25) // passing the custom padding in pixels
     .setContext(ctx)
-    .draw();
-  const stave2 = new Stave(15, 110, 300).addClef('treble').addTimeSignature('4/4').setContext(ctx).draw();
-  const stave3 = new Stave(15, 220, 300).addClef('bass').addTimeSignature('4/4').setContext(ctx).draw();
+    .drawWithStyle();
+  const stave2 = new Stave(15, 110, 300).addClef('treble').addTimeSignature('4/4').setContext(ctx).drawWithStyle();
+  const stave3 = new Stave(15, 220, 300).addClef('bass').addTimeSignature('4/4').setContext(ctx).drawWithStyle();
 
   Stave.formatBegModifiers([stave1, stave2, stave3]);
 
-  new StaveConnector(stave1, stave2).setType('single').setContext(ctx).draw();
-  new StaveConnector(stave2, stave3).setType('single').setContext(ctx).draw();
-  new StaveConnector(stave2, stave3).setType('brace').setContext(ctx).draw();
+  new StaveConnector(stave1, stave2).setType('single').setContext(ctx).drawWithStyle();
+  new StaveConnector(stave2, stave3).setType('single').setContext(ctx).drawWithStyle();
+  new StaveConnector(stave2, stave3).setType('brace').setContext(ctx).drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }

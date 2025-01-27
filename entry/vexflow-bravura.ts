@@ -1,28 +1,25 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // vexflow-bravura.ts is the entry point for vexflow-bravura.js.
-// This version bundles the Bravura music engraving font.
+// This version bundles the Bravura music engraving font and the Academico text font.
 
-import { Flow } from '../src/flow';
-import { loadBravura } from '../src/fonts/load_bravura';
-import { loadCustom } from '../src/fonts/load_custom';
-import { loadTextFonts } from '../src/fonts/textfonts';
+import { VexFlow } from '../src/vexflow';
 
-loadBravura();
-loadCustom();
-Flow.setMusicFont('Bravura', 'Custom');
-loadTextFonts();
+import { Font } from '../src/font';
+import { Academico } from '../src/fonts/academico';
+import { AcademicoBold } from '../src/fonts/academicobold';
+import { Bravura } from '../src/fonts/bravura';
 
-// Re-export all exports from index.ts.
+const fontBravura = Font.load('Bravura', Bravura, { display: 'block' });
+const fontAcademico = Font.load('Academico', Academico, { display: 'swap' });
+const fontAcademicoBold = Font.load('Academico', AcademicoBold, { display: 'swap', weight: 'bold' });
+
+VexFlow.BUILD.INFO = 'vexflow-bravura';
+VexFlow.setFonts('Bravura', 'Academico');
+Promise.allSettled([fontBravura, fontAcademico, fontAcademicoBold]).then(() => {
+  //
+});
+
 export * from '../src/index';
-// Also collect all exports into a default export for CJS projects.
-export * as default from '../src/index';
-
-// ADD_MUSIC_FONT
-// To make a vexflow-xxx.js build that ONLY loads your new music font, copy this file and name it vexflow-xxx.ts.
-// Replace these lines:
-//     import { loadXXX } from '../src/fonts/load_xxx';
-//     loadXXX();
-//     Flow.setMusicFont('XXX', 'Custom');
-// Feel free to remove references to Custom if you are not using those glyphs.
+export default VexFlow;

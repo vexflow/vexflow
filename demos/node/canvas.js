@@ -1,35 +1,45 @@
-// node canvas.js > output.html
+// Run:
+//   node canvas.js > output/canvascontext.html
 
-// Use VexFlow to render a hello world score in a node-canvas context (https://www.npmjs.com/package/canvas).
-
+// Summary: Create an HTML page containing the VexFlow output.
+//   Use VexFlow to render a hello world score in a node-canvas context.
+//   See: https://www.npmjs.com/package/canvas
+//   Display the canvas data in an <img> tag via canvas.toDataURL().
+//
+//
 // Since we use a require(...) statement below, we will load the CJS bundle at build/cjs/vexflow.js
 // See the `exports` field in package.json for details.
-// This bundle includes all three music engraving fonts: Bravura, Petaluma, and Gonville.
+
 const Vex = require('vexflow');
 
-// Or, you can include just a single music font:
-// const Vex = require('vexflow/bravura');
-// const Vex = require('vexflow/petaluma');
-// const Vex = require('vexflow/gonville');
+const { createCanvas, registerFont } = require('canvas');
 
-const { createCanvas } = require('canvas');
+// Node canvas has a different API for loading fonts.
+registerFont('../../node_modules/@vexflow-fonts/bravura/bravura.otf', { family: 'Bravura' });
+registerFont('../../node_modules/@vexflow-fonts/petaluma/petaluma.otf', { family: 'Petaluma' });
 
-const { Renderer, Stave, StaveNote, Formatter } = Vex.Flow;
+const { Renderer, Stave, StaveNote, Formatter } = VexFlow;
 
 const canvas = createCanvas(1000, 500);
 
+// VexFlow 5 uses a hidden canvas for measuring font glyphs.
+// https://www.w3.org/TR/2012/WD-html5-author-20120329/the-canvas-element.html#the-canvas-element
+// In browsers, canvas elements usually default to 300 x 150.
+VexFlow.Element.setTextMeasurementCanvas(createCanvas(300, 150));
+
+VexFlow.setFonts('Bravura');
+// VexFlow.setFonts('Petaluma');
+
 const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
 const context = renderer.getContext();
-context.setFont('Arial', 10);
 context.scale(2, 2);
 
 const stave = new Stave(10, 40, 400);
 stave.addClef('treble');
 stave.addTimeSignature('4/4');
-stave.setContext(context).draw();
+stave.setContext(context).drawWithStyle();
 
 const notes = [
-  //
   new StaveNote({ keys: ['c/5'], duration: '4' }),
   new StaveNote({ keys: ['b/4'], duration: '4' }),
   new StaveNote({ keys: ['a/4'], duration: '4' }),

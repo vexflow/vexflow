@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="../../build/cjs/vexflow-core.js"></script>
+    <script src="run.js"></script>
+  </head>
+  <body>
+    <p>
+      This page loads the <code>vexflow-core.js</code> build. It does not bundle any fonts, and is minified for
+      production use.
+    </p>
+    <p><a href="../../build/cjs/vexflow-core.js">Click here to view the vexflow-core.js file</a>.</p>
+    <p>Open the developer console and explore the <code>VexFlow</code> object. Below are some things you can try:</p>
+    <p>Get an object with the build information of the VexFlow library.</p>
+    <pre>VexFlow.BUILD</pre>
+    <p>
+      Since this build does not preload any fonts, you will need to manually load fonts with your favorite method (e.g.,
+      <code>@font-face</code> CSS or <code>await VexFlow.loadFonts(...)</code>). After the fonts are loaded, you can
+      call <code>VexFlow.setFonts(...)</code> to set the font family for your VexFlow score. For example, if you call
+      <code>VexFlow.loadFonts(fontName1, fontName2, fontName3, ...)</code>, we will load the requested fonts from our
+      CDN:
+    </p>
+    <button onclick="copyCode(0)">Copy Code</button>
+    <button onclick="runCode(0)">Run Code</button>
+    <pre id="code0"></pre>
+    <p>
+      Draw a stave with a treble clef, time signature, and a few notes. Note that if you have not called
+      VexFlow.loadFonts(...) and VexFlow.setFonts(...), you will likely see empty boxes where the music symbols would
+      normally be drawn.
+    </p>
+    <button onclick="copyCode(1)">Copy Code</button>
+    <button onclick="runCode(1)">Run Code</button>
+    <pre id="code1"></pre>
+    <div id="output"></div>
+    <script>
+      const code0 = `VexFlow.loadFonts("Petaluma", "Petaluma Script").then(()=>{
+  VexFlow.setFonts("Petaluma", "Petaluma Script");
+  console.log(VexFlow.getFonts());
+});`;
+
+      const code1 = `const vf = new VexFlow.Factory({
+  renderer: { elementId: 'output', width: 300, height: 180 },
+});
+
+const score = vf.EasyScore();
+const system = vf.System();
+
+system
+  .addStave({
+    voices: [
+      score.voice(score.notes('C#5/q, B4, A4, G#4', { stem: 'up' })),
+      score.voice(score.notes('C#4/h, C#4', { stem: 'down' })),
+    ],
+  })
+  .addClef('treble')
+  .addTimeSignature('4/4');
+
+vf.draw();`;
+
+      showCode(code0, code1);
+    </script>
+  </body>
+</html>

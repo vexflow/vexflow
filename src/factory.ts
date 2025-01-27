@@ -1,4 +1,5 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// MIT License
 // @author Mohit Cheppudira
 // MIT License
 
@@ -16,7 +17,6 @@ import { FontInfo } from './font';
 import { Formatter, FormatterOptions } from './formatter';
 import { FretHandFinger } from './frethandfinger';
 import { GhostNote } from './ghostnote';
-import { Glyph } from './glyph';
 import { GlyphNote, GlyphNoteOptions } from './glyphnote';
 import { GraceNote, GraceNoteStruct } from './gracenote';
 import { GraceNoteGroup } from './gracenotegroup';
@@ -63,23 +63,19 @@ export interface FactoryOptions {
     height: number;
     background?: string;
   };
-  font?: FontInfo;
 }
 
 // eslint-disable-next-line
 function L(...args: any[]) {
-  if (Factory.DEBUG) log('Vex.Flow.Factory', args);
+  if (Factory.DEBUG) log('VexFlow.Factory', args);
 }
 
 /**
  * Factory implements a high level API around VexFlow.
  */
 export class Factory {
-  /** To enable logging for this class. Set `Vex.Flow.Factory.DEBUG` to `true`. */
+  /** To enable logging for this class. Set `VexFlow.Factory.DEBUG` to `true`. */
   static DEBUG: boolean = false;
-
-  /** Default text font. */
-  static TEXT_FONT: Required<FontInfo> = { ...Element.TEXT_FONT };
 
   /**
    * Static simplified function to access constructor without providing FactoryOptions
@@ -88,7 +84,7 @@ export class Factory {
    *
    * Create an SVG renderer and attach it to the DIV element named "boo" to render using <page-width> 1200 and <page-height> 600
    *
-   * `const vf: Factory = Vex.Flow.Factory.newFromElementId('boo', 1200, 600 );`
+   * `const vf: Factory = VexFlow.Factory.newFromElementId('boo', 1200, 600 );`
    */
   static newFromElementId(elementId: string | null, width = 500, height = 200): Factory {
     return new Factory({ renderer: { elementId, width, height } });
@@ -108,7 +104,7 @@ export class Factory {
    *
    * Create an SVG renderer and attach it to the DIV element named "boo" to render using <page-width> 1200 and <page-height> 600
    *
-   * `const vf: Factory = new Vex.Flow.Factory({renderer: { elementId: 'boo', width: 1200, height: 600 }});`
+   * `const vf: Factory = new VexFlow.Factory({renderer: { elementId: 'boo', width: 1200, height: 600 }});`
    */
   constructor(options: FactoryOptions = {}) {
     L('New factory: ', options);
@@ -122,7 +118,6 @@ export class Factory {
         height: 200,
         background: '#FFF',
       },
-      font: Factory.TEXT_FONT,
     };
 
     this.setOptions(options);
@@ -144,11 +139,11 @@ export class Factory {
 
   initRenderer(): void {
     const { elementId, width, height, background } = this.options.renderer;
-    if (elementId == null) {
+    if (elementId === null) {
       return;
     }
 
-    if (elementId == '') {
+    if (elementId === '') {
       L(this);
       throw new RuntimeError('renderer.elementId not set in FactoryOptions');
     }
@@ -195,7 +190,7 @@ export class Factory {
       x: 0,
       y: 0,
       width: this.options.renderer.width - staveSpace * 1.0,
-      options: { spacing_between_lines_px: staveSpace * 1.0 },
+      options: { spacingBetweenLinesPx: staveSpace * 1.0 },
       ...params,
     };
 
@@ -212,7 +207,7 @@ export class Factory {
       x: 0,
       y: 0,
       width: this.options.renderer.width - staveSpace * 1.0,
-      options: { spacing_between_lines_px: staveSpace * 1.3 },
+      options: { spacingBetweenLinesPx: staveSpace * 1.3 },
       ...params,
     };
 
@@ -231,7 +226,7 @@ export class Factory {
     return note;
   }
 
-  GlyphNote(glyph: Glyph, noteStruct: NoteStruct, options?: GlyphNoteOptions): GlyphNote {
+  GlyphNote(glyph: string, noteStruct: NoteStruct, options?: GlyphNoteOptions): GlyphNote {
     const note = new GlyphNote(glyph, noteStruct, options);
     if (this.stave) note.setStave(this.stave);
     note.setContext(this.context);
@@ -360,8 +355,6 @@ export class Factory {
   ChordSymbol(params?: {
     vJustify?: string;
     hJustify?: string;
-    kerning?: boolean;
-    reportWidth?: boolean;
     fontFamily?: string;
     fontSize?: number;
     fontWeight?: string;
@@ -369,16 +362,12 @@ export class Factory {
     const p = {
       vJustify: 'top',
       hJustify: 'center',
-      kerning: true,
-      reportWidth: true,
       ...params,
     };
 
     const chordSymbol = new ChordSymbol();
     chordSymbol.setHorizontal(p.hJustify);
     chordSymbol.setVertical(p.vJustify);
-    chordSymbol.setEnableKerning(p.kerning);
-    chordSymbol.setReportWidth(p.reportWidth);
     // There is a default font based on the engraving font.  Only set then
     // font if it is specific, else use the default
     if (typeof p.fontFamily === 'string' && typeof p.fontSize === 'number') {
@@ -394,8 +383,8 @@ export class Factory {
   Articulation(params?: { betweenLines?: boolean; type?: string; position?: string | number }): Articulation {
     const articulation = new Articulation(params?.type ?? 'a.');
 
-    if (params?.position != undefined) articulation.setPosition(params.position);
-    if (params?.betweenLines != undefined) articulation.setBetweenLines(params.betweenLines);
+    if (params?.position !== undefined) articulation.setPosition(params.position);
+    if (params?.betweenLines !== undefined) articulation.setBetweenLines(params.betweenLines);
     articulation.setContext(this.context);
     return articulation;
   }
@@ -406,12 +395,13 @@ export class Factory {
   ) {
     const options = {
       type,
-      position: 0,
       accidental: '',
       ...params,
     };
     const ornament = new Ornament(type);
-    ornament.setPosition(options.position);
+    if (params?.position !== undefined) {
+      ornament.setPosition(params.position);
+    }
     if (options.upperAccidental) {
       ornament.setUpperAccidental(options.upperAccidental);
     }
@@ -477,7 +467,7 @@ export class Factory {
   }
 
   MultiMeasureRest(params: MultimeasureRestRenderOptions): MultiMeasureRest {
-    const numMeasures = defined(params.number_of_measures, 'NoNumberOfMeasures');
+    const numMeasures = defined(params.numberOfMeasures, 'NoNumberOfMeasures');
     const multiMeasureRest = new MultiMeasureRest(numMeasures, params);
     multiMeasureRest.setContext(this.context);
     this.renderQ.push(multiMeasureRest);
@@ -494,8 +484,8 @@ export class Factory {
     return voice;
   }
 
-  StaveConnector(params: { top_stave: Stave; bottom_stave: Stave; type: StaveConnectorType }): StaveConnector {
-    const connector = new StaveConnector(params.top_stave, params.bottom_stave);
+  StaveConnector(params: { topStave: Stave; bottomStave: Stave; type: StaveConnectorType }): StaveConnector {
+    const connector = new StaveConnector(params.topStave, params.bottomStave);
     connector.setType(params.type).setContext(this.context);
     this.renderQ.push(connector);
     return connector;
@@ -538,7 +528,7 @@ export class Factory {
     return beam;
   }
 
-  Curve(params: { from: Note; to: Note; options: CurveOptions }): Curve {
+  Curve(params: { from: Note | undefined; to: Note | undefined; options: CurveOptions }): Curve {
     const curve = new Curve(params.from, params.to, params.options).setContext(this.context);
     this.renderQ.push(curve);
     return curve;
@@ -547,17 +537,17 @@ export class Factory {
   StaveTie(params: {
     from?: Note | null;
     to?: Note | null;
-    first_indices?: number[];
-    last_indices?: number[];
+    firstIndexes?: number[];
+    lastIndexes?: number[];
     text?: string;
     options?: { direction?: number };
   }): StaveTie {
     const tie = new StaveTie(
       {
-        first_note: params.from,
-        last_note: params.to,
-        first_indices: params.first_indices,
-        last_indices: params.last_indices,
+        firstNote: params.from,
+        lastNote: params.to,
+        firstIndexes: params.firstIndexes,
+        lastIndexes: params.lastIndexes,
       },
       params.text
     );
@@ -571,15 +561,15 @@ export class Factory {
   StaveLine(params: {
     from: StaveNote;
     to: StaveNote;
-    first_indices: number[];
-    last_indices: number[];
+    firstIndexes: number[];
+    lastIndexes: number[];
     options?: { text?: string; font?: FontInfo };
   }): StaveLine {
     const line = new StaveLine({
-      first_note: params.from,
-      last_note: params.to,
-      first_indices: params.first_indices,
-      last_indices: params.last_indices,
+      firstNote: params.from,
+      lastNote: params.to,
+      firstIndexes: params.firstIndexes,
+      lastIndexes: params.lastIndexes,
     });
 
     if (params.options?.text) line.setText(params.options.text);
@@ -594,7 +584,7 @@ export class Factory {
     from: Note | null;
     to: Note | null;
     options: {
-      harsh?: boolean;
+      code?: number;
       line?: number;
     };
   }): VibratoBracket {
@@ -604,7 +594,7 @@ export class Factory {
     });
 
     if (params.options.line) vibratoBracket.setLine(params.options.line);
-    if (params.options.harsh) vibratoBracket.setHarsh(params.options.harsh);
+    if (params.options.code) vibratoBracket.setVibratoCode(params.options.code);
 
     vibratoBracket.setContext(this.context);
     this.renderQ.push(vibratoBracket);
@@ -649,7 +639,7 @@ export class Factory {
   /**
    * Creates EasyScore. Normally the first step after constructing a Factory. For example:
    * ```
-   * const vf: Factory = new Vex.Flow.Factory({renderer: { elementId: 'boo', width: 1200, height: 600 }});
+   * const vf: Factory = new VexFlow.Factory({renderer: { elementId: 'boo', width: 1200, height: 600 }});
    * const score: EasyScore = vf.EasyScore();
    * ```
    * @param options.factory optional instance of Factory
@@ -693,12 +683,12 @@ export class Factory {
   draw(): void {
     const ctx = this.context;
     this.systems.forEach((s) => s.setContext(ctx).format());
-    this.staves.forEach((s) => s.setContext(ctx).draw());
-    this.voices.forEach((v) => v.setContext(ctx).draw());
+    this.staves.forEach((s) => s.setContext(ctx).drawWithStyle());
+    this.voices.forEach((v) => v.setContext(ctx).drawWithStyle());
     this.renderQ.forEach((e) => {
-      if (!e.isRendered()) e.setContext(ctx).draw();
+      if (!e.isRendered()) e.setContext(ctx).drawWithStyle();
     });
-    this.systems.forEach((s) => s.setContext(ctx).draw());
+    this.systems.forEach((s) => s.setContext(ctx).drawWithStyle());
     this.reset();
   }
 }

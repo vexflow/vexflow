@@ -1,5 +1,5 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
-// Author Mark Meeus 2019
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// @author: Mark Meeus 2019
 
 import { KeySignature } from './keysignature';
 import { ModifierContext } from './modifiercontext';
@@ -19,7 +19,7 @@ export class KeySigNote extends Note {
     this.keySignature = new KeySignature(keySpec, cancelKeySpec, alterKeySpec);
 
     // Note properties
-    this.ignore_ticks = true;
+    this.ignoreTicks = true;
   }
 
   /* Overridden to ignore */
@@ -41,6 +41,6 @@ export class KeySigNote extends Note {
     this.setRendered();
     this.keySignature.setX(this.getAbsoluteX());
     this.keySignature.setContext(ctx);
-    this.keySignature.draw();
+    this.keySignature.drawWithStyle();
   }
 }

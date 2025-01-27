@@ -1,11 +1,12 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 //
 // ## Description
 // `StemmableNote` is an abstract interface for notes with optional stems.
 // Examples of stemmable notes are `StaveNote` and `TabNote`
 
-import { Glyph, GlyphProps } from './glyph';
-import { Note, NoteStruct } from './note';
+import { Flag } from './flag';
+import { Glyphs } from './glyphs';
+import { GlyphProps, Note, NoteStruct } from './note';
 import { Stem, StemOptions } from './stem';
 import { Tables } from './tables';
 import { Category } from './typeguard';
@@ -16,11 +17,11 @@ export abstract class StemmableNote extends Note {
     return Category.StemmableNote;
   }
 
-  stem_direction?: number;
+  stemDirection?: number;
   stem?: Stem;
 
-  protected flag?: Glyph;
-  protected stem_extension_override?: number;
+  protected flag = new Flag();
+  protected stemExtensionOverride?: number;
 
   constructor(noteStruct: NoteStruct) {
     super(noteStruct);
@@ -40,7 +41,7 @@ export abstract class StemmableNote extends Note {
 
   setStem(stem: Stem): this {
     this.stem = stem;
-    this.addChildElement(stem);
+    this.addChild(stem);
     return this;
   }
 
@@ -51,14 +52,19 @@ export abstract class StemmableNote extends Note {
     return this;
   }
 
-  buildFlag(category = 'flag'): void {
+  buildFlag(): void {
     const { glyphProps } = this;
 
     if (this.hasFlag()) {
       const flagCode =
-        this.getStemDirection() === Stem.DOWN ? glyphProps.code_flag_downstem : glyphProps.code_flag_upstem;
+        // codeFlagDown = codeFlagUp + 1
+        // if codeFlagUp is undefined, codePoint will be 0
+        this.getStemDirection() === Stem.DOWN
+          ? String.fromCodePoint((glyphProps.codeFlagUp?.codePointAt(0) ?? -1) + 1)
+          : (glyphProps.codeFlagUp ?? Glyphs.null);
 
-      if (flagCode) this.flag = new Glyph(flagCode, this.render_options.glyph_font_scale, { category });
+      this.flag.setText(flagCode);
+      this.flag.fontInfo = this.fontInfo;
     }
   }
 
@@ -81,7 +87,7 @@ export abstract class StemmableNote extends Note {
     const glyphProps = this.getGlyphProps();
 
     if (glyphProps) {
-      return glyphProps.beam_count;
+      return glyphProps.beamCount;
     } else {
       return 0;
     }
@@ -90,23 +96,22 @@ export abstract class StemmableNote extends Note {
   // Get the minimum length of stem
   getStemMinimumLength(): number {
     const frac = Tables.durationToFraction(this.duration);
+    const beamIsUndefined = this.beam === undefined;
     let length = frac.value() <= 1 ? 0 : 20;
     // if note is flagged, cannot shorten beam
     switch (this.duration) {
       case '8':
-        if (this.beam == undefined) length = 35;
-        break;
       case '16':
-        length = this.beam == undefined ? 35 : 25;
+        length = beamIsUndefined ? 35 : 25;
         break;
       case '32':
-        length = this.beam == undefined ? 45 : 35;
+        length = beamIsUndefined ? 45 : 35;
         break;
       case '64':
-        length = this.beam == undefined ? 50 : 40;
+        length = beamIsUndefined ? 50 : 40;
         break;
       case '128':
-        length = this.beam == undefined ? 55 : 45;
+        length = beamIsUndefined ? 55 : 45;
         break;
       default:
         break;
@@ -116,8 +121,8 @@ export abstract class StemmableNote extends Note {
 
   // Get/set the direction of the stem
   getStemDirection(): number {
-    if (!this.stem_direction) throw new RuntimeError('NoStem', 'No stem attached to this note.');
-    return this.stem_direction;
+    if (!this.stemDirection) throw new RuntimeError('NoStem', 'No stem attached to this note.');
+    return this.stemDirection;
   }
 
   setStemDirection(direction?: number): this {
@@ -126,7 +131,7 @@ export abstract class StemmableNote extends Note {
       throw new RuntimeError('BadArgument', `Invalid stem direction: ${direction}`);
     }
 
-    this.stem_direction = direction;
+    this.stemDirection = direction;
 
     // Reset and reformat everything. Flag has to be built before calling getStemExtension.
     this.reset();
@@ -138,26 +143,6 @@ export abstract class StemmableNote extends Note {
     if (this.stem) {
       this.stem.setDirection(direction);
       this.stem.setExtension(this.getStemExtension());
-
-      // Lookup the base custom notehead (closest to the base of the stem) to extend or shorten
-      // the stem appropriately. If there's no custom note head, lookup the standard notehead.
-      const glyphProps = this.getBaseCustomNoteHeadGlyphProps() || this.getGlyphProps();
-
-      // Get the font-specific customizations for the note heads.
-      const offsets = Tables.currentMusicFont().lookupMetric(`stem.noteHead.${glyphProps.code_head}`, {
-        offsetYBaseStemUp: 0,
-        offsetYTopStemUp: 0,
-        offsetYBaseStemDown: 0,
-        offsetYTopStemDown: 0,
-      });
-
-      // Configure the stem to use these offsets.
-      this.stem.setOptions({
-        stem_up_y_offset: offsets.offsetYTopStemUp, // glyph.stem_up_y_offset,
-        stem_down_y_offset: offsets.offsetYTopStemDown, // glyph.stem_down_y_offset,
-        stem_up_y_base_offset: offsets.offsetYBaseStemUp, // glyph.stem_up_y_base_offset,
-        stem_down_y_base_offset: offsets.offsetYBaseStemDown, // glyph.stem_down_y_base_offset,
-      });
     }
 
     if (this.preFormatted) {
@@ -168,41 +153,40 @@ export abstract class StemmableNote extends Note {
 
   // Get the `x` coordinate of the stem
   getStemX(): number {
-    const x_begin = this.getAbsoluteX() + this.x_shift;
-    const x_end = this.getAbsoluteX() + this.x_shift + this.getGlyphWidth();
-    const stem_x = this.stem_direction === Stem.DOWN ? x_begin : x_end;
-    return stem_x;
+    const xBegin = this.getAbsoluteX() + this.xShift;
+    const xEnd = this.getAbsoluteX() + this.xShift + this.getGlyphWidth();
+    const stemX = this.stemDirection === Stem.DOWN ? xBegin : xEnd;
+    return stemX;
   }
 
   // Get the `x` coordinate for the center of the glyph.
   // Used for `TabNote` stems and stemlets over rests
   getCenterGlyphX(): number {
-    return this.getAbsoluteX() + this.x_shift + this.getGlyphWidth() / 2;
+    return this.getAbsoluteX() + this.xShift + this.getGlyphWidth() / 2;
   }
 
   // Get the stem extension for the current duration
   getStemExtension(): number {
     const glyphProps = this.getGlyphProps();
+    const flagHeight = this.flag.getHeight();
+    const scale = this.getFontScale();
 
-    if (this.stem_extension_override != undefined) {
-      return this.stem_extension_override;
+    if (this.stemExtensionOverride !== undefined) {
+      return this.stemExtensionOverride;
     }
 
-    // Use stem_beam_extension with beams
+    // Use stemBeamExtension with beams
     if (this.beam) {
-      return glyphProps.stem_beam_extension;
+      return glyphProps.stemBeamExtension * scale;
     }
 
-    if (glyphProps) {
-      return this.getStemDirection() === Stem.UP ? glyphProps.stem_up_extension : glyphProps.stem_down_extension;
-    }
-
-    return 0;
+    // If the flag is longer than the stem, extend the stem by the difference.
+    return flagHeight > Stem.HEIGHT * scale ? flagHeight - Stem.HEIGHT * scale : 0;
   }
 
   // Set the stem length to a specific. Will override the default length.
   setStemLength(height: number): this {
-    this.stem_extension_override = height - Stem.HEIGHT;
+    this.stemExtensionOverride = height - Stem.HEIGHT;
     return this;
   }
 
@@ -221,7 +205,7 @@ export abstract class StemmableNote extends Note {
 
       return Math.min(
         stave.getYForTopText(textLine),
-        extents.topY - this.render_options.annotation_spacing * (textLine + 1)
+        extents.topY - this.renderOptions.annotationSpacing * (textLine + 1)
       );
     } else {
       return stave.getYForTopText(textLine);
@@ -235,17 +219,14 @@ export abstract class StemmableNote extends Note {
       const extents = this.getStemExtents();
       if (!extents) throw new RuntimeError('InvalidState', 'Stem does not have extents.');
 
-      return Math.max(
-        stave.getYForTopText(textLine),
-        extents.baseY + this.render_options.annotation_spacing * textLine
-      );
+      return Math.max(stave.getYForTopText(textLine), extents.baseY + this.renderOptions.annotationSpacing * textLine);
     } else {
       return stave.getYForBottomText(textLine);
     }
   }
 
   hasFlag(): boolean {
-    return Tables.getGlyphProps(this.duration).flag == true && !this.beam;
+    return this.glyphProps.codeFlagUp !== undefined && !this.beam && !this.isRest();
   }
 
   /** Post formats the note. */
@@ -261,6 +242,6 @@ export abstract class StemmableNote extends Note {
     this.setRendered();
 
     this.setStem(new Stem(stemOptions));
-    this.stem?.setContext(this.getContext()).draw();
+    this.stem?.setContext(this.getContext()).drawWithStyle();
   }
 }

@@ -1,8 +1,6 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
-// Author Larry Kuhns 2011
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// @author: Larry Kuhns 2011
 
-import { Font, FontInfo, FontStyle, FontWeight } from './font';
-import { Stave } from './stave';
 import { StaveModifier } from './stavemodifier';
 import { Category } from './typeguard';
 
@@ -23,64 +21,46 @@ export class Volta extends StaveModifier {
     return VoltaType;
   }
 
-  static TEXT_FONT: Required<FontInfo> = {
-    family: Font.SANS_SERIF,
-    size: 9,
-    weight: FontWeight.BOLD,
-    style: FontStyle.NORMAL,
-  };
+  protected type: number;
 
-  protected volta: number;
-  protected number: string;
-
-  protected y_shift: number;
-
-  constructor(type: number, number: string, x: number, y_shift: number) {
+  constructor(type: number, label: string, x: number, yShift: number) {
     super();
-    this.volta = type;
+    this.type = type;
     this.x = x;
-    this.y_shift = y_shift;
-    this.number = number;
-    this.resetFont();
+    this.yShift = yShift;
+    this.text = label;
   }
 
-  setShiftY(y: number): this {
-    this.y_shift = y;
-    return this;
-  }
-
-  draw(stave: Stave, x: number): this {
+  draw(): void {
+    const stave = this.checkStave();
+    const x = stave.getModifierXShift(this.getPosition());
     const ctx = stave.checkContext();
     this.setRendered();
 
     let width = stave.getWidth() - x; // don't include x (offset) for width
-    const top_y = stave.getYForTopText(stave.getNumLines()) + this.y_shift;
-    const vert_height = 1.5 * stave.getSpacingBetweenLines();
-    switch (this.volta) {
+    const topY = stave.getYForTopText(stave.getNumLines()) + this.yShift;
+    const vertHeight = 1.5 * stave.getSpacingBetweenLines();
+    switch (this.type) {
       case VoltaType.BEGIN:
-        ctx.fillRect(this.x + x, top_y, 1, vert_height);
+        ctx.fillRect(this.x + x, topY, 1, vertHeight);
         break;
       case VoltaType.END:
         width -= 5;
-        ctx.fillRect(this.x + x + width, top_y, 1, vert_height);
+        ctx.fillRect(this.x + x + width, topY, 1, vertHeight);
         break;
       case VoltaType.BEGIN_END:
         width -= 3;
-        ctx.fillRect(this.x + x, top_y, 1, vert_height);
-        ctx.fillRect(this.x + x + width, top_y, 1, vert_height);
+        ctx.fillRect(this.x + x, topY, 1, vertHeight);
+        ctx.fillRect(this.x + x + width, topY, 1, vertHeight);
         break;
       default:
         break;
     }
     // If the beginning of a volta, draw measure number
-    if (this.volta === VoltaType.BEGIN || this.volta === VoltaType.BEGIN_END) {
-      ctx.save();
-      ctx.setFont(this.textFont);
-      ctx.fillText(this.number, this.x + x + 5, top_y + 15);
-      ctx.restore();
+    if (this.type === VoltaType.BEGIN || this.type === VoltaType.BEGIN_END) {
+      this.renderText(ctx, x + 5, topY - this.yShift + 15);
     }
 
-    ctx.fillRect(this.x + x, top_y, width, 1);
-    return this;
+    ctx.fillRect(this.x + x, topY, width, 1);
   }
 }

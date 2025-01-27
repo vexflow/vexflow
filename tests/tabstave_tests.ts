@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // TabStave Tests
@@ -19,9 +19,10 @@ const TabStaveTests = {
 function draw(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 400, 160);
   const stave = new TabStave(10, 10, 300);
+  stave.setMeasure(1);
   stave.setNumLines(6);
   stave.setContext(ctx);
-  stave.draw();
+  stave.drawWithStyle();
 
   options.assert.equal(stave.getYForNote(0), 127, 'getYForNote(0)');
   options.assert.equal(stave.getYForLine(5), 127, 'getYForLine(5)');

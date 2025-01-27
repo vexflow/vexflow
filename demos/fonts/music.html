@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- 
+      Summary: Sample of the music fonts available in VexFlow. This page doesn't use any VexFlow features.
+      Run: Open this html file in your web browser.
+    -->
+    <style>
+      html {
+        font-family: sans-serif;
+        font-size: 22px;
+      }
+
+      body {
+        margin: 20px;
+      }
+
+      button {
+        font-size: 18px;
+        padding: 10px;
+        cursor: pointer;
+      }
+
+      .music {
+        font-size: 100px;
+        display: none;
+      }
+
+      #info {
+        display: none;
+      }
+    </style>
+    <!-- 
+        In your browser's dev tools / network tab, you'll see that these index.css files are loaded immediately. 
+        However, the actual font files (*.woff2) are not loaded until the SHOW NEXT FONT button is clicked.
+    -->
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/bravura/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/bravuratext/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/finaleash/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/finalebroadway/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/finalejazz/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/finalemaestro/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/gonville/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/gootville/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/gootvilletext/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/leipzig/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/leland/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/lelandtext/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/musejazz/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/petaluma/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/petalumatext/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/sebastian/index.css" />
+    <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/sebastiantext/index.css" />
+  </head>
+  <body>
+    <button id="show-next-font" onclick="showNextFont()">SHOW NEXT FONT</button>
+    <p id="info">
+      Glyphs below are set in <b><span id="font-name"></span></b>. Glyph code points were copied from:
+      <a href="https://w3c.github.io/smufl/latest/">https://w3c.github.io/smufl/latest/</a>
+    </p>
+    <div class="music">
+      &#xE560; &#xE1D7; &#xE050; &#xE062; &#xE080; &#xE081; &#xE082; &#xE083; &#xE084; &#xE08A; &#xE08B; &#xE1D2;
+      &#xE1D3; &#xE1D4; &#xE1D5; &#xE1D6; &#xE1D7; &#xE1D8; &#xE1D9; &#xE1DA; &#xE1DB; &#xE1DC; &#xE1DD; &#xE1DE;
+      &#xE1DF; &#xE1E0; &#xE1E1; &#xE1E2; &#xE1E7; &#xE260; &#xE261; &#xE262; &#xE263; &#xE264; &#xE245; &#xE269;
+      &#xE002; &#xE0A2; &#xE1F6; &#xE014; &#xE030; &#xE032; &#xE1FE; &#xE1FF; &#xE200; &#xE201; &#xE202; &#xE203;
+    </div>
+    <script>
+      const fonts = [
+        'Bravura',
+        'Bravura Text',
+        'Finale Ash',
+        'Finale Broadway',
+        'Finale Jazz',
+        'Finale Maestro',
+        'Gonville',
+        'Gootville',
+        'Gootville Text',
+        'Leipzig',
+        'Leland',
+        'Leland Text',
+        'MuseJazz',
+        'Petaluma',
+        'Petaluma Text',
+        'Sebastian',
+        'Sebastian Text',
+      ];
+      let index = 0;
+
+      function showNextFont() {
+        document.querySelector('#info').style.display = 'block';
+
+        const fontName = fonts[index];
+        const musicDIV = document.querySelector('.music');
+        musicDIV.style.display = 'block';
+        musicDIV.style.fontFamily = fontName;
+        document.querySelector('#font-name').innerText = fontName;
+        index = (index + 1) % fonts.length;
+        updateButtonLabel();
+      }
+
+      function updateButtonLabel() {
+        document.querySelector('#show-next-font').innerText = `SHOW NEXT FONT: ${fonts[index]}`;
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        updateButtonLabel();
+      });
+    </script>
+  </body>
+</html>

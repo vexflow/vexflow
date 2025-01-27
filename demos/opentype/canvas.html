@@ -1,0 +1,547 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- 
+      Provide a comma separated list of SMuFL glyph names.
+      See: https://w3c.github.io/smufl/latest/tables/
+           https://w3c.github.io/smufl/latest/tables/clefs.html
+           https://w3c.github.io/smufl/latest/tables/flags.html
+           https://w3c.github.io/smufl/latest/tables/beamed-groups-of-notes.html
+           ...etc
+      We will draw the glyphs on a canvas in three different fonts (Bravura, Gonville, Petaluma).
+      Use the keyboard's arrow keys to cycle through the glyphs.
+    -->
+    <script src="https://cdn.jsdelivr.net/npm/wawoff2@2.0.1/build/decompress_binding.js"></script>
+    <script>
+      let resolveWawoff2;
+      window.wawoff2IsReady = new Promise((resolve) => {
+        resolveWawoff2 = resolve;
+      });
+
+      // Decompress *.woff2 files with wawoff2@2.0.1.
+      window.Module = {
+        onRuntimeInitialized: () => {
+          resolveWawoff2(window.Module);
+        },
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
+    <script src="../../build/cjs/vexflow-debug.js"></script>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 20px 30px;
+        background-color: #191919;
+        color: #ddd;
+      }
+
+      a {
+        color: #9af;
+      }
+
+      .canvas-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-gap: 20px;
+        text-align: left;
+      }
+
+      canvas {
+        border: 1px solid black;
+        background-color: #ddd;
+        display: block;
+        margin-top: 5px;
+        margin-bottom: 20px;
+      }
+
+      div#glyphs {
+        align-items: center;
+        font-family: monospace;
+        width: 1000px;
+        font-size: 1.3em;
+        padding: 10px 20px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        min-height: 50px;
+        max-height: 200px;
+        background-color: #ccc;
+        color: #888;
+        overflow: auto;
+      }
+
+      div#glyphs div {
+        margin: 6px 0;
+      }
+
+      div#glyphs .selected {
+        color: #f00;
+        text-decoration: underline;
+      }
+
+      div#gonvilledev-container {
+        display: none;
+      }
+
+      h1 {
+        margin-bottom: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <p>
+      This page demonstrates how we can use <a href="https://opentype.js.org/">opentype.js</a> to draw a glyph onto a
+      <code>&lt;canvas&gt;</code>. We load Bravura, Gonville, and Petaluma. Cycle through the glyphs with the keyboard
+      arrow keys.
+    </p>
+    <div id="glyphs"></div>
+    <br /><br />
+    <div class="canvas-container">
+      <div>
+        <h1>Bravura</h1>
+        <canvas id="bravura-output" width="1000" height="600"></canvas>
+      </div>
+      <div>
+        <h1>Petaluma</h1>
+        <canvas id="petaluma-output" width="1000" height="600"></canvas>
+      </div>
+      <div>
+        <h1>Gonville</h1>
+        <canvas id="gonville-output" width="1000" height="600"></canvas>
+      </div>
+      <div id="gonvilledev-container">
+        <h1>Gonville Dev</h1>
+        <canvas id="gonvilledev-output" width="1000" height="600"></canvas>
+      </div>
+    </div>
+    <script type="module">
+      const showGonvilleDev = false;
+
+      let currentGlyphIndex = parseInt(localStorage.getItem('currentGlyphIndex')) ?? 0;
+
+      let glyphNames = [];
+      const DEFAULT_GLYPH_NAMES = [
+        // 'bracketTop',
+        // 'bracketBottom',
+        // 'segno',
+        // 'coda',
+        // 'codaSquare',
+        // 'segnoSerpent1',
+        // 'gClef',
+        // 'gClef8vbOld',
+        // 'gClef8vbCClef',
+        // 'cClef',
+        // 'cClefCombining',
+        // 'fClef',
+        // 'unpitchedPercussionClef1',
+        // 'unpitchedPercussionClef2',
+        // 'sixStringTabClef', // 6stringTabClef
+        // 'fourStringTabClef', // 4stringTabClef
+        // 'gClefChange',
+        // 'cClefChange',
+        // 'fClefChange',
+        // 'timeSig0',
+        // 'timeSig1',
+        // 'timeSig2',
+        // 'timeSig3',
+        // 'timeSig4',
+        // 'timeSig5',
+        // 'timeSig6',
+        // 'timeSig7',
+        // 'timeSig8',
+        // 'timeSig9',
+        // 'timeSigCommon',
+        // 'timeSigCutCommon',
+        // 'timeSigPlus',
+        // 'timeSigPlusSmall',
+        // 'timeSigMinus',
+        // 'timeSigParensLeftSmall',
+        // 'timeSigParensRightSmall',
+        // 'timeSigParensLeft',
+        // 'timeSigParensRight',
+        // 'noteheadDoubleWhole',
+        // 'noteheadWhole',
+        // 'noteheadHalf',
+        // 'noteheadBlack',
+        // 'noteheadXWhole',
+        // 'noteheadXHalf',
+        // 'noteheadXBlack',
+        // 'noteheadCircleX',
+        // 'noteheadTriangleUpWhole',
+        // 'noteheadTriangleUpHalf',
+        // 'noteheadTriangleUpWhite',
+        // 'noteheadTriangleUpBlack',
+        // 'noteheadDiamondWhole',
+        // 'noteheadDiamondHalf',
+        // 'noteheadDiamondBlack',
+        'augmentationDot', // MOVE ORIGIN LEFT
+        // 'tremolo1',
+        // 'flag8thUp',
+        // 'flag8thDown',
+        // 'flag16thUp',
+        // 'flag16thDown',
+        // 'flag32ndUp',
+        // 'flag32ndDown',
+        // 'flag64thUp',
+        // 'flag64thDown',
+        // 'flag128thUp',
+        // 'flag128thDown',
+        // 'flag256thUp',
+        // 'flag256thDown',
+        // 'flag512thUp',
+        // 'flag512thDown',
+        // 'flag1024thUp',
+        // 'flag1024thDown',
+        // 'accidentalFlat',
+        // 'accidentalNatural',
+        // 'accidentalSharp',
+        // 'accidentalDoubleSharp',
+        // 'accidentalDoubleFlat',
+        // 'accidentalParensLeft',
+        // 'accidentalParensRight',
+        'accidentalQuarterToneFlatArrowUp', // MOVE ORIGIN LEFT
+        'accidentalThreeQuarterTonesFlatArrowDown', // MOVE ORIGIN LEFT
+        'accidentalQuarterToneSharpNaturalArrowUp', // MOVE ORIGIN RIGHT
+        // 'accidentalQuarterToneFlatNaturalArrowDown',
+        // 'accidentalThreeQuarterTonesSharpArrowUp',
+        // 'accidentalQuarterToneSharpArrowDown',
+        // 'accidentalQuarterToneFlatStein',
+        // 'accidentalThreeQuarterTonesFlatZimmermann',
+        // 'accidentalQuarterToneSharpStein',
+        // 'accidentalThreeQuarterTonesSharpStein',
+        // 'accidentalBuyukMucennebFlat',
+        // 'accidentalBakiyeFlat',
+        // 'accidentalKomaSharp',
+        // 'accidentalKucukMucennebSharp',
+        // 'accidentalBuyukMucennebSharp',
+        // 'articAccentAbove',
+        // 'articAccentBelow',
+        'articStaccatoAbove', // MOVE ORIGIN DOWN
+        'articStaccatoBelow', // MOVE ORIGIN UP
+        'articTenutoAbove', // MOVE ORIGIN DOWN
+        'articTenutoBelow', // MOVE ORIGIN UP
+        // 'articStaccatissimoAbove',
+        // 'articStaccatissimoBelow',
+        // 'articMarcatoAbove',
+        // 'articMarcatoBelow',
+        // 'fermataAbove',
+        // 'fermataBelow',
+        // 'fermataVeryShortAbove',
+        // 'fermataVeryShortBelow',
+        // 'fermataShortAbove',
+        // 'fermataShortBelow',
+        // 'fermataLongAbove',
+        // 'fermataLongBelow',
+        // 'fermataVeryLongAbove',
+        // 'fermataVeryLongBelow',
+        // 'fermataLongHenzeAbove',
+        // 'fermataLongHenzeBelow',
+        // 'fermataShortHenzeAbove',
+        // 'fermataShortHenzeBelow',
+        // 'breathMarkComma',
+        // 'breathMarkTick',
+        // 'breathMarkUpbow',
+        // 'caesura',
+        // 'caesuraCurved',
+        // 'restMaxima',
+        // 'restLonga',
+        // 'restDoubleWhole',
+        // 'restWhole',
+        // 'restHalf',
+        // 'restQuarter',
+        // 'rest8th',
+        // 'rest16th',
+        // 'rest32nd',
+        // 'rest64th',
+        // 'rest128th',
+        // 'rest256th',
+        // 'rest512th',
+        'rest1024th', // MOVE ORIGIN DOWN, SO THAT ONLY 3 BUMPS ARE BELOW THE ORIGIN.
+        // 'restQuarterOld',
+        'restDoubleWholeLegerLine', // MOVE ORIGIN UP
+        // 'restWholeLegerLine',
+        // 'restHalfLegerLine',
+        // 'restQuarterZ',
+        // 'dynamicPiano',
+        'dynamicMezzo', // MOVE ORIGIN RIGHT, TO THE FOOT OF THE M
+        'dynamicForte', // MOVE ORIGIN RIGHT
+        'dynamicRinforzando', // NUDGE ORIGIN RIGHT
+        'dynamicSforzando', // MOVE ORIGIN RIGHT
+        'dynamicZ', // MOVE ORIGIN RIGHT
+        'dynamicNiente', // MOVE ORIGIN RIGHT
+        // 'graceNoteSlashStemUp',
+        // 'graceNoteSlashStemDown',
+        // 'ornamentTrill',
+        // 'ornamentTurn',
+        // 'ornamentTurnInverted',
+        // 'ornamentTurnSlash',
+        // 'ornamentShortTrill',
+        // 'ornamentMordent',
+        // 'ornamentTremblement',
+        // 'ornamentHaydn',
+        // 'ornamentPrecompAppoggTrill',
+        // 'ornamentPrecompSlideTrillDAnglebert',
+        // 'ornamentPrecompSlideTrillBach',
+        // 'ornamentPrecompTrillSuffixDandrieu',
+        // 'ornamentPrecompTrillWithMordent',
+        // 'ornamentPrecompDoubleCadenceUpperPrefix',
+        // 'ornamentPrecompDoubleCadenceUpperPrefixTurn',
+        // 'ornamentPrecompTrillLowerSuffix',
+        // 'stringsDownBow',
+        // 'stringsUpBow',
+        // 'stringsHarmonic',
+        // 'pluckedSnapPizzicatoBelow',
+        // 'pluckedSnapPizzicatoAbove',
+        // 'pluckedLeftHandPizzicato',
+        // 'keyboardPedalPed',
+        // 'keyboardPedalP',
+        // 'keyboardPedalE',
+        'keyboardPedalD', // MOVE ORIGIN RIGHT SO IT TOUCHES THE ROUND PART OF THE LOWERCASE d
+        // 'keyboardPedalDot',
+        'keyboardPedalUp', // MOVE ORIGIN UP
+        // 'pictChokeCymbal',
+        // 'accdnCombRH3RanksEmpty',
+        // 'accdnCombRH4RanksEmpty',
+        // 'accdnCombLH2RanksEmpty',
+        // 'accdnCombLH3RanksEmptySquare',
+        'accdnCombDot', // MOVE ORIGIN DOWN
+        // 'accdnPush',
+        // 'accdnPull',
+        'wiggleArpeggiatoUp', // IS PETALUMA BUGGY?
+        'wiggleArpeggiatoDown', // FLIP THIS GLYPH. IS PETALUMA BUGGY?
+        // 'arrowBlackUp',
+        // 'arrowBlackDown',
+        // 'arrowheadBlackUp',
+        // 'arrowheadBlackRight',
+        // 'arrowheadBlackDown',
+        // 'arrowheadBlackLeft',
+        // 'arrowheadOpenUp',
+        // 'arrowheadOpenRight',
+        // 'arrowheadOpenDown',
+        // 'arrowheadOpenLeft',
+      ];
+
+      const originOffset = [200, 350];
+
+      // You might have to purge the jsDelivr CDN cache to make the updated font available sooner:
+      // https://www.jsdelivr.com/tools/purge
+      // For example, you can submit this URL:
+      // https://cdn.jsdelivr.net/npm/@vexflow-fonts/gonville/gonville.woff2
+      const fontNames = ['Bravura', 'Gonville', 'Petaluma'];
+      const fontURLs = [];
+      for (let fontName of fontNames) {
+        console.log(VexFlow.Font.getURLForFont(fontName));
+        fontURLs.push(VexFlow.Font.getURLForFont(fontName));
+      }
+
+      // Build Gonville from source and put it in the vexflow/build/ directory.
+      // Serve it with `npx serve` at localhost:3000.
+      // Here, we load it and call it 'GonvilleDev'.
+      if (showGonvilleDev) {
+        document.getElementById('gonvilledev-container').style.display = 'block';
+
+        fontNames.push('GonvilleDev');
+        fontURLs.push('http://localhost:3000/build/gonville/gonville.woff2?' + Math.random());
+      }
+
+      const fonts = {};
+
+      function loadFont(fontIndex) {
+        const fontName = fontNames[fontIndex];
+        const fontURL = fontURLs[fontIndex];
+        return fetch(fontURL)
+          .then((response) => response.arrayBuffer())
+          .then((compressedArrayBuffer) => {
+            const decompressedUint8Array = Module.decompress(compressedArrayBuffer);
+            const decompressedArrayBuffer = decompressedUint8Array.buffer.slice(
+              decompressedUint8Array.byteOffset,
+              decompressedUint8Array.byteLength + decompressedUint8Array.byteOffset
+            );
+            const font = opentype.parse(decompressedArrayBuffer);
+            console.log(font.names.fullName.en, 'loaded with', font.numGlyphs, 'glyphs.');
+            fonts[fontName] = font;
+
+            const canvas = document.getElementById(fontName.toLowerCase() + '-output');
+            const ctx = canvas.getContext('2d');
+
+            doubleCanvasIfHighDPI(canvas, ctx);
+            return ctx;
+          });
+      }
+
+      wawoff2IsReady.then((wawoff2) => {
+        for (let fontIndex = 0; fontIndex < fontNames.length; fontIndex++) {
+          loadFont(fontIndex).then((ctx) => {
+            updateGlyphCanvases();
+          });
+        }
+      });
+
+      function draw(glyph, ctx, fontName, size = 72) {
+        const x = originOffset[0];
+        const y = originOffset[1];
+        glyph.draw(ctx, x, y, size);
+        glyph.drawPoints(ctx, x, y, size);
+        glyph.drawMetrics(ctx, x, y, size);
+        drawOrigin(ctx);
+      }
+
+      // Draw the origin as a cross.
+      function drawOrigin(ctx) {
+        const r = 10;
+        ctx.globalAlpha = 1;
+        ctx.save();
+        ctx.translate(originOffset[0], originOffset[1]);
+        ctx.strokeStyle = '#ff6347';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-r, 0);
+        ctx.lineTo(r, 0);
+        ctx.moveTo(0, -r);
+        ctx.lineTo(0, r);
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, r, 0, 2 * Math.PI);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function doubleCanvasIfHighDPI(canvas, ctx) {
+        const ratio = window.devicePixelRatio;
+        if (ratio > 1) {
+          const canvasWidth = canvas.width;
+          const canvasHeight = canvas.height;
+
+          canvas.width = canvasWidth * ratio;
+          canvas.height = canvasHeight * ratio;
+          canvas.style.width = canvasWidth + 'px';
+          canvas.style.height = canvasHeight + 'px';
+
+          ctx.scale(ratio, ratio);
+        }
+      }
+
+      function setupKeyboardHandlers() {
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+            currentGlyphIndex--;
+          } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+            currentGlyphIndex++;
+          }
+
+          itemSelected();
+        });
+      }
+
+      function itemSelected() {
+        if (currentGlyphIndex < 0) {
+          currentGlyphIndex = 0;
+        } else if (currentGlyphIndex >= glyphNames.length) {
+          currentGlyphIndex = glyphNames.length - 1;
+        }
+        localStorage.setItem('currentGlyphIndex', currentGlyphIndex);
+        updateGlyphsInputTextBox();
+        updateGlyphCanvases();
+      }
+
+      // NOT USED YET
+      function saveGlyphNames() {
+        localStorage.setItem('glyphNames', glyphNames.join(','));
+      }
+
+      function loadGlyphNames() {
+        const names = localStorage.getItem('glyphNames');
+        if (names !== null && names.length > 0) {
+          names = names.replace(/\s/g, '');
+          glyphNames = names.split(',');
+        } else {
+          glyphNames = DEFAULT_GLYPH_NAMES;
+        }
+        updateGlyphsInputTextBox();
+      }
+
+      function itemDivClicked(event, itemIndex) {
+        const text = event.target.innerHTML;
+        navigator.clipboard
+          .writeText(text)
+          .then(() => {
+            console.log(text + 'copied to clipboard successfully');
+          })
+          .catch((err) => {
+            console.error('Could not copy text: ', err);
+          });
+        currentGlyphIndex = itemIndex;
+        itemSelected();
+      }
+
+      window.itemDivClicked = itemDivClicked;
+
+      function updateGlyphsInputTextBox() {
+        const items = glyphNames.map((item, index) => {
+          const isSelected = index === currentGlyphIndex;
+          const selectedClass = isSelected ? 'class="selected"' : '';
+          return '<div ' + selectedClass + ' onclick="itemDivClicked(event, ' + index + ')">' + item + '</div>';
+        });
+
+        const glyphsDIV = document.getElementById('glyphs');
+        glyphsDIV.innerHTML = items.join('');
+
+        setTimeout(() => {
+          const selectedDIV = document.querySelector('#glyphs .selected');
+          selectedDIV?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 1000);
+      }
+
+      function updateGlyphCanvases() {
+        // Make sure all fonts are loaded.
+        const loadedFonts = Object.keys(fonts);
+        if (loadedFonts.length < fontNames.length) {
+          console.log('Not all fonts are loaded yet.');
+          return;
+        } else {
+          console.log('All fonts are loaded!');
+        }
+
+        const glyph = VexFlow.Glyphs[glyphNames[currentGlyphIndex]];
+        if (!glyph) {
+          console.log('Unknown glyph name: ' + glyphNames[currentGlyphIndex]);
+          return;
+        }
+
+        // Find the bounding box of the glyph in all fonts.
+        // Keep the largest bounding box.
+        let heightOfTallestGlyph = 0;
+        for (let fontName of fontNames) {
+          const font = fonts[fontName];
+          const glyphObject = font.charToGlyph(glyph);
+          const boundingBox = glyphObject.getBoundingBox();
+          const height = boundingBox.y2 - boundingBox.y1;
+          if (height > heightOfTallestGlyph) {
+            heightOfTallestGlyph = height;
+          }
+        }
+
+        // Fit the glyphs into 300 vertical pixels.
+        // 300px = 100 units @ 3000 font size
+        const fontSize = (300 / heightOfTallestGlyph) * 1000;
+
+        // Draw the glyph in all fonts.
+        for (let fontName of fontNames) {
+          const font = fonts[fontName];
+          const canvas = document.getElementById(fontName.toLowerCase() + '-output');
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // Sorry for the confusing naming here.
+          // The `glyph` variable is actually a single character.
+          // We convert it to an opentype.js Glyph object.
+          const glyphObject = font.charToGlyph(glyph);
+          draw(glyphObject, ctx, fontName, fontSize);
+        }
+      }
+
+      setupKeyboardHandlers();
+      loadGlyphNames();
+    </script>
+  </body>
+</html>

@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // StaveTie Tests
@@ -24,6 +24,7 @@ const StaveTieTests = {
     run('No Start Note', noStartNote2);
     run('Set Direction Down', setDirectionDown);
     run('Set Direction Up', setDirectionUp);
+    run('Tie Algorithms', tieAlgorithms);
   },
 };
 
@@ -54,8 +55,8 @@ const simple = createTest(['(cb4 e#4 a4)/2, (d4 e4 f4)', { stem: 'down' }], (f, 
   f.StaveTie({
     from: notes[0],
     to: notes[1],
-    first_indices: [0, 1],
-    last_indices: [0, 1],
+    firstIndexes: [0, 1],
+    lastIndexes: [0, 1],
   });
 });
 
@@ -63,8 +64,8 @@ const chord = createTest(['(d4 e4 f4)/2, (cn4 f#4 a4)', { stem: 'down' }], (f, n
   f.StaveTie({
     from: notes[0],
     to: notes[1],
-    first_indices: [0, 1, 2],
-    last_indices: [0, 1, 2],
+    firstIndexes: [0, 1, 2],
+    lastIndexes: [0, 1, 2],
   });
 });
 
@@ -72,8 +73,8 @@ const stemUp = createTest(['(d4 e4 f4)/2, (cn4 f#4 a4)', { stem: 'up' }], (f, no
   f.StaveTie({
     from: notes[0],
     to: notes[1],
-    first_indices: [0, 1, 2],
-    last_indices: [0, 1, 2],
+    firstIndexes: [0, 1, 2],
+    lastIndexes: [0, 1, 2],
   });
 });
 
@@ -81,8 +82,8 @@ const noEndNote1 = createTest(['(cb4 e#4 a4)/2, (d4 e4 f4)', { stem: 'down' }], 
   stave.addEndClef('treble');
   f.StaveTie({
     from: notes[1],
-    first_indices: [2],
-    last_indices: [2],
+    firstIndexes: [2],
+    lastIndexes: [2],
     text: 'slow.',
   });
 });
@@ -90,8 +91,8 @@ const noEndNote1 = createTest(['(cb4 e#4 a4)/2, (d4 e4 f4)', { stem: 'down' }], 
 const noEndNote2 = createTest(['(cb4 e#4 a4)/2, (d4 e4 f4)', { stem: 'down' }], (f, notes) => {
   f.StaveTie({
     from: notes[1],
-    first_indices: [2],
-    last_indices: [2],
+    firstIndexes: [2],
+    lastIndexes: [2],
     text: 'slow.',
   });
 });
@@ -100,8 +101,8 @@ const noStartNote1 = createTest(['(cb4 e#4 a4)/2, (d4 e4 f4)', { stem: 'down' }]
   stave.addClef('treble');
   f.StaveTie({
     to: notes[0],
-    first_indices: [2],
-    last_indices: [2],
+    firstIndexes: [2],
+    lastIndexes: [2],
     text: 'H',
   });
 });
@@ -109,8 +110,8 @@ const noStartNote1 = createTest(['(cb4 e#4 a4)/2, (d4 e4 f4)', { stem: 'down' }]
 const noStartNote2 = createTest(['(cb4 e#4 a4)/2, (d4 e4 f4)', { stem: 'down' }], (f, notes) => {
   f.StaveTie({
     to: notes[0],
-    first_indices: [2],
-    last_indices: [2],
+    firstIndexes: [2],
+    lastIndexes: [2],
     text: 'H',
   });
 });
@@ -119,8 +120,8 @@ const setDirectionDown = createTest(['(cb4 e#4 a4)/2, (d4 e4 f4)', { stem: 'down
   f.StaveTie({
     from: notes[0],
     to: notes[1],
-    first_indices: [0, 1],
-    last_indices: [0, 1],
+    firstIndexes: [0, 1],
+    lastIndexes: [0, 1],
     options: { direction: Stem.DOWN },
   });
 });
@@ -129,11 +130,40 @@ const setDirectionUp = createTest(['(cb4 e#4 a4)/2, (d4 e4 f4)', { stem: 'down' 
   f.StaveTie({
     from: notes[0],
     to: notes[1],
-    first_indices: [0, 1],
-    last_indices: [0, 1],
+    firstIndexes: [0, 1],
+    lastIndexes: [0, 1],
     options: { direction: Stem.UP },
   });
 });
+
+function tieAlgorithms(options: TestOptions): void {
+  const factory = VexFlowTests.makeFactory(options, 300);
+  const stave = factory.Stave();
+  const score = factory.EasyScore();
+  const [n0, n1] = score.notes('(c4 e4 g4)/2, (c4 e4 g4)', { stem: 'up' });
+  const voice = score.voice([n0, n1]);
+  const tie1 = factory.StaveTie({
+    from: n0,
+    to: n1,
+    firstIndexes: [0],
+    lastIndexes: [0],
+  });
+  const tie2 = factory.StaveTie({
+    from: n0,
+    to: n1,
+    firstIndexes: [1, 2],
+    lastIndexes: [1, 2],
+    options: { direction: Stem.DOWN },
+  });
+  factory.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+  factory.draw();
+  options.assert.equal(tie1.getDirection(), Stem.UP);
+  options.assert.equal(tie2.getDirection(), Stem.DOWN);
+  options.assert.ok(tie1.getFirstX() < tie1.getLastX());
+  n1.setStemDirection(Stem.DOWN);
+  options.assert.equal(tie1.getDirection(), Stem.DOWN);
+  options.assert.equal(tie2.getDirection(), Stem.DOWN);
+}
 
 VexFlowTests.register(StaveTieTests);
 export { StaveTieTests };

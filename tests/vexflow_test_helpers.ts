@@ -1,10 +1,11 @@
-// [VexFlow](https://vexflow.com/) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // VexFlow Test Support Library
 
-import { ContextBuilder, Factory, Flow, Font, RenderContext, Renderer } from '../src/index';
+import { ContextBuilder, Element, Factory, RenderContext, Renderer, VexFlow } from '../src/index';
 
+import { Metrics } from '../src/metrics';
 import { globalObject } from '../src/util';
 
 // eslint-disable-next-line
@@ -25,16 +26,16 @@ export interface TestOptions {
 // Each test case will switch through the available fonts, and then restore the original font when done.
 let originalFontNames: string[];
 function useTempFontStack(fontName: string): void {
-  originalFontNames = Flow.getMusicFont();
-  Flow.setMusicFont(...VexFlowTests.FONT_STACKS[fontName]);
+  originalFontNames = VexFlow.getFonts();
+  VexFlow.setFonts(...VexFlowTests.FONT_STACKS[fontName]);
 }
 function restoreOriginalFontStack(): void {
-  Flow.setMusicFont(...originalFontNames);
+  VexFlow.setFonts(...originalFontNames);
 }
 
 // A micro util inspired by jQuery.
 if (!global.$) {
-  // generate_png_images.js uses jsdom and does not include jQuery.
+  // generate_images_jsdom.js uses jsdom and does not include jQuery.
   global.$ = (param: HTMLElement | string) => {
     let element: HTMLElement;
     if (typeof param !== 'string') {
@@ -42,7 +43,7 @@ if (!global.$) {
     } else if (param.startsWith('<')) {
       // Extract the tag name: e.g., <div/> => div
       // Assume param.match returns something (! operator).
-      // eslint-disable-next-line
+
       const tagName = param.match(/[A-Za-z]+/g)![0];
       element = document.createElement(tagName);
     } else {
@@ -92,9 +93,13 @@ export type RunOptions = {
   job: number;
 };
 
-/** Allow `name` to be used inside file names. */
-function sanitizeName(name: string): string {
-  return name.replace(/[^a-zA-Z0-9]/g, '_');
+/**
+ * Clean the input string so we can use it inside file names.
+ * Only allow alphanumeric characters and underscores.
+ * Replace other characters with underscores.
+ */
+function sanitize(text: string): string {
+  return text.replace(/[^a-zA-Z0-9]/g, '_');
 }
 
 const CANVAS_TEST_CONFIG = {
@@ -115,7 +120,19 @@ const SVG_TEST_CONFIG = {
   backend: Renderer.Backends.SVG,
   tagName: 'div',
   testType: 'SVG',
-  fontStacks: ['Bravura', 'Gonville', 'Petaluma', 'Leland'],
+  fontStacks: [
+    'Bravura',
+    // 'Finale Ash',
+    // 'Finale Broadway',
+    // 'Finale Maestro',
+    'Gonville',
+    // 'Gootville',
+    // 'Leland',
+    // 'Leipzig',
+    // 'MuseJazz',
+    'Petaluma',
+    // 'Sebastian',
+  ],
 };
 
 const SVG_TEXT_CONFIG = {
@@ -129,7 +146,7 @@ const NODE_TEST_CONFIG = {
   backend: Renderer.Backends.CANVAS,
   tagName: 'canvas',
   testType: 'NodeCanvas',
-  fontStacks: ['Bravura', 'Gonville', 'Petaluma', 'Leland'],
+  fontStacks: ['Bravura', 'Petaluma', 'Leland', 'Gonville'],
 };
 
 interface Test {
@@ -144,7 +161,7 @@ export class VexFlowTests {
     VexFlowTests.tests.push(test);
   }
 
-  static parseJobOptions(runOptions: RunOptions | undefined): RunOptions {
+  static parseJobOptions(runOptions?: RunOptions): RunOptions {
     let { jobs, job } = runOptions || { jobs: 1, job: 0 };
     if (window) {
       const { location } = window;
@@ -167,7 +184,7 @@ export class VexFlowTests {
   }
 
   // flow.html calls this to invoke all the tests.
-  static run(runOptions: RunOptions | undefined): void {
+  static run(runOptions?: RunOptions): void {
     const { jobs, job } = VexFlowTests.parseJobOptions(runOptions);
     VexFlowTests.tests.forEach((test, idx: number) => {
       if (jobs === 1 || idx % jobs === job) {
@@ -176,7 +193,7 @@ export class VexFlowTests {
     });
   }
 
-  // See: generate_png_images.js
+  // See: generate_images_jsdom.js
   // Provides access to Node JS fs & process.
   // eslint-disable-next-line
   static shims: any;
@@ -193,14 +210,24 @@ export class VexFlowTests {
 
   /**
    * Each font stack is a prioritized list of font names.
+   * Music engraving fonts are paired with their recommended text fonts (if specified by the designer).
    */
   static FONT_STACKS: Record<string, string[]> = {
-    Bravura: ['Bravura', 'Custom'],
-    Gonville: ['Gonville', 'Bravura', 'Custom'],
-    Petaluma: ['Petaluma', 'Gonville', 'Bravura', 'Custom'],
-    Leland: ['Leland', 'Bravura', 'Custom'],
+    Bravura: ['Bravura', 'Academico'],
+    'Finale Ash': ['Finale Ash', 'Finale Ash Text'],
+    'Finale Broadway': ['Finale Broadway', 'Finale Broadway Text'],
+    'Finale Maestro': ['Finale Maestro', 'Finale Maestro Text'],
+    Gonville: ['Gonville', 'Academico'],
+    Gootville: ['Gootville', 'Edwin'],
+    Leland: ['Leland', 'Edwin'],
+    Leipzig: ['Leipzig', 'Academico'],
+    MuseJazz: ['MuseJazz', 'MuseJazz Text'],
+    Petaluma: ['Petaluma', 'Petaluma Script'],
+    Sebastian: ['Sebastian', 'Nepomuk'],
   };
 
+  // Used by generate_images_jsdom.js.
+  // TODO: Rename to JSDOM_FONT_STACKS?
   static set NODE_FONT_STACKS(fontStacks: string[]) {
     NODE_TEST_CONFIG.fontStacks = fontStacks;
   }
@@ -232,8 +259,7 @@ export class VexFlowTests {
   }
 
   /**
-   * Append a <div/> which contains the test case title and rendered output.
-   * See flow.html and flow.css.
+   * Append a <div/> which contains the test case title and rendered output. See tests/flow.html.
    * @param elementId
    * @param testTitle
    * @param tagName
@@ -297,15 +323,20 @@ export class VexFlowTests {
    */
   static runNodeTestHelper(fontName: string, element: HTMLElement): void {
     if (Renderer.lastContext !== undefined) {
-      const moduleName = sanitizeName(QUnit.module.name);
-      const testName = sanitizeName(QUnit.test.name);
-      // If we are only testing Bravura, we OMIT the font name from the
-      // output image file name, which allows visual diffs against
-      // the previous release: version 3.0.9. In the future, if we decide
-      // to test all fonts by default, we can remove this check.
-      const onlyBravura = NODE_TEST_CONFIG.fontStacks.length === 1 && fontName === 'Bravura';
-      const fontInfo = onlyBravura ? '' : `.${fontName}`;
-      const fileName = `${VexFlowTests.NODE_IMAGEDIR}/${moduleName}.${testName}${fontInfo}.png`;
+      // See QUNIT MOCK in generate_images_jsdom.js
+      const fileName =
+        VexFlowTests.NODE_IMAGEDIR +
+        '/' +
+        // eslint-disable-next-line
+        // @ts-ignore
+        sanitize(QUnit.moduleName) +
+        '.' +
+        // eslint-disable-next-line
+        // @ts-ignore
+        sanitize(QUnit.testName) +
+        '.' +
+        sanitize(fontName) +
+        '.jsdom.png';
 
       const imageData = (element as HTMLCanvasElement).toDataURL().split(';base64,').pop();
       const imageBuffer = Buffer.from(imageData as string, 'base64');
@@ -322,9 +353,11 @@ export class VexFlowTests {
     }
     const testTypeLowerCase = testType.toLowerCase();
     fontStacks.forEach((fontStackName: string) => {
+      // eslint-disable-next-line
       QUnit.test(name, (assert: any) => {
         useTempFontStack(fontStackName);
-        const elementId = VexFlowTests.generateTestID(`${testTypeLowerCase}_` + fontStackName);
+        const sanitizedFontStackName = sanitize(fontStackName);
+        const elementId = VexFlowTests.generateTestID(`${testTypeLowerCase}_` + sanitizedFontStackName);
         const moduleName = assert.test.module.name;
         const title = moduleName + ' › ' + name + ` › ${testType} + ${fontStackName}`;
 
@@ -332,17 +365,8 @@ export class VexFlowTests {
         // Add a fragment identifier to the url (e.g., #Stave.Multiple_Stave_Barline_Test.Bravura)
         // This titleId will match the name of the PNGs generated by visual regression tests
         // (without the _Current.png or _Reference.png).
-        let prefix = '';
-        if (testTypeLowerCase === 'canvas') {
-          prefix = testTypeLowerCase + '_';
-        } else {
-          // DO NOT ADD A PREFIX TO SVG TESTS
-          // The canvas prefix above is for making sure our element ids are unique,
-          // since we have a canvas+bravura test case and a svg+bravura test case
-          // that would otherwise have the same titleId.
-        }
-        const titleId = `${prefix}${sanitizeName(moduleName)}.${sanitizeName(name)}.${fontStackName}`;
-
+        const prefix = testTypeLowerCase + '_';
+        const titleId = `${prefix}${sanitize(moduleName)}.${sanitize(name)}.${sanitizedFontStackName}`;
         const element = VexFlowTests.createTest(elementId, title, tagName, titleId);
         const options: TestOptions = { elementId, params, assert, backend };
         const isSVG = backend === Renderer.Backends.SVG;
@@ -361,7 +385,7 @@ export class VexFlowTests {
    */
   static plotLegendForNoteWidth(ctx: RenderContext, x: number, y: number): void {
     ctx.save();
-    ctx.setFont(Font.SANS_SERIF, 8);
+    ctx.setFont(Metrics.get('fontFamily'), 8);
 
     const spacing = 12;
     let lastY = y;
@@ -386,6 +410,13 @@ export class VexFlowTests {
     legend('#DDD', 'Formatter Shift');
 
     ctx.restore();
+  }
+
+  static drawBoundingBox(ctx: RenderContext, el: Element) {
+    const bb = el.getBoundingBox();
+    ctx.beginPath();
+    ctx.rect(bb.getX(), bb.getY(), bb.getW(), bb.getH());
+    ctx.stroke();
   }
 }
 
@@ -431,10 +462,3 @@ export const MINOR_KEYS = [
   'D#m',
   'A#m',
 ];
-
-// VexFlow classes can be accessed via Vex.Flow.* or by directly importing a library class.
-// Tests can be accessed via Vex.Flow.Test.* or by directly importing a test class.
-// Here we set Vex.Flow.Test = VexFlowTests.
-// eslint-disable-next-line
-// @ts-ignore
-Flow.Test = VexFlowTests;

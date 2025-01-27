@@ -1,9 +1,9 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // VF.* Prefix Tests
 //
-// VexFlow classes are available under the global Vex.Flow.* namespace.
+// VexFlow classes are available under the global VexFlow.* namespace.
 
 import { VexFlowTests } from './vexflow_test_helpers';
 
@@ -16,7 +16,6 @@ import {
   Beam,
   Bend,
   BoundingBox,
-  BoundingBoxComputation,
   ChordSymbol,
   Clef,
   ClefNote,
@@ -26,13 +25,11 @@ import {
   EasyScore,
   Element,
   Factory,
-  Flow,
   Font,
   Formatter,
   Fraction,
   FretHandFinger,
   GhostNote,
-  Glyph,
   GlyphNote,
   GraceNote,
   GraceNoteGroup,
@@ -73,7 +70,6 @@ import {
   TabTie,
   TextBracket,
   TextDynamics,
-  TextFormatter,
   TextNote,
   TickContext,
   TimeSignature,
@@ -81,29 +77,25 @@ import {
   Tremolo,
   Tuning,
   Tuplet,
+  VexFlow,
   Vibrato,
   VibratoBracket,
   Voice,
   Volta,
 } from '../src/index';
 
-// Tell TypeScript that we want very flexible typing,
-// so we can use the Vex.Flow.* API in unusual ways without warnings.
-// eslint-disable-next-line
-declare let Vex: Record<string, any> & { Flow: typeof Flow & Record<string, any> };
-
 const VFPrefixTests = {
   Start(): void {
     QUnit.module('VF.* API');
-    QUnit.test('VF.* API', VF_Prefix);
-    QUnit.test('VF Alias', VF_Alias);
+    QUnit.test('VF.* API', VFPrefix);
+    QUnit.test('VF Alias', VFAlias);
   },
 };
 
-function VF_Prefix(assert: Assert): void {
-  // Intentionally use Vex.Flow here so we can verify that the Vex.Flow.* API
+function VFPrefix(assert: Assert): void {
+  // Intentionally use VexFlow here so we can verify that the VexFlow.* API
   // is equivalent to using the individual classes in TypeScript.
-  const VF = Vex.Flow;
+  const VF = VexFlow;
   assert.equal(Accidental, VF.Accidental);
   assert.equal(Annotation, VF.Annotation);
   assert.equal(Articulation, VF.Articulation);
@@ -112,7 +104,6 @@ function VF_Prefix(assert: Assert): void {
   assert.equal(Beam, VF.Beam);
   assert.equal(Bend, VF.Bend);
   assert.equal(BoundingBox, VF.BoundingBox);
-  assert.equal(BoundingBoxComputation, VF.BoundingBoxComputation);
   assert.equal(ChordSymbol, VF.ChordSymbol);
   assert.equal(Clef, VF.Clef);
   assert.equal(ClefNote, VF.ClefNote);
@@ -122,14 +113,12 @@ function VF_Prefix(assert: Assert): void {
   assert.equal(EasyScore, VF.EasyScore);
   assert.equal(Element, VF.Element);
   assert.equal(Factory, VF.Factory);
-  assert.equal(Flow.RESOLUTION, VF.RESOLUTION);
   assert.equal(Font, VF.Font);
   assert.equal(Formatter, VF.Formatter);
   assert.propEqual(new Formatter(), new VF.Formatter(), 'new Formatter()');
   assert.equal(Fraction, VF.Fraction);
   assert.equal(FretHandFinger, VF.FretHandFinger);
   assert.equal(GhostNote, VF.GhostNote);
-  assert.equal(Glyph, VF.Glyph);
   assert.equal(GlyphNote, VF.GlyphNote);
   assert.equal(GraceNote, VF.GraceNote);
   assert.equal(GraceNoteGroup, VF.GraceNoteGroup);
@@ -152,7 +141,7 @@ function VF_Prefix(assert: Assert): void {
   assert.equal(RepeatNote, VF.RepeatNote);
   assert.equal(Repetition, VF.Repetition);
   assert.equal(Stave, VF.Stave);
-  assert.notEqual(Stave, VF.StaveNote);
+  assert.notEqual(Stave, VF.StaveNote); // Sanity check.
   assert.equal(StaveConnector, VF.StaveConnector);
   assert.equal(StaveHairpin, VF.StaveHairpin);
   assert.equal(StaveLine, VF.StaveLine);
@@ -171,7 +160,6 @@ function VF_Prefix(assert: Assert): void {
   assert.equal(TabTie, VF.TabTie);
   assert.equal(TextBracket, VF.TextBracket);
   assert.equal(TextDynamics, VF.TextDynamics);
-  assert.equal(TextFormatter, VF.TextFormatter);
   assert.equal(TextNote, VF.TextNote);
   assert.equal(TickContext, VF.TickContext);
   assert.equal(TimeSignature, VF.TimeSignature);
@@ -186,23 +174,13 @@ function VF_Prefix(assert: Assert): void {
 }
 
 /**
- * If you have name collisions with VexFlow classes, consider extracting classes from Vex.Flow
- * and renaming them with a VF prefix.
+ * If you have name collisions with VexFlow classes (e.g., if you have an Accidental class in your app),
+ * consider extracting classes from VexFlow and renaming them with a VF prefix.
  */
-function VF_Alias(assert: Assert): void {
-  const Flow = Vex.Flow;
-  const VFAliases = {
-    get VFAccidental() {
-      return Flow.Accidental;
-    },
-    get VFAnnotation() {
-      return Flow.Annotation;
-    },
-    get VFVibrato() {
-      return Flow.Vibrato;
-    },
-  };
-  const { VFVibrato, VFAccidental, VFAnnotation } = VFAliases;
+function VFAlias(assert: Assert): void {
+  const VFVibrato = VexFlow.Vibrato;
+  const VFAccidental = VexFlow.Accidental;
+  const VFAnnotation = VexFlow.Annotation;
   assert.equal(Accidental, VFAccidental);
   assert.equal(Annotation, VFAnnotation);
 

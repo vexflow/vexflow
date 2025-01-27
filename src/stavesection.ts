@@ -1,10 +1,8 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
-// Author Larry Kuhns 2011
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// @author: Larry Kuhns 2011
 
-import { Font, FontInfo, FontStyle, FontWeight } from './font';
-import { Stave } from './stave';
+import { Metrics } from './metrics';
 import { StaveModifier } from './stavemodifier';
-import { TextFormatter } from './textformatter';
 import { Category } from './typeguard';
 
 export class StaveSection extends StaveModifier {
@@ -12,73 +10,41 @@ export class StaveSection extends StaveModifier {
     return Category.StaveSection;
   }
 
-  static TEXT_FONT: Required<FontInfo> = {
-    family: Font.SANS_SERIF,
-    size: 10,
-    weight: FontWeight.BOLD,
-    style: FontStyle.NORMAL,
-  };
-
-  protected section: string;
-  protected shift_x: number;
-  protected shift_y: number;
   protected drawRect: boolean;
 
-  constructor(section: string, x: number, shift_y: number, drawRect = true) {
+  constructor(section: string, x: number = 0, yShift: number = 0, drawRect = true) {
     super();
 
-    this.setWidth(16);
-    this.section = section;
+    this.setText(section);
     this.x = x;
-    this.shift_x = 0;
-    this.shift_y = shift_y;
+    this.yShift = yShift;
     this.drawRect = drawRect;
-    this.resetFont();
+    this.padding = Metrics.get('StaveSection.padding');
   }
 
-  setStaveSection(section: string): this {
-    this.section = section;
+  setDrawRect(drawRect: boolean): this {
+    this.drawRect = drawRect;
     return this;
   }
 
-  setShiftX(x: number): this {
-    this.shift_x = x;
-    return this;
-  }
-
-  setShiftY(y: number): this {
-    this.shift_y = y;
-    return this;
-  }
-
-  draw(stave: Stave, shift_x: number): this {
-    const borderWidth = 2;
-    const padding = 2;
+  draw(): void {
+    const stave = this.checkStave();
     const ctx = stave.checkContext();
     this.setRendered();
 
-    ctx.save();
-    ctx.setLineWidth(borderWidth);
-    ctx.setFont(this.textFont);
-    const textFormatter = TextFormatter.create(this.textFont);
-
-    const textWidth = textFormatter.getWidthForTextInPx(this.section);
-    const textY = textFormatter.getYForStringInPx(this.section);
-    const textHeight = textY.height;
-    const headroom = -1 * textY.yMin;
-    const width = textWidth + 2 * padding; // add left & right padding
-    const height = textHeight + 2 * padding; // add top & bottom padding
+    this.x = stave.getX() + stave.getModifierXShift(this.getPosition());
+    const headroom = -1 * this.textMetrics.actualBoundingBoxDescent;
+    const width = this.width + 2 * this.padding; // add left & right padding
+    const height = this.height + 2 * this.padding; // add top & bottom padding
 
     //  Seems to be a good default y
-    const y = stave.getYForTopText(1.5) + this.shift_y;
-    const x = this.x + shift_x;
+    const y = stave.getYForTopText(1.5) + this.yShift;
+    const x = this.x + this.xShift;
     if (this.drawRect) {
       ctx.beginPath();
       ctx.rect(x, y - height + headroom, width, height);
       ctx.stroke();
     }
-    ctx.fillText(this.section, x + padding, y - padding);
-    ctx.restore();
-    return this;
+    this.renderText(ctx, this.xShift + this.padding, y - this.padding);
   }
 }

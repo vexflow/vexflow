@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/wawoff2@2.0.1/build/decompress_binding.js"></script>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 20px 30px;
+      }
+
+      .music {
+        font-size: 72px;
+      }
+
+      .text {
+        font-family: monospace;
+        font-size: 32px;
+        line-height: 150%;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      This page demonstrates <a href="https://opentype.js.org/">opentype.js</a> and the
+      <a href="https://developer.mozilla.org/en-US/docs/Web/API/FontFace">FontFace API</a>.
+    </p>
+    <br /><br />
+    <label for="musicFontInput">Choose a <b>SMuFL Music Font</b> File:</label>
+    <input id="musicFontInput" type="file" accept=".woff, .woff2, .otf" />
+    <br /><br />
+    <div id="musicFontSize"></div>
+    <div id="musicFontInfo"></div>
+    <p>The music glyphs below will be styled after you load the font.</p>
+    <div class="music">
+      &#xE050; &#xE062; &#xE080; &#xE081; &#xE082; &#xE083; &#xE084; &#xE08A; &#xE08B; &#xE1E7; &#xE260; &#xE261;
+      &#xE262; &#xE263; &#xE0A2; &#xE264; &#xE245; &#xE1F6; &#xE014; &#xE030; &#xE032; &#xE1FE; &#xE1FF; &#xE200;
+      &#xE201; &#xE202; &#xE203; &#xE1D2; &#xE1D3; &#xE1D4; &#xE1D5; &#xE1D6; &#xE1D7; &#xE1D8; &#xE1D9; &#xE1DA;
+      &#xE1DB; &#xE1DC; &#xE1DD; &#xE1DE; &#xE1DF; &#xE1E0; &#xE1E1; &#xE1E2; &#xE269; &#xE002; &#xE560; &#xE1D7;
+    </div>
+    <br /><br />
+    <hr />
+    <br /><br />
+    <label for="textFontInput">Choose a <b>Text Font</b> File:</label>
+    <input id="textFontInput" type="file" accept=".woff, .woff2, .otf" />
+    <br /><br />
+    <div id="textFontSize"></div>
+    <div id="textFontInfo"></div>
+    <p>The text below will be styled after you load the font.</p>
+    <div class="text">
+      The quick brown fox jumped over 1,234,567,890 lazy dogs. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+      Sed pretium aliquam tempor. Curabitur tincidunt malesuada ligula et fermentum. Integer varius iaculis condimentum.
+      Nullam ultricies lorem vel nisi tincidunt iaculis. Vivamus faucibus enim in tortor lacinia dignissim. Vestibulum a
+      dolor quis lorem condimentum aliquam in id nunc. Nulla tristique, purus eget faucibus mattis, est nulla dapibus
+      sem, nec hendrerit libero felis ac justo. Donec ac molestie arcu, nec pulvinar ipsum. Pellentesque habitant morbi
+      tristique senectus et netus et malesuada fames ac turpis egestas. Quisque pretium enim a lacus ultrices, nec
+      vestibulum ipsum viverra. Proin condimentum placerat libero ut consequat. Nulla vitae.
+    </div>
+    <script>
+      const loadedFonts = {
+        music: [],
+        text: [],
+      };
+
+      function onFontSelected(file, fontType) {
+        file.arrayBuffer().then((buffer) => {
+          let uncompressedFontData;
+          if (getFileType(file) === 'woff2') {
+            uncompressedFontData = Module.decompress(buffer);
+          } else {
+            uncompressedFontData = new Uint8Array(buffer);
+          }
+          const fontSize = `<b>Font File Size:</b> ${file.size}  bytes<br /><b>Uncompressed Size:</b> ${uncompressedFontData.length} bytes`;
+          document.getElementById(fontType + 'FontSize').innerHTML = fontSize;
+          const fontName = parseFont(uncompressedFontData, fontType);
+
+          convertFontFileToBase64(file, (base64) => {
+            loadFontFace(fontName, fontType, base64);
+          });
+        });
+      }
+
+      const inputMusic = document.querySelector('#musicFontInput');
+      inputMusic.onchange = function () {
+        onFontSelected(this.files[0], 'music');
+      };
+
+      const inputText = document.querySelector('#textFontInput');
+      inputText.onchange = function () {
+        onFontSelected(this.files[0], 'text');
+      };
+
+      // This demo only supports woff2 / woff / otf.
+      function getFileType(file) {
+        const fileName = file.name.toLowerCase();
+        if (fileName.endsWith('.woff2')) {
+          return 'woff2';
+        } else if (fileName.endsWith('.woff')) {
+          return 'woff';
+        } else {
+          return 'otf';
+        }
+      }
+
+      function parseFont(fontData, fontType) {
+        const fontBuffer = fontData.buffer.slice(fontData.byteOffset, fontData.byteLength + fontData.byteOffset);
+        const font = opentype.parse(fontBuffer);
+        console.log(font);
+        const fontName = font.names.fontFamily.en;
+        let fontInfo = `<b>Font Family Name:</b> ${fontName}<br />`;
+        fontInfo += `<b>Num Glyphs:</b> ${font.glyphs.length}<br />`;
+        document.getElementById(fontType + 'FontInfo').innerHTML = fontInfo;
+
+        return fontName;
+      }
+
+      // Use the browser's FontFace API to load and display the font.
+      function loadFontFace(fontName, fontType, base64EncodedFont) {
+        const fontFace = new FontFace(fontName, `url('data:font/woff2;charset=utf-8;base64,${base64EncodedFont}')`);
+        const fontFaceLoadPromise = fontFace.load();
+        document.fonts.add(fontFace);
+
+        loadedFonts[fontType].unshift(fontName);
+        // Set the font stack on the music or text.
+        document.querySelector('.' + fontType).style.fontFamily = loadedFonts[fontType].join(', ');
+      }
+
+      function convertFontFileToBase64(file, callback) {
+        const reader = new FileReader();
+        reader.onload = function (evt) {
+          const dataurl = evt.target.result;
+          callback(dataurl.substr(dataurl.indexOf(',') + 1));
+        };
+        reader.readAsDataURL(file);
+      }
+    </script>
+  </body>
+</html>

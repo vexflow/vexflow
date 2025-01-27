@@ -1,5 +1,5 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
-// Author: Ron B. Yeh
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// @author Ron B. Yeh
 // MIT License
 
 import { Accidental } from './accidental';
@@ -8,7 +8,7 @@ import { Dot } from './dot';
 import { GraceNote } from './gracenote';
 import { GraceNoteGroup } from './gracenotegroup';
 import { Note } from './note';
-import { RenderContext } from './rendercontext.js';
+import { RenderContext } from './rendercontext';
 import { Barline } from './stavebarline';
 import { StaveNote } from './stavenote';
 import { StemmableNote } from './stemmablenote';
@@ -81,6 +81,7 @@ export const enum Category {
   Curve = 'Curve',
   Dot = 'Dot',
   Element = 'Element',
+  Flag = 'Flag',
   Fraction = 'Fraction',
   FretHandFinger = 'FretHandFinger',
   GhostNote = 'GhostNote',

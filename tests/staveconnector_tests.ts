@@ -1,13 +1,13 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // StaveConnector Tests
 
 // TODO: Should we change StaveConnector.type => StaveConnectorType? We are inconsistent with this.
 
+import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
-import { Flow } from '../src/flow';
 import { Modifier } from '../src/modifier';
 import { ContextBuilder } from '../src/renderer';
 import { Stave } from '../src/stave';
@@ -44,16 +44,16 @@ function drawSingle(options: TestOptions, contextBuilder: ContextBuilder): void 
   const connector = new StaveConnector(stave1, stave2);
   connector.setType(StaveConnector.type.SINGLE);
   connector.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  connector.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  connector.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
 
 function drawSingle4pxStaveLines(options: TestOptions, contextBuilder: ContextBuilder): void {
-  const oldThickness = Flow.STAVE_LINE_THICKNESS;
-  Flow.STAVE_LINE_THICKNESS = 4;
+  const oldThickness = VexFlow.STAVE_LINE_THICKNESS;
+  VexFlow.STAVE_LINE_THICKNESS = 4;
   const ctx = contextBuilder(options.elementId, 400, 300);
   const stave1 = new Stave(25, 10, 300);
   const stave2 = new Stave(25, 120, 300);
@@ -62,10 +62,10 @@ function drawSingle4pxStaveLines(options: TestOptions, contextBuilder: ContextBu
   const connector = new StaveConnector(stave1, stave2);
   connector.setType(StaveConnector.type.SINGLE);
   connector.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  connector.draw();
-  Flow.STAVE_LINE_THICKNESS = oldThickness;
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  connector.drawWithStyle();
+  VexFlow.STAVE_LINE_THICKNESS = oldThickness;
 
   options.assert.ok(true, 'all pass');
 }
@@ -82,10 +82,10 @@ function drawSingleBoth(options: TestOptions, contextBuilder: ContextBuilder): v
   const connector2 = new StaveConnector(stave1, stave2);
   connector2.setType(StaveConnector.type.SINGLE_RIGHT);
   connector2.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  connector1.draw();
-  connector2.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  connector1.drawWithStyle();
+  connector2.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -103,10 +103,10 @@ function drawDouble(options: TestOptions, contextBuilder: ContextBuilder): void 
   line.setType(StaveConnector.type.SINGLE);
   connector.setContext(ctx);
   line.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  connector.draw();
-  line.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  connector.drawWithStyle();
+  line.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -125,10 +125,10 @@ function drawBrace(options: TestOptions, contextBuilder: ContextBuilder): void {
   line.setType(StaveConnector.type.SINGLE);
   connector.setContext(ctx);
   line.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  connector.draw();
-  line.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  connector.drawWithStyle();
+  line.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -146,10 +146,10 @@ function drawBraceWide(options: TestOptions, contextBuilder: ContextBuilder): vo
   line.setType(StaveConnector.type.SINGLE);
   connector.setContext(ctx);
   line.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  connector.draw();
-  line.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  connector.drawWithStyle();
+  line.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -167,10 +167,10 @@ function drawBracket(options: TestOptions, contextBuilder: ContextBuilder): void
   line.setType(StaveConnector.type.SINGLE);
   connector.setContext(ctx);
   line.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  connector.draw();
-  line.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  connector.drawWithStyle();
+  line.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -187,9 +187,9 @@ function drawRepeatBegin(options: TestOptions, contextBuilder: ContextBuilder): 
   const line = new StaveConnector(stave1, stave2);
   line.setType(StaveConnector.type.BOLD_DOUBLE_LEFT);
   line.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  line.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  line.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -206,9 +206,9 @@ function drawRepeatEnd(options: TestOptions, contextBuilder: ContextBuilder): vo
   const line = new StaveConnector(stave1, stave2);
   line.setType(StaveConnector.type.BOLD_DOUBLE_RIGHT);
   line.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  line.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  line.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -225,9 +225,9 @@ function drawThinDouble(options: TestOptions, contextBuilder: ContextBuilder): v
   const line = new StaveConnector(stave1, stave2);
   line.setType(StaveConnector.type.THIN_DOUBLE);
   line.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  line.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  line.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -264,14 +264,14 @@ function drawRepeatAdjacent(options: TestOptions, contextBuilder: ContextBuilder
   connector2.setType(StaveConnector.type.BOLD_DOUBLE_RIGHT);
   connector3.setType(StaveConnector.type.BOLD_DOUBLE_LEFT);
   connector4.setType(StaveConnector.type.BOLD_DOUBLE_RIGHT);
-  stave1.draw();
-  stave2.draw();
-  stave3.draw();
-  stave4.draw();
-  connector1.draw();
-  connector2.draw();
-  connector3.draw();
-  connector4.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  stave3.drawWithStyle();
+  stave4.drawWithStyle();
+  connector1.drawWithStyle();
+  connector2.drawWithStyle();
+  connector3.drawWithStyle();
+  connector4.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -328,15 +328,15 @@ function drawRepeatOffset2(options: TestOptions, contextBuilder: ContextBuilder)
   connector1.setXShift(stave1.getModifierXShift());
   connector3.setXShift(stave3.getModifierXShift());
 
-  stave1.draw();
-  stave2.draw();
-  stave3.draw();
-  stave4.draw();
-  connector1.draw();
-  connector2.draw();
-  connector3.draw();
-  connector4.draw();
-  connector5.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  stave3.drawWithStyle();
+  stave4.drawWithStyle();
+  connector1.drawWithStyle();
+  connector2.drawWithStyle();
+  connector3.drawWithStyle();
+  connector4.drawWithStyle();
+  connector5.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -396,15 +396,15 @@ function drawRepeatOffset(options: TestOptions, contextBuilder: ContextBuilder):
   connector1.setXShift(stave1.getModifierXShift());
   connector3.setXShift(stave3.getModifierXShift());
 
-  stave1.draw();
-  stave2.draw();
-  stave3.draw();
-  stave4.draw();
-  connector1.draw();
-  connector2.draw();
-  connector3.draw();
-  connector4.draw();
-  connector5.draw();
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  stave3.drawWithStyle();
+  stave4.drawWithStyle();
+  connector1.drawWithStyle();
+  connector2.drawWithStyle();
+  connector3.drawWithStyle();
+  connector4.drawWithStyle();
+  connector5.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -418,7 +418,7 @@ function drawCombined(options: TestOptions, contextBuilder: ContextBuilder): voi
   const stave5 = new Stave(150, 370, 300);
   const stave6 = new Stave(150, 460, 300);
   const stave7 = new Stave(150, 560, 300);
-  stave1.setText('Violin', Modifier.Position.LEFT);
+  stave1.setStaveText('Violin', Modifier.Position.LEFT);
   stave1.setContext(ctx);
   stave2.setContext(ctx);
   stave3.setContext(ctx);
@@ -426,37 +426,37 @@ function drawCombined(options: TestOptions, contextBuilder: ContextBuilder): voi
   stave5.setContext(ctx);
   stave6.setContext(ctx);
   stave7.setContext(ctx);
-  const conn_single = new StaveConnector(stave1, stave7);
-  const conn_double = new StaveConnector(stave2, stave3);
-  const conn_bracket = new StaveConnector(stave4, stave7);
-  const conn_none = new StaveConnector(stave4, stave5);
-  const conn_brace = new StaveConnector(stave6, stave7);
-  conn_single.setType(StaveConnector.type.SINGLE);
-  conn_double.setType(StaveConnector.type.DOUBLE);
-  conn_bracket.setType(StaveConnector.type.BRACKET);
-  conn_brace.setType(StaveConnector.type.BRACE);
-  conn_brace.setXShift(-5);
-  conn_double.setText('Piano');
-  conn_none.setText('Multiple', { shift_y: -15 });
-  conn_none.setText('Line Text', { shift_y: 15 });
-  conn_brace.setText('Harpsichord');
-  conn_single.setContext(ctx);
-  conn_double.setContext(ctx);
-  conn_bracket.setContext(ctx);
-  conn_none.setContext(ctx);
-  conn_brace.setContext(ctx);
-  stave1.draw();
-  stave2.draw();
-  stave3.draw();
-  stave4.draw();
-  stave5.draw();
-  stave6.draw();
-  stave7.draw();
-  conn_single.draw();
-  conn_double.draw();
-  conn_bracket.draw();
-  conn_none.draw();
-  conn_brace.draw();
+  const connSingle = new StaveConnector(stave1, stave7);
+  const connDouble = new StaveConnector(stave2, stave3);
+  const connBracket = new StaveConnector(stave4, stave7);
+  const connNone = new StaveConnector(stave4, stave5);
+  const connBrace = new StaveConnector(stave6, stave7);
+  connSingle.setType(StaveConnector.type.SINGLE);
+  connDouble.setType(StaveConnector.type.DOUBLE);
+  connBracket.setType(StaveConnector.type.BRACKET);
+  connBrace.setType(StaveConnector.type.BRACE);
+  connBrace.setXShift(-5);
+  connDouble.setText('Piano');
+  connNone.setText('Multiple', { shiftY: -15 });
+  connNone.setText('Line Text', { shiftY: 15 });
+  connBrace.setText('Harpsichord');
+  connSingle.setContext(ctx);
+  connDouble.setContext(ctx);
+  connBracket.setContext(ctx);
+  connNone.setContext(ctx);
+  connBrace.setContext(ctx);
+  stave1.drawWithStyle();
+  stave2.drawWithStyle();
+  stave3.drawWithStyle();
+  stave4.drawWithStyle();
+  stave5.drawWithStyle();
+  stave6.drawWithStyle();
+  stave7.drawWithStyle();
+  connSingle.drawWithStyle();
+  connDouble.drawWithStyle();
+  connBracket.drawWithStyle();
+  connNone.drawWithStyle();
+  connBrace.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }

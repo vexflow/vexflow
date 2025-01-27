@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // TextBracket Tests
@@ -105,13 +105,13 @@ function simple1(options: TestOptions): void {
     }),
   ];
 
-  topOctaves[1].render_options.line_width = 2;
-  topOctaves[1].render_options.show_bracket = false;
+  topOctaves[1].renderOptions.lineWidth = 2;
+  topOctaves[1].renderOptions.showBracket = false;
 
-  bottomOctaves[0].render_options.underline_superscript = false;
+  bottomOctaves[0].renderOptions.underlineSuperscript = false;
   bottomOctaves[0].setDashed(false);
 
-  bottomOctaves[1].render_options.bracket_height = 40;
+  bottomOctaves[1].renderOptions.bracketHeight = 40;
   bottomOctaves[1].setDashed(true, [2, 2]);
 
   f.Formatter().joinVoices([voice]).formatToStave([voice], stave);

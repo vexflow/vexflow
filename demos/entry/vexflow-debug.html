@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="../../build/cjs/vexflow-debug.js"></script>
+    <script src="run.js"></script>
+  </head>
+  <body>
+    <p>
+      This page loads the <code>vexflow-debug.js</code> build, which is the non-minified version of
+      <code>vexflow.js</code>. This build bundles the Bravura, Petaluma, and Gonville music fonts.
+    </p>
+    <p><a href="../../build/cjs/vexflow-debug.js">Click here to view the vexflow-debug.js file</a>.</p>
+    <p>Open the developer console and explore the <code>VexFlow</code> object. Below are some things you can try:</p>
+    <p>Get an object with the build information of the VexFlow library.</p>
+    <pre>VexFlow.BUILD</pre>
+    <p>Get the default font stack, as an array of strings.</p>
+    <pre>VexFlow.getFonts()</pre>
+    <p>Get the dictionary of all available music glyphs in VexFlow.</p>
+    <pre>VexFlow.Glyphs</pre>
+    <p>This is the string representing a treble clef:</p>
+    <pre>VexFlow.Glyphs.gClef</pre>
+    <p>This is the string representing a treble clef:</p>
+    <button onclick="copyCode(0)">Copy Code</button>
+    <button onclick="runCode(0)">Run Code</button>
+    <pre id="code0"></pre>
+    <div id="trebleClef" style="font-family: Bravura; font-size: 92px"></div>
+    <p>Draw a stave with a treble clef, time signature, and a few notes.</p>
+    <button onclick="copyCode(1)">Copy Code</button>
+    <button onclick="runCode(1)">Run Code</button>
+    <pre id="code1"></pre>
+    <div id="output"></div>
+    <script>
+      const code0 = `document.getElementById("trebleClef").innerText = VexFlow.Glyphs.gClef`;
+
+      const code1 = `const vf = new VexFlow.Factory({
+        renderer: { elementId: 'output', width: 300, height: 180 },
+      });
+
+      const score = vf.EasyScore();
+      const system = vf.System();
+
+      system
+        .addStave({
+          voices: [
+            score.voice(score.notes('C#5/q, B4, A4, G#4', { stem: 'up' })),
+            score.voice(score.notes('C#4/h, C#4', { stem: 'down' })),
+          ],
+        })
+        .addClef('treble')
+        .addTimeSignature('4/4');
+
+      vf.draw();`;
+
+      showCode(code0, code1);
+    </script>
+  </body>
+</html>

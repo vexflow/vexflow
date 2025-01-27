@@ -1,36 +1,17 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna Cheppudira 2013.
-// Co-author: Benjamin W. Bohl
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
+// Co-author: Benjamin W. Bohl
 
-import { Glyph } from './glyph';
+import { Glyphs } from './glyphs';
+import { Metrics } from './metrics';
 import { Stave } from './stave';
 import { StaveModifier, StaveModifierPosition } from './stavemodifier';
-import { Tables } from './tables';
 import { Category } from './typeguard';
-import { defined, log } from './util';
-
-export interface ClefType {
-  code: string;
-  line: number;
-}
-
-export interface ClefAnnotatiomType extends ClefType {
-  x_shift: number;
-  point: number;
-}
-
-export interface ClefMetrics {
-  width: number;
-  annotations: {
-    [key: string]: {
-      [type: string]: { line?: number; shiftX?: number } | number;
-    };
-  };
-}
+import { log } from './util';
 
 // eslint-disable-next-line
 function L(...args: any[]) {
-  if (Clef.DEBUG) log('Vex.Flow.Clef', args);
+  if (Clef.DEBUG) log('VexFlow.Clef', args);
 }
 
 /**
@@ -39,86 +20,79 @@ function L(...args: any[]) {
  * See `tests/clef_tests.ts` for usage examples.
  */
 export class Clef extends StaveModifier {
-  /** To enable logging for this class, set `Vex.Flow.Clef.DEBUG` to `true`. */
+  /** To enable logging for this class, set `VexFlow.Clef.DEBUG` to `true`. */
   static DEBUG: boolean = false;
 
   static get CATEGORY(): string {
     return Category.Clef;
   }
 
-  annotation?: ClefAnnotatiomType;
-
   /**
    * The attribute `clef` must be a key from
    * `Clef.types`
    */
-  clef: ClefType = Clef.types['treble'];
+  code = Clef.types['treble'].code;
+  line = Clef.types['treble'].line;
 
-  protected attachment?: Glyph;
-  protected size?: string;
-  protected type?: string;
+  protected size = 'default';
+  protected type = 'treble';
 
   /**
    * Every clef name is associated with a glyph code from the font file
    * and a default stave line number.
    */
-  static get types(): Record<string, ClefType> {
+  static get types(): Record<string, { code: string; line: number }> {
+    const { gClef, fClef, cClef, unpitchedPercussionClef1, sixStringTabClef } = Glyphs;
+
     return {
       treble: {
-        code: 'gClef',
+        code: gClef,
         line: 3,
       },
       bass: {
-        code: 'fClef',
+        code: fClef,
         line: 1,
       },
       alto: {
-        code: 'cClef',
+        code: cClef,
         line: 2,
       },
       tenor: {
-        code: 'cClef',
+        code: cClef,
         line: 1,
       },
       percussion: {
-        code: 'unpitchedPercussionClef1',
+        code: unpitchedPercussionClef1,
         line: 2,
       },
       soprano: {
-        code: 'cClef',
+        code: cClef,
         line: 4,
       },
       'mezzo-soprano': {
-        code: 'cClef',
+        code: cClef,
         line: 3,
       },
       'baritone-c': {
-        code: 'cClef',
+        code: cClef,
         line: 0,
       },
       'baritone-f': {
-        code: 'fClef',
+        code: fClef,
         line: 2,
       },
       subbass: {
-        code: 'fClef',
+        code: fClef,
         line: 0,
       },
       french: {
-        code: 'gClef',
+        code: gClef,
         line: 4,
       },
       tab: {
-        code: '6stringTabClef',
+        code: sixStringTabClef,
         line: 2.5,
       },
-    };
-  }
-
-  static get annotationSmufl(): Record<string, string> {
-    return {
-      '8va': 'timeSig8',
-      '8vb': 'timeSig8',
     };
   }
 
@@ -128,53 +102,43 @@ export class Clef extends StaveModifier {
 
     this.setPosition(StaveModifierPosition.BEGIN);
     this.setType(type, size, annotation);
-    this.setWidth(Glyph.getWidth(this.clef.code, Clef.getPoint(this.size), `clef_${this.size}`));
     L('Creating clef:', type);
   }
 
   /** Set clef type, size and annotation. */
-  setType(type: string, size?: string, annotation?: string): this {
+  setType(type: string, size: string = 'default', annotation?: string): this {
     this.type = type;
-    this.clef = Clef.types[type];
-    if (size === undefined) {
-      this.size = 'default';
-    } else {
-      this.size = size;
-    }
-
-    const musicFont = Tables.currentMusicFont();
+    this.code = Clef.types[type].code;
+    this.line = Clef.types[type].line;
+    this.size = size ?? 'default';
 
     // If an annotation, such as 8va, is specified, add it to the Clef object.
-    if (annotation !== undefined) {
-      const code = Clef.annotationSmufl[annotation];
-      const point = (Clef.getPoint(this.size) / 5) * 3;
-      const line = musicFont.lookupMetric(`clef_${this.size}.annotations.${annotation}.${this.type}.line`);
-      const x_shift = musicFont.lookupMetric(`clef_${this.size}.annotations.${annotation}.${this.type}.shiftX`);
-
-      this.annotation = { code, point, line, x_shift };
-
-      this.attachment = new Glyph(this.annotation.code, this.annotation.point);
-      this.attachment.metrics.x_max = 0;
-      this.attachment.setXShift(this.annotation.x_shift);
-    } else {
-      this.annotation = undefined;
+    if (annotation === '8va') {
+      if (this.code === Glyphs.gClef) {
+        this.code = Glyphs.gClef8va;
+      }
+      if (this.code === Glyphs.fClef) {
+        this.code = Glyphs.fClef8va;
+      }
     }
+    if (annotation === '8vb') {
+      if (this.code === Glyphs.gClef) {
+        this.code = Glyphs.gClef8vb;
+      }
+      if (this.code === Glyphs.fClef) {
+        this.code = Glyphs.fClef8vb;
+      }
+    }
+    this.text = this.code;
+    this.fontInfo.size = Math.floor(Clef.getPoint(this.size));
 
     return this;
-  }
-
-  /** Get clef width. */
-  getWidth(): number {
-    if (this.type === 'tab') {
-      defined(this.stave, 'ClefError', "Can't get width without stave.");
-    }
-    return this.width;
   }
 
   /** Get point for clefs. */
   static getPoint(size?: string): number {
     // for sizes other than 'default', clef is 2/3 of the default value
-    return size == 'default' ? Tables.NOTATION_FONT_SCALE : (Tables.NOTATION_FONT_SCALE / 3) * 2;
+    return size === 'default' ? Metrics.get('fontSize') : (Metrics.get('fontSize') * 2) / 3;
   }
 
   /** Set associated stave. */
@@ -189,18 +153,10 @@ export class Clef extends StaveModifier {
     const ctx = stave.checkContext();
     this.setRendered();
 
-    this.applyStyle(ctx);
     ctx.openGroup('clef', this.getAttribute('id'));
-    Glyph.renderGlyph(ctx, this.x, stave.getYForLine(this.clef.line), Clef.getPoint(this.size), this.clef.code, {
-      category: `clef_${this.size}`,
-    });
-    if (this.annotation !== undefined && this.attachment !== undefined) {
-      this.placeGlyphOnLine(this.attachment, stave, this.annotation.line);
-      this.attachment.setStave(stave);
-      this.attachment.setContext(ctx);
-      this.attachment.renderToStave(this.x);
-    }
+
+    this.y = stave.getYForLine(this.line);
+    this.renderText(ctx, 0, 0);
     ctx.closeGroup();
-    this.restoreStyle(ctx);
   }
 }

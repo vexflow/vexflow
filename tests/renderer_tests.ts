@@ -1,5 +1,5 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
-// Author: Ron B. Yeh
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// @author Ron B. Yeh
 // MIT License
 //
 // Renderer Tests
@@ -57,7 +57,7 @@ const RendererTests = {
  * Helper function to add three notes to a stave.
  */
 function drawStave(stave: Stave, context: RenderContext): void {
-  stave.addClef('bass').addTimeSignature('3/4').draw();
+  stave.addClef('bass').addTimeSignature('3/4').drawWithStyle();
   Formatter.FormatAndDraw(context, stave, [
     new StaveNote({ keys: ['C/4'], duration: '4' }),
     new StaveNote({ keys: ['E/4'], duration: '4' }),

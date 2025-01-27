@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 
 import { BoundingBox } from './boundingbox';
@@ -128,11 +128,12 @@ export class System extends Element {
   }
 
   /** Set origin X. */
-  setX(x: number) {
+  setX(x: number): this {
     this.options.x = x;
     this.partStaves.forEach((s) => {
       s.setX(x);
     });
+    return this;
   }
 
   /** Get origin y. */
@@ -141,11 +142,12 @@ export class System extends Element {
   }
 
   /** Set origin y. */
-  setY(y: number) {
+  setY(y: number): this {
     this.options.y = y;
     this.partStaves.forEach((s) => {
       s.setY(y);
     });
+    return this;
   }
 
   /** Get associated staves. */
@@ -171,8 +173,8 @@ export class System extends Element {
    */
   addConnector(type: StaveConnectorType = 'double'): StaveConnector {
     this.connector = this.factory.StaveConnector({
-      top_stave: this.partStaves[0],
-      bottom_stave: this.partStaves[this.partStaves.length - 1],
+      topStave: this.partStaves[0],
+      bottomStave: this.partStaves[this.partStaves.length - 1],
       type,
     });
     return this.connector;
@@ -193,7 +195,7 @@ export class System extends Element {
    * `]});`
    */
   addStave(params: SystemStave): Stave {
-    const staveOptions: StaveOptions = { left_bar: false, ...params.options };
+    const staveOptions: StaveOptions = { leftBar: false, ...params.options };
 
     const stave =
       params.stave ??
@@ -236,9 +238,9 @@ export class System extends Element {
 
   /** Format the system. */
   format(): void {
-    const options_details = this.options.details;
+    const optionsDetails = this.options.details;
     let justifyWidth = 0;
-    const formatter = new Formatter(options_details);
+    const formatter = new Formatter(optionsDetails);
     this.formatter = formatter;
 
     let y = this.options.y;
@@ -287,14 +289,18 @@ export class System extends Element {
     formatter.postFormat();
 
     for (let i = 0; i < this.options.formatIterations; i++) {
-      formatter.tune(options_details);
+      formatter.tune(optionsDetails);
     }
 
     this.startX = startX;
     this.debugNoteMetricsYs = debugNoteMetricsYs;
     this.lastY = y;
-    this.boundingBox = new BoundingBox(this.options.x, this.options.y, this.options.width, this.lastY - this.options.y);
     Stave.formatBegModifiers(this.partStaves);
+  }
+
+  /** Get the boundingBox. */
+  getBoundingBox(): BoundingBox {
+    return new BoundingBox(this.options.x, this.options.y, this.options.width, (this.lastY ?? 0) - this.options.y);
   }
 
   /** Render the system. */

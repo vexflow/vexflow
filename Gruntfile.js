@@ -19,6 +19,10 @@ DEVELOP
 
 grunt watch
   - FAST: Watch for changes and produces the debug CJS libraries in build/cjs/.
+  - Deletes the reference images and anything else in build first.
+
+grunt webpack:watchDebug
+  - Same as grunt watch without deleting the build directory first.
 
 grunt watch:esm
   - FAST: Watch for changes and build the ESM libraries in build/esm/.
@@ -106,23 +110,30 @@ const concurrently = require('concurrently');
 // release-it can only be dynamically imported.
 const releaseItDynamicImport = import('release-it');
 
-// A module entry file `entry/xxxx.ts` will be mapped to a build output file in build/cjs/ or /build/esm/entry/.
+// The VEX_XXXX constants below specify entry files for webpack.
+// A module entry file `entry/xxxx.ts` will be mapped to a build output file in build/cjs/ or build/esm/entry/.
 // Also see the package.json `exports` field, which is one way for projects to specify which entry file to import.
-const VEX = 'vexflow';
-const VEX_BRAVURA = 'vexflow-bravura';
-const VEX_GONVILLE = 'vexflow-gonville';
-const VEX_LELAND = 'vexflow-leland';
-const VEX_PETALUMA = 'vexflow-petaluma';
-const VEX_CORE = 'vexflow-core'; // Supports dynamic import of the font modules below.
+// For example, if we want to add a build target which bundles the Petaluma font, we would:
+// - add an entry file `vexflow/entry/vexflow-petaluma.ts` by duplicating `vexflow/entry/vexflow-bravura.ts` and changing the loaded fonts.
+// - uncomment the const VEX_PETALUMA line below.
+// - add VEX_PETALUMA to the PRODUCTION_BUILD_TARGETS array.
+const VEX = 'vexflow'; // Bundles Bravura and Petaluma.
+const VEX_CORE = 'vexflow-core'; // Dynamically load any SMuFL font at runtime. Bundles ZERO fonts.
+const VEX_BRAVURA = 'vexflow-bravura'; // Bundles only Bravura.
+// const VEX_PETALUMA = 'vexflow-petaluma'; // Bundles Petaluma and Petaluma Script.
+// const VEX_XXXXXXXX = 'vexflow-xxxxxxxx'; // Bundles XXXXXXXX and YYYYYYYY.
+// ... add more fonts here ...
 const VEX_DEBUG = 'vexflow-debug';
 const VEX_DEBUG_TESTS = 'vexflow-debug-with-tests';
+
+const PRODUCTION_BUILD_TARGETS = [VEX, VEX_CORE, VEX_BRAVURA /*, VEX_PETALUMA */];
+const DEBUG_BUILD_TARGETS = [VEX_DEBUG, VEX_DEBUG_TESTS];
 
 const versionInfo = require('./tools/version_info');
 // Add a banner to the top of some CJS output files.
 const banner =
   `VexFlow ${versionInfo.VERSION}   ${versionInfo.DATE}   ${versionInfo.ID}\n` +
-  `Copyright (c) 2010 Mohit Muthanna Cheppudira <mohit@muthanna.com>\n` +
-  `https://www.vexflow.com   https://github.com/0xfe/vexflow`;
+  'Copyright (c) 2023-present VexFlow contributors (see https://github.com/vexflow/vexflow/blob/main/AUTHORS.md).';
 
 // Output directories & files.
 const BASE_DIR = __dirname;
@@ -181,7 +192,7 @@ function webpackConfigs() {
   //   an object that maps entry names to file names
   //   a file name string
   // returns a webpack config object.
-  function getConfig(entryFiles, mode, addBanner, libraryName, watch = false) {
+  function getConfig(entryFiles, mode, addBanner, watch = false) {
     let entry, filename;
     if (Array.isArray(entryFiles)) {
       entry = {};
@@ -205,11 +216,11 @@ function webpackConfigs() {
     }
 
     // Support different ways of loading VexFlow.
-    // The `globalObject` string is assigned to `root` in line 15 of vexflow-debug.js.
-    // VexFlow is exported as root["Vex"], and can be accessed via:
-    //   - `window.Vex` in browsers
-    //   - `globalThis.Vex` in node JS >= 12
-    //   - `this.Vex` in all other environments
+    // The `globalObject` string is assigned to `root` in line 13 of vexflow-debug.js.
+    // VexFlow is exported as root["VexFlow"], and can be accessed via:
+    //   - `window.VexFlow` in browsers
+    //   - `globalThis.VexFlow` in node JS >= 12
+    //   - `this.VexFlow` in all other environments
     // See: https://webpack.js.org/configuration/output/#outputglobalobject
     //
     // IMPORTANT: The outer parentheses are required! Webpack inserts this string into the final output, and
@@ -278,7 +289,7 @@ function webpackConfigs() {
         path: BUILD_CJS_DIR,
         filename: filename,
         library: {
-          name: libraryName,
+          name: 'VexFlow', // The name of the exported library.
           type: 'umd',
           export: 'default',
         },
@@ -327,46 +338,22 @@ function webpackConfigs() {
   const WATCH = true;
 
   function prodConfig(watch = false) {
-    return getConfig(
-      [VEX, VEX_BRAVURA, VEX_GONVILLE, VEX_LELAND, VEX_PETALUMA, VEX_CORE],
-      PRODUCTION_MODE,
-      BANNER,
-      'Vex',
-      watch
-    );
-  }
-
-  // The font modules need to have different webpack configs because they have a different
-  // exported library name (e.g., VexFlowFont.Bravura instead of Vex).
-  function fontConfigs(watch = false) {
-    return [
-      getConfig('vexflow-font-bravura', PRODUCTION_MODE, !BANNER, ['VexFlowFont', 'Bravura'], watch),
-      getConfig('vexflow-font-leland', PRODUCTION_MODE, !BANNER, ['VexFlowFont', 'Leland'], watch),
-      getConfig('vexflow-font-petaluma', PRODUCTION_MODE, !BANNER, ['VexFlowFont', 'Petaluma'], watch),
-      getConfig('vexflow-font-gonville', PRODUCTION_MODE, !BANNER, ['VexFlowFont', 'Gonville'], watch),
-      getConfig('vexflow-font-custom', PRODUCTION_MODE, !BANNER, ['VexFlowFont', 'Custom'], watch),
-      // ADD_MUSIC_FONT
-      // Add a webpack config for exporting your font module.
-      // Provide the base name of your font entry file.
-      // For an entry file at `entry/vexflow-font-xxx.ts`, use the string 'vexflow-font-xxx'.
-      // Webpack will use this config to generate a CJS font module at `build/cjs/vexflow-font-xxx.js`.
-      // getConfig('vexflow-font-xxx', PRODUCTION_MODE, !BANNER, ['VexFlowFont', 'XXX'], watch),
-    ];
+    return getConfig(PRODUCTION_BUILD_TARGETS, PRODUCTION_MODE, BANNER, watch);
   }
 
   function debugConfig(watch = false) {
-    return getConfig([VEX_DEBUG, VEX_DEBUG_TESTS], DEVELOPMENT_MODE, BANNER, 'Vex', watch);
+    return getConfig(DEBUG_BUILD_TARGETS, DEVELOPMENT_MODE, BANNER, watch);
   }
 
   return {
     // grunt webpack:prodAndDebug
-    prodAndDebug: () => [prodConfig(), ...fontConfigs(), debugConfig()],
+    prodAndDebug: () => [prodConfig(), debugConfig()],
     // grunt webpack:prod
-    prod: () => [prodConfig(), ...fontConfigs()],
+    prod: () => prodConfig(),
     // grunt webpack:debug
     debug: () => debugConfig(),
     // grunt webpack:watchProd
-    watchProd: () => [prodConfig(WATCH), ...fontConfigs(WATCH)],
+    watchProd: () => prodConfig(WATCH),
     // grunt webpack:watchDebug
     watchDebug: () => debugConfig(WATCH),
   };
@@ -378,6 +365,14 @@ module.exports = (grunt) => {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     webpack: webpackConfigs(),
+
+    // grunt eslint
+    eslint: {
+      target: ['entry/**/*.ts', 'src/**/*.ts', 'tests/**/*.ts', 'tests/formatter/*.js'],
+      options: {
+        fix: true,
+      },
+    },
 
     // grunt qunit
     // Run unit tests on the command line by loading tests/flow-headless-browser.html.
@@ -451,6 +446,7 @@ module.exports = (grunt) => {
     },
   });
 
+  grunt.loadNpmTasks('grunt-eslint');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-qunit');
@@ -460,10 +456,10 @@ module.exports = (grunt) => {
   // Build all targets for production and debugging.
   grunt.registerTask('default', 'Build all VexFlow targets.', [
     'clean:build',
+    'eslint',
     'webpack:prodAndDebug',
     'build:esm',
     'build:types',
-    'build:docs',
   ]);
 
   // grunt test
@@ -735,9 +731,9 @@ module.exports = (grunt) => {
     if (!process.env.GITHUB_TOKEN) {
       console.log(
         'GITHUB_TOKEN environment variable is missing.\n' +
-          'You can manually release to GitHub at https://github.com/0xfe/vexflow/releases/new\n' +
+          'You can manually release to GitHub at https://github.com/vexflow/vexflow/releases/new\n' +
           'Or use the GitHub CLI:\n' +
-          'gh release create 4.0.0 --title "Release 4.0.0"\n\n'
+          'gh release create 5.0.0 --title "Release 5.0.0"\n\n'
       );
     }
 
@@ -763,7 +759,7 @@ module.exports = (grunt) => {
         commit: true,
         tag: true,
         push: true,
-        pushRepo: 'git@github.com:0xfe/vexflow.git',
+        pushRepo: 'git@github.com:vexflow/vexflow.git',
       },
       github: {
         release: true,

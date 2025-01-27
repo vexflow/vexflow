@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="../../build/cjs/vexflow-debug-with-tests.js"></script>
+  </head>
+  <body>
+    <p>
+      This page loads the <code>vexflow-debug-with-tests.js</code> build, which is the non-minified version of
+      <code>vexflow.js</code>. This build bundles the Bravura, Petaluma, and Gonville music fonts. It also includes all
+      test cases, which are run on the <a href="../../tests/flow.html">vexflow/tests/flow.html</a> test page.
+    </p>
+    <p>
+      <a href="../../build/cjs/vexflow-debug-with-tests.js">Click here to view the vexflow-debug-with-tests.js file</a>.
+    </p>
+    <p>Open the developer console and explore the <code>VexFlow</code> object. Below are some things you can try:</p>
+    <p>Get an object with the build information of the VexFlow library.</p>
+    <pre>VexFlow.BUILD</pre>
+    <p>Get the default font stack, as an array of strings.</p>
+    <pre>VexFlow.getFonts()</pre>
+    <p>Draw a stave with a treble clef, time signature, and a few notes.</p>
+    <button onclick="copyCode()">Copy Code</button>
+    <button onclick="runCode()">Run Code</button>
+    <pre id="code"></pre>
+    <div id="output"></div>
+    <script>
+      const sampleCode = `const vf = new VexFlow.Factory({
+  renderer: { elementId: 'output', width: 300, height: 180 },
+});
+
+const score = vf.EasyScore();
+const system = vf.System();
+
+system
+  .addStave({
+    voices: [
+      score.voice(score.notes('C#5/q, B4, A4, G#4', { stem: 'up' })),
+      score.voice(score.notes('C#4/h, C#4', { stem: 'down' })),
+    ],
+  })
+  .addClef('treble')
+  .addTimeSignature('4/4');
+
+vf.draw();`;
+      document.getElementById('code').innerText = sampleCode;
+
+      function copyCode() {
+        navigator.clipboard.writeText(sampleCode);
+      }
+
+      function runCode() {
+        eval('"use strict";' + sampleCode);
+      }
+    </script>
+  </body>
+</html>

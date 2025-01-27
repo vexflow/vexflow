@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 
 export * from './accidental';
@@ -8,7 +8,6 @@ export * from './barnote';
 export * from './beam';
 export * from './bend';
 export * from './boundingbox';
-export * from './boundingboxcomputation';
 export * from './canvascontext';
 export * from './chordsymbol';
 export * from './clef';
@@ -19,14 +18,13 @@ export * from './dot';
 export * from './easyscore';
 export * from './element';
 export * from './factory';
-export * from './flow';
 export * from './font';
 // Do not export './fonts/*' because they are used by the entry/* files.
+export * from './flag';
 export * from './formatter';
 export * from './fraction';
 export * from './frethandfinger';
 export * from './ghostnote';
-export * from './glyph';
 export * from './glyphnote';
 export * from './gracenote';
 export * from './gracenotegroup';
@@ -68,18 +66,16 @@ export * from './stringnumber';
 export * from './strokes';
 export * from './svgcontext';
 export * from './system';
-// Do not export './tables' because it is internal. Its public API is accessible via Vex.Flow.*.
+// Do not export './tables' because it is internal. Its public API is accessible via VexFlow.*.
 export * from './tabnote';
 export * from './tabslide';
 export * from './tabstave';
 export * from './tabtie';
 export * from './textbracket';
 export * from './textdynamics';
-export * from './textformatter';
 export * from './textnote';
 export * from './tickable';
 export * from './tickcontext';
-export * from './timesigglyph';
 export * from './timesignature';
 export * from './timesignote';
 export * from './tremolo';
@@ -87,8 +83,8 @@ export * from './tuning';
 export * from './tuplet';
 export * from './typeguard';
 export * from './util';
-// Do not export './version'. It is accessible via Vex.Flow.BUILD.
-export * from './vex';
+// Do not export './version'. It is accessible via VexFlow.BUILD.
+export * from './vexflow';
 export * from './vibrato';
 export * from './vibratobracket';
 export * from './voice';

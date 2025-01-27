@@ -1,11 +1,11 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // TabSlide Tests
 
+import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
-import { Flow } from '../src/flow';
 import { Formatter } from '../src/formatter';
 import { RenderContext } from '../src/rendercontext';
 import { ContextBuilder } from '../src/renderer';
@@ -25,8 +25,8 @@ const TabSlideTests = {
   },
 };
 
-function tieNotes(notes: TabNote[], indices: number[], stave: TabStave, ctx: RenderContext): void {
-  const voice = new Voice(Flow.TIME4_4);
+function tieNotes(notes: TabNote[], indexes: number[], stave: TabStave, ctx: RenderContext): void {
+  const voice = new Voice(VexFlow.TIME4_4);
   voice.addTickables(notes);
 
   new Formatter().joinVoices([voice]).format([voice], 100);
@@ -34,25 +34,24 @@ function tieNotes(notes: TabNote[], indices: number[], stave: TabStave, ctx: Ren
 
   const tie = new TabSlide(
     {
-      first_note: notes[0],
-      last_note: notes[1],
-      first_indices: indices,
-      last_indices: indices,
+      firstNote: notes[0],
+      lastNote: notes[1],
+      firstIndexes: indexes,
+      lastIndexes: indexes,
     },
     TabSlide.SLIDE_UP
   );
 
   tie.setContext(ctx);
-  tie.draw();
+  tie.drawWithStyle();
 }
 
 function setupContext(options: TestOptions, width?: number): { context: RenderContext; stave: TabStave } {
-  // eslint-disable-next-line
   const context = options.contextBuilder!(options.elementId, 350, 140);
   context.scale(0.9, 0.9);
 
   context.font = '10pt Arial';
-  const stave = new TabStave(10, 10, width || 350).addTabGlyph().setContext(context).draw();
+  const stave = new TabStave(10, 10, width || 350).addTabGlyph().setContext(context).drawWithStyle();
 
   return { context, stave };
 }
@@ -120,51 +119,51 @@ function multiTest(options: TestOptions, buildTabSlide: (notes: TieNotes) => Tab
     }),
   ];
 
-  const voice = new Voice(Flow.TIME4_4).addTickables(notes);
+  const voice = new Voice(VexFlow.TIME4_4).addTickables(notes);
   new Formatter().joinVoices([voice]).format([voice], 300);
   voice.draw(context, stave);
 
   buildTabSlide({
-    first_note: notes[0],
-    last_note: notes[1],
-    first_indices: [0],
-    last_indices: [0],
+    firstNote: notes[0],
+    lastNote: notes[1],
+    firstIndexes: [0],
+    lastIndexes: [0],
   })
     .setContext(context)
-    .draw();
+    .drawWithStyle();
 
   options.assert.ok(true, 'Single note');
 
   buildTabSlide({
-    first_note: notes[2],
-    last_note: notes[3],
-    first_indices: [0, 1],
-    last_indices: [0, 1],
+    firstNote: notes[2],
+    lastNote: notes[3],
+    firstIndexes: [0, 1],
+    lastIndexes: [0, 1],
   })
     .setContext(context)
-    .draw();
+    .drawWithStyle();
 
   options.assert.ok(true, 'Chord');
 
   buildTabSlide({
-    first_note: notes[4],
-    last_note: notes[5],
-    first_indices: [0],
-    last_indices: [0],
+    firstNote: notes[4],
+    lastNote: notes[5],
+    firstIndexes: [0],
+    lastIndexes: [0],
   })
     .setContext(context)
-    .draw();
+    .drawWithStyle();
 
   options.assert.ok(true, 'Single note high-fret');
 
   buildTabSlide({
-    first_note: notes[6],
-    last_note: notes[7],
-    first_indices: [0, 1],
-    last_indices: [0, 1],
+    firstNote: notes[6],
+    lastNote: notes[7],
+    firstIndexes: [0, 1],
+    lastIndexes: [0, 1],
   })
     .setContext(context)
-    .draw();
+    .drawWithStyle();
 
   options.assert.ok(true, 'Chord high-fret');
 }

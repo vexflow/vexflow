@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // NoteHead Tests
@@ -8,9 +8,9 @@
 //       The SVGContext operates differently. It just sets the sx and sy as the new scale, instead of multiplying it.
 //       See: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/scale
 
+import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
-import { Flow } from '../src/flow';
 import { Formatter } from '../src/formatter';
 import { NoteHead } from '../src/notehead';
 import { RenderContext } from '../src/rendercontext';
@@ -47,16 +47,16 @@ function basic(options: TestOptions, contextBuilder: ContextBuilder): void {
   setContextStyle(ctx);
 
   const stave = new Stave(10, 0, 250).addClef('treble');
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
 
   const formatter = new Formatter();
-  const voice = new Voice(Flow.TIME4_4).setStrict(false);
+  const voice = new Voice(VexFlow.TIME4_4).setStrict(false);
 
-  const note_head1 = new NoteHead({ duration: '4', line: 3 });
-  const note_head2 = new NoteHead({ duration: '1', line: 2.5 });
-  const note_head3 = new NoteHead({ duration: '2', line: 0 });
+  const noteHead1 = new NoteHead({ duration: '4', line: 3 });
+  const noteHead2 = new NoteHead({ duration: '1', line: 2.5 });
+  const noteHead3 = new NoteHead({ duration: '2', line: 0 });
 
-  voice.addTickables([note_head1, note_head2, note_head3]);
+  voice.addTickables([noteHead1, noteHead2, noteHead3]);
   formatter.joinVoices([voice]).formatToStave([voice], stave);
 
   voice.draw(ctx, stave);
@@ -70,7 +70,7 @@ function basic(options: TestOptions, contextBuilder: ContextBuilder): void {
 function showNote(noteStruct: StaveNoteStruct, stave: Stave, ctx: RenderContext, x: number) {
   const note = new StaveNote(noteStruct).setStave(stave);
   new TickContext().addTickable(note).preFormat().setX(x);
-  note.setContext(ctx).draw();
+  note.setContext(ctx).drawWithStyle();
   return note;
 }
 
@@ -109,11 +109,11 @@ function variousHeads(options: TestOptions, contextBuilder: ContextBuilder): voi
     const stave = new Stave(10, 10 + staveNum * 120, notes.length * 25 + 75)
       .addClef('percussion')
       .setContext(ctx)
-      .draw();
+      .drawWithStyle();
 
     for (let i = 0; i < notes.length; ++i) {
       const note = notes[i];
-      note.stem_direction = staveNum === 0 ? -1 : 1;
+      note.stemDirection = staveNum === 0 ? -1 : 1;
       const staveNote = showNote(note, stave, ctx, (i + 1) * 25);
 
       options.assert.ok(staveNote.getX() > 0, 'Note ' + i + ' has X value');
@@ -178,11 +178,11 @@ function variousNoteHeads(options: TestOptions, contextBuilder: ContextBuilder):
     const stave = new Stave(10, 10 + staveNum * 120, notes.length * 25 + 75)
       .addClef('percussion')
       .setContext(ctx)
-      .draw();
+      .drawWithStyle();
 
     for (let i = 0; i < notes.length; ++i) {
       const note = notes[i];
-      note.stem_direction = staveNum === 0 ? -1 : 1;
+      note.stemDirection = staveNum === 0 ? -1 : 1;
       const staveNote = showNote(note, stave, ctx, (i + 1) * 25);
 
       options.assert.ok(staveNote.getX() > 0, 'Note ' + i + ' has X value');
@@ -193,19 +193,19 @@ function variousNoteHeads(options: TestOptions, contextBuilder: ContextBuilder):
 
 function variousNoteHeads2(options: TestOptions, contextBuilder: ContextBuilder): void {
   const notes: StaveNoteStruct[] = [
-    { keys: ['g/5/do'], duration: '4', auto_stem: true },
-    { keys: ['g/5/re'], duration: '4', auto_stem: true },
-    { keys: ['g/5/mi'], duration: '4', auto_stem: true },
-    { keys: ['g/5/fa'], duration: '4', auto_stem: true },
-    { keys: ['e/4/faup'], duration: '4', auto_stem: true },
-    { keys: ['g/5/so'], duration: '4', auto_stem: true },
-    { keys: ['g/5/la'], duration: '4', auto_stem: true },
-    { keys: ['g/5/ti'], duration: '4', auto_stem: true },
+    { keys: ['g/5/do'], duration: '4', autoStem: true },
+    { keys: ['g/5/re'], duration: '4', autoStem: true },
+    { keys: ['g/5/mi'], duration: '4', autoStem: true },
+    { keys: ['g/5/fa'], duration: '4', autoStem: true },
+    { keys: ['e/4/faup'], duration: '4', autoStem: true },
+    { keys: ['g/5/so'], duration: '4', autoStem: true },
+    { keys: ['g/5/la'], duration: '4', autoStem: true },
+    { keys: ['g/5/ti'], duration: '4', autoStem: true },
   ];
 
   const ctx = contextBuilder(options.elementId, notes.length * 25 + 100, 240);
 
-  const stave = new Stave(10, 10, notes.length * 25 + 75).addClef('percussion').setContext(ctx).draw();
+  const stave = new Stave(10, 10, notes.length * 25 + 75).addClef('percussion').setContext(ctx).drawWithStyle();
 
   for (let i = 0; i < notes.length; ++i) {
     const note = notes[i];
@@ -244,11 +244,14 @@ function drumChordHeads(options: TestOptions, contextBuilder: ContextBuilder): v
 
   // Draw two staves, one with up-stems and one with down-stems.
   for (let h = 0; h < 2; ++h) {
-    const stave = new Stave(10, 10 + h * 120, notes.length * 25 + 75).addClef('percussion').setContext(ctx).draw();
+    const stave = new Stave(10, 10 + h * 120, notes.length * 25 + 75)
+      .addClef('percussion')
+      .setContext(ctx)
+      .drawWithStyle();
 
     for (let i = 0; i < notes.length; ++i) {
       const note = notes[i];
-      note.stem_direction = h === 0 ? -1 : 1;
+      note.stemDirection = h === 0 ? -1 : 1;
       const staveNote = showNote(note, stave, ctx, (i + 1) * 25);
 
       options.assert.ok(staveNote.getX() > 0, 'Note ' + i + ' has X value');
@@ -263,10 +266,10 @@ function basicBoundingBoxes(options: TestOptions, contextBuilder: ContextBuilder
 
   // 250 is 450/1.8
   const stave = new Stave(10, 0, 250).addClef('treble');
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
 
   const formatter = new Formatter();
-  const voice = new Voice(Flow.TIME4_4).setStrict(false);
+  const voice = new Voice(VexFlow.TIME4_4).setStrict(false);
 
   const nh1 = new StaveNote({ keys: ['b/4'], duration: '4' });
   const nh2 = new StaveNote({ keys: ['a/4'], duration: '2' });

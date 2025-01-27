@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // StaveModifier Tests
@@ -23,7 +23,7 @@ function draw(options: TestOptions, contextBuilder: ContextBuilder): void {
   const ctx = contextBuilder(options.elementId, 400, 120);
   const stave = new Stave(10, 10, 300);
   stave.setContext(ctx);
-  stave.draw();
+  stave.drawWithStyle();
 
   options.assert.equal(stave.getYForNote(0), 100, 'getYForNote(0)');
   options.assert.equal(stave.getYForLine(5), 100, 'getYForLine(5)');
@@ -45,7 +45,7 @@ function drawBeginAndEnd(options: TestOptions, contextBuilder: ContextBuilder): 
   stave.setEndTimeSignature('9/8');
   stave.setEndKeySignature('G', 'C#');
   stave.setEndBarType(BarlineType.DOUBLE);
-  stave.draw();
+  stave.drawWithStyle();
 
   // change
   const END = StaveModifierPosition.END;
@@ -58,7 +58,7 @@ function drawBeginAndEnd(options: TestOptions, contextBuilder: ContextBuilder): 
   stave.setTimeSignature('C', undefined, END);
   stave.setKeySignature('F', undefined, END);
   stave.setEndBarType(BarlineType.SINGLE);
-  stave.draw();
+  stave.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }

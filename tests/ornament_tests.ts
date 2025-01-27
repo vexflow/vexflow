@@ -1,6 +1,6 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
-// Author: Cyril Silverman
+// @author Cyril Silverman
 //
 // Ornament Tests
 
@@ -11,9 +11,10 @@ import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 import { Accidental } from '../src/accidental';
 import { Beam } from '../src/beam';
 import { Dot } from '../src/dot';
+import { Element } from '../src/element';
 import { Factory } from '../src/factory';
 import { Formatter } from '../src/formatter';
-import { Glyph } from '../src/glyph';
+import { Glyphs } from '../src/glyphs';
 import { Ornament } from '../src/ornament';
 import { ContextBuilder } from '../src/renderer';
 import { Stave } from '../src/stave';
@@ -42,27 +43,27 @@ function drawOrnaments(options: TestOptions, contextBuilder: ContextBuilder): vo
   const ctx = contextBuilder(options.elementId, 750, 195);
 
   const stave = new Stave(10, 30, 700);
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
   const notes = [
-    new StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    new StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['c/4'], duration: '4', stemDirection: 1 }),
   ];
 
   notes[0].addModifier(new Ornament('mordent'), 0);
-  notes[1].addModifier(new Ornament('mordent_inverted'), 0);
+  notes[1].addModifier(new Ornament('mordentInverted'), 0);
   notes[2].addModifier(new Ornament('turn'), 0);
-  notes[3].addModifier(new Ornament('turn_inverted'), 0);
+  notes[3].addModifier(new Ornament('turnInverted'), 0);
   notes[4].addModifier(new Ornament('tr'), 0);
   notes[5].addModifier(new Ornament('upprall'), 0);
   notes[6].addModifier(new Ornament('downprall'), 0);
@@ -84,28 +85,28 @@ function drawOrnamentsDisplaced(options: TestOptions, contextBuilder: ContextBui
   const ctx = contextBuilder(options.elementId, 750, 195);
 
   const stave = new Stave(10, 30, 700);
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
   const notes = [
-    new StaveNote({ keys: ['a/5'], duration: '4', stem_direction: -1 }),
-    new StaveNote({ keys: ['a/5'], duration: '4', stem_direction: -1 }),
-    new StaveNote({ keys: ['a/5'], duration: '4', stem_direction: -1 }),
-    new StaveNote({ keys: ['a/5'], duration: '4', stem_direction: -1 }),
-    new StaveNote({ keys: ['a/5'], duration: '4', stem_direction: -1 }),
-    new StaveNote({ keys: ['a/5'], duration: '4', stem_direction: -1 }),
-    new StaveNote({ keys: ['a/5'], duration: '4', stem_direction: -1 }),
-    new StaveNote({ keys: ['a/4'], duration: '4', stem_direction: 1 }),
-    new StaveNote({ keys: ['a/4'], duration: '4', stem_direction: 1 }),
-    new StaveNote({ keys: ['a/4'], duration: '4', stem_direction: 1 }),
-    new StaveNote({ keys: ['a/4'], duration: '4', stem_direction: 1 }),
-    new StaveNote({ keys: ['a/4'], duration: '4', stem_direction: 1 }),
-    new StaveNote({ keys: ['a/4'], duration: '4', stem_direction: 1 }),
+    new StaveNote({ keys: ['a/5'], duration: '4', stemDirection: -1 }),
+    new StaveNote({ keys: ['a/5'], duration: '4', stemDirection: -1 }),
+    new StaveNote({ keys: ['a/5'], duration: '4', stemDirection: -1 }),
+    new StaveNote({ keys: ['a/5'], duration: '4', stemDirection: -1 }),
+    new StaveNote({ keys: ['a/5'], duration: '4', stemDirection: -1 }),
+    new StaveNote({ keys: ['a/5'], duration: '4', stemDirection: -1 }),
+    new StaveNote({ keys: ['a/5'], duration: '4', stemDirection: -1 }),
+    new StaveNote({ keys: ['a/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['a/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['a/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['a/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['a/4'], duration: '4', stemDirection: 1 }),
+    new StaveNote({ keys: ['a/4'], duration: '4', stemDirection: 1 }),
   ];
 
   notes[0].addModifier(new Ornament('mordent'), 0);
-  notes[1].addModifier(new Ornament('mordent_inverted'), 0);
-  notes[1].addModifier(new Ornament('mordent_inverted'), 0);
+  notes[1].addModifier(new Ornament('mordentInverted'), 0);
+  notes[1].addModifier(new Ornament('mordentInverted'), 0);
   notes[2].addModifier(new Ornament('turn'), 0);
-  notes[3].addModifier(new Ornament('turn_inverted'), 0);
+  notes[3].addModifier(new Ornament('turnInverted'), 0);
   notes[4].addModifier(new Ornament('tr'), 0);
   notes[5].addModifier(new Ornament('upprall'), 0);
   notes[6].addModifier(new Ornament('downprall'), 0);
@@ -129,18 +130,18 @@ const addDelayedTurns = (f: Factory) => {
   const context = f.getContext();
 
   const stave = f.Stave({ x: 10, y: 30, width: 500 });
-  stave.setContext(context).draw();
+  stave.setContext(context).drawWithStyle();
 
   const notes = [
-    f.StaveNote({ keys: ['a/4'], duration: '4', stem_direction: 1 }),
-    f.StaveNote({ keys: ['a/4'], duration: '4', stem_direction: 1 }),
-    f.StaveNote({ keys: ['a/4'], duration: '4', stem_direction: 1 }),
-    f.StaveNote({ keys: ['a/4'], duration: '4', stem_direction: 1 }),
+    f.StaveNote({ keys: ['a/4'], duration: '4', stemDirection: 1 }),
+    f.StaveNote({ keys: ['a/4'], duration: '4', stemDirection: 1 }),
+    f.StaveNote({ keys: ['a/4'], duration: '4', stemDirection: 1 }),
+    f.StaveNote({ keys: ['a/4'], duration: '4', stemDirection: 1 }),
   ];
 
   notes[0].addModifier(f.Ornament('turn', { delayed: true }), 0);
-  notes[1].addModifier(f.Ornament('turn_inverted', { delayed: true }), 0);
-  notes[2].addModifier(f.Ornament('turn_inverted', { delayed: true }), 0);
+  notes[1].addModifier(f.Ornament('turnInverted', { delayed: true }), 0);
+  notes[2].addModifier(f.Ornament('turnInverted', { delayed: true }), 0);
   notes[3].addModifier(f.Ornament('turn', { delayed: true }), 0);
 
   return { context, stave, notes };
@@ -180,21 +181,21 @@ function drawOrnamentsDelayedMultipleVoices(options: TestOptions, contextBuilder
   stave.addTimeSignature('4/4');
 
   const notes1 = [
-    new StaveNote({ keys: ['f/5'], duration: '2r'}),
-    new StaveNote({ keys: ['c/5'], duration: '2', stem_direction: 1 }),
+    new StaveNote({ keys: ['f/5'], duration: '2r' }),
+    new StaveNote({ keys: ['c/5'], duration: '2', stemDirection: 1 }),
   ];
   const notes2 = [
-    new StaveNote({ keys: ['a/4'], duration: '4', stem_direction: -1 }),
-    new StaveNote({ keys: ['e/4'], duration: '4r'}),
-    new StaveNote({ keys: ['e/4'], duration: '2r'}),
+    new StaveNote({ keys: ['a/4'], duration: '4', stemDirection: -1 }),
+    new StaveNote({ keys: ['e/4'], duration: '4r' }),
+    new StaveNote({ keys: ['e/4'], duration: '2r' }),
   ];
 
-  notes1[1].addModifier(new Ornament('turn_inverted').setDelayed(true), 0);
+  notes1[1].addModifier(new Ornament('turnInverted').setDelayed(true), 0);
   notes2[0].addModifier(new Ornament('turn').setDelayed(true), 0);
 
-  const voice1 = new Voice({ num_beats: 4, beat_value: 4, });
+  const voice1 = new Voice({ numBeats: 4, beatValue: 4 });
   voice1.addTickables(notes1);
-  const voice2 = new Voice({ num_beats: 4, beat_value: 4, });
+  const voice2 = new Voice({ numBeats: 4, beatValue: 4 });
   voice2.addTickables(notes2);
 
   const formatWidth = stave.getNoteEndX() - stave.getNoteStartX();
@@ -203,7 +204,7 @@ function drawOrnamentsDelayedMultipleVoices(options: TestOptions, contextBuilder
   formatter.joinVoices([voice2]);
   formatter.format([voice1, voice2], formatWidth);
 
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
   voice1.draw(ctx, stave);
   voice2.draw(ctx, stave);
 }
@@ -216,18 +217,18 @@ function drawOrnamentsStacked(options: TestOptions): void {
   const ctx = f.getContext();
 
   const stave = f.Stave({ x: 10, y: 30, width: 500 });
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
   const notes = [
-    f.StaveNote({ keys: ['a/4'], duration: '4', stem_direction: 1 }),
-    f.StaveNote({ keys: ['a/4'], duration: '4', stem_direction: 1 }),
-    f.StaveNote({ keys: ['a/4'], duration: '4', stem_direction: 1 }),
-    f.StaveNote({ keys: ['a/4'], duration: '4', stem_direction: 1 }),
+    f.StaveNote({ keys: ['a/4'], duration: '4', stemDirection: 1 }),
+    f.StaveNote({ keys: ['a/4'], duration: '4', stemDirection: 1 }),
+    f.StaveNote({ keys: ['a/4'], duration: '4', stemDirection: 1 }),
+    f.StaveNote({ keys: ['a/4'], duration: '4', stemDirection: 1 }),
   ];
 
   notes[0].addModifier(f.Ornament('mordent'), 0);
-  notes[1].addModifier(f.Ornament('turn_inverted'), 0);
+  notes[1].addModifier(f.Ornament('turnInverted'), 0);
   notes[2].addModifier(f.Ornament('turn'), 0);
-  notes[3].addModifier(f.Ornament('turn_inverted'), 0);
+  notes[3].addModifier(f.Ornament('turnInverted'), 0);
 
   notes[0].addModifier(f.Ornament('turn'), 0);
   notes[1].addModifier(f.Ornament('prallup'), 0);
@@ -246,45 +247,45 @@ function drawOrnamentsWithAccidentals(options: TestOptions): void {
   const ctx = f.getContext();
 
   const stave = f.Stave({ x: 10, y: 60, width: 600 });
-  stave.setContext(ctx).draw();
+  stave.setContext(ctx).drawWithStyle();
   const notes = [
-    f.StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    f.StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    f.StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    f.StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    f.StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    f.StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    f.StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    f.StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    f.StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    f.StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
-    f.StaveNote({ keys: ['f/4'], duration: '4', stem_direction: 1 }),
+    f.StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
+    f.StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
+    f.StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
+    f.StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
+    f.StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
+    f.StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
+    f.StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
+    f.StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
+    f.StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
+    f.StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
+    f.StaveNote({ keys: ['f/4'], duration: '4', stemDirection: 1 }),
   ];
 
   notes[0].addModifier(f.Ornament('mordent', { lowerAccidental: '#', upperAccidental: '#' }), 0);
-  notes[1].addModifier(f.Ornament('turn_inverted', { lowerAccidental: 'b', upperAccidental: 'b' }), 0);
+  notes[1].addModifier(f.Ornament('turnInverted', { lowerAccidental: 'b', upperAccidental: 'b' }), 0);
   notes[2].addModifier(f.Ornament('turn', { upperAccidental: '##', lowerAccidental: '##' }), 0);
-  notes[3].addModifier(f.Ornament('mordent_inverted', { lowerAccidental: 'db', upperAccidental: 'db' }), 0);
-  notes[4].addModifier(f.Ornament('turn_inverted', { upperAccidental: '++', lowerAccidental: '++' }), 0);
+  notes[3].addModifier(f.Ornament('mordentInverted', { lowerAccidental: 'db', upperAccidental: 'db' }), 0);
+  notes[4].addModifier(f.Ornament('turnInverted', { upperAccidental: '++', lowerAccidental: '++' }), 0);
   notes[5].addModifier(f.Ornament('tr', { upperAccidental: 'n', lowerAccidental: 'n' }), 0);
   notes[6].addModifier(f.Ornament('prallup', { upperAccidental: 'd', lowerAccidental: 'd' }), 0);
   notes[7].addModifier(f.Ornament('lineprall', { upperAccidental: 'db', lowerAccidental: 'db' }), 0);
   notes[8].addModifier(f.Ornament('upmordent', { upperAccidental: 'bbs', lowerAccidental: 'bbs' }), 0);
   notes[9].addModifier(f.Ornament('prallprall', { upperAccidental: 'bb', lowerAccidental: 'bb' }), 0);
-  notes[10].addModifier(f.Ornament('turn_inverted', { upperAccidental: '+', lowerAccidental: '+' }), 0);
+  notes[10].addModifier(f.Ornament('turnInverted', { upperAccidental: '+', lowerAccidental: '+' }), 0);
 
   // Helper function to justify and draw a 4/4 voice
   Formatter.FormatAndDraw(ctx, stave, notes);
 }
 
 function jazzOrnaments(options: TestOptions): void {
-  const clefWidth = Glyph.getWidth('gClef', 38); // widest clef
+  const clefWidth = Element.measureWidth(Glyphs.gClef);
 
   // Helper function.
   function draw(modifiers: Ornament[], keys: string[], x: number, width: number, y: number, stemDirection?: number) {
     // Helper function to create a StaveNote.
     const note = (keys: string[], duration: string, modifier: Ornament, stemDirection?: number) => {
-      const n = new StaveNote({ keys, duration, stem_direction: stemDirection })
+      const n = new StaveNote({ keys, duration, stemDirection })
         .addModifier(modifier, 0)
         .addModifier(new Accidental('b'), 0);
       const dot = duration.indexOf('d') >= 0;
@@ -294,7 +295,7 @@ function jazzOrnaments(options: TestOptions): void {
       return n;
     };
 
-    const stave = new Stave(x, y, width).addClef('treble').setContext(ctx).draw();
+    const stave = new Stave(x, y, width).addClef('treble').setContext(ctx).drawWithStyle();
 
     const notes = [
       note(keys, '4d', modifiers[0], stemDirection),
@@ -309,13 +310,13 @@ function jazzOrnaments(options: TestOptions): void {
 
     Beam.generateBeams(notes);
     const voice = new Voice({
-      num_beats: 4,
-      beat_value: 4,
+      numBeats: 4,
+      beatValue: 4,
     }).setMode(VoiceMode.SOFT);
     voice.addTickables(notes);
     const formatter = new Formatter().joinVoices([voice]);
     formatter.format([voice], width - Stave.defaultPadding - clefWidth);
-    stave.setContext(ctx).draw();
+    stave.setContext(ctx).drawWithStyle();
     voice.draw(ctx, stave);
   }
 

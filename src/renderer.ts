@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 
 import { CanvasContext } from './canvascontext';
@@ -124,7 +124,7 @@ export class Renderer {
       const backend: number = arg1;
 
       let element: HTMLElement;
-      if (typeof arg0 == 'string') {
+      if (typeof arg0 === 'string') {
         const maybeElement = document.getElementById(arg0);
         if (!maybeElement) {
           throw new RuntimeError('BadElementId', `Can't find element with ID "${maybeElement}"`);

@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 
 import { Element } from './element';
@@ -37,21 +37,19 @@ export abstract class Tickable extends Element {
     return Category.Tickable;
   }
 
-  protected ignore_ticks: boolean;
+  protected ignoreTicks: boolean;
   protected tupletStack: Tuplet[];
   protected tuplet?: Tuplet;
   protected ticks: Fraction;
-  protected center_x_shift: number;
+  protected centerXShift: number;
   protected voice?: Voice;
-  protected width: number;
-  protected x_shift: number;
   protected modifierContext?: ModifierContext;
   protected tickContext?: TickContext;
   protected modifiers: Modifier[];
   protected tickMultiplier: Fraction;
   protected formatterMetrics: FormatterMetrics;
   protected intrinsicTicks: number;
-  protected align_center: boolean;
+  protected alignCenter: boolean;
 
   private _preFormatted: boolean = false;
   private _postFormatted: boolean = false;
@@ -65,19 +63,15 @@ export abstract class Tickable extends Element {
     this.intrinsicTicks = 0; // Floating point value of ticks
     this.tickMultiplier = new Fraction(1, 1);
 
-    // Formatter metrics
-    this.width = 0;
-    this.x_shift = 0; // Shift from tick context
-
     this.modifiers = [];
     this.tupletStack = [];
 
-    this.align_center = false;
-    this.center_x_shift = 0; // Shift from tick context if center aligned
+    this.alignCenter = false;
+    this.centerXShift = 0; // Shift from tick context if center aligned
 
     // This flag tells the formatter to ignore this tickable during
     // formatting and justification. It is set by tickables such as BarNote.
-    this.ignore_ticks = false;
+    this.ignoreTicks = false;
 
     // This is a space for an external formatting class or function to maintain
     // metrics.
@@ -116,18 +110,13 @@ export abstract class Tickable extends Element {
 
   /** Check if it ignores the ticks. */
   shouldIgnoreTicks(): boolean {
-    return this.ignore_ticks;
+    return this.ignoreTicks;
   }
 
   /** Ignore the ticks. */
   setIgnoreTicks(flag: boolean): this {
-    this.ignore_ticks = flag;
+    this.ignoreTicks = flag;
     return this;
-  }
-
-  /** Set width of note. Used by the formatter for positioning. */
-  setWidth(width: number): void {
-    this.width = width;
   }
 
   /** Get width of note. Used by the formatter for positioning. */
@@ -139,21 +128,10 @@ export abstract class Tickable extends Element {
     return this.width + (this.modifierContext ? this.modifierContext.getWidth() : 0);
   }
 
-  /** Displace note by `x` pixels. Used by the formatter. */
-  setXShift(x: number): this {
-    this.x_shift = x;
-    return this;
-  }
-
-  /** Get the `x` displaced pixels of the note. */
-  getXShift(): number {
-    return this.x_shift;
-  }
-
   /** Get `x` position of this tick context. */
   getX(): number {
     const tickContext = this.checkTickContext(`Can't getX() without a TickContext.`);
-    return tickContext.getX() + this.x_shift;
+    return tickContext.getX() + this.xShift;
   }
 
   /** Return the formatterMetrics. */
@@ -164,7 +142,7 @@ export abstract class Tickable extends Element {
   /** Return the center `x` shift. */
   getCenterXShift(): number {
     if (this.isCenterAligned()) {
-      return this.center_x_shift;
+      return this.centerXShift;
     }
 
     return 0;
@@ -172,18 +150,18 @@ export abstract class Tickable extends Element {
 
   /** Set the center `x` shift. */
   setCenterXShift(centerXShift: number): this {
-    this.center_x_shift = centerXShift;
+    this.centerXShift = centerXShift;
     return this;
   }
 
   // Check if tickable is center aligned. */
   isCenterAligned(): boolean {
-    return this.align_center;
+    return this.alignCenter;
   }
 
   // Set/unset center alignment. */
-  setCenterAlignment(align_center: boolean): this {
-    this.align_center = align_center;
+  setCenterAlignment(alignCenter: boolean): this {
+    this.alignCenter = alignCenter;
     return this;
   }
 

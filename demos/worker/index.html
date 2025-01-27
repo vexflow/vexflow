@@ -1,14 +1,22 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <meta charset="UTF-8" />
+    <!--
+      Summary: Use web workers to render multiple scores simultaneously.
+      Run: 
+        Start a web server with `npx http-server -p 8080` from the `vexflow/` folder
+        Navigate to http://127.0.0.1:8080/demos/worker/
+    -->
     <style>
       html {
-        font: 16px 'Helvetica Neue', Arial, sans-serif;
+        font: 16px sans-serif;
       }
+
       body {
         margin: 20px;
       }
+
       canvas {
         width: 500px;
         height: 200px;
@@ -21,9 +29,11 @@
   <body>
     <p>
       The five scores below are rendered by web workers via
-      <a href="https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas" target="_blank">OffscreenCanvas</a>. To
-      see this page, you need to run a webserver from the vexflow directory. For example, `npx http-server`, then open
-      http://127.0.0.1:8080/demos/worker/.
+      <a href="https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas" target="_blank">OffscreenCanvas</a
+      >.<br />
+      To see this page, you need to run a webserver from the <b>vexflow/</b> directory.<br />For example,
+      <b><code>npx http-server</code></b
+      >, then open <a href="http://127.0.0.1:8080/demos/worker/">http://127.0.0.1:8080/demos/worker/</a>
     </p>
     <script type="module">
       if (window.Worker) {
@@ -37,9 +47,7 @@
             `<canvas id="outputCanvas${i}" width="1000" height="400"></canvas>`
           );
 
-          // Test the standard bundle (vexflow.js) and also the minimal bundle with dynamically loaded fonts (vexflow-core.js).
-          const workerJS = Math.random() > 0.5 ? 'worker-vexflow.js' : 'worker-vexflow-core.js';
-
+          const workerJS = 'worker-vexflow-core.js';
           const w = new Worker(workerJS);
           w.onmessage = function (e) {
             console.log(`Message from #${i} / ${workerJS}:  [${e.data}]`);

@@ -1,13 +1,14 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // Key Signature Tests
 //
 
+import { VexFlow } from '../src/vexflow';
 import { MAJOR_KEYS, MINOR_KEYS, TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
-import { Flow } from '../src/flow';
-import { Glyph } from '../src/glyph';
+import { Element } from '../src/element';
+import { Glyphs } from '../src/glyphs';
 import { KeySignature } from '../src/keysignature';
 import { ContextBuilder } from '../src/renderer';
 import { Stave } from '../src/stave';
@@ -33,11 +34,10 @@ const KeySignatureTests = {
 };
 
 const fontWidths = () => {
-  const glyphScale = 39; // default font scale
-  const sharpWidth = Glyph.getWidth('accidentalSharp', glyphScale) + 1;
-  const flatWidth = Glyph.getWidth('accidentalFlat', glyphScale) + 1;
-  const naturalWidth = Glyph.getWidth('accidentalNatural', glyphScale) + 2;
-  const clefWidth = Glyph.getWidth('gClef', glyphScale) * 2; // widest clef
+  const sharpWidth = Element.measureWidth(Glyphs.accidentalSharp) + 1;
+  const flatWidth = Element.measureWidth(Glyphs.accidentalFlat) + 1;
+  const naturalWidth = Element.measureWidth(Glyphs.accidentalNatural) + 2;
+  const clefWidth = Element.measureWidth(Glyphs.gClef) * 2; // widest clef
   return { sharpWidth, flatWidth, naturalWidth, clefWidth };
 };
 
@@ -45,7 +45,7 @@ function parser(assert: Assert): void {
   assert.expect(13);
 
   function catchError(spec: string): void {
-    assert.throws(() => Flow.keySignature(spec), /BadKeySignature/);
+    assert.throws(() => VexFlow.keySignature(spec), /BadKeySignature/);
   }
 
   catchError('asdf');
@@ -61,20 +61,20 @@ function parser(assert: Assert): void {
   catchError('b:invalid');
   catchError('#:not_a_number');
 
-  Flow.keySignature('B');
-  Flow.keySignature('C');
-  Flow.keySignature('Fm');
-  Flow.keySignature('Ab');
-  Flow.keySignature('Abm');
-  Flow.keySignature('F#');
-  Flow.keySignature('G#m');
-  Flow.keySignature('G#');
-  Flow.keySignature('Dbm');
+  VexFlow.keySignature('B');
+  VexFlow.keySignature('C');
+  VexFlow.keySignature('Fm');
+  VexFlow.keySignature('Ab');
+  VexFlow.keySignature('Abm');
+  VexFlow.keySignature('F#');
+  VexFlow.keySignature('G#m');
+  VexFlow.keySignature('G#');
+  VexFlow.keySignature('Dbm');
 
-  Flow.keySignature('flats_8');
-  Flow.keySignature('sharps_14');
-  Flow.keySignature('flats_10');
-  Flow.keySignature('sharps_8');
+  VexFlow.keySignature('flats_8');
+  VexFlow.keySignature('sharps_14');
+  VexFlow.keySignature('flats_10');
+  VexFlow.keySignature('sharps_8');
 
 
   assert.ok(true, 'all pass');
@@ -105,9 +105,13 @@ function majorKeys(options: TestOptions, contextBuilder: ContextBuilder): void {
   }
 
   stave1.setContext(ctx);
-  stave1.draw();
+  stave1.drawWithStyle();
+  stave1.getModifiers().forEach((modifier) => {
+    VexFlowTests.drawBoundingBox(ctx, modifier);
+  });
+
   stave2.setContext(ctx);
-  stave2.draw();
+  stave2.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -169,13 +173,13 @@ function majorKeysCanceled(options: TestOptions, contextBuilder: ContextBuilder)
   }
 
   stave1.setContext(ctx);
-  stave1.draw();
+  stave1.drawWithStyle();
   stave2.setContext(ctx);
-  stave2.draw();
+  stave2.drawWithStyle();
   stave3.setContext(ctx);
-  stave3.draw();
+  stave3.drawWithStyle();
   stave4.setContext(ctx);
-  stave4.draw();
+  stave4.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -210,7 +214,7 @@ function keysCanceledForEachClef(options: TestOptions, contextBuilder: ContextBu
       stave.addKeySignature(cancelKey);
       stave.addKeySignature(key, cancelKey);
       stave.addKeySignature(key);
-      stave.setContext(ctx).draw();
+      stave.setContext(ctx).drawWithStyle();
       tx += width;
     });
     tx = x;
@@ -261,13 +265,13 @@ function majorKeysAltered(options: TestOptions, contextBuilder: ContextBuilder):
   }
 
   stave1.setContext(ctx);
-  stave1.draw();
+  stave1.drawWithStyle();
   stave2.setContext(ctx);
-  stave2.draw();
+  stave2.drawWithStyle();
   stave3.setContext(ctx);
-  stave3.draw();
+  stave3.drawWithStyle();
   stave4.setContext(ctx);
-  stave4.draw();
+  stave4.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -297,9 +301,9 @@ function minorKeys(options: TestOptions, contextBuilder: ContextBuilder): void {
   }
 
   stave1.setContext(ctx);
-  stave1.draw();
+  stave1.drawWithStyle();
   stave2.setContext(ctx);
-  stave2.draw();
+  stave2.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }
@@ -319,8 +323,8 @@ function endKeyWithClef(options: TestOptions, contextBuilder: ContextBuilder): v
   const stave2 = new Stave(10, 90, 350);
   stave2.setKeySignature('Cb').setClef('bass').setEndClef('treble').setEndKeySignature('G');
 
-  stave1.setContext(ctx).draw();
-  stave2.setContext(ctx).draw();
+  stave1.setContext(ctx).drawWithStyle();
+  stave2.setContext(ctx).drawWithStyle();
   options.assert.ok(true, 'all pass');
 }
 
@@ -346,9 +350,9 @@ function staveHelper(options: TestOptions, contextBuilder: ContextBuilder): void
   }
 
   stave1.setContext(ctx);
-  stave1.draw();
+  stave1.drawWithStyle();
   stave2.setContext(ctx);
-  stave2.draw();
+  stave2.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
 }

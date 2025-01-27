@@ -1,4 +1,4 @@
-// [VexFlow](https://vexflow.com) - Copyright (c) Mohit Muthanna 2010.
+// Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
 // Three Voices Tests - Three voices in single staff.
@@ -59,7 +59,7 @@ function createThreeVoicesTest(
     factory.draw();
 
     for (let i = 0; i < beams.length; i++) {
-      beams[i].setContext(factory.getContext()).draw();
+      beams[i].setContext(factory.getContext()).drawWithStyle();
     }
 
     options.assert.ok(true);
@@ -129,7 +129,7 @@ function autoRestTwoVoices(options: TestOptions): void {
 
   let beams: Beam[] = [];
 
-  function createMeasure(measureTitle: string, width: number, align_rests: boolean) {
+  function createMeasure(measureTitle: string, width: number, alignRests: boolean) {
     const stave = f.Stave({ x: x, y: 50, width: width }).setBegBarType(1);
     x += width;
 
@@ -145,7 +145,7 @@ function autoRestTwoVoices(options: TestOptions): void {
 
     beams = beams.concat(Beam.applyAndGetBeams(voices[0], 1)).concat(Beam.applyAndGetBeams(voices[1], -1));
 
-    f.Formatter().joinVoices(voices).formatToStave(voices, stave, { align_rests });
+    f.Formatter().joinVoices(voices).formatToStave(voices, stave, { alignRests });
   }
 
   createMeasure('Default Rest Positions', 400, false);
@@ -154,7 +154,7 @@ function autoRestTwoVoices(options: TestOptions): void {
   f.draw();
 
   for (let i = 0; i < beams.length; i++) {
-    beams[i].setContext(f.getContext()).draw();
+    beams[i].setContext(f.getContext()).drawWithStyle();
   }
 
   options.assert.ok(true, 'Auto Adjust Rests - Two Voices');
@@ -165,7 +165,7 @@ function autoRestThreeVoices1(options: TestOptions): void {
   const score = f.EasyScore();
   let x = 10;
 
-  function createMeasure(measureTitle: string, width: number, align_rests: boolean) {
+  function createMeasure(measureTitle: string, width: number, alignRests: boolean) {
     const stave = f.Stave({ x: x, y: 50, width: width }).setBegBarType(1);
 
     const voices = [
@@ -181,7 +181,7 @@ function autoRestThreeVoices1(options: TestOptions): void {
       ),
     ];
 
-    f.Formatter().joinVoices(voices).formatToStave(voices, stave, { align_rests });
+    f.Formatter().joinVoices(voices).formatToStave(voices, stave, { alignRests });
 
     x += width;
   }
@@ -198,7 +198,7 @@ function autoRestThreeVoices2(options: TestOptions): void {
   const score = f.EasyScore();
   let x = 10;
 
-  function createMeasure(measureTitle: string, width: number, align_rests: boolean) {
+  function createMeasure(measureTitle: string, width: number, alignRests: boolean) {
     const stave = f.Stave({ x: x, y: 50, width: width }).setBegBarType(1);
 
     const voices = [
@@ -208,7 +208,7 @@ function autoRestThreeVoices2(options: TestOptions): void {
       score.voice([f.TextNote({ text: measureTitle, duration: 'h', line: -1, smooth: true })], { time: '2/4' }),
     ];
 
-    f.Formatter().joinVoices(voices).formatToStave(voices, stave, { align_rests });
+    f.Formatter().joinVoices(voices).formatToStave(voices, stave, { alignRests });
 
     x += width;
   }
