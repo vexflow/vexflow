@@ -30,7 +30,6 @@ export class BarNote extends Note {
   protected metrics: { widths: Record<string, number> };
   // Initialized by the constructor via this.setType(type)
   protected type!: BarlineType;
-  public barline!: Barline;
 
   constructor(type: string | BarlineType = BarlineType.SINGLE) {
     super({ duration: 'b' });
@@ -53,7 +52,6 @@ export class BarNote extends Note {
     // Tell the formatter that bar notes have no duration.
     this.ignoreTicks = true;
     this.setType(type);
-    this.barline = new Barline(type);
   }
 
   /** Get the type of bar note.*/
