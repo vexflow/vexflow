@@ -10,15 +10,14 @@
 // Since we use a require(...) statement below, we will load the CJS bundle at build/cjs/vexflow.js
 // See the `exports` field in package.json for details.
 
-const Vex = require('vexflow');
+const VexFlow = require('vexflow');
+const { Renderer, Stave, StaveNote, Formatter } = VexFlow;
 
 const { createCanvas, registerFont } = require('canvas');
 
 // Node canvas has a different API for loading fonts.
 registerFont('../../node_modules/@vexflow-fonts/bravura/bravura.otf', { family: 'Bravura' });
 registerFont('../../node_modules/@vexflow-fonts/petaluma/petaluma.otf', { family: 'Petaluma' });
-
-const { Renderer, Stave, StaveNote, Formatter } = VexFlow;
 
 const canvas = createCanvas(1000, 500);
 

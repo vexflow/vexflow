@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <!--
+      Summary: Manually load the Bravura music font with CSS @font-face.
+        Demonstrate mouseover and mouseout events.
+        This demo does not use the VexFlow library.
+      Run: 
+        Open hover.html in a browser.
+    -->
+    <style>
+      @font-face {
+        font-family: 'Bravura';
+        font-style: normal;
+        font-display: block;
+        font-weight: 400;
+        src:
+          local('Bravura'),
+          url(../../node_modules/@vexflow-fonts/bravura/bravura.woff2) format('woff2');
+      }
+
+      svg {
+        width: 600px;
+        height: 600px;
+        border: 1px solid gray;
+      }
+
+      svg > text {
+        font-family: 'Bravura'; /* */
+        font-size: 80pt;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+        Preload the Bravura font. The empty <span></span> below triggers the browser to load the music font.
+    -->
+    <span style="font-family: Bravura"></span>
+    <svg>
+      <circle id="c" cx="100" cy="100" r="40" stroke="gold" stroke-width="8" fill="yellow" />
+      <text id="t" x="30" y="200" fill="rgb(55,55,55)" stroke="none" paint-order="stroke fill">
+        &#xE560; &#xE1D7; &#xE050; &#xE062; &#xE080; &#xE081; &#xE082; &#xE083;
+      </text>
+      <circle id="c" cx="380" cy="180" r="30" stroke="green" stroke-width="5" fill="rgba(20,200,200,0.8)" />
+    </svg>
+    <script type="module">
+      const fontFaceSet = await document.fonts.ready;
+
+      const text = document.querySelector('#t');
+      text.addEventListener('mouseover', () => {
+        text.setAttribute('fill', `rgb(77,77,77)`);
+        text.setAttribute('stroke', `rgb(233, 200, 0)`);
+        text.setAttribute('stroke-width', `6`);
+      });
+
+      text.addEventListener('mouseout', () => {
+        text.setAttribute('fill', `rgb(55,55,55)`);
+        text.setAttribute('stroke', `none`);
+        text.setAttribute('stroke-width', `0`);
+      });
+    </script>
+  </body>
+</html>
