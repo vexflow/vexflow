@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!--
+      The <meta charset="UTF-8" /> tag above is important!
+      Otherwise, the browser might render the music glyphs incorrectly.
+    -->
+    <!--
+      This page loads `vexflow.js` with a <script src=""></script> tag.
+      This demo points to the local build/ directory
+    -->
+    <style>
+      html {
+        font-family: 'Academico', 'Georgia', serif;
+        font-size: 18px;
+      }
+
+      body {
+        margin: 20px;
+        line-height: 1.75em;
+      }
+    </style>
+    <script src="../../build/cjs/vexflow.js"></script>
+  </head>
+  <body>
+    <p>Use <b>vexflow.js</b> to render a simple score. View source and use developer tools to inspect the elements.</p>
+    <div id="output"></div>
+    <script type="module">
+      const factory = new VexFlow.Factory({ renderer: { elementId: 'output' } });
+      const score = factory.EasyScore();
+      const system = factory.System();
+      system
+        .addStave({
+          voices: [score.voice(score.notes('C5/h, A4/q, F4'))],
+        })
+        .addClef('treble')
+        .addTimeSignature('4/4');
+      factory.draw();
+    </script>
+  </body>
+</html>
