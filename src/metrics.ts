@@ -271,6 +271,10 @@ export const MetricsDefaults: Record<string, any> = {
     textYOffset: 2,
   },
 
+  TupletNote: {
+    fontSize: 12,
+  },
+
   Volta: {
     fontSize: 9,
     fontWeight: 'bold',

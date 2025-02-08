@@ -41,6 +41,9 @@
  *   yOffset: int, default 0
  *     manually offset a tuplet, for instance to avoid collisions
  *     with articulations, etc...
+ *
+ *   baseNoteLength: string
+ *      Show helper note duration in parenthesis after tuplet ratio.
  * }
  */
 
@@ -63,12 +66,30 @@ export interface TupletOptions {
   ratioed?: boolean;
   yOffset?: number;
   textYOffset?: number;
+  baseNoteLength?: string;
 }
 
 export const enum TupletLocation {
   BOTTOM = -1,
   TOP = +1,
 }
+
+const BRACKET_PADDING = 5; // padding between inner text and bracket if bracket is enabled
+const NOTE_PADDING = 1; // padding between text elements of (note) if note is shown
+const NOTE_OFFSET = -3; // offset of shown note
+const EXTRA_SPACING = 2; // spacing between ratio and shown note
+
+const NOTE_GLYPHS: Record<string, string> = {
+  '4': Glyphs.metNoteQuarterUp, // quarter note
+  '8': Glyphs.metNote8thUp, // eighth note
+  '16': Glyphs.metNote16thUp, // sixteenth note
+  '32': Glyphs.metNote32ndUp, // thirty-second note
+  '64': Glyphs.metNote64thUp, // sixty-fourth note
+  '128': Glyphs.metNote128thUp, // one hundred twenty-eighth note
+  '256': Glyphs.metNote256thUp,
+  '512': Glyphs.metNote512thUp,
+  '1024': Glyphs.metNote1024thUp,
+};
 
 export class Tuplet extends Element {
   static get CATEGORY(): string {
@@ -78,6 +99,9 @@ export class Tuplet extends Element {
   notes: Note[];
   protected options: Required<TupletOptions>;
   protected textElement: Element;
+  protected noteElement: Element;
+  protected leftParen: Element;
+  protected rightParen: Element;
 
   static get LOCATION_TOP(): number {
     return TupletLocation.TOP;
@@ -104,6 +128,8 @@ export class Tuplet extends Element {
     const location = options.location || Tuplet.LOCATION_TOP;
     const yOffset = options.yOffset || Metrics.get('Tuplet.yOffset');
     const textYOffset = options.textYOffset || Metrics.get('Tuplet.textYOffset');
+    const baseNoteLength = options.baseNoteLength !== undefined ? options.baseNoteLength : '';
+
     this.options = {
       bracketed,
       location,
@@ -112,8 +138,12 @@ export class Tuplet extends Element {
       ratioed,
       yOffset,
       textYOffset,
+      baseNoteLength,
     };
     this.textElement = new Element('Tuplet');
+    this.noteElement = new Element('TupletNote');
+    this.leftParen = new Element('TupletNote');
+    this.rightParen = new Element('TupletNote');
 
     this.setTupletLocation(location || Tuplet.LOCATION_TOP);
 
@@ -186,6 +216,7 @@ export class Tuplet extends Element {
   }
 
   resolveGlyphs(): void {
+    // Ratio glyph calculations
     let numerator = '';
     let denominator = '';
     let n = this.options.numNotes;
@@ -193,6 +224,7 @@ export class Tuplet extends Element {
       numerator = String.fromCharCode(0xe880 /* tuplet0 */ + (n % 10)) + numerator;
       n = Math.floor(n / 10);
     }
+
     if (this.options.ratioed) {
       n = this.options.notesOccupied;
       while (n >= 1) {
@@ -202,6 +234,16 @@ export class Tuplet extends Element {
       denominator = Glyphs.tupletColon + denominator;
     }
     this.textElement.setText(numerator + denominator);
+
+    // resolve shown note if needed
+    if (this.options.baseNoteLength !== '') {
+      const unsanitized = this.options.baseNoteLength;
+      const sanitizedDuration = Tables.sanitizeDuration(unsanitized);
+      const note = NOTE_GLYPHS[sanitizedDuration];
+      this.leftParen.setText('(');
+      this.noteElement.setText(note);
+      this.rightParen.setText(')');
+    }
   }
 
   // determine how many tuplets are nested within this tuplet
@@ -292,7 +334,7 @@ export class Tuplet extends Element {
   }
 
   draw(): void {
-    const { location, bracketed, textYOffset } = this.options;
+    const { location, bracketed, textYOffset, baseNoteLength } = this.options;
     const ctx = this.checkContext();
     let xPos = 0;
     let yPos = 0;
@@ -300,43 +342,70 @@ export class Tuplet extends Element {
     // determine x value of left bound of tuplet
     const firstNote = this.notes[0] as StemmableNote;
     const lastNote = this.notes[this.notes.length - 1] as StemmableNote;
-
     if (!bracketed) {
       xPos = firstNote.getStemX();
       this.width = lastNote.getStemX() - xPos;
     } else {
-      xPos = firstNote.getTieLeftX() - 5;
-      this.width = lastNote.getTieRightX() - xPos + 5;
+      xPos = firstNote.getTieLeftX() - BRACKET_PADDING;
+      this.width = lastNote.getTieRightX() - xPos + BRACKET_PADDING;
     }
 
     // determine y value for tuplet
     yPos = this.getYPosition();
 
+    // calculate width taken by all text elements
+    const ratioWidth = this.textElement.getWidth();
+    let totalTextWidth = ratioWidth;
+    let leftParenWidth = 0;
+    let noteWidth = 0;
+    let rightParenWidth = 0;
+    if (baseNoteLength !== '') {
+      leftParenWidth = this.leftParen.getWidth() + NOTE_PADDING;
+      noteWidth = this.noteElement.getWidth() + NOTE_PADDING;
+      rightParenWidth = this.rightParen.getWidth() + NOTE_PADDING;
+      totalTextWidth = ratioWidth + EXTRA_SPACING + leftParenWidth + noteWidth + rightParenWidth;
+    }
+
+    // find center of notation for text placement
     const notationCenterX = xPos + this.width / 2;
-    const notationStartX = notationCenterX - this.textElement.getWidth() / 2;
+    const notationStartX = notationCenterX - totalTextWidth / 2;
+
+    // Compute a common vertical coordinate for text rendering.
+    // (Using the text element’s height as a reference)
+    const commonTextY =
+      yPos + this.textElement.getHeight() / 2 + (location === Tuplet.LOCATION_TOP ? -1 : 1) * textYOffset;
 
     // start grouping
     ctx.openGroup('tuplet', this.getAttribute('id'));
 
     // draw bracket if the tuplet is not beamed
     if (bracketed) {
-      const lineWidth = this.width / 2 - this.textElement.getWidth() / 2 - 5;
+      const lineWidth = this.width / 2 - totalTextWidth / 2 - BRACKET_PADDING;
+      const isTupletBottom = location === Tuplet.LOCATION_BOTTOM;
 
-      // only draw the bracket if it has positive length
       if (lineWidth > 0) {
         ctx.fillRect(xPos, yPos, lineWidth, 1);
-        ctx.fillRect(xPos + this.width / 2 + this.textElement.getWidth() / 2 + 5, yPos, lineWidth, 1);
-        ctx.fillRect(xPos, yPos + (location === Tuplet.LOCATION_BOTTOM ? 1 : 0), 1, location * 10);
-        ctx.fillRect(xPos + this.width, yPos + (location === Tuplet.LOCATION_BOTTOM ? 1 : 0), 1, location * 10);
+        ctx.fillRect(xPos + this.width / 2 + totalTextWidth / 2 + BRACKET_PADDING, yPos, lineWidth, 1);
+        ctx.fillRect(xPos, yPos + (isTupletBottom ? 1 : 0), 1, location * 10);
+        ctx.fillRect(xPos + this.width, yPos + (isTupletBottom ? 1 : 0), 1, location * 10);
       }
     }
 
-    // draw text
-    this.textElement.renderText(
-      ctx,
-      notationStartX,
-      yPos + this.textElement.getHeight() / 2 + (location === Tuplet.LOCATION_TOP ? -1 : 1) * textYOffset
-    );
+    // draw ratio text (x:y)
+    let currentX = notationStartX;
+    this.textElement.renderText(ctx, currentX, commonTextY);
+    currentX += ratioWidth + EXTRA_SPACING;
+
+    // draw parenthesis + note glyph if wanted
+    if (baseNoteLength !== '') {
+      this.leftParen.renderText(ctx, currentX, commonTextY);
+      currentX += leftParenWidth;
+
+      this.noteElement.renderText(ctx, currentX, commonTextY + NOTE_OFFSET);
+      currentX += noteWidth;
+
+      this.rightParen.renderText(ctx, currentX, commonTextY);
+    }
 
     // Set up an interactive bounding box and finalize the tuplet rendering
     const bb = this.getBoundingBox();
