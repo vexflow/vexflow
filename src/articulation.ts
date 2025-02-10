@@ -238,6 +238,7 @@ export class Articulation extends Modifier {
         }
         articulation.setTextLine(state.topTextLine);
         state.topTextLine += increment;
+        articulation.setOrigin(0.5, 1);
       } else if (articulation.getPosition() === BELOW) {
         let noteLine = Math.max(lines - note.getLineNumber(), 0);
         if (stemDirection === Stem.DOWN) {
@@ -251,6 +252,7 @@ export class Articulation extends Modifier {
         }
         articulation.setTextLine(state.textLine);
         state.textLine += increment;
+        articulation.setOrigin(0.5, 0);
       }
     });
 
@@ -351,12 +353,10 @@ export class Articulation extends Modifier {
     let y = (
       {
         [ABOVE]: () => {
-          this.setOrigin(0.5, 1);
           const y = getTopY(note, textLine) - (textLine + initialOffset) * staffSpace;
           return shouldSitOutsideStaff ? Math.min(stave.getYForTopText(Articulation.INITIAL_OFFSET), y) : y;
         },
         [BELOW]: () => {
-          this.setOrigin(0.5, 0);
           const y = getBottomY(note, textLine) + (textLine + initialOffset) * staffSpace;
           return shouldSitOutsideStaff ? Math.max(stave.getYForBottomText(Articulation.INITIAL_OFFSET), y) : y;
         },
