@@ -36,37 +36,66 @@ const durationAliases: Record<string, string> = {
   b: '256',
 };
 
-const keySignatures: Record<string, { accidental?: string; num: number }> = {
+type KeySignature = {
+  acc?: string;
+  num: number;
+};
+
+type KeySignatures = Record<string, KeySignature>;
+
+const generateKeySignatures = (): KeySignatures => {
+  const keySignatures: KeySignatures = {};
+
+  // Generate flats
+  for (let i = 1; i <= 14; i++) {
+    keySignatures[`flats_${i}`] = { acc: 'b', num: i };
+  }
+
+  // Generate sharps
+  for (let i = 1; i <= 14; i++) {
+    keySignatures[`sharps_${i}`] = { acc: '#', num: i };
+  }
+
+  return keySignatures;
+};
+
+const keySignatures: Record<string, KeySignature> = {
+  ...generateKeySignatures(),
   C: { num: 0 },
   Am: { num: 0 },
-  F: { accidental: 'b', num: 1 },
-  Dm: { accidental: 'b', num: 1 },
-  Bb: { accidental: 'b', num: 2 },
-  Gm: { accidental: 'b', num: 2 },
-  Eb: { accidental: 'b', num: 3 },
-  Cm: { accidental: 'b', num: 3 },
-  Ab: { accidental: 'b', num: 4 },
-  Fm: { accidental: 'b', num: 4 },
-  Db: { accidental: 'b', num: 5 },
-  Bbm: { accidental: 'b', num: 5 },
-  Gb: { accidental: 'b', num: 6 },
-  Ebm: { accidental: 'b', num: 6 },
-  Cb: { accidental: 'b', num: 7 },
-  Abm: { accidental: 'b', num: 7 },
-  G: { accidental: '#', num: 1 },
-  Em: { accidental: '#', num: 1 },
-  D: { accidental: '#', num: 2 },
-  Bm: { accidental: '#', num: 2 },
-  A: { accidental: '#', num: 3 },
-  'F#m': { accidental: '#', num: 3 },
-  E: { accidental: '#', num: 4 },
-  'C#m': { accidental: '#', num: 4 },
-  B: { accidental: '#', num: 5 },
-  'G#m': { accidental: '#', num: 5 },
-  'F#': { accidental: '#', num: 6 },
-  'D#m': { accidental: '#', num: 6 },
-  'C#': { accidental: '#', num: 7 },
-  'A#m': { accidental: '#', num: 7 },
+  F: { acc: 'b', num: 1 },
+  Dm: { acc: 'b', num: 1 },
+  Bb: { acc: 'b', num: 2 },
+  Gm: { acc: 'b', num: 2 },
+  Eb: { acc: 'b', num: 3 },
+  Cm: { acc: 'b', num: 3 },
+  Ab: { acc: 'b', num: 4 },
+  Fm: { acc: 'b', num: 4 },
+  Db: { acc: 'b', num: 5 },
+  Bbm: { acc: 'b', num: 5 },
+  Gb: { acc: 'b', num: 6 },
+  Ebm: { acc: 'b', num: 6 },
+  Cb: { acc: 'b', num: 7 },
+  Abm: { acc: 'b', num: 7 },
+  Dbm: { acc: 'b', num: 8 },
+  Gbm: { acc: 'b', num: 9 },
+  G: { acc: '#', num: 1 },
+  Em: { acc: '#', num: 1 },
+  D: { acc: '#', num: 2 },
+  Bm: { acc: '#', num: 2 },
+  A: { acc: '#', num: 3 },
+  'F#m': { acc: '#', num: 3 },
+  E: { acc: '#', num: 4 },
+  'C#m': { acc: '#', num: 4 },
+  B: { acc: '#', num: 5 },
+  'G#m': { acc: '#', num: 5 },
+  'F#': { acc: '#', num: 6 },
+  'D#m': { acc: '#', num: 6 },
+  'C#': { acc: '#', num: 7 },
+  'A#m': { acc: '#', num: 7 },
+  'G#': { acc: '#', num: 8 },
+  'D#': { acc: '#', num: 9 },
+  'A#': { acc: '#', num: 10 },
 };
 
 const clefs: Record<string, { lineShift: number }> = {
@@ -491,7 +520,7 @@ export class Tables {
       throw new RuntimeError('BadKeySignature', `Bad key signature spec: '${spec}'`);
     }
 
-    if (!keySpec.accidental) {
+    if (!keySpec.acc) {
       return [];
     }
 
@@ -500,15 +529,24 @@ export class Tables {
       '#': [0, 1.5, -0.5, 1, 2.5, 0.5, 2],
     };
 
-    const notes = accidentalList[keySpec.accidental];
-
-    const accList = [];
-    for (let i = 0; i < keySpec.num; ++i) {
-      const line = notes[i];
-      accList.push({ type: keySpec.accidental, line });
+    const baseNotes = accidentalList[keySpec.acc];
+    if (!baseNotes) {
+      throw new RuntimeError('UnsupportedAccidental', `Unsupported accidental type: '${keySpec.acc}'`);
     }
 
-    return accList;
+    const accidentalCount = Math.min(keySpec.num, 7);
+    const doubleAccidentalCount = Math.max(keySpec.num - 7, 0);
+
+    const regularAccidentals = baseNotes.slice(doubleAccidentalCount, accidentalCount).map((line: number) => ({
+      type: `${keySpec.acc}`,
+      line,
+    }));
+
+    const doubleAccidentals = baseNotes
+      .slice(0, doubleAccidentalCount)
+      .map((line: number) => ({ type: `${keySpec.acc}${keySpec.acc}`, line }));
+
+    return [...regularAccidentals, ...doubleAccidentals];
   }
 
   static getKeySignatures(): Record<string, { accidental?: string; num: number }> {
