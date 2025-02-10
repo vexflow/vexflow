@@ -2,9 +2,9 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <!-- 
-      Summary: Sample of the music fonts available in VexFlow. This page doesn't use any VexFlow features.
-      Run: Open this html file in your web browser.
+    <!--
+      Summary: Sample of the music fonts available in VexFlow. This page doesn't use the VexFlow library.
+      Run: Open this html file in your web browser. Click on the button or press 'n' to show the next font.
     -->
     <style>
       html {
@@ -31,8 +31,8 @@
         display: none;
       }
     </style>
-    <!-- 
-        In your browser's dev tools / network tab, you'll see that these index.css files are loaded immediately. 
+    <!--
+        In your browser's dev tools > network tab, you'll see that these index.css files are loaded immediately.
         However, the actual font files (*.woff2) are not loaded until the SHOW NEXT FONT button is clicked.
     -->
     <link rel="stylesheet" href="../../node_modules/@vexflow-fonts/bravura/index.css" />
@@ -55,6 +55,7 @@
   </head>
   <body>
     <button id="show-next-font" onclick="showNextFont()">SHOW NEXT FONT</button>
+    <p>This demo does not use the VexFlow library.</p>
     <p id="info">
       Glyphs below are set in <b><span id="font-name"></span></b>. Glyph code points were copied from:
       <a href="https://w3c.github.io/smufl/latest/">https://w3c.github.io/smufl/latest/</a>
@@ -93,7 +94,12 @@
         const fontName = fonts[index];
         const musicDIV = document.querySelector('.music');
         musicDIV.style.display = 'block';
+
+        // The magic happens here!
+        // You should a *.woff2 file load in developer tools > network tab.
+        // If you don't see a font file load, you might already have a local copy of the font.
         musicDIV.style.fontFamily = fontName;
+
         document.querySelector('#font-name').innerText = fontName;
         index = (index + 1) % fonts.length;
         updateButtonLabel();
@@ -105,6 +111,12 @@
 
       document.addEventListener('DOMContentLoaded', () => {
         updateButtonLabel();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'n') {
+          showNextFont();
+        }
       });
     </script>
   </body>
