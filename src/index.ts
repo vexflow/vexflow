@@ -32,6 +32,7 @@ export * from './gracetabnote';
 export * from './keymanager';
 export * from './keysignature';
 export * from './keysignote';
+export * from './metrics';
 export * from './modifier';
 export * from './modifiercontext';
 export * from './multimeasurerest';
