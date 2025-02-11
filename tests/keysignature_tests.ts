@@ -39,7 +39,7 @@ const fontWidths = () => {
 };
 
 function parser(assert: Assert): void {
-  assert.expect(11);
+  assert.expect(16);
 
   function catchError(spec: string): void {
     assert.throws(() => VexFlow.keySignature(spec), /BadKeySignature/);
@@ -48,13 +48,18 @@ function parser(assert: Assert): void {
   catchError('asdf');
   catchError('D!');
   catchError('E#');
-  catchError('D#');
   catchError('#');
   catchError('b');
   catchError('Kb');
   catchError('Fb');
-  catchError('Dbm');
   catchError('B#m');
+  catchError('flats_15');
+  catchError('sharps_16');
+  catchError('flat_1');
+  catchError('sharps_-1');
+  catchError('sharp_0');
+  catchError('sharps_B');
+  catchError('flats_c');
 
   VexFlow.keySignature('B');
   VexFlow.keySignature('C');
@@ -63,6 +68,12 @@ function parser(assert: Assert): void {
   VexFlow.keySignature('Abm');
   VexFlow.keySignature('F#');
   VexFlow.keySignature('G#m');
+  VexFlow.keySignature('flats_8');
+  VexFlow.keySignature('sharps_14');
+  VexFlow.keySignature('flats_10');
+  VexFlow.keySignature('sharps_8');
+  VexFlow.keySignature('flats_0');
+  VexFlow.keySignature('sharps_0');
 
   assert.ok(true, 'all pass');
 }
