@@ -36,7 +36,29 @@ const durationAliases: Record<string, string> = {
   b: '256',
 };
 
-const keySignatures: Record<string, { accidental?: string; num: number }> = {
+type KeySignature = {
+  accidental?: string;
+  num: number;
+};
+
+type KeySignatures = Record<string, KeySignature>;
+
+const generateKeySignatures = (): KeySignatures => {
+  const keySignatures: KeySignatures = {};
+
+  for (let i = 1; i <= 14; i++) {
+    keySignatures[`flats_${i}`] = { accidental: 'b', num: i };
+    keySignatures[`sharps_${i}`] = { accidental: 'b', num: i };
+  }
+
+  keySignatures['flats_0'] = { num: 0 };
+  keySignatures['sharps_0'] = { num: 0 };
+
+  return keySignatures;
+};
+
+const keySignatures: Record<string, KeySignature> = {
+  ...generateKeySignatures(),
   C: { num: 0 },
   Am: { num: 0 },
   F: { accidental: 'b', num: 1 },
@@ -53,6 +75,8 @@ const keySignatures: Record<string, { accidental?: string; num: number }> = {
   Ebm: { accidental: 'b', num: 6 },
   Cb: { accidental: 'b', num: 7 },
   Abm: { accidental: 'b', num: 7 },
+  Dbm: { accidental: 'b', num: 8 },
+  Gbm: { accidental: 'b', num: 9 },
   G: { accidental: '#', num: 1 },
   Em: { accidental: '#', num: 1 },
   D: { accidental: '#', num: 2 },
@@ -67,6 +91,9 @@ const keySignatures: Record<string, { accidental?: string; num: number }> = {
   'D#m': { accidental: '#', num: 6 },
   'C#': { accidental: '#', num: 7 },
   'A#m': { accidental: '#', num: 7 },
+  'G#': { accidental: '#', num: 8 },
+  'D#': { accidental: '#', num: 9 },
+  'A#': { accidental: '#', num: 10 },
 };
 
 const clefs: Record<string, { lineShift: number }> = {
@@ -502,13 +529,19 @@ export class Tables {
 
     const notes = accidentalList[keySpec.accidental];
 
-    const accList = [];
-    for (let i = 0; i < keySpec.num; ++i) {
-      const line = notes[i];
-      accList.push({ type: keySpec.accidental, line });
-    }
+    const accidentalCount = Math.min(keySpec.num, 7);
+    const doubleAccidentalCount = Math.max(keySpec.num - 7, 0);
 
-    return accList;
+    const regularAccidentals = notes.slice(doubleAccidentalCount, accidentalCount).map((line) => ({
+      type: `${keySpec.accidental}`,
+      line,
+    }));
+
+    const doubleAccidentals = notes.slice(0, doubleAccidentalCount).map((line) => ({
+      type: `${keySpec.accidental}${keySpec.accidental}`,
+      line,
+    }));
+    return [...regularAccidentals, ...doubleAccidentals];
   }
 
   static getKeySignatures(): Record<string, { accidental?: string; num: number }> {
