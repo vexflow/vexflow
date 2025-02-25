@@ -1,0 +1,462 @@
+import { VexFlow } from '../src/vexflow.js';
+import { VexFlowTests } from './vexflow_test_helpers.js';
+import { Dot } from '../src/dot.js';
+import { Formatter } from '../src/formatter.js';
+import { Metrics } from '../src/metrics.js';
+import { Stave } from '../src/stave.js';
+import { TabNote } from '../src/tabnote.js';
+import { TabStave } from '../src/tabstave.js';
+import { TickContext } from '../src/tickcontext.js';
+import { Voice, VoiceMode } from '../src/voice.js';
+const TabNoteTests = {
+    Start() {
+        QUnit.module('TabNote');
+        QUnit.test('Tick', ticks);
+        QUnit.test('TabStave Line', tabStaveLine);
+        QUnit.test('Width', width);
+        const run = VexFlowTests.runTests;
+        run('TabNote Draw', draw);
+        run('TabNote Stems Up', drawStemsUp);
+        run('TabNote Stems Down', drawStemsDown);
+        run('TabNote Stems Up Through Stave', drawStemsUpThrough);
+        run('TabNote Stems Down Through Stave', drawStemsDownThrough);
+        run('TabNote Stems with Dots', drawStemsDotted);
+    },
+};
+function ticks(assert) {
+    const BEAT = (1 * VexFlow.RESOLUTION) / 4;
+    let note = new TabNote({ positions: [{ str: 6, fret: 6 }], duration: '1' });
+    assert.equal(note.getTicks().value(), BEAT * 4, 'Whole note has 4 beats');
+    note = new TabNote({ positions: [{ str: 3, fret: 4 }], duration: '4' });
+    assert.equal(note.getTicks().value(), BEAT, 'Quarter note has 1 beat');
+}
+function tabStaveLine(assert) {
+    const note = new TabNote({
+        positions: [
+            { str: 6, fret: 6 },
+            { str: 4, fret: 5 },
+        ],
+        duration: '1',
+    });
+    const positions = note.getPositions();
+    assert.equal(positions[0].str, 6, 'String 6, Fret 6');
+    assert.equal(positions[0].fret, 6, 'String 6, Fret 6');
+    assert.equal(positions[1].str, 4, 'String 4, Fret 5');
+    assert.equal(positions[1].fret, 5, 'String 4, Fret 5');
+    const stave = new Stave(10, 10, 300);
+    note.setStave(stave);
+    const ys = note.getYs();
+    assert.equal(ys.length, 2, 'Chord should be rendered on two lines');
+    assert.equal(ys[0], 100, 'Line for String 6, Fret 6');
+    assert.equal(ys[1], 80, 'Line for String 4, Fret 5');
+}
+function width(assert) {
+    assert.expect(1);
+    const note = new TabNote({
+        positions: [
+            { str: 6, fret: 6 },
+            { str: 4, fret: 5 },
+        ],
+        duration: '1',
+    });
+    assert.throws(() => note.getWidth(), /UnformattedNote/, 'Unformatted note should have no width');
+}
+function draw(options, contextBuilder) {
+    const ctx = contextBuilder(options.elementId, 600, 140);
+    ctx.font = '10pt Arial';
+    const stave = new TabStave(10, 10, 550);
+    stave.setContext(ctx);
+    stave.drawWithStyle();
+    const notes = [
+        { positions: [{ str: 6, fret: 6 }], duration: '4' },
+        {
+            positions: [
+                { str: 3, fret: 6 },
+                { str: 4, fret: 25 },
+            ],
+            duration: '4',
+        },
+        {
+            positions: [
+                { str: 2, fret: 'x' },
+                { str: 5, fret: 15 },
+            ],
+            duration: '4',
+        },
+        {
+            positions: [
+                { str: 2, fret: 'x' },
+                { str: 5, fret: 5 },
+            ],
+            duration: '4',
+        },
+        {
+            positions: [
+                { str: 2, fret: 10 },
+                { str: 5, fret: 12 },
+            ],
+            duration: '4',
+        },
+        {
+            positions: [
+                { str: 6, fret: 0 },
+                { str: 5, fret: 5 },
+                { str: 4, fret: 5 },
+                { str: 3, fret: 4 },
+                { str: 2, fret: 3 },
+                { str: 1, fret: 0 },
+            ],
+            duration: '4',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+            ],
+            duration: '4',
+        },
+    ];
+    function showNote(noteStruct, stave, ctx, x) {
+        const tabNote = new TabNote(noteStruct);
+        const tickContext = new TickContext();
+        tickContext.addTickable(tabNote).preFormat().setX(x);
+        tabNote.setContext(ctx).setStave(stave);
+        tabNote.drawWithStyle();
+        return tabNote;
+    }
+    for (let i = 0; i < notes.length; ++i) {
+        const note = notes[i];
+        const tabNote = showNote(note, stave, ctx, (i + 1) * 25);
+        options.assert.ok(tabNote.getX() > 0, 'Note ' + i + ' has X value');
+        options.assert.ok(tabNote.getYs().length > 0, 'Note ' + i + ' has Y values');
+    }
+}
+function drawStemsUp(options, contextBuilder) {
+    const ctx = contextBuilder(options.elementId, 600, 200);
+    ctx.font = '10pt Arial';
+    const stave = new TabStave(10, 30, 550);
+    stave.setContext(ctx);
+    stave.drawWithStyle();
+    const specs = [
+        {
+            positions: [
+                { str: 3, fret: 6 },
+                { str: 4, fret: 25 },
+            ],
+            duration: '4',
+        },
+        {
+            positions: [
+                { str: 2, fret: 10 },
+                { str: 5, fret: 12 },
+            ],
+            duration: '8',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+            ],
+            duration: '8',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+            ],
+            duration: '16',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+            ],
+            duration: '32',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+            ],
+            duration: '64',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+            ],
+            duration: '128',
+        },
+    ];
+    const notes = specs.map((struct) => {
+        const tabNote = new TabNote(struct);
+        tabNote.renderOptions.drawStem = true;
+        return tabNote;
+    });
+    const voice = new Voice(VexFlow.TIME4_4).setMode(VoiceMode.SOFT);
+    voice.addTickables(notes);
+    new Formatter().joinVoices([voice]).formatToStave([voice], stave);
+    voice.draw(ctx, stave);
+    options.assert.ok(true, 'TabNotes successfully drawn');
+}
+function drawStemsDown(options, contextBuilder) {
+    const ctx = contextBuilder(options.elementId, 600, 200);
+    ctx.font = '10pt Arial';
+    const stave = new TabStave(10, 10, 550);
+    stave.setContext(ctx);
+    stave.drawWithStyle();
+    const specs = [
+        {
+            positions: [
+                { str: 3, fret: 6 },
+                { str: 4, fret: 25 },
+            ],
+            duration: '4',
+        },
+        {
+            positions: [
+                { str: 2, fret: 10 },
+                { str: 5, fret: 12 },
+            ],
+            duration: '8',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+            ],
+            duration: '8',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+            ],
+            duration: '16',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+            ],
+            duration: '32',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+            ],
+            duration: '64',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+            ],
+            duration: '128',
+        },
+    ];
+    const notes = specs.map((struct) => {
+        const tabNote = new TabNote(struct);
+        tabNote.renderOptions.drawStem = true;
+        tabNote.setStemDirection(-1);
+        return tabNote;
+    });
+    const voice = new Voice(VexFlow.TIME4_4).setMode(VoiceMode.SOFT);
+    voice.addTickables(notes);
+    new Formatter().joinVoices([voice]).formatToStave([voice], stave);
+    voice.draw(ctx, stave);
+    options.assert.ok(true, 'All objects have been drawn');
+}
+function drawStemsUpThrough(options, contextBuilder) {
+    const ctx = contextBuilder(options.elementId, 600, 200);
+    ctx.font = '10pt Arial';
+    const stave = new TabStave(10, 30, 550);
+    stave.setContext(ctx);
+    stave.drawWithStyle();
+    const specs = [
+        {
+            positions: [
+                { str: 3, fret: 6 },
+                { str: 4, fret: 25 },
+            ],
+            duration: '4',
+        },
+        {
+            positions: [
+                { str: 2, fret: 10 },
+                { str: 5, fret: 12 },
+            ],
+            duration: '8',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+            ],
+            duration: '8',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+            ],
+            duration: '16',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+            ],
+            duration: '32',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+            ],
+            duration: '64',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+            ],
+            duration: '128',
+        },
+    ];
+    const notes = specs.map((struct) => {
+        const tabNote = new TabNote(struct);
+        tabNote.renderOptions.drawStem = true;
+        tabNote.renderOptions.drawStemThroughStave = true;
+        return tabNote;
+    });
+    ctx.setFont(Metrics.get('fontFamily'), 10, 'bold');
+    const voice = new Voice(VexFlow.TIME4_4).setMode(VoiceMode.SOFT);
+    voice.addTickables(notes);
+    new Formatter().joinVoices([voice]).formatToStave([voice], stave);
+    voice.draw(ctx, stave);
+    options.assert.ok(true, 'TabNotes successfully drawn');
+}
+function drawStemsDownThrough(options, contextBuilder) {
+    const ctx = contextBuilder(options.elementId, 600, 250);
+    ctx.font = '10pt Arial';
+    const stave = new TabStave(10, 10, 550, { numLines: 8 });
+    stave.setContext(ctx);
+    stave.drawWithStyle();
+    const specs = [
+        {
+            positions: [
+                { str: 3, fret: 6 },
+                { str: 4, fret: 25 },
+            ],
+            duration: '4',
+        },
+        {
+            positions: [
+                { str: 2, fret: 10 },
+                { str: 5, fret: 12 },
+            ],
+            duration: '8',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+            ],
+            duration: '8',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+            ],
+            duration: '16',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+                { str: 6, fret: 10 },
+            ],
+            duration: '32',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+            ],
+            duration: '64',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 3, fret: 5 },
+                { str: 5, fret: 5 },
+                { str: 7, fret: 5 },
+            ],
+            duration: '128',
+        },
+    ];
+    const notes = specs.map((struct) => {
+        const tabNote = new TabNote(struct);
+        tabNote.renderOptions.drawStem = true;
+        tabNote.renderOptions.drawStemThroughStave = true;
+        tabNote.setStemDirection(-1);
+        return tabNote;
+    });
+    ctx.setFont('Arial', 10, 'bold');
+    const voice = new Voice(VexFlow.TIME4_4).setMode(VoiceMode.SOFT);
+    voice.addTickables(notes);
+    new Formatter().joinVoices([voice]).formatToStave([voice], stave);
+    voice.draw(ctx, stave);
+    options.assert.ok(true, 'All objects have been drawn');
+}
+function drawStemsDotted(options, contextBuilder) {
+    const ctx = contextBuilder(options.elementId, 600, 200);
+    ctx.font = '10pt Arial';
+    const stave = new TabStave(10, 10, 550);
+    stave.setContext(ctx);
+    stave.drawWithStyle();
+    const specs = [
+        {
+            positions: [
+                { str: 3, fret: 6 },
+                { str: 4, fret: 25 },
+            ],
+            duration: '4d',
+        },
+        {
+            positions: [
+                { str: 2, fret: 10 },
+                { str: 5, fret: 12 },
+            ],
+            duration: '8',
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+            ],
+            duration: '4dd',
+            stemDirection: -1,
+        },
+        {
+            positions: [
+                { str: 1, fret: 6 },
+                { str: 4, fret: 5 },
+            ],
+            duration: '16',
+            stemDirection: -1,
+        },
+    ];
+    const notes = specs.map((struct) => new TabNote(struct, true));
+    Dot.buildAndAttach([notes[0], notes[2], notes[2]]);
+    const voice = new Voice(VexFlow.TIME4_4).setMode(VoiceMode.SOFT);
+    voice.addTickables(notes);
+    new Formatter().joinVoices([voice]).formatToStave([voice], stave);
+    voice.draw(ctx, stave);
+    options.assert.ok(true, 'TabNotes successfully drawn');
+}
+VexFlowTests.register(TabNoteTests);
+export { TabNoteTests };
