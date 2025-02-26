@@ -272,7 +272,7 @@ export const MetricsDefaults: Record<string, any> = {
   },
 
   TupletNote: {
-    fontSize: 12,
+    fontSize: 16,
   },
 
   Volta: {

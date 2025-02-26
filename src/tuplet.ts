@@ -43,7 +43,7 @@
  *     with articulations, etc...
  *
  *   baseNoteLength: string
- *      Show helper note duration in parenthesis after tuplet ratio.
+ *      Show helper note duration after tuplet ratio.
  * }
  */
 
@@ -75,9 +75,8 @@ export const enum TupletLocation {
 }
 
 const BRACKET_PADDING = 5; // padding between inner text and bracket if bracket is enabled
-const NOTE_PADDING = 1; // padding between text elements of (note) if note is shown
 const NOTE_OFFSET = -3; // offset of shown note
-const EXTRA_SPACING = 2; // spacing between ratio and shown note
+const EXTRA_SPACING = 1; // spacing between ratio and shown note
 
 const NOTE_GLYPHS: Record<string, string> = {
   '4': Glyphs.metNoteQuarterUp, // quarter note
@@ -100,8 +99,6 @@ export class Tuplet extends Element {
   protected options: Required<TupletOptions>;
   protected textElement: Element;
   protected noteElement: Element;
-  protected leftParen: Element;
-  protected rightParen: Element;
 
   static get LOCATION_TOP(): number {
     return TupletLocation.TOP;
@@ -142,8 +139,6 @@ export class Tuplet extends Element {
     };
     this.textElement = new Element('Tuplet');
     this.noteElement = new Element('TupletNote');
-    this.leftParen = new Element('TupletNote');
-    this.rightParen = new Element('TupletNote');
 
     this.setTupletLocation(location || Tuplet.LOCATION_TOP);
 
@@ -236,13 +231,15 @@ export class Tuplet extends Element {
     this.textElement.setText(numerator + denominator);
 
     // resolve shown note if needed
-    if (this.options.baseNoteLength !== '') {
-      const unsanitized = this.options.baseNoteLength;
-      const sanitizedDuration = Tables.sanitizeDuration(unsanitized);
-      const note = NOTE_GLYPHS[sanitizedDuration];
-      this.leftParen.setText('(');
-      this.noteElement.setText(note);
-      this.rightParen.setText(')');
+    if (this.options.baseNoteLength) {
+      const sanitizedDuration = Tables.sanitizeDuration(this.options.baseNoteLength);
+      const noteGlyph = NOTE_GLYPHS[sanitizedDuration];
+
+      if (noteGlyph) {
+        this.noteElement.setText(noteGlyph);
+      } else {
+        throw new RuntimeError('BadArguments', `Invalid helper note length: ${this.options.baseNoteLength}`);
+      }
     }
   }
 
@@ -356,14 +353,10 @@ export class Tuplet extends Element {
     // calculate width taken by all text elements
     const ratioWidth = this.textElement.getWidth();
     let totalTextWidth = ratioWidth;
-    let leftParenWidth = 0;
     let noteWidth = 0;
-    let rightParenWidth = 0;
-    if (baseNoteLength !== '') {
-      leftParenWidth = this.leftParen.getWidth() + NOTE_PADDING;
-      noteWidth = this.noteElement.getWidth() + NOTE_PADDING;
-      rightParenWidth = this.rightParen.getWidth() + NOTE_PADDING;
-      totalTextWidth = ratioWidth + EXTRA_SPACING + leftParenWidth + noteWidth + rightParenWidth;
+    if (baseNoteLength) {
+      noteWidth = this.noteElement.getWidth();
+      totalTextWidth = ratioWidth + EXTRA_SPACING + noteWidth;
     }
 
     // find center of notation for text placement
@@ -396,15 +389,10 @@ export class Tuplet extends Element {
     this.textElement.renderText(ctx, currentX, commonTextY);
     currentX += ratioWidth + EXTRA_SPACING;
 
-    // draw parenthesis + note glyph if wanted
-    if (baseNoteLength !== '') {
-      this.leftParen.renderText(ctx, currentX, commonTextY);
-      currentX += leftParenWidth;
-
+    // draw note glyph if wanted
+    if (baseNoteLength) {
       this.noteElement.renderText(ctx, currentX, commonTextY + NOTE_OFFSET);
       currentX += noteWidth;
-
-      this.rightParen.renderText(ctx, currentX, commonTextY);
     }
 
     // Set up an interactive bounding box and finalize the tuplet rendering
