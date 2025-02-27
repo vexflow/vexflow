@@ -787,7 +787,6 @@ export class StaveNote extends StemmableNote {
     // addtional y shifts for rests
     let restShift = 0;
     switch (this._noteHeads[index].getText()) {
-      case Glyphs.restDoubleWhole:
       case Glyphs.restWhole:
         restShift += 0.5;
         break;
@@ -802,7 +801,14 @@ export class StaveNote extends StemmableNote {
         restShift -= 1.5;
         break;
       case Glyphs.rest128th:
+      case Glyphs.rest256th:
         restShift -= 2.5;
+        break;
+      case Glyphs.rest512th:
+        restShift -= 3.5;
+        break;
+      case Glyphs.rest1024th:
+        restShift -= 4.5;
         break;
     }
 
