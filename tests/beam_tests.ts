@@ -321,7 +321,7 @@ function mixed2(options: TestOptions): void {
 
 function mixed3(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, 450, 230);
-  const stave = f.Stave({ y: 20 });
+  const stave = f.Stave({ y: 25 });
   const score = f.EasyScore();
 
   const voice = score.voice(
@@ -344,8 +344,8 @@ function mixed3(options: TestOptions): void {
     { time: '31/64' }
   );
 
-  f.Beam({ notes: voice.getTickables().slice(0, 12) as StemmableNote[] });
-  f.Beam({ notes: voice2.getTickables().slice(0, 12) as StemmableNote[] });
+  f.Beam({ notes: voice.getTickables() as StemmableNote[] });
+  f.Beam({ notes: voice2.getTickables() as StemmableNote[] });
 
   f.Formatter().joinVoices([voice, voice2]).formatToStave([voice, voice2], stave);
 
