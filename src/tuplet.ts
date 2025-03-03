@@ -42,8 +42,9 @@
  *     manually offset a tuplet, for instance to avoid collisions
  *     with articulations, etc...
  *
- *   baseNoteLength: string
- *      Show helper note duration after tuplet ratio.
+ *   suffix: string
+ *      suffix to show after ratio.
+ *      NOTE: any of the Glyphs.met... work well for note glyphs
  * }
  */
 
@@ -66,7 +67,7 @@ export interface TupletOptions {
   ratioed?: boolean;
   yOffset?: number;
   textYOffset?: number;
-  baseNoteLength?: string;
+  suffix?: string;
 }
 
 export const enum TupletLocation {
@@ -74,21 +75,9 @@ export const enum TupletLocation {
   TOP = +1,
 }
 
-const BRACKET_PADDING = 5; // padding between inner text and bracket if bracket is enabled
-const NOTE_OFFSET = -3; // offset of shown note
-const EXTRA_SPACING = 1; // spacing between ratio and shown note
-
-const NOTE_GLYPHS: Record<string, string> = {
-  '4': Glyphs.metNoteQuarterUp, // quarter note
-  '8': Glyphs.metNote8thUp, // eighth note
-  '16': Glyphs.metNote16thUp, // sixteenth note
-  '32': Glyphs.metNote32ndUp, // thirty-second note
-  '64': Glyphs.metNote64thUp, // sixty-fourth note
-  '128': Glyphs.metNote128thUp, // one hundred twenty-eighth note
-  '256': Glyphs.metNote256thUp,
-  '512': Glyphs.metNote512thUp,
-  '1024': Glyphs.metNote1024thUp,
-};
+// const BRACKET_PADDING = 5; // padding between inner text and bracket if bracket is enabled
+// const NOTE_OFFSET = -3; // offset of shown note
+// const EXTRA_SPACING = 1; // spacing between ratio and shown note
 
 export class Tuplet extends Element {
   static get CATEGORY(): string {
@@ -98,7 +87,7 @@ export class Tuplet extends Element {
   notes: Note[];
   protected options: Required<TupletOptions>;
   protected textElement: Element;
-  protected noteElement: Element;
+  protected suffixElement: Element;
 
   static get LOCATION_TOP(): number {
     return TupletLocation.TOP;
@@ -125,7 +114,7 @@ export class Tuplet extends Element {
     const location = options.location || Tuplet.LOCATION_TOP;
     const yOffset = options.yOffset || Metrics.get('Tuplet.yOffset');
     const textYOffset = options.textYOffset || Metrics.get('Tuplet.textYOffset');
-    const baseNoteLength = options.baseNoteLength !== undefined ? options.baseNoteLength : '';
+    const suffix = options.suffix !== undefined ? options.suffix : '';
 
     this.options = {
       bracketed,
@@ -135,10 +124,10 @@ export class Tuplet extends Element {
       ratioed,
       yOffset,
       textYOffset,
-      baseNoteLength,
+      suffix,
     };
     this.textElement = new Element('Tuplet');
-    this.noteElement = new Element('TupletNote');
+    this.suffixElement = new Element('Tuplet.suffix');
 
     this.setTupletLocation(location || Tuplet.LOCATION_TOP);
 
@@ -230,16 +219,9 @@ export class Tuplet extends Element {
     }
     this.textElement.setText(numerator + denominator);
 
-    // resolve shown note if needed
-    if (this.options.baseNoteLength) {
-      const sanitizedDuration = Tables.sanitizeDuration(this.options.baseNoteLength);
-      const noteGlyph = NOTE_GLYPHS[sanitizedDuration];
-
-      if (noteGlyph) {
-        this.noteElement.setText(noteGlyph);
-      } else {
-        throw new RuntimeError('BadArguments', `Invalid helper note length: ${this.options.baseNoteLength}`);
-      }
+    // resolve shown glyph if needed
+    if (this.options.suffix) {
+      this.suffixElement.setText(this.options.suffix);
     }
   }
 
@@ -331,7 +313,11 @@ export class Tuplet extends Element {
   }
 
   draw(): void {
-    const { location, bracketed, textYOffset, baseNoteLength } = this.options;
+    const { location, bracketed, textYOffset, suffix } = this.options;
+    const bracketPadding = Metrics.get('Tuplet.bracketPadding');
+    const extraSpacing = Metrics.get('Tuplet.suffix.extraSpacing');
+    const suffixOffsetY = Metrics.get('Tuplet.suffix.suffixOffsetY');
+
     const ctx = this.checkContext();
     let xPos = 0;
     let yPos = 0;
@@ -343,8 +329,8 @@ export class Tuplet extends Element {
       xPos = firstNote.getStemX();
       this.width = lastNote.getStemX() - xPos;
     } else {
-      xPos = firstNote.getTieLeftX() - BRACKET_PADDING;
-      this.width = lastNote.getTieRightX() - xPos + BRACKET_PADDING;
+      xPos = firstNote.getTieLeftX() - bracketPadding;
+      this.width = lastNote.getTieRightX() - xPos + bracketPadding;
     }
 
     // determine y value for tuplet
@@ -354,9 +340,9 @@ export class Tuplet extends Element {
     const ratioWidth = this.textElement.getWidth();
     let totalTextWidth = ratioWidth;
     let noteWidth = 0;
-    if (baseNoteLength) {
-      noteWidth = this.noteElement.getWidth();
-      totalTextWidth = ratioWidth + EXTRA_SPACING + noteWidth;
+    if (suffix) {
+      noteWidth = this.suffixElement.getWidth();
+      totalTextWidth = ratioWidth + extraSpacing + noteWidth;
     }
 
     // find center of notation for text placement
@@ -373,12 +359,12 @@ export class Tuplet extends Element {
 
     // draw bracket if the tuplet is not beamed
     if (bracketed) {
-      const lineWidth = this.width / 2 - totalTextWidth / 2 - BRACKET_PADDING;
+      const lineWidth = this.width / 2 - totalTextWidth / 2 - bracketPadding;
       const isTupletBottom = location === Tuplet.LOCATION_BOTTOM;
 
       if (lineWidth > 0) {
         ctx.fillRect(xPos, yPos, lineWidth, 1);
-        ctx.fillRect(xPos + this.width / 2 + totalTextWidth / 2 + BRACKET_PADDING, yPos, lineWidth, 1);
+        ctx.fillRect(xPos + this.width / 2 + totalTextWidth / 2 + bracketPadding, yPos, lineWidth, 1);
         ctx.fillRect(xPos, yPos + (isTupletBottom ? 1 : 0), 1, location * 10);
         ctx.fillRect(xPos + this.width, yPos + (isTupletBottom ? 1 : 0), 1, location * 10);
       }
@@ -387,11 +373,11 @@ export class Tuplet extends Element {
     // draw ratio text (x:y)
     let currentX = notationStartX;
     this.textElement.renderText(ctx, currentX, commonTextY);
-    currentX += ratioWidth + EXTRA_SPACING;
+    currentX += ratioWidth + extraSpacing;
 
     // draw note glyph if wanted
-    if (baseNoteLength) {
-      this.noteElement.renderText(ctx, currentX, commonTextY + NOTE_OFFSET);
+    if (suffix) {
+      this.suffixElement.renderText(ctx, currentX, commonTextY + suffixOffsetY);
       currentX += noteWidth;
     }
 

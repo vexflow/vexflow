@@ -7,6 +7,7 @@ import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Dot } from '../src/dot';
 import { Formatter } from '../src/formatter';
+import { Glyphs } from '../src/glyphs';
 import { Stem } from '../src/stem';
 import { Tuplet } from '../src/tuplet';
 
@@ -17,10 +18,10 @@ const TupletTests = {
     run('Simple Tuplet', simple);
     run('Beamed Tuplet', beamed);
     run('Ratioed Tuplet', ratio);
-    run('Base Note Length Tuplet', baseDuration);
+    run('Suffixed Tuplet', suffix);
     run('Bottom Tuplet', bottom);
     run('Bottom Ratioed Tuplet', bottomRatio);
-    run('Bottom Base Note Length Tuplet', bottomBaseDuration);
+    run('Bottom Suffixed Tuplet', bottomSuffix);
     run('Awkward Tuplet', awkward);
     run('Complex Tuplet', complex);
     run('Mixed Stem Direction Tuplet', mixedTop);
@@ -156,7 +157,7 @@ function ratio(options: TestOptions): void {
   options.assert.ok(true, 'Ratioed Test');
 }
 
-function baseDuration(options: TestOptions): void {
+function suffix(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options);
   const stave = f.Stave({ x: 10, y: 10, width: 350 }).addTimeSignature('4/4');
 
@@ -179,7 +180,7 @@ function baseDuration(options: TestOptions): void {
     notes: notes.slice(0, 3),
     options: {
       ratioed: true,
-      baseNoteLength: 'q',
+      suffix: Glyphs.noteQuarterUp,
     },
   });
 
@@ -188,7 +189,7 @@ function baseDuration(options: TestOptions): void {
     options: {
       ratioed: true,
       notesOccupied: 4,
-      baseNoteLength: '8',
+      suffix: Glyphs.note8thUp,
     },
   });
 
@@ -289,7 +290,7 @@ function bottomRatio(options: TestOptions): void {
   options.assert.ok(true, 'Bottom Ratioed Test');
 }
 
-function bottomBaseDuration(options: TestOptions): void {
+function bottomSuffix(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, 350, 160);
   const stave = f.Stave({ x: 10, y: 10 }).addTimeSignature('5/8');
 
@@ -313,7 +314,7 @@ function bottomBaseDuration(options: TestOptions): void {
     options: {
       location: Tuplet.LOCATION_BOTTOM,
       ratioed: true,
-      baseNoteLength: 'q',
+      suffix: Glyphs.metNoteQuarterUp,
     },
   });
 
@@ -322,7 +323,7 @@ function bottomBaseDuration(options: TestOptions): void {
     options: {
       location: Tuplet.LOCATION_BOTTOM,
       notesOccupied: 1,
-      baseNoteLength: '8',
+      suffix: Glyphs.metNote8thUp,
     },
   });
 
