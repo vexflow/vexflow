@@ -75,10 +75,6 @@ export const enum TupletLocation {
   TOP = +1,
 }
 
-// const BRACKET_PADDING = 5; // padding between inner text and bracket if bracket is enabled
-// const NOTE_OFFSET = -3; // offset of shown note
-// const EXTRA_SPACING = 1; // spacing between ratio and shown note
-
 export class Tuplet extends Element {
   static get CATEGORY(): string {
     return Category.Tuplet;
@@ -114,7 +110,7 @@ export class Tuplet extends Element {
     const location = options.location || Tuplet.LOCATION_TOP;
     const yOffset = options.yOffset || Metrics.get('Tuplet.yOffset');
     const textYOffset = options.textYOffset || Metrics.get('Tuplet.textYOffset');
-    const suffix = options.suffix !== undefined ? options.suffix : '';
+    const suffix = options.suffix || '';
 
     this.options = {
       bracketed,
