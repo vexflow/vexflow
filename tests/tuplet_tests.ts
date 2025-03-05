@@ -7,6 +7,7 @@ import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Dot } from '../src/dot';
 import { Formatter } from '../src/formatter';
+import { Glyphs } from '../src/glyphs';
 import { Stem } from '../src/stem';
 import { Tuplet } from '../src/tuplet';
 
@@ -17,8 +18,10 @@ const TupletTests = {
     run('Simple Tuplet', simple);
     run('Beamed Tuplet', beamed);
     run('Ratioed Tuplet', ratio);
+    run('Suffixed Tuplet', suffix);
     run('Bottom Tuplet', bottom);
     run('Bottom Ratioed Tuplet', bottomRatio);
+    run('Bottom Suffixed Tuplet', bottomSuffix);
     run('Awkward Tuplet', awkward);
     run('Complex Tuplet', complex);
     run('Mixed Stem Direction Tuplet', mixedTop);
@@ -154,6 +157,51 @@ function ratio(options: TestOptions): void {
   options.assert.ok(true, 'Ratioed Test');
 }
 
+function suffix(options: TestOptions): void {
+  const f = VexFlowTests.makeFactory(options);
+  const stave = f.Stave({ x: 10, y: 10, width: 350 }).addTimeSignature('4/4');
+
+  const notes = [
+    { keys: ['f/4'], duration: '4' },
+    { keys: ['a/4'], duration: '4' },
+    { keys: ['b/4'], duration: '4' },
+    { keys: ['g/4'], duration: '8' },
+    { keys: ['e/4'], duration: '8' },
+    { keys: ['g/4'], duration: '8' },
+  ]
+    .map(setStemUp)
+    .map(f.StaveNote.bind(f));
+
+  f.Beam({
+    notes: notes.slice(3, 6),
+  });
+
+  f.Tuplet({
+    notes: notes.slice(0, 3),
+    options: {
+      ratioed: true,
+      suffix: Glyphs.noteQuarterUp,
+    },
+  });
+
+  f.Tuplet({
+    notes: notes.slice(3, 6),
+    options: {
+      ratioed: true,
+      notesOccupied: 4,
+      suffix: Glyphs.note8thUp,
+    },
+  });
+
+  const voice = f.Voice().setStrict(true).addTickables(notes);
+
+  new Formatter().joinVoices([voice]).formatToStave([voice], stave);
+
+  f.draw();
+
+  options.assert.ok(true, 'Base Duration Test');
+}
+
 function bottom(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, 350, 160);
   const stave = f.Stave({ x: 10, y: 10 }).addTimeSignature('3/4');
@@ -240,6 +288,55 @@ function bottomRatio(options: TestOptions): void {
   f.draw();
 
   options.assert.ok(true, 'Bottom Ratioed Test');
+}
+
+function bottomSuffix(options: TestOptions): void {
+  const f = VexFlowTests.makeFactory(options, 350, 160);
+  const stave = f.Stave({ x: 10, y: 10 }).addTimeSignature('5/8');
+
+  const notes = [
+    { keys: ['f/4'], duration: '4' },
+    { keys: ['c/4'], duration: '4' },
+    { keys: ['d/4'], duration: '4' },
+    { keys: ['d/5'], duration: '8' },
+    { keys: ['g/5'], duration: '8' },
+    { keys: ['b/4'], duration: '8' },
+  ]
+    .map(setStemDown)
+    .map(f.StaveNote.bind(f));
+
+  f.Beam({
+    notes: notes.slice(3, 6),
+  });
+
+  f.Tuplet({
+    notes: notes.slice(0, 3),
+    options: {
+      location: Tuplet.LOCATION_BOTTOM,
+      ratioed: true,
+      suffix: Glyphs.metNoteQuarterUp,
+    },
+  });
+
+  f.Tuplet({
+    notes: notes.slice(3, 6),
+    options: {
+      location: Tuplet.LOCATION_BOTTOM,
+      notesOccupied: 1,
+      suffix: Glyphs.metNote8thUp,
+    },
+  });
+
+  const voice = f
+    .Voice({ time: { numBeats: 5, beatValue: 8 } })
+    .setStrict(true)
+    .addTickables(notes);
+
+  new Formatter().joinVoices([voice]).formatToStave([voice], stave);
+
+  f.draw();
+
+  options.assert.ok(true, 'Bottom Base Duration Test');
 }
 
 function awkward(options: TestOptions): void {

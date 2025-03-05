@@ -269,6 +269,12 @@ export const MetricsDefaults: Record<string, any> = {
   Tuplet: {
     yOffset: 0,
     textYOffset: 2,
+    bracketPadding: 5,
+    suffix: {
+      fontScale: 1 / 2,
+      extraSpacing: 1,
+      suffixOffsetY: -3,
+    },
   },
 
   Volta: {
