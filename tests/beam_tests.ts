@@ -33,6 +33,7 @@ const BeamTests = {
     run('Auto-stemmed Beam', autoStem);
     run('Mixed Beam 1', mixed);
     run('Mixed Beam 2', mixed2);
+    run('Mixed Beam 3', mixed3);
     run('Dotted Beam', dotted);
     run('Partial Beam', partial);
     run('Close Trade-offs Beam', tradeoffs);
@@ -316,6 +317,41 @@ function mixed2(options: TestOptions): void {
   f.draw();
 
   options.assert.ok(true, 'Multi Test');
+}
+
+function mixed3(options: TestOptions): void {
+  const f = VexFlowTests.makeFactory(options, 450, 230);
+  const stave = f.Stave({ y: 25 });
+  const score = f.EasyScore();
+
+  const voice = score.voice(
+    score.notes(
+      'f5/32, d5/16, c5/32, c5/64, d5/128, e5/8, f5/16, d5/32, c5/64, c5/32, d5/16, e5/1024, e5/512, e5/512, e5/512, e5/1024',
+      {
+        stem: 'up',
+      }
+    ),
+    { time: '31/64' }
+  );
+
+  const voice2 = score.voice(
+    score.notes(
+      'f4/32, d4/16, c4/32, c4/64, d4/128, e4/8, f4/16, e4/256, e4/512, e4/1024, e4/1024, d4/32, c4/64, c4/32, d4/16',
+      {
+        stem: 'down',
+      }
+    ),
+    { time: '31/64' }
+  );
+
+  f.Beam({ notes: voice.getTickables() as StemmableNote[] });
+  f.Beam({ notes: voice2.getTickables() as StemmableNote[] });
+
+  f.Formatter().joinVoices([voice, voice2]).formatToStave([voice, voice2], stave);
+
+  f.draw();
+
+  options.assert.ok(true, 'Multi Test with 1024th, 512th, and 256th notes');
 }
 
 function dotted(options: TestOptions): void {

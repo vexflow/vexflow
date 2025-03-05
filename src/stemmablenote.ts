@@ -113,6 +113,15 @@ export abstract class StemmableNote extends Note {
       case '128':
         length = beamIsUndefined ? 55 : 45;
         break;
+      case '256':
+        length = beamIsUndefined ? 60 : 55;
+        break;
+      case '512':
+        length = beamIsUndefined ? 65 : 60;
+        break;
+      case '1024':
+        length = beamIsUndefined ? 70 : 65;
+        break;
       default:
         break;
     }

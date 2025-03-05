@@ -13,6 +13,8 @@ const RESOLUTION = 16384;
  * For example, a quarter note is 4, so it maps to RESOLUTION / 4 = 4096 ticks.
  */
 const durations: Record<string, number> = {
+  '1/8': RESOLUTION * 8, // Maxima
+  '1/4': RESOLUTION * 4, // Longa
   '1/2': RESOLUTION * 2,
   1: RESOLUTION / 1,
   2: RESOLUTION / 2,
@@ -23,9 +25,13 @@ const durations: Record<string, number> = {
   64: RESOLUTION / 64,
   128: RESOLUTION / 128,
   256: RESOLUTION / 256,
+  512: RESOLUTION / 512,
+  1024: RESOLUTION / 1024,
 };
 
 const durationAliases: Record<string, string> = {
+  m: '1/8', // Maxima
+  l: '1/4', // Longa
   w: '1',
   h: '2',
   q: '4',
@@ -296,11 +302,19 @@ export class Tables {
   static RENDER_PRECISION_PLACES = 3;
   static RESOLUTION = RESOLUTION;
 
-  // 1/2, 1, 2, 4, 8, 16, 32, 64, 128
+  // 1/8, 1/4, 1/2, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024
   // NOTE: There is no 256 here! However, there are other mentions of 256 in this file.
   // For example, in durations has a 256 key, and sanitizeDuration() can return 256.
   // The sanitizeDuration() bit may need to be removed by 0xfe.
   static durationCodes: Record<string, Partial<GlyphProps>> = {
+    '1/8': {
+      stem: true,
+    },
+
+    '1/4': {
+      stem: false,
+    },
+
     '1/2': {
       stem: false,
     },
@@ -350,6 +364,27 @@ export class Tables {
       stemBeamExtension: 22.5,
       stem: true,
       codeFlagUp: Glyphs.flag128thUp,
+    },
+
+    256: {
+      beamCount: 6,
+      stemBeamExtension: 25,
+      stem: true,
+      codeFlagUp: Glyphs.flag256thUp,
+    },
+
+    512: {
+      beamCount: 7,
+      stemBeamExtension: 27.5,
+      stem: true,
+      codeFlagUp: Glyphs.flag512thUp,
+    },
+
+    1024: {
+      beamCount: 8,
+      stemBeamExtension: 30,
+      stem: true,
+      codeFlagUp: Glyphs.flag1024thUp,
     },
   };
 
@@ -738,6 +773,10 @@ export class Tables {
         }
       case 'R':
         switch (duration) {
+          case '1/8':
+            return Glyphs.restMaxima;
+          case '1/4':
+            return Glyphs.restLonga;
           case '1/2':
             return Glyphs.restDoubleWhole;
           case '1':
@@ -756,6 +795,12 @@ export class Tables {
             return Glyphs.rest64th;
           case '128':
             return Glyphs.rest128th;
+          case '256':
+            return Glyphs.rest256th;
+          case '512':
+            return Glyphs.rest512th;
+          case '1024':
+            return Glyphs.rest1024th;
         }
         break;
       case 'S':
@@ -771,6 +816,10 @@ export class Tables {
         }
       default:
         switch (duration) {
+          case '1/8':
+            return Glyphs.mensuralNoteheadMaximaBlack;
+          case '1/4':
+            return Glyphs.mensuralNoteheadLongaBlack;
           case '1/2':
             return Glyphs.noteheadDoubleWhole;
           case '1':
