@@ -2,7 +2,6 @@
 
 VexFlow is an open-source library for rendering music notation. It is written in TypeScript (compiled to ES6), and outputs scores to HTML Canvas and SVG. It works in browsers and also in Node.js projects (e.g., a command line script to save a score as a PDF).
 
-The guide below refers to VexFlow 5.
 
 ## Quick Start
 
@@ -27,7 +26,7 @@ The quickest way to add VexFlow to a web page is via a `<script>` tag.
 <div id="output"></div>
 
 <!-- Load library -->
-<script src="https://cdn.jsdelivr.net/npm/vexflow@5.0.0-alpha.4/build/cjs/vexflow.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vexflow@5.0.0/build/cjs/vexflow.js"></script>
 
 <script>
   document.fonts.ready.then(() => {
@@ -37,7 +36,7 @@ The quickest way to add VexFlow to a web page is via a `<script>` tag.
 </script>
 ```
 
-The URL above includes a version number <code>vexflow@x.y.z</code>. Specifying a particular version is good practice, to prevent rare issues with a future update breaking your deployment. During development &amp; testing, feel free to use the latest release by omitting the version number: https://cdn.jsdelivr.net/npm/vexflow/build/cjs/vexflow.js
+The URL above includes a version number <code>vexflow@x.y.z</code>. Specifying a version is good practice, to prevent issues with a future update breaking your deployment. During development &amp; testing, feel free to use the latest release by omitting the version number: https://cdn.jsdelivr.net/npm/vexflow/build/cjs/vexflow.js
 
 If your project uses a bundler, you can install VexFlow from npm:
 
@@ -111,7 +110,7 @@ stave.setContext(context).draw();
 
 ## More Resources
 
-- If you need help, come join us on the [Vexflow Google Group](https://groups.google.com/forum/?fromgroups#!forum/vexflow).
+- If you need help, start a [GitHub discussion](https://github.com/vexflow/vexflow/discussions) or join us on the [Vexflow Google Group](https://groups.google.com/forum/?fromgroups#!forum/vexflow).
 
 - Learn more on the [VexFlow wiki](https://github.com/0xfe/vexflow/wiki).
 
@@ -127,7 +126,7 @@ If you find VexFlow useful, please consider sponsoring its development: https://
 
 # MIT License
 
-Copyright (c) 2023-present VexFlow contributors (see AUTHORS.md).
+Copyright (c) 2023-present VexFlow contributors (see AUTHORS.md).<br />
 Copyright (c) 2010-2022 Mohit Muthanna Cheppudira
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
