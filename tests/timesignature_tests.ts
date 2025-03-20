@@ -22,6 +22,7 @@ const TimeSignatureTests = {
     run('Interchangeable Signature Test', interchangeable);
     run('Aggregate Signature Test', agregate);
     run('Complex Signature Test', complex);
+    run('Bounding Box Test', boundingBox);
     run('Time Signature multiple staves alignment test', multiple);
     run('Time Signature Change Test', change);
   },
@@ -146,6 +147,28 @@ function complex(options: TestOptions, contextBuilder: ContextBuilder): void {
     .addTimeSignature('3/8')
     .setContext(ctx)
     .drawWithStyle();
+
+  options.assert.ok(true, 'all pass');
+}
+
+function boundingBox(options: TestOptions, contextBuilder: ContextBuilder): void {
+  const ctx = contextBuilder(options.elementId, 600, 120);
+
+  const stave = new Stave(10, 10, 500)
+    .addTimeSignature('(2+3)/16')
+    .addTimeSignature('+')
+    .addTimeSignature('3/8')
+    .addTimeSignature('4/4')
+    .addTimeSignature('C')
+    .addTimeSignature('5322/3')
+    .addTimeSignature('3/54444')
+    .setContext(ctx)
+    .drawWithStyle();
+
+  const timeSignatures = stave.getModifiers();
+  timeSignatures.forEach((timeSignature) => {
+    VexFlowTests.drawBoundingBox(ctx, timeSignature);
+  });
 
   options.assert.ok(true, 'all pass');
 }

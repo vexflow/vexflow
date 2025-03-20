@@ -5,6 +5,7 @@
 // See tables.js for the internal time signatures
 // representation
 
+import { BoundingBox } from './boundingbox';
 import { Element } from './element';
 import { Glyphs } from './glyphs';
 import { RenderContext } from './rendercontext';
@@ -42,6 +43,9 @@ export class TimeSignature extends StaveModifier {
 
   bottomLine: number; // bottomLine and topLine are used to calculate the position of the
   topLine: number; // top row of digits in a numeric TimeSignature.
+
+  protected topRenderY: number = 0; // topRenderY and botRenderY are used for BoundingBox calcs and drawing and
+  protected botRenderY: number = 0; // give the proper Y locations for placing topText and botText.
 
   protected timeSpec: string = '4/4';
   protected line: number = 0;
@@ -205,6 +209,8 @@ export class TimeSignature extends StaveModifier {
     this.setRendered();
     ctx.openGroup('timesignature', this.getAttribute('id'));
     this.drawAt(ctx, stave, this.x);
+    const bb = this.getBoundingBox();
+    ctx.pointerRect(bb.getX(), bb.getY(), bb.getW(), bb.getH());
     ctx.closeGroup();
   }
 
@@ -212,16 +218,42 @@ export class TimeSignature extends StaveModifier {
     this.setRendered();
 
     if (this.isNumeric) {
+      // render top text
       let startX = x + this.topStartX;
-      let y = 0;
-      if (this.botText.getText().length > 0) y = stave.getYForLine(this.topLine - this.lineShift);
-      else y = (stave.getYForLine(this.topLine) + stave.getYForLine(this.bottomLine)) / 2;
-      this.topText.renderText(ctx, startX, y);
+      if (this.botText.getText().length > 0) this.topRenderY = stave.getYForLine(this.topLine - this.lineShift);
+      else this.topRenderY = (stave.getYForLine(this.topLine) + stave.getYForLine(this.bottomLine)) / 2;
+      this.topText.renderText(ctx, startX, this.topRenderY);
+
+      // render bottom text
       startX = x + this.botStartX;
-      y = stave.getYForLine(this.bottomLine + this.lineShift);
-      this.botText.renderText(ctx, startX, y);
+      this.botRenderY = stave.getYForLine(this.bottomLine + this.lineShift);
+      this.botText.renderText(ctx, startX, this.botRenderY);
     } else {
       this.renderText(ctx, x - this.x, stave.getYForLine(this.line));
+    }
+  }
+
+  // gets combined bounding box of time sig
+  // NOTE: should be called after drawAt initializes top/botRenderY to get proper position
+  getBoundingBox(): BoundingBox {
+    if (this.isNumeric) {
+      // these always return boxes so no need to handle case where one/both are null/undefined
+      const topBoundingBox = this.topText.getBoundingBox();
+      const botBoundingBox = this.botText.getBoundingBox();
+
+      // move boxes to offset positions to be inline with the rendered text from drawAt.
+      topBoundingBox.move(this.x + this.topStartX, this.topRenderY);
+      botBoundingBox.move(this.x + this.botStartX, this.botRenderY);
+
+      // combine the two boxes
+      const mergedBox = topBoundingBox.mergeWith(botBoundingBox);
+      return mergedBox;
+    } else {
+      // use element bounding box call when only simple text (like "C" or "C|")
+      const stave = this.checkStave();
+      const textBoundingBox = super.getBoundingBox();
+      textBoundingBox.move(0, stave.getYForLine(this.line));
+      return textBoundingBox;
     }
   }
 }
