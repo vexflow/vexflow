@@ -1,14 +1,14 @@
 // Run:
-//   node import.mjs
+//   node import1.mjs
 
 // This file is an ES module that imports VexFlow.
 // This file needs to have the .mjs extension, or the nearest package.json needs to specify type="module".
 // Otherwise, the import statement will not work.
 
-import { Vex } from 'vexflow';
+import { VexFlow } from 'vexflow';
 
 // The above import statement is equivalent to the following:
-// import { Vex } from '../../build/esm/entry/vexflow.js';
+// import { VexFlow } from '../../build/esm/entry/vexflow.js';
 // It works because our package.json has an "exports" field that points to the correct ESM entry point:
 /*
 "exports": {
@@ -21,8 +21,8 @@ import { Vex } from 'vexflow';
 }
 */
 
-// If you want to use the vexflow-bravura.js distribution, which bundles the Bravura & Academico fonts you can import it like this:
-// import { Vex } from 'vexflow/bravura';
+// If you want to use the vexflow-bravura.js distribution, which bundles only the Bravura & Academico fonts, import like this:
+// import { VexFlow } from 'vexflow/bravura';
 
 // To use this ES module in a script tag, you will need to set type="module".
 // Additionally, the webpage will need to be able to resolve to the correct ESM entry point.
