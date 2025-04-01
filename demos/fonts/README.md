@@ -43,3 +43,9 @@ Example `@vexflow-fonts/bravura/index.css`:
     src: local("Bravura"), url(bravura.woff2) format("woff2");
 }
 ```
+
+## text.html
+
+**This page doesn't use the VexFlow library.**
+
+It just demonstrates how web fonts work, using CSS to load `*.woff2` fonts.
