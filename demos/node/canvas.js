@@ -11,7 +11,7 @@
 // See the `exports` field in package.json for details.
 
 const VexFlow = require('vexflow');
-const { Renderer, Stave, StaveNote, Formatter } = VexFlow;
+const { Renderer, Stave, StaveNote, Formatter, Element } = VexFlow;
 
 const { createCanvas, registerFont } = require('canvas');
 
@@ -24,7 +24,7 @@ const canvas = createCanvas(1000, 500);
 // VexFlow 5 uses a hidden canvas for measuring font glyphs.
 // https://www.w3.org/TR/2012/WD-html5-author-20120329/the-canvas-element.html#the-canvas-element
 // In browsers, canvas elements usually default to 300 x 150.
-VexFlow.Element.setTextMeasurementCanvas(createCanvas(300, 150));
+Element.setTextMeasurementCanvas(createCanvas(300, 150));
 
 VexFlow.setFonts('Bravura');
 // VexFlow.setFonts('Petaluma');
