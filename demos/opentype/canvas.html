@@ -3,14 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <!-- 
-      Provide a comma separated list of SMuFL glyph names.
-      See: https://w3c.github.io/smufl/latest/tables/
-           https://w3c.github.io/smufl/latest/tables/clefs.html
-           https://w3c.github.io/smufl/latest/tables/flags.html
-           https://w3c.github.io/smufl/latest/tables/beamed-groups-of-notes.html
-           ...etc
-      We will draw the glyphs on a canvas in three different fonts (Bravura, Gonville, Petaluma).
-      Use the keyboard's arrow keys to cycle through the glyphs.
+      Summary: Draws music glyphs with opentype.js.
+        Provide a comma separated list of SMuFL glyph names in DEFAULT_GLYPH_NAMES.
+        See: https://w3c.github.io/smufl/latest/tables/
+             https://w3c.github.io/smufl/latest/tables/clefs.html
+             https://w3c.github.io/smufl/latest/tables/flags.html
+             https://w3c.github.io/smufl/latest/tables/beamed-groups-of-notes.html
+             ...etc
+        We will draw the glyphs on a canvas in three different fonts (Bravura, Gonville, Petaluma).
+        Use the keyboard's arrow keys to cycle through the glyphs.
+        This tool was used to debug & fix the origins of various Gonville glyphs.
+        
+      Run: Open canvas.html in a browser.
     -->
     <script src="https://cdn.jsdelivr.net/npm/wawoff2@2.0.1/build/decompress_binding.js"></script>
     <script>
