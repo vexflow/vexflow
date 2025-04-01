@@ -10,7 +10,8 @@
 // Since we use a require(...) statement below, we will load the CJS bundle at build/cjs/vexflow.js
 // See the `exports` field in package.json for details.
 
-const Vex = require('vexflow');
+const VexFlow = require('vexflow');
+const { Renderer, Stave, StaveNote, Formatter, Element } = VexFlow;
 
 const { createCanvas, registerFont } = require('canvas');
 
@@ -18,14 +19,12 @@ const { createCanvas, registerFont } = require('canvas');
 registerFont('../../node_modules/@vexflow-fonts/bravura/bravura.otf', { family: 'Bravura' });
 registerFont('../../node_modules/@vexflow-fonts/petaluma/petaluma.otf', { family: 'Petaluma' });
 
-const { Renderer, Stave, StaveNote, Formatter } = VexFlow;
-
 const canvas = createCanvas(1000, 500);
 
 // VexFlow 5 uses a hidden canvas for measuring font glyphs.
 // https://www.w3.org/TR/2012/WD-html5-author-20120329/the-canvas-element.html#the-canvas-element
 // In browsers, canvas elements usually default to 300 x 150.
-VexFlow.Element.setTextMeasurementCanvas(createCanvas(300, 150));
+Element.setTextMeasurementCanvas(createCanvas(300, 150));
 
 VexFlow.setFonts('Bravura');
 // VexFlow.setFonts('Petaluma');

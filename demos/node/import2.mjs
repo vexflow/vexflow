@@ -1,7 +1,5 @@
 // Summary:
 //   Save scores to portable SVG, with embedded OTF fonts (base64 encoded).
-//   This demo is buggy, since the note heads are detached from the stems.
-//   Perhaps this is a glyph measurement issue?
 //
 // Run:
 //   node import2.mjs
@@ -12,6 +10,24 @@
 import { default as fs } from 'fs';
 
 import { JSDOM } from 'jsdom';
+
+// VexFlow 5 uses a hidden canvas for measuring font glyphs.
+// In a browser environment, you don't need to do anything special.
+// However, in a node environment, you need to provide a canvas element.
+import { createCanvas, registerFont } from 'canvas';
+const fontsDir = '../../node_modules/@vexflow-fonts/';
+
+function getFontPath(fontName) {
+  const fontNameLowerCase = fontName.toLowerCase();
+  return `${fontsDir}${fontNameLowerCase}/${fontNameLowerCase}.otf`;
+}
+
+const fonts = ['Bravura', 'Petaluma', 'Gonville', 'Leland'];
+fonts.forEach((fontName) => {
+  // Register the fonts with node canvas so the canvas context can measure glyphs properly.
+  registerFont(getFontPath(fontName), { family: fontName });
+  console.log(`Registered font: ${fontName}`);
+});
 
 // Reference to VexFlow, assigned in the step1() function.
 let VF;
@@ -64,8 +80,6 @@ function svgScore(fontName) {
   stave.setContext(ctx).drawWithStyle();
   Formatter.FormatAndDraw(ctx, stave, notes);
 
-  // const svg = div.innerHTML.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ');
-
   const svg = div.childNodes[0];
   svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
   insertFont(svg, fontName);
@@ -73,23 +87,24 @@ function svgScore(fontName) {
   return svg.outerHTML;
 }
 
+// Embed a custom font directly into the SVG.
 function insertFont(svgElement, fontName) {
-  const fontNameLowerCase = fontName.toLowerCase();
-  const fontsDir = '../../node_modules/@vexflow-fonts/';
-  const fontFile = fs.readFileSync(fontsDir + fontNameLowerCase + '/' + fontNameLowerCase + '.otf');
+  const fontFile = fs.readFileSync(getFontPath(fontName));
   const fontBase64 = fontFile.toString('base64');
 
   const defsElement = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
   const defsString = `
 <style>
   <![CDATA[
-@font-face {
-  font-family: "${fontName}";
-  src: url("data:font/opentype;base64,${fontBase64}");
-}
+    @font-face {
+      font-family: "${fontName}";
+      src: url("data:font/opentype;base64,${fontBase64}");
+    }
   ]]>
-</style>`;
+</style>
+`;
   defsElement.innerHTML = defsString;
+  // Insert the font definition <defs> element as the first child of the SVG element.
   svgElement.insertBefore(defsElement, svgElement.firstChild);
 }
 
@@ -104,9 +119,14 @@ async function step0() {
   }
 }
 
-async function step1() {
-  const { VexFlow } = await import('vexflow');
+async function importVexFlow() {
+  const { VexFlow, Element } = await import('vexflow');
   VF = VexFlow;
+
+  // VexFlow 5 uses a hidden canvas for measuring font glyphs.
+  // https://www.w3.org/TR/2012/WD-html5-author-20120329/the-canvas-element.html#the-canvas-element
+  // In browsers, canvas elements usually default to 300 x 150.
+  Element.setTextMeasurementCanvas(createCanvas(300, 150));
 
   console.log('Loaded VexFlow Version: ', VF.BUILD.VERSION, ' Build: ', VF.BUILD.ID);
   console.log('The default music font stack is:', VF.getFonts());
@@ -115,54 +135,31 @@ async function step1() {
   console.log('>>> Bravura...');
 }
 
-async function step2() {
-  VF.setFonts('Bravura', 'Academico');
+async function renderScoreWithFont(currFontName, nextFontName) {
+  VF.setFonts(currFontName); // You can add more fonts as additional parameters.
   console.log('The current music font stack is:', VF.getFonts());
-  fs.writeFileSync('output/score_bravura.svg', svgScore('Bravura'));
-
+  const outputFile = `output/score_${currFontName.toLowerCase()}.svg`;
+  fs.writeFileSync(outputFile, svgScore(currFontName));
+  console.log('Saved to ' + outputFile);
   console.log('\n==================================\n');
-  console.log('>>> Petaluma...');
-}
-
-async function step3() {
-  VF.setFonts('Petaluma', 'Petaluma Script');
-  console.log('The current music font stack is:', VF.getFonts());
-  fs.writeFileSync('output/score_petaluma.svg', svgScore('Petaluma'));
-
-  console.log('\n==================================\n');
-  console.log('>>> Gonville...');
-}
-
-async function step4() {
-  VF.setFonts('Gonville', 'Academico');
-  console.log('The current music font stack is:', VF.getFonts());
-  fs.writeFileSync('output/score_gonville.svg', svgScore('Gonville'));
-
-  console.log('\n==================================\n');
-  console.log('>>> Leland...');
-}
-
-async function step5() {
-  VF.setFonts('Leland', 'Edwin');
-  console.log('The current music font stack is:', VF.getFonts());
-  fs.writeFileSync('output/score_leland.svg', svgScore('Leland'));
-
-  console.log('\n==================================\n');
-  console.log('DONE!');
+  if (nextFontName) {
+    console.log(`>>> ${nextFontName}...`);
+  }
 }
 
 async function runAllSteps() {
   await step0();
   await waitForKeyPress();
-  await step1();
+  await importVexFlow();
   await waitForKeyPress();
-  await step2();
+  await renderScoreWithFont('Bravura', 'Petaluma');
   await waitForKeyPress();
-  await step3();
+  await renderScoreWithFont('Petaluma', 'Gonville');
   await waitForKeyPress();
-  await step4();
+  await renderScoreWithFont('Gonville', 'Leland');
   await waitForKeyPress();
-  await step5();
+  await renderScoreWithFont('Leland');
+  console.log('DONE!');
 }
 
 runAllSteps().then(() => process.exit(0));

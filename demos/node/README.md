@@ -1,6 +1,6 @@
 # Using VexFlow in Node JS
 
-You can use VexFlow in Node JS by calling `const Vex = require(...)` on the CJS build of the library.
+You can use VexFlow in Node JS by calling `const VexFlow = require(...)` on the CJS build of the library.
 
 `node svg.js > output.svg` creates a SVG image file containing the VexFlow output.
 

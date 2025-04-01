@@ -2,6 +2,12 @@
 <html>
   <head>
     <meta charset="UTF-8" />
+    <!--
+      Summary: Use opentype.js to load a SMuFL OTF file and render some glyphs.
+        This demo does not use the VexFlow library.
+      Run: Open load.html in a browser.
+        Click "Choose File" and select a SMuFL OTF file (e.g., Bravura.otf).
+    -->
     <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/wawoff2@2.0.1/build/decompress_binding.js"></script>
     <style>
@@ -32,7 +38,8 @@
     <br /><br />
     <div id="musicFontSize"></div>
     <div id="musicFontInfo"></div>
-    <p>The music glyphs below will be styled after you load the font.</p>
+    <p>Before loading a SMuFL font, the glyphs below will look like empty rectangles.</p>
+    <p>After loading a SMuFL font, the glyphs below will be music engraving symbols.</p>
     <div class="music">
       &#xE050; &#xE062; &#xE080; &#xE081; &#xE082; &#xE083; &#xE084; &#xE08A; &#xE08B; &#xE1E7; &#xE260; &#xE261;
       &#xE262; &#xE263; &#xE0A2; &#xE264; &#xE245; &#xE1F6; &#xE014; &#xE030; &#xE032; &#xE1FE; &#xE1FF; &#xE200;
