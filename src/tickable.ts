@@ -39,7 +39,6 @@ export abstract class Tickable extends Element {
 
   protected ignoreTicks: boolean;
   protected tupletStack: Tuplet[];
-  protected tuplet?: Tuplet;
   protected ticks: Fraction;
   protected centerXShift: number;
   protected voice?: Voice;
@@ -178,9 +177,9 @@ export abstract class Tickable extends Element {
     this.voice = voice;
   }
 
-  /** Get the tuplet. */
+  /** Get the outermost tuplet if any. */
   getTuplet(): Tuplet | undefined {
-    return this.tuplet;
+    return (this.tupletStack.length ? this.tupletStack[0] : undefined);
   }
 
   /** Return a list of Tuplets. */
@@ -222,6 +221,8 @@ export abstract class Tickable extends Element {
 
   /** Attach to new tuplet. */
   setTuplet(tuplet: Tuplet): this {
+    // setTuplet should be parallel to getTuplet.  Instead it acts as appendTuplet;
+    // TODO(msac) change!.
     if (tuplet) {
       this.tupletStack.push(tuplet);
 
@@ -230,9 +231,6 @@ export abstract class Tickable extends Element {
 
       this.applyTickMultiplier(notesOccupied, noteCount);
     }
-
-    this.tuplet = tuplet;
-
     return this;
   }
 
@@ -324,12 +322,13 @@ export abstract class Tickable extends Element {
     this.ticks = this.tickMultiplier.clone().multiply(this.intrinsicTicks);
   }
 
-  /** Get the tick multiplier. */
+  /** Get the tick multiplier as a Fraction.  Defaults to Fraction(1, 1). */
   getTickMultiplier(): Fraction {
     return this.tickMultiplier;
   }
 
-  /** Apply a tick multiplier. */
+  /** Apply a tick multiplier, by multiplying the current tickMultiplier by
+   * the numerator and denominator given here. Updates ticks. */
   applyTickMultiplier(numerator: number, denominator: number): void {
     this.tickMultiplier.multiply(numerator, denominator);
     this.ticks = this.tickMultiplier.clone().multiply(this.intrinsicTicks);
