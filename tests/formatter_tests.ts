@@ -28,13 +28,44 @@ import { Stem } from '../src/stem';
 import { StemmableNote } from '../src/stemmablenote';
 import { StringNumber } from '../src/stringnumber';
 import { System } from '../src/system';
+import type { Tickable } from '../src/tickable';
 import { Tuplet } from '../src/tuplet';
 import { Voice, VoiceTime } from '../src/voice';
 import { MockTickable } from './mocks';
 
+const QUARTER_NOTE_DURATION = VexFlow.RESOLUTION / 4;
+
+function createTickable(beat: number): MockTickable {
+  return new MockTickable().setTicks(beat);
+}
+
+function getTestVoices(): Voice[] {
+  const BEAT: number = VexFlow.RESOLUTION / 4;
+
+  const tickables1: MockTickable[] = [
+    createTickable(BEAT).setWidth(10),
+    createTickable(BEAT * 2).setWidth(20),
+    createTickable(BEAT).setWidth(30),
+  ];
+
+  const tickables2: MockTickable[] = [
+    createTickable(BEAT * 2).setWidth(10),
+    createTickable(BEAT).setWidth(20),
+    createTickable(BEAT).setWidth(30),
+  ];
+
+  const voice1 = new Voice(VexFlow.TIME4_4);
+  const voice2 = new Voice(VexFlow.TIME4_4);
+
+  voice1.addTickables(tickables1);
+  voice2.addTickables(tickables2);
+  return [voice1, voice2];
+}
+
 const FormatterTests = {
   Start(): void {
     QUnit.module('Formatter');
+    QUnit.test('getResolutionMultiplier', getResolutionMultiplier);
     QUnit.test('TickContext Building', buildTickContexts);
 
     const run = VexFlowTests.runTests;
@@ -68,30 +99,59 @@ function getGlyphWidth(glyph: string): number {
   return el.getWidth();
 }
 
-function buildTickContexts(assert: Assert): void {
-  function createTickable(beat: number) {
-    return new MockTickable().setTicks(beat);
+function getResolutionMultiplier(assert: Assert): void {
+  const [voice1, voice2] = getTestVoices();
+  assert.equal(
+    voice1.getResolutionMultiplier(),
+    voice2.getResolutionMultiplier(),
+    'Voices with same smallest duration have the same resolution multiplier'
+  );
+  assert.equal(
+    Formatter.getResolutionMultiplier([voice1, voice2]),
+    voice1.getResolutionMultiplier(),
+    'LCM of voice1, voice2 is voice1'
+  );
+
+  // two new voices: one with triplets, one with quintuplets
+  const TIME1_4: VoiceTime = {
+    numBeats: 1,
+    beatValue: 4,
+    resolution: VexFlow.RESOLUTION,
+  };
+
+  const tickables3: Note[] = [];
+  for (let i = 0; i < 3; i++) {
+    tickables3.push(new StaveNote({ keys: ['f/4'], duration: '8' }).setWidth(15));
   }
+  new Tuplet(tickables3, { numNotes: 3, notesOccupied: 2 });
+  const voice3 = new Voice(TIME1_4);
+  voice3.addTickables(tickables3);
 
-  const BEAT = (1 * VexFlow.RESOLUTION) / 4;
+  const tickables4: Note[] = [];
+  for (let i = 0; i < 5; i++) {
+    tickables4.push(new StaveNote({ keys: ['f/4'], duration: '16' }).setWidth(9));
+  }
+  new Tuplet(tickables4, { numNotes: 5, notesOccupied: 4 });
+  const voice4 = new Voice(TIME1_4);
+  voice4.addTickables(tickables4);
 
-  const tickables1 = [
-    createTickable(BEAT).setWidth(10),
-    createTickable(BEAT * 2).setWidth(20),
-    createTickable(BEAT).setWidth(30),
-  ];
+  assert.notEqual(voice3.getResolutionMultiplier(), voice4.getResolutionMultiplier());
+  assert.notEqual(
+    Formatter.getResolutionMultiplier([voice3, voice4]),
+    voice3.getResolutionMultiplier(),
+    'LCM of RM of voices 3 and 4 is neither RM(3) nor RM(4)'
+  );
+  assert.notEqual(
+    Formatter.getResolutionMultiplier([voice3, voice4]),
+    voice4.getResolutionMultiplier(),
+    'LCM of RM of voices 3 and 4 is neither RM(3) nor RM(4)'
+  );
+}
 
-  const tickables2 = [
-    createTickable(BEAT * 2).setWidth(10),
-    createTickable(BEAT).setWidth(20),
-    createTickable(BEAT).setWidth(30),
-  ];
-
-  const voice1 = new Voice(VexFlow.TIME4_4);
-  const voice2 = new Voice(VexFlow.TIME4_4);
-
-  voice1.addTickables(tickables1);
-  voice2.addTickables(tickables2);
+function buildTickContexts(assert: Assert): void {
+  const [voice1, voice2] = getTestVoices();
+  const tickables1: Tickable[] = voice1.getTickables();
+  const tickables2: Tickable[] = voice2.getTickables();
 
   const formatter = new Formatter();
   const tContexts = formatter.createTickContexts([voice1, voice2]);
@@ -136,10 +196,10 @@ function rightJustify(options: TestOptions): void {
     stave.drawWithStyle();
     voice.draw(f.getContext(), stave);
   };
-  renderTest({ numBeats: 4, beatValue: 4, resolution: 4 * 4096 }, 3, '4', '2', 10, 300);
-  renderTest({ numBeats: 4, beatValue: 4, resolution: 4 * 4096 }, 1, 'w', 'w', 310, 300);
-  renderTest({ numBeats: 3, beatValue: 4, resolution: 4 * 4096 }, 3, '4', '4', 610, 300);
-  renderTest({ numBeats: 3, beatValue: 4, resolution: 4 * 4096 }, 6, '8', '8', 910, 300);
+  renderTest({ numBeats: 4, beatValue: 4, resolution: 4 * QUARTER_NOTE_DURATION }, 3, '4', '2', 10, 300);
+  renderTest({ numBeats: 4, beatValue: 4, resolution: 4 * QUARTER_NOTE_DURATION }, 1, 'w', 'w', 310, 300);
+  renderTest({ numBeats: 3, beatValue: 4, resolution: 4 * QUARTER_NOTE_DURATION }, 3, '4', '4', 610, 300);
+  renderTest({ numBeats: 3, beatValue: 4, resolution: 4 * QUARTER_NOTE_DURATION }, 6, '8', '8', 910, 300);
   options.assert.ok(true);
 }
 
@@ -857,7 +917,7 @@ function annotations(options: TestOptions): void {
     // Don't beam the last group
     let notesToBeam: StaveNote[] = [];
     notes.forEach((note) => {
-      if (note.getIntrinsicTicks() < 4096) {
+      if (note.getIntrinsicTicks() < QUARTER_NOTE_DURATION) {
         notesToBeam.push(note);
         if (notesToBeam.length >= beamGroup) {
           beams.push(new Beam(notesToBeam));

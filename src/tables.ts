@@ -9,13 +9,16 @@ import { RuntimeError } from './util';
 const RESOLUTION = 16384;
 
 /**
- * Map duration numbers to 'ticks', the unit of duration used throughout VexFlow.
+ * Map duration numbers and strings to an integer number of ticks,
+ * the unit of duration used throughout VexFlow.
  * For example, a quarter note is 4, so it maps to RESOLUTION / 4 = 4096 ticks.
+ * In some places ticks can also be Fractions (such as tuplets) but not in
+ * basic durations.
  */
 const durations: Record<string, number> = {
   '1/8': RESOLUTION * 8, // Maxima
   '1/4': RESOLUTION * 4, // Longa
-  '1/2': RESOLUTION * 2,
+  '1/2': RESOLUTION * 2, // Breve
   1: RESOLUTION / 1,
   2: RESOLUTION / 2,
   4: RESOLUTION / 4,
