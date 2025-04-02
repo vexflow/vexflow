@@ -177,9 +177,9 @@ export abstract class Tickable extends Element {
     this.voice = voice;
   }
 
-  /** Get the outermost tuplet if any. */
+  /** Get the most newly added Tuplet if any. */
   getTuplet(): Tuplet | undefined {
-    return (this.tupletStack.length ? this.tupletStack[0] : undefined);
+    return this.tupletStack.length ? this.tupletStack[this.tupletStack.length - 1] : undefined;
   }
 
   /** Return a list of Tuplets. */
