@@ -38,17 +38,22 @@ export interface FormatterOptions {
   maxIterations?: number;
 }
 
+/** An interface for passing options to various formatters **/
 export interface FormatParams {
-  alignRests?: boolean; // align rests vertically with neighboring notes.
-  stave?: Stave;
-  context?: RenderContext;
+  /** Should rests align vertically with neighboring notes (default false) **/
+  alignRests?: boolean;
+  /** Should notes be automatically beamed **/
   autoBeam?: boolean;
+  /** Stave object to render to **/
+  stave?: Stave;
+  /** The RenderContext **/
+  context?: RenderContext;
 }
 
-export interface AlignmentContexts<T> {
+export interface AlignmentTickContexts {
   list: number[];
-  map: Record<number, T>;
-  array: T[];
+  map: Record<number, TickContext>;
+  array: TickContext[];
   resolutionMultiplier: number;
 }
 
@@ -56,64 +61,6 @@ export interface AlignmentModifierContexts {
   map: Map<Stave | undefined, Record<number, ModifierContext>>;
   array: ModifierContext[];
   resolutionMultiplier: number;
-}
-
-type addToContextFn<T> = (tickable: Tickable, context: T, voiceIndex: number) => void;
-type makeContextFn<T> = (tick?: { tickID: number }) => T;
-
-/**
- * Create `Alignment`s for each tick in `voices`. Also calculate the
- * total number of ticks in voices.
- */
-function createContexts<T>(
-  voices: Voice[],
-  makeContext: makeContextFn<T>,
-  addToContext: addToContextFn<T>
-): AlignmentContexts<T> {
-  if (voices.length === 0)
-    return {
-      map: {},
-      array: [],
-      list: [],
-      resolutionMultiplier: 0,
-    };
-
-  // Initialize tick maps.
-  const tickToContextMap: Record<number, T> = {};
-  const tickList: number[] = [];
-  const contexts: T[] = [];
-  const resolutionMultiplier = Formatter.getResolutionMultiplier(voices);
-  // For each voice, extract notes and create a context for every
-  // new tick that hasn't been seen before.
-  voices.forEach((voice, voiceIndex) => {
-    // Use resolution multiplier as denominator so that no additional expansion
-    // of fractional tick values is needed.
-    const ticksUsed = new Fraction(0, resolutionMultiplier);
-
-    voice.getTickables().forEach((tickable) => {
-      const integerTicks = ticksUsed.numerator;
-
-      // If we have no tick context for this tick, create one.
-      if (!tickToContextMap[integerTicks]) {
-        const newContext = makeContext({ tickID: integerTicks });
-        contexts.push(newContext);
-        tickToContextMap[integerTicks] = newContext;
-        // Maintain a list of unique integerTicks.
-        tickList.push(integerTicks);
-      }
-
-      // Add this tickable to the TickContext.
-      addToContext(tickable, tickToContextMap[integerTicks], voiceIndex);
-      ticksUsed.add(tickable.getTicks());
-    });
-  });
-
-  return {
-    map: tickToContextMap,
-    array: contexts,
-    list: tickList.sort((a, b) => a - b),
-    resolutionMultiplier,
-  };
 }
 
 // eslint-disable-next-line
@@ -166,7 +113,7 @@ function getRestLineForNextNoteGroup(
  * to each tick based on the widths of the notes and modifiers in that tick. This
  * establishes the smallest amount of space required for each tick.
  *
- * Finally, the formatter distributes the left over space proportionally to
+ * Finally, the formatter distributes the leftover space proportionally to
  * all the ticks, setting the `x` values of the notes in each tick.
  *
  * See `tests/formatter_tests.ts` for usage examples. The helper functions included
@@ -184,8 +131,11 @@ export class Formatter {
   protected justifyWidth: number;
   protected totalCost: number;
   protected totalShift: number;
-  protected tickContexts: AlignmentContexts<TickContext>;
+  // note: this is poorly named because there is an object type TickContext,
+  // and this does not store it (similarly with modifierContexts).
+  protected tickContexts: AlignmentTickContexts;
   protected formatterOptions: Required<FormatterOptions>;
+  // note that this is an array of AlignmentModifierContexts, not one like tickContexts.
   protected modifierContexts: AlignmentModifierContexts[];
   protected voices: Voice[];
   protected lossHistory: number[];
@@ -311,9 +261,9 @@ export class Formatter {
    * @param notes array of `Note` instances for the stave (`Note`, `BarNote`, etc.)
    * @param tabnotes array of `Note` instances for the tab stave (`TabNote`, `BarNote`, etc.)
    * @param autoBeam automatically generate beams.
-   * @param params a configuration object:
-   *    * `autoBeam` automatically generates beams for the notes.
-   *    * `alignRests` aligns rests with nearby notes.
+   * @param params a FormatParams configuration object:
+   *    * `autoBeam` automatically generates beams for the notes. (overrides autoBeam setting above)
+   *    * `alignRests` aligns rests with nearby notes. (default false)
    */
   static FormatAndDrawTab(
     ctx: RenderContext,
@@ -361,12 +311,14 @@ export class Formatter {
 
   /**
    * Automatically set the vertical position of rests based on previous/next note positions.
+   * Useful for multiple voices on the same staff or for rests within beam groups.
+   * Ignores rests that have already been set to a line other than 3 (middle line).
    * @param tickables an array of Tickables.
    * @param alignAllNotes If `false`, only align rests that are within a group of beamed notes.
-   * @param alignTuplets If `false`, ignores tuplets.
+   * @param alignTuplets If `false` (default), ignores tuplets.
    */
-  static AlignRestsToNotes(tickables: Tickable[], alignAllNotes: boolean, alignTuplets?: boolean): void {
-    tickables.forEach((currTickable: Tickable, index: number) => {
+  static AlignRestsToNotes(tickables: Tickable[], alignAllNotes: boolean, alignTuplets: boolean = false): void {
+    tickables.forEach((currTickable: Tickable, index: number): void => {
       if (isStaveNote(currTickable) && currTickable.isRest()) {
         if (currTickable.getTuplet() && !alignTuplets) {
           return;
@@ -551,7 +503,8 @@ export class Formatter {
     return this.minTotalWidth;
   }
 
-  /** Calculate the resolution multiplier for `voices`. */
+  /** Calculate the resolution multiplier for `voices`, which is the
+   * least common multiple of all the voices' getResolutionMultiplier() results. */
   static getResolutionMultiplier(voices: Voice[]): number {
     if (!voices || !voices.length) {
       throw new RuntimeError('BadArgument', 'No voices to format');
@@ -621,24 +574,72 @@ export class Formatter {
    * Create a `TickContext` for each tick in `voices`. Also calculate the
    * total number of ticks in voices.
    */
-  createTickContexts(voices: Voice[]): AlignmentContexts<TickContext> {
-    const fn: addToContextFn<TickContext> = (tickable: Tickable, context: TickContext, voiceIndex: number) =>
-      context.addTickable(tickable, voiceIndex);
-    const contexts = createContexts(voices, (tick?: { tickID: number }) => new TickContext(tick), fn);
-    this.tickContexts = contexts;
-    const contextArray = this.tickContexts.array;
+  createTickContexts(voices: Voice[]): AlignmentTickContexts {
+    if (voices.length === 0) {
+      // We need to short-circuit this since at present, Formatter.getResolutionMultiplier
+      // throws an error on no voices.
+      return {
+        map: {},
+        array: [],
+        list: [],
+        resolutionMultiplier: 0,
+      } as AlignmentTickContexts;
+    }
 
-    contextArray.forEach((context) => {
+    // Initialize tick maps.
+    const tickToContextMap: Record<number, TickContext> = {};
+    const tickList: number[] = [];
+    const tickContexts: TickContext[] = [];
+    const resolutionMultiplier = Formatter.getResolutionMultiplier(voices);
+    // For each voice, extract notes and create a context for every
+    // new tick that hasn't been seen before.
+    voices.forEach((voice: Voice, voiceIndex: number): void => {
+      // Use resolution multiplier as denominator so that no additional expansion
+      // of fractional tick values is needed.
+      const ticksUsed = new Fraction(0, resolutionMultiplier);
+
+      voice.getTickables().forEach((tickable: Tickable): void => {
+        const integerTicks: number = ticksUsed.numerator;
+
+        // If we have no tick context for this tick, create one.
+        if (!tickToContextMap[integerTicks]) {
+          const newContext = new TickContext({ tickID: integerTicks });
+          tickContexts.push(newContext);
+          tickToContextMap[integerTicks] = newContext;
+          // Maintain a list of unique integerTicks.
+          tickList.push(integerTicks);
+        }
+
+        // Add this tickable to the TickContext.
+        const tickContext: TickContext = tickToContextMap[integerTicks];
+        tickContext.addTickable(tickable, voiceIndex);
+        ticksUsed.add(tickable.getTicks());
+      });
+    });
+
+    const contexts: AlignmentTickContexts = {
+      map: tickToContextMap,
+      array: tickContexts,
+      list: tickList.sort((a, b) => a - b),
+      resolutionMultiplier,
+    };
+
+    this.tickContexts = contexts;
+    // Give each TickContext a link to the array of all TickContexts
+    // for moving forward and backwards.
+    const contextArray: TickContext[] = this.tickContexts.array;
+
+    contextArray.forEach((context: TickContext): void => {
       context.tContexts = contextArray;
     });
     return contexts;
   }
 
   /**
-   * Get the AlignmentContexts of TickContexts that were created by createTickContexts.
+   * Get the AlignmentTickContexts of TickContexts that were created by createTickContexts.
    * Returns undefined if createTickContexts has not yet been run.
    */
-  getTickContexts(): AlignmentContexts<TickContext> | undefined {
+  getTickContexts(): AlignmentTickContexts | undefined {
     return this.tickContexts;
   }
 
@@ -650,7 +651,7 @@ export class Formatter {
    */
   preFormat(justifyWidth = 0, renderingContext?: RenderContext, voicesParam?: Voice[], stave?: Stave): number {
     // Initialize context maps.
-    const contexts = this.tickContexts;
+    const contexts: AlignmentTickContexts = this.tickContexts;
     if (!contexts) {
       throw new RuntimeError('NoTickContexts', 'preFormat requires TickContexts');
     }
@@ -663,7 +664,7 @@ export class Formatter {
     // If voices and a stave were provided, set the Stave for each voice
     // and preFormat to apply Y values to the notes;
     if (voicesParam && stave) {
-      voicesParam.forEach((voice) => voice.setStave(stave).preFormat());
+      voicesParam.forEach((voice: Voice): Voice => voice.setStave(stave).preFormat());
     }
 
     // Now distribute the ticks to each tick context, and assign them their
@@ -1028,13 +1029,14 @@ export class Formatter {
    * This is the top-level call for all formatting logic completed
    * after `x` *and* `y` values have been computed for the notes
    * in the voices.
+   * Calls postFormat on each ModifierContext and TickContext.
    */
   postFormat(): this {
     this.modifierContexts.forEach((modifierContexts) => {
       modifierContexts.array.forEach((mc) => mc.postFormat());
     });
 
-    this.tickContexts.list.forEach((tick) => {
+    this.tickContexts.list.forEach((tick: number): void => {
       this.tickContexts.map[tick].postFormat();
     });
 
