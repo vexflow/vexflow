@@ -86,6 +86,7 @@ export class Metrics {
 
 // eslint-disable-next-line
 export const MetricsDefaults: Record<string, any> = {
+  pointerRect: false,
   fontFamily: 'Bravura,Academico',
   fontSize: 30,
   fontScale: 1.0,
@@ -183,6 +184,10 @@ export const MetricsDefaults: Record<string, any> = {
     fontSize: 10,
   },
 
+  StaveNote: {
+    pointerRect: true,
+  },
+
   StaveSection: {
     fontSize: 10,
     fontWeight: 'bold',
@@ -267,6 +272,7 @@ export const MetricsDefaults: Record<string, any> = {
   },
 
   Tuplet: {
+    pointerRect: true,
     yOffset: 0,
     textYOffset: 2,
   },

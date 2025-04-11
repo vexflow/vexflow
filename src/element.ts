@@ -113,6 +113,7 @@ export class Element {
 
   private context?: RenderContext;
   protected attrs: ElementAttributes;
+  protected pointerRect: boolean;
 
   protected rendered: boolean;
   protected style: ElementStyle = {};
@@ -155,6 +156,7 @@ export class Element {
     this._fontInfo = Metrics.getFontInfo(this.attrs.type);
     this.style = Metrics.getStyle(this.attrs.type);
     this.fontScale = Metrics.get(`${this.attrs.type}.fontScale`);
+    this.pointerRect = Metrics.get(`${this.attrs.type}.pointerRect`);
 
     // If a default registry exist, then register with it right away.
     Registry.getDefaultRegistry()?.register(this);
@@ -349,8 +351,10 @@ export class Element {
 
   /** Draw pointer rect. This allows mouse interaction with the element */
   drawPointerRect() {
-    const bb = this.getBoundingBox();
-    this.context?.pointerRect(bb.getX(), bb.getY(), bb.getW(), bb.getH());
+    if (this.pointerRect) {
+      const bb = this.getBoundingBox();
+      this.context?.pointerRect(bb.getX(), bb.getY(), bb.getW(), bb.getH());  
+    }
   }
 
   /** Set the context to an SVGContext or CanvasContext object */
