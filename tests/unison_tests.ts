@@ -32,26 +32,26 @@ const UnisonTests = {
 
 function simple(options: TestOptions): void {
   VexFlow.UNISON = options.params.unison;
-  const vf = VexFlowTests.makeFactory(options, 500, 200);
-  const score = vf.EasyScore();
+  const factory = VexFlowTests.makeFactory(options, 500, 200);
+  const score = factory.EasyScore();
 
-  const system = vf.System({ y: 40, x: 10, width: 400 });
+  const system = factory.System({ y: 40, x: 10, width: 400 });
   system.addStave({
     voices: [score.voice(score.notes(options.params.voice1)), score.voice(score.notes(options.params.voice2))],
   });
 
   system.getStaves()[0].setClef('treble');
   system.getStaves()[0].setTimeSignature('4/4');
-  vf.draw();
+  factory.draw();
   options.assert.expect(0);
 }
 
 function style(options: TestOptions): void {
   VexFlow.UNISON = options.params.unison;
-  const vf = VexFlowTests.makeFactory(options, 500, 200);
-  const score = vf.EasyScore();
+  const factory = VexFlowTests.makeFactory(options, 500, 200);
+  const score = factory.EasyScore();
 
-  const system = vf.System({ y: 40, x: 10, width: 400 });
+  const system = factory.System({ y: 40, x: 10, width: 400 });
   const notes1 = score.notes('e4/q, e4/q, e4/h');
   const notes2 = score.notes('e4/8, e4/8, e4/q, e4/h');
   notes1[2].setStyle({ fillStyle: 'blue', strokeStyle: 'blue' });
@@ -62,26 +62,26 @@ function style(options: TestOptions): void {
 
   system.getStaves()[0].setClef('treble');
   system.getStaves()[0].setTimeSignature('4/4');
-  vf.draw();
+  factory.draw();
   options.assert.expect(0);
 }
 
 function breve(options: TestOptions): void {
   VexFlow.UNISON = options.params.unison;
-  const vf = VexFlowTests.makeFactory(options, 500, 200);
-  const score = vf.EasyScore();
+  const factory = VexFlowTests.makeFactory(options, 500, 200);
+  const score = factory.EasyScore();
 
-  const system = vf.System({ y: 40, x: 10, width: 400 });
+  const system = factory.System({ y: 40, x: 10, width: 400 });
   system.addStave({
     voices: [
-      score.voice([vf.StaveNote({ keys: ['e/4'], duration: '1/2' })], { time: '8/4' }),
+      score.voice([factory.StaveNote({ keys: ['e/4'], duration: '1/2' })], { time: '8/4' }),
       score.voice(score.notes('e4/1, e4/1'), { time: '8/4' }),
     ],
   });
 
   system.getStaves()[0].setClef('treble');
   system.getStaves()[0].setTimeSignature('8/4');
-  vf.draw();
+  factory.draw();
   options.assert.expect(0);
 }
 

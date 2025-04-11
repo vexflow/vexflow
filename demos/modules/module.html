@@ -41,9 +41,7 @@
       document.querySelector('#info').innerText = `${VERSION} / ${ID} / ${DATE}`;
 
       function showScore() {
-        const { Factory } = VexFlow;
-
-        const factory = new Factory({
+        const factory = new VexFlow.Factory({
           renderer: { elementId: 'output', width: 500, height: 200 },
         });
 
