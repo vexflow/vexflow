@@ -347,6 +347,12 @@ export class Element {
     return this.context;
   }
 
+  /** Draw pointer rect. This allows mouse interaction with the element */
+  drawPointerRect() {
+    const bb = this.getBoundingBox();
+    this.context?.pointerRect(bb.getX(), bb.getY(), bb.getW(), bb.getH());
+  }
+
   /** Set the context to an SVGContext or CanvasContext object */
   setContext(context?: RenderContext): this {
     this.context = context;

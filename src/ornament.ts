@@ -294,6 +294,7 @@ export class Ornament extends Modifier {
         glyphY + this.yShift - this.accidentalUpper.getTextMetrics().actualBoundingBoxDescent
       );
     }
+    this.drawPointerRect();
     ctx.closeGroup();
   }
 }

@@ -703,6 +703,7 @@ export class Stave extends Element {
       }
     }
 
+    this.drawPointerRect();
     ctx.closeGroup();
 
     // Draw the modifiers (bar lines, coda, segno, repeat brackets, etc.)

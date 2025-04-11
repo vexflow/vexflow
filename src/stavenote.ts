@@ -1210,8 +1210,7 @@ export class StaveNote extends StemmableNote {
     if (shouldRenderStem) this.drawStem();
     this.drawNoteHeads();
     this.drawFlag();
-    const bb = this.getBoundingBox();
-    ctx.pointerRect(bb.getX(), bb.getY(), bb.getW(), bb.getH());
+    this.drawPointerRect();
     ctx.closeGroup();
     this.setRendered();
   }

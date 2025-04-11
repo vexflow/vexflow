@@ -438,6 +438,7 @@ export class TabNote extends StemmableNote {
 
     this.drawFlag();
     this.drawModifiers();
+    this.drawPointerRect();
     ctx.closeGroup();
   }
 }

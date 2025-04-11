@@ -157,6 +157,7 @@ export class Clef extends StaveModifier {
 
     this.y = stave.getYForLine(this.line);
     this.renderText(ctx, 0, 0);
+    this.drawPointerRect();
     ctx.closeGroup();
   }
 }

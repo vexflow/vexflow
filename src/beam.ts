@@ -994,6 +994,7 @@ export class Beam extends Element {
     ctx.openGroup('beam', this.getAttribute('id'));
     this.drawStems(ctx);
     this.drawBeamLines(ctx);
+    this.drawPointerRect();
     ctx.closeGroup();
   }
 }

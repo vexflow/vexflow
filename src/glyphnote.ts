@@ -62,6 +62,7 @@ export class GlyphNote extends Note {
     this.y = stave.getYForLine(this.options.line);
     this.renderText(ctx, 0, 0);
     this.drawModifiers();
+    this.drawPointerRect();
     ctx.closeGroup();
   }
 }

@@ -283,6 +283,7 @@ export class Annotation extends Modifier {
     this.x = x;
     this.y = y;
     this.renderText(ctx, 0, 0);
+    this.drawPointerRect();
     ctx.closeGroup();
   }
 }

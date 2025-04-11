@@ -338,9 +338,7 @@ export class Tuplet extends Element {
       yPos + this.textElement.getHeight() / 2 + (location === Tuplet.LOCATION_TOP ? -1 : 1) * textYOffset
     );
 
-    // Set up an interactive bounding box and finalize the tuplet rendering
-    const bb = this.getBoundingBox();
-    ctx.pointerRect(bb.getX(), bb.getY(), bb.getW(), bb.getH());
+    this.drawPointerRect();
     ctx.closeGroup();
     this.setRendered();
   }
