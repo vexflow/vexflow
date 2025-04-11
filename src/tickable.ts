@@ -229,8 +229,8 @@ export abstract class Tickable extends Element {
     if (tuplet) {
       try {
         this.removeTuplet(tuplet);
-      } catch (_e) {
-        // do nothing.
+      } catch {
+        // do nothing -- resetTuplet silent failed if tuplet missing.
       }
     } else {
       this.clearTuplets();
