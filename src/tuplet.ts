@@ -135,14 +135,16 @@ export class Tuplet extends Element {
   attach(): void {
     for (let i = 0; i < this.notes.length; i++) {
       const note = this.notes[i];
-      note.setTuplet(this);
+      if (!note.getTupletStack().includes(this)) {
+        note.addTuplet(this);
+      }
     }
   }
 
   detach(): void {
     for (let i = 0; i < this.notes.length; i++) {
       const note = this.notes[i];
-      note.resetTuplet(this);
+      note.removeTuplet(this);
     }
   }
 
