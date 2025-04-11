@@ -179,7 +179,7 @@ export abstract class Tickable extends Element {
 
   /** Get the most newly added Tuplet if any. */
   getTuplet(): Tuplet | undefined {
-    return this.tupletStack.length ? this.tupletStack[this.tupletStack.length - 1] : undefined;
+    return this.tupletStack.at(-1);
   }
 
   /** Return a list of Tuplets. */

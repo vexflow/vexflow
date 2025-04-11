@@ -263,7 +263,7 @@ export class Formatter {
    * @param autoBeam automatically generate beams.
    * @param params a FormatParams configuration object:
    *    * `autoBeam` automatically generates beams for the notes. (overrides autoBeam setting above)
-   *    * `alignRests` aligns rests with nearby notes. (default False)
+   *    * `alignRests` aligns rests with nearby notes. (default false)
    */
   static FormatAndDrawTab(
     ctx: RenderContext,
