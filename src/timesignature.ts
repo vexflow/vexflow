@@ -219,8 +219,11 @@ export class TimeSignature extends StaveModifier {
     if (this.isNumeric) {
       // render top text
       let startX = x + this.topStartX;
-      if (this.botText.getText().length > 0) this.topRenderY = stave.getYForLine(this.topLine - this.lineShift);
-      else this.topRenderY = (stave.getYForLine(this.topLine) + stave.getYForLine(this.bottomLine)) / 2;
+      if (this.botText.getText().length > 0) {
+        this.topRenderY = stave.getYForLine(this.topLine - this.lineShift);
+      } else {
+        this.topRenderY = (stave.getYForLine(this.topLine) + stave.getYForLine(this.bottomLine)) / 2;
+      }
       this.topText.renderText(ctx, startX, this.topRenderY);
 
       // render bottom text
