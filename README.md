@@ -31,13 +31,12 @@ npm install vexflow
 Factory and EasyScore are VexFlow's high-level API for creating staves, voices, and notes. On a web page containing a `<div id="output"></div>`, the following code displays a score:
 
 ```javascript
-const { Factory } = VexFlow;
-const f = new Factory({
+const factory = new VexFlow.Factory({
   renderer: { elementId: 'output', width: 500, height: 200 },
 });
 
-const score = f.EasyScore();
-const system = f.System();
+const score = factory.EasyScore();
+const system = factory.System();
 
 system
   .addStave({
@@ -49,7 +48,7 @@ system
   .addClef('treble')
   .addTimeSignature('4/4');
 
-f.draw();
+factory.draw();
 ```
 
 [See it running here.](https://vexflow.github.io/vexflow-examples/getting-started)

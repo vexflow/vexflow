@@ -34,12 +34,12 @@
     <script>
       const code0 = `document.getElementById("trebleClef").innerText = VexFlow.Glyphs.gClef`;
 
-      const code1 = `const vf = new VexFlow.Factory({
+      const code1 = `const factory = new VexFlow.Factory({
         renderer: { elementId: 'output', width: 300, height: 180 },
       });
 
-      const score = vf.EasyScore();
-      const system = vf.System();
+      const score = factory.EasyScore();
+      const system = factory.System();
 
       system
         .addStave({
@@ -51,7 +51,7 @@
         .addClef('treble')
         .addTimeSignature('4/4');
 
-      vf.draw();`;
+      factory.draw();`;
 
       showCode(code0, code1);
     </script>

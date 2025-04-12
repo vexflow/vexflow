@@ -28,11 +28,10 @@
       });
 
       function showScore() {
-        const { Factory } = VexFlow;
         const { VERSION, ID, DATE, INFO } = VexFlow.BUILD;
         document.querySelector('#info').innerText = INFO + ' / ' + VERSION + ' / ' + ID + ' / ' + DATE;
 
-        const factory = new Factory({
+        const factory = new VexFlow.Factory({
           renderer: { elementId: 'output', width: 500, height: 200 },
         });
 

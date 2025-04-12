@@ -22,12 +22,12 @@
     <pre id="code"></pre>
     <div id="output"></div>
     <script>
-      const sampleCode = `const vf = new VexFlow.Factory({
+      const sampleCode = `const factory = new VexFlow.Factory({
   renderer: { elementId: 'output', width: 300, height: 180 },
 });
 
-const score = vf.EasyScore();
-const system = vf.System();
+const score = factory.EasyScore();
+const system = factory.System();
 
 system
   .addStave({
@@ -39,7 +39,7 @@ system
   .addClef('treble')
   .addTimeSignature('4/4');
 
-vf.draw();`;
+factory.draw();`;
       document.getElementById('code').innerText = sampleCode;
 
       function copyCode() {

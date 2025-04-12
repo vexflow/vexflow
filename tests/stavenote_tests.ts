@@ -992,10 +992,10 @@ function dotsAndBeamsDown(options: TestOptions, contextBuilder: ContextBuilder):
 }
 
 function noteHeadsSimple(options: TestOptions): void {
-  const vf = VexFlowTests.makeFactory(options, 800, 250);
-  const score = vf.EasyScore();
+  const factory = VexFlowTests.makeFactory(options, 800, 250);
+  const score = factory.EasyScore();
 
-  const system1 = vf.System({ y: 100, x: 50, width: 200 });
+  const system1 = factory.System({ y: 100, x: 50, width: 200 });
   system1
     .addStave({
       voices: [
@@ -1006,17 +1006,17 @@ function noteHeadsSimple(options: TestOptions): void {
     .addClef('treble')
     .addTimeSignature('4/4');
 
-  const system2 = vf.System({ y: 100, x: 250, width: 150 });
+  const system2 = factory.System({ y: 100, x: 250, width: 150 });
   system2.addStave({
     voices: [score.voice(score.notes('b4/h, b4/h/r')), score.voice(score.notes('b4/w'))],
   });
 
-  const system3 = vf.System({ y: 100, x: 400, width: 150 });
+  const system3 = factory.System({ y: 100, x: 400, width: 150 });
   system3.addStave({
     voices: [score.voice(score.notes('d5/h, d5/h/r')), score.voice(score.notes('e4/w'))],
   });
 
-  const system4 = vf.System({ y: 100, x: 550, width: 150 });
+  const system4 = factory.System({ y: 100, x: 550, width: 150 });
   system4.addStave({
     voices: [
       score.voice(score.notes('e4/q, e4/q/r, e4/h/r')),
@@ -1024,16 +1024,16 @@ function noteHeadsSimple(options: TestOptions): void {
     ],
   });
 
-  vf.draw();
+  factory.draw();
   options.assert.expect(0);
 }
 
 function noPadding(options: TestOptions): void {
-  const vf = VexFlowTests.makeFactory(options, 800, 500);
-  const score = vf.EasyScore();
+  const factory = VexFlowTests.makeFactory(options, 800, 500);
+  const score = factory.EasyScore();
 
   function newStave(y: number, noPadding: boolean): void {
-    let system = vf.System({ y, x: 50, width: 200, noPadding });
+    let system = factory.System({ y, x: 50, width: 200, noPadding });
     system
       .addStave({
         voices: [
@@ -1044,17 +1044,17 @@ function noPadding(options: TestOptions): void {
       .addClef('treble')
       .addTimeSignature('4/4');
 
-    system = vf.System({ y, x: 250, width: 150, noPadding });
+    system = factory.System({ y, x: 250, width: 150, noPadding });
     system.addStave({
       voices: [score.voice(score.notes('b4/h, b4/h')), score.voice(score.notes('b4/w'))],
     });
 
-    system = vf.System({ y, x: 400, width: 150, noPadding });
+    system = factory.System({ y, x: 400, width: 150, noPadding });
     system.addStave({
       voices: [score.voice(score.notes('d5/h, d5/h')), score.voice(score.notes('e4/w'))],
     });
 
-    system = vf.System({ y, x: 550, width: 150, noPadding });
+    system = factory.System({ y, x: 550, width: 150, noPadding });
     system.addStave({
       voices: [score.voice(score.notes('e4/q, e4/q, e4/h')), score.voice(score.notes('e4/8, e4/8, e4/q, e4/h'))],
     });
@@ -1062,15 +1062,15 @@ function noPadding(options: TestOptions): void {
 
   newStave(100, true);
   newStave(200, false);
-  vf.draw();
+  factory.draw();
   options.assert.expect(0);
 }
 
 function noteHeadsHidden(options: TestOptions): void {
-  const vf = VexFlowTests.makeFactory(options, 800, 250);
-  const score = vf.EasyScore();
+  const factory = VexFlowTests.makeFactory(options, 800, 250);
+  const score = factory.EasyScore();
 
-  const system1 = vf.System({ y: 100, x: 50, width: 200 });
+  const system1 = factory.System({ y: 100, x: 50, width: 200 });
   const notes1 = score.notes('g4/w');
   notes1[0].renderOptions.draw = false;
   system1
@@ -1083,19 +1083,19 @@ function noteHeadsHidden(options: TestOptions): void {
     .addClef('treble')
     .addTimeSignature('4/4');
 
-  const system2 = vf.System({ y: 100, x: 250, width: 150 });
+  const system2 = factory.System({ y: 100, x: 250, width: 150 });
   const notes2 = score.notes('b4/w');
   notes2[0].renderOptions.draw = false;
   system2.addStave({
     voices: [score.voice(score.notes('b4/h, b4/h/r')), score.voice(notes2)],
   });
 
-  const system3 = vf.System({ y: 100, x: 400, width: 150 });
+  const system3 = factory.System({ y: 100, x: 400, width: 150 });
   system3.addStave({
     voices: [score.voice(score.notes('d5/h, d5/h/r')), score.voice(score.notes('e4/w'))],
   });
 
-  const system4 = vf.System({ y: 100, x: 550, width: 150 });
+  const system4 = factory.System({ y: 100, x: 550, width: 150 });
   const notes4 = score.notes('e4/q, e4/q/r, e4/h/r');
   notes4[0].renderOptions.draw = false;
   notes4[2].renderOptions.draw = false;
@@ -1103,66 +1103,66 @@ function noteHeadsHidden(options: TestOptions): void {
     voices: [score.voice(notes4), score.voice(score.notes('e4/8, e4/8/r, e4/q/r, e4/h/r'))],
   });
 
-  vf.draw();
+  factory.draw();
   options.assert.expect(0);
 }
 
 function centerAlignedRest(options: TestOptions): void {
-  const f = VexFlowTests.makeFactory(options, 400, 160);
-  const stave = f.Stave({ x: 10, y: 10, width: 350 }).addClef('treble').addTimeSignature('4/4');
-  const note = f.StaveNote({ keys: ['b/4'], duration: '1r', alignCenter: true });
-  const voice = f.Voice().setStrict(false).addTickables([note]);
-  f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
-  f.draw();
+  const factory = VexFlowTests.makeFactory(options, 400, 160);
+  const stave = factory.Stave({ x: 10, y: 10, width: 350 }).addClef('treble').addTimeSignature('4/4');
+  const note = factory.StaveNote({ keys: ['b/4'], duration: '1r', alignCenter: true });
+  const voice = factory.Voice().setStrict(false).addTickables([note]);
+  factory.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+  factory.draw();
   options.assert.ok(true);
 }
 
 function centerAlignedRestFermata(options: TestOptions): void {
-  const f = VexFlowTests.makeFactory(options, 400, 160);
+  const factory = VexFlowTests.makeFactory(options, 400, 160);
 
-  const stave = f.Stave({ x: 10, y: 10, width: 350 }).addClef('treble').addTimeSignature('4/4');
+  const stave = factory.Stave({ x: 10, y: 10, width: 350 }).addClef('treble').addTimeSignature('4/4');
 
-  const note = f
+  const note = factory
     .StaveNote({ keys: ['b/4'], duration: '1r', alignCenter: true })
     .addModifier(new Articulation('a@a').setPosition(3), 0);
 
-  const voice = f.Voice().setStrict(false).addTickables([note]);
+  const voice = factory.Voice().setStrict(false).addTickables([note]);
 
-  f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+  factory.Formatter().joinVoices([voice]).formatToStave([voice], stave);
 
-  f.draw();
+  factory.draw();
 
   options.assert.ok(true);
 }
 
 function centerAlignedRestAnnotation(options: TestOptions): void {
-  const f = VexFlowTests.makeFactory(options, 400, 160);
+  const factory = VexFlowTests.makeFactory(options, 400, 160);
 
-  const stave = f.Stave({ x: 10, y: 10, width: 350 }).addClef('treble').addTimeSignature('4/4');
+  const stave = factory.Stave({ x: 10, y: 10, width: 350 }).addClef('treble').addTimeSignature('4/4');
 
-  const note = f
+  const note = factory
     .StaveNote({ keys: ['b/4'], duration: '1r', alignCenter: true })
     .addModifier(new Annotation('Whole measure rest').setVerticalJustification(AnnotationVerticalJustify.TOP), 0);
 
-  const voice = f.Voice().setStrict(false).addTickables([note]);
+  const voice = factory.Voice().setStrict(false).addTickables([note]);
 
-  f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+  factory.Formatter().joinVoices([voice]).formatToStave([voice], stave);
 
-  f.draw();
+  factory.draw();
 
   options.assert.ok(true);
 }
 
 function centerAlignedNoteMultiModifiers(options: TestOptions): void {
-  const f = VexFlowTests.makeFactory(options, 400, 160);
+  const factory = VexFlowTests.makeFactory(options, 400, 160);
 
-  const stave = f.Stave({ x: 10, y: 10, width: 350 }).addClef('treble').addTimeSignature('4/4');
+  const stave = factory.Stave({ x: 10, y: 10, width: 350 }).addClef('treble').addTimeSignature('4/4');
 
   function newFinger(num: string, pos: ModifierPosition) {
     return new FretHandFinger(num).setPosition(pos);
   }
 
-  const note = f
+  const note = factory
     .StaveNote({ keys: ['c/4', 'e/4', 'g/4'], duration: '4', alignCenter: true })
     .addModifier(new Annotation('Test').setPosition(3), 0)
     .addStroke(0, new Stroke(2))
@@ -1173,25 +1173,25 @@ function centerAlignedNoteMultiModifiers(options: TestOptions): void {
     .addModifier(new StringNumber('4').setPosition(Modifier.Position.BELOW), 2);
   Dot.buildAndAttach([note], { all: true });
 
-  const voice = f.Voice().setStrict(false).addTickables([note]);
+  const voice = factory.Voice().setStrict(false).addTickables([note]);
 
-  f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+  factory.Formatter().joinVoices([voice]).formatToStave([voice], stave);
 
-  f.draw();
+  factory.draw();
 
   options.assert.ok(true);
 }
 
 function centerAlignedMultiVoice(options: TestOptions): void {
-  const f = VexFlowTests.makeFactory(options, 400, 160);
+  const factory = VexFlowTests.makeFactory(options, 400, 160);
 
-  const stave = f.Stave({ x: 10, y: 10, width: 350 }).addClef('treble').addTimeSignature('3/8');
+  const stave = factory.Stave({ x: 10, y: 10, width: 350 }).addClef('treble').addTimeSignature('3/8');
 
   // Set a custom duration of 3 / 8.
   const customDuration = new Fraction(3, 8);
   // TODO: Should the whole rest draw a ledger line that is visible to the left/right of the rest?
   const notes0 = [
-    f.StaveNote({
+    factory.StaveNote({
       keys: ['c/4'],
       duration: '1r',
       alignCenter: true,
@@ -1199,23 +1199,23 @@ function centerAlignedMultiVoice(options: TestOptions): void {
     }),
   ];
 
-  const createStaveNote = (struct: StaveNoteStruct) => f.StaveNote(struct);
+  const createStaveNote = (struct: StaveNoteStruct) => factory.StaveNote(struct);
   const notes1 = [
     { keys: ['b/4'], duration: '8' },
     { keys: ['b/4'], duration: '8' },
     { keys: ['b/4'], duration: '8' },
   ].map(createStaveNote);
 
-  notes1[1].addModifier(f.Accidental({ type: '#' }), 0);
+  notes1[1].addModifier(factory.Accidental({ type: '#' }), 0);
 
-  f.Beam({ notes: notes1 });
+  factory.Beam({ notes: notes1 });
 
-  const voice0 = f.Voice({ time: '3/8' }).setStrict(false).addTickables(notes0);
-  const voice1 = f.Voice({ time: '3/8' }).setStrict(false).addTickables(notes1);
+  const voice0 = factory.Voice({ time: '3/8' }).setStrict(false).addTickables(notes0);
+  const voice1 = factory.Voice({ time: '3/8' }).setStrict(false).addTickables(notes1);
 
-  f.Formatter().joinVoices([voice0, voice1]).formatToStave([voice0, voice1], stave);
+  factory.Formatter().joinVoices([voice0, voice1]).formatToStave([voice0, voice1], stave);
 
-  f.draw();
+  factory.draw();
 
   options.assert.ok(true);
 }
