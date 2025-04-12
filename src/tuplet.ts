@@ -377,9 +377,7 @@ export class Tuplet extends Element {
       currentX += noteWidth;
     }
 
-    // Set up an interactive bounding box and finalize the tuplet rendering
-    const bb = this.getBoundingBox();
-    ctx.pointerRect(bb.getX(), bb.getY(), bb.getW(), bb.getH());
+    this.drawPointerRect();
     ctx.closeGroup();
     this.setRendered();
   }

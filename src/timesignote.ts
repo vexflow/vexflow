@@ -42,6 +42,7 @@ export class TimeSigNote extends Note {
 
     ctx.openGroup('timesignote', this.getAttribute('id'));
     this.timeSig.drawAt(ctx, stave, this.getAbsoluteX());
+    this.drawPointerRect();
     ctx.closeGroup();
   }
 }

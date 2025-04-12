@@ -157,6 +157,7 @@ export class NoteHead extends Note {
     this.x = this.getAbsoluteX();
     this.renderText(ctx, 0, 0);
     (this.parent as StaveNote)?.drawModifiers(this);
+    this.drawPointerRect();
     ctx.closeGroup();
   }
 }
