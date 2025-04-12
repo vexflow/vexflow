@@ -299,6 +299,7 @@ export class KeySignature extends StaveModifier {
       const glyph = this.children[i];
       glyph.renderText(ctx, this.x, 0);
     }
+    this.drawPointerRect();
     ctx.closeGroup();
   }
 }

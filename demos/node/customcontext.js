@@ -3,18 +3,18 @@
 // Run:
 //   node customcontext.js
 
-const Vex = require('vexflow');
+const VexFlow = require('vexflow');
 const { createCanvas } = require('canvas');
 
-const VF = VexFlow;
+const { Element, RenderContext, Renderer, Stave } = VexFlow;
 
 // In VexFlow 4, this demo worked fine without the line of code below.
 // VexFlow 5 requires a hidden canvas for measuring font glyphs.
 // Call VexFlow.Element.setTextMeasurementCanvas(...) with an object that conforms to the Canvas API.
 // Here, we use node-canvas.
-VF.Element.setTextMeasurementCanvas(createCanvas(300, 150));
+Element.setTextMeasurementCanvas(createCanvas(300, 150));
 
-class CustomContext extends VF.RenderContext {
+class CustomContext extends RenderContext {
   constructor() {
     super();
     this.fillStyle = '';
@@ -187,11 +187,11 @@ class CustomContext extends VF.RenderContext {
   }
 }
 
-const renderer = new VF.Renderer(new CustomContext());
+const renderer = new Renderer(new CustomContext());
 const context = renderer.getContext();
 context.setFont('Arial', 10).setBackgroundFillStyle('#eed');
 
-const stave = new VF.Stave(10, 40, 400);
+const stave = new Stave(10, 40, 400);
 stave.addClef('treble');
 stave.addTimeSignature('4/4');
 stave.setContext(context).drawWithStyle();

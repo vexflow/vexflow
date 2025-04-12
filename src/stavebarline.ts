@@ -165,6 +165,7 @@ export class Barline extends StaveModifier {
         // Default is NONE, so nothing to draw
         break;
     }
+    this.drawPointerRect();
     ctx.closeGroup();
   }
 

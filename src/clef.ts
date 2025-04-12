@@ -157,9 +157,7 @@ export class Clef extends StaveModifier {
 
     this.y = stave.getYForLine(this.line);
     this.renderText(ctx, 0, 0);
-    const bb = this.getBoundingBox();
-    ctx.pointerRect(bb.getX(), bb.getY(), bb.getW(), bb.getH());
-
+    this.drawPointerRect();
     ctx.closeGroup();
   }
 }

@@ -54,3 +54,5 @@ const canvas = dom.window.document.querySelector('canvas');
 const imageData = canvas.toDataURL().split(';base64,').pop();
 const imageBuffer = Buffer.from(imageData, 'base64');
 fs.writeFileSync('output/font-load-2.png', imageBuffer, { encoding: 'base64' });
+
+console.log('Saved to output/font-load-2.png');

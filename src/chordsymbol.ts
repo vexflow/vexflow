@@ -454,6 +454,7 @@ export class ChordSymbol extends Modifier {
       symbol.setY(y);
       symbol.renderText(ctx, 0, 0);
     });
+    this.drawPointerRect();
     ctx.closeGroup();
   }
 

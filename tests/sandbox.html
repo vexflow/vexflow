@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sandbox</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      const iframeURL = 'https://vexflow.github.io/vexflow-sandbox/?dev=1&parent=' + window.location.origin;
+      const iframe = document.createElement('iframe');
+      iframe.tabIndex = 0;
+      iframe.src = iframeURL;
+      document.body.appendChild(iframe);
+      setTimeout(() => {
+        iframe.focus();
+      }, 100);
+    </script>
+  </body>
+</html>

@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <!-- 
+    <!--
       Summary: Preload fonts from the jsdelivr CDN, and render five staves (one in each music font).
       Run: Open this html file in your web browser.
 
@@ -34,7 +34,7 @@
     <p>View the source code for more information.</p>
     <!--
         To view this demo, open all.html in your web browser.
-        The standard VexFlow library (build/cjs/vexflow.js) is bundled with ZERO music fonts.
+        The slim VexFlow core library (build/cjs/vexflow-core.js) is bundled with ZERO music fonts.
         You can either load SMuFL fonts from your own server, or from the VexFlow fonts CDN (jsdelivr).
         The build/cjs/*.js files are compatible with <script> tags.
         The build/esm/*.js files are compatible with ESM import statements.
@@ -47,6 +47,8 @@
       console.log('VexFlow BUILD ' + JSON.stringify(VF.BUILD));
 
       // Load the specified fonts from the jsdelivr CDN.
+      // This line triggers network requests from URLs:
+      // https://cdn.jsdelivr.net/npm/@vexflow-fonts/*
       await VF.loadFonts('Bravura', 'Gonville', 'Petaluma', 'Leland', 'Sebastian');
 
       function drawScoreInDiv(elementId) {

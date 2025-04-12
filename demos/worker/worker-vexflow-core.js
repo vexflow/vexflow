@@ -41,5 +41,5 @@ onmessage = function (e) {
   }
 
   // We need to make sure the SMuFL fonts are loaded before VexFlow does any drawing.
-  Vex.Flow.loadFonts('Bravura', 'Petaluma', 'Gonville', 'Leland').then(draw);
+  VexFlow.loadFonts('Bravura', 'Petaluma', 'Gonville', 'Leland').then(draw);
 };

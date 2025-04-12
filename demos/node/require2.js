@@ -2,23 +2,27 @@
 // Run:
 //   node require2.js
 
-const { VexFlow, Stave, StaveNote } = require('vexflow');
-const Vex2 = require('vexflow');
+const VexFlow = require('vexflow');
+const { Stave, StaveNote } = require('vexflow');
 
-const Vex3 = require('../../build/cjs/vexflow-debug.js');
-const Vex4 = require('../../build/cjs/vexflow-debug-with-tests.js');
+const VF2 = require('../../build/cjs/vexflow-debug.js');
+const VF3 = require('../../build/cjs/vexflow-debug-with-tests.js');
 
 // This only includes the Bravura & Academico fonts.
-const Vex5 = require('vexflow/bravura');
+const VF4 = require('vexflow/bravura');
 
-console.log(Vex2.StaveNote);
-console.log(Vex3.StaveNote);
-console.log(Vex4.StaveNote);
-console.log(Vex5.StaveNote);
+console.log(VF2.StaveNote);
+console.log(VF3.StaveNote);
+console.log(VF4.StaveNote);
+
+console.log(VexFlow.BUILD);
+console.log(VF2.BUILD);
+console.log(VF3.BUILD);
+console.log(VF4.BUILD);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // The following statements return true:
-console.log(StaveNote === VexFlow.StaveNote);
-console.log(Vex2.VexFlow === VexFlow);
-console.log(Vex2.StaveNote === StaveNote);
+console.log(VexFlow.StaveNote === StaveNote);
 console.log(VexFlow.Stave === Stave);
+console.log(VexFlow.BUILD.VERSION === VF2.BUILD.VERSION);
+console.log(VexFlow.BUILD.ID === VF2.BUILD.ID);

@@ -26,12 +26,12 @@
       VexFlow.setFonts('Petaluma', 'Petaluma Script');
       console.log(VexFlow.getFonts());
 
-      const vf = new VexFlow.Factory({
+      const factory = new VexFlow.Factory({
         renderer: { elementId: 'output', width: 300, height: 180 },
       });
 
-      const score = vf.EasyScore();
-      const system = vf.System();
+      const score = factory.EasyScore();
+      const system = factory.System();
 
       system
         .addStave({
@@ -43,7 +43,7 @@
         .addClef('treble')
         .addTimeSignature('4/4');
 
-      vf.draw();
+      factory.draw();
     </script>
   </body>
 </html>

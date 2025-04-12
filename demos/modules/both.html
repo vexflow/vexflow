@@ -2,6 +2,10 @@
 <html>
   <head>
     <meta charset="UTF-8" />
+    <!--
+      Summary: Load VexFlow in two ways...as an ES Module and as a CommonJS module.
+      Run: Navigate to http://localhost:8080/demos/modules/both.html
+    -->
   </head>
   <body>
     <p>Take a look at the source code. Output is logged to the developer console.</p>
@@ -11,8 +15,6 @@
       import { VexFlow, StaveNote } from '../../build/esm/entry/vexflow-debug.js';
       // import { VexFlow, StaveNote, ArticulationTests } from '../../build/esm/entry/vexflow-debug-with-tests.js';
       // import { VexFlow, StaveNote } from '../../build/esm/entry/vexflow-bravura.js';
-      // import { VexFlow, StaveNote } from '../../build/esm/entry/vexflow-gonville.js';
-      // import { VexFlow, StaveNote } from '../../build/esm/entry/vexflow-petaluma.js';
       // import { VexFlow, StaveNote } from '../../build/esm/entry/vexflow-core.js';
       console.log('ESM');
       console.log(VexFlow);

@@ -2,6 +2,9 @@
 
 QUICK START
 
+For information on building and or developing Vexflow see:
+https://github.com/vexflow/vexflow/wiki/Build
+
 grunt
   - Build the complete set of VexFlow libraries (with source-maps) for production and debug use.
     This is the 'default' grunt task.

@@ -209,8 +209,7 @@ export class TimeSignature extends StaveModifier {
     this.setRendered();
     ctx.openGroup('timesignature', this.getAttribute('id'));
     this.drawAt(ctx, stave, this.x);
-    const bb = this.getBoundingBox();
-    ctx.pointerRect(bb.getX(), bb.getY(), bb.getW(), bb.getH());
+    this.drawPointerRect();
     ctx.closeGroup();
   }
 

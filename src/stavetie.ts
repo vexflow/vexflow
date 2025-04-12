@@ -174,6 +174,7 @@ export class StaveTie extends Element {
       ctx.closePath();
       ctx.fill();
     }
+    this.drawPointerRect();
     ctx.closeGroup();
   }
 

@@ -30,6 +30,7 @@ export class Flag extends Element {
 
     L("Drawing flag '", this.text, "' at", this.x, this.y);
     this.renderText(ctx, 0, 0);
+    this.drawPointerRect();
     ctx.closeGroup();
   }
 }

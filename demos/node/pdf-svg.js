@@ -5,10 +5,11 @@
 // Status:
 //   BROKEN
 //   VexFlow 5 broke this demo because the paths are no longer draw into the SVG context.
-//   Instead of JSDOM, we'll probably need to use Puppeteer or Playwright (https://playwright.dev/docs/api/class-playwright).
+//   Instead of JSDOM, we'll need to use an environment that can load OTF fonts before rendering SVG text elements.
+//   See: Puppeteer (https://pptr.dev/) or Playwright (https://playwright.dev).
 
-const Vex = require('vexflow');
-// const Vex = require('vexflow/bravura');
+const VexFlow = require('vexflow');
+// const VexFlow = require('vexflow/bravura');
 
 const fs = require('fs');
 const { JSDOM } = require('jsdom');

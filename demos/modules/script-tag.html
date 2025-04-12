@@ -2,6 +2,10 @@
 <html>
   <head>
     <meta charset="UTF-8" />
+    <!--
+      Summary: Load VexFlow via a <script> tag.
+      Run: Open this file in a web browser.
+    -->
     <style>
       body {
         font-size: 16pt;
@@ -16,17 +20,18 @@
     <p>See also: <a href="module.html">ES Modules</a></p>
     <script src="../../build/cjs/vexflow-core.js"></script>
     <script>
+      // This is only needed if you are using vexflow-core.js.
+      // If you use vexflow.js, it will automatically load the bundled fonts.
       VexFlow.loadFonts('Bravura', 'Academico').then(() => {
         console.log('Fonts loaded!');
         showScore();
       });
 
       function showScore() {
-        const { Factory } = VexFlow;
         const { VERSION, ID, DATE, INFO } = VexFlow.BUILD;
         document.querySelector('#info').innerText = INFO + ' / ' + VERSION + ' / ' + ID + ' / ' + DATE;
 
-        const factory = new Factory({
+        const factory = new VexFlow.Factory({
           renderer: { elementId: 'output', width: 500, height: 200 },
         });
 
