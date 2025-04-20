@@ -4,6 +4,7 @@
 // This file implements the `Stroke` class which renders chord strokes
 // that can be arpeggiated, brushed, rasgueado, etc.
 
+import { BoundingBox } from './boundingbox';
 import { Element } from './element';
 import { Glyphs } from './glyphs';
 import { Metrics } from './metrics';
@@ -72,6 +73,7 @@ export class Stroke extends Modifier {
   public renderOptions: {
     fontScale: number;
   };
+  protected boundingBox = new BoundingBox(0, 0, 0, 0);
 
   constructor(type: number, options?: { allVoices: boolean }) {
     super();
@@ -161,6 +163,7 @@ export class Stroke extends Modifier {
     // Draw the stroke
     if (this.type === Stroke.Type.BRUSH_DOWN || this.type === Stroke.Type.BRUSH_UP) {
       ctx.fillRect(x + this.xShift, topY, 1, botY - topY);
+      this.boundingBox = new BoundingBox(x + this.xShift, topY, 1, botY - topY);
     } else {
       // Select the wiggle glyph depending on the arrow direction
       const lineGlyph = arrow === Glyphs.arrowheadBlackDown ? Glyphs.wiggleArpeggiatoDown : Glyphs.wiggleArpeggiatoUp;
@@ -180,11 +183,23 @@ export class Stroke extends Modifier {
         el.renderText(ctx, x + this.xShift, topY - el.getTextMetrics().actualBoundingBoxDescent + el.getHeight() / 2);
         ctx.closeRotation();
         textY = topY + el.getWidth() + 5;
+        this.boundingBox = new BoundingBox(
+          x + this.xShift - el.getHeight() / 2,
+          topY - el.getTextMetrics().actualBoundingBoxDescent + el.getHeight() / 2,
+          el.getHeight(),
+          el.getWidth()
+        );
       } else {
         ctx.openRotation(-90, x + this.xShift, botY);
         el.renderText(ctx, x + this.xShift, botY - el.getTextMetrics().actualBoundingBoxDescent + el.getHeight() / 2);
         ctx.closeRotation();
         textY = botY - el.getWidth() - 5;
+        this.boundingBox = new BoundingBox(
+          x + this.xShift - el.getHeight() / 2,
+          botY - el.getTextMetrics().actualBoundingBoxDescent + el.getHeight() / 2 - el.getWidth(),
+          el.getHeight(),
+          el.getWidth()
+        );
       }
     }
 
@@ -198,6 +213,9 @@ export class Stroke extends Modifier {
         x + this.xShift - el.getWidth() / 2,
         arrowY
       );
+      this.boundingBox.mergeWith(
+        new BoundingBox(x + this.xShift - el.getWidth() / 2, arrowY - el.getHeight(), el.getWidth(), el.getHeight())
+      );
     }
 
     // Draw the rasgueado "R"
@@ -209,6 +227,19 @@ export class Stroke extends Modifier {
         x + this.xShift - el.getWidth() / 2,
         textY + (this.type === Stroke.Type.RASGUEADO_DOWN ? el.getHeight() : 0)
       );
+      this.boundingBox.mergeWith(
+        new BoundingBox(
+          x + this.xShift - el.getWidth() / 2,
+          textY + (this.type === Stroke.Type.RASGUEADO_DOWN ? el.getHeight() : 0) - el.getHeight(),
+          el.getWidth(),
+          el.getHeight()
+        )
+      );
     }
+  }
+
+  /** Get the boundingBox. */
+  getBoundingBox(): BoundingBox {
+    return this.boundingBox;
   }
 }
