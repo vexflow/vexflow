@@ -59,7 +59,7 @@ export abstract class Tickable extends Element {
     // These properties represent the duration of
     // this tickable element.
     this.ticks = new Fraction(0, 1); // Fractional value of ticks
-    this.intrinsicTicks = 0; // Floating point value of ticks
+    this.intrinsicTicks = 0; // Integer value of ticks without tickMultiplier (tuplets)
     this.tickMultiplier = new Fraction(1, 1);
 
     this.modifiers = [];
@@ -177,59 +177,100 @@ export abstract class Tickable extends Element {
     this.voice = voice;
   }
 
-  /** Get the most newly added Tuplet if any. */
+  /** Get the Tuplet if any.
+   * If there are multiple Tuplets, the most recently added one is returned. */
   getTuplet(): Tuplet | undefined {
     return this.tupletStack.at(-1);
   }
 
-  /** Return a list of Tuplets. */
-  getTupletStack(): Tuplet[] {
-    return this.tupletStack;
+  /** Return a readonly array of Tuplets (might be empty). */
+  getTupletStack(): readonly Tuplet[] {
+    return this.tupletStack as readonly Tuplet[];
   }
 
   /**
+   * Remove the given tuplet; raises an Error if the tuplet is not in the TupletStack.
+   */
+  removeTuplet(tuplet: Tuplet): this {
+    const i = this.tupletStack.indexOf(tuplet);
+    if (i === -1) {
+      throw new RuntimeError('BadArguments', 'Tuplet is not found in this tickable');
+    }
+    this.tupletStack.splice(i, 1);
+    const noteCount = tuplet.getNoteCount();
+    const notesOccupied = tuplet.getNotesOccupied();
+
+    // Revert old multiplier by inverting numerator & denominator:
+    // to remove a 3:2 tuplet, multiply the previous 2/3 by 3/2 to get 1/1.
+    this.applyTickMultiplier(noteCount, notesOccupied);
+    return this;
+  }
+
+  /**
+   * Remove all tuplets from the tickable.
+   */
+  clearTuplets(): this {
+    if (!this.tupletStack.length) {
+      return this;
+    }
+    this.tupletStack = [];
+    this.tickMultiplier = new Fraction(1, 1);
+    this.ticks = new Fraction(this.intrinsicTicks, 1);
+    return this;
+  }
+
+  /**
+   * Deprecated, to be removed in v6.  Use `removeTuplet(tuplet)` or `clearTuplets()` instead.
    * Reset the specific Tuplet (if this is not provided, all tuplets are reset).
    * Remove any prior tuplets from the tick calculation and
    * reset the intrinsic tick value.
    */
   resetTuplet(tuplet?: Tuplet): this {
-    let noteCount;
-    let notesOccupied;
     if (tuplet) {
-      const i = this.tupletStack.indexOf(tuplet);
-      if (i !== -1) {
-        this.tupletStack.splice(i, 1);
-        noteCount = tuplet.getNoteCount();
-        notesOccupied = tuplet.getNotesOccupied();
-
-        // Revert old multiplier by inverting numerator & denom.:
-        this.applyTickMultiplier(noteCount, notesOccupied);
+      try {
+        this.removeTuplet(tuplet);
+      } catch {
+        // do nothing -- resetTuplet silent failed if tuplet missing.
       }
-      return this;
-    }
-
-    while (this.tupletStack.length) {
-      tuplet = this.tupletStack.pop() as Tuplet;
-      noteCount = tuplet.getNoteCount();
-      notesOccupied = tuplet.getNotesOccupied();
-
-      // Revert old multiplier by inverting numerator & denom.:
-      this.applyTickMultiplier(noteCount, notesOccupied);
+    } else {
+      this.clearTuplets();
     }
     return this;
   }
 
-  /** Attach to new tuplet. */
+  /** Set the tuplet to the given Tuplet.  If there are existing tuplets clears them first. */
   setTuplet(tuplet: Tuplet): this {
-    // setTuplet should be parallel to getTuplet.  Instead it acts as appendTuplet;
-    // TODO(msac) change!.
-    if (tuplet) {
-      this.tupletStack.push(tuplet);
+    if (this.tupletStack.length) {
+      this.clearTuplets();
+    }
+    return this.addTuplet(tuplet);
+  }
 
-      const noteCount = tuplet.getNoteCount();
-      const notesOccupied = tuplet.getNotesOccupied();
+  /** Add the given Tuplet to the tupletStack without clearing it first. */
+  addTuplet(tuplet: Tuplet): this {
+    this.tupletStack.push(tuplet);
 
-      this.applyTickMultiplier(notesOccupied, noteCount);
+    const noteCount = tuplet.getNoteCount();
+    const notesOccupied = tuplet.getNotesOccupied();
+
+    // apply the reciprocal of the tuplet.  3:2 multiplies by 2/3, etc.
+    this.applyTickMultiplier(notesOccupied, noteCount);
+    return this;
+  }
+
+  /**
+   * Sets all the tuplets on the tickable to the given tupletStack.  Note that
+   * a new array is created on the tickable, so manipulating the array that is
+   * passed in will not affect the tupletStack used by the tickable.
+   */
+  setTupletStack(tupletStack: Tuplet[]): this {
+    this.clearTuplets();
+    for (const tup of tupletStack) {
+      // TODO: this can be made more efficient by figuring out the composite
+      //     noteCount and notesOccupied individually and applying the tick multiplier
+      //     only at the end.  In practice, however, nested tuplets are used seldom enough
+      //     that the added complexity is not worth the difficulty.
+      this.addTuplet(tup);
     }
     return this;
   }
@@ -251,7 +292,6 @@ export abstract class Tickable extends Element {
 
   /**
    * Optional, if tickable has modifiers, associate a Modifier.
-   * @param mod the modifier
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   addModifier(modifier: Modifier, index: number = 0): this {
@@ -311,12 +351,12 @@ export abstract class Tickable extends Element {
     return this._postFormatted;
   }
 
-  /** Return the intrinsic ticks. */
+  /** Return the intrinsic ticks as an integer. */
   getIntrinsicTicks(): number {
     return this.intrinsicTicks;
   }
 
-  /** Set the intrinsic ticks. */
+  /** Set the intrinsic ticks as an integer. */
   setIntrinsicTicks(intrinsicTicks: number): void {
     this.intrinsicTicks = intrinsicTicks;
     this.ticks = this.tickMultiplier.clone().multiply(this.intrinsicTicks);
