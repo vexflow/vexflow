@@ -6,10 +6,10 @@
 import { VexFlow } from 'vexflow';
 import { Stave, StaveNote } from 'vexflow';
 
-import * as VF0 from 'vexflow'; // the entire module, which looks like { default: ... }. Same as Vex3 below.
-import { default as VF1 } from 'vexflow'; // extract the default export. Same as Vex0.VexFlow.
-import VF2 from 'vexflow'; // default export. Same as Vex1 above.
-const VF3 = await import('vexflow'); // dynamic import. The imported object is the same as Vex0 above.
+import * as VF0 from 'vexflow'; // the entire module, which looks like { default: ... }. Same as VF3 below.
+import { default as VF1 } from 'vexflow'; // extract the default export. Same as VF0.VexFlow.
+import VF2 from 'vexflow'; // default export. Same as VF1 above.
+const VF3 = await import('vexflow'); // dynamic import. The imported object is the same as VF0 above.
 
 import { StaveNote as StaveNoteAlias } from 'vexflow'; // provide an alias for the named import.
 const { Clef } = VF0;
