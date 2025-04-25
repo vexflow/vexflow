@@ -353,7 +353,7 @@ export class Element {
   drawPointerRect() {
     if (this.shouldDrawPointerRect) {
       const bb = this.getBoundingBox();
-      this.context?.pointerRect(bb.getX(), bb.getY(), bb.getW(), bb.getH());  
+      this.context?.pointerRect(bb.getX(), bb.getY(), bb.getW(), bb.getH());
     }
   }
 
