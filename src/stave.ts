@@ -53,7 +53,7 @@ const SORT_ORDER_END_MODIFIERS = {
 };
 
 export class Stave extends Element {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.Stave;
   }
 
@@ -188,7 +188,7 @@ export class Stave extends Element {
     return this.getYForLine(this.getNumLines() - 1) + (this.getStyle().lineWidth ?? 1);
   }
 
-  setX(x: number): this {
+  override setX(x: number): this {
     const shift = x - this.x;
     this.formatted = false;
     this.x = x;
@@ -201,7 +201,7 @@ export class Stave extends Element {
     return this;
   }
 
-  setWidth(width: number): this {
+  override setWidth(width: number): this {
     this.formatted = false;
     this.width = width;
     this.endX = this.x + width;
@@ -303,7 +303,7 @@ export class Stave extends Element {
     return this.options.spacingBetweenLinesPx;
   }
 
-  getBoundingBox(): BoundingBox {
+  override getBoundingBox(): BoundingBox {
     return new BoundingBox(this.x, this.y, this.width, this.getBottomY() - this.y);
   }
 
@@ -676,7 +676,7 @@ export class Stave extends Element {
   /**
    * All drawing functions below need the context to be set.
    */
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkContext();
     this.setRendered();
 

@@ -53,7 +53,7 @@ export class Crescendo extends Note {
   static DEBUG: boolean = false;
 
   /** Crescendo category string. */
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.Crescendo;
   }
 
@@ -101,13 +101,13 @@ export class Crescendo extends Note {
   }
 
   // Preformat the note
-  preFormat(): this {
+  override preFormat(): this {
     this.preFormatted = true;
     return this;
   }
 
   // Render the Crescendo object onto the canvas
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkContext();
     const stave = this.checkStave();
     this.setRendered();

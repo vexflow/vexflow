@@ -43,7 +43,7 @@ export interface StaveTempoOptions {
 }
 
 export class StaveTempo extends StaveModifier {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.StaveTempo;
   }
   protected tempo: StaveTempoOptions;
@@ -95,7 +95,7 @@ export class StaveTempo extends StaveModifier {
     return this;
   }
 
-  draw(): void {
+  override draw(): void {
     const stave = this.checkStave();
     const shiftX = stave.getModifierXShift(this.getPosition());
     const ctx = stave.checkContext();

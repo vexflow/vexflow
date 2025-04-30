@@ -10,7 +10,7 @@ import { Category, isStaveNote, isTabNote } from './typeguard';
 import { RuntimeError } from './util';
 
 export class Dot extends Modifier {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.Dot;
   }
 
@@ -137,7 +137,7 @@ export class Dot extends Modifier {
     this.dotShiftY = 0;
   }
 
-  setNote(note: Note): this {
+  override setNote(note: Note): this {
     this.note = note;
     this.font = note.font;
     return this;
@@ -148,7 +148,7 @@ export class Dot extends Modifier {
     return this;
   }
 
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkContext();
     const note = this.checkAttachedNote();
     this.setRendered();
