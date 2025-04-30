@@ -23,7 +23,7 @@ export class TextDynamics extends Note {
   /** To enable logging for this class. Set `VexFlow.TextDynamics.DEBUG` to `true`. */
   static DEBUG: boolean = false;
 
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.TextDynamics;
   }
 
@@ -69,7 +69,7 @@ export class TextDynamics extends Note {
   }
 
   /** Preformat the dynamics text. */
-  preFormat(): this {
+  override preFormat(): this {
     // length of this.glyphs must be <=
     // length of this.sequence, so if we're formatted before
     // create new glyphs.
@@ -89,7 +89,7 @@ export class TextDynamics extends Note {
   }
 
   /** Draw the dynamics text on the rendering context. */
-  draw(): void {
+  override draw(): void {
     this.setRendered();
     const x = this.getAbsoluteX();
     const y = this.checkStave().getYForLine(this.line + -3);

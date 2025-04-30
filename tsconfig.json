@@ -11,10 +11,23 @@
     "skipLibCheck": true /* Skip type checking of declaration files. */,
     "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
     "moduleResolution": "node",
-    "lib": ["dom", "es2020"],
-    "removeComments": false
-    // "noImplicitOverride": true, /* Introduce in the future for more type safety. Will cause >= 217 errors due to lack of "override" keyword. */
+    "lib": [
+      "dom",
+      "es2020"
+    ],
+    "removeComments": false,
+    "noImplicitOverride": true, /* Require explicit `override` keyword on all class members that override a base-class member. */
   },
-  "include": ["./src", "./entry", "./tests"],
-  "exclude": ["node_modules/**/*", "tools/fonts/legacy", "releases", "reference", "build"]
+  "include": [
+    "./src",
+    "./entry",
+    "./tests"
+  ],
+  "exclude": [
+    "node_modules/**/*",
+    "tools/fonts/legacy",
+    "releases",
+    "reference",
+    "build"
+  ]
 }

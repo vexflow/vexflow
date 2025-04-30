@@ -11,25 +11,25 @@ import { TickContext } from '../src/tickcontext';
 import { Voice } from '../src/voice';
 
 class MockTickable extends Tickable {
-  tickContext?: TickContext;
-  ticks: Fraction = new Fraction(1, 1);
-  voice?: Voice;
+  override tickContext?: TickContext;
+  override ticks: Fraction = new Fraction(1, 1);
+  override voice?: Voice;
   stave?: Stave;
-  ignoreTicks: boolean = false;
+  override ignoreTicks: boolean = false;
 
   init(): void {
     // DO NOTHING.
   }
 
-  getX(): number {
+  override getX(): number {
     return this.tickContext!.getX();
   }
 
-  getIntrinsicTicks(): number {
+  override getIntrinsicTicks(): number {
     return this.ticks.value();
   }
 
-  getTicks(): Fraction {
+  override getTicks(): Fraction {
     return this.ticks;
   }
 
@@ -52,16 +52,16 @@ class MockTickable extends Tickable {
     };
   }
 
-  getWidth(): number {
+  override getWidth(): number {
     return this.width;
   }
 
-  setWidth(w: number): this {
+  override setWidth(w: number): this {
     this.width = w;
     return this;
   }
 
-  setVoice(v: Voice): this {
+  override setVoice(v: Voice): this {
     this.voice = v;
     return this;
   }
@@ -75,26 +75,26 @@ class MockTickable extends Tickable {
     return this.stave;
   }
 
-  setTickContext(tc: TickContext): this {
+  override setTickContext(tc: TickContext): this {
     this.tickContext = tc;
     return this;
   }
 
-  setIgnoreTicks(flag: boolean): this {
+  override setIgnoreTicks(flag: boolean): this {
     this.ignoreTicks = flag;
     return this;
   }
 
-  shouldIgnoreTicks(): boolean {
+  override shouldIgnoreTicks(): boolean {
     return this.ignoreTicks;
   }
 
-  preFormat(): void {
+  override preFormat(): void {
     // DO NOTHING.
   }
 
   // eslint-disable-next-line
-  draw(...args: any[]): void {
+  override draw(...args: any[]): void {
     // DO NOTHING.
   }
 }

@@ -35,7 +35,7 @@ export class Modifier extends Element {
    * Modifiers category string. Every modifier has a different category.
    * The `ModifierContext` uses this to determine the type and order of the modifiers.
    */
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.Modifier;
   }
 
@@ -158,7 +158,7 @@ export class Modifier extends Element {
   }
 
   /** Shift modifier down `y` pixels. Negative values shift up. */
-  setYShift(y: number): this {
+  override setYShift(y: number): this {
     this.yShift = y;
     return this;
   }
@@ -177,7 +177,7 @@ export class Modifier extends Element {
    * Shift modifier `x` pixels in the direction of the modifier. Negative values
    * shift reverse.
    */
-  setXShift(x: number): this {
+  override setXShift(x: number): this {
     this.xShift = 0;
     if (this.position === Modifier.Position.LEFT) {
       this.xShift -= x;
@@ -188,12 +188,12 @@ export class Modifier extends Element {
   }
 
   /** Get shift modifier `x` */
-  getXShift(): number {
+  override getXShift(): number {
     return this.xShift;
   }
 
   /** Render the modifier onto the canvas. */
-  draw(): void {
+  override draw(): void {
     this.checkContext();
     throw new RuntimeError('NotImplemented', 'draw() not implemented for this modifier.');
   }

@@ -16,7 +16,7 @@ import { Category, isStaveNote, isStemmableNote } from './typeguard';
 import { RuntimeError } from './util';
 
 export class StringNumber extends Modifier {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.StringNumber;
   }
 
@@ -132,7 +132,7 @@ export class StringNumber extends Modifier {
   protected stringNumber: string;
   protected xOffset: number;
   protected yOffset: number;
-  protected textLine: number;
+  protected override textLine: number;
   protected stemOffset: number;
   protected dashed: boolean;
   protected leg: number;
@@ -192,7 +192,7 @@ export class StringNumber extends Modifier {
     return this;
   }
 
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkContext();
     const note = this.checkAttachedNote();
     this.setRendered();

@@ -23,7 +23,7 @@ export class BarNote extends Note {
   /** To enable logging for this class. Set `VexFlow.BarNote.DEBUG` to `true`. */
   static DEBUG: boolean = false;
 
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.BarNote;
   }
 
@@ -70,19 +70,19 @@ export class BarNote extends Note {
 
   /* Overridden to ignore */
   // eslint-disable-next-line
-  addToModifierContext(mc: ModifierContext): this {
+  override addToModifierContext(mc: ModifierContext): this {
     // DO NOTHING.
     return this;
   }
 
   /** Overridden to ignore. */
-  preFormat(): this {
+  override preFormat(): this {
     this.preFormatted = true;
     return this;
   }
 
   /** Render note to stave. */
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkContext();
     L('Rendering bar line at: ', this.getAbsoluteX());
     const barline = new Barline(this.type);

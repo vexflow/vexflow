@@ -53,7 +53,7 @@ export class Accidental extends Modifier {
   protected cautionary: boolean;
 
   /** Accidentals category string. */
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.Accidental;
   }
 
@@ -521,7 +521,7 @@ export class Accidental extends Modifier {
     this.reset();
   }
 
-  protected reset(): void {
+  protected override reset(): void {
     this.text = '';
 
     if (!this.cautionary) {
@@ -540,7 +540,7 @@ export class Accidental extends Modifier {
   }
 
   /** Attach this accidental to `note`, which must be a `StaveNote`. */
-  setNote(note: Note): this {
+  override setNote(note: Note): this {
     defined(note, 'ArgumentError', `Bad note value: ${note}`);
 
     this.note = note;
@@ -556,7 +556,7 @@ export class Accidental extends Modifier {
   }
 
   /** Render accidental onto canvas. */
-  draw(): void {
+  override draw(): void {
     const { type, position, index } = this;
 
     const ctx = this.checkContext();

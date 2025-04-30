@@ -6,7 +6,7 @@ import { StaveModifier } from './stavemodifier';
 import { Category } from './typeguard';
 
 export class StaveSection extends StaveModifier {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.StaveSection;
   }
 
@@ -27,7 +27,7 @@ export class StaveSection extends StaveModifier {
     return this;
   }
 
-  draw(): void {
+  override draw(): void {
     const stave = this.checkStave();
     const ctx = stave.checkContext();
     this.setRendered();

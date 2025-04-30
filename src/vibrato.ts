@@ -15,7 +15,7 @@ export interface VibratoRenderOptions {
 
 /** `Vibrato` implements diverse vibratos. */
 export class Vibrato extends Modifier {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.Vibrato;
   }
 
@@ -89,7 +89,7 @@ export class Vibrato extends Modifier {
   }
 
   /** Draw the vibrato on the rendering context. */
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkContext();
     const note = this.checkAttachedNote();
     this.setRendered();

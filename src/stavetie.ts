@@ -19,7 +19,7 @@ export interface TieNotes {
 }
 
 export class StaveTie extends Element {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.StaveTie;
   }
 
@@ -277,7 +277,7 @@ export class StaveTie extends Element {
     }
   }
 
-  draw(): boolean {
+  override draw(): boolean {
     this.checkContext();
     this.setRendered();
     this.synchronizeIndexes();

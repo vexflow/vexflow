@@ -9,7 +9,7 @@ import { StaveTie, TieNotes } from './stavetie';
 import { Category } from './typeguard';
 
 export class TabTie extends StaveTie {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.TabTie;
   }
 

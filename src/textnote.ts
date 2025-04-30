@@ -31,7 +31,7 @@ export interface TextNoteStruct extends NoteStruct {
  * Examples of this would be such as dynamics, lyrics, chord changes, etc.
  */
 export class TextNote extends Note {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.TextNote;
   }
 
@@ -118,7 +118,7 @@ export class TextNote extends Note {
   }
 
   /** Pre-render formatting. */
-  preFormat(): void {
+  override preFormat(): void {
     if (this.preFormatted) return;
     const tickContext = this.checkTickContext(`Can't preformat without a TickContext.`);
 
@@ -137,7 +137,7 @@ export class TextNote extends Note {
    * Renders the TextNote.
    * `TextNote` has to be assigned to a `Stave` before rendering by means of `setStave`.
    */
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkContext();
     const stave = this.checkStave();
     const tickContext = this.checkTickContext(`Can't draw without a TickContext.`);

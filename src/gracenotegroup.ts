@@ -30,7 +30,7 @@ function L(...args: any) {
 export class GraceNoteGroup extends Modifier {
   static DEBUG: boolean = false;
 
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.GraceNoteGroup;
   }
 
@@ -152,12 +152,12 @@ export class GraceNoteGroup extends Modifier {
     return this;
   }
 
-  setWidth(width: number): this {
+  override setWidth(width: number): this {
     this.width = width;
     return this;
   }
 
-  getWidth(): number {
+  override getWidth(): number {
     return this.width + StaveNote.minNoteheadPadding;
   }
 
@@ -165,7 +165,7 @@ export class GraceNoteGroup extends Modifier {
     return this.graceNotes;
   }
 
-  draw(): void {
+  override draw(): void {
     const ctx: RenderContext = this.checkContext();
     const note = this.checkAttachedNote();
     this.setRendered();

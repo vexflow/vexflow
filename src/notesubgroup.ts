@@ -17,7 +17,7 @@ import { Category } from './typeguard';
 import { Voice } from './voice';
 
 export class NoteSubGroup extends Modifier {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.NoteSubGroup;
   }
 
@@ -69,16 +69,16 @@ export class NoteSubGroup extends Modifier {
     this.preFormatted = true;
   }
 
-  setWidth(width: number): this {
+  override setWidth(width: number): this {
     this.width = width;
     return this;
   }
 
-  getWidth(): number {
+  override getWidth(): number {
     return this.width;
   }
 
-  draw(): void {
+  override draw(): void {
     const ctx: RenderContext = this.checkContext();
     const note = this.checkAttachedNote();
     this.setRendered();

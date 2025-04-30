@@ -9,7 +9,7 @@ import { Category } from './typeguard';
 
 /** ClefNote implements clef annotations in measures. */
 export class ClefNote extends Note {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.ClefNote;
   }
 
@@ -34,13 +34,13 @@ export class ClefNote extends Note {
     return this.clef;
   }
 
-  preFormat(): this {
+  override preFormat(): this {
     this.preFormatted = true;
     return this;
   }
 
   /** Render clef note. */
-  draw(): void {
+  override draw(): void {
     const stave = this.checkStave();
     const ctx = this.checkContext();
 
@@ -50,7 +50,7 @@ export class ClefNote extends Note {
     this.clef.renderText(ctx, 0, 0);
   }
 
-  getBoundingBox(): BoundingBox {
+  override getBoundingBox(): BoundingBox {
     return this.clef.getBoundingBox();
   }
 }

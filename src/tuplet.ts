@@ -76,7 +76,7 @@ export const enum TupletLocation {
 }
 
 export class Tuplet extends Element {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.Tuplet;
   }
 
@@ -310,7 +310,7 @@ export class Tuplet extends Element {
     return yPosition + nestedTupletYOffset + yOffset;
   }
 
-  draw(): void {
+  override draw(): void {
     const { location, bracketed, textYOffset, suffix } = this.options;
     const bracketPadding = Metrics.get('Tuplet.bracketPadding');
     const extraSpacing = Metrics.get('Tuplet.suffix.extraSpacing');

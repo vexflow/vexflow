@@ -18,7 +18,7 @@ export interface BendPhrase {
 
 /** Bend implements tablature bends. */
 export class Bend extends Modifier {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.Bend;
   }
 
@@ -123,7 +123,7 @@ export class Bend extends Modifier {
   }
 
   /** Set horizontal shift in pixels. */
-  setXShift(value: number): this {
+  override setXShift(value: number): this {
     this.xShift = value;
     this.updateWidth();
     return this;
@@ -167,7 +167,7 @@ export class Bend extends Modifier {
   }
 
   /** Draw the bend on the rendering context. */
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkContext();
     const note = this.checkAttachedNote();
     this.setRendered();

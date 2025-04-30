@@ -18,7 +18,7 @@ export enum BarlineType {
 }
 
 export class Barline extends StaveModifier {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.Barline;
   }
 
@@ -129,7 +129,7 @@ export class Barline extends StaveModifier {
   }
 
   // Draw barlines
-  draw(): void {
+  override draw(): void {
     const stave = this.checkStave();
     const ctx = stave.checkContext();
     this.setRendered();

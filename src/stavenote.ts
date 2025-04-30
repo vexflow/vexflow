@@ -90,7 +90,7 @@ function centerRest(rest: StaveNoteFormatSettings, noteU: StaveNoteFormatSetting
 export class StaveNote extends StemmableNote {
   static DEBUG: boolean = false;
 
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.StaveNote;
   }
 
@@ -426,7 +426,7 @@ export class StaveNote extends StemmableNote {
     this.buildFlag();
   }
 
-  reset(): this {
+  override reset(): this {
     super.reset();
 
     // Save prior noteHead styles & reapply them after making new noteheads.
@@ -445,7 +445,7 @@ export class StaveNote extends StemmableNote {
     return this;
   }
 
-  setBeam(beam: Beam): this {
+  override setBeam(beam: Beam): this {
     this.beam = beam;
     this.calcNoteDisplacements();
     // Update stem extension if a beam is assigned.
@@ -456,7 +456,7 @@ export class StaveNote extends StemmableNote {
   }
 
   // Builds a `Stem` for the note
-  buildStem(): this {
+  override buildStem(): this {
     this.setStem(new Stem({ hide: this.isRest() }));
     return this;
   }
@@ -594,7 +594,7 @@ export class StaveNote extends StemmableNote {
   }
 
   // Get the `BoundingBox` for the entire note
-  getBoundingBox(): BoundingBox {
+  override getBoundingBox(): BoundingBox {
     const boundingBox = new BoundingBox(this.getAbsoluteX(), this.ys[0], 0, 0);
     this._noteHeads.forEach((notehead) => {
       boundingBox.mergeWith(notehead.getBoundingBox());
@@ -621,7 +621,7 @@ export class StaveNote extends StemmableNote {
 
   // Gets the line number of the bottom note in the chord.
   // If `isTopNote` is `true` then get the top note's line number instead
-  getLineNumber(isTopNote?: boolean): number {
+  override getLineNumber(isTopNote?: boolean): number {
     if (!this.keyProps.length) {
       throw new RuntimeError('NoKeyProps', "Can't get bottom note line, because note is not initialized properly.");
     }
@@ -644,7 +644,7 @@ export class StaveNote extends StemmableNote {
   /**
    * @returns true if this note is a type of rest. Rests don't have pitches, but take up space in the score.
    */
-  isRest(): boolean {
+  override isRest(): boolean {
     const val = this.glyphProps.codeHead;
     return val >= '\ue4e0' && val <= '\ue4ff';
   }
@@ -655,15 +655,15 @@ export class StaveNote extends StemmableNote {
   }
 
   // Determine if the `StaveNote` has a stem
-  hasStem(): boolean {
+  override hasStem(): boolean {
     return this.glyphProps.stem;
   }
 
-  hasFlag(): boolean {
+  override hasFlag(): boolean {
     return super.hasFlag() && !this.isRest();
   }
 
-  getStemX(): number {
+  override getStemX(): number {
     if (this.noteType === 'r') {
       return this.getCenterGlyphX();
     } else {
@@ -675,14 +675,14 @@ export class StaveNote extends StemmableNote {
 
   // Get the `y` coordinate for text placed on the top/bottom of a
   // note at a desired `textLine`
-  getYForTopText(textLine: number): number {
+  override getYForTopText(textLine: number): number {
     const extents = this.getStemExtents();
     return Math.min(
       this.checkStave().getYForTopText(textLine),
       extents.topY - this.renderOptions.annotationSpacing * (textLine + 1)
     );
   }
-  getYForBottomText(textLine: number): number {
+  override getYForBottomText(textLine: number): number {
     const extents = this.getStemExtents();
     return Math.max(
       this.checkStave().getYForTopText(textLine),
@@ -692,7 +692,7 @@ export class StaveNote extends StemmableNote {
 
   // Sets the current note to the provided `stave`. This applies
   // `y` values to the `NoteHeads`.
-  setStave(stave: Stave): this {
+  override setStave(stave: Stave): this {
     super.setStave(stave);
 
     const ys = this._noteHeads.map((notehead) => {
@@ -722,7 +722,7 @@ export class StaveNote extends StemmableNote {
   }
 
   // Get the starting `x` coordinate for a `StaveTie`
-  getTieRightX(): number {
+  override getTieRightX(): number {
     let tieStartX = this.getAbsoluteX();
     tieStartX += this.getGlyphWidth() + this.xShift + this.rightDisplacedHeadPx;
     if (this.modifierContext) tieStartX += this.modifierContext.getRightShift();
@@ -730,14 +730,14 @@ export class StaveNote extends StemmableNote {
   }
 
   // Get the ending `x` coordinate for a `StaveTie`
-  getTieLeftX(): number {
+  override getTieLeftX(): number {
     let tieEndX = this.getAbsoluteX();
     tieEndX += this.xShift - this.leftDisplacedHeadPx;
     return tieEndX;
   }
 
   // Get the stave line on which to place a rest
-  getLineForRest(): number {
+  override getLineForRest(): number {
     let restLine = this.keyProps[0].line;
     if (this.keyProps.length > 1) {
       const lastLine = this.keyProps[this.keyProps.length - 1].line;
@@ -751,7 +751,7 @@ export class StaveNote extends StemmableNote {
 
   // Get the default `x` and `y` coordinates for the provided `position`
   // and key `index`
-  getModifierStartXY(
+  override getModifierStartXY(
     position: number,
     index: number,
     options: { forceFlagRight?: boolean } = {}
@@ -820,7 +820,7 @@ export class StaveNote extends StemmableNote {
 
   // Sets the style of the complete StaveNote, including all keys
   // and the stem.
-  setStyle(style: ElementStyle): this {
+  override setStyle(style: ElementStyle): this {
     return super.setGroupStyle(style);
   }
 
@@ -849,7 +849,7 @@ export class StaveNote extends StemmableNote {
   }
 
   /** Get the glyph width. */
-  getGlyphWidth(): number {
+  override getGlyphWidth(): number {
     return this.noteHeads[0].getWidth();
   }
 
@@ -892,7 +892,7 @@ export class StaveNote extends StemmableNote {
   }
 
   // Pre-render formatting
-  preFormat(): void {
+  override preFormat(): void {
     if (this.preFormatted) return;
 
     let noteHeadPadding = 0;
@@ -1125,7 +1125,7 @@ export class StaveNote extends StemmableNote {
     });
   }
 
-  drawStem(stemOptions?: StemOptions): void {
+  override drawStem(stemOptions?: StemOptions): void {
     // GCR TODO: I can't find any context in which this is called with the stemStruct
     // argument in the codebase or tests. Nor can I find a case where super.drawStem
     // is called at all. Perhaps these should be removed?
@@ -1149,7 +1149,7 @@ export class StaveNote extends StemmableNote {
   /**
    * Override stemmablenote stem extension to adjust for distance from middle line.
    */
-  getStemExtension(): number {
+  override getStemExtension(): number {
     const superStemExtension = super.getStemExtension();
     if (!this.glyphProps.stem) {
       return superStemExtension;
@@ -1188,7 +1188,7 @@ export class StaveNote extends StemmableNote {
   }
 
   // Draws all the `StaveNote` parts. This is the main drawing method.
-  draw(): void {
+  override draw(): void {
     if (this.renderOptions.draw === false) return;
 
     if (this.ys.length === 0) {

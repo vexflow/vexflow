@@ -55,7 +55,7 @@ export type StaveConnectorType =
 
 /** StaveConnector implements the connector lines between staves of a system. */
 export class StaveConnector extends Element {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.StaveConnector;
   }
 
@@ -149,7 +149,7 @@ export class StaveConnector extends Element {
   }
 
   /** Set optional associated Text. */
-  setText(text: string, options: { shiftX?: number; shiftY?: number } = {}): this {
+  override setText(text: string, options: { shiftX?: number; shiftY?: number } = {}): this {
     const textElement = new Element('StaveConnector.text');
     textElement.setText(text);
     textElement.setXShift(options.shiftX ?? 0);
@@ -159,7 +159,7 @@ export class StaveConnector extends Element {
   }
 
   /** Render connector and associated text. */
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkContext();
     this.setRendered();
 

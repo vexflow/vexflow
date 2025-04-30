@@ -67,7 +67,7 @@ export interface SystemOptions {
  * the system are formatted together.
  */
 export class System extends Element {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.System;
   }
 
@@ -123,12 +123,12 @@ export class System extends Element {
   }
 
   /** Get origin X. */
-  getX(): number {
+  override getX(): number {
     return this.options.x;
   }
 
   /** Set origin X. */
-  setX(x: number): this {
+  override setX(x: number): this {
     this.options.x = x;
     this.partStaves.forEach((s) => {
       s.setX(x);
@@ -137,12 +137,12 @@ export class System extends Element {
   }
 
   /** Get origin y. */
-  getY(): number {
+  override getY(): number {
     return this.options.y;
   }
 
   /** Set origin y. */
-  setY(y: number): this {
+  override setY(y: number): this {
     this.options.y = y;
     this.partStaves.forEach((s) => {
       s.setY(y);
@@ -161,7 +161,7 @@ export class System extends Element {
   }
 
   /** Set associated context. */
-  setContext(context: RenderContext): this {
+  override setContext(context: RenderContext): this {
     super.setContext(context);
     this.factory.setContext(context);
     return this;
@@ -299,12 +299,12 @@ export class System extends Element {
   }
 
   /** Get the boundingBox. */
-  getBoundingBox(): BoundingBox {
+  override getBoundingBox(): BoundingBox {
     return new BoundingBox(this.options.x, this.options.y, this.options.width, (this.lastY ?? 0) - this.options.y);
   }
 
   /** Render the system. */
-  draw(): void {
+  override draw(): void {
     // Render debugging information, if requested.
     const ctx = this.checkContext();
     if (!this.formatter || !this.startX || !this.lastY || !this.debugNoteMetricsYs) {

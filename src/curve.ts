@@ -25,7 +25,7 @@ export enum CurvePosition {
 }
 
 export class Curve extends Element {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.Curve;
   }
 
@@ -130,7 +130,7 @@ export class Curve extends Element {
     if (!this.style?.lineDash) ctx.fill();
   }
 
-  draw(): boolean {
+  override draw(): boolean {
     this.checkContext();
     this.setRendered();
 

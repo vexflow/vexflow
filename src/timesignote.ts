@@ -7,7 +7,7 @@ import { TimeSignature } from './timesignature';
 import { Category } from './typeguard';
 
 export class TimeSigNote extends Note {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.TimeSigNote;
   }
 
@@ -25,17 +25,17 @@ export class TimeSigNote extends Note {
 
   /* Overridden to ignore */
   // eslint-disable-next-line
-  addToModifierContext(mc: ModifierContext): this {
+  override addToModifierContext(mc: ModifierContext): this {
     // DO NOTHING.
     return this;
   }
 
-  preFormat(): this {
+  override preFormat(): this {
     this.preFormatted = true;
     return this;
   }
 
-  draw(): void {
+  override draw(): void {
     const stave = this.checkStave();
     const ctx = this.checkContext();
     this.setRendered();

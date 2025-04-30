@@ -12,7 +12,7 @@ import { RuntimeError } from './util';
 const ERROR_MSG = 'Ghost note must have valid initialization data to identify duration.';
 
 export class GhostNote extends StemmableNote {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.GhostNote;
   }
 
@@ -40,28 +40,28 @@ export class GhostNote extends StemmableNote {
   /**
    * @returns true if this note is a type of rest. Rests don't have pitches, but take up space in the score.
    */
-  isRest(): boolean {
+  override isRest(): boolean {
     return true;
   }
 
-  setStave(stave: Stave): this {
+  override setStave(stave: Stave): this {
     super.setStave(stave);
     return this;
   }
 
   /* Overridden to ignore */
   // eslint-disable-next-line
-  addToModifierContext(mc: ModifierContext): this {
+  override addToModifierContext(mc: ModifierContext): this {
     // DO NOTHING.
     return this;
   }
 
-  preFormat(): this {
+  override preFormat(): this {
     this.preFormatted = true;
     return this;
   }
 
-  draw(): void {
+  override draw(): void {
     // Draw Annotations
     this.setRendered();
     for (let i = 0; i < this.modifiers.length; ++i) {

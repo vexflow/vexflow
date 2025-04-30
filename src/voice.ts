@@ -28,7 +28,7 @@ export enum VoiceMode {
  * `Voice` is mainly a container object to group `Tickables` for formatting.
  */
 export class Voice extends Element {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.Voice;
   }
 
@@ -152,7 +152,7 @@ export class Voice extends Element {
   }
 
   /** Get the bounding box for the voice. */
-  getBoundingBox(): BoundingBox {
+  override getBoundingBox(): BoundingBox {
     const boundingBox = this.tickables[0].getBoundingBox();
     for (let i = 1; i < this.tickables.length; ++i) {
       const tickable = this.tickables[i];
@@ -284,7 +284,7 @@ export class Voice extends Element {
    * This method also calculates the voice's boundingBox while drawing
    * the notes. Note the similarities with this.getBoundingBox().
    */
-  draw(context: RenderContext = this.checkContext(), stave?: Stave): void {
+  override draw(context: RenderContext = this.checkContext(), stave?: Stave): void {
     stave = stave ?? this.stave;
     this.setRendered();
     for (let i = 0; i < this.tickables.length; ++i) {

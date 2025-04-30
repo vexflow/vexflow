@@ -14,7 +14,7 @@ const CODES: Record<string, string> = {
 };
 
 export class RepeatNote extends GlyphNote {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.RepeatNote;
   }
 

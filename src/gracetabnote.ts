@@ -12,7 +12,7 @@ import { TabNote, TabNoteStruct } from './tabnote';
 import { Category } from './typeguard';
 
 export class GraceTabNote extends TabNote {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.GraceTabNote;
   }
 

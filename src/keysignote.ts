@@ -7,7 +7,7 @@ import { Note } from './note';
 import { Category } from './typeguard';
 
 export class KeySigNote extends Note {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.KeySigNote;
   }
 
@@ -24,19 +24,19 @@ export class KeySigNote extends Note {
 
   /* Overridden to ignore */
   // eslint-disable-next-line
-  addToModifierContext(mc: ModifierContext): this {
+  override addToModifierContext(mc: ModifierContext): this {
     // DO NOTHING.
     return this;
   }
 
-  preFormat(): this {
+  override preFormat(): this {
     this.preFormatted = true;
     this.keySignature.setStave(this.checkStave());
     this.setWidth(this.keySignature.getWidth());
     return this;
   }
 
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkStave().checkContext();
     this.setRendered();
     this.keySignature.setX(this.getAbsoluteX());

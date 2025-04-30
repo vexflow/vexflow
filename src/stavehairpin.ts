@@ -23,7 +23,7 @@ export interface StaveHairpinRenderOptions {
 }
 
 export class StaveHairpin extends Element {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.StaveHairpin;
   }
 
@@ -187,7 +187,7 @@ export class StaveHairpin extends Element {
     ctx.closePath();
   }
 
-  draw(): void {
+  override draw(): void {
     this.checkContext();
     this.setRendered();
 

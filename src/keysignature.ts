@@ -16,7 +16,7 @@ import { Category } from './typeguard';
 import { defined } from './util';
 
 export class KeySignature extends StaveModifier {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.KeySignature;
   }
 
@@ -125,13 +125,13 @@ export class KeySignature extends StaveModifier {
   }
 
   // Add this key signature to a stave.
-  setStave(stave: Stave): this {
+  override setStave(stave: Stave): this {
     this.formatted = false;
     return super.setStave(stave);
   }
 
   // Get the `BoundingBox`
-  getBoundingBox(): BoundingBox {
+  override getBoundingBox(): BoundingBox {
     if (!this.formatted) this.format();
 
     return super.getBoundingBox();
@@ -203,14 +203,14 @@ export class KeySignature extends StaveModifier {
   }
 
   // Get the padding required for this modifier
-  getPadding(index: number): number {
+  override getPadding(index: number): number {
     if (!this.formatted) this.format();
 
     return this.children.length === 0 || (!this.paddingForced && index < 2) ? 0 : this.padding;
   }
 
   // Get the width of the modifier
-  getWidth(): number {
+  override getWidth(): number {
     if (!this.formatted) this.format();
 
     return this.width;
@@ -287,7 +287,7 @@ export class KeySignature extends StaveModifier {
   }
 
   // Render the key signature
-  draw(): void {
+  override draw(): void {
     const stave = this.checkStave();
     const ctx = stave.checkContext();
 

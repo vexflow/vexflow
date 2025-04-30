@@ -49,7 +49,7 @@ function drawArrowHead(
 }
 
 export class StaveLine extends Element {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.StaveLine;
   }
 
@@ -132,7 +132,7 @@ export class StaveLine extends Element {
   }
 
   // The the annotation for the `StaveLine`
-  setText(text: string): this {
+  override setText(text: string): this {
     this.text = text;
     return this;
   }
@@ -261,7 +261,7 @@ export class StaveLine extends Element {
   }
 
   // Renders the `StaveLine` on the context
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkContext();
     this.setRendered();
 

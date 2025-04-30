@@ -26,7 +26,7 @@ export enum StaveModifierPosition {
 }
 
 export class StaveModifier extends Element {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.StaveModifier;
   }
 

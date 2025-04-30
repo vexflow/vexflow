@@ -9,7 +9,7 @@ import { Category } from './typeguard';
 
 /** Parenthesis implements parenthesis modifiers for notes. */
 export class Parenthesis extends Modifier {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.Parenthesis;
   }
 
@@ -71,14 +71,14 @@ export class Parenthesis extends Modifier {
   }
 
   /** Set the associated note. */
-  setNote(note: Note): this {
+  override setNote(note: Note): this {
     this.note = note;
     this.setFont(note.getFont());
     return this;
   }
 
   /** Render the parenthesis. */
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkContext();
     const note = this.checkAttachedNote();
     this.setRendered();

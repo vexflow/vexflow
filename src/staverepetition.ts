@@ -8,7 +8,7 @@ import { StaveModifier } from './stavemodifier';
 import { Category } from './typeguard';
 
 export class Repetition extends StaveModifier {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.Repetition;
   }
 
@@ -30,8 +30,8 @@ export class Repetition extends StaveModifier {
 
   protected symbolType: number;
 
-  protected xShift: number;
-  protected yShift: number;
+  protected override xShift: number;
+  protected override yShift: number;
 
   constructor(type: number, x: number, yShift: number) {
     super();
@@ -52,7 +52,7 @@ export class Repetition extends StaveModifier {
     return this;
   }
 
-  draw(): void {
+  override draw(): void {
     const stave = this.checkStave();
     const x = stave.getModifierXShift(this.getPosition());
     this.setRendered();

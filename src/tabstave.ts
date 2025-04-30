@@ -4,7 +4,7 @@ import { Stave, StaveOptions } from './stave';
 import { Category } from './typeguard';
 
 export class TabStave extends Stave {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.TabStave;
   }
 
@@ -19,7 +19,7 @@ export class TabStave extends Stave {
     super(x, y, width, tabOptions);
   }
 
-  getYForGlyphs(): number {
+  override getYForGlyphs(): number {
     return this.getYForLine(2.5);
   }
 

@@ -14,7 +14,7 @@ import { Category, isNote, isStaveNote, isTabNote } from './typeguard';
 import { RuntimeError } from './util';
 
 export class Stroke extends Modifier {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.Stroke;
   }
 
@@ -93,7 +93,7 @@ export class Stroke extends Modifier {
     this.setWidth(10);
   }
 
-  getPosition(): number {
+  override getPosition(): number {
     return this.position;
   }
 
@@ -102,7 +102,7 @@ export class Stroke extends Modifier {
     return this;
   }
 
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkContext();
     const note = this.checkAttachedNote();
     this.setRendered();

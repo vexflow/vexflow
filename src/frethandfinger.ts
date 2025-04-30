@@ -12,7 +12,7 @@ import { Category } from './typeguard';
 import { RuntimeError } from './util';
 
 export class FretHandFinger extends Modifier {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.FretHandFinger;
   }
 
@@ -147,7 +147,7 @@ export class FretHandFinger extends Modifier {
     return this;
   }
 
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkContext();
     const note = this.checkAttachedNote();
     this.setRendered();

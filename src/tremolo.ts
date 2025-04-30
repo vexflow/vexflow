@@ -10,7 +10,7 @@ import { Category } from './typeguard';
 
 /** Tremolo implements tremolo notation. */
 export class Tremolo extends Modifier {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.Tremolo;
   }
 
@@ -28,7 +28,7 @@ export class Tremolo extends Modifier {
   }
 
   /** Draw the tremolo on the rendering context. */
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkContext();
     const note = this.checkAttachedNote();
     this.setRendered();
