@@ -36,7 +36,7 @@ export enum TextBracketPosition {
 export class TextBracket extends Element {
   static DEBUG: boolean = false;
 
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.TextBracket;
   }
 
@@ -106,7 +106,7 @@ export class TextBracket extends Element {
    * @param ctx
    * @returns this
    */
-  applyStyle(ctx: RenderContext): this {
+  override applyStyle(ctx: RenderContext): this {
     this.textElement.setFont(this.fontInfo);
     // We called this.resetFont() in the constructor, so we know this.textFont is available.
     const { family, size, weight, style } = this.fontInfo;
@@ -137,7 +137,7 @@ export class TextBracket extends Element {
   }
 
   // Draw the octave bracket on the rendering context
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkContext();
     this.setRendered();
 

@@ -125,7 +125,7 @@ function getPartialStemLines(stemY: number, unusedStrings: number[][], stave: St
 }
 
 export class TabNote extends StemmableNote {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.TabNote;
   }
 
@@ -185,7 +185,7 @@ export class TabNote extends StemmableNote {
     return this.positions.map((x) => x.str).reduce((a, b) => (a < b ? a : b));
   };
 
-  reset(): this {
+  override reset(): this {
     super.reset();
     if (this.stave) this.setStave(this.stave);
     return this;
@@ -200,13 +200,13 @@ export class TabNote extends StemmableNote {
   }
 
   // Determine if the note has a stem
-  hasStem(): boolean {
+  override hasStem(): boolean {
     if (this.renderOptions.drawStem) return true;
     return false;
   }
 
   // Get the default stem extension for the note
-  getStemExtension(): number {
+  override getStemExtension(): number {
     if (this.stemExtensionOverride !== undefined) {
       return this.stemExtensionOverride;
     }
@@ -243,7 +243,7 @@ export class TabNote extends StemmableNote {
   }
 
   // Set the `stave` to the note
-  setStave(stave: Stave): this {
+  override setStave(stave: Stave): this {
     super.setStave(stave);
     const ctx = stave.getContext();
     this.setContext(ctx);
@@ -268,7 +268,7 @@ export class TabNote extends StemmableNote {
 
   // Get the default `x` and `y` coordinates for a modifier at a specific
   // `position` at a fret position `index`
-  getModifierStartXY(position: number, index: number): { x: number; y: number } {
+  override getModifierStartXY(position: number, index: number): { x: number; y: number } {
     if (!this.preFormatted) {
       throw new RuntimeError('UnformattedNote', "Can't call GetModifierStartXY on an unformatted note");
     }
@@ -294,12 +294,12 @@ export class TabNote extends StemmableNote {
   }
 
   // Get the default line for rest
-  getLineForRest(): number {
+  override getLineForRest(): number {
     return Number(this.positions[0].str);
   }
 
   // Pre-render formatting
-  preFormat(): void {
+  override preFormat(): void {
     if (this.preFormatted) return;
     if (this.modifierContext) this.modifierContext.preFormat();
     // width is already set during init()
@@ -307,7 +307,7 @@ export class TabNote extends StemmableNote {
   }
 
   // Get the x position for the stem
-  getStemX(): number {
+  override getStemX(): number {
     return this.getCenterGlyphX();
   }
 
@@ -325,7 +325,7 @@ export class TabNote extends StemmableNote {
   }
 
   // Get the stem extents for the tabnote
-  getStemExtents(): { topY: number; baseY: number } {
+  override getStemExtents(): { topY: number; baseY: number } {
     return this.checkStem().getExtents();
   }
 
@@ -416,7 +416,7 @@ export class TabNote extends StemmableNote {
   }
 
   // The main rendering function for the entire note.
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkContext();
 
     if (this.ys.length === 0) {

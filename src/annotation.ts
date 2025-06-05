@@ -41,7 +41,7 @@ export class Annotation extends Modifier {
   static DEBUG: boolean = false;
 
   /** Annotations category string. */
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.Annotation;
   }
 
@@ -217,7 +217,7 @@ export class Annotation extends Modifier {
   }
 
   /** Render text beside the note. */
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkContext();
     const note = this.checkAttachedNote();
     const stemDirection = note.hasStem() ? note.getStemDirection() : Stem.UP;

@@ -75,7 +75,7 @@ export enum SymbolModifiers {
 export class ChordSymbol extends Modifier {
   static DEBUG: boolean = false;
 
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.ChordSymbol;
   }
 
@@ -398,7 +398,7 @@ export class ChordSymbol extends Modifier {
   }
 
   /** Render text and glyphs above/below the note. */
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkContext();
     const note = this.checkAttachedNote() as StemmableNote;
     this.setRendered();
@@ -459,7 +459,7 @@ export class ChordSymbol extends Modifier {
   }
 
   // Get the `BoundingBox` for the entire chord
-  getBoundingBox(): BoundingBox {
+  override getBoundingBox(): BoundingBox {
     const boundingBox = this.symbolBlocks[0].getBoundingBox();
     for (let i = 1; i < this.symbolBlocks.length; i++) {
       boundingBox.mergeWith(this.symbolBlocks[i].getBoundingBox());

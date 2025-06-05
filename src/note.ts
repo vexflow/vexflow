@@ -92,7 +92,7 @@ export abstract class Note extends Tickable {
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // STATIC MEMBERS
 
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.Note;
   }
 
@@ -412,7 +412,7 @@ export abstract class Note extends Tickable {
   }
 
   /** True if this note has no duration (e.g., bar notes, spacers, etc.). */
-  shouldIgnoreTicks(): boolean {
+  override shouldIgnoreTicks(): boolean {
     return this.ignoreTicks;
   }
 
@@ -467,13 +467,13 @@ export abstract class Note extends Tickable {
   }
 
   /** Return the voice that this note belongs in. */
-  getVoice(): Voice {
+  override getVoice(): Voice {
     if (!this.voice) throw new RuntimeError('NoVoice', 'Note has no voice.');
     return this.voice;
   }
 
   /** Attach this note to `voice`. */
-  setVoice(voice: Voice): this {
+  override setVoice(voice: Voice): this {
     this.voice = voice;
     this.preFormatted = false;
     return this;
@@ -485,7 +485,7 @@ export abstract class Note extends Tickable {
   }
 
   /** Set the `TickContext` for this note. */
-  setTickContext(tc: TickContext): this {
+  override setTickContext(tc: TickContext): this {
     this.tickContext = tc;
     this.preFormatted = false;
     return this;
@@ -538,7 +538,7 @@ export abstract class Note extends Tickable {
    * @param index of the key to modify.
    * @returns this
    */
-  addModifier(modifier: Modifier, index: number = 0): this {
+  override addModifier(modifier: Modifier, index: number = 0): this {
     const signature = 'Note.addModifier(modifier: Modifier, index: number=0)';
     // Backwards compatibility with 3.0.9.
     if (typeof index === 'string') {
@@ -636,7 +636,7 @@ export abstract class Note extends Tickable {
    * excludes xShift, so you'll need to factor it in if you're
    * looking for the post-formatted x-position.
    */
-  getAbsoluteX(): number {
+  override getAbsoluteX(): number {
     const tickContext = this.checkTickContext(`Can't getAbsoluteX() without a TickContext.`);
     // Position note to left edge of tick context.
     let x = tickContext.getX();
@@ -690,7 +690,7 @@ export abstract class Note extends Tickable {
   }
 
   // Get the `BoundingBox` for the entire note
-  getBoundingBox(): BoundingBox {
+  override getBoundingBox(): BoundingBox {
     const boundingBox = super.getBoundingBox();
     for (let i = 0; i < this.modifiers.length; i++) {
       boundingBox.mergeWith(this.modifiers[i].getBoundingBox());

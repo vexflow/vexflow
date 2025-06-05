@@ -7,7 +7,7 @@ import { Category } from './typeguard';
 import { RuntimeError } from './util';
 
 export class StaveText extends StaveModifier {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.StaveText;
   }
 
@@ -27,7 +27,7 @@ export class StaveText extends StaveModifier {
     this.justification = options.justification ?? TextNote.Justification.CENTER;
   }
 
-  draw(): void {
+  override draw(): void {
     const stave = this.checkStave();
     const ctx = stave.checkContext();
     this.setRendered();

@@ -37,7 +37,7 @@ const assertIsValidTimeSig = (timeSpec: string) => {
  * such as "3/4(6/8)" or "2/4+5/8".
  */
 export class TimeSignature extends StaveModifier {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.TimeSignature;
   }
 
@@ -203,7 +203,7 @@ export class TimeSignature extends StaveModifier {
    * Draw the time signature on a Stave using its RenderContext.  Both setStave
    * and setContext must already be run.
    */
-  draw(): void {
+  override draw(): void {
     const stave = this.checkStave();
     const ctx = stave.checkContext();
     this.setRendered();
@@ -237,7 +237,7 @@ export class TimeSignature extends StaveModifier {
 
   // gets combined bounding box of time sig
   // NOTE: should be called after drawAt initializes top/botRenderY to get proper position
-  getBoundingBox(): BoundingBox {
+  override getBoundingBox(): BoundingBox {
     if (this.isNumeric) {
       // these always return boxes so no need to handle case where one/both are null/undefined
       const topBoundingBox = this.topText.getBoundingBox();

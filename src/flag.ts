@@ -18,12 +18,12 @@ export class Flag extends Element {
   /** To enable logging for this class. Set `VexFlow.NoteHead.DEBUG` to `true`. */
   static DEBUG: boolean = false;
 
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.Flag;
   }
 
   /** Draw the notehead. */
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkContext();
     this.setRendered();
     ctx.openGroup('flag', this.getAttribute('id'));

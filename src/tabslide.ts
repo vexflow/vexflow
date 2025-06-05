@@ -11,7 +11,7 @@ import { Category } from './typeguard';
 import { RuntimeError } from './util';
 
 export class TabSlide extends TabTie {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.TabSlide;
   }
 
@@ -79,7 +79,13 @@ export class TabSlide extends TabTie {
    * @param params.firstX is specified in pixels.
    * @param params.lastX is specified in pixels.
    */
-  renderTie(params: { direction: number; firstX: number; lastX: number; lastYs: number[]; firstYs: number[] }): void {
+  override renderTie(params: {
+    direction: number;
+    firstX: number;
+    lastX: number;
+    lastYs: number[];
+    firstYs: number[];
+  }): void {
     if (params.firstYs.length === 0 || params.lastYs.length === 0) {
       throw new RuntimeError('BadArguments', 'No Y-values to render');
     }

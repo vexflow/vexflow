@@ -24,7 +24,7 @@ export class PedalMarking extends Element {
   /** To enable logging for this class. Set `VexFlow.PedalMarking.DEBUG` to `true`. */
   static DEBUG: boolean = false;
 
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.PedalMarking;
   }
 
@@ -244,7 +244,7 @@ export class PedalMarking extends Element {
   }
 
   /** Render the pedal marking in position on the rendering context. */
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkContext();
     this.setRendered();
 

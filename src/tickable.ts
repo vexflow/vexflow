@@ -33,7 +33,7 @@ export interface FormatterMetrics {
  * has a duration, i.e., Tickables occupy space in the musical rendering dimension.
  */
 export abstract class Tickable extends Element {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.Tickable;
   }
 
@@ -119,7 +119,7 @@ export abstract class Tickable extends Element {
   }
 
   /** Get width of note. Used by the formatter for positioning. */
-  getWidth(): number {
+  override getWidth(): number {
     if (!this._preFormatted) {
       throw new RuntimeError('UnformattedNote', "Can't call GetWidth on an unformatted note.");
     }
@@ -128,7 +128,7 @@ export abstract class Tickable extends Element {
   }
 
   /** Get `x` position of this tick context. */
-  getX(): number {
+  override getX(): number {
     const tickContext = this.checkTickContext(`Can't getX() without a TickContext.`);
     return tickContext.getX() + this.xShift;
   }

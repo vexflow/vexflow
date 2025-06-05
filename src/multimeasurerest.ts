@@ -54,7 +54,7 @@ export interface MultimeasureRestRenderOptions {
 }
 
 export class MultiMeasureRest extends Element {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.MultiMeasureRest;
   }
 
@@ -187,7 +187,7 @@ export class MultiMeasureRest extends Element {
     x += elTop.getWidth();
   }
 
-  draw(): void {
+  override draw(): void {
     const ctx = this.checkContext();
     this.setRendered();
 

@@ -11,11 +11,11 @@ export interface GraceNoteStruct extends StaveNoteStruct {
 }
 
 export class GraceNote extends StaveNote {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.GraceNote;
   }
 
-  static get LEDGER_LINE_OFFSET(): number {
+  static override get LEDGER_LINE_OFFSET(): number {
     return 2;
   }
 
@@ -36,7 +36,7 @@ export class GraceNote extends StaveNote {
     this.width = 3;
   }
 
-  getStemExtension(): number {
+  override getStemExtension(): number {
     if (this.stemExtensionOverride) {
       return this.stemExtensionOverride;
     }
@@ -46,7 +46,7 @@ export class GraceNote extends StaveNote {
     return ret;
   }
 
-  draw(): void {
+  override draw(): void {
     super.draw();
     this.setRendered();
     const stem = this.stem;

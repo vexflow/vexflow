@@ -13,7 +13,7 @@ export enum VoltaType {
 }
 
 export class Volta extends StaveModifier {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.Volta;
   }
 
@@ -31,7 +31,7 @@ export class Volta extends StaveModifier {
     this.text = label;
   }
 
-  draw(): void {
+  override draw(): void {
     const stave = this.checkStave();
     const x = stave.getModifierXShift(this.getPosition());
     const ctx = stave.checkContext();

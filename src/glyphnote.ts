@@ -11,7 +11,7 @@ export interface GlyphNoteOptions {
 }
 
 export class GlyphNote extends Note {
-  static get CATEGORY(): string {
+  static override get CATEGORY(): string {
     return Category.GlyphNote;
   }
 
@@ -35,7 +35,7 @@ export class GlyphNote extends Note {
     return this;
   }
 
-  preFormat(): this {
+  override preFormat(): this {
     if (!this.preFormatted && this.modifierContext) {
       this.modifierContext.preFormat();
     }
@@ -52,7 +52,7 @@ export class GlyphNote extends Note {
     }
   }
 
-  draw(): void {
+  override draw(): void {
     const stave = this.checkStave();
     const ctx = stave.checkContext();
     this.setRendered();
