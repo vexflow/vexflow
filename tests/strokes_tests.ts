@@ -5,19 +5,19 @@
 
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
-import { Barline, Beam, Bend, GraceNote, GraceNoteStruct, Stroke } from '../src/index';
+import { Barline, Beam, Bend, Category, GraceNote, GraceNoteStruct, StemmableNote, Stroke } from '../src/index';
 
 const StrokesTests = {
   Start(): void {
     QUnit.module('Strokes');
     const run = VexFlowTests.runTests;
-    // TODO: Rename tests by removing 'Strokes - ' since it is redundant with the module name.
-    // This will make flow.html easier to read.
-    run('Strokes - Brush/Roll/Rasgueado', brushRollRasgueado);
-    run('Strokes - Arpeggio directionless (without arrows)', arpeggioDirectionless);
-    run('Strokes - Multi Voice', multiVoice);
-    run('Strokes - Notation and Tab', notesWithTab);
-    run('Strokes - Multi-Voice Notation and Tab', multiNotationAndTab);
+
+    run('Brush/Roll/Rasgueado', brushRollRasgueado, { drawBoundingBox: false });
+    run('Brush/Roll/Rasgueado - bounding box', brushRollRasgueado, { drawBoundingBox: true });
+    run('Arpeggio directionless (without arrows)', arpeggioDirectionless);
+    run('Multi Voice', multiVoice);
+    run('Notation and Tab', notesWithTab);
+    run('Multi-Voice Notation and Tab', multiNotationAndTab);
   },
 };
 
@@ -64,6 +64,21 @@ function brushRollRasgueado(options: TestOptions): void {
   f.Formatter().joinVoices([voice2]).formatToStave([voice2], stave2);
 
   f.draw();
+
+  const drawBoundingBoxes = (notes: StemmableNote[]) => {
+    notes.forEach((note) => {
+      note.getModifiersByType(Category.Stroke).forEach((stroke) => {
+        const bb = stroke.getBoundingBox();
+        f.getContext().rect(bb.getX(), bb.getY(), bb.getW(), bb.getH());
+        f.getContext().stroke();
+      });
+    });
+  };
+
+  if (options.params.drawBoundingBox) {
+    drawBoundingBoxes(notes1);
+    drawBoundingBoxes(notes2);
+  }
 
   options.assert.ok(true, 'Brush/Roll/Rasgueado');
 }
