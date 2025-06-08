@@ -568,18 +568,18 @@ function nested(options: TestOptions): void {
   });
 
   f.Tuplet({
-    notes: notes.slice(0, 7),
-    options: {
-      notesOccupied: 2,
-      numNotes: 3,
-    },
-  });
-
-  f.Tuplet({
     notes: notes.slice(2, 7),
     options: {
       notesOccupied: 4,
       numNotes: 5,
+    },
+  });
+
+  f.Tuplet({
+    notes: notes.slice(0, 7),
+    options: {
+      notesOccupied: 2,
+      numNotes: 3,
     },
   });
 
@@ -614,17 +614,6 @@ function single(options: TestOptions): void {
     notes: notes.slice(1, 4),
   });
 
-  // big quartuplet
-  f.Tuplet({
-    notes: notes.slice(0, -1),
-    options: {
-      numNotes: 4,
-      notesOccupied: 3,
-      ratioed: true,
-      bracketed: true,
-    },
-  });
-
   // first singleton
   f.Tuplet({
     notes: notes.slice(0, 1),
@@ -650,6 +639,17 @@ function single(options: TestOptions): void {
     options: {
       numNotes: 3,
       notesOccupied: 2,
+      ratioed: true,
+      bracketed: true,
+    },
+  });
+
+  // big quartuplet
+  f.Tuplet({
+    notes: notes.slice(0, -1),
+    options: {
+      numNotes: 4,
+      notesOccupied: 3,
       ratioed: true,
       bracketed: true,
     },
