@@ -27,6 +27,7 @@ const TupletTests = {
     run('Mixed Stem Direction Tuplet', mixedTop);
     run('Mixed Stem Direction Bottom Tuplet', mixedBottom);
     run('Nested Tuplets', nested);
+    run('Nested Tuplets Only Tuplet Children', nestedChildren);
     run('Single Tuplets', single);
   },
 };
@@ -591,6 +592,60 @@ function nested(options: TestOptions): void {
   f.draw();
 
   options.assert.ok(true, 'Nested Tuplets');
+}
+
+function nestedChildren(options: TestOptions): void {
+  const f = VexFlowTests.makeFactory(options);
+  const stave = f.Stave({ x: 10, y: 10 }).addTimeSignature('4/4');
+
+  const notes = [
+    // Big triplet 1:
+    { keys: ['b/4'], duration: '4' },
+    { keys: ['a/4'], duration: '4' },
+    { keys: ['c/4'], duration: '4' },
+    { keys: ['g/4'], duration: '8' },
+    { keys: ['a/4'], duration: '8' },
+    { keys: ['f/4'], duration: '8' },
+  ]
+    .map(setStemUp)
+    .map(f.StaveNote.bind(f));
+
+  f.Beam({
+    notes: notes.slice(3),
+  });
+
+  f.Tuplet({
+    notes: notes.slice(0, 3),
+    options: {
+      notesOccupied: 2,
+      numNotes: 3,
+    },
+  });
+
+  f.Tuplet({
+    notes: notes.slice(3),
+    options: {
+      notesOccupied: 2,
+      numNotes: 3,
+    },
+  });
+
+  f.Tuplet({
+    notes: notes.slice(),
+    options: {
+      notesOccupied: 4,
+      numNotes: 3,
+    },
+  });
+
+  // 4/4 time
+  const voice = f.Voice().setStrict(true).addTickables(notes);
+
+  new Formatter().joinVoices([voice]).formatToStave([voice], stave);
+
+  f.draw();
+
+  options.assert.ok(true, 'Nested Tuplets Only Tuplet Children');
 }
 
 function single(options: TestOptions): void {

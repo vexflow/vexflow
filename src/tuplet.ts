@@ -228,23 +228,23 @@ export class Tuplet extends Element {
   // offset for this tuplet:
   getNestedTupletCount(): number {
     const { location } = this.options;
-    const firstNote = this.notes[0];
-    let maxTupletCount = countTuplets(firstNote, location);
-    let minTupletCount = countTuplets(firstNote, location);
 
-    // Count the tuplets that are on the same side (above/below)
-    // as this tuplet:
-    function countTuplets(note: Note, location: number) {
-      return note.getTupletStack().filter((tuplet) => tuplet.options.location === location).length;
+    let maxOffset = 0;
+    for (const note of this.notes) {
+      // Find the array of tuplets that note belongs to
+      const stack = note
+        .getTupletStack()
+        // Count the tuplets that are on the same side (above/below) as this tuplet.
+        .filter((tuplet) => tuplet.options.location === location);
+
+      // Find where “this” appears in that filtered stack
+      const index = stack.indexOf(this);
+      if (index >= 0 && index > maxOffset) {
+        maxOffset = index;
+      }
     }
 
-    this.notes.forEach((note) => {
-      const tupletCount = countTuplets(note, location);
-      maxTupletCount = tupletCount > maxTupletCount ? tupletCount : maxTupletCount;
-      minTupletCount = tupletCount < minTupletCount ? tupletCount : minTupletCount;
-    });
-
-    return maxTupletCount - minTupletCount;
+    return maxOffset;
   }
 
   // determine the y position of the tuplet:
