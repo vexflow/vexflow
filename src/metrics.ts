@@ -275,7 +275,11 @@ export const MetricsDefaults: Record<string, any> = {
     pointerRect: true,
     yOffset: 0,
     textYOffset: 2,
-    bracketPadding: 5,
+    bracket: {
+      padding: 5,
+      lineWidth: 1,
+      legLength: 10,
+    },
     suffix: {
       fontScale: 1 / 2,
       extraSpacing: 1,
