@@ -48,6 +48,7 @@
  * }
  */
 
+import { BoundingBox } from './boundingbox';
 import { Element } from './element';
 import { Formatter } from './formatter';
 import { Glyphs } from './glyphs';
@@ -312,7 +313,10 @@ export class Tuplet extends Element {
 
   override draw(): void {
     const { location, bracketed, textYOffset, suffix } = this.options;
-    const bracketPadding = Metrics.get('Tuplet.bracketPadding');
+
+    const bracketPadding = Metrics.get('Tuplet.bracket.padding');
+    const bracketThickness = Metrics.get('Tuplet.bracket.lineWidth');
+    const bracketLegLength = Metrics.get('Tuplet.bracket.legLength');
     const extraSpacing = Metrics.get('Tuplet.suffix.extraSpacing');
     const suffixOffsetY = Metrics.get('Tuplet.suffix.suffixOffsetY');
 
@@ -323,16 +327,26 @@ export class Tuplet extends Element {
     // determine x value of left bound of tuplet
     const firstNote = this.notes[0] as StemmableNote;
     const lastNote = this.notes[this.notes.length - 1] as StemmableNote;
+    let bodyWidth = 0;
     if (!bracketed) {
       xPos = firstNote.getStemX();
-      this.width = lastNote.getStemX() - xPos;
+      bodyWidth = lastNote.getStemX() - xPos;
+      this.setWidth(bodyWidth);
     } else {
       xPos = firstNote.getTieLeftX() - bracketPadding;
-      this.width = lastNote.getTieRightX() - xPos + bracketPadding;
+      bodyWidth = lastNote.getTieRightX() - xPos + bracketPadding;
+      // value added to fully include right bracket leg in bounding box
+      this.setWidth(bodyWidth + bracketThickness);
     }
+
+    this.setX(xPos);
 
     // determine y value for tuplet
     yPos = this.getYPosition();
+
+    // set y and height for bounding box calculations
+    this.setY(location === TupletLocation.TOP ? yPos : yPos - bracketLegLength + bracketThickness);
+    this.height = bracketLegLength;
 
     // calculate width taken by all text elements
     const ratioWidth = this.textElement.getWidth();
@@ -344,7 +358,7 @@ export class Tuplet extends Element {
     }
 
     // find center of notation for text placement
-    const notationCenterX = xPos + this.width / 2;
+    const notationCenterX = xPos + bodyWidth / 2;
     const notationStartX = notationCenterX - totalTextWidth / 2;
 
     // Compute a common vertical coordinate for text rendering.
@@ -357,30 +371,53 @@ export class Tuplet extends Element {
 
     // draw bracket if the tuplet is not beamed
     if (bracketed) {
-      const lineWidth = this.width / 2 - totalTextWidth / 2 - bracketPadding;
+      const lineWidth = bodyWidth / 2 - totalTextWidth / 2 - bracketPadding;
       const isTupletBottom = location === Tuplet.LOCATION_BOTTOM;
 
       if (lineWidth > 0) {
-        ctx.fillRect(xPos, yPos, lineWidth, 1);
-        ctx.fillRect(xPos + this.width / 2 + totalTextWidth / 2 + bracketPadding, yPos, lineWidth, 1);
-        ctx.fillRect(xPos, yPos + (isTupletBottom ? 1 : 0), 1, location * 10);
-        ctx.fillRect(xPos + this.width, yPos + (isTupletBottom ? 1 : 0), 1, location * 10);
+        ctx.fillRect(xPos, yPos, lineWidth, bracketThickness);
+        ctx.fillRect(xPos + bodyWidth / 2 + totalTextWidth / 2 + bracketPadding, yPos, lineWidth, bracketThickness);
+        ctx.fillRect(xPos, yPos + (isTupletBottom ? 1 : 0), bracketThickness, location * bracketLegLength);
+        ctx.fillRect(xPos + bodyWidth, yPos + (isTupletBottom ? 1 : 0), bracketThickness, location * bracketLegLength);
       }
     }
 
     // draw ratio text (x:y)
     let currentX = notationStartX;
     this.textElement.renderText(ctx, currentX, commonTextY);
+    // set text element proper x and y
+    this.textElement.setX(currentX);
+    this.textElement.setY(commonTextY);
     currentX += ratioWidth + extraSpacing;
 
     // draw note glyph if wanted
     if (suffix) {
-      this.suffixElement.renderText(ctx, currentX, commonTextY + suffixOffsetY);
+      const suffixY = commonTextY + suffixOffsetY;
+      this.suffixElement.renderText(ctx, currentX, suffixY);
+      this.suffixElement.setX(currentX);
+      this.suffixElement.setY(suffixY);
       currentX += noteWidth;
     }
 
     this.drawPointerRect();
     ctx.closeGroup();
     this.setRendered();
+  }
+
+  override getBoundingBox(): BoundingBox {
+    const { bracketed, suffix } = this.options;
+
+    const ratioBounding = this.textElement.getBoundingBox();
+    const suffixBounding = this.suffixElement.getBoundingBox();
+
+    const mergedText = suffix ? ratioBounding.mergeWith(suffixBounding) : ratioBounding;
+
+    if (!bracketed) {
+      return mergedText;
+    }
+
+    const bracketBounding = new BoundingBox(this.x, this.y, this.width, this.height);
+
+    return bracketBounding.mergeWith(mergedText);
   }
 }
