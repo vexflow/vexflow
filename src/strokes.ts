@@ -239,7 +239,7 @@ export class Stroke extends Modifier {
   }
 
   /** Get the boundingBox. */
-  getBoundingBox(): BoundingBox {
+  override getBoundingBox(): BoundingBox {
     return this.boundingBox;
   }
 }
