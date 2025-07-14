@@ -15,6 +15,8 @@ const TupletTests = {
   Start(): void {
     QUnit.module('Tuplet');
     const run = VexFlowTests.runTests;
+    run('Bounding Box Above', aboveBounding);
+    run('Bounding Box Below', belowBounding);
     run('Simple Tuplet', simple);
     run('Beamed Tuplet', beamed);
     run('Ratioed Tuplet', ratio);
@@ -43,6 +45,159 @@ const setStemDirection = set('stemDirection');
 const setStemUp = setStemDirection(Stem.UP);
 const setStemDown = setStemDirection(Stem.DOWN);
 const setDurationToQuarterNote = set('duration')('4');
+
+function aboveBounding(options: TestOptions): void {
+  const f = VexFlowTests.makeFactory(options, 600);
+  const stave = f.Stave({ x: 10, y: 10 });
+
+  const notes = [
+    { keys: ['g/4'], duration: '4' },
+    { keys: ['a/4'], duration: '4' },
+    { keys: ['b/4'], duration: '4' },
+    { keys: ['g/4'], duration: '4' },
+    { keys: ['a/4'], duration: '4' },
+    { keys: ['b/4'], duration: '4' },
+    { keys: ['g/4'], duration: '4' },
+    { keys: ['a/4'], duration: '4' },
+    { keys: ['b/4'], duration: '4' },
+    { keys: ['g/4'], duration: '4' },
+    { keys: ['a/4'], duration: '4' },
+    { keys: ['b/4'], duration: '4' },
+    { keys: ['g/4'], duration: '4' },
+    { keys: ['a/4'], duration: '4' },
+    { keys: ['b/4'], duration: '4' },
+    { keys: ['g/4'], duration: '4' },
+    { keys: ['a/4'], duration: '4' },
+    { keys: ['b/4'], duration: '4' },
+    { keys: ['g/4'], duration: '4' },
+    { keys: ['a/4'], duration: '4' },
+    { keys: ['b/4'], duration: '4' },
+  ]
+    .map(setStemUp)
+    .map(f.StaveNote.bind(f));
+
+  const tuplet = f.Tuplet({ notes: notes.slice(0, 3), options: { notesOccupied: 2, numNotes: 3, bracketed: false } });
+  const ratioedTuplet = f.Tuplet({
+    notes: notes.slice(3, 6),
+    options: { notesOccupied: 2, numNotes: 3, bracketed: false, ratioed: true },
+  });
+  const suffixTuplet = f.Tuplet({
+    notes: notes.slice(6, 9),
+    options: { notesOccupied: 2, numNotes: 3, bracketed: false, suffix: Glyphs.metNoteQuarterUp },
+  });
+  const ratioedSuffixTuplet = f.Tuplet({
+    notes: notes.slice(9, 12),
+    options: { notesOccupied: 2, numNotes: 3, bracketed: false, suffix: Glyphs.metNoteQuarterUp, ratioed: true },
+  });
+  const bracketedTuplet = f.Tuplet({ notes: notes.slice(12, 15), options: { notesOccupied: 2, numNotes: 3 } });
+  const bracketedRatioedTuplet = f.Tuplet({
+    notes: notes.slice(15, 18),
+    options: { notesOccupied: 2, numNotes: 3, ratioed: true },
+  });
+  const bracketedRatioedSuffixTuplet = f.Tuplet({
+    notes: notes.slice(18),
+    options: { notesOccupied: 2, numNotes: 3, suffix: Glyphs.metNoteQuarterUp, ratioed: true },
+  });
+
+  const voice = f.Voice().setStrict(false).addTickables(notes);
+
+  new Formatter().joinVoices([voice]).formatToStave([voice], stave);
+
+  f.draw();
+
+  VexFlowTests.drawBoundingBox(f.getContext(), tuplet);
+  VexFlowTests.drawBoundingBox(f.getContext(), ratioedTuplet);
+  VexFlowTests.drawBoundingBox(f.getContext(), suffixTuplet);
+  VexFlowTests.drawBoundingBox(f.getContext(), ratioedSuffixTuplet);
+  VexFlowTests.drawBoundingBox(f.getContext(), bracketedTuplet);
+  VexFlowTests.drawBoundingBox(f.getContext(), bracketedRatioedTuplet);
+  VexFlowTests.drawBoundingBox(f.getContext(), bracketedRatioedSuffixTuplet);
+
+  options.assert.ok(true, 'Bounding Box Above Test');
+}
+
+function belowBounding(options: TestOptions): void {
+  const f = VexFlowTests.makeFactory(options, 600);
+  const stave = f.Stave({ x: 10, y: 10 });
+
+  const notes = [
+    { keys: ['g/4'], duration: '4' },
+    { keys: ['a/4'], duration: '4' },
+    { keys: ['b/4'], duration: '4' },
+    { keys: ['g/4'], duration: '4' },
+    { keys: ['a/4'], duration: '4' },
+    { keys: ['b/4'], duration: '4' },
+    { keys: ['g/4'], duration: '4' },
+    { keys: ['a/4'], duration: '4' },
+    { keys: ['b/4'], duration: '4' },
+    { keys: ['g/4'], duration: '4' },
+    { keys: ['a/4'], duration: '4' },
+    { keys: ['b/4'], duration: '4' },
+    { keys: ['g/4'], duration: '4' },
+    { keys: ['a/4'], duration: '4' },
+    { keys: ['b/4'], duration: '4' },
+    { keys: ['g/4'], duration: '4' },
+    { keys: ['a/4'], duration: '4' },
+    { keys: ['b/4'], duration: '4' },
+    { keys: ['g/4'], duration: '4' },
+    { keys: ['a/4'], duration: '4' },
+    { keys: ['b/4'], duration: '4' },
+  ]
+    .map(setStemUp)
+    .map(f.StaveNote.bind(f));
+
+  const tuplet = f.Tuplet({
+    notes: notes.slice(0, 3),
+    options: { notesOccupied: 2, numNotes: 3, bracketed: false, location: -1 },
+  });
+  const ratioedTuplet = f.Tuplet({
+    notes: notes.slice(3, 6),
+    options: { notesOccupied: 2, numNotes: 3, bracketed: false, ratioed: true, location: -1 },
+  });
+  const suffixTuplet = f.Tuplet({
+    notes: notes.slice(6, 9),
+    options: { notesOccupied: 2, numNotes: 3, bracketed: false, suffix: Glyphs.metNoteQuarterUp, location: -1 },
+  });
+  const ratioedSuffixTuplet = f.Tuplet({
+    notes: notes.slice(9, 12),
+    options: {
+      notesOccupied: 2,
+      numNotes: 3,
+      bracketed: false,
+      suffix: Glyphs.metNoteQuarterUp,
+      ratioed: true,
+      location: -1,
+    },
+  });
+  const bracketedTuplet = f.Tuplet({
+    notes: notes.slice(12, 15),
+    options: { notesOccupied: 2, numNotes: 3, location: -1 },
+  });
+  const bracketedRatioedTuplet = f.Tuplet({
+    notes: notes.slice(15, 18),
+    options: { notesOccupied: 2, numNotes: 3, ratioed: true, location: -1 },
+  });
+  const bracketedRatioedSuffixTuplet = f.Tuplet({
+    notes: notes.slice(18),
+    options: { notesOccupied: 2, numNotes: 3, suffix: Glyphs.metNoteQuarterUp, ratioed: true, location: -1 },
+  });
+
+  const voice = f.Voice().setStrict(false).addTickables(notes);
+
+  new Formatter().joinVoices([voice]).formatToStave([voice], stave);
+
+  f.draw();
+
+  VexFlowTests.drawBoundingBox(f.getContext(), tuplet);
+  VexFlowTests.drawBoundingBox(f.getContext(), ratioedTuplet);
+  VexFlowTests.drawBoundingBox(f.getContext(), suffixTuplet);
+  VexFlowTests.drawBoundingBox(f.getContext(), ratioedSuffixTuplet);
+  VexFlowTests.drawBoundingBox(f.getContext(), bracketedTuplet);
+  VexFlowTests.drawBoundingBox(f.getContext(), bracketedRatioedTuplet);
+  VexFlowTests.drawBoundingBox(f.getContext(), bracketedRatioedSuffixTuplet);
+
+  options.assert.ok(true, 'Bounding Box Below Test');
+}
 
 /**
  * Simple test case with one ascending triplet and one descending triplet.
