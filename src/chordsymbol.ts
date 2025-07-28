@@ -403,7 +403,8 @@ export class ChordSymbol extends Modifier {
     const note = this.checkAttachedNote() as StemmableNote;
     this.setRendered();
 
-    ctx.openGroup('chordsymbol', this.getAttribute('id'));
+    const clsAttribute = this.getAttribute('class');
+    ctx.openGroup('chordsymbol' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
 
     const start = note.getModifierStartXY(Modifier.Position.ABOVE, this.index);
     ctx.setFont(this.fontInfo);

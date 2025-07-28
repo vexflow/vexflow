@@ -367,7 +367,8 @@ export class Tuplet extends Element {
       yPos + this.textElement.getHeight() / 2 + (location === Tuplet.LOCATION_TOP ? -1 : 1) * textYOffset;
 
     // start grouping
-    ctx.openGroup('tuplet', this.getAttribute('id'));
+    const clsAttribute = this.getAttribute('class');
+    ctx.openGroup('tuplet' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
 
     // draw bracket if the tuplet is not beamed
     if (bracketed) {

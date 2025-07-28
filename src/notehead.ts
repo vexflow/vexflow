@@ -151,7 +151,8 @@ export class NoteHead extends Note {
   override draw(): void {
     const ctx = this.checkContext();
     this.setRendered();
-    ctx.openGroup('notehead', this.getAttribute('id'));
+    const clsAttribute = this.getAttribute('class');
+    ctx.openGroup('notehead' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
 
     L("Drawing note head '", this.noteType, this.duration, "' at", this.x, this.y);
     this.x = this.getAbsoluteX();

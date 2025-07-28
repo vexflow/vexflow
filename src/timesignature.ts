@@ -207,7 +207,8 @@ export class TimeSignature extends StaveModifier {
     const stave = this.checkStave();
     const ctx = stave.checkContext();
     this.setRendered();
-    ctx.openGroup('timesignature', this.getAttribute('id'));
+    const clsAttribute = this.getAttribute('class');
+    ctx.openGroup('timesignature' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
     this.drawAt(ctx, stave, this.x);
     this.drawPointerRect();
     ctx.closeGroup();
