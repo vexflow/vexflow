@@ -224,7 +224,8 @@ export class Annotation extends Modifier {
     const start = note.getModifierStartXY(ModifierPosition.ABOVE, this.index);
 
     this.setRendered();
-    ctx.openGroup('annotation', this.getAttribute('id'));
+    const clsAttribute = this.getAttribute('class');
+    ctx.openGroup('annotation' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
 
     const textWidth = this.getWidth();
     const textHeight = Font.convertSizeToPixelValue(this.fontInfo.size);

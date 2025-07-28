@@ -210,7 +210,8 @@ export class Stem extends Element {
     const stemletYOffset = this.isStemlet ? stemHeight - this.stemletHeight * this.stemDirection : 0;
 
     // Draw the stem
-    ctx.openGroup('stem', this.getAttribute('id'));
+    const clsAttribute = this.getAttribute('class');
+    ctx.openGroup('stem' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
     ctx.beginPath();
     ctx.setLineWidth(Stem.WIDTH);
     ctx.moveTo(stemX, stemY - stemletYOffset + yBaseOffset);

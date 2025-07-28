@@ -991,7 +991,8 @@ export class Beam extends Element {
       this.postFormat();
     }
 
-    ctx.openGroup('beam', this.getAttribute('id'));
+    const clsAttribute = this.getAttribute('class');
+    ctx.openGroup('beam' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
     this.drawStems(ctx);
     this.drawBeamLines(ctx);
     this.drawPointerRect();

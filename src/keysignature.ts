@@ -294,7 +294,8 @@ export class KeySignature extends StaveModifier {
     if (!this.formatted) this.format();
     this.setRendered();
 
-    ctx.openGroup('keysignature', this.getAttribute('id'));
+    const clsAttribute = this.getAttribute('class');
+    ctx.openGroup('keysignature' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
     for (let i = 0; i < this.children.length; i++) {
       const glyph = this.children[i];
       glyph.renderText(ctx, this.x, 0);
