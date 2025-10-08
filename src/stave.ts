@@ -680,7 +680,8 @@ export class Stave extends Element {
     const ctx = this.checkContext();
     this.setRendered();
 
-    ctx.openGroup('stave', this.getAttribute('id'));
+    const clsAttribute = this.getAttribute('class');
+    ctx.openGroup('stave' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
     if (!this.formatted) this.format();
 
     const numLines = this.options.numLines;

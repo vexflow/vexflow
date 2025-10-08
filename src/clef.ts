@@ -153,7 +153,8 @@ export class Clef extends StaveModifier {
     const ctx = stave.checkContext();
     this.setRendered();
 
-    ctx.openGroup('clef', this.getAttribute('id'));
+    const clsAttribute = this.getAttribute('class');
+    ctx.openGroup('clef' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
 
     this.y = stave.getYForLine(this.line);
     this.renderText(ctx, 0, 0);

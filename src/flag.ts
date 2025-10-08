@@ -26,7 +26,8 @@ export class Flag extends Element {
   override draw(): void {
     const ctx = this.checkContext();
     this.setRendered();
-    ctx.openGroup('flag', this.getAttribute('id'));
+    const clsAttribute = this.getAttribute('class');
+    ctx.openGroup('flag' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
 
     L("Drawing flag '", this.text, "' at", this.x, this.y);
     this.renderText(ctx, 0, 0);
