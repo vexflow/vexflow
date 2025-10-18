@@ -2,6 +2,7 @@
 
 import { ElementStyle } from './element';
 import { FontInfo } from './font';
+import { structuredClone } from './util';
 
 export class Metrics {
   protected static cacheStyle = new Map<string, ElementStyle>();
