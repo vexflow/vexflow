@@ -1,6 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
-export { structuredClone } from 'structured-clone-es'
+export { structuredClone } from 'structured-clone-es';
 
 // Note: Keep this module free of imports to reduce the chance of circular dependencies.
 
