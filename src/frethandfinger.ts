@@ -43,6 +43,10 @@ export class FretHandFinger extends Modifier {
       }
 
       if (note !== prevNote) {
+        // POSSIBLE_BUG_BELOW?
+        // Same pattern as accidental.ts:98 — loop variable `n` is never used inside the
+        // body. Math.max gets called note.keys.length times with the same arguments.
+        // SUGGESTED_FIX: drop the loop wrapper and run the body once.
         for (let n = 0; n < note.keys.length; ++n) {
           if (leftShift === 0) {
             shiftLeft = Math.max(note.getLeftDisplacedHeadPx(), shiftLeft);

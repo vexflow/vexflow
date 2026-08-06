@@ -88,6 +88,7 @@ function getPartialStemLines(stemY: number, unusedStrings: number[][], stave: St
     }
 
     const lineYs: number[] = [];
+    // BAD_COMMENT_BELOW? Grammar: "it's y position" → "its y position" (possessive).
     // Iterate through each group string and store it's y position
     strings.forEach((string, index, strings) => {
       const isTopBound = string === 1;
@@ -329,6 +330,7 @@ export class TabNote extends StemmableNote {
     return this.checkStem().getExtents();
   }
 
+  // BAD_COMMENT_BELOW? Typo "fal" → "flag".
   // Draw the fal onto the context
   drawFlag(): void {
     const {

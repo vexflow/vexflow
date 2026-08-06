@@ -32,6 +32,8 @@ export interface Key {
 
 /** Music implements some standard music theory routines. */
 export class Music {
+  // BAD_COMMENT_BELOW?
+  // Grammar: "Number of an canonical notes" → "Number of canonical notes".
   /** Number of an canonical notes (12). */
   static get NUM_TONES(): number {
     return this.canonicalNotes.length;
@@ -142,6 +144,9 @@ export class Music {
       minor: [2, 1, 2, 2, 1, 2, 2],
       ionian: [2, 2, 1, 2, 2, 2, 1],
       dorian: [2, 1, 2, 2, 2, 1, 2],
+      // POSSIBLE_BUG_BELOW?
+      // Mode name misspelled: "phyrgian" → "phrygian". Renaming is a breaking change for any
+      // callers using the typo; if so, keep both keys or add a deprecated alias.
       phyrgian: [1, 2, 2, 2, 1, 2, 2],
       lydian: [2, 2, 2, 1, 2, 2, 1],
       mixolydian: [2, 2, 1, 2, 2, 1, 2],

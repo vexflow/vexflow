@@ -1005,6 +1005,7 @@ export class Formatter {
 
       context.move(shift, prevContext, nextContext);
 
+      // BAD_COMMENT_BELOW? Typo "Should the cost by normalized" → "Should the cost be normalized".
       // Q(msac): Should the cost by normalized by the number
       // of tickables at this position?  If so, switch this to getAverageDeviationCost()
       const cost = -context.getDeviationCost();

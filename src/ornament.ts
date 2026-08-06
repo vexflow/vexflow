@@ -105,6 +105,7 @@ export class Ornament extends Modifier {
   }
 
   /**
+   * BAD_COMMENT_BELOW? Typo "happens in the attach" → "happens in the attack".
    * ornamentAttack indicates something that happens in the attach, placed before the note and
    * any accidentals
    */

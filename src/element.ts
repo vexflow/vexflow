@@ -277,6 +277,12 @@ export class Element {
     if (!this.hasClass(className)) return this;
     const arr = this.attrs.class?.split(' ');
     if (arr) {
+      // POSSIBLE_BUG_BELOW?
+      // splice() with only a start index removes ALL elements from that index to the end of
+      // the array — not just the matched class. So removing one class also drops every class
+      // that came after it.
+      // SUGGESTED_FIX
+      // arr.splice(arr.indexOf(className), 1);
       arr.splice(arr.indexOf(className));
       this.attrs.class = arr.join(' ');
     }

@@ -64,6 +64,10 @@ export class StringNumber extends Modifier {
       }
 
       if (note !== prevNote) {
+        // POSSIBLE_BUG_BELOW?
+        // Same pattern as accidental.ts:98 / frethandfinger.ts / gracenotegroup.ts — the
+        // loop variable `n` is never used inside the body.
+        // SUGGESTED_FIX: drop the loop wrapper and run the body once.
         for (let n = 0; n < note.keys.length; ++n) {
           if (pos === Modifier.Position.LEFT) {
             extraXSpaceForDisplacedNotehead = Math.max(note.getLeftDisplacedHeadPx(), extraXSpaceForDisplacedNotehead);

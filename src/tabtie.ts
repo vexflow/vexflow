@@ -2,6 +2,7 @@
 // MIT License
 //
 // ## Description
+// BAD_COMMENT_BELOW? Typo "varies types" → "various types".
 // This class implements varies types of ties between contiguous notes. The
 // ties include: regular ties, hammer ons, pull offs, and slides.
 
@@ -39,6 +40,7 @@ export class TabTie extends StaveTie {
     this.renderOptions.cp2 = 11;
     this.renderOptions.yShift = 3;
 
+    // BAD_COMMENT_BELOW? Grammar: "Tab tie's are always face up" → "Tab ties are always face up" (no apostrophe; plural, not possessive).
     this.direction = -1; // Tab tie's are always face up.
   }
 }

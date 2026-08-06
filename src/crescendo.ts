@@ -93,7 +93,9 @@ export class Crescendo extends Note {
     return this;
   }
 
-  // Set whether the sign should be a descresendo by passing a bool
+  // BAD_COMMENT_BELOW?
+  // Typo: "descresendo" should be "decrescendo".
+  // Set whether the sign should be a decrescendo by passing a bool
   // to `decresc`
   setDecrescendo(decresc: boolean): this {
     this.decrescendo = decresc;
@@ -117,6 +119,10 @@ export class Crescendo extends Note {
 
     const beginX = this.getAbsoluteX();
     const endX = nextContext ? nextContext.getX() : stave.getX() + stave.getWidth();
+    // BAD_COMMENT_BELOW?
+    // `this.line + -3` is just `this.line - 3`. Unnecessary unary minus.
+    // SUGGESTED_FIX
+    // const y = stave.getYForLine(this.line - 3) + 1;
     const y = stave.getYForLine(this.line + -3) + 1;
 
     L('Drawing ', this.decrescendo ? 'decrescendo ' : 'crescendo ', this.height, 'x', beginX - endX);

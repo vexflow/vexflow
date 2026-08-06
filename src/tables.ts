@@ -332,6 +332,10 @@ export class Tables {
   static RENDER_PRECISION_PLACES = 3;
   static RESOLUTION = RESOLUTION;
 
+  // BAD_COMMENT_BELOW?
+  // The comment below claims "There is no 256 here", but 256 IS present in durationCodes
+  // (see entry below). The comment appears to be stale — likely from an older version
+  // where 256 was missing. Verify and update the note.
   // 1/8, 1/4, 1/2, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024
   // NOTE: There is no 256 here! However, there are other mentions of 256 in this file.
   // For example, in durations has a 256 key, and sanitizeDuration() can return 256.

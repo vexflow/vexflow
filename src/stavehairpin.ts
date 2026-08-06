@@ -68,6 +68,7 @@ export class StaveHairpin extends Element {
     const ppt = formatter.pixelsPerTick;
 
     if (ppt === null) {
+      // BAD_COMMENT_BELOW? Typo "must be provide" → "must be provided" (in the error string).
       throw new RuntimeError('BadArguments', 'A valid Formatter must be provide to draw offsets by ticks.');
     }
 

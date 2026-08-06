@@ -209,6 +209,7 @@ export class Stroke extends Modifier {
       el.setText(arrow);
       el.renderText(
         ctx,
+        // BAD_COMMENT_BELOW? Typo "substracting" → "subtracting".
         // Center the arrow head substracting its width / 2
         x + this.xShift - el.getWidth() / 2,
         arrowY

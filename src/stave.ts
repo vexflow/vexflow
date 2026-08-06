@@ -331,6 +331,12 @@ export class Stave extends Element {
   }
 
   getLineForY(y: number): number {
+    // BAD_COMMENT_BELOW?
+    // This comment is wrong: getLineForY does NOT call getYForLine in a loop —
+    // it inverts the formula algebraically. The comment is stale.
+    // SUGGESTED_FIX
+    // // Inverse of getYForLine: solves y = this.y + line*spacing + headroom*spacing
+    // // for `line`.
     // Does the reverse of getYForLine - somewhat dumb and just calls
     // getYForLine until the right value is reaches
 
@@ -568,6 +574,7 @@ export class Stave extends Element {
 
   /**
    * Use the modifier's `getCategory()` as a key for the `order` array.
+   * BAD_COMMENT_BELOW? Typo "0 to to 3" → "0 to 3".
    * The retrieved value is used to sort modifiers from left to right (0 to to 3).
    */
   sortByCategory(items: StaveModifier[], order: Record<string, number>): void {
@@ -816,6 +823,7 @@ export class Stave extends Element {
       staves.forEach((stave) => {
         adjustX = 0;
         const modifiers = stave.getModifiers(StaveModifierPosition.BEGIN, category);
+        // BAD_COMMENT_BELOW? Typo "adjustement" → "adjustment".
         // Calculate adjustement required for the stave
         modifiers.forEach((modifier) => {
           if (minStartX - modifier.getX() > adjustX) adjustX = minStartX - modifier.getX();

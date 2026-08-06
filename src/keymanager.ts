@@ -137,6 +137,8 @@ export class KeyManager {
       };
     }
 
+    // BAD_COMMENT_BELOW? Apparent typo "shitshoot" — likely meant "best guess"
+    // or "shot in the dark". Also informal/jarring in a code comment.
     // Last resort -- shitshoot
     delete this.scaleMapByValue[this.music.getNoteValue(this.scaleMap[parts.root])];
     this.scaleMapByValue[this.music.getNoteValue(note)] = note;
