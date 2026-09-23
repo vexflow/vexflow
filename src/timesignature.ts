@@ -127,6 +127,7 @@ export class TimeSignature extends StaveModifier {
     botWidth = this.botText.getWidth();
     height = Math.max(height, this.botText.getHeight());
 
+    // BAD_COMMENT_BELOW? Typo "line line" — duplicated word.
     // If the height of the digits is more than three staff spaces (30), shift half a line line
     // in order to center the digits on lines 1.5 and 4.5 rather than 2 and 4.
     this.lineShift = height > 30 ? 0.5 : 0;

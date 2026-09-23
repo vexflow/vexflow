@@ -127,6 +127,12 @@ export class Renderer {
       if (typeof arg0 === 'string') {
         const maybeElement = document.getElementById(arg0);
         if (!maybeElement) {
+          // POSSIBLE_BUG_BELOW?
+          // The error interpolates `${maybeElement}` but at this point maybeElement is null
+          // (that's why we're in the throw branch). The message will read `... ID "null"`,
+          // hiding which ID the caller actually used.
+          // SUGGESTED_FIX
+          // throw new RuntimeError('BadElementId', `Can't find element with ID "${arg0}"`);
           throw new RuntimeError('BadElementId', `Can't find element with ID "${maybeElement}"`);
         }
         element = maybeElement;

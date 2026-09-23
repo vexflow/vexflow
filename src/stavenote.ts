@@ -488,6 +488,7 @@ export class StaveNote extends StemmableNote {
     }
 
     for (let i = start; i !== end; i += step) {
+      // BAD_COMMENT_BELOW? Typo "sortedKeNotes" → "sortedKeyProps" (the actual field name).
       // Building noteheads rely on sortedKeNotes in order to calculate the displacements
       const noteProps = this.sortedKeyProps[i].keyProps;
       const line = noteProps.line;
@@ -784,6 +785,7 @@ export class StaveNote extends StemmableNote {
       x = this.getGlyphWidth() / 2;
     }
 
+    // BAD_COMMENT_BELOW? Typo "addtional" → "additional".
     // addtional y shifts for rests
     let restShift = 0;
     switch (this._noteHeads[index].getText()) {

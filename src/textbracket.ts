@@ -102,6 +102,7 @@ export class TextBracket extends Element {
   }
 
   /**
+   * BAD_COMMENT_BELOW? Typo "backet" → "bracket".
    * Apply the text backet styling to the provided context.
    * @param ctx
    * @returns this
@@ -153,6 +154,7 @@ export class TextBracket extends Element {
         throw new RuntimeError('InvalidPosition', `The position ${this.position} is invalid.`);
     }
 
+    // BAD_COMMENT_BELOW? Typo "coordintates" → "coordinates".
     // Get the preliminary start and stop coordintates for the bracket
     const start = { x: this.start.getAbsoluteX(), y };
     const stop = { x: this.stop.getAbsoluteX(), y };

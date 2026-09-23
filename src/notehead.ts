@@ -116,6 +116,7 @@ export class NoteHead extends Note {
   /** Get the canvas `x` coordinate position of the notehead. */
   override getAbsoluteX(): number {
     // If the note has not been preformatted, then get the static x value
+    // BAD_COMMENT_BELOW? Grammar: "it's x value" → "its x value" (possessive, no apostrophe).
     // Otherwise, it's been formatted and we should use it's x value relative
     // to its tick context
     const x = !this.preFormatted ? this.x : super.getAbsoluteX();

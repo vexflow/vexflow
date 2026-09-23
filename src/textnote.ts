@@ -84,12 +84,12 @@ export class TextNote extends Note {
     // Scale the font size by 1/1.3.
     const smallerFontSize = Font.convertSizeToPointValue(this.fontInfo.size) * 0.769231;
     if (noteStruct.superscript) {
-      this.superscript = new Element('TexNote.subSuper');
+      this.superscript = new Element('TexNote.subSuper' /* POSSIBLE_BUG_BELOW? Typo "TexNote" → "TextNote" in the category key; may break Metrics lookups that key on the type string. */);
       this.superscript.setText(noteStruct.superscript);
       this.superscript.setFontSize(smallerFontSize);
     }
     if (noteStruct.subscript) {
-      this.subscript = new Element('TexNote.subSuper');
+      this.subscript = new Element('TexNote.subSuper' /* POSSIBLE_BUG_BELOW? Typo "TexNote" → "TextNote" in the category key; may break Metrics lookups that key on the type string. */);
       this.subscript.setText(noteStruct.subscript);
       this.subscript.setFontSize(smallerFontSize);
     }

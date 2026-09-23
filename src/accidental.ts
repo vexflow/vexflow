@@ -94,6 +94,16 @@ export class Accidental extends Modifier {
       const props = note.getKeyProps()[index];
 
       if (note !== prevNote) {
+        // POSSIBLE_BUG_BELOW?
+        // The loop iterates over note.keys but never uses `n`. note.getLeftDisplacedHeadPx()
+        // and note.getXShift() don't depend on the key index, so this Math.max is computed
+        // identically on every iteration. Either the body should index by `n`, or the loop is
+        // unnecessary and the inside should run exactly once.
+        // SUGGESTED_FIX
+        // extraXSpaceNeededForLeftDisplacedNotehead = Math.max(
+        //   note.getLeftDisplacedHeadPx() - note.getXShift(),
+        //   extraXSpaceNeededForLeftDisplacedNotehead
+        // );
         // Iterate through all notes to get the displaced pixels
         for (let n = 0; n < note.keys.length; ++n) {
           // If the current extra left-space needed isn't as big as this note's,
@@ -322,6 +332,9 @@ export class Accidental extends Modifier {
 
     // ### Convert Columns to xOffsets
     //
+    // BAD_COMMENT_BELOW?
+    // Grammar: "than is an accidental might need" — likely a leftover word. Suggested rewrite:
+    // "which sometimes results in a larger xOffset than an accidental might need".
     // This keeps columns aligned, even if they have different accidentals within them
     // which sometimes results in a larger xOffset than is an accidental might need
     // to preserve the symmetry of the accidental shape.

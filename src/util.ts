@@ -88,6 +88,12 @@ export function upperFirst(s: string = ''): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+// BAD_COMMENT_BELOW?
+// The docstring says "in the range [0, pi)" but the code normalizes to [0, 2π).
+// SUGGESTED_FIX
+// /**
+//  * Convert an arbitrary angle in radians to the equivalent one in the range [0, 2π).
+//  */
 /**
  * Convert an arbitrary angle in radians to the equivalent one in the range [0, pi).
  */

@@ -62,6 +62,11 @@ export class GraceNoteGroup extends Modifier {
       const spacing = isStavenote ? groupSpacingStave : groupSpacingTab;
 
       if (isStavenote && note !== prevNote) {
+        // POSSIBLE_BUG_BELOW?
+        // Same pattern as accidental.ts:98 and frethandfinger.ts — loop variable `n` is
+        // never used inside the body. Math.max gets called note.keys.length times with
+        // the same arguments.
+        // SUGGESTED_FIX: drop the loop wrapper and run the body once.
         // Iterate through all notes to get the displaced pixels
         for (let n = 0; n < note.keys.length; ++n) {
           shift = Math.max(note.getLeftDisplacedHeadPx(), shift);
@@ -99,6 +104,7 @@ export class GraceNoteGroup extends Modifier {
     return true;
   }
 
+  // BAD_COMMENT_BELOW? Malformed docstring start — `//**` should be `/**`.
   //** `GraceNoteGroup` inherits from `Modifier` and is placed inside a `ModifierContext`. */
   constructor(graceNotes: StemmableNote[], showSlur?: boolean) {
     super();

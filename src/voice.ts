@@ -196,6 +196,7 @@ export class Voice extends Element {
    * as the denominator of softmax.  (It is not the sum of the softmax(t) over all tickables)
    *
    * Note that the "exp" of "expTicksUsed" stands for "expontential" ticks used,
+   * BAD_COMMENT_BELOW? Typo "expontential" → "exponential".
    * not "expected" ticks used.
    */
   protected reCalculateExpTicksUsed(): number {

@@ -220,6 +220,7 @@ export abstract class Note extends Tickable {
       return undefined;
     }
 
+    // BAD_COMMENT_BELOW? Typo "numbr" → "number".
     // Add ticks as necessary depending on the numbr of dots
     let currentTicks = ticks;
     for (let i = 0; i < dots; i++) {
