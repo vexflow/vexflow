@@ -671,14 +671,15 @@ export class Element {
 
   setOriginX(x: number): void {
     const bbox = this.getBoundingBox();
-    const originX = Math.abs((bbox.getX() - this.xShift) / bbox.getW());
+    // The bounding box includes this.x, which is not part of the origin.
+    const originX = Math.abs((bbox.getX() - this.x - this.xShift) / bbox.getW());
     const xShift = (x - originX) * bbox.getW();
     this.xShift = -xShift;
   }
 
   setOriginY(y: number): void {
     const bbox = this.getBoundingBox();
-    const originY = Math.abs((bbox.getY() - this.yShift) / bbox.getH());
+    const originY = Math.abs((bbox.getY() - this.y - this.yShift) / bbox.getH());
     const yShift = (y - originY) * bbox.getH();
     this.yShift = -yShift;
   }
