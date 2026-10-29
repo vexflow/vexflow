@@ -6,6 +6,7 @@
 // render grace notes.
 
 import { Beam } from './beam';
+import { BoundingBox } from './boundingbox';
 import { Formatter } from './formatter';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
@@ -163,6 +164,16 @@ export class GraceNoteGroup extends Modifier {
 
   getGraceNotes(): Note[] {
     return this.graceNotes;
+  }
+
+  /** Returns the box enclosing the grace notes (not the slur). Valid after the group has been drawn, as that positions the grace notes. */
+  override getBoundingBox(): BoundingBox {
+    if (this.graceNotes.length === 0) return super.getBoundingBox();
+    const boundingBox = this.graceNotes[0].getBoundingBox();
+    for (let i = 1; i < this.graceNotes.length; i++) {
+      boundingBox.mergeWith(this.graceNotes[i].getBoundingBox());
+    }
+    return boundingBox;
   }
 
   override draw(): void {
