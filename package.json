@@ -138,6 +138,9 @@
     "structured-clone-es": "^1.0.0"
   },
   "overrides": {
-    "undici": "6.23.0"
+    "undici": "6.23.0",
+    "concurrently": {
+      "shell-quote": "1.11.0"
+    }
   }
 }
