@@ -264,6 +264,7 @@ export class StaveConnector extends Element {
       ctx.fillRect(topX, topY, width, attachmentHeight);
     }
 
+    // BAD_COMMENT_BELOW? Typo "paralell" → "parallel".
     // If the connector is a thin double barline, draw the paralell line
     if (this.type === StaveConnector.type.THIN_DOUBLE) {
       ctx.fillRect(topX - 3, topY, width, attachmentHeight);

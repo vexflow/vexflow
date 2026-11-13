@@ -43,6 +43,10 @@ export class CanvasContext extends RenderContext {
   /**  The 2D rendering context from the Canvas API. Forward method calls to this object. */
   context2D: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 
+  // BAD_COMMENT_BELOW?
+  // Typo: `curTransfrom` should be `curTransform`. This field is public and used in
+  // openRotation/closeRotation below. Renaming would be a breaking API change, so
+  // either add a deprecated alias or keep as-is and document the typo.
   curTransfrom: DOMMatrix;
   /**
    * The HTMLCanvasElement or OffscreenCanvas that is associated with the above context.

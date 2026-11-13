@@ -219,6 +219,15 @@ export class VexFlow {
    * Customize `Font.HOST_URL` and `Font.FILES` to load different fonts for your app.
    */
   static async loadFonts(...fontNames: string[]): Promise<void> {
+    // POSSIBLE_BUG_BELOW?
+    // `fontNames` is a rest parameter, so it is always an array — `!fontNames` can never be
+    // true. The doc above says "If `fontNames` is undefined, all fonts in Font.FILES will be
+    // loaded", but as written this branch is unreachable. The correct check is likely
+    // `fontNames.length === 0`.
+    // SUGGESTED_FIX
+    // if (fontNames.length === 0) {
+    //   fontNames = Object.keys(Font.FILES);
+    // }
     if (!fontNames) {
       fontNames = Object.keys(Font.FILES);
     }

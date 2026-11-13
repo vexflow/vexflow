@@ -4,6 +4,7 @@
 import { Tables } from './tables';
 import { RuntimeError } from './util';
 
+// BAD_COMMENT_BELOW? Typo "varies types" → "various types".
 /** `Tuning` implements varies types of tunings for tablature. */
 export class Tuning {
   protected tuningValues: number[] = [];

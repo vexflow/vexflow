@@ -129,6 +129,8 @@ export class Stem extends Element {
     return this.stemExtension;
   }
 
+  // BAD_COMMENT_BELOW?
+  // Typo: "The the y bounds" → "Set the y bounds".
   // The the y bounds for the top and bottom noteheads
   setYBounds(yTop: number, yBottom: number): void {
     this.yTop = yTop;
@@ -206,6 +208,8 @@ export class Stem extends Element {
 
     L('Rendering stem - ', 'Top Y: ', this.yTop, 'Bottom Y: ', this.yBottom);
 
+    // BAD_COMMENT_BELOW?
+    // Typo: "required fo satisfy" → "required to satisfy".
     // The offset from the stem's base which is required fo satisfy the stemlet height
     const stemletYOffset = this.isStemlet ? stemHeight - this.stemletHeight * this.stemDirection : 0;
 

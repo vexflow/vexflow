@@ -109,6 +109,10 @@ export class ModifierContext {
   }
 
   /**
+   * BAD_COMMENT_BELOW? Comment is truncated — "Get the width of the entire" is
+   * missing its object. Likely "Get the width of the entire ModifierContext."
+   */
+  /**
    * Get the width of the entire
    */
   getWidth(): number {

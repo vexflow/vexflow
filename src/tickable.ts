@@ -28,6 +28,8 @@ export interface FormatterMetrics {
   };
 }
 
+// BAD_COMMENT_BELOW?
+// Grammar: "a element that sit" → "an element that sits".
 /**
  * Tickable represents a element that sit on a score and
  * has a duration, i.e., Tickables occupy space in the musical rendering dimension.

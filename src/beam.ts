@@ -74,6 +74,11 @@ export class Beam extends Element {
   protected override yShift: number = 0;
   private breakOnIndexes: number[];
   private _beamCount: number;
+  // POSSIBLE_BUG_BELOW?
+  // `unbeamable` is read in draw() (early-return) but never assigned anywhere in this
+  // codebase. The author already flagged it ("Remove?"). It's effectively dead code:
+  // either delete it, or wire up code that actually sets it.
+  // SUGGESTED_FIX: delete this field and the `if (this.unbeamable) return;` check in draw().
   // note that this is never set and is a private property.  Remove?
   private unbeamable?: boolean;
 
@@ -159,7 +164,7 @@ export class Beam extends Element {
   }
 
   /**
-   * A helper function to autimatically build beams for a voice with
+   * A helper function to automatically build beams for a voice with
    * configuration options.
    *
    * Example configuration object:
@@ -739,6 +744,10 @@ export class Beam extends Element {
         // Determine necessary extension for cross-stave notes in the beam group
         let crossStemExtension = 0;
         if (note.getStemDirection() !== this._stemDirection) {
+          // POSSIBLE_BUG_BELOW?
+          // This `beamCount` shadows the outer `beamCount = this._beamCount` destructured at
+          // the top of applyStemExtensions(). The shadowing is easy to miss when reading.
+          // SUGGESTED_FIX: rename to `noteBeamCount` to make the difference explicit.
           const beamCount = note.getGlyphProps().beamCount;
           crossStemExtension = (1 + (beamCount - 1) * 1.5) * this.renderOptions.beamWidth;
 

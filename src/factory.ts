@@ -1,6 +1,7 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 // @author Mohit Cheppudira
+// BAD_COMMENT_BELOW? Duplicate "MIT License" line — header has it twice.
 // MIT License
 
 import { Accidental } from './accidental';

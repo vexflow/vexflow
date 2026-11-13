@@ -15,6 +15,9 @@ function L(...args: any[]) {
  * directly, but used internally in `StaveNote`.
  */
 export class Flag extends Element {
+  // BAD_COMMENT_BELOW?
+  // Wrong class reference — should say `VexFlow.Flag.DEBUG`, not `VexFlow.NoteHead.DEBUG`.
+  // Likely copy-paste from notehead.ts.
   /** To enable logging for this class. Set `VexFlow.NoteHead.DEBUG` to `true`. */
   static DEBUG: boolean = false;
 
@@ -22,6 +25,8 @@ export class Flag extends Element {
     return Category.Flag;
   }
 
+  // BAD_COMMENT_BELOW?
+  // Comment says "notehead" but this draws a flag. Likely copy-paste from notehead.ts.
   /** Draw the notehead. */
   override draw(): void {
     const ctx = this.checkContext();

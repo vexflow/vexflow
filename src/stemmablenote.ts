@@ -193,6 +193,7 @@ export abstract class StemmableNote extends Note {
     return flagHeight > Stem.HEIGHT * scale ? flagHeight - Stem.HEIGHT * scale : 0;
   }
 
+  // BAD_COMMENT_BELOW? Missing word: "to a specific." → "to a specific length."
   // Set the stem length to a specific. Will override the default length.
   setStemLength(height: number): this {
     this.stemExtensionOverride = height - Stem.HEIGHT;
