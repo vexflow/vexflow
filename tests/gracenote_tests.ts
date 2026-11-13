@@ -16,6 +16,7 @@ import { Dot } from '../src/dot';
 import { Factory } from '../src/factory';
 import { Formatter } from '../src/formatter';
 import { GraceNote, GraceNoteStruct } from '../src/gracenote';
+import { GraceNoteGroup } from '../src/gracenotegroup';
 import { StaveNote, StaveNoteStruct } from '../src/stavenote';
 
 const GraceNoteTests = {
@@ -48,8 +49,44 @@ const GraceNoteTests = {
     run('Grace Note Slash with Beams', slashWithBeams);
     run('Grace Notes Multiple Voices', multipleVoices);
     run('Grace Notes Multiple Voices Multiple Draws', multipleVoicesMultipleDraws);
+    run('Grace Note Group Bounding Box', boundingBox);
   },
 };
+
+function boundingBox(options: TestOptions): void {
+  const f = VexFlowTests.makeFactory(options, 300, 130);
+  const stave = f.Stave({ x: 10, y: 10, width: 250 });
+
+  const graceNotes = [
+    { keys: ['e/4'], duration: '16' },
+    { keys: ['f/4'], duration: '16' },
+    { keys: ['g/5'], duration: '16' },
+  ].map(f.GraceNote.bind(f));
+  const group = f.GraceNoteGroup({ notes: graceNotes });
+  group.beamNotes();
+
+  const note = f.StaveNote({ keys: ['b/4'], duration: 'q' }).addModifier(group, 0);
+  const voice = f.Voice().setStrict(false).addTickables([note]);
+  f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+  f.draw();
+
+  VexFlowTests.drawBoundingBox(f.getContext(), group);
+
+  // The box of the group must sit left of the main note, around the stave, and not at (0, 0).
+  const bb = group.getBoundingBox();
+  options.assert.ok(bb.getX() > 0 && bb.getY() > 0, 'Group box is not at the origin');
+  options.assert.ok(bb.getX() + bb.getW() <= note.getAbsoluteX(), 'Group box ends left of the main note');
+  options.assert.ok(
+    bb.getY() < stave.getBottomLineBottomY() && bb.getY() + bb.getH() > stave.getTopLineTopY(),
+    'Group box overlaps the stave vertically'
+  );
+  options.assert.ok(bb.getY() > stave.getTopLineTopY() - 40, 'Group box is near the stave');
+
+  // The box of the main note is no longer stretched to the origin by the group.
+  options.assert.ok(note.getBoundingBox().getX() >= bb.getX() - 10, 'Main note box is not stretched to the origin');
+
+  options.assert.ok(new GraceNoteGroup([]).getBoundingBox() !== undefined, 'Empty group has a box');
+}
 
 function basic(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, 700, 130);
