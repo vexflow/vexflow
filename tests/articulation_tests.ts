@@ -39,8 +39,53 @@ const ArticulationTests = {
     run('Fermata Very Long Above/Below', drawFermata, { sym1: 'a@avl', sym2: 'a@uvl' });
     run('Inline/Multiple', drawArticulations2, { sym1: 'a.', sym2: 'a.' });
     run('TabNote Articulation', tabNotes, { sym1: 'a.', sym2: 'a.' });
+    run('Draw Is Idempotent', drawIsIdempotent);
   },
 };
+
+// Drawing the same articulations again must not move them (https://github.com/vexflow/vexflow/issues/254).
+function drawIsIdempotent(options: TestOptions, contextBuilder: ContextBuilder): void {
+  const ctx = contextBuilder(options.elementId, 500, 250);
+  const stave = new Stave(10, 50, 480).addClef('treble').setContext(ctx).drawWithStyle();
+
+  const { ABOVE, BELOW } = ModifierPosition;
+  const articulations: Articulation[] = [];
+  const note = (key: string, stemDirection: number, position: number, codes: string[]) => {
+    const staveNote = new StaveNote({ keys: [key], duration: 'q', stemDirection });
+    codes.forEach((code) => {
+      const articulation = new Articulation(code).setPosition(position);
+      articulations.push(articulation);
+      staveNote.addModifier(articulation, 0);
+    });
+    return staveNote;
+  };
+
+  // Staccato above the stem tip of c/4 snaps to a position within the staff lines, where draw() calls setOrigin().
+  // That used to absorb the x/y of the previous draw into the shift. The staccato below a/3 is outside the staff.
+  const notes = [note('c/4', Stem.UP, ABOVE, ['a.']), note('a/3', Stem.UP, BELOW, ['a.'])];
+  const voice = new Voice({ numBeats: 2, beatValue: 4 }).addTickables(notes);
+  new Formatter().joinVoices([voice]).formatToStave([voice], stave);
+
+  const getBoxes = () =>
+    articulations.map((a) => {
+      const box = a.getBoundingBox();
+      return [box.getX(), box.getY(), box.getW(), box.getH()];
+    });
+
+  voice.draw(ctx, stave);
+  const first = getBoxes();
+  for (let i = 2; i <= 3; i++) {
+    voice.draw(ctx, stave);
+    options.assert.deepEqual(getBoxes(), first, `Bounding boxes after draw #${i} match those of draw #1.`);
+  }
+
+  // Setting the origin again must not depend on the position the articulation was drawn at.
+  const articulation = new Articulation('a.');
+  articulation.setOrigin(0.5, 0.5);
+  const [xShift, yShift] = [articulation.getXShift(), articulation.getYShift()];
+  articulation.setX(240).setY(160).setOrigin(0.5, 0.5);
+  options.assert.deepEqual([articulation.getXShift(), articulation.getYShift()], [xShift, yShift], 'Origin shifts');
+}
 
 // Helper function for creating StaveNotes.
 function drawArticulations(options: TestOptions): void {
