@@ -1,7 +1,7 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
-// Accidental Tests
+// Tests accidental layout and automatic accidental state across notes and voices.
 
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
@@ -27,6 +27,8 @@ const AccidentalTests = {
   Start(): void {
     QUnit.module('Accidental');
     QUnit.test('Automatic Accidentals - Simple Tests', autoAccidentalWorking);
+    QUnit.test('Automatic Accidentals - Voice Order', autoAccidentalVoiceOrder);
+    QUnit.test('Automatic Accidentals - Simultaneous Notes', autoAccidentalSimultaneousNotes);
     const run = VexFlowTests.runTests;
     run('Bounding Box', basic, { drawBoundingBox: true });
     run('Accidental Padding', formatAccidentalSpaces);
@@ -147,6 +149,81 @@ function autoAccidentalWorking(assert: Assert): void {
   assert.equal(hasAccidental(notes[8]), false, 'Double sharp rememberd');
   assert.equal(hasAccidental(notes[9]), true, 'Added natural');
   assert.equal(hasAccidental(notes[10]), false, 'Natural remembered');
+}
+
+/** Earlier notes must establish accidental state before later notes in another voice. */
+function autoAccidentalVoiceOrder(assert: Assert): void {
+  for (const reverseVoices of [false, true]) {
+    // Use fresh notes because applying accidentals changes their modifiers.
+    const halfNotes = [
+      new StaveNote({ keys: ['c/4'], duration: '2' }),
+      new StaveNote({ keys: ['c#/4'], duration: '2' }),
+    ];
+    const offsetNotes = [
+      new StaveNote({ keys: ['g/4'], duration: '4' }),
+      new StaveNote({ keys: ['c#/4'], duration: '4' }),
+      new StaveNote({ keys: ['g/4'], duration: '2' }),
+    ];
+    const voices = [new Voice().addTickables(halfNotes), new Voice().addTickables(offsetNotes)];
+    if (reverseVoices) voices.reverse();
+
+    Accidental.applyAccidentals(voices, 'C');
+
+    // Compare accidental types on every note, in the original musical voice order.
+    const accidentals = [halfNotes, offsetNotes].map((notes) =>
+      notes.map((note) =>
+        note
+          .getModifiers()
+          .filter(isAccidental)
+          .map((accidental) => accidental.type)
+      )
+    );
+    assert.deepEqual(
+      accidentals,
+      [
+        [[], []],
+        [[], ['#'], []],
+      ],
+      `The earlier C# gets the sharp; the later C# remembers it (reversed voices: ${reverseVoices})`
+    );
+  }
+}
+
+/** A natural cancels an earlier sharp, and simultaneous sharps both restore it. */
+function autoAccidentalSimultaneousNotes(assert: Assert): void {
+  for (const reverseVoices of [false, true]) {
+    // The second voice introduces a natural between the first voice's note onsets.
+    const halfNotes = [
+      new StaveNote({ keys: ['g/4'], duration: '2' }),
+      new StaveNote({ keys: ['c#/4'], duration: '2' }),
+    ];
+    const offsetNotes = [
+      new StaveNote({ keys: ['c#/4'], duration: '4' }),
+      new StaveNote({ keys: ['c/4'], duration: '4' }),
+      new StaveNote({ keys: ['c#/4'], duration: '2' }),
+    ];
+    const voices = [new Voice().addTickables(halfNotes), new Voice().addTickables(offsetNotes)];
+    if (reverseVoices) voices.reverse();
+
+    Accidental.applyAccidentals(voices, 'C');
+
+    const accidentals = [halfNotes, offsetNotes].map((notes) =>
+      notes.map((note) =>
+        note
+          .getModifiers()
+          .filter(isAccidental)
+          .map((accidental) => accidental.type)
+      )
+    );
+    assert.deepEqual(
+      accidentals,
+      [
+        [[], ['#']],
+        [['#'], ['n'], ['#']],
+      ],
+      `Both simultaneous C# notes get sharps after the natural (reversed voices: ${reverseVoices})`
+    );
+  }
 }
 
 /**

@@ -2,6 +2,7 @@
 // MIT License
 // @author Mohit Cheppudira
 // @author Greg Ristow (modifications)
+// Defines accidental modifiers, their layout, and automatic placement across voices.
 
 import { Fraction } from './fraction';
 import { Metrics } from './metrics';
@@ -405,7 +406,7 @@ export class Accidental extends Modifier {
     const tickPositions: number[] = [];
     const tickNoteMap: Record<number, Tickable[]> = {};
 
-    // Sort the tickables in each voice by their tick position in the voice.
+    // Group tickables from all voices by their musical start time.
     voices.forEach((voice) => {
       const tickPosition = new Fraction(0, 1);
       const tickable = voice.getTickables();
@@ -424,6 +425,10 @@ export class Accidental extends Modifier {
         tickPosition.add(t.getTicks());
       });
     });
+
+    // Voices can introduce earlier ticks after later ones have already been collected.
+    // Update accidental state in musical order while keeping simultaneous notes together.
+    tickPositions.sort((a, b) => a - b);
 
     const music = new Music();
 
