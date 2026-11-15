@@ -111,7 +111,7 @@ Current main also contains dependency updates for fast-uri, ip-address, and zod.
 
 ### R09. Changing a tuplet note's duration corrupts its intrinsic ticks
 
-- **Status:** Fixed locally with #268; publication pending.
+- **Status:** Fixed and pushed with #268 in `344e7e76`.
 
 - **Location:** `src/tickable.ts:370–381`.
 - **Problem:** `setDuration()` saves the already-scaled tick value as the intrinsic duration. Later tuplet operations apply or remove multipliers against the wrong base.
@@ -251,7 +251,7 @@ Validation: 1,874 browser tests and 33 regression tests pass. The jsdom generato
 
 ## Second GitHub P2 follow-up — November 15, 2026
 
-#203, #206, #253, #255, and #268 are fixed locally. Publication is pending. #218 was closed at the maintainer's request.
+#203, #206, #253, #255, and #268 are fixed, pushed, and closed in `344e7e76`. #218 was closed at the maintainer's request.
 
 - **#203:** Rests clear simultaneous chords and stems.
 - **#206:** Pedal markings clear bottom annotations and pedal-change notches.
@@ -259,4 +259,4 @@ Validation: 1,874 browser tests and 33 regression tests pass. The jsdom generato
 - **#255:** Grace-tab fret sizing and vertical centering honor public size settings.
 - **#268 and R09:** Voice timing follows tuplet edits. Duration edits retain their unscaled base.
 
-See [usage, scope, and before/after examples](docs/engraving-p2.md). Final validation and GitHub status are tracked in `issues.md`.
+See [usage, scope, and before/after examples](docs/engraving-p2.md). Validation passed: 1,874 browser tests, 35 regression tests, TypeScript, and lint. GitHub CI and all CodeQL jobs passed. Final issue status is tracked in `issues.md`.

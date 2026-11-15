@@ -11,9 +11,9 @@
 All five P1 issues have been fixed, pushed, and closed: #71, #346, #347, #349, and #350. The original triage below is retained for context.
 
 - **P2 follow-up:** The first five P2 issues are fixed, pushed, and closed: #38, #102, #152, #177, and #182.
-- **Second P2 batch:** #203, #206, #253, #255, and #268 are fixed locally. Publication and issue closure are pending. #218 was closed at the maintainer's request. See [usage and visual examples](docs/engraving-p2.md).
-- **Remaining work:** The remaining P2 items are #311, #333, #334, #335, #336, and #341. Issues #221, #281, #292, and #337 were closed outside these batches.
-- **Latest validation:** 1,874 browser tests and 35 regression tests pass locally. TypeScript and changed-file lint pass. The second P2 batch has before/after examples in both font families. Its GitHub checks are pending publication. The first batch also passed CI and CodeQL.
+- **Second P2 batch:** #203, #206, #253, #255, and #268 are fixed, pushed, and closed in `344e7e76`. #218 was closed at the maintainer's request. See [usage and visual examples](docs/engraving-p2.md).
+- **Remaining work:** GitHub has 15 open issues. The remaining P2 items are #311, #333, #334, #335, #336, and #341. Issues #221, #281, #292, and #337 were closed outside these batches.
+- **Latest validation:** 1,874 browser tests and 35 regression tests pass locally. TypeScript and changed-file lint pass. The second P2 batch has before/after examples in both font families. [GitHub CI](https://github.com/vexflow/vexflow/actions/runs/43769502530) and all [CodeQL jobs](https://github.com/vexflow/vexflow/actions/runs/43769502702) passed for `344e7e76`.
 - **Next:** Clear resolved reports, then address the P2 validation and engraving defects.
 
 ## Original triage summary
@@ -41,17 +41,13 @@ No issues were closed during this pass. Closed issues, pull requests, and Depend
 
 ## Recommended plan
 
-**Steps 1–3 are complete. Start with step 4.**
+The P1 fixes and both P2 batches are complete. Continue with:
 
-1. **Fix the security and process-stall defects.** Start with #347, #350, and #349. Add isolated regression tests and reject invalid input promptly.
-2. **Repair ESM delivery.** Fix #346 and smoke-test every published ESM entry point.
-3. **Finish portable SVG export.** Treat #71 as a user-facing blocker. Test saved output without installed music fonts and in restrictive viewers.
-4. **Clear resolved reports.** Close the six candidates above. Move #292 and #337 to ongoing community coordination. Add the small UTF-8 README note for #140.
-5. **Repair validation before larger layout work.** Recheck #102 and #218. Address the build-exit and visual-comparison weaknesses in `report.md` R06–R07; those are not yet separate issues.
-6. **Fix focused engraving defects.** Work on #182, #253, #255, and #341. Reduce #203, #206, and #268 to regression cases before changing the formatter.
-7. **Unify text and style behavior.** Address #152, #177, and #333. Use concrete examples from #333 to narrow #311.
-8. **Measure performance improvements.** Establish a small #38 benchmark set, then tackle #335, #334, and #336. Check visual output and memory behavior.
-9. **Keep broad API proposals out of this cycle.** Consolidate the #158/#247 design discussion. Revisit the other deferred items when a concrete use case and owner exist.
+1. **Repair validation.** Address build-exit and visual-comparison weaknesses in `report.md` R06–R07. These are not yet separate issues.
+2. **Finish focused rendering fixes.** Address SVG sizing in #341 and score theming in #333. Use #333 to narrow the broad #311 report.
+3. **Measure performance improvements.** Use the #38 benchmark set for #335, #334, and #336. Check appearance and memory behavior.
+4. **Clear small documentation items.** Review #328 and #331 for closure. Add the UTF-8 note for #140.
+5. **Keep broad API proposals deferred.** Revisit #158 and #247 when a concrete use case and owner exist.
 
 ## GitHub tracking
 
@@ -62,7 +58,7 @@ All 40 issues have native GitHub **Type** and **Priority** fields populated and 
 - **Priority mapping:** P0 = Urgent, P1 = High, P2 = Medium, P3 = Low.
 - **Labels removed from these issues:** `bug`, `feature`, `enhancement`, and P0–P3. The native fields now carry that information.
 - **Labels retained:** Specific context such as `security`, `documentation`, `performance`, `testing`, `dependencies`, `question`, `needs-reproduction`, `ai_review`, and `triaged`.
-- **Publication status:** Complete. GitHub readback confirms all fields and labels. The original triage comments remain. The original inventory had 40 open issues. All five P1 issues are closed. Each has a fix comment. The in progress label was removed. The P2 batch (#38, #102, #152, #177, #182) is also closed, with fix comments and relevant screenshots. GitHub readback now confirms 26 open issues and no remaining High-priority issues.
+- **Publication status:** Complete. GitHub readback confirms all fields and labels. The original triage comments remain. The original inventory had 40 open issues. All five P1 issues are closed. Each has a fix comment. The in progress label was removed. The P2 batch (#38, #102, #152, #177, #182) is also closed, with fix comments and relevant screenshots. The second P2 batch (#203, #206, #253, #255, #268) is closed with fix comments and screenshots. #218 is closed at the maintainer's request. Work labels were removed. GitHub readback confirms 15 open issues.
 
 ## P1
 
@@ -140,14 +136,14 @@ All 40 issues have native GitHub **Type** and **Priority** fields populated and 
 
 ### [#203](https://github.com/vexflow/vexflow/issues/203) — Rest collisions across voices
 
-**Status:** Fixed locally; publication pending. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
+**Status:** Fixed and closed. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
 
 - **Fix:** Rests move by the clearance needed to avoid simultaneous chords and stems in a shared modifier context.
 - **Validation:** Upper and lower rests clear the opposing voice in Bravura and Petaluma. Before/after examples are documented.
 
 ### [#206](https://github.com/vexflow/vexflow/issues/206) — Vertical annotation collisions
 
-**Status:** Fixed locally; publication pending. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
+**Status:** Fixed and closed. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
 
 - **Fix:** Pedal text, brackets, and change notches clear bottom annotations across the marked passage.
 - **Validation:** Tests cover intermediate annotations, larger text, brackets, mixed pedal text, and two font families.
@@ -161,21 +157,21 @@ All 40 issues have native GitHub **Type** and **Priority** fields populated and 
 
 ### [#253](https://github.com/vexflow/vexflow/issues/253) — Grace-note bounding boxes before drawing
 
-**Status:** Fixed locally; publication pending. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
+**Status:** Fixed and closed. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
 
 - **Fix:** Grace-note groups position their notes before measurement. Notehead, flag, and TextDynamics bounds use page coordinates.
 - **Validation:** Bounds match before and after drawing, remain stable on repeated reads, and follow later layout changes.
 
 ### [#255](https://github.com/vexflow/vexflow/issues/255) — GraceTabNote font sizing
 
-**Status:** Fixed locally; publication pending. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
+**Status:** Fixed and closed. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
 
 - **Fix:** Fret text honors explicit font sizes and the grace-scale metric. Widths and vertical centering update together.
 - **Validation:** Tests cover numeric and CSS sizes, ghost toggles, default reset, and custom class scale.
 
 ### [#268](https://github.com/vexflow/vexflow/issues/268) — Tuplet tick overflow
 
-**Status:** Fixed locally; publication pending. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
+**Status:** Fixed and closed. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
 
 - **Fix:** Voice timing caches refresh after tuplet edits. Duration edits preserve unscaled intrinsic ticks, also fixing report R09.
 - **Validation:** Tests cover both construction orders, repeated attachment, nested tuplets, ratio edits, detach, clear, and strict overflow rejection.
