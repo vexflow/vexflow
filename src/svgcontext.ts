@@ -1,11 +1,13 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 // @author Gregory Ristow (2015)
+// SVG drawing context with optional font-independent path export.
 
 import { Element } from './element';
 import { Font, FontInfo, FontStyle, FontWeight } from './font';
 import { Metrics } from './metrics';
 import { RenderContext, TextMeasure } from './rendercontext';
+import { SVGFont, svgWithFontPaths } from './svgexport';
 import { Tables } from './tables';
 import { normalizeAngle, prefix, RuntimeError, structuredClone } from './util';
 
@@ -58,6 +60,19 @@ export interface State {
  */
 export class SVGContext extends RenderContext {
   protected static measureTextElement = new Element();
+
+  /** Serialize a drawing. Supplying fonts converts all text to portable paths. */
+  static toSVG(svg: SVGSVGElement, fonts?: SVGFont[]): string {
+    const output = fonts === undefined ? svg : svgWithFontPaths(svg, fonts);
+    // Use the drawing's DOM implementation, including when hosted in jsdom.
+    const Serializer = svg.ownerDocument.defaultView?.XMLSerializer ?? XMLSerializer;
+    return new Serializer().serializeToString(output);
+  }
+
+  /** Export without modifying the live drawing. See docs/portable-svg.md for font setup. */
+  toSVG(fonts?: SVGFont[]): string {
+    return SVGContext.toSVG(this.svg, fonts);
+  }
 
   element: HTMLElement; // the parent DOM object
   svg: SVGSVGElement;

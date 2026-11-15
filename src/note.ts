@@ -1,5 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
+// Base note layout and bounded duration parsing for score input.
 
 import { Beam } from './beam';
 import { BoundingBox } from './boundingbox';
@@ -164,10 +165,11 @@ export abstract class Note extends Tickable {
   }
 
   protected static parseDuration(durationString?: string): NoteDuration | undefined {
-    if (!durationString) {
+    // Durations are short tokens. Bound work before parsing untrusted score text.
+    if (!durationString || durationString.length > 64) {
       return undefined;
     }
-    const regexp = /(\d*\/?\d+|[a-z])(d*)([nrhms]|$)/;
+    const regexp = /^(\d+(?:\/\d+)?|[a-z])(d*)([nrhms]?)$/;
     const result = regexp.exec(durationString);
     if (!result) {
       return undefined;

@@ -4,7 +4,7 @@
 
 **Result:** 22 findings: 5 P1, 16 P2, and 1 P3.
 
-**Tracking status (November 15, 2026):** R03 (#348) is fixed. The other four P1 issues remain open. All five have `bug` and `ai_review` labels. P2 and P3 findings have not been filed as part of this review.
+**Tracking status (November 15, 2026):** All five P1 findings are fixed. R03 (#348) was fixed earlier. R01, R02, R04, and R05 are fixed in the current follow-up. The separate SVG export issue #71 is also fixed. P2 and P3 findings remain open; they have not been filed as part of this review.
 
 ## Scope and baseline
 
@@ -39,19 +39,19 @@ Current main also contains dependency updates for fast-uri, ip-address, and zod.
 
 ### R01. The ESM build rewrites a package name into a nonexistent package
 
-- **Status:** Open — [#346](https://github.com/vexflow/vexflow/issues/346). Fix not started.
+- **Status:** Fixed — [#346](https://github.com/vexflow/vexflow/issues/346).
 - **Location:** `tools/fix-esm-imports.mjs:49–65`; `src/util.ts:4`.
 - **Problem:** The rewrite adds `.js` to bare package imports and re-exports. This breaks the package's ESM entry points.
 - **Evidence:** Building ESM and running the rewrite changes `structured-clone-es` to `structured-clone-es.js`. Importing `entry/vexflow-core.js` then fails with `ERR_MODULE_NOT_FOUND`.
-- **Fix:** Rewrite only relative file specifiers. Add an ESM import smoke test against the built package. Current CI tests the debug CommonJS build and misses this failure.
+- **Fix applied:** The rewrite parses real module specifiers and changes only relative paths. Bare packages, URLs, comments, and explicit extensions are preserved. All published ESM entries have import smoke tests.
 
 ### R02. Registry class names can write to Object.prototype
 
-- **Status:** Open — [#347](https://github.com/vexflow/vexflow/issues/347). Fix not started.
+- **Status:** Fixed — [#347](https://github.com/vexflow/vexflow/issues/347).
 - **Location:** `src/registry.ts:27–34,72–88`; `src/element.ts:262–271`.
 - **Problem:** Indexes use ordinary objects and trust inherited properties. An untrusted class name can change shared object state across the application.
 - **Evidence:** Register an element with ID `reviewProbe`, then call `element.addClass('__proto__')`. A fresh `{}` now exposes that element as `.reviewProbe`. The probe removed the property afterward.
-- **Fix:** Use `Map` or null-prototype dictionaries at every index level. Validate index names and test `__proto__`, `constructor`, and `toString` as values and IDs.
+- **Fix applied:** Registry buckets use null-prototype dictionaries. Public index methods validate index names. Regression tests cover prototype-related IDs and class names without modifying Object.prototype.
 
 ### R03. Automatic accidentals are processed out of musical order
 
@@ -64,19 +64,27 @@ Current main also contains dependency updates for fast-uri, ip-address, and zod.
 
 ### R04. Malformed duration and meter strings can stall the process
 
-- **Status:** Open — [#349](https://github.com/vexflow/vexflow/issues/349). Fix not started.
+- **Status:** Fixed — [#349](https://github.com/vexflow/vexflow/issues/349).
 - **Location:** `src/note.ts:166–171`; `src/voice.ts:68–74`; `src/tuning.ts:46`.
 - **Problem:** Unanchored or overlapping regular expressions repeatedly retry long input. Applications that accept score text can freeze the browser or a server worker.
 - **Evidence:** Duration parsing with 10,000 digits followed by `X` exceeded a 750 ms child-process limit. A meter string containing 100,000 digits also exceeded it. The tuning whitespace split has the same retry risk by inspection.
-- **Fix:** Use anchored, unambiguous parsing and reasonable input limits. Split tuning strings on commas, then trim each field. Add bounded tests for long invalid input.
+- **Fix applied:** Duration and meter parsing are anchored and limited to 64-character tokens. Tuning strings split on commas before trimming. Long malformed inputs run in isolated regression tests with hard timeouts.
 
 ### R05. Invalid meter values can enter an infinite GCD loop
 
-- **Status:** Open — [#350](https://github.com/vexflow/vexflow/issues/350). Fix not started.
+- **Status:** Fixed — [#350](https://github.com/vexflow/vexflow/issues/350).
 - **Location:** `src/voice.ts:68–90,175–179`; `src/fraction.ts:24–35`.
 - **Problem:** Meter values are not checked for finiteness or a positive denominator. GCD rejects `NaN` at entry but accepts infinity. Its remainder calculation then becomes `NaN`, and the loop never ends.
 - **Evidence:** `new Voice('4/0').isComplete()` timed out. An overflowing numerator and `Fraction.GCD(Infinity, 1)` did too.
-- **Fix:** Validate meter values before creating fractions. Reject non-finite GCD inputs. Define and enforce valid fraction denominators.
+- **Fix applied:** Meters and resolution must be positive safe integers. Tick overflow is rejected. GCD rejects non-finite inputs. Fractions reject non-finite values and zero denominators before mutation.
+
+### P1 follow-up validation
+
+- All 1,874 existing browser tests and 30 new regression tests pass on Node 24.
+- The old registry probe polluted Object.prototype. The old duration, invalid-meter, and GCD probes timed out. The fixed cases pass.
+- TypeScript compilation and lint of changed source and tool files pass.
+- The full `grunt test` command now runs the ESM and isolated regression checks.
+- SVG export validation and screenshots are documented in [portable-svg.md](docs/portable-svg.md).
 
 ## P2 — Next maintenance cycle
 

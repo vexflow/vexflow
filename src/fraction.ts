@@ -1,5 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
+// Rational arithmetic with finite values and nonzero denominators.
 //
 // @author Joshua Koo / @zz85
 // @author @incompleteopus
@@ -22,7 +23,7 @@ export class Fraction {
    * Note: GCD(0, 0) => 0 and GCD(0, n) => n.
    */
   static GCD(a: number, b: number): number {
-    if (typeof a !== 'number' || Number.isNaN(a) || typeof b !== 'number' || Number.isNaN(b)) {
+    if (!Number.isFinite(a) || !Number.isFinite(b)) {
       throw new RuntimeError('BadArgument', `Invalid numbers: ${a}, ${b}`);
     }
 
@@ -71,6 +72,9 @@ export class Fraction {
 
   /** Set the numerator and denominator. */
   set(numerator: number = 1, denominator: number = 1): this {
+    if (!Number.isFinite(numerator) || !Number.isFinite(denominator) || denominator === 0) {
+      throw new RuntimeError('BadArgument', `Invalid fraction: ${numerator}/${denominator}`);
+    }
     this.numerator = numerator;
     this.denominator = denominator;
     return this;

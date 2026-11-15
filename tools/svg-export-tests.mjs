@@ -1,0 +1,203 @@
+// Browser regressions for portable SVG export. Artifacts are written under build/svg-export/.
+import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import test from 'node:test';
+import { fileURLToPath } from 'node:url';
+
+import puppeteer from 'puppeteer';
+
+const root = fileURLToPath(new URL('../', import.meta.url));
+const output = join(root, 'build/svg-export');
+
+/** Run both music font families in a browser, then view the exported files without fonts. */
+test('portable SVG paths retain score geometry and render with fonts and styles blocked', async () => {
+  mkdirSync(output, { recursive: true });
+  // Match the existing QUnit runner on CI hosts that do not support Chrome's sandbox.
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: process.env.CI ? ['--no-sandbox', '--disable-setuid-sandbox'] : [],
+  });
+  try {
+    const page = await browser.newPage();
+    await page.setViewport({ width: 640, height: 300, deviceScaleFactor: 1 });
+    await page.setContent('<div id="score"></div>');
+    await page.addScriptTag({ path: join(root, 'build/cjs/vexflow-debug.js') });
+    await page.addScriptTag({ path: join(root, 'node_modules/opentype.js/dist/opentype.js') });
+    const faces = [
+      ['Bravura', 'bravura/bravura.otf'],
+      ['Academico', 'academico/academico.otf'],
+      ['Academico', 'academico/academico-bold.otf', 'bold'],
+      ['Petaluma', 'petaluma/petaluma.otf'],
+      ['Petaluma Script', 'petalumascript/petalumascript.otf'],
+    ].map(([family, file, weight]) => ({
+      family,
+      weight,
+      data: readFileSync(join(root, 'node_modules/@vexflow-fonts', file)).toString('base64'),
+    }));
+    await page.evaluate(async (faces) => {
+      window.outlineFonts = [];
+      for (const { family, weight, data } of faces) {
+        const bytes = Uint8Array.from(atob(data), (c) => c.charCodeAt(0));
+        const face = new FontFace(family, bytes, { weight: weight ?? 'normal' });
+        document.fonts.add(await face.load());
+        window.outlineFonts.push({ family, weight, font: opentype.parse(bytes.buffer) });
+      }
+      await document.fonts.ready;
+    }, faces);
+
+    // Verify exact outlines, fallback runs, sizes, style matching, and non-mutating errors.
+    const checks = await page.evaluate(() => {
+      const container = document.createElement('div');
+      const context = new VexFlow.SVGContext(container);
+      context.resize(200, 100);
+      context.openGroup('styled').setAttribute('transform', 'translate(4 5)');
+      context.setFont('Academico', '12pt', 'bold').setFillStyle('#cf2300').fillText('AV', 10, 30);
+      context.closeGroup();
+      context.setFont('Bravura,Academico', '16px').fillText('\uE050Hello', 5, 60);
+      const before = context.toSVG();
+      let missingError = false;
+      try {
+        context.toSVG([]);
+      } catch (error) {
+        missingError = /MissingFont/.test(error.message);
+      }
+      const exported = new DOMParser().parseFromString(context.toSVG(window.outlineFonts), 'image/svg+xml');
+      const paths = exported.querySelectorAll('path');
+      const bold = window.outlineFonts.find((face) => face.weight === 'bold').font;
+      const regular = window.outlineFonts.find((face) => face.family === 'Academico' && !face.weight).font;
+      const music = window.outlineFonts[0].font;
+      const expectedMixed =
+        music.getPath('\uE050', 5, 60, 16).toPathData(5) +
+        regular.getPath('Hello', 5 + music.getAdvanceWidth('\uE050', 16), 60, 16).toPathData(5);
+      context.setFont('Academico', '12pt', 'normal', 'italic').fillText('italic', 5, 80);
+      let italicError = false;
+      try {
+        context.toSVG(window.outlineFonts);
+      } catch (error) {
+        italicError = /MissingFont/.test(error.message);
+      }
+      return {
+        exact: paths[0].getAttribute('d') === bold.getPath('AV', 10, 30, 16).toPathData(5),
+        mixed: paths[1].getAttribute('d') === expectedMixed,
+        color: paths[0].getAttribute('fill'),
+        transform: paths[0].parentElement.getAttribute('transform'),
+        original: before.includes('<text') && context.svg.querySelectorAll('text').length === 3,
+        noText: !exported.querySelector('text'),
+        missingError,
+        italicError,
+      };
+    });
+    assert.deepEqual(checks, {
+      exact: true,
+      mixed: true,
+      color: '#cf2300',
+      transform: 'translate(4 5)',
+      original: true,
+      noText: true,
+      missingError: true,
+      italicError: true,
+    });
+
+    for (const [name, music, text] of [
+      ['bravura', 'Bravura', 'Academico'],
+      ['petaluma', 'Petaluma', 'Petaluma Script'],
+    ]) {
+      const drawings = await page.evaluate(
+        ({ music, text }) => {
+          document.querySelector('#score').replaceChildren();
+          VexFlow.setFonts(music, text);
+          const renderer = new VexFlow.Renderer(document.querySelector('#score'), VexFlow.Renderer.Backends.SVG);
+          renderer.resize(620, 240);
+          const context = renderer.getContext();
+          const stave = new VexFlow.Stave(15, 35, 580).addClef('treble').addKeySignature('D').addTimeSignature('4/4');
+          stave.setContext(context).draw();
+          const notes = [
+            new VexFlow.StaveNote({ keys: ['c/5', 'e/5', 'g/5'], duration: 'q' }).addModifier(
+              new VexFlow.Accidental('#'),
+              0
+            ),
+            new VexFlow.StaveNote({ keys: ['b/4'], duration: 'q' }),
+            new VexFlow.StaveNote({ keys: ['a/4'], duration: 'q' }),
+            new VexFlow.StaveNote({ keys: ['b/4'], duration: 'qr' }),
+          ];
+          VexFlow.Formatter.FormatAndDraw(context, stave, notes);
+          context.setFont(`${text},Academico`, '14pt').fillText('Andante — AV', 20, 28);
+          context.setFont(`${text},Academico`, '12pt').fillText('Sing clearly', 200, 195);
+          const before = context.toSVG();
+          const after = context.toSVG(window.outlineFonts);
+          const originalBounds = Array.from(context.svg.querySelectorAll('text')).map((node) => {
+            const { x, y, width, height } = node.getBBox();
+            return { x, y, width, height };
+          });
+          const clone = new DOMParser().parseFromString(after, 'image/svg+xml').documentElement;
+          return { before, after, glyphs: originalBounds.length, paths: clone.querySelectorAll('path').length };
+        },
+        { music, text }
+      );
+      assert.ok(drawings.glyphs > 10);
+      assert.ok(drawings.paths >= drawings.glyphs);
+      assert.doesNotMatch(drawings.after, /<text\b|@font-face|<use\b/);
+      writeFileSync(join(output, `${name}-before.svg`), drawings.before);
+      writeFileSync(join(output, `${name}-after.svg`), drawings.after);
+      await page.screenshot({ path: join(output, `${name}-source.png`) });
+
+      // A fresh document has no web fonts. CSP forbids styles, fonts, and network fetches.
+      const viewer = await browser.newPage();
+      await viewer.setViewport({ width: 640, height: 300, deviceScaleFactor: 1 });
+      const failures = [];
+      viewer.on('request', (request) => failures.push(request.url()));
+      const csp =
+        "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; font-src 'none'; style-src 'none'; img-src data:\">";
+      for (const state of ['before', 'after']) {
+        await viewer.setContent(csp + drawings[state]);
+        assert.equal(await viewer.evaluate(() => document.fonts.size), 0);
+        await viewer.screenshot({ path: join(output, `${name}-${state}.png`) });
+        if (state === 'after') {
+          const geometry = await viewer.$eval('svg', (svg) => {
+            const box = svg.getBBox();
+            return { width: box.width, height: box.height, text: svg.querySelectorAll('text').length };
+          });
+          assert.equal(geometry.text, 0);
+          assert.ok(geometry.width > 500 && geometry.height > 100);
+        }
+      }
+      // Also exercise the SVG-as-image path used by image export tools.
+      await viewer.setContent(
+        csp +
+          `<img width="620" height="240" src="data:image/svg+xml;base64,${Buffer.from(drawings.after).toString('base64')}">`
+      );
+      await viewer.waitForFunction(() => document.querySelector('img').complete);
+      assert.ok(await viewer.$eval('img', (img) => img.naturalWidth > 0));
+      assert.ok(
+        failures.every((url) => url.startsWith('data:')),
+        'no font or network requests'
+      );
+      await viewer.close();
+    }
+    await page.close();
+  } finally {
+    await browser.close();
+  }
+});
+
+/** Reproduce the original generator workflow, including SVG loaded through Image(). */
+test('image generator embeds the local music fonts in saved SVGs', () => {
+  const directory = join(root, 'build/svg-generator-check');
+  mkdirSync(directory, { recursive: true });
+  const result = spawnSync(process.execPath, ['tools/generate_images_pptr.js', 'build', directory, '--module=Clef'], {
+    cwd: root,
+    timeout: 30000,
+    encoding: 'utf8',
+  });
+  assert.ifError(result.error);
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  const files = readdirSync(directory);
+  const svgs = files.filter((name) => name.endsWith('.svg'));
+  assert.ok(svgs.length >= 3, 'representative SVGs generated');
+  for (const name of svgs) {
+    assert.match(readFileSync(join(directory, name), 'utf8'), /data:font\/woff2;base64,/);
+    assert.ok(files.includes(name + '.png'), 'SVG rasterization succeeded');
+  }
+});

@@ -66,6 +66,7 @@ export * from './stemmablenote';
 export * from './stringnumber';
 export * from './strokes';
 export * from './svgcontext';
+export * from './svgexport';
 export * from './system';
 // Do not export './tables' because it is internal. Its public API is accessible via VexFlow.*.
 export * from './tabnote';

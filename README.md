@@ -82,6 +82,8 @@ stave.setContext(context).draw();
 
 ## Examples
 
+To save SVGs that display without installed fonts, see [portable SVG export](docs/portable-svg.md).
+
 A good way to learn the API is to look at our examples & unit tests:
 
 - [Examples](https://vexflow.github.io/vexflow-examples)

@@ -1,5 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
+// Groups tickables and validates the meter used to count their duration.
 
 import { BoundingBox } from './boundingbox';
 import { Element } from './element';
@@ -67,13 +68,11 @@ export class Voice extends Element {
     let voiceTime: VoiceTime | undefined;
     if (typeof time === 'string') {
       // Time signature shortcut: "4/4", "3/8", etc.
-      const match = time.match(/(\d+)\/(\d+)/);
-      if (match) {
-        voiceTime = {
-          numBeats: parseInt(match[1]),
-          beatValue: parseInt(match[2]),
-        };
+      const match = time.length <= 64 ? /^(\d+)\/(\d+)$/.exec(time) : null;
+      if (!match) {
+        throw new RuntimeError('BadArgument', 'Invalid time signature. Expected positive integers such as 4/4.');
       }
+      voiceTime = { numBeats: Number(match[1]), beatValue: Number(match[2]) };
     } else {
       voiceTime = time;
     }
@@ -86,8 +85,16 @@ export class Voice extends Element {
       ...voiceTime,
     };
 
-    // Recalculate total ticks.
-    this.totalTicks = new Fraction(this.time.numBeats * (this.time.resolution / this.time.beatValue), 1);
+    // Reject invalid meters before they can introduce infinity or NaN into tick arithmetic.
+    const { numBeats, beatValue, resolution } = this.time;
+    if (![numBeats, beatValue, resolution].every((value) => Number.isSafeInteger(value) && value > 0)) {
+      throw new RuntimeError('BadArgument', 'Meter and resolution must be positive safe integers.');
+    }
+    const totalTicks = numBeats * (resolution / beatValue);
+    if (!Number.isFinite(totalTicks) || totalTicks <= 0 || totalTicks > Number.MAX_SAFE_INTEGER) {
+      throw new RuntimeError('BadArgument', 'Meter exceeds the supported tick range.');
+    }
+    this.totalTicks = new Fraction(totalTicks, 1);
     // until tickables are added, the smallestTickCount is the same as the stated totalTicks duration.
     this.smallestTickCount = this.totalTicks.clone();
   }

@@ -28,9 +28,14 @@ class Index {
   // [attributeName][attributeValue][elementId] => Element
   [key: string]: { [key: string]: { [key: string]: Element } };
   constructor() {
-    this.id = {};
-    this.type = {};
-    this.class = {};
+    this.id = Object.create(null);
+    this.type = Object.create(null);
+    this.class = Object.create(null);
+  }
+
+  /** Only these attributes may select an index, even when called directly. */
+  static isValidName(name: string): boolean {
+    return name === 'id' || name === 'type' || name === 'class';
   }
 }
 
@@ -70,9 +75,13 @@ export class Registry {
   }
 
   setIndexValue(name: string, value: string, id: string, elem: Element): void {
+    if (!Index.isValidName(name)) {
+      throw new RuntimeError('BadArgument', `Unknown registry index: ${name}`);
+    }
     const index = this.index;
     if (!index[name][value]) {
-      index[name][value] = {};
+      // IDs and values such as __proto__ are ordinary keys, never inherited properties.
+      index[name][value] = Object.create(null);
     }
     index[name][value][id] = elem;
   }
@@ -80,6 +89,9 @@ export class Registry {
   // Updates the indexes for element 'id'. If an element's attribute changes
   // from A -> B, make sure to remove the element from A.
   updateIndex({ id, name, value, oldValue }: RegistryUpdate): void {
+    if (!Index.isValidName(name)) {
+      throw new RuntimeError('BadArgument', `Unknown registry index: ${name}`);
+    }
     const elem = this.getElementById(id);
     if (oldValue !== undefined && this.index[name][oldValue]) {
       delete this.index[name][oldValue][id];
@@ -115,6 +127,7 @@ export class Registry {
   }
 
   getElementsByAttribute(attribute: string, value: string): Element[] {
+    if (!Index.isValidName(attribute)) return [];
     const indexAttr = this.index[attribute];
     if (indexAttr) {
       const indexAttrVal = indexAttr[value];
@@ -137,8 +150,7 @@ export class Registry {
   // This is called by the element when an attribute value changes. If an indexed
   // attribute changes, then update the local index.
   onUpdate(info: RegistryUpdate): this {
-    const allowedNames = ['id', 'type', 'class'];
-    if (allowedNames.includes(info.name)) {
+    if (Index.isValidName(info.name)) {
       this.updateIndex(info);
     }
     return this;

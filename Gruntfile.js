@@ -467,7 +467,24 @@ module.exports = (grunt) => {
 
   // grunt test
   // Run command line qunit tests.
-  grunt.registerTask('test', 'Run command line unit tests.', ['clean:build', 'webpack:debug', 'qunit']);
+  grunt.registerTask('test', 'Run command line unit tests.', [
+    'clean:build',
+    'webpack:debug',
+    'build:esm',
+    'test:regressions',
+    'qunit',
+  ]);
+
+  // Run hostile inputs in isolated processes, and verify the actual published ESM entries.
+  grunt.registerTask('test:regressions', 'Test built ESM, input validation, and portable SVG export.', () => {
+    require('child_process').execFileSync(
+      process.execPath,
+      ['--test', 'tools/p1-regression-tests.mjs', 'tools/svg-export-tests.mjs'],
+      {
+        stdio: 'inherit',
+      }
+    );
+  });
 
   // grunt build:cjs
   grunt.registerTask('build:cjs', 'Use webpack to create CJS files in build/cjs/', 'webpack:prodAndDebug');

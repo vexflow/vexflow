@@ -1,3 +1,4 @@
+// Generate score snapshots. Saved SVGs embed the test fonts for SVG-to-PNG rendering.
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
@@ -97,8 +98,19 @@ const savePNGData = (filename, pngDataURL) => {
   return ret;
 };
 
+/** Embed local test fonts so an SVG image does not rely on its source page's FontFaceSet. */
+function fontStyle(family, filename, weight = 'normal') {
+  const data = fs.readFileSync(path.join(process.cwd(), 'node_modules/@vexflow-fonts', filename));
+  return `@font-face { font-family: ${JSON.stringify(family)}; font-weight: ${weight}; src: url(data:font/woff2;base64,${data.toString('base64')}) format('woff2'); }`;
+}
+
 const launch = async (query, jobInfo) => {
-  const browser = await puppeteer.launch({ headless: 'new', devtools: false });
+  const browser = await puppeteer.launch({
+    headless: 'new',
+    devtools: false,
+    // Match the QUnit runner when used by CI without Chrome sandbox support.
+    args: process.env.CI ? ['--no-sandbox', '--disable-setuid-sandbox'] : [],
+  });
   const page = await browser.newPage();
   page.on('error', (msg) => {
     jobLog(msg, 'error', jobInfo);
@@ -202,6 +214,33 @@ const launchTestPage = async (jobs, job) => {
       return ret;
     });
 
+    // Font loading on the test page does not carry over to an SVG loaded through Image().
+    const fontFiles = await page.evaluate(() => (typeof VexFlow !== 'undefined' ? (VexFlow.Font?.FILES ?? {}) : {}));
+    const usedFamilies = await page.evaluate(() => {
+      const families = new Set();
+      for (const { el, type } of window.VF_TEST_GLOBAL.elmDefs) {
+        if (type !== 'svg') continue;
+        for (const element of [el, ...el.querySelectorAll('[font-family]')]) {
+          for (const family of (element.getAttribute('font-family') || '').split(',')) {
+            families.add(family.trim().replace(/^['"]|['"]$/g, ''));
+          }
+        }
+      }
+      return Array.from(families);
+    });
+    const fontStyles = {};
+    for (const family of usedFamilies) {
+      if (Object.prototype.hasOwnProperty.call(fontFiles, family)) {
+        fontStyles[family] = fontStyle(family, fontFiles[family]);
+      }
+    }
+    if (fontStyles.Academico) {
+      fontStyles.Academico += fontStyle('Academico', 'academico/academico-bold.woff2', 'bold');
+    }
+    await page.evaluate((styles) => {
+      window.VF_TEST_GLOBAL.fontStyles = styles;
+    }, fontStyles);
+
     const doIt = async (elmDef) => {
       result = 'error';
       const filename = `${options.IMAGE_OUTPUT_DIR}/${elmDef.nameStr}`;
@@ -223,7 +262,18 @@ const launchTestPage = async (jobs, job) => {
             break;
           case 'svg':
             data = await page.evaluate(async (elIdx) => {
-              const el = window.VF_TEST_GLOBAL.elmDefs[elIdx].el;
+              const el = window.VF_TEST_GLOBAL.elmDefs[elIdx].el.cloneNode(true);
+              const families = new Set();
+              for (const text of [el, ...el.querySelectorAll('[font-family]')]) {
+                for (const family of (text.getAttribute('font-family') || '').split(',')) {
+                  families.add(family.trim().replace(/^['"]|['"]$/g, ''));
+                }
+              }
+              const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+              style.textContent = Array.from(families)
+                .map((family) => window.VF_TEST_GLOBAL.fontStyles[family] || '')
+                .join('\n');
+              el.prepend(style);
               const svgStr = new XMLSerializer().serializeToString(el);
               const pngDataURL = await window.VF_TEST_GLOBAL.svg2png(svgStr);
               return {

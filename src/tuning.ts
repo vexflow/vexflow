@@ -1,5 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
+// Parses named or comma-separated tablature tunings.
 
 import { Tables } from './tables';
 import { RuntimeError } from './util';
@@ -37,13 +38,14 @@ export class Tuning {
    * @param tuningString tuning name (eg. 'dagdad') or comma separated note strings
    */
   setTuning(tuningString: string): void {
-    if (Tuning.names[tuningString]) {
+    if (Object.prototype.hasOwnProperty.call(Tuning.names, tuningString)) {
       tuningString = Tuning.names[tuningString];
     }
 
     this.tuningValues = [];
 
-    const keys = tuningString.split(/\s*,\s*/);
+    // Splitting first avoids repeatedly scanning long whitespace runs for a comma.
+    const keys = tuningString.split(',').map((key) => key.trim());
     if (keys.length === 0) {
       throw new RuntimeError('BadArguments', `Invalid tuning string: ${tuningString}`);
     }
