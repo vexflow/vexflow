@@ -57,12 +57,12 @@ Annotations above or below a note still reserve space between notes. Their text 
 
 ## Visual checks
 
-These examples use Bravura. Each comparison also runs with Petaluma.
+Before/after screenshots are attached to the issues. Each comparison covers Bravura and Petaluma.
 
-| Change | Before | After |
-| --- | --- | --- |
-| Text spacing: black text should match the gray text-font reference | ![Old text spacing](images/p2/152-Bravura-before.png) | ![Correct text spacing](images/p2/152-Bravura-after.png) |
-| Shared lyric baselines, with stems up and down | ![Uneven lyrics](images/p2/177-Bravura-before.png) | ![Aligned lyrics](images/p2/177-Bravura-after.png) |
-| Long lyrics under tied notes, with and without a dot | ![Shortened ties](images/p2/182-Bravura-before.png) | ![Correct tie anchors](images/p2/182-Bravura-after.png) |
+| Change | Screenshots |
+| --- | --- |
+| Text spacing against a text-font reference | [#152](https://github.com/vexflow/vexflow/issues/152#issuecomment-6902575060) |
+| Shared lyric baselines with stems up and down | [#177](https://github.com/vexflow/vexflow/issues/177#issuecomment-6902575788) |
+| Long lyrics under tied notes, with and without a dot | [#182](https://github.com/vexflow/vexflow/issues/182#issuecomment-6902576573) |
 
 Run `grunt test` for the numeric and browser regressions. PNGs are written to `build/p2-examples/`. Use `node tools/render-p2-examples.mjs PATH_TO_BUNDLE before` to capture the same examples against another build.

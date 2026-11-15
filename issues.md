@@ -14,6 +14,7 @@ All five P1 issues have been fixed, pushed, and closed: #71, #346, #347, #349, a
 - **Second P2 batch:** #203, #206, #253, #255, and #268 are fixed, pushed, and closed in `344e7e76`. #218 was closed at the maintainer's request. See [usage and visual examples](docs/engraving-p2.md).
 - **Remaining work:** GitHub has 15 open issues. The remaining P2 items are #311, #333, #334, #335, #336, and #341. Issues #221, #281, #292, and #337 were closed outside these batches.
 - **Latest validation:** 1,874 browser tests and 35 regression tests pass locally. TypeScript and changed-file lint pass. The second P2 batch has before/after examples in both font families. [GitHub CI](https://github.com/vexflow/vexflow/actions/runs/43769502530) and all [CodeQL jobs](https://github.com/vexflow/vexflow/actions/runs/43769502702) passed for `344e7e76`.
+- **Screenshot storage:** All 32 before/after images for #71, #152, #177, #182, #203, #206, #253, and #255 are attached directly to their issues. The fix comments and usage docs link to those attachments. Repository image copies were removed.
 - **Next:** Clear resolved reports, then address the P2 validation and engraving defects.
 
 ## Original triage summary

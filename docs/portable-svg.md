@@ -61,11 +61,6 @@ Before/after SVGs and PNGs are written to `build/svg-export/`.
 
 ## Before and after
 
-Both columns show saved SVGs in a fresh browser document with fonts and styles blocked.
-
-| Font family | Ordinary SVG | Path export |
-| --- | --- | --- |
-| Bravura / Academico | ![Before: missing music glyphs](images/issue-71/bravura-before.png) | ![After: portable Bravura score](images/issue-71/bravura-after.png) |
-| Petaluma / Petaluma Script | ![Before: missing music glyphs](images/issue-71/petaluma-before.png) | ![After: portable Petaluma score](images/issue-71/petaluma-after.png) |
+Before/after screenshots are [attached to issue #71](https://github.com/vexflow/vexflow/issues/71#issuecomment-6902574295). They show saved SVGs in a fresh browser with fonts and styles blocked. Both Bravura and Petaluma are covered.
 
 The test image generator also embeds its local music fonts in saved SVGs. This fixes its SVG-to-PNG conversion. Those font-embedded snapshots still need a viewer that permits embedded font styles. Use path export for restrictive viewers.

@@ -103,16 +103,12 @@ node --test tools/p2-range-tests.mjs
 
 The focused tests render both Bravura and Petaluma.
 They check numeric clearance, pre-draw bounds, fret sizes, and tuplet timing.
-The saved examples below use the same fixture before and after the fix.
+Before/after screenshots are attached to the issues. They use the same fixtures against the old and fixed builds.
 For #253, the rectangle shows the box measured before drawing.
 
-| Issue and example | Before | After |
-| --- | --- | --- |
-| #203: upper rest, Bravura | ![Before](images/p2-range/203-Bravura-0-before.png) | ![After](images/p2-range/203-Bravura-0-after.png) |
-| #203: lower rest, Petaluma | ![Before](images/p2-range/203-Petaluma-1-before.png) | ![After](images/p2-range/203-Petaluma-1-after.png) |
-| #206: bracket, Bravura | ![Before](images/p2-range/206-Bravura-0-before.png) | ![After](images/p2-range/206-Bravura-0-after.png) |
-| #206: larger text, Petaluma | ![Before](images/p2-range/206-Petaluma-1-before.png) | ![After](images/p2-range/206-Petaluma-1-after.png) |
-| #253: flags, Bravura | ![Before](images/p2-range/253-Bravura-0-before.png) | ![After](images/p2-range/253-Bravura-0-after.png) |
-| #253: beam, Petaluma | ![Before](images/p2-range/253-Petaluma-1-before.png) | ![After](images/p2-range/253-Petaluma-1-after.png) |
-| #255: smaller frets, Bravura | ![Before](images/p2-range/255-Bravura-0-before.png) | ![After](images/p2-range/255-Bravura-0-after.png) |
-| #255: mixed CSS sizes, Petaluma | ![Before](images/p2-range/255-Petaluma-1-before.png) | ![After](images/p2-range/255-Petaluma-1-after.png) |
+| Issue | Examples and screenshots |
+| --- | --- |
+| #203 | [Upper and lower rests](https://github.com/vexflow/vexflow/issues/203#issuecomment-6902570808) |
+| #206 | [Pedal brackets and larger text](https://github.com/vexflow/vexflow/issues/206#issuecomment-6902577311) |
+| #253 | [Grace-note flags and beams](https://github.com/vexflow/vexflow/issues/253#issuecomment-6902578066) |
+| #255 | [Smaller frets and mixed CSS sizes](https://github.com/vexflow/vexflow/issues/255#issuecomment-6902578912) |

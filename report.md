@@ -260,3 +260,7 @@ Validation: 1,874 browser tests and 33 regression tests pass. The jsdom generato
 - **#268 and R09:** Voice timing follows tuplet edits. Duration edits retain their unscaled base.
 
 See [usage, scope, and before/after examples](docs/engraving-p2.md). Validation passed: 1,874 browser tests, 35 regression tests, TypeScript, and lint. GitHub CI and all CodeQL jobs passed. Final issue status is tracked in `issues.md`.
+
+## Screenshot follow-up
+
+Before/after images for the eight visual fixes are attached directly to their GitHub issues. The fix comments and usage documents link to those comments. The 32 repository image copies were removed.
