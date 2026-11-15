@@ -8,7 +8,9 @@
 // See `tests/tabnote_tests.ts` for usage examples.
 
 import { Element } from './element';
+import { Font } from './font';
 import { Glyphs } from './glyphs';
+import { Metrics } from './metrics';
 import { Modifier } from './modifier';
 import { Note } from './note';
 import { Stave } from './stave';
@@ -132,6 +134,8 @@ export class TabNote extends StemmableNote {
   protected ghost: boolean;
   protected fretElement: Element[] = [];
   protected positions: TabNotePosition[];
+  /** Explicit fret size; otherwise use text metrics and this note's grace scale. */
+  protected fretFontSize?: string | number;
 
   // Initialize the TabNote with a `noteStruct` full of properties
   // and whether to `drawStem` when rendering the note
@@ -229,7 +233,16 @@ export class TabNote extends StemmableNote {
     return el;
   }
 
-  // Calculate and store the width of the note
+  /** Resize fret text as well as the parent. Set sizes before formatting the voice. */
+  override setFontSize(size?: string | number): this {
+    super.setFontSize(size);
+    this.fretFontSize = size;
+    if (this.positions) this.updateWidth();
+    this.preFormatted = false;
+    return this;
+  }
+
+  // Calculate and store the width of the note, retaining explicit sizes across ghost changes.
   updateWidth(): void {
     this.fretElement = [];
     this.width = 0;
@@ -237,6 +250,14 @@ export class TabNote extends StemmableNote {
       let fret = this.positions[i].fret;
       if (this.ghost) fret = '(' + fret + ')';
       const el = TabNote.tabToElement(fret.toString());
+      const defaultSize = Font.convertSizeToPointValue(Metrics.getFontInfo('TabNote.text').size);
+      const size =
+        this.fretFontSize === undefined
+          ? defaultSize * this.getFontScale()
+          : Font.convertSizeToPointValue(this.fretFontSize);
+      el.setFontSize((Font.convertSizeToPointValue(el.fontInfo.size) * size) / defaultSize);
+      const metrics = el.getTextMetrics();
+      el.setYShift((metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent) / 2);
       this.fretElement.push(el);
       this.width = Math.max(el.getWidth(), this.width);
     }

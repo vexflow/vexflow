@@ -1,11 +1,14 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
+// Pedal text and brackets with clearance for annotations in the marked passage.
 
+import { Annotation } from './annotation';
 import { Element } from './element';
 import { Glyphs } from './glyphs';
 import { Metrics } from './metrics';
+import { Stave } from './stave';
 import { StaveNote } from './stavenote';
-import { Category } from './typeguard';
+import { Category, isAnnotation, isStaveNote } from './typeguard';
 import { log, RuntimeError } from './util';
 
 // eslint-disable-next-line
@@ -132,6 +135,40 @@ export class PedalMarking extends Element {
     return this;
   }
 
+  /** Compute a baseline below annotations in participating voices on this stave. */
+  getYForStave(stave: Stave): number {
+    let y = stave.getYForBottomText(this.line + 3);
+    const events = this.notes.filter((note) => note.getStave() === stave);
+    if (!events.length) return y;
+    const startX = Math.min(...events.map((note) => note.getAbsoluteX()));
+    const endX = Math.max(...events.map((note) => note.getAbsoluteX()));
+    const voices = new Set(events.map((note) => note.getVoice()));
+    // Bracket notches and text both extend upward from the baseline.
+    const text = new Element('PedalMarking').setFont(this.fontInfo);
+    const textHeight = Math.max(
+      text.setText(this.depressText).getTextMetrics().actualBoundingBoxAscent,
+      text.setText(this.releaseText).getTextMetrics().actualBoundingBoxAscent
+    );
+    const height =
+      this.type === PedalMarking.type.BRACKET
+        ? this.renderOptions.bracketHeight
+        : Math.max(textHeight, this.type === PedalMarking.type.MIXED ? this.renderOptions.bracketHeight : 0);
+    for (const voice of voices) {
+      for (const note of voice.getTickables()) {
+        if (!isStaveNote(note) || note.getStave() !== stave) continue;
+        if (note.getAbsoluteX() < startX || note.getAbsoluteX() > endX) continue;
+        for (const modifier of note.getModifiers()) {
+          if (!isAnnotation(modifier) || modifier.getVerticalJustification() !== Annotation.VerticalJustify.BOTTOM)
+            continue;
+          const bottom =
+            modifier.computeY().y + modifier.getYShift() + modifier.getTextMetrics().actualBoundingBoxDescent;
+          y = Math.max(y, bottom + 4 + height);
+        }
+      }
+    }
+    return y;
+  }
+
   /** Draw the bracket based pedal markings. */
   drawBracketed(): void {
     const ctx = this.checkContext();
@@ -139,6 +176,8 @@ export class PedalMarking extends Element {
     let prevX: number;
     let prevY: number;
     let textWidth = 0;
+    const baselines = new Map(this.notes.map((note) => [note.checkStave(), 0]));
+    for (const stave of baselines.keys()) baselines.set(stave, this.getYForStave(stave));
 
     // Iterate through each note
     this.notes.forEach((note, index, notes) => {
@@ -147,7 +186,7 @@ export class PedalMarking extends Element {
 
       // Get the initial coordinates for the note
       const x = note.getAbsoluteX();
-      const y = note.checkStave().getYForBottomText(this.line + 3);
+      const y = baselines.get(note.checkStave())!;
 
       // Throw if current note is positioned before the previous note
       if (x < prevX) {
@@ -216,13 +255,15 @@ export class PedalMarking extends Element {
     const ctx = this.checkContext();
     let isPedalDepressed = false;
     let textWidth = 0;
+    const baselines = new Map(this.notes.map((note) => [note.checkStave(), 0]));
+    for (const stave of baselines.keys()) baselines.set(stave, this.getYForStave(stave));
 
     // Iterate through each note, placing glyphs or custom text accordingly
     this.notes.forEach((note) => {
       isPedalDepressed = !isPedalDepressed;
       const stave = note.checkStave();
       const x = note.getAbsoluteX();
-      const y = stave.getYForBottomText(this.line + 3);
+      const y = baselines.get(stave)!;
 
       if (isPedalDepressed) {
         textWidth = ctx.measureText(this.depressText).width;

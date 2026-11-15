@@ -1,6 +1,8 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
+// Dynamics glyphs with page-relative bounds available before drawing.
 
+import { BoundingBox } from './boundingbox';
 import { Glyphs } from './glyphs';
 import { Note } from './note';
 import { TextNoteStruct } from './textnote';
@@ -86,6 +88,17 @@ export class TextDynamics extends Note {
 
     this.preFormatted = true;
     return this;
+  }
+
+  /** Measure at the same page coordinates used by draw(), after voice formatting. */
+  override getBoundingBox(): BoundingBox {
+    const metrics = this.getTextMetrics();
+    return new BoundingBox(
+      this.getAbsoluteX() + this.x + this.xShift,
+      this.checkStave().getYForLine(this.line - 3) + this.y + this.yShift - metrics.actualBoundingBoxAscent,
+      this.getWidth(),
+      this.getHeight()
+    );
   }
 
   /** Draw the dynamics text on the rendering context. */

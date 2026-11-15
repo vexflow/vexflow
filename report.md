@@ -4,7 +4,7 @@
 
 **Result:** 22 findings: 5 P1, 16 P2, and 1 P3.
 
-**Tracking status (November 15, 2026):** All five P1 findings are fixed and their issues are closed. R03 (#348) was fixed earlier. R01, R02, R04, and R05 are fixed in the current follow-up. The separate SVG export issue #71 is also fixed. P2 and P3 findings remain open; they have not been filed as part of this review.
+**Tracking status (November 15, 2026):** All five P1 findings are fixed and their issues are closed. R03 (#348) was fixed earlier. R01, R02, R04, and R05 are fixed in the current follow-up. The separate SVG export issue #71 is also fixed. R09 is fixed in the second GitHub P2 follow-up. The other original P2 and P3 findings remain open; they have not been filed as part of this review.
 
 ## Scope and baseline
 
@@ -111,10 +111,12 @@ Current main also contains dependency updates for fast-uri, ip-address, and zod.
 
 ### R09. Changing a tuplet note's duration corrupts its intrinsic ticks
 
+- **Status:** Fixed locally with #268; publication pending.
+
 - **Location:** `src/tickable.ts:370–381`.
 - **Problem:** `setDuration()` saves the already-scaled tick value as the intrinsic duration. Later tuplet operations apply or remove multipliers against the wrong base.
 - **Evidence:** Set a note in a 3:2 tuplet to `new Fraction(1, 4)`, then detach the tuplet. The note retains about 2730.67 ticks instead of 4096.
-- **Fix:** Store the unscaled duration in `intrinsicTicks`. Derive `ticks` from that value and the current multiplier. Test duration edits with nested tuplets too.
+- **Fix applied:** Store the unscaled duration in `intrinsicTicks`. Voice timing caches refresh after edits. Nested-tuplet duration edits and detach operations have a regression test.
 
 ### R10. Tuplet labels move on the second draw
 
@@ -246,3 +248,15 @@ The first five P2 entries in `issues.md` have been fixed, pushed, and closed. Th
 - **#182:** Removed lyric-only spacing from tie anchors while retaining nearby modifier clearance.
 
 Validation: 1,874 browser tests and 33 regression tests pass. The jsdom generator produced 450 Bravura PNGs. TypeScript and changed-file lint pass. GitHub CI and all CodeQL jobs passed. See `issues.md` for the updated issue status.
+
+## Second GitHub P2 follow-up — November 15, 2026
+
+#203, #206, #253, #255, and #268 are fixed locally. Publication is pending. #218 was closed at the maintainer's request.
+
+- **#203:** Rests clear simultaneous chords and stems.
+- **#206:** Pedal markings clear bottom annotations and pedal-change notches.
+- **#253:** Grace-note and TextDynamics bounds work before drawing.
+- **#255:** Grace-tab fret sizing and vertical centering honor public size settings.
+- **#268 and R09:** Voice timing follows tuplet edits. Duration edits retain their unscaled base.
+
+See [usage, scope, and before/after examples](docs/engraving-p2.md). Final validation and GitHub status are tracked in `issues.md`.

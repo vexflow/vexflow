@@ -49,6 +49,8 @@ export class Voice extends Element {
   protected mode: VoiceMode = VoiceMode.STRICT;
   protected expTicksUsed?: number;
   protected preFormatted: boolean = false;
+  /** Durations can change after insertion, for example when attaching tuplets. */
+  private ticksDirty: boolean = false;
   protected options: { softmaxFactor: number };
 
   protected readonly totalTicks: Fraction;
@@ -101,11 +103,13 @@ export class Voice extends Element {
 
   /** Get the total ticks in the voice. */
   getTotalTicks(): Fraction {
+    this.refreshTicks();
     return this.totalTicks;
   }
 
   /** Get the total ticks used in the voice by all the tickables. */
   getTicksUsed(): Fraction {
+    this.refreshTicks();
     return this.ticksUsed;
   }
 
@@ -116,6 +120,7 @@ export class Voice extends Element {
 
   /** Get the tick count for the shortest tickable */
   getSmallestTickCount(): Fraction {
+    this.refreshTicks();
     return this.smallestTickCount;
   }
 
@@ -140,12 +145,13 @@ export class Voice extends Element {
 
   /** Get the resolution multiplier for the voice. */
   getResolutionMultiplier(): number {
+    this.refreshTicks();
     return this.resolutionMultiplier;
   }
 
   /** Get the actual tick resolution for the voice. */
   getActualResolution(): number {
-    return this.resolutionMultiplier * this.time.resolution;
+    return this.getResolutionMultiplier() * this.time.resolution;
   }
 
   /** Set the voice's stave. */
@@ -178,6 +184,7 @@ export class Voice extends Element {
 
   /** Determine if the voice is complete according to the voice mode. */
   isComplete(): boolean {
+    this.refreshTicks();
     if (this.mode === VoiceMode.STRICT || this.mode === VoiceMode.FULL) {
       return this.ticksUsed.equals(this.totalTicks);
     } else {
@@ -214,6 +221,7 @@ export class Voice extends Element {
 
   /** Get the softmax-scaled value of a tick duration. 'tickValue' is a number. */
   softmax(tickValue: number): number {
+    this.refreshTicks();
     if (!this.expTicksUsed) {
       this.expTicksUsed = this.reCalculateExpTicksUsed();
     }
@@ -224,8 +232,32 @@ export class Voice extends Element {
     return sm;
   }
 
+  /** Invalidate cached duration totals when a member's duration changes. */
+  invalidateTicks(): void {
+    this.ticksDirty = true;
+    this.expTicksUsed = undefined;
+  }
+
+  /** Recount once after a batch of duration edits; avoid partial-tuplet validation. */
+  private refreshTicks(): void {
+    if (!this.ticksDirty) return;
+    this.ticksUsed.set(0, 1);
+    this.totalTicks.set(this.time.numBeats * (this.time.resolution / this.time.beatValue), 1);
+    this.smallestTickCount = this.totalTicks.clone();
+    for (const tickable of this.tickables) {
+      if (tickable.shouldIgnoreTicks()) continue;
+      const ticks = tickable.getTicks();
+      this.ticksUsed.add(ticks);
+      if (ticks.lessThan(this.smallestTickCount)) this.smallestTickCount = ticks.clone();
+    }
+    this.resolutionMultiplier = this.ticksUsed.denominator;
+    this.totalTicks.add(0, this.resolutionMultiplier);
+    this.ticksDirty = false;
+  }
+
   /** Add a tickable to the voice. */
   addTickable(tickable: Tickable): this {
+    this.refreshTicks();
     if (!tickable.shouldIgnoreTicks()) {
       const ticks = tickable.getTicks();
 

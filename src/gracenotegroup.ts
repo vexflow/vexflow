@@ -166,9 +166,19 @@ export class GraceNoteGroup extends Modifier {
     return this.graceNotes;
   }
 
-  /** Returns the box enclosing the grace notes (not the slur). Valid after the group has been drawn, as that positions the grace notes. */
+  /** Position grace notes after the parent has been formatted and assigned a stave. */
+  private positionGraceNotes(): void {
+    const note = this.checkAttachedNote();
+    note.checkStave();
+    this.preFormat();
+    this.alignSubNotesWithNote(this.getGraceNotes(), note, this.position);
+    this.beams.forEach((beam) => beam.postFormat());
+  }
+
+  /** Enclose the positioned grace notes (not the slur). Drawing is not required. */
   override getBoundingBox(): BoundingBox {
     if (this.graceNotes.length === 0) return super.getBoundingBox();
+    this.positionGraceNotes();
     const boundingBox = this.graceNotes[0].getBoundingBox();
     for (let i = 1; i < this.graceNotes.length; i++) {
       boundingBox.mergeWith(this.graceNotes[i].getBoundingBox());
@@ -183,7 +193,7 @@ export class GraceNoteGroup extends Modifier {
 
     L('Drawing grace note group for:', note);
 
-    this.alignSubNotesWithNote(this.getGraceNotes(), note, this.position); // Modifier function
+    this.positionGraceNotes();
 
     // Draw grace notes.
     this.graceNotes.forEach((graceNote) => graceNote.setContext(ctx).drawWithStyle());

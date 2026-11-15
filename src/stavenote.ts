@@ -70,7 +70,11 @@ const isInnerNoteIndex = (note: StaveNote, index: number) =>
 
 // Helper methods for rest positioning in ModifierContext.
 function shiftRestVertical(rest: StaveNoteFormatSettings, note: StaveNoteFormatSettings, dir: number) {
-  const delta = dir;
+  // Move far enough to clear the other voice, including tall chords and stems.
+  // Whole-space steps preserve the rest's line/space alignment.
+  const clearance = 0.5;
+  const distance = dir > 0 ? note.maxLine + clearance - rest.minLine : rest.maxLine + clearance - note.minLine;
+  const delta = dir * Math.max(1, Math.ceil(distance));
 
   rest.line += delta;
   rest.maxLine += delta;
@@ -593,11 +597,16 @@ export class StaveNote extends StemmableNote {
     this.sortedKeyProps.sort((a, b) => a.keyProps.line - b.keyProps.line);
   }
 
-  // Get the `BoundingBox` for the entire note
+  // Measure noteheads and flags from layout coordinates, including before draw().
   override getBoundingBox(): BoundingBox {
     const boundingBox = new BoundingBox(this.getAbsoluteX(), this.ys[0], 0, 0);
     this._noteHeads.forEach((notehead) => {
-      boundingBox.mergeWith(notehead.getBoundingBox());
+      const displacement = notehead.isDisplaced()
+        ? (notehead.getWidth() - Stem.WIDTH / 2) * this.getStemDirection()
+        : 0;
+      const box = notehead.getBoundingBox();
+      box.setX(this.getNoteHeadBeginX() + displacement + notehead.getXShift());
+      boundingBox.mergeWith(box);
     });
     const { yTop, yBottom } = this.getNoteHeadBounds();
 
@@ -609,8 +618,11 @@ export class StaveNote extends StemmableNote {
           : yBottom - noteStemHeight + this.flag.getTextMetrics().actualBoundingBoxAscent;
       boundingBox.mergeWith(new BoundingBox(this.getAbsoluteX(), stemY, 0, 0));
     }
-    if (this.hasFlag()) {
+    if (this.shouldDrawFlag()) {
+      const { x, y } = this.getFlagPosition();
       const bbFlag = this.flag.getBoundingBox();
+      bbFlag.setX(x + this.flag.getXShift());
+      bbFlag.setY(y + this.flag.getYShift() - this.flag.getTextMetrics().actualBoundingBoxAscent);
       boundingBox.mergeWith(bbFlag);
     }
     for (let i = 0; i < this.modifiers.length; i++) {
@@ -1116,6 +1128,18 @@ export class StaveNote extends StemmableNote {
     return hasStem && hasFlag && hasNoBeam && !this.isRest();
   }
 
+  /** Share flag coordinates between measurement and drawing. */
+  private getFlagPosition(): { x: number; y: number } {
+    const { yTop, yBottom } = this.getNoteHeadBounds();
+    const noteStemHeight = this.checkStem().getHeight();
+    const x = this.getStemX() - Tables.STEM_WIDTH / 2;
+    const y =
+      this.getStemDirection() === Stem.DOWN
+        ? yTop - noteStemHeight - this.flag.getTextMetrics().actualBoundingBoxDescent
+        : yBottom - noteStemHeight + this.flag.getTextMetrics().actualBoundingBoxAscent;
+    return { x, y };
+  }
+
   // Draw the flag for the note
   drawFlag(): void {
     const ctx = this.checkContext();
@@ -1124,16 +1148,7 @@ export class StaveNote extends StemmableNote {
     }
 
     if (this.shouldDrawFlag()) {
-      const { yTop, yBottom } = this.getNoteHeadBounds();
-
-      const noteStemHeight = this.stem!.getHeight();
-      const flagX = this.getStemX() - Tables.STEM_WIDTH / 2;
-      const flagY =
-        this.getStemDirection() === Stem.DOWN
-          ? // Down stems are below the note head and have flags on the right.
-            yTop - noteStemHeight - this.flag.getTextMetrics().actualBoundingBoxDescent
-          : // Up stems are above the note head and have flags on the right.
-            yBottom - noteStemHeight + this.flag.getTextMetrics().actualBoundingBoxAscent;
+      const { x: flagX, y: flagY } = this.getFlagPosition();
 
       // Draw the Flag
       this.flag.setContext(ctx).setX(flagX).setY(flagY).drawWithStyle();

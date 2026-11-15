@@ -11,8 +11,9 @@
 All five P1 issues have been fixed, pushed, and closed: #71, #346, #347, #349, and #350. The original triage below is retained for context.
 
 - **P2 follow-up:** The first five P2 issues are fixed, pushed, and closed: #38, #102, #152, #177, and #182.
-- **Remaining work:** 26 issues remain open on GitHub. None is P1. Issues #221, #281, #292, and #337 were also closed outside this batch.
-- **Latest validation:** 1,874 browser tests and 33 regression tests pass. TypeScript and changed-file lint pass. The jsdom Bravura pass produced 450 PNGs. GitHub CI and all CodeQL jobs passed.
+- **Second P2 batch:** #203, #206, #253, #255, and #268 are fixed locally. Publication and issue closure are pending. #218 was closed at the maintainer's request. See [usage and visual examples](docs/engraving-p2.md).
+- **Remaining work:** The remaining P2 items are #311, #333, #334, #335, #336, and #341. Issues #221, #281, #292, and #337 were closed outside these batches.
+- **Latest validation:** 1,874 browser tests and 35 regression tests pass locally. TypeScript and changed-file lint pass. The second P2 batch has before/after examples in both font families. Its GitHub checks are pending publication. The first batch also passed CI and CodeQL.
 - **Next:** Clear resolved reports, then address the P2 validation and engraving defects.
 
 ## Original triage summary
@@ -139,51 +140,45 @@ All 40 issues have native GitHub **Type** and **Priority** fields populated and 
 
 ### [#203](https://github.com/vexflow/vexflow/issues/203) — Rest collisions across voices
 
-**Recommendation:** Investigate. **Type:** Bug. **Priority:** Medium. **Labels:** `needs-reproduction`, `triaged`.
+**Status:** Fixed locally; publication pending. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
 
-- **Finding:** Current StaveNote formatting has special-case rest placement, but no current minimal example establishes whether it handles the reported score.
-- **Next step:** Reduce the score to a VexFlow-only test with shared voice formatting. Fix the failing case; do not close based on existing heuristics.
-- **Evidence:** `src/stavenote.ts:71; src/stavenote.ts:281`.
+- **Fix:** Rests move by the clearance needed to avoid simultaneous chords and stems in a shared modifier context.
+- **Validation:** Upper and lower rests clear the opposing voice in Bravura and Petaluma. Before/after examples are documented.
 
 ### [#206](https://github.com/vexflow/vexflow/issues/206) — Vertical annotation collisions
 
-**Recommendation:** Investigate. **Type:** Bug. **Priority:** Medium. **Labels:** `needs-reproduction`, `triaged`.
+**Status:** Fixed locally; publication pending. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
 
-- **Finding:** The thread identifies the colliding text as Annotation. It does not include enough score data to reproduce the layout on current main.
-- **Next step:** Obtain a minimal example and define which collisions the formatter should resolve. Coordinate with #177.
-- **Evidence:** `src/annotation.ts; issue discussion`.
+- **Fix:** Pedal text, brackets, and change notches clear bottom annotations across the marked passage.
+- **Validation:** Tests cover intermediate annotations, larger text, brackets, mixed pedal text, and two font families.
 
 ### [#218](https://github.com/vexflow/vexflow/issues/218) — Puppeteer image-generation crashes
 
-**Recommendation:** Verify before closing. **Type:** Bug. **Priority:** Medium. **Labels:** `testing`, `needs-reproduction`, `triaged`.
+**Status:** Closed. **Type:** Bug. **Priority:** Medium. **Labels:** `testing`, `triaged`.
 
-- **Finding:** The latest reporter update says Puppeteer 23.3.0 stopped crashing, but also reports inconsistent image counts. Unit tests do not exercise this full generation pipeline.
-- **Next step:** Run the current concurrent image generator and compare image counts. Close the old crash report if it passes; track any image-comparison failure separately.
-- **Evidence:** `tools/generate_images_pptr.js:104; issue discussion`.
+- **Fix:** Closed at the maintainer's request. The reporter had confirmed that the Puppeteer upgrade stopped the crash.
+- **Validation:** No new full concurrent-generator claim is made. Image-count and comparison-tooling work remains separate.
 
 ### [#253](https://github.com/vexflow/vexflow/issues/253) — Grace-note bounding boxes before drawing
 
-**Recommendation:** Address. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
+**Status:** Fixed locally; publication pending. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
 
-- **Finding:** Merged PR #338 fixes the box after drawing. Its description and the current method explicitly leave positioning before drawing unresolved.
-- **Next step:** Keep open for the pre-draw contract and add a regression. The TextDynamics report in the comments also needs a separate reproduction.
-- **Evidence:** [Source](https://github.com/vexflow/vexflow/pull/338).
+- **Fix:** Grace-note groups position their notes before measurement. Notehead, flag, and TextDynamics bounds use page coordinates.
+- **Validation:** Bounds match before and after drawing, remain stable on repeated reads, and follow later layout changes.
 
 ### [#255](https://github.com/vexflow/vexflow/issues/255) — GraceTabNote font sizing
 
-**Recommendation:** Address. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
+**Status:** Fixed locally; publication pending. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
 
-- **Finding:** A current probe confirms setFontSize changes the parent but leaves fret text at size 9. TabNote creates fret elements from TabNote.text metrics.
-- **Next step:** Propagate grace-tab sizing to fret elements and recalculate width and vertical alignment. Add a regression.
-- **Evidence:** `src/tabnote.ts:220; src/gracetabnote.ts; focused probe`.
+- **Fix:** Fret text honors explicit font sizes and the grace-scale metric. Widths and vertical centering update together.
+- **Validation:** Tests cover numeric and CSS sizes, ghost toggles, default reset, and custom class scale.
 
 ### [#268](https://github.com/vexflow/vexflow/issues/268) — Tuplet tick overflow
 
-**Recommendation:** Investigate. **Type:** Bug. **Priority:** Medium. **Labels:** `needs-reproduction`, `triaged`.
+**Status:** Fixed locally; publication pending. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
 
-- **Finding:** The report lacks a complete reproduction. A current strict 4/4 probe passes when tuplets are created before adding notes to the voice; Tuplet already attaches in its constructor.
-- **Next step:** Reduce the reported case and check construction order, duplicate attach calls, and V5 option names. Keep as a suspected bug until reproduced.
-- **Evidence:** `src/tuplet.ts:133; focused probe`.
+- **Fix:** Voice timing caches refresh after tuplet edits. Duration edits preserve unscaled intrinsic ticks, also fixing report R09.
+- **Validation:** Tests cover both construction orders, repeated attachment, nested tuplets, ratio edits, detach, clear, and strict overflow rejection.
 
 ### [#311](https://github.com/vexflow/vexflow/issues/311) — Style setters with no visible effect
 

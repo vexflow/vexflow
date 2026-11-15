@@ -1,5 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
+// Timed score elements; duration changes invalidate their voice's cached totals.
 
 import { Element } from './element';
 import { Fraction } from './fraction';
@@ -115,6 +116,7 @@ export abstract class Tickable extends Element {
   /** Ignore the ticks. */
   setIgnoreTicks(flag: boolean): this {
     this.ignoreTicks = flag;
+    this.voice?.invalidateTicks();
     return this;
   }
 
@@ -216,6 +218,7 @@ export abstract class Tickable extends Element {
     this.tupletStack = [];
     this.tickMultiplier = new Fraction(1, 1);
     this.ticks = new Fraction(this.intrinsicTicks, 1);
+    this.voice?.invalidateTicks();
     return this;
   }
 
@@ -248,6 +251,7 @@ export abstract class Tickable extends Element {
 
   /** Add the given Tuplet to the tupletStack without clearing it first. */
   addTuplet(tuplet: Tuplet): this {
+    if (this.tupletStack.includes(tuplet)) return this;
     this.tupletStack.push(tuplet);
 
     const noteCount = tuplet.getNoteCount();
@@ -360,6 +364,7 @@ export abstract class Tickable extends Element {
   setIntrinsicTicks(intrinsicTicks: number): void {
     this.intrinsicTicks = intrinsicTicks;
     this.ticks = this.tickMultiplier.clone().multiply(this.intrinsicTicks);
+    this.voice?.invalidateTicks();
   }
 
   /** Get the tick multiplier as a Fraction.  Defaults to Fraction(1, 1). */
@@ -372,13 +377,16 @@ export abstract class Tickable extends Element {
   applyTickMultiplier(numerator: number, denominator: number): void {
     this.tickMultiplier.multiply(numerator, denominator);
     this.ticks = this.tickMultiplier.clone().multiply(this.intrinsicTicks);
+    this.voice?.invalidateTicks();
   }
 
   /** Set the duration. */
   setDuration(duration: Fraction): void {
     const ticks = duration.numerator * (Tables.RESOLUTION / duration.denominator);
     this.ticks = this.tickMultiplier.clone().multiply(ticks);
-    this.intrinsicTicks = this.ticks.value();
+    // Keep the unscaled duration so later tuplets do not apply the ratio twice.
+    this.intrinsicTicks = ticks;
+    this.voice?.invalidateTicks();
   }
 
   getAbsoluteX(): number {

@@ -479,7 +479,13 @@ module.exports = (grunt) => {
   grunt.registerTask('test:regressions', 'Test built ESM, input validation, and portable SVG export.', () => {
     require('child_process').execFileSync(
       process.execPath,
-      ['--test', 'tools/p1-regression-tests.mjs', 'tools/svg-export-tests.mjs', 'tools/p2-regression-tests.mjs'],
+      [
+        '--test',
+        'tools/p1-regression-tests.mjs',
+        'tools/svg-export-tests.mjs',
+        'tools/p2-regression-tests.mjs',
+        'tools/p2-range-tests.mjs',
+      ],
       {
         stdio: 'inherit',
       }
