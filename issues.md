@@ -10,9 +10,9 @@
 
 All five P1 issues have been fixed, pushed, and closed: #71, #346, #347, #349, and #350. The original triage below is retained for context.
 
-- **P2 follow-up:** The first five P2 issues are fixed and validated: #38, #102, #152, #177, and #182.
-- **Remaining work:** 30 issues from the original inventory after closing this batch. None is P1.
-- **Latest local validation:** 1,874 browser tests and 33 regression tests pass. TypeScript and changed-file lint pass. The jsdom Bravura pass produced 450 PNGs. GitHub CI for this batch is pending publication.
+- **P2 follow-up:** The first five P2 issues are fixed, pushed, and closed: #38, #102, #152, #177, and #182.
+- **Remaining work:** 26 issues remain open on GitHub. None is P1. Issues #221, #281, #292, and #337 were also closed outside this batch.
+- **Latest validation:** 1,874 browser tests and 33 regression tests pass. TypeScript and changed-file lint pass. The jsdom Bravura pass produced 450 PNGs. GitHub CI and all CodeQL jobs passed.
 - **Next:** Clear resolved reports, then address the P2 validation and engraving defects.
 
 ## Original triage summary
@@ -61,7 +61,7 @@ All 40 issues have native GitHub **Type** and **Priority** fields populated and 
 - **Priority mapping:** P0 = Urgent, P1 = High, P2 = Medium, P3 = Low.
 - **Labels removed from these issues:** `bug`, `feature`, `enhancement`, and P0–P3. The native fields now carry that information.
 - **Labels retained:** Specific context such as `security`, `documentation`, `performance`, `testing`, `dependencies`, `question`, `needs-reproduction`, `ai_review`, and `triaged`.
-- **Publication status:** Complete. GitHub readback confirms all fields and labels. The original triage comments remain. The original inventory had 40 open issues. All five P1 issues are closed. Each has a fix comment. The in progress label was removed. GitHub readback confirms 35 open issues and no remaining High-priority issues.
+- **Publication status:** Complete. GitHub readback confirms all fields and labels. The original triage comments remain. The original inventory had 40 open issues. All five P1 issues are closed. Each has a fix comment. The in progress label was removed. The P2 batch (#38, #102, #152, #177, #182) is also closed, with fix comments and relevant screenshots. GitHub readback now confirms 26 open issues and no remaining High-priority issues.
 
 ## P1
 
@@ -104,35 +104,35 @@ All 40 issues have native GitHub **Type** and **Priority** fields populated and 
 
 ### [#38](https://github.com/vexflow/vexflow/issues/38) — Realistic score benchmarks
 
-**Status:** Fixed; publication pending. **Type:** Task. **Priority:** Medium. **Labels:** `performance`, `testing`, `triaged`.
+**Status:** Fixed and closed. **Type:** Task. **Priority:** Medium. **Labels:** `performance`, `testing`, `triaged`.
 
 - **Fix:** Added three original score studies and a browser benchmark runner. Font loading and warmup are outside the measured work. The report separates construction, layout, and drawing.
 - **Validation:** All workloads render in CI smoke tests. Five local samples per score and visual output are documented in [benchmarks.md](docs/benchmarks.md).
 
 ### [#102](https://github.com/vexflow/vexflow/issues/102) — jsdom support
 
-**Status:** Fixed; publication pending. **Type:** Bug. **Priority:** Medium. **Labels:** `testing`, `triaged`.
+**Status:** Fixed and closed. **Type:** Bug. **Priority:** Medium. **Labels:** `testing`, `triaged`.
 
 - **Fix:** Pinned canvas 3.2.3 to avoid the reproduced native crash. Added a focused jsdom PNG/SVG test and a module filter for image generation.
 - **Validation:** 450 Bravura PNGs generated successfully. The focused test covers font registration, seven Clef PNGs, and portable SVG serialization. See [jsdom.md](docs/jsdom.md).
 
 ### [#152](https://github.com/vexflow/vexflow/issues/152) — Text and music font ordering
 
-**Status:** Fixed; publication pending. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
+**Status:** Fixed and closed. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
 
 - **Fix:** Text elements use a text-first font stack. Music glyphs retain their stack. Custom text faces can be chosen through setTextFonts().
 - **Validation:** Canvas widths match the text font. SVG examples cover Bravura and Petaluma. Class and element overrides still work. See [text-and-lyrics.md](docs/text-and-lyrics.md).
 
 ### [#177](https://github.com/vexflow/vexflow/issues/177) — Lyric layout and annotation positioning
 
-**Status:** Fixed; publication pending. **Type:** Feature. **Priority:** Medium. **Labels:** `triaged`.
+**Status:** Fixed and closed. **Type:** Feature. **Priority:** Medium. **Labels:** `triaged`.
 
 - **Fix:** Added computeX(), computeY(), and setTextBaseline(). Callers can align a lyric row or override one positioning axis before drawing.
 - **Validation:** Tests cover all justifications, shared baselines, subclass overrides, and resetting automatic placement. Before/after examples are in [text-and-lyrics.md](docs/text-and-lyrics.md).
 
 ### [#182](https://github.com/vexflow/vexflow/issues/182) — Lyrics shorten ties
 
-**Status:** Fixed; publication pending. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
+**Status:** Fixed and closed. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
 
 - **Fix:** Tie anchors exclude spacing added only for annotations above or below a note. Nearby modifiers keep their clearance.
 - **Validation:** Long lyrics no longer shorten ties. Tests cover dots, side string numbers, and inline annotations. Before/after examples are in [text-and-lyrics.md](docs/text-and-lyrics.md).

@@ -237,7 +237,7 @@ Before release, run a clean locked install, the browser suite, a working visual 
 
 ## GitHub P2 follow-up — November 15, 2026
 
-The first five P2 entries in `issues.md` have been addressed. These are separate from the original R06–R21 findings above.
+The first five P2 entries in `issues.md` have been fixed, pushed, and closed. These are separate from the original R06–R21 findings above.
 
 - **#38:** Added a compact benchmark corpus, repeatable measurements, and visual artifacts.
 - **#102:** Pinned canvas 3.2.3 after reproducing a native crash with 3.1.0. Verified jsdom PNG and portable SVG output.
@@ -245,4 +245,4 @@ The first five P2 entries in `issues.md` have been addressed. These are separate
 - **#177:** Added independent annotation position methods and an explicit lyric baseline.
 - **#182:** Removed lyric-only spacing from tie anchors while retaining nearby modifier clearance.
 
-Validation: 1,874 browser tests and 33 regression tests pass. The jsdom generator produced 450 Bravura PNGs. TypeScript and changed-file lint pass. See `issues.md` for publication and closure status.
+Validation: 1,874 browser tests and 33 regression tests pass. The jsdom generator produced 450 Bravura PNGs. TypeScript and changed-file lint pass. GitHub CI and all CodeQL jobs passed. See `issues.md` for the updated issue status.
