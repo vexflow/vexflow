@@ -2,9 +2,8 @@
 // MIT License
 //
 // PedalMarking Tests
-
 // TODO: Fix Error => Type 'Tickable' is not assignable to type 'StaveNote'.
-
+import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Factory } from '../src/factory';
@@ -14,6 +13,7 @@ import { Tickable } from '../src/tickable';
 const PedalMarkingTests = {
   Start(): void {
     QUnit.module('PedalMarking');
+    QUnit.test('annotationClearance', annotationClearance);
 
     const run = VexFlowTests.runTests;
     run('Simple Pedal 1', simple1);
@@ -128,3 +128,26 @@ const customTest2 = createTest((factory, notes0, notes1) => {
 
 VexFlowTests.register(PedalMarkingTests);
 export { PedalMarkingTests };
+
+/** Pedal changes clear annotations on intermediate notes before those notes draw. */
+function annotationClearance(assert: Assert): void {
+  const V = VexFlow;
+  const stave = new V.Stave(20, 60, 600);
+  const notes = Array.from({ length: 4 }, () => new StaveNote({ keys: ['c/4'], duration: 'q' }).setStave(stave));
+  const annotations = ['pedal', 'change', 'gypsy', 'mark'].map((text, i) => {
+    const annotation = new V.Annotation(text).setVerticalJustification('bottom').setFontSize(20);
+    notes[i].addModifier(annotation, 0);
+    return annotation;
+  });
+  const voice = new V.Voice('4/4').addTickables(notes);
+  new V.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+  for (const type of ['bracket', 'mixed']) {
+    const pedal = new V.PedalMarking([notes[0], notes[1], notes[1], notes[3]]).setType(type);
+    if (type === 'mixed') pedal.setCustomText('Ped.');
+    const bottom = Math.max(...annotations.map((a) => a.computeY().y + a.getTextMetrics().actualBoundingBoxDescent));
+    assert.ok(pedal.getYForStave(stave) - pedal.renderOptions.bracketHeight >= bottom + 4);
+    annotations[2].setTextBaseline(300);
+    assert.ok(pedal.getYForStave(stave) >= 314, 'Explicit baselines are respected');
+    annotations[2].setTextBaseline();
+  }
+}

@@ -2,13 +2,14 @@
 // MIT License
 //
 // GraceTabNote Tests
-
 import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
+import { Font } from '../src/font';
 import { Formatter } from '../src/formatter';
 import { GraceNoteGroup } from '../src/gracenotegroup';
 import { GraceTabNote } from '../src/gracetabnote';
+import { Metrics, MetricsDefaults } from '../src/metrics';
 import { RenderContext } from '../src/rendercontext';
 import { ContextBuilder } from '../src/renderer';
 import { TabNote, TabNoteStruct } from '../src/tabnote';
@@ -18,6 +19,7 @@ import { Voice } from '../src/voice';
 const GraceTabNoteTests = {
   Start(): void {
     QUnit.module('Grace Tab Notes');
+    QUnit.test('fretSizing', fretSizing);
     // TODO: Rename tests below since it is redundant with the module name.
     // Remove "Grace Tab Note "
     const run = VexFlowTests.runTests;
@@ -116,3 +118,41 @@ function slurred(options: TestOptions, contextBuilder: ContextBuilder): void {
 
 VexFlowTests.register(GraceTabNoteTests);
 export { GraceTabNoteTests };
+
+/** Public sizes and the class scale affect fret metrics and survive ghost changes. */
+function fretSizing(assert: Assert): void {
+  class InspectableGraceTabNote extends GraceTabNote {
+    getFrets() {
+      return this.fretElement;
+    }
+  }
+  const scale = MetricsDefaults.GraceTabNote.fontScale;
+  try {
+    const note = new InspectableGraceTabNote({
+      positions: [
+        { str: 2, fret: 12 },
+        { str: 4, fret: 3 },
+      ],
+      duration: '8',
+    });
+    for (const size of [4, 6, '12px', 14]) {
+      note.setFontSize(size).preFormat();
+      for (const fret of note.getFrets()) {
+        assert.equal(Font.convertSizeToPointValue(fret.fontInfo.size), Font.convertSizeToPointValue(size));
+        const metrics = fret.getTextMetrics();
+        assert.equal(fret.getYShift(), (metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent) / 2);
+      }
+    }
+    note.setFontSize(7).setGhost(true);
+    assert.equal(Font.convertSizeToPointValue(note.getFrets()[0].fontInfo.size), 7);
+    note.setGhost(false).setFontSize();
+    assert.equal(Font.convertSizeToPointValue(note.getFrets()[0].fontInfo.size), 6);
+    MetricsDefaults.GraceTabNote.fontScale = 1 / 3;
+    Metrics.clear('GraceTabNote');
+    const small = new InspectableGraceTabNote({ positions: [{ str: 2, fret: 12 }], duration: '8' });
+    assert.equal(Font.convertSizeToPointValue(small.getFrets()[0].fontInfo.size), 3);
+  } finally {
+    MetricsDefaults.GraceTabNote.fontScale = scale;
+    Metrics.clear('GraceTabNote');
+  }
+}

@@ -54,15 +54,3 @@ These methods do not draw or change the annotation's stored position. `draw()` u
 ## Ties and lyrics
 
 Annotations above or below a note still reserve space between notes. Their text width no longer shifts the tie's starting point. Dots, side string numbers, and annotations centered on the note retain their clearance.
-
-## Visual checks
-
-Before/after screenshots are attached to the issues. Each comparison covers Bravura and Petaluma.
-
-| Change | Screenshots |
-| --- | --- |
-| Text spacing against a text-font reference | [#152](https://github.com/vexflow/vexflow/issues/152#issuecomment-6902575060) |
-| Shared lyric baselines with stems up and down | [#177](https://github.com/vexflow/vexflow/issues/177#issuecomment-6902575788) |
-| Long lyrics under tied notes, with and without a dot | [#182](https://github.com/vexflow/vexflow/issues/182#issuecomment-6902576573) |
-
-Run `grunt test` for the numeric and browser regressions. PNGs are written to `build/p2-examples/`. Use `node tools/render-p2-examples.mjs PATH_TO_BUNDLE before` to capture the same examples against another build.

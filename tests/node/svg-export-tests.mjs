@@ -1,19 +1,17 @@
-// Browser regressions for portable SVG export. Artifacts are written under build/svg-export/.
+// Portable SVG integration tests in browsers without access to fonts or styles.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 import puppeteer from 'puppeteer';
 
-const root = fileURLToPath(new URL('../', import.meta.url));
-const output = join(root, 'build/svg-export');
+const root = fileURLToPath(new URL('../../', import.meta.url));
 
 /** Run both music font families in a browser, then view the exported files without fonts. */
 test('portable SVG paths retain score geometry and render with fonts and styles blocked', async () => {
-  mkdirSync(output, { recursive: true });
   // Match the existing QUnit runner on CI hosts that do not support Chrome's sandbox.
   const browser = await puppeteer.launch({
     headless: true,
@@ -139,9 +137,6 @@ test('portable SVG paths retain score geometry and render with fonts and styles 
       assert.ok(drawings.glyphs > 10);
       assert.ok(drawings.paths >= drawings.glyphs);
       assert.doesNotMatch(drawings.after, /<text\b|@font-face|<use\b/);
-      writeFileSync(join(output, `${name}-before.svg`), drawings.before);
-      writeFileSync(join(output, `${name}-after.svg`), drawings.after);
-      await page.screenshot({ path: join(output, `${name}-source.png`) });
 
       // A fresh document has no web fonts. CSP forbids styles, fonts, and network fetches.
       const viewer = await browser.newPage();
@@ -153,7 +148,6 @@ test('portable SVG paths retain score geometry and render with fonts and styles 
       for (const state of ['before', 'after']) {
         await viewer.setContent(csp + drawings[state]);
         assert.equal(await viewer.evaluate(() => document.fonts.size), 0);
-        await viewer.screenshot({ path: join(output, `${name}-${state}.png`) });
         if (state === 'after') {
           const geometry = await viewer.$eval('svg', (svg) => {
             const box = svg.getBBox();

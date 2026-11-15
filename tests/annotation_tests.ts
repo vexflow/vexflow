@@ -32,6 +32,7 @@ import { Voice } from '../src/voice';
 const AnnotationTests = {
   Start(): void {
     QUnit.module('Annotation');
+    QUnit.test('computedPositions', computedPositions);
     const run = VexFlowTests.runTests;
     run('Bounding Box', placement, { drawBoundingBox: true });
     run('Placement', placement, { drawBoundingBox: false });
@@ -497,3 +498,43 @@ function tabNotes(options: TestOptions, contextBuilder: ContextBuilder): void {
 
 VexFlowTests.register(AnnotationTests);
 export { AnnotationTests };
+
+/** Layout queries match drawing, and callers can override a single axis. */
+function computedPositions(assert: Assert): void {
+  const ctx = new VexFlow.SVGContext(document.createElement('div'));
+  const stave = new Stave(10, 20, 500).setContext(ctx);
+  const note = new StaveNote({ keys: ['c/4'], duration: 'w' }).setStave(stave);
+  const annotation = new Annotation('Aligned').setContext(ctx);
+  note.addModifier(annotation, 0);
+  const voice = new Voice('4/4').addTickables([note]);
+  new Formatter().joinVoices([voice]).formatToStave([voice], stave);
+  const position = [annotation.getX(), annotation.getY(), annotation.isRendered()];
+  annotation.computeX();
+  annotation.computeY();
+  assert.deepEqual([annotation.getX(), annotation.getY(), annotation.isRendered()], position);
+  const automatic = annotation.computeY().y;
+  annotation.setTextBaseline(210);
+  assert.equal(annotation.computeY().y, 210);
+  annotation.setTextBaseline();
+  assert.equal(annotation.computeY().y, automatic);
+  assert.throws(() => annotation.setTextBaseline(Infinity), /BadArgument/);
+  for (const h of [1, 2, 3, 4])
+    for (const v of [1, 2, 3, 4]) {
+      annotation.setJustification(h).setVerticalJustification(v);
+      const { x } = annotation.computeX(),
+        { y } = annotation.computeY();
+      annotation.draw();
+      assert.equal(annotation.getX(), x);
+      assert.equal(annotation.getY(), y);
+    }
+  class FixedLyric extends Annotation {
+    override computeY() {
+      return { y: 250, textHeight: 15 };
+    }
+  }
+  const custom = new FixedLyric('Override').setNote(note).setIndex(0).setContext(ctx);
+  const x = custom.computeX().x;
+  custom.draw();
+  assert.equal(custom.getX(), x);
+  assert.equal(custom.getY(), 250);
+}

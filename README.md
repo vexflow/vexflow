@@ -93,7 +93,7 @@ A good way to learn the API is to look at our examples & unit tests:
 ## More Resources
 
 - [Text fonts and lyric layout](docs/text-and-lyrics.md), [jsdom rendering](docs/jsdom.md), and [score benchmarks](docs/benchmarks.md).
-- [Rest, pedal, grace-note, and tuplet layout](docs/engraving-p2.md).
+- [Score layout](docs/score-layout.md).
 
 - If you need help, start a [GitHub discussion](https://github.com/vexflow/vexflow/discussions).
 

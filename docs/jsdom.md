@@ -2,7 +2,7 @@
 
 VexFlow 5 works with jsdom and node-canvas. Register fonts with node-canvas before measuring or drawing. The browser FontFace API is not available in jsdom.
 
-Use Node 24 and the pinned `canvas` version from this repository. A local canvas 3.1.0 install crashed during canvas resizing on Node 24. Canvas 3.2.3 passed the full Bravura generation run and the focused export tests.
+Use Node 24 and the pinned `canvas` version from this repository.
 
 ## Generate test images
 

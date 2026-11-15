@@ -32,6 +32,8 @@ import { TickContext } from '../src/tickcontext';
 const StaveNoteTests = {
   Start(): void {
     QUnit.module('StaveNote');
+    QUnit.test('lyricTieClearance', lyricTieClearance);
+    QUnit.test('restClearance', restClearance);
     QUnit.test('Tick', ticks);
     QUnit.test('Tick - New API', ticksNewAPI);
     QUnit.test('Stem', stem);
@@ -1222,3 +1224,53 @@ function centerAlignedMultiVoice(options: TestOptions): void {
 
 VexFlowTests.register(StaveNoteTests);
 export { StaveNoteTests };
+
+/** Rest movement must clear the full opposing chord, not just one staff space. */
+function restClearance(assert: Assert): void {
+  const fonts = VexFlow.getFonts();
+  try {
+    for (const family of ['Bravura', 'Petaluma']) {
+      VexFlow.setFonts(family, 'Academico');
+      for (const direction of [1, -1]) {
+        const stave = new Stave(20, 100, 500);
+        const rest = new StaveNote({ keys: ['b/4'], duration: 'qr', stemDirection: direction }).setStave(stave);
+        const chord = new StaveNote({
+          keys: direction > 0 ? ['g/4', 'c/5', 'g/5'] : ['c/4', 'e/4', 'g/4'],
+          duration: 'q',
+          stemDirection: -direction,
+        }).setStave(stave);
+        const voices = (direction > 0 ? [rest, chord] : [chord, rest]).map((n) =>
+          new VexFlow.Voice('1/4').addTickables([n])
+        );
+        new Formatter().joinVoices(voices).formatToStave(voices, stave);
+        const a = rest.getBoundingBox(),
+          b = chord.getBoundingBox();
+        assert.ok(direction > 0 ? a.y + a.h <= b.y : a.y >= b.y + b.h, family + ' rest clearance');
+      }
+    }
+  } finally {
+    VexFlow.setFonts(...fonts);
+  }
+}
+
+/** Lyrics reserve note spacing without moving tie anchors past nearby modifiers. */
+function lyricTieClearance(assert: Assert): void {
+  const offset = (lyric: boolean, nearby: string) => {
+    const stave = new Stave(10, 10, 600);
+    const notes = [0, 1].map(() => new StaveNote({ keys: ['c/4'], duration: 'h' }).setStave(stave));
+    if (lyric)
+      notes[0].addModifier(
+        new Annotation('A very long lyric').setVerticalJustification(nearby === 'inline' ? 'center' : 'bottom'),
+        0
+      );
+    if (nearby === 'dot') Dot.buildAndAttach([notes[0]]);
+    if (nearby === 'number') notes[0].addModifier(new StringNumber('3').setPosition(Modifier.Position.RIGHT), 0);
+    const voice = new VexFlow.Voice('4/4').addTickables(notes);
+    new Formatter().joinVoices([voice]).formatToStave([voice], stave);
+    return notes[0].getTieRightX() - notes[0].getAbsoluteX();
+  };
+  for (const nearby of ['', 'dot', 'number']) {
+    assert.equal(offset(true, nearby), offset(false, nearby), nearby + ' retains clearance');
+  }
+  assert.ok(offset(true, 'inline') > offset(false, ''), 'Inline annotations retain their width');
+}

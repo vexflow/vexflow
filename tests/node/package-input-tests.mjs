@@ -8,8 +8,8 @@ import { join } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-const root = fileURLToPath(new URL('../', import.meta.url));
-const coreURL = new URL('../build/esm/entry/vexflow-core.js', import.meta.url).href;
+const root = fileURLToPath(new URL('../../', import.meta.url));
+const coreURL = new URL('../../build/esm/entry/vexflow-core.js', import.meta.url).href;
 
 /** A timeout or nonzero exit always fails the test, rather than freezing the runner. */
 function runIsolated(source) {
@@ -30,9 +30,9 @@ function checkCore(source) {
 }
 
 test('all published ESM entries load', () => {
-  const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url)));
+  const pkg = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url)));
   for (const entry of Object.values(pkg.exports)) {
-    runIsolated(`await import(${JSON.stringify(new URL(`../${entry.import}`, import.meta.url).href)});`);
+    runIsolated(`await import(${JSON.stringify(new URL(`../../${entry.import}`, import.meta.url).href)});`);
   }
 });
 

@@ -2,9 +2,8 @@
 // MIT License
 //
 // GraceNote Tests
-
 // TODO: In the 'stem' test (aka Grace Note Stem › SVG + Petaluma in flow.html), the Petaluma note heads are not scaled down properly.
-
+import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { ModifierPosition } from '../src';
@@ -22,6 +21,7 @@ import { StaveNote, StaveNoteStruct } from '../src/stavenote';
 const GraceNoteTests = {
   Start(): void {
     QUnit.module('Grace Notes');
+    QUnit.test('boundsBeforeDrawing', boundsBeforeDrawing);
     const run = VexFlowTests.runTests;
     run('Grace Note Basic', basic);
     run('With Articulation and Annotation on Parent Note', graceNoteModifiers);
@@ -586,3 +586,34 @@ function multipleVoicesMultipleDraws(options: TestOptions): void {
 
 VexFlowTests.register(GraceNoteTests);
 export { GraceNoteTests };
+
+/** Grace and dynamics bounds use page coordinates without needing a draw pass. */
+function boundsBeforeDrawing(assert: Assert): void {
+  for (const beamed of [false, true]) {
+    const ctx = new VexFlow.SVGContext(document.createElement('div'));
+    const stave = new VexFlow.Stave(80, 75, 550).setContext(ctx);
+    const grace = [
+      new GraceNote({ keys: ['d/4', 'e/4'], duration: '8', stemDirection: beamed ? -1 : 1 }),
+      new GraceNote({ keys: ['g/4'], duration: '8', stemDirection: beamed ? -1 : 1 }),
+    ];
+    const group = new GraceNoteGroup(grace);
+    if (beamed) group.beamNotes();
+    const parent = new StaveNote({ keys: ['c/5'], duration: 'q' }).setStave(stave).addModifier(group, 0);
+    const dynamics = new VexFlow.TextDynamics({ text: 'sfz', duration: 'q', line: 8 }).setStave(stave);
+    const voice = new VexFlow.Voice('2/4').addTickables([parent, dynamics]);
+    new Formatter().joinVoices([voice]).formatToStave([voice], stave);
+    const before = group.getBoundingBox(),
+      dynamicsBefore = dynamics.getBoundingBox();
+    assert.deepEqual(group.getBoundingBox(), before);
+    assert.notOk(grace.some((note) => note.isRendered()));
+    voice.draw(ctx, stave);
+    assert.deepEqual(group.getBoundingBox(), before);
+    assert.deepEqual(dynamics.getBoundingBox(), dynamicsBefore);
+    assert.ok(before.x > stave.getX() && before.w > 0);
+    assert.equal(dynamicsBefore.x, dynamics.getAbsoluteX());
+    assert.equal(dynamicsBefore.y, stave.getYForLine(5) - dynamics.getTextMetrics().actualBoundingBoxAscent);
+    parent.setStave(new VexFlow.Stave(140, 100, 600).setContext(ctx));
+    const moved = group.getBoundingBox();
+    assert.ok(moved.x > before.x && moved.y > before.y);
+  }
+}

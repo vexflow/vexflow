@@ -17,6 +17,7 @@ import { MockTickable } from './mocks';
 const VoiceTests = {
   Start(): void {
     QUnit.module('Voice');
+    QUnit.test('tupletDurationEdits', tupletDurationEdits);
     QUnit.test('Strict Test', strict);
     QUnit.test('Ignore Test', ignore);
     VexFlowTests.runTests('Full Voice Mode Test', full);
@@ -105,3 +106,38 @@ function full(options: TestOptions, contextBuilder: ContextBuilder): void {
 
 VexFlowTests.register(VoiceTests);
 export { VoiceTests };
+
+/** Voice timing must follow late, repeated, and nested tuplet edits. */
+function tupletDurationEdits(assert: Assert): void {
+  const notes = Array.from({ length: 3 }, () => new StaveNote({ keys: ['c/4'], duration: '8' }));
+  const voice = new Voice('1/4').setStrict(false).addTickables(notes);
+  assert.equal(voice.getTicksUsed().value(), 6144);
+  const tuplet = new VexFlow.Tuplet(notes, { numNotes: 3, notesOccupied: 2 });
+  voice.setStrict(true);
+  assert.equal(voice.getTicksUsed().value(), 4096);
+  assert.ok(voice.isComplete());
+  tuplet.attach();
+  notes[0].addTuplet(tuplet);
+  assert.equal(voice.getTicksUsed().value(), 4096, 'Repeated attachment is harmless');
+  assert.equal(voice.getSmallestTickCount().value(), 4096 / 3);
+  assert.equal(voice.getResolutionMultiplier(), 3);
+  const nested = new VexFlow.Tuplet(notes, { numNotes: 3, notesOccupied: 2 });
+  assert.equal(voice.getTicksUsed().value(), (4096 * 2) / 3);
+  notes[0].setDuration(new VexFlow.Fraction(1, 4));
+  nested.detach();
+  tuplet.detach();
+  assert.equal(voice.getTicksUsed().value(), 8192, 'Duration edits retain their unscaled base');
+  assert.notOk(voice.isComplete());
+  tuplet.attach();
+  tuplet.setNotesOccupied(1);
+  assert.equal(voice.getTicksUsed().value(), 8192 / 3);
+  notes.forEach((note) => note.clearTuplets());
+  assert.equal(voice.getTicksUsed().value(), 8192);
+  const first = Array.from({ length: 3 }, () => new StaveNote({ keys: ['c/4'], duration: '8' }));
+  new VexFlow.Tuplet(first, { numNotes: 3, notesOccupied: 2 });
+  const strict = new Voice('1/4').addTickables(first);
+  assert.ok(strict.isComplete());
+  assert.throws(() => strict.addTickable(new StaveNote({ keys: ['c/4'], duration: '8' })), /Too many ticks/);
+  const other = new Voice('1/4').addTickables([new StaveNote({ keys: ['d/4'], duration: 'q' })]);
+  new Formatter().joinVoices([strict, other]).format([strict, other], 300);
+}

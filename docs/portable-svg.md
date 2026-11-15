@@ -52,15 +52,3 @@ For an existing VexFlow SVG element, call `SVGContext.toSVG(svgElement, fonts)`.
 This API exports SVGs produced by `SVGContext`. It does not convert arbitrary SVG text layouts, external CSS, or added `<tspan>` elements. Use the same fonts for layout and export; different font versions can change spacing. Complex script shaping depends on the font library supplied by the caller.
 
 Text becomes paths and is no longer selectable or searchable. Keep an ordinary SVG for editing or accessible text.
-
-## Verification
-
-Run `grunt test` to check exports with Bravura/Academico and Petaluma/Petaluma Script. The tests use a fresh browser document with font loading and styles blocked. They also test SVGs displayed as images.
-
-Before/after SVGs and PNGs are written to `build/svg-export/`.
-
-## Before and after
-
-Before/after screenshots are [attached to issue #71](https://github.com/vexflow/vexflow/issues/71#issuecomment-6902574295). They show saved SVGs in a fresh browser with fonts and styles blocked. Both Bravura and Petaluma are covered.
-
-The test image generator also embeds its local music fonts in saved SVGs. This fixes its SVG-to-PNG conversion. Those font-embedded snapshots still need a viewer that permits embedded font styles. Use path export for restrictive viewers.

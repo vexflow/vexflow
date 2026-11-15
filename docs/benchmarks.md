@@ -34,18 +34,8 @@ node tools/benchmark-scores.mjs --output=build/benchmark-after
 
 Compare the median timings and inspect the PNGs side by side. SVG files use fonts from the rendering page; open them with those fonts or use the PNGs for visual review.
 
-Do not enforce a fixed millisecond threshold in shared CI. Timing depends on the host. The CI smoke check verifies that each workload renders and keeps its expected structure. Use repeated local measurements to assess #334–#336.
+Do not enforce a fixed millisecond threshold in shared CI. Timing depends on the host. The CI smoke check verifies that each workload renders and keeps its expected structure. Use repeated local measurements to assess performance changes.
 
 ## Larger scores
 
 [VexRender](https://github.com/AaronDavidNewman/VexRender) remains useful for larger, application-generated scores and historical version comparisons. The compact local studies complement that corpus. They do not replace it or claim complete engraving coverage.
-
-## Initial measurements
-
-November 15, 2026. macOS arm64, Node v24.22.3, Chrome/157.0.8103.50. Debug build, four systems, five measured runs after warmup. Values below are medians in milliseconds. They are a local baseline, not a performance guarantee.
-
-| Study | Construction | Layout | Draw | Total |
-| --- | ---: | ---: | ---: | ---: |
-| Chorale | 7.9 | 1.3 | 10.1 | 19.6 |
-| Piano | 13.5 | 1.0 | 16.1 | 31.2 |
-| Chamber | 24.6 | 2.1 | 31.5 | 58.5 |

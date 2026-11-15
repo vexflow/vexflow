@@ -481,10 +481,9 @@ module.exports = (grunt) => {
       process.execPath,
       [
         '--test',
-        'tools/p1-regression-tests.mjs',
-        'tools/svg-export-tests.mjs',
-        'tools/p2-regression-tests.mjs',
-        'tools/p2-range-tests.mjs',
+        'tests/node/package-input-tests.mjs',
+        'tests/node/svg-export-tests.mjs',
+        'tests/node/rendering-tests.mjs',
       ],
       {
         stdio: 'inherit',

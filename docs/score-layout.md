@@ -1,8 +1,6 @@
-# Rest, pedal, grace-note, and tuplet fixes
+# Score layout
 
-This follow-up addresses #203, #206, #253, #255, and #268.
-
-## Rests across voices (#203)
+## Rests across voices
 
 Join voices that share a stave before formatting them:
 
@@ -10,14 +8,12 @@ Join voices that share a stave before formatting them:
 new Formatter().joinVoices([upperVoice, lowerVoice]).formatToStave([upperVoice, lowerVoice], stave);
 ```
 
-A rest now moves far enough to clear the other voice's chord and stem.
-The previous formatter moved it by only one staff space.
-The change applies to simultaneous notes in a shared modifier context.
+Rest placement clears the other voice's chord and stem for simultaneous notes in a shared modifier context.
 It does not add collision detection across different tick positions.
 
-## Annotations and pedal markings (#206)
+## Annotations and pedal markings
 
-Pedal text, brackets, and change notches now clear bottom annotations.
+Pedal text, brackets, and change notches clear bottom annotations.
 Placement considers intermediate notes in the participating voices, not just pedal events.
 It uses the annotations' computed positions, so drawing order does not matter.
 
@@ -27,9 +23,9 @@ It uses the annotations' computed positions, so drawing order does not matter.
 - Explicit annotation baselines and vertical shifts are respected.
 - This is not a general collision solver for every modifier or unrelated voice.
 
-## Bounds before drawing (#253)
+## Bounds before drawing
 
-`GraceNoteGroup.getBoundingBox()` now works after formatting the parent note.
+`GraceNoteGroup.getBoundingBox()` works after formatting the parent note.
 The parent must have a stave and tick context. No render context is required for measurement.
 
 ```js
@@ -42,10 +38,10 @@ const bounds = graceGroup.getBoundingBox();
 - The box encloses the grace notes. It excludes the slur.
 - Repeated measurements do not accumulate position offsets.
 - Notehead and flag bounds use layout coordinates before drawing.
-- `TextDynamics.getBoundingBox()` also uses page coordinates before drawing.
+- `TextDynamics.getBoundingBox()` uses page coordinates before drawing.
 - Reformat after changing note sizes or moving the score.
 
-## Grace-tab sizes (#255)
+## Grace-tab sizes
 
 Set the fret size before formatting:
 
@@ -66,7 +62,7 @@ With the standard metrics, that is `9pt × 2/3 = 6pt`.
 For a shared default, set `MetricsDefaults.GraceTabNote.fontScale` and call
 `Metrics.clear('GraceTabNote')` before creating the notes.
 
-## Tuplet timing (#268)
+## Tuplet timing
 
 Create tuplets before adding notes to a strict voice:
 
@@ -88,27 +84,8 @@ voice.setStrict(true);
 new Formatter().joinVoices([voice]).format([voice], 300);
 ```
 
-Voice totals, shortest duration, resolution, and spacing weights now refresh after duration edits.
+Voice totals, shortest duration, resolution, and spacing weights refresh after duration edits.
 Nested tuplets and detach operations are included.
 A strict voice still rejects too many ticks at insertion time.
 It cannot infer a tuplet that has not been created yet.
 Reformat after editing durations.
-
-## Validation and examples
-
-```sh
-npm test
-node --test tools/p2-range-tests.mjs
-```
-
-The focused tests render both Bravura and Petaluma.
-They check numeric clearance, pre-draw bounds, fret sizes, and tuplet timing.
-Before/after screenshots are attached to the issues. They use the same fixtures against the old and fixed builds.
-For #253, the rectangle shows the box measured before drawing.
-
-| Issue | Examples and screenshots |
-| --- | --- |
-| #203 | [Upper and lower rests](https://github.com/vexflow/vexflow/issues/203#issuecomment-6902570808) |
-| #206 | [Pedal brackets and larger text](https://github.com/vexflow/vexflow/issues/206#issuecomment-6902577311) |
-| #253 | [Grace-note flags and beams](https://github.com/vexflow/vexflow/issues/253#issuecomment-6902578066) |
-| #255 | [Smaller frets and mixed CSS sizes](https://github.com/vexflow/vexflow/issues/255#issuecomment-6902578912) |

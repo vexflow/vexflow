@@ -2,7 +2,6 @@
 // MIT License
 //
 // Font Tests
-
 import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
@@ -10,6 +9,7 @@ import { Accidental } from '../src/accidental';
 import { Bend } from '../src/bend';
 import { CanvasContext } from '../src/canvascontext';
 import { Font, FontStyle, FontWeight } from '../src/font';
+import { Metrics, MetricsDefaults } from '../src/metrics';
 import { PedalMarking } from '../src/pedalmarking';
 import { StaveNote } from '../src/stavenote';
 import { TextBracket } from '../src/textbracket';
@@ -19,6 +19,7 @@ import { Voice } from '../src/voice';
 const FontTests = {
   Start(): void {
     QUnit.module('Font');
+    QUnit.test('textFontDefaults', textFontDefaults);
     QUnit.test('setFont', setFont);
     QUnit.test('Parsing', fontParsing);
     QUnit.test('Sizes', fontSizes);
@@ -176,3 +177,31 @@ function setMusicFontToPetaluma(options: TestOptions): void {
 
 VexFlowTests.register(FontTests);
 export { FontTests };
+
+/** Text uses text metrics while music and explicit overrides retain their families. */
+function textFontDefaults(assert: Assert): void {
+  const fonts = VexFlow.getFonts();
+  const previous = MetricsDefaults.Annotation.fontFamily;
+  try {
+    VexFlow.setFonts('Bravura', 'Academico');
+    const annotation = new VexFlow.Annotation('Sing with gentle voices');
+    const ctx = document.createElement('canvas').getContext('2d')!;
+    ctx.font = Font.toCSSString(annotation.fontInfo);
+    const actual = ctx.measureText(annotation.getText()).width;
+    ctx.font = Font.toCSSString({ ...annotation.fontInfo, family: 'Academico' });
+    assert.equal(actual, ctx.measureText(annotation.getText()).width);
+    assert.equal(new Accidental('#').fontInfo.family, 'Bravura,Academico');
+    assert.equal(annotation.setFont('Georgia', 12).fontInfo.family, 'Georgia');
+    VexFlow.setTextFonts('Courier New');
+    assert.ok(new VexFlow.Annotation('Custom').fontInfo.family.startsWith('Courier New'));
+    VexFlow.setFonts('Petaluma', 'Bravura', 'Leland');
+    assert.equal(new Accidental('#').fontInfo.family, 'Petaluma,Bravura,Leland');
+    MetricsDefaults.Annotation.fontFamily = 'Georgia';
+    Metrics.clear();
+    assert.equal(new VexFlow.Annotation('Class override').fontInfo.family, 'Georgia');
+  } finally {
+    if (previous === undefined) delete MetricsDefaults.Annotation.fontFamily;
+    else MetricsDefaults.Annotation.fontFamily = previous;
+    VexFlow.setFonts(...fonts);
+  }
+}
