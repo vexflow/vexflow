@@ -73,6 +73,8 @@ export class ModifierContext {
 
   protected width: number = 0;
   protected spacing: number = 0;
+  /** Horizontal space added only for annotations above or below the note. */
+  protected annotationRightShift: number = 0;
 
   addModifier(member: ModifierContextMember): this {
     L('addModifier is deprecated, use addMember instead.');
@@ -123,6 +125,11 @@ export class ModifierContext {
     return this.state.rightShift;
   }
 
+  /** Ties clear nearby modifiers, but must not start beyond a lyric's text box. */
+  getRightShiftForTie(): number {
+    return this.state.rightShift - this.annotationRightShift;
+  }
+
   getState(): ModifierContextState {
     return this.state;
   }
@@ -157,10 +164,27 @@ export class ModifierContext {
     StringNumber.format(members[Category.StringNumber] as StringNumber[], state);
     Articulation.format(members[Category.Articulation] as Articulation[], state);
     Ornament.format(members[Category.Ornament] as Ornament[], state);
-    Annotation.format(members[Category.Annotation] as Annotation[], state);
+    const annotations = (members[Category.Annotation] as Annotation[] | undefined) ?? [];
+    const isOutsideNote = (annotation: Annotation): boolean =>
+      annotation.getVerticalJustification() === Annotation.VerticalJustify.TOP ||
+      annotation.getVerticalJustification() === Annotation.VerticalJustify.BOTTOM;
+    Annotation.format(
+      annotations.filter((annotation) => !isOutsideNote(annotation)),
+      state
+    );
+    const rightShiftBeforeAnnotations = state.rightShift;
+    Annotation.format(annotations.filter(isOutsideNote), state);
+    const rightShiftWithAnnotations = state.rightShift;
+    // Keep annotation vertical placement in its original stage. Its horizontal
+    // text box must not push nearby modifiers away from the notehead.
+    state.rightShift = rightShiftBeforeAnnotations;
     ChordSymbol.format(members[Category.ChordSymbol] as ChordSymbol[], state);
     Bend.format(members[Category.Bend] as Bend[], state);
     Vibrato.format(members[Category.Vibrato] as Vibrato[], state, this);
+
+    // Reserve enough note spacing for both the lyric and nearby modifiers.
+    this.annotationRightShift = Math.max(0, rightShiftWithAnnotations - state.rightShift);
+    state.rightShift += this.annotationRightShift;
 
     // Update width of this member context
     this.width = state.leftShift + state.rightShift;

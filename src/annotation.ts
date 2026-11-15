@@ -1,5 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
+// Text annotations with independently overridable horizontal and vertical layout.
 import { Font } from './font';
 import { Metrics } from './metrics';
 import { Modifier, ModifierPosition } from './modifier';
@@ -9,7 +10,7 @@ import { Stem } from './stem';
 import { StemmableNote } from './stemmablenote';
 import { Tables } from './tables';
 import { Category, isStemmableNote, isTabNote } from './typeguard';
-import { log } from './util';
+import { log, RuntimeError } from './util';
 
 // eslint-disable-next-line
 function L(...args: any[]) {
@@ -175,6 +176,8 @@ export class Annotation extends Modifier {
 
   protected horizontalJustification: AnnotationHorizontalJustify;
   protected verticalJustification: AnnotationVerticalJustify;
+  /** Optional absolute baseline for lyrics aligned across a stave or system. */
+  protected textBaseline?: number;
 
   /**
    * Annotations inherit from `Modifier` and is positioned correctly when
@@ -200,6 +203,11 @@ export class Annotation extends Modifier {
     return this;
   }
 
+  /** Get the annotation's position relative to the note. */
+  getVerticalJustification(): AnnotationVerticalJustify {
+    return this.verticalJustification;
+  }
+
   /**
    * Get horizontal justification.
    */
@@ -216,21 +224,21 @@ export class Annotation extends Modifier {
     return this;
   }
 
-  /** Render text beside the note. */
-  override draw(): void {
-    const ctx = this.checkContext();
+  /** Use an absolute text baseline. Pass undefined to restore automatic placement. */
+  setTextBaseline(y?: number): this {
+    if (y !== undefined && !Number.isFinite(y)) {
+      throw new RuntimeError('BadArgument', 'Text baseline must be finite.');
+    }
+    this.textBaseline = y;
+    return this;
+  }
+
+  /** Compute horizontal placement after formatting, without drawing or changing position. */
+  computeX(): { x: number; textWidth: number } {
     const note = this.checkAttachedNote();
-    const stemDirection = note.hasStem() ? note.getStemDirection() : Stem.UP;
     const start = note.getModifierStartXY(ModifierPosition.ABOVE, this.index);
-
-    this.setRendered();
-    const clsAttribute = this.getAttribute('class');
-    ctx.openGroup('annotation' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
-
     const textWidth = this.getWidth();
-    const textHeight = Font.convertSizeToPixelValue(this.fontInfo.size);
     let x;
-    let y;
 
     if (this.horizontalJustification === AnnotationHorizontalJustify.LEFT) {
       x = start.x;
@@ -241,6 +249,17 @@ export class Annotation extends Modifier {
     } /* CENTER_STEM */ else {
       x = (note as StemmableNote).getStemX() - textWidth / 2;
     }
+
+    return { x, textWidth };
+  }
+
+  /** Compute the text baseline after formatting. Subclasses may override just this axis. */
+  computeY(): { y: number; textHeight: number } {
+    const textHeight = Font.convertSizeToPixelValue(this.fontInfo.size);
+    if (this.textBaseline !== undefined) return { y: this.textBaseline, textHeight };
+    const note = this.checkAttachedNote();
+    const stemDirection = note.hasStem() ? note.getStemDirection() : Stem.UP;
+    let y;
 
     let stemExt: Record<string, number> = {};
     let spacing = 0;
@@ -279,6 +298,18 @@ export class Annotation extends Modifier {
       const extents = note.getStemExtents();
       y = extents.topY + (extents.baseY - extents.topY) / 2 + textHeight / 2;
     }
+
+    return { y, textHeight };
+  }
+
+  /** Draw using the same positioning methods available to callers before rendering. */
+  override draw(): void {
+    const ctx = this.checkContext();
+    const { x } = this.computeX();
+    const { y } = this.computeY();
+    this.setRendered();
+    const clsAttribute = this.getAttribute('class');
+    ctx.openGroup('annotation' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
 
     L('Rendering annotation: ', this.text, x, y);
     this.x = x;

@@ -92,6 +92,8 @@ A good way to learn the API is to look at our examples & unit tests:
 
 ## More Resources
 
+- [Text fonts and lyric layout](docs/text-and-lyrics.md), [jsdom rendering](docs/jsdom.md), and [score benchmarks](docs/benchmarks.md).
+
 - If you need help, start a [GitHub discussion](https://github.com/vexflow/vexflow/discussions).
 
 - Learn more on the [VexFlow wiki](https://github.com/vexflow/vexflow/wiki).

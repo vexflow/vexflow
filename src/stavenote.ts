@@ -725,7 +725,7 @@ export class StaveNote extends StemmableNote {
   override getTieRightX(): number {
     let tieStartX = this.getAbsoluteX();
     tieStartX += this.getGlyphWidth() + this.xShift + this.rightDisplacedHeadPx;
-    if (this.modifierContext) tieStartX += this.modifierContext.getRightShift();
+    if (this.modifierContext) tieStartX += this.modifierContext.getRightShiftForTie();
     return tieStartX;
   }
 

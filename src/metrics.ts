@@ -1,4 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// Shared drawing metrics, with separate defaults for text and music glyphs.
 
 import { ElementStyle } from './element';
 import { FontInfo } from './font';
@@ -22,7 +23,7 @@ export class Metrics {
     let font = this.cacheFont.get(key);
     if (!font) {
       font = {
-        family: Metrics.get(`${key}.fontFamily`),
+        family: Metrics.getFontFamily(key),
         size: Metrics.get(`${key}.fontSize`) * Metrics.get(`${key}.fontScale`),
         weight: Metrics.get(`${key}.fontWeight`),
         style: Metrics.get(`${key}.fontStyle`),
@@ -30,6 +31,19 @@ export class Metrics {
       this.cacheFont.set(key, font);
     }
     return structuredClone(font);
+  }
+
+  /** Keep text spaces in the text font while honoring class-specific font overrides. */
+  private static getFontFamily(key: string): string {
+    if (!Metrics.get(`${key}.isText`, false)) return Metrics.get(`${key}.fontFamily`);
+    let family = MetricsDefaults.textFontFamily;
+    let metrics = MetricsDefaults;
+    for (const part of key.split('.')) {
+      metrics = metrics?.[part];
+      if (!metrics) break;
+      family = metrics.fontFamily ?? family;
+    }
+    return family;
   }
 
   static getStyle(key: string): ElementStyle {
@@ -89,6 +103,7 @@ export class Metrics {
 export const MetricsDefaults: Record<string, any> = {
   pointerRect: false,
   fontFamily: 'Bravura,Academico',
+  textFontFamily: 'Academico,Bravura',
   fontSize: 30,
   fontScale: 1.0,
   fontWeight: 'normal',
@@ -107,10 +122,12 @@ export const MetricsDefaults: Record<string, any> = {
   },
 
   Annotation: {
+    isText: true,
     fontSize: 10,
   },
 
   Bend: {
+    isText: true,
     fontSize: 10,
     line: {
       strokeStyle: '#777777',
@@ -119,6 +136,7 @@ export const MetricsDefaults: Record<string, any> = {
   },
 
   ChordSymbol: {
+    isText: true,
     fontSize: 12,
     spacing: 0.05,
     subscriptOffset: 0.2,
@@ -127,6 +145,7 @@ export const MetricsDefaults: Record<string, any> = {
   },
 
   FretHandFinger: {
+    isText: true,
     fontSize: 9,
     fontWeight: 'bold',
   },
@@ -145,6 +164,7 @@ export const MetricsDefaults: Record<string, any> = {
 
   PedalMarking: {
     text: {
+      isText: true,
       fontSize: 12,
       fontStyle: 'italic',
     },
@@ -152,6 +172,7 @@ export const MetricsDefaults: Record<string, any> = {
 
   Repetition: {
     text: {
+      isText: true,
       fontSize: 12,
       fontWeight: 'bold',
       offsetX: 12,
@@ -167,6 +188,7 @@ export const MetricsDefaults: Record<string, any> = {
   },
 
   Stave: {
+    isText: true,
     strokeStyle: '#999999',
     fontSize: 8,
     padding: 12,
@@ -177,11 +199,13 @@ export const MetricsDefaults: Record<string, any> = {
 
   StaveConnector: {
     text: {
+      isText: true,
       fontSize: 16,
     },
   },
 
   StaveLine: {
+    isText: true,
     fontSize: 10,
   },
 
@@ -190,6 +214,7 @@ export const MetricsDefaults: Record<string, any> = {
   },
 
   StaveSection: {
+    isText: true,
     fontSize: 10,
     fontWeight: 'bold',
     lineWidth: 2,
@@ -198,8 +223,10 @@ export const MetricsDefaults: Record<string, any> = {
   },
 
   StaveTempo: {
+    isText: true,
     fontSize: 14,
     glyph: {
+      isText: false,
       fontSize: 25,
     },
     name: {
@@ -208,10 +235,12 @@ export const MetricsDefaults: Record<string, any> = {
   },
 
   StaveText: {
+    isText: true,
     fontSize: 16,
   },
 
   StaveTie: {
+    isText: true,
     fontSize: 10,
   },
 
@@ -220,6 +249,7 @@ export const MetricsDefaults: Record<string, any> = {
   },
 
   StringNumber: {
+    isText: true,
     fontSize: 10,
     fontWeight: 'bold',
     verticalPadding: 8,
@@ -230,6 +260,7 @@ export const MetricsDefaults: Record<string, any> = {
 
   Stroke: {
     text: {
+      isText: true,
       fontSize: 10,
       fontStyle: 'italic',
       fontWeight: 'bold',
@@ -238,32 +269,38 @@ export const MetricsDefaults: Record<string, any> = {
 
   TabNote: {
     text: {
+      isText: true,
       fontSize: 9,
     },
   },
 
   TabSlide: {
+    isText: true,
     fontSize: 10,
     fontStyle: 'italic',
     fontWeight: 'bold',
   },
 
   TabStave: {
+    isText: true,
     strokeStyle: '#999999',
     fontSize: 8,
   },
 
   TabTie: {
+    isText: true,
     fontSize: 10,
   },
 
   TextBracket: {
+    isText: true,
     fontSize: 15,
     fontStyle: 'italic',
   },
 
   TextNote: {
     text: {
+      isText: true,
       fontSize: 12,
     },
   },
@@ -289,6 +326,7 @@ export const MetricsDefaults: Record<string, any> = {
   },
 
   Volta: {
+    isText: true,
     fontSize: 9,
     fontWeight: 'bold',
   },

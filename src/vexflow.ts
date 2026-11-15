@@ -1,3 +1,4 @@
+// Public VexFlow facade, renderer configuration, and font selection.
 import { Accidental } from './accidental';
 import { Annotation, AnnotationHorizontalJustify, AnnotationVerticalJustify } from './annotation';
 import { Articulation } from './articulation';
@@ -248,9 +249,22 @@ export class VexFlow {
    * See `demos/fonts/` for more examples.
    */
   static setFonts(...fontNames: string[]): void {
-    // Convert the array of font names into an array of Font objects.
-    MetricsDefaults.fontFamily = fontNames.join(',');
+    const names = fontNames.flatMap((name) => name.split(',').map((part) => part.trim())).filter(Boolean);
+    MetricsDefaults.fontFamily = names.join(',');
+    const textNames = names.filter((name) => Font.TEXT_FONT_NAMES.includes(name));
+    // Music-only stacks retain a usable text face. Never reverse a music fallback stack.
+    VexFlow.setTextFonts(...(textNames.length ? textNames : ['Academico']));
+  }
+
+  /** Choose text faces independently. Music fonts remain available for mixed glyph strings. */
+  static setTextFonts(...fontNames: string[]): void {
+    MetricsDefaults.textFontFamily = [...new Set([...fontNames, ...VexFlow.getFonts()])].join(',');
     Metrics.clear();
+  }
+
+  /** Return the text-first stack used by new text elements. */
+  static getTextFonts(): string[] {
+    return Metrics.get('textFontFamily').split(',');
   }
 
   static getFonts(): string[] {

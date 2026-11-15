@@ -1,0 +1,68 @@
+# Text, lyrics, and tie placement
+
+## Text fonts
+
+Text elements now prefer a text font. Music glyphs keep their music-first stack.
+
+```javascript
+VexFlow.setFonts('Bravura', 'Academico');
+// Annotations and other text: Academico,Bravura
+// Music glyphs: Bravura,Academico
+
+VexFlow.setFonts('Petaluma', 'Petaluma Script');
+```
+
+`setFonts` recognizes VexFlow's built-in text faces. A music-only stack uses Academico for text. For a custom text face, select it explicitly after `setFonts`:
+
+```javascript
+VexFlow.setFonts('My Music Font');
+VexFlow.setTextFonts('My Text Font', 'serif');
+```
+
+Load the chosen fonts before creating notes or measuring text. A per-element `setFont()` call still takes precedence. Class-specific `MetricsDefaults.Annotation.fontFamily` overrides also work; call `Metrics.clear()` after editing metrics.
+
+Existing elements retain the fonts they were created with. `setFonts()` resets the shared text selection, so call `setTextFonts()` afterward when using a custom face.
+
+## Shared lyric baselines
+
+Annotations can use an absolute baseline in the renderer's coordinates. Give all lyrics in a row the same baseline:
+
+```javascript
+const lyric = new VexFlow.Annotation('Sing clearly')
+  .setVerticalJustification(VexFlow.Annotation.VerticalJustify.BOTTOM)
+  .setTextBaseline(180);
+
+note.addModifier(lyric, 0);
+```
+
+Call `setTextBaseline()` without an argument to restore automatic positioning. The caller chooses a baseline that clears the notes, stems, and adjacent staves. Each verse can have its own baseline.
+
+## Layout before drawing
+
+Attach notes to their staves and format the voice before requesting coordinates:
+
+```javascript
+notes.forEach((note) => note.setStave(stave));
+new VexFlow.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+
+const { x, textWidth } = lyric.computeX();
+const { y, textHeight } = lyric.computeY();
+```
+
+These methods do not draw or change the annotation's stored position. `draw()` uses the same methods. A subclass may override `computeY()` while retaining standard horizontal justification.
+
+## Ties and lyrics
+
+Annotations above or below a note still reserve space between notes. Their text width no longer shifts the tie's starting point. Dots, side string numbers, and annotations centered on the note retain their clearance.
+
+## Visual checks
+
+These examples use Bravura. Each comparison also runs with Petaluma.
+
+| Change | Before | After |
+| --- | --- | --- |
+| Text spacing: black text should match the gray text-font reference | ![Old text spacing](images/p2/152-Bravura-before.png) | ![Correct text spacing](images/p2/152-Bravura-after.png) |
+| Shared lyric baselines, with stems up and down | ![Uneven lyrics](images/p2/177-Bravura-before.png) | ![Aligned lyrics](images/p2/177-Bravura-after.png) |
+| Long lyrics under tied notes, with and without a dot | ![Shortened ties](images/p2/182-Bravura-before.png) | ![Correct tie anchors](images/p2/182-Bravura-after.png) |
+
+Run `grunt test` for the numeric and browser regressions. PNGs are written to `build/p2-examples/`. Use `node tools/render-p2-examples.mjs PATH_TO_BUNDLE before` to capture the same examples against another build.

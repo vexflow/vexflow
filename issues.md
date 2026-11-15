@@ -10,8 +10,9 @@
 
 All five P1 issues have been fixed, pushed, and closed: #71, #346, #347, #349, and #350. The original triage below is retained for context.
 
-- **Remaining work:** 35 issues from the original inventory. None is P1.
-- **Validation:** 1,874 existing browser tests and 30 new regression tests pass. TypeScript and changed-file lint pass. GitHub CI and all CodeQL jobs passed.
+- **P2 follow-up:** The first five P2 issues are fixed and validated: #38, #102, #152, #177, and #182.
+- **Remaining work:** 30 issues from the original inventory after closing this batch. None is P1.
+- **Latest local validation:** 1,874 browser tests and 33 regression tests pass. TypeScript and changed-file lint pass. The jsdom Bravura pass produced 450 PNGs. GitHub CI for this batch is pending publication.
 - **Next:** Clear resolved reports, then address the P2 validation and engraving defects.
 
 ## Original triage summary
@@ -103,43 +104,38 @@ All 40 issues have native GitHub **Type** and **Priority** fields populated and 
 
 ### [#38](https://github.com/vexflow/vexflow/issues/38) — Realistic score benchmarks
 
-**Recommendation:** Address. **Type:** Task. **Priority:** Medium. **Labels:** `performance`, `testing`, `triaged`.
+**Status:** Fixed; publication pending. **Type:** Task. **Priority:** Medium. **Labels:** `performance`, `testing`, `triaged`.
 
-- **Finding:** The thread already produced VexRender. The remaining work is a maintained benchmark corpus, not creating a tool from scratch.
-- **Next step:** Choose a few representative scores and record layout time and visual output. Use them to validate #334–#336.
-- **Evidence:** [Source](https://github.com/AaronDavidNewman/VexRender).
+- **Fix:** Added three original score studies and a browser benchmark runner. Font loading and warmup are outside the measured work. The report separates construction, layout, and drawing.
+- **Validation:** All workloads render in CI smoke tests. Five local samples per score and visual output are documented in [benchmarks.md](docs/benchmarks.md).
 
 ### [#102](https://github.com/vexflow/vexflow/issues/102) — jsdom support
 
-**Recommendation:** Verify before closing. **Type:** Bug. **Priority:** Medium. **Labels:** `testing`, `needs-reproduction`, `triaged`.
+**Status:** Fixed; publication pending. **Type:** Bug. **Priority:** Medium. **Labels:** `testing`, `triaged`.
 
-- **Finding:** The original lack of font registration is superseded by generate_images_jsdom.js. That does not prove the whole backend works on current runtimes.
-- **Next step:** Run a small font-aware export on the supported Node version before closing. Separate any native canvas failure from the original font-loading issue.
-- **Evidence:** `tools/generate_images_jsdom.js:15`.
+- **Fix:** Pinned canvas 3.2.3 to avoid the reproduced native crash. Added a focused jsdom PNG/SVG test and a module filter for image generation.
+- **Validation:** 450 Bravura PNGs generated successfully. The focused test covers font registration, seven Clef PNGs, and portable SVG serialization. See [jsdom.md](docs/jsdom.md).
 
 ### [#152](https://github.com/vexflow/vexflow/issues/152) — Text and music font ordering
 
-**Recommendation:** Address. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
+**Status:** Fixed; publication pending. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
 
-- **Finding:** The default font stack is still Bravura,Academico. Text and music share that fallback order, so the reported spacing risk remains.
-- **Next step:** Add a text-spacing regression and separate text-font defaults from music-glyph fallback. Avoid reversing every stack blindly.
-- **Evidence:** `src/metrics.ts:91`.
+- **Fix:** Text elements use a text-first font stack. Music glyphs retain their stack. Custom text faces can be chosen through setTextFonts().
+- **Validation:** Canvas widths match the text font. SVG examples cover Bravura and Petaluma. Class and element overrides still work. See [text-and-lyrics.md](docs/text-and-lyrics.md).
 
 ### [#177](https://github.com/vexflow/vexflow/issues/177) — Lyric layout and annotation positioning
 
-**Recommendation:** Address. **Type:** Feature. **Priority:** Medium. **Labels:** `triaged`.
+**Status:** Fixed; publication pending. **Type:** Feature. **Priority:** Medium. **Labels:** `triaged`.
 
-- **Finding:** Annotation.draw still computes both coordinates while drawing. The thread identifies a real need for consistent lyric positioning across a system.
-- **Next step:** Separate layout from drawing or define a small lyric API. Keep this distinct from the tie-anchor defect in #182.
-- **Evidence:** `src/annotation.ts:219`.
+- **Fix:** Added computeX(), computeY(), and setTextBaseline(). Callers can align a lyric row or override one positioning axis before drawing.
+- **Validation:** Tests cover all justifications, shared baselines, subclass overrides, and resetting automatic placement. Before/after examples are in [text-and-lyrics.md](docs/text-and-lyrics.md).
 
 ### [#182](https://github.com/vexflow/vexflow/issues/182) — Lyrics shorten ties
 
-**Recommendation:** Address. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
+**Status:** Fixed; publication pending. **Type:** Bug. **Priority:** Medium. **Labels:** `triaged`.
 
-- **Finding:** StaveNote.getTieRightX still includes the modifier context's right shift. Annotation widths contribute to that shift.
-- **Next step:** Add the long-lyric reproduction and anchor ties to note geometry without dropping spacing for nearby modifiers.
-- **Evidence:** `src/stavenote.ts:725; src/annotation.ts:170`.
+- **Fix:** Tie anchors exclude spacing added only for annotations above or below a note. Nearby modifiers keep their clearance.
+- **Validation:** Long lyrics no longer shorten ties. Tests cover dots, side string numbers, and inline annotations. Before/after examples are in [text-and-lyrics.md](docs/text-and-lyrics.md).
 
 ### [#203](https://github.com/vexflow/vexflow/issues/203) — Rest collisions across voices
 

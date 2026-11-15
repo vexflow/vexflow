@@ -44,6 +44,7 @@ const runOptions = {
 //   node generate_images_jsdom.js SCRIPT_DIR IMAGE_OUTPUT_DIR --fonts=bravura,gonville
 const ALL_FONTS = ['Bravura', 'Petaluma', 'Finale Ash', 'Sebastian', 'Gonville'];
 let fontStacksToTest = ALL_FONTS;
+let selectedModule;
 const { argv } = process;
 
 if (argv.length >= 5) {
@@ -59,6 +60,8 @@ if (argv.length >= 5) {
       runOptions.jobs = intValue;
     } else if (arg.startsWith('--job=')) {
       runOptions.job = intValue;
+    } else if (arg.startsWith('--module=')) {
+      selectedModule = value;
     } else {
       // console.log('???', arg);
     }
@@ -92,6 +95,7 @@ if (!global.QUnit) {
 
     // See: https://api.qunitjs.com/QUnit/test/
     test(testName, callback) {
+      if (selectedModule && QUMock.moduleName !== selectedModule) return;
       QUMock.testName = testName;
       QUMock.assertions.test.module.name = QUMock.moduleName;
       // Print out the progress and keep it on a single line.
@@ -113,7 +117,8 @@ if (!global.QUnit) {
 }
 
 // vexflow-debug-with-tests.js includes both the VexFlow library and the test code.
-const vexflowDebugWithTestsJS = path.resolve(__dirname, path.join(scriptDir, 'cjs', 'vexflow-debug-with-tests.js'));
+// Accept paths from the caller's working directory, like the Puppeteer generator.
+const vexflowDebugWithTestsJS = path.resolve(scriptDir, 'cjs', 'vexflow-debug-with-tests.js');
 if (!fs.existsSync(vexflowDebugWithTestsJS)) {
   console.log('Cannot find', vexflowDebugWithTestsJS);
   console.log('Aborting');

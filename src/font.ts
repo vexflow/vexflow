@@ -1,3 +1,4 @@
+// Font parsing, loading, and the built-in text faces used alongside SMuFL music fonts.
 import { Metrics } from './metrics';
 
 export interface FontInfo {
@@ -31,6 +32,24 @@ export enum FontStyle {
 let fontParser: HTMLSpanElement;
 
 export class Font {
+  /** Known text faces. Custom faces can be selected with VexFlow.setTextFonts(). */
+  static TEXT_FONT_NAMES = [
+    'Academico',
+    'Edwin',
+    'Bravura Text',
+    'Finale Ash Text',
+    'Finale Broadway Text',
+    'Finale Jazz Text',
+    'Finale Maestro Text',
+    'Gootville Text',
+    'Leland Text',
+    'MuseJazz Text',
+    'Nepomuk',
+    'Petaluma Script',
+    'Petaluma Text',
+    'Roboto Slab',
+    'Sebastian Text',
+  ];
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // STATIC MEMBERS
 

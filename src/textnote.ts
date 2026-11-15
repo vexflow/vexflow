@@ -1,5 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
+// Timed text and optional music glyphs, including smaller text scripts.
 
 import { Element } from './element';
 import { Font, FontInfo } from './font';
@@ -78,18 +79,18 @@ export class TextNote extends Note {
     if (noteStruct.font) {
       this.setFont(noteStruct.font);
     } else if (noteStruct.glyph === undefined) {
-      this.setFont(Metrics.getFontInfo('TextNote.text.fontSize'));
+      this.setFont(Metrics.getFontInfo('TextNote.text'));
     }
 
     // Scale the font size by 1/1.3.
     const smallerFontSize = Font.convertSizeToPointValue(this.fontInfo.size) * 0.769231;
     if (noteStruct.superscript) {
-      this.superscript = new Element('TexNote.subSuper');
+      this.superscript = new Element('TextNote.text');
       this.superscript.setText(noteStruct.superscript);
       this.superscript.setFontSize(smallerFontSize);
     }
     if (noteStruct.subscript) {
-      this.subscript = new Element('TexNote.subSuper');
+      this.subscript = new Element('TextNote.text');
       this.subscript.setText(noteStruct.subscript);
       this.subscript.setFontSize(smallerFontSize);
     }
