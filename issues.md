@@ -8,10 +8,10 @@
 
 ## Current status
 
-All five P1 issues have been fixed and validated: #71, #346, #347, #349, and #350. The original triage below is retained for context.
+All five P1 issues have been fixed, pushed, and closed: #71, #346, #347, #349, and #350. The original triage below is retained for context.
 
 - **Remaining work:** 35 issues from the original inventory. None is P1.
-- **Validation:** 1,874 existing browser tests and 30 new regression tests pass. TypeScript and changed-file lint pass.
+- **Validation:** 1,874 existing browser tests and 30 new regression tests pass. TypeScript and changed-file lint pass. GitHub CI and all CodeQL jobs passed.
 - **Next:** Clear resolved reports, then address the P2 validation and engraving defects.
 
 ## Original triage summary
@@ -60,41 +60,41 @@ All 40 issues have native GitHub **Type** and **Priority** fields populated and 
 - **Priority mapping:** P0 = Urgent, P1 = High, P2 = Medium, P3 = Low.
 - **Labels removed from these issues:** `bug`, `feature`, `enhancement`, and P0–P3. The native fields now carry that information.
 - **Labels retained:** Specific context such as `security`, `documentation`, `performance`, `testing`, `dependencies`, `question`, `needs-reproduction`, `ai_review`, and `triaged`.
-- **Publication status:** Complete. GitHub readback confirms all fields and labels. The original triage comments remain. The original inventory had 40 open issues. All five P1 issues are fixed; their linked GitHub issues track publication and closure.
+- **Publication status:** Complete. GitHub readback confirms all fields and labels. The original triage comments remain. The original inventory had 40 open issues. All five P1 issues are closed. Each has a fix comment. The in progress label was removed. GitHub readback confirms 35 open issues and no remaining High-priority issues.
 
 ## P1
 
 ### [#71](https://github.com/vexflow/vexflow/issues/71) — Portable SVG export
 
-**Status:** Fixed. **Type:** Bug. **Priority:** High. **Labels:** `5.0`, `triaged`.
+**Status:** Fixed and closed. **Type:** Bug. **Priority:** High. **Labels:** `5.0`, `triaged`.
 
 - **Fix:** Portable path export is available through `SVGContext.toSVG(fonts)`. It resolves inherited font attributes and keeps the live drawing unchanged. The image generator also embeds its local fonts.
 - **Validation:** Two font families render in a fresh browser with fonts and styles blocked. SVG-as-image loading passes. The Clef generator produces 28 examples. See [usage and screenshots](docs/portable-svg.md).
 
 ### [#346](https://github.com/vexflow/vexflow/issues/346) — Broken ESM package imports
 
-**Status:** Fixed. **Type:** Bug. **Priority:** High. **Labels:** `ai_review`, `triaged`.
+**Status:** Fixed and closed. **Type:** Bug. **Priority:** High. **Labels:** `ai_review`, `triaged`.
 
 - **Fix:** The rewrite changes only relative module paths. It preserves bare packages, URLs, explicit extensions, strings, and comments.
 - **Validation:** All three published ESM entries load. Rewrite fixtures and repeat-run checks pass.
 
 ### [#347](https://github.com/vexflow/vexflow/issues/347) — Registry prototype pollution
 
-**Status:** Fixed. **Type:** Bug. **Priority:** High. **Labels:** `ai_review`, `security`, `triaged`.
+**Status:** Fixed and closed. **Type:** Bug. **Priority:** High. **Labels:** `ai_review`, `security`, `triaged`.
 
 - **Fix:** Registry buckets use null-prototype dictionaries. Public methods reject unsupported index names.
 - **Validation:** Prototype-related IDs and classes work without changing Object.prototype.
 
 ### [#349](https://github.com/vexflow/vexflow/issues/349) — Parser denial of service
 
-**Status:** Fixed. **Type:** Bug. **Priority:** High. **Labels:** `ai_review`, `security`, `triaged`.
+**Status:** Fixed and closed. **Type:** Bug. **Priority:** High. **Labels:** `ai_review`, `security`, `triaged`.
 
 - **Fix:** Duration and meter tokens use bounded, anchored parsing. Tuning splitting no longer retries long whitespace runs.
 - **Validation:** Long malformed inputs fail promptly in isolated processes with hard timeouts. Valid durations and tunings still pass.
 
 ### [#350](https://github.com/vexflow/vexflow/issues/350) — Infinite loop on invalid meter
 
-**Status:** Fixed. **Type:** Bug. **Priority:** High. **Labels:** `ai_review`, `security`, `triaged`.
+**Status:** Fixed and closed. **Type:** Bug. **Priority:** High. **Labels:** `ai_review`, `security`, `triaged`.
 
 - **Fix:** Meters reject invalid values and tick overflow. Fractions reject non-finite values and zero denominators. GCD rejects infinity.
 - **Validation:** The reported hangs now throw BadArgument. Zero numerators, finite fractions, and valid meters still work.

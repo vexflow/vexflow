@@ -4,7 +4,7 @@
 
 **Result:** 22 findings: 5 P1, 16 P2, and 1 P3.
 
-**Tracking status (November 15, 2026):** All five P1 findings are fixed. R03 (#348) was fixed earlier. R01, R02, R04, and R05 are fixed in the current follow-up. The separate SVG export issue #71 is also fixed. P2 and P3 findings remain open; they have not been filed as part of this review.
+**Tracking status (November 15, 2026):** All five P1 findings are fixed and their issues are closed. R03 (#348) was fixed earlier. R01, R02, R04, and R05 are fixed in the current follow-up. The separate SVG export issue #71 is also fixed. P2 and P3 findings remain open; they have not been filed as part of this review.
 
 ## Scope and baseline
 
@@ -80,7 +80,7 @@ Current main also contains dependency updates for fast-uri, ip-address, and zod.
 
 ### P1 follow-up validation
 
-- All 1,874 existing browser tests and 30 new regression tests pass on Node 24.
+- All 1,874 existing browser tests and 30 new regression tests pass on Node 24. GitHub CI and all CodeQL jobs passed.
 - The old registry probe polluted Object.prototype. The old duration, invalid-meter, and GCD probes timed out. The fixed cases pass.
 - TypeScript compilation and lint of changed source and tool files pass.
 - The full `grunt test` command now runs the ESM and isolated regression checks.
