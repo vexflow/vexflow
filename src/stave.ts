@@ -1,4 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// Staff geometry, modifiers, and inherited ledger-line styling.
 // MIT License
 
 import { BoundingBox, Bounds } from './boundingbox';
@@ -110,7 +111,7 @@ export class Stave extends Element {
       ...options,
     };
     this.bounds = { x: this.x, y: this.y, w: this.width, h: 0 };
-    this.defaultLedgerLineStyle = { strokeStyle: '#444', lineWidth: 2 };
+    this.defaultLedgerLineStyle = { lineWidth: 2 };
 
     this.resetLines();
 
@@ -127,7 +128,9 @@ export class Stave extends Element {
 
   /** Get default style for ledger lines. */
   getDefaultLedgerLineStyle(): ElementStyle {
-    return { ...this.getStyle(), ...this.defaultLedgerLineStyle };
+    const themed = this.getContext()?.getDefaultStyle().strokeStyle !== undefined;
+    const fallback = themed ? {} : { strokeStyle: '#444' };
+    return { ...fallback, ...(this.styleExplicit ? this.getStyle() : {}), ...this.defaultLedgerLineStyle };
   }
 
   space(spacing: number): number {

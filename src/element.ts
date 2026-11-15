@@ -1,4 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// Shared element ownership, styling, fonts, and drawing state.
 // MIT License
 // @author Mohit Cheppudira
 
@@ -117,6 +118,8 @@ export class Element {
 
   protected rendered: boolean;
   protected style: ElementStyle = {};
+  /** Distinguishes caller overrides from built-in metric colors. */
+  protected styleExplicit = false;
   protected registry?: Registry;
 
   protected _fontInfo: Required<FontInfo>;
@@ -206,12 +209,14 @@ export class Element {
    */
   setStyle(style: ElementStyle): this {
     this.style = style;
+    this.styleExplicit = true;
     return this;
   }
 
   /** Set the element & associated children style used for rendering. */
   setGroupStyle(style: ElementStyle): this {
     this.style = style;
+    this.styleExplicit = true;
     this.children.forEach((child) => child.setGroupStyle(style));
     return this;
   }
@@ -224,12 +229,20 @@ export class Element {
   /** Apply the element style to `context`. */
   applyStyle(context: RenderContext | undefined = this.context, style: ElementStyle = this.getStyle()): this {
     if (!context) return this;
+    // Built-in colors yield to score defaults. Nested explicit styles inherit through
+    // the context, so a voice color also reaches its notes, stems, and modifiers.
+    if (style === this.style && !this.styleExplicit) {
+      const defaults = context.getDefaultStyle();
+      style = { ...style };
+      if (defaults.fillStyle !== undefined) delete style.fillStyle;
+      if (defaults.strokeStyle !== undefined) delete style.strokeStyle;
+    }
     if (style.shadowColor) context.setShadowColor(style.shadowColor);
-    if (style.shadowBlur) context.setShadowBlur(style.shadowBlur);
+    if (style.shadowBlur !== undefined) context.setShadowBlur(style.shadowBlur);
     if (style.fillStyle) context.setFillStyle(style.fillStyle);
     if (style.strokeStyle) context.setStrokeStyle(style.strokeStyle);
-    if (style.lineWidth) context.setLineWidth(style.lineWidth);
-    if (style.lineDash) context.setLineDash(style.lineDash.split(' ').map(Number));
+    if (style.lineWidth !== undefined) context.setLineWidth(style.lineWidth);
+    if (style.lineDash !== undefined) context.setLineDash(style.lineDash ? style.lineDash.split(' ').map(Number) : []);
 
     return this;
   }
@@ -240,10 +253,21 @@ export class Element {
    */
   drawWithStyle(): this {
     const ctx = this.checkContext();
+    const defaults = ctx.getDefaultStyle();
     ctx.save();
-    this.applyStyle(ctx);
-    this.draw();
-    ctx.restore();
+    try {
+      if (this.styleExplicit) {
+        const inherited = { ...defaults };
+        if (this.style.fillStyle !== undefined) inherited.fillStyle = this.style.fillStyle;
+        if (this.style.strokeStyle !== undefined) inherited.strokeStyle = this.style.strokeStyle;
+        ctx.setDefaultStyle(inherited);
+      }
+      this.applyStyle(ctx);
+      this.draw();
+    } finally {
+      ctx.setDefaultStyle(defaults);
+      ctx.restore();
+    }
     return this;
   }
 

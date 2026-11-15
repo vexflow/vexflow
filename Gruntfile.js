@@ -181,7 +181,9 @@ readEnvironmentVariables();
 
 function runCommand(command, ...args) {
   // The stdio option passes the output from the spawned process back to this process's console.
-  spawnSync(command, args, { stdio: 'inherit' });
+  const result = spawnSync(command, args, { stdio: 'inherit' });
+  if (result.error) throw result.error;
+  if (result.status !== 0) throw new Error(`${command} failed (${result.signal ?? result.status}).`);
 }
 
 function webpackConfigs() {
@@ -484,6 +486,8 @@ module.exports = (grunt) => {
         'tests/node/package-input-tests.mjs',
         'tests/node/svg-export-tests.mjs',
         'tests/node/rendering-tests.mjs',
+        'tests/node/sheet-tests.mjs',
+        'tests/node/render-metrics-tests.mjs',
       ],
       {
         stdio: 'inherit',

@@ -45,6 +45,7 @@ import { Registry } from './registry';
 import { RenderContext } from './rendercontext';
 import { Renderer, RendererBackends, RendererLineEndType } from './renderer';
 import { RepeatNote } from './repeatnote';
+import { Sheet } from './sheet';
 import { Stave } from './stave';
 import { Barline, BarlineType, RepeatBracketType } from './stavebarline';
 import { StaveConnector } from './staveconnector';
@@ -156,6 +157,7 @@ export class VexFlow {
   static Stroke = Stroke;
   static SVGContext = SVGContext;
   static System = System;
+  static Sheet = Sheet;
   static TabNote = TabNote;
   static TabSlide = TabSlide;
   static TabStave = TabStave;

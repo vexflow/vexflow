@@ -48,6 +48,7 @@ export * from './registry';
 export * from './rendercontext';
 export * from './renderer';
 export * from './repeatnote';
+export * from './sheet';
 export * from './stave';
 export * from './stavebarline';
 export * from './staveconnector';

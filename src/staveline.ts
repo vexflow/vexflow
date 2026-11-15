@@ -1,4 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// Lines between notes with inherited and explicit element styling.
 //
 // ## Description
 //
@@ -215,6 +216,7 @@ export class StaveLine extends Element {
       ctx.setStrokeStyle(this.renderOptions.color);
       ctx.setFillStyle(this.renderOptions.color);
     }
+    this.applyStyle(ctx);
 
     // Draw the shaft of the arrow
     ctx.beginPath();
@@ -332,6 +334,7 @@ export class StaveLine extends Element {
     // Draw the text
     const color = renderOptions.color;
     this.applyStyle(ctx, { fillStyle: color, strokeStyle: color });
+    this.applyStyle(ctx);
     this.renderText(ctx, x, y);
   }
 }

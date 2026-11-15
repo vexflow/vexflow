@@ -1,4 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// Parse compact notation and optional bar-separated measures.
 // MIT License
 
 import { Accidental } from './accidental';
@@ -237,6 +238,8 @@ export interface BuilderElements {
 export interface BuilderOptions extends Record<string, any> {
   stem?: string;
   clef?: string;
+  /** Initial duration for notes that omit one. Defaults to an eighth note. */
+  duration?: string;
 }
 
 export class Builder {
@@ -262,7 +265,7 @@ export class Builder {
       ...options,
     };
     this.elements = { notes: [], accidentals: [] };
-    this.rollingDuration = '8';
+    this.rollingDuration = options?.duration ?? '8';
     this.resetPiece();
   }
 
@@ -523,6 +526,43 @@ export class EasyScore {
     options = { clef: this.defaults.clef, stem: this.defaults.stem, ...options };
     this.parse(line, options);
     return this.builder.getElements().notes;
+  }
+
+  /**
+   * Parse bar-separated measures. Durations carry across bars; notes() is unchanged.
+   * A bar may have adjacent commas. Quoted option values may contain literal bars.
+   * Empty measures and invalid notation throw, rather than returning partial music.
+   */
+  measures(line: string, options: BuilderOptions = {}): StemmableNote[][] {
+    const parts: string[] = [];
+    let start = 0;
+    let quote = '';
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (quote) {
+        if (char === quote) quote = '';
+      } else if (char === '"' || char === "'") {
+        quote = char;
+      } else if (char === '|') {
+        parts.push(line.slice(start, i));
+        start = i + 1;
+      }
+    }
+    parts.push(line.slice(start));
+    const measures = parts.map((part, index) => {
+      let text = part.trim();
+      if (index > 0) text = text.replace(/^,\s*/, '');
+      if (index < parts.length - 1) text = text.replace(/\s*,$/, '');
+      if (!text) throw new RuntimeError('BadArguments', 'Empty EasyScore measure. Use an explicit rest.');
+      return text;
+    });
+    let duration = options.duration;
+    return measures.map((text) => {
+      const result = this.parse(text, { clef: this.defaults.clef, stem: this.defaults.stem, ...options, duration });
+      if (!result.success) throw new RuntimeError('BadArguments', `Invalid EasyScore measure: ${text}`);
+      duration = this.builder.rollingDuration;
+      return this.builder.getElements().notes;
+    });
   }
 
   voice(notes: Note[], options: { time?: string; options?: { softmaxFactor: number } } = {}): Voice {

@@ -1,4 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// Staff note geometry, owned noteheads, stems, and modifiers.
 //
 // This file implements notes for standard notation. This consists of one or
 // more `NoteHeads`, an optional stem, and an optional flag.
@@ -426,8 +427,6 @@ export class StaveNote extends StemmableNote {
     } else {
       this.setStemDirection(noteStruct.stemDirection ?? Stem.UP);
     }
-    this.reset();
-    this.buildFlag();
   }
 
   override reset(): this {
@@ -467,6 +466,9 @@ export class StaveNote extends StemmableNote {
 
   // Builds a `NoteHead` for each key in the note
   buildNoteHeads(): NoteHead[] {
+    // Replace owned heads, rather than retaining obsolete children after reflow.
+    const oldHeads = new Set(this._noteHeads);
+    this.children = this.children.filter((child) => !oldHeads.has(child as NoteHead));
     this._noteHeads = [];
     const stemDirection = this.getStemDirection();
     const keys = this.getKeys();

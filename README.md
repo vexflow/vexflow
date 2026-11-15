@@ -93,7 +93,8 @@ A good way to learn the API is to look at our examples & unit tests:
 ## More Resources
 
 - [Text fonts and lyric layout](docs/text-and-lyrics.md), [jsdom rendering](docs/jsdom.md), and [score benchmarks](docs/benchmarks.md).
-- [Score layout](docs/score-layout.md).
+- [Score layout](docs/score-layout.md) and [responsive sheets and themes](docs/sheets-and-themes.md).
+- [Rendering tests and visual comparisons](docs/testing.md).
 
 - If you need help, start a [GitHub discussion](https://github.com/vexflow/vexflow/discussions).
 

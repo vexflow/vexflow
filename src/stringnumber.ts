@@ -1,4 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// String-number text, circles, and continuation lines.
 // @author Larry Kuhns
 //
 // This file implements the `StringNumber` class which renders string
@@ -253,7 +254,6 @@ export class StringNumber extends Modifier {
     if (isStemmableNote(lastNote)) {
       // Only StemmableNote objects have getStemX().
       const end = lastNote.getStemX() - note.getX() + 5;
-      ctx.setStrokeStyle('#000000');
       ctx.setLineCap('round');
       ctx.setLineWidth(0.6);
       if (this.dashed) {

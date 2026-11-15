@@ -1,3 +1,4 @@
+// Generate test images with bounded workers and propagate every worker failure.
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -160,9 +161,13 @@ const appMain = async () => {
         process.stderr.write(data);
       });
 
+      child.on('error', (error) => {
+        log(error.message, 'error');
+        resolve({ key, code: 1 });
+      });
       child.on('close', (code) => {
         log(`\n${proc} closed with code ${code}`);
-        resolve({ key, code });
+        resolve({ key, code: code ?? 1 });
       });
     });
   };
@@ -219,8 +224,8 @@ const appMain = async () => {
         const { code } = await race();
         if (code) {
           exitCode = code;
-          log('child error. aborting...');
-          break;
+          log('child error. finishing active workers...');
+          requests.length = 0;
         }
       }
     }

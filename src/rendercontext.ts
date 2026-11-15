@@ -1,4 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// Common drawing interface and scoped score foreground defaults.
 // MIT License
 
 import { FontInfo } from './font';
@@ -12,6 +13,20 @@ export interface TextMeasure {
 }
 
 export abstract class RenderContext {
+  /** Drawing defaults supplied by a score. Explicit element colors take precedence. */
+  private defaultStyle: { fillStyle?: string; strokeStyle?: string } = {};
+
+  /** Set foreground defaults. Factory scopes these to a single draw. */
+  setDefaultStyle(style: { fillStyle?: string; strokeStyle?: string }): this {
+    this.defaultStyle = { ...style };
+    return this;
+  }
+
+  /** Return the current score defaults, without exposing mutable state. */
+  getDefaultStyle(): { fillStyle?: string; strokeStyle?: string } {
+    return { ...this.defaultStyle };
+  }
+
   static get CATEGORY(): string {
     return Category.RenderContext;
   }

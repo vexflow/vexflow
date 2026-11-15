@@ -1,4 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// Text brackets with inherited colors and explicit style overrides.
 // @author Cyril Silverman
 //
 // This file implements `TextBrackets` which extend between two notes.
@@ -42,7 +43,7 @@ export class TextBracket extends Element {
 
   public renderOptions: {
     dashed: boolean;
-    color: string;
+    color?: string;
     lineWidth: number;
     underlineSuperscript: boolean;
     showBracket: boolean;
@@ -90,7 +91,6 @@ export class TextBracket extends Element {
     this.renderOptions = {
       dashed: true,
       dash: [5],
-      color: 'black',
       lineWidth: 1,
       showBracket: true,
       bracketHeight: 8,
@@ -115,11 +115,12 @@ export class TextBracket extends Element {
     this.superscriptElement.setFont(family, smallerFontSize, weight, style);
 
     const options = this.renderOptions;
-    ctx.setStrokeStyle(options.color);
-    ctx.setFillStyle(options.color);
+    if (options.color !== undefined) {
+      ctx.setStrokeStyle(options.color);
+      ctx.setFillStyle(options.color);
+    }
     ctx.setLineWidth(options.lineWidth);
-
-    return this;
+    return super.applyStyle(ctx);
   }
 
   // Set whether the bracket line should be `dashed`. You can also

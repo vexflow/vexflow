@@ -1,4 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// Construct, lay out, theme, and draw notation with optional retained scores.
 // MIT License
 // @author Mohit Cheppudira
 // MIT License
@@ -30,6 +31,7 @@ import { PedalMarking } from './pedalmarking';
 import { RenderContext } from './rendercontext';
 import { Renderer } from './renderer';
 import { RepeatNote } from './repeatnote';
+import { Sheet, SheetOptions } from './sheet';
 import { Stave, StaveOptions } from './stave';
 import { BarlineType } from './stavebarline';
 import { StaveConnector, StaveConnectorType } from './staveconnector';
@@ -98,6 +100,10 @@ export class Factory {
   protected voices!: Voice[];
   protected renderQ!: Element[];
   protected systems!: System[];
+  protected sheets!: Sheet[];
+  private retained = false;
+  /** Foreground defaults survive reset(), like renderer options. */
+  protected style: { fillStyle?: string; strokeStyle?: string } = {};
 
   /**
    * Example:
@@ -124,6 +130,8 @@ export class Factory {
   }
 
   reset(): void {
+    this.sheets = [];
+    this.retained = false;
     this.renderQ = [];
     this.systems = [];
     this.staves = [];
@@ -180,6 +188,19 @@ export class Factory {
 
   getVoices(): Voice[] {
     return this.voices;
+  }
+
+  /** Set score colors. Explicit element styles override these defaults. */
+  setStyle(style: { fillStyle?: string; strokeStyle?: string }): this {
+    this.style = { ...style };
+    return this;
+  }
+
+  /** Create an optional continuous sheet from measure-sized Systems. */
+  Sheet(options: Omit<SheetOptions, 'factory'> = {}): Sheet {
+    const sheet = new Sheet({ ...options, factory: this });
+    this.sheets.push(sheet);
+    return sheet;
   }
 
   /** Return pixels from current stave spacing. */
@@ -680,15 +701,32 @@ export class Factory {
   }
 
   /** Render the score. */
-  draw(): void {
+  draw(options: { retain?: boolean } = {}): void {
     const ctx = this.context;
-    this.systems.forEach((s) => s.setContext(ctx).format());
-    this.staves.forEach((s) => s.setContext(ctx).drawWithStyle());
-    this.voices.forEach((v) => v.setContext(ctx).drawWithStyle());
-    this.renderQ.forEach((e) => {
-      if (!e.isRendered()) e.setContext(ctx).drawWithStyle();
+    this.sheets.forEach((sheet) => sheet.format());
+    const managed = new Set(this.sheets.flatMap((sheet) => sheet.getSystems()));
+    this.systems.forEach((s) => {
+      if (!managed.has(s)) s.setContext(ctx).format();
     });
-    this.systems.forEach((s) => s.setContext(ctx).drawWithStyle());
-    this.reset();
+    const defaults = ctx.getDefaultStyle();
+    ctx.save();
+    ctx.setDefaultStyle(this.style);
+    if (this.style.fillStyle !== undefined) ctx.setFillStyle(this.style.fillStyle);
+    if (this.style.strokeStyle !== undefined) ctx.setStrokeStyle(this.style.strokeStyle);
+    // Clear draw flags so retained scores redraw beams and other queued elements.
+    if (this.retained) this.renderQ.forEach((element) => element.setRendered(false));
+    try {
+      this.staves.forEach((s) => s.setContext(ctx).drawWithStyle());
+      this.voices.forEach((v) => v.setContext(ctx).drawWithStyle());
+      this.renderQ.forEach((e) => {
+        if (!e.isRendered()) e.setContext(ctx).drawWithStyle();
+      });
+      this.systems.forEach((s) => s.setContext(ctx).drawWithStyle());
+    } finally {
+      ctx.setDefaultStyle(defaults);
+      ctx.restore();
+    }
+    this.retained = options.retain ?? false;
+    if (!options.retain) this.reset();
   }
 }

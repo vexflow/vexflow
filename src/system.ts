@@ -1,4 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// Align voices and staves within one measure-sized system.
 // MIT License
 
 import { BoundingBox } from './boundingbox';
@@ -158,6 +159,24 @@ export class System extends Element {
   /** Get associated voices. */
   getVoices(): Voice[] {
     return this.partVoices;
+  }
+
+  /** Set a fixed layout width, or request the minimum width when omitted. */
+  override setWidth(width?: number): this {
+    if (width !== undefined && (!Number.isFinite(width) || width <= 0)) {
+      throw new RuntimeError('BadArgument', 'System width must be a positive finite number.');
+    }
+    this.options.autoWidth = width === undefined;
+    if (width !== undefined) {
+      this.options.width = width;
+      this.partStaves.forEach((stave) => stave.setWidth(width));
+    }
+    return this;
+  }
+
+  /** Width assigned by the latest layout. */
+  override getWidth(): number {
+    return this.options.width;
   }
 
   /** Set associated context. */

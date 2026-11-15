@@ -1,4 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// SVG drawing backend, pixel sizing, state, and portable export.
 // MIT License
 // @author Gregory Ristow (2015)
 // SVG drawing context with optional font-independent path export.
@@ -275,10 +276,10 @@ export class SVGContext extends RenderContext {
   resize(width: number, height: number): this {
     this.width = width;
     this.height = height;
-    this.element.style.width = width.toString();
+    this.element.style.width = `${width}px`;
 
-    this.svg.style.width = width.toString();
-    this.svg.style.height = height.toString();
+    this.svg.style.width = `${width}px`;
+    this.svg.style.height = `${height}px`;
 
     const attributes = {
       width,

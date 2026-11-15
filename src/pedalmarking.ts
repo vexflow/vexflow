@@ -1,4 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// Pedal text and brackets with annotation clearance and inherited styles.
 // MIT License
 // Pedal text and brackets with clearance for annotations in the marked passage.
 
@@ -37,7 +38,7 @@ export class PedalMarking extends Element {
   protected releaseText: string;
 
   public renderOptions: {
-    color: string;
+    color?: string;
     bracketHeight: number;
     textMarginRight: number;
     bracketLineWidth: number;
@@ -104,7 +105,6 @@ export class PedalMarking extends Element {
       bracketHeight: 10,
       textMarginRight: 6,
       bracketLineWidth: 1,
-      color: 'black',
     };
   }
 
@@ -289,8 +289,11 @@ export class PedalMarking extends Element {
     const ctx = this.checkContext();
     this.setRendered();
 
-    ctx.setStrokeStyle(this.renderOptions.color);
-    ctx.setFillStyle(this.renderOptions.color);
+    if (this.renderOptions.color !== undefined) {
+      ctx.setStrokeStyle(this.renderOptions.color);
+      ctx.setFillStyle(this.renderOptions.color);
+    }
+    this.applyStyle(ctx);
     ctx.setFont(this.font);
     L('Rendering Pedal Marking');
 
