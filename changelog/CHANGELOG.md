@@ -1,3 +1,18 @@
+# 5.1.1
+
+## Fixes and performance
+
+- Cache repeated text measurements with bounded storage and clear cached metrics when fonts change.
+- Keep copied metrics and styles independent without deep-cloning unrelated state.
+- Document UTF-8 encoding in the HTML setup example.
+
+## Explorer
+
+- Use a compact layout with an 80% preview and the inspector beside the score.
+- Add locally bundled CodeJar editing and Prism syntax highlighting.
+- Format all examples consistently and add explanatory comments.
+- Fix the keyboard shortcut regression test and isolate browser state between tests.
+
 # 5.1.0
 
 ## Features
