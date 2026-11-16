@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
+// Fetch historical release builds. Versions are validated before any filesystem or process work.
 
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import fs from 'fs';
 import path, { dirname } from 'path';
 import copy from 'recursive-copy';
@@ -15,6 +16,14 @@ const TEMP_SUFFIX = '-delete-me-later';
 
 // Determine which versions the user wants to extract/download.
 const versionsRequested = process.argv.slice(2);
+
+// Accept release versions, never paths, flags, npm specs, or shell fragments.
+const releaseVersion = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?$/;
+for (const version of versionsRequested) {
+  if (version.length > 100 || version !== version.trim() || !releaseVersion.test(version)) {
+    throw new Error(`Invalid release version: ${version}`);
+  }
+}
 
 if (versionsRequested.length === 0) {
   console.log('Usage:   node get_releases.mjs <release-version>');
@@ -91,10 +100,10 @@ async function getReleasesForVersion3OrEarlier() {
 
     if (fs.existsSync(worktreePath)) {
       console.log('Removing existing worktree:', worktreePath);
-      execSync(`git worktree remove ${worktreePath}`).toString();
+      execFileSync('git', ['worktree', 'remove', '--', worktreePath]);
     }
 
-    const output = execSync(`git worktree add --detach ${worktreePath} ${ver}`).toString();
+    const output = execFileSync('git', ['worktree', 'add', '--detach', '--', worktreePath, ver]).toString();
     console.log(output);
   }
 
@@ -113,11 +122,11 @@ async function getReleasesForVersion3OrEarlier() {
 
   console.log('\nRemove temporary worktrees.');
   for (const worktreePath of worktrees) {
-    execSync(`git worktree remove ${worktreePath} --force`).toString();
+    execFileSync('git', ['worktree', 'remove', '--force', '--', worktreePath]);
   }
 
   // Prune worktree information.
-  execSync(`git worktree prune`).toString();
+  execFileSync('git', ['worktree', 'prune']);
 }
 await getReleasesForVersion3OrEarlier();
 
@@ -134,12 +143,14 @@ async function getReleasesForVersion4OrLater() {
     fs.mkdirSync(tempDir);
 
     console.log('\nDownload', ver, 'from npm.');
-    execSync(`npm pack vexflow@${ver} --pack-destination ${tempDir} 2> /dev/null`).toString();
+    execFileSync('npm', ['pack', `vexflow@${ver}`, '--pack-destination', tempDir, '--ignore-scripts'], {
+      stdio: ['ignore', 'pipe', 'inherit'],
+    });
 
     const packageFile = `vexflow-${ver}.tgz`;
     console.log('Extract', packageFile);
     const tgzFile = path.join(tempDir, packageFile);
-    execSync(`tar -xf ${tgzFile} -C ${tempDir}`).toString();
+    execFileSync('tar', ['-xf', tgzFile, '-C', tempDir]);
 
     // Copy the files from the temporary directory to the target directory.
     const sourceDir = path.join(tempDir, 'package', 'build');
@@ -153,7 +164,7 @@ async function getReleasesForVersion4OrLater() {
     }
 
     // Remove the temporary directory.
-    fs.rmdirSync(tempDir, { recursive: true });
+    fs.rmSync(tempDir, { recursive: true });
   }
 }
 

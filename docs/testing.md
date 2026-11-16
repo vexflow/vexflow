@@ -3,9 +3,15 @@
 Run the normal checks:
 
 ```sh
+nvm install
+nvm use
+npm ci
 npm test
 npm run lint
 ```
+
+`.nvmrc` pins the Node version used in CI. Run `npm audit` to check development and runtime dependencies.
+See [development dependencies](dependencies.md) for security overrides and regression coverage.
 
 The test task builds VexFlow, runs Node integration checks, and runs QUnit in Chrome. Set `PUPPETEER_EXECUTABLE_PATH` to use a locally installed Chrome executable.
 

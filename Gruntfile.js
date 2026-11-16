@@ -106,7 +106,6 @@ const { execSync, spawnSync } = require('child_process');
 const ts = require('typescript');
 const webpack = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const open = require('opener');
 const concurrently = require('concurrently');
 
@@ -189,7 +188,6 @@ function runCommand(command, ...args) {
 function webpackConfigs() {
   let pluginBanner;
   let pluginCircular;
-  let pluginFork;
   let pluginTerser;
 
   // entryFiles is one of the following:
@@ -250,20 +248,6 @@ function webpackConfigs() {
         plugins.push(pluginCircular);
       }
 
-      if (!pluginFork) {
-        pluginFork = new ForkTsCheckerWebpackPlugin({
-          typescript: {
-            diagnosticOptions: {
-              semantic: true,
-              syntactic: true,
-              declaration: true,
-              global: true,
-            },
-          },
-        });
-        plugins.push(pluginFork);
-      }
-
       return plugins;
     }
 
@@ -321,12 +305,11 @@ function webpackConfigs() {
             resolve: { fullySpecified: false },
             use: [
               {
-                // https://webpack.js.org/guides/build-performance/#typescript-loader
-                // https://www.npmjs.com/package/fork-ts-checker-webpack-plugin
+                // Type-check in the loader, including watch builds, without a second checker dependency.
                 loader: 'ts-loader',
                 options: {
                   configFile: 'tsconfig.json',
-                  transpileOnly: true,
+                  transpileOnly: false,
                 },
               },
             ],
@@ -484,6 +467,7 @@ module.exports = (grunt) => {
       [
         '--test',
         'tests/node/package-input-tests.mjs',
+        'tests/node/tool-security-tests.mjs',
         'tests/node/metrics-tests.mjs',
         'tests/node/chord-kerning-tests.mjs',
         'tests/node/svg-export-tests.mjs',

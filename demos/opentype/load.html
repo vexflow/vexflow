@@ -78,8 +78,10 @@
           } else {
             uncompressedFontData = new Uint8Array(buffer);
           }
-          const fontSize = `<b>Font File Size:</b> ${file.size}  bytes<br /><b>Uncompressed Size:</b> ${uncompressedFontData.length} bytes`;
-          document.getElementById(fontType + 'FontSize').innerHTML = fontSize;
+          showFontInfo(fontType + 'FontSize', [
+            ['Font File Size:', `${file.size} bytes`],
+            ['Uncompressed Size:', `${uncompressedFontData.length} bytes`],
+          ]);
           const fontName = parseFont(uncompressedFontData, fontType);
 
           convertFontFileToBase64(file, (base64) => {
@@ -115,11 +117,23 @@
         const font = opentype.parse(fontBuffer);
         console.log(font);
         const fontName = font.names.fontFamily.en;
-        let fontInfo = `<b>Font Family Name:</b> ${fontName}<br />`;
-        fontInfo += `<b>Num Glyphs:</b> ${font.glyphs.length}<br />`;
-        document.getElementById(fontType + 'FontInfo').innerHTML = fontInfo;
+        showFontInfo(fontType + 'FontInfo', [
+          ['Font Family Name:', fontName],
+          ['Num Glyphs:', font.glyphs.length],
+        ]);
 
         return fontName;
+      }
+
+      // Font metadata is untrusted text. Build markup separately so names cannot inject HTML.
+      function showFontInfo(id, rows) {
+        const target = document.getElementById(id);
+        target.replaceChildren();
+        for (const [label, value] of rows) {
+          const heading = document.createElement('b');
+          heading.textContent = label;
+          target.append(heading, ` ${value}`, document.createElement('br'));
+        }
       }
 
       // Use the browser's FontFace API to load and display the font.
