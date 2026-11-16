@@ -541,6 +541,7 @@ h2 {
 }
 .editor-footer {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   align-items: center;
   font-size: 9px;
@@ -552,7 +553,7 @@ h2 {
   align-items: center;
   gap: 5px;
 }
-.editor-footer span:last-child {
+.editor-footer > :last-child {
   margin-left: auto;
 }
 .environment {

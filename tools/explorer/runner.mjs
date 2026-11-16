@@ -1,4 +1,4 @@
-// Runs one edited example in an opaque-origin iframe and reports only serializable diagnostics.
+// Reuses an isolated VexFlow runtime, cleaning ordinary run effects between examples.
 export function runPreview() {
   'use strict';
   const channel = 'vexflow-explorer';
@@ -12,7 +12,93 @@ export function runPreview() {
     grid = false;
   let elements = [],
     records = new Map();
-  const send = (type, data) => parent.postMessage({ channel, token, type, ...data }, '*');
+  const send = (type, data, runToken = token) => parent.postMessage({ channel, token: runToken, type, ...data }, '*');
+  const native = {
+    setTimeout: window.setTimeout.bind(window),
+    setInterval: window.setInterval.bind(window),
+    clearTimeout: window.clearTimeout.bind(window),
+    requestAnimationFrame: window.requestAnimationFrame.bind(window),
+    cancelAnimationFrame: window.cancelAnimationFrame.bind(window),
+    addEventListener: EventTarget.prototype.addEventListener,
+    removeEventListener: EventTarget.prototype.removeEventListener,
+    log: console.log,
+  };
+  const timers = new Set();
+  const animations = new Set();
+  const listeners = [];
+
+  /** Keep browser APIs usable while allowing ordinary example effects to be removed. */
+  function trackEffects() {
+    for (const name of ['setTimeout', 'setInterval']) {
+      window[name] = (callback, delay, ...args) => {
+        const owner = token;
+        const id = native[name](() => {
+          if (name === 'setTimeout') timers.delete(id);
+          if (owner !== token) return;
+          if (typeof callback === 'function') callback.apply(window, args);
+          else new Function(String(callback))();
+        }, delay);
+        timers.add(id);
+        return id;
+      };
+    }
+    // Timeout and interval IDs share one pool in browsers.
+    window.clearTimeout = window.clearInterval = (id) => {
+      timers.delete(id);
+      native.clearTimeout(id);
+    };
+    window.requestAnimationFrame = (callback) => {
+      const owner = token;
+      const id = native.requestAnimationFrame((time) => {
+        animations.delete(id);
+        if (owner === token) callback.call(window, time);
+      });
+      animations.add(id);
+      return id;
+    };
+    window.cancelAnimationFrame = (id) => {
+      animations.delete(id);
+      native.cancelAnimationFrame(id);
+    };
+    EventTarget.prototype.addEventListener = function (type, listener, options) {
+      const capture = typeof options === 'boolean' ? options : !!options?.capture;
+      // Leave native deduplication, once, and AbortSignal behavior intact.
+      if (
+        listener &&
+        !listeners.some((r) => r.target === this && r.type === type && r.listener === listener && r.capture === capture)
+      )
+        listeners.push({ target: this, type, listener, capture });
+      native.addEventListener.call(this, type, listener, options);
+    };
+    EventTarget.prototype.removeEventListener = function (type, listener, options) {
+      const capture = typeof options === 'boolean' ? options : !!options?.capture;
+      const index = listeners.findIndex(
+        (r) => r.target === this && r.type === type && r.listener === listener && r.capture === capture
+      );
+      if (index !== -1) listeners.splice(index, 1);
+      native.removeEventListener.call(this, type, listener, options);
+    };
+  }
+
+  /** Fonts and library objects stay warm; each score and its diagnostics start empty. */
+  function cleanRun() {
+    timers.forEach(native.clearTimeout);
+    timers.clear();
+    animations.forEach(native.cancelAnimationFrame);
+    animations.clear();
+    for (const { target, type, listener, capture } of listeners)
+      native.removeEventListener.call(target, type, listener, capture);
+    listeners.length = 0;
+    console.log = native.log;
+    svg = overlay = selected = undefined;
+    pinned = false;
+    elements = [];
+    records.clear();
+    const score = document.createElement('div');
+    score.id = 'score';
+    document.body.replaceChildren(score);
+    document.body.removeAttribute('style');
+  }
   const safe = (fn) => {
     try {
       return fn();
@@ -145,25 +231,27 @@ export function runPreview() {
 
   /** Collect elements via the public Registry hook rather than monkey-patching drawing methods. */
   async function run(message) {
+    const runToken = message.token;
+    cleanRun();
     token = message.token;
     const VF = window.VexFlow;
-    const registry = new VF.Registry();
-    const collected = new Map();
-    const original = registry.register.bind(registry);
-    registry.register = (element, id) => {
-      const result = original(element, id);
-      collected.set(element.getAttribute('id'), element);
-      return result;
-    };
-    VF.Registry.enableDefaultRegistry(registry);
-    VF.setFonts(message.font, message.font === 'Petaluma' ? 'Petaluma Script' : 'Academico');
-    await document.fonts.ready;
-    const logs = [];
-    console.log = (...values) => {
-      if (logs.length < 20) logs.push(values.map((v) => String(v).slice(0, 500)).join(' '));
-    };
     const start = performance.now();
     try {
+      const registry = new VF.Registry();
+      const collected = new Map();
+      const original = registry.register.bind(registry);
+      registry.register = (element, id) => {
+        const result = original(element, id);
+        collected.set(element.getAttribute('id'), element);
+        return result;
+      };
+      VF.Registry.enableDefaultRegistry(registry);
+      VF.setFonts(message.font, message.font === 'Petaluma' ? 'Petaluma Script' : 'Academico');
+      await document.fonts.ready;
+      const logs = [];
+      console.log = (...values) => {
+        if (logs.length < 20) logs.push(values.map((v) => String(v).slice(0, 500)).join(' '));
+      };
       const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
       await new AsyncFunction(
         'VF',
@@ -179,14 +267,18 @@ export function runPreview() {
       elements = [...collected.values()].map(describe);
       records = new Map(elements.map((e) => [e.id, e]));
       const raw = new XMLSerializer().serializeToString(svg);
-      send('rendered', {
-        elements,
-        svg: raw,
-        logs,
-        duration: rounded(performance.now() - start),
-        width: Number(svg.getAttribute('width')),
-        height: Number(svg.getAttribute('height')),
-      });
+      send(
+        'rendered',
+        {
+          elements,
+          svg: raw,
+          logs,
+          duration: rounded(performance.now() - start),
+          width: Number(svg.getAttribute('width')),
+          height: Number(svg.getAttribute('height')),
+        },
+        runToken
+      );
       svg.addEventListener('pointermove', (event) => inspect(event));
       svg.addEventListener('click', (event) => inspect(event, true));
       svg.addEventListener('pointerleave', () => {
@@ -202,13 +294,18 @@ export function runPreview() {
       paint();
     } catch (error) {
       const match = String(error.stack).match(/explorer-example\.js:(\d+):(\d+)/);
-      send('error', {
-        message: String(error.message).slice(0, 2500),
-        name: error.name,
-        line: match ? Math.max(1, Number(match[1]) - 3) : undefined,
-      });
+      send(
+        'error',
+        {
+          message: String(error.message).slice(0, 2500),
+          name: error.name,
+          line: match ? Math.max(1, Number(match[1]) - 3) : undefined,
+        },
+        runToken
+      );
     } finally {
       VF.Registry.disableDefaultRegistry();
+      send('done', {}, runToken);
     }
   }
 
@@ -244,5 +341,7 @@ export function runPreview() {
       send('inspect', { element: selected, pinned });
     }
   });
+  // Runtime listeners above belong to the frame, not to an editable example.
+  trackEffects();
   parent.postMessage({ channel, type: 'ready' }, '*');
 }

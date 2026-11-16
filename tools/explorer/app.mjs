@@ -188,7 +188,7 @@ function schedule() {
   if ($('auto-run').checked) debounce = setTimeout(run, 450);
   else $('draft-state').textContent = 'Edited · press Run to update';
 }
-/** Start a fresh preview so previous runs cannot leak score state. */
+/** Render the latest edit in the warm sandbox, with a clean score and registry. */
 function run() {
   if (!current || $('example-view').hidden) return;
   clearTimeout(debounce);
@@ -249,7 +249,7 @@ function receive(message) {
   $('download').disabled = false;
   $('elements').disabled = false;
   $('render-status').textContent =
-    `${message.width} × ${message.height} · ${message.duration} ms · ${elements.length} elements`;
+    `${message.width} × ${message.height} · ${message.totalDuration} ms total · ${message.duration} ms render · ${elements.length} elements`;
   const select = $('elements');
   select.replaceChildren(node('option', 'Select an element…'));
   select.firstChild.value = '';
@@ -386,6 +386,10 @@ $('controls').onsubmit = (event) => event.preventDefault();
 $('run').onclick = run;
 $('reset').onclick = reset;
 $('recover').onclick = reset;
+$('reset-runtime').onclick = () => {
+  preview.reset();
+  run();
+};
 $('auto-run').onchange = () => {
   if ($('auto-run').checked) run();
 };

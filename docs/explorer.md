@@ -20,6 +20,7 @@ Use `npm run explorer -- --port=8080` for another local port. The server listens
 - Each recipe has a consistent score frame, code editor, controls, and API notes.
 - Code updates after a short pause. Turn off live updates to run manually with Cmd/Ctrl+Enter.
 - Drafts and control values stay in local storage on the current browser. Reset restores one example.
+- Reset runtime reloads VexFlow and clears global changes. It keeps your code and controls.
 - Copy produces a complete snippet, including parameter values. Use it in a module script or async function after loading VexFlow.
 - Hash routes work on static hosting, such as `#example/tuplets` and `#glyphs/gClef`.
 - SVG export includes font data and excludes debug overlays.
@@ -55,11 +56,21 @@ The glyph atlas reads VexFlow's glyph names. Font coverage comes from each insta
 
 The shared `staff()` helper creates a soft voice before adding tickables. This lets duration controls explore incomplete or long measures. Use a strict voice when a complete meter is part of the example.
 
-The test suite renders every default, every select value, and numeric endpoints. It also renders each example with Petaluma. Tests cover editing, error recovery, saved drafts, search, hover/pin inspection, overlays, dark paper, glyph lookup, SVG download, mobile layout, and upload failures. Screenshots stay in the system temporary directory.
+The test suite renders every default, every select value, and numeric endpoints. It also renders each example with Petaluma. A warm-runtime pass switches through the full catalog and asserts zero resource requests and unchanged library/font objects.
+
+Tests cover run cleanup, queued edits, timeout recovery, runtime reset, editing, error recovery, saved drafts, search, hover/pin inspection, overlays, dark paper, glyph lookup, SVG download, mobile layout, and upload failures. Screenshots stay in the system temporary directory.
 
 ## Runtime boundaries
 
-Edited code runs in a fresh iframe with `sandbox="allow-scripts"`. The frame has an opaque origin. It cannot access the explorer's DOM, local storage, or other pages on `vexflow.com`. Its content policy blocks network connections. The parent accepts messages only from the current frame and run token. The preview runtime is inserted inline into that frame, so delayed user-code errors retain their messages without requiring bucket CORS changes.
+Edited code runs in a persistent iframe with `sandbox="allow-scripts"`. VexFlow and its embedded fonts load once per runtime. Edits, controls, and example switches reuse them without new asset requests.
+
+Each run gets a new score container and registry. Previous inspection state, tracked timers, animation callbacks, and `addEventListener` subscriptions are cleared. Async runs execute in order; queued edits collapse to the latest version. Stale results are ignored. If a run stalls for ten seconds, the frame is discarded before retrying any queued edit.
+
+The status shows total time from Run to the received result, including startup and queueing, plus time inside the renderer. The live-edit debounce is excluded.
+
+Cleanup does not undo arbitrary global mutations, property event handlers, observers, or detached promises. Use Reset runtime after experiments that change shared library objects or browser globals. This creates a new frame without changing your code.
+
+The frame has an opaque origin. It cannot access the explorer's DOM, local storage, or other pages on `vexflow.com`. Its content policy blocks network connections. The parent accepts messages only from the current frame and run token. The preview runtime is inserted inline into that frame, so delayed user-code errors retain their messages without requiring bucket CORS changes.
 
 The sandbox is an origin boundary, not a CPU or memory limit. An infinite synchronous loop can still stall a browser tab. The watchdog handles asynchronous runs that never settle. Use local examples you trust; this tool is not a hosted service for running arbitrary third-party programs.
 

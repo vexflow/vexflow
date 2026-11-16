@@ -44,6 +44,19 @@ async function visit(example) {
   await assertRendered(example.id);
 }
 
+/** Run immediately so assertions cannot mistake the previous result for a new render. */
+async function edit(code) {
+  await page.$eval(
+    '#editor',
+    (el, code) => {
+      el.value = code;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      document.querySelector('#run').click();
+    },
+    code
+  );
+}
+
 try {
   await test('all curated recipes and every select/range endpoint render', async () => {
     for (const example of examples) {
@@ -152,6 +165,131 @@ try {
     } finally {
       await rm(directory, { recursive: true, force: true });
     }
+  });
+
+  await test('warm edits and all example switches reuse the library and font objects without requests', async () => {
+    const notes = examples.find((e) => e.id === 'notes');
+    await visit(notes);
+    const frame = page.frames().find((frame) => frame.url() === 'about:srcdoc');
+    await frame.evaluate(() => {
+      window.originalLibrary = VexFlow;
+      window.originalFonts = [...document.fonts];
+    });
+    const requests = [];
+    const record = (request) => requests.push(request.url());
+    page.on('request', record);
+    try {
+      for (let i = 0; i < 4; i++) {
+        await edit(`${notes.code}\n// edit ${i}`);
+        await assertRendered('warm edit');
+        assert.equal(await frame.$$eval('#score > svg', (nodes) => nodes.length), 1);
+      }
+      for (const example of examples) {
+        await page.evaluate((id) => {
+          location.hash = `#example/${id}`;
+        }, example.id);
+        await page.waitForFunction(
+          (title) => document.querySelector('#title').textContent === title,
+          {},
+          example.title
+        );
+        await assertRendered(`warm ${example.id}`);
+      }
+      for (const font of ['Petaluma', 'Gonville', 'Bravura']) {
+        await page.select('#font', font);
+        await assertRendered(`warm ${font}`);
+      }
+      assert.equal(
+        page.frames().find((f) => f.url() === 'about:srcdoc'),
+        frame
+      );
+      assert.ok(
+        await frame.evaluate(
+          () =>
+            VexFlow === window.originalLibrary &&
+            [...document.fonts].every((font, i) => font === window.originalFonts[i])
+        )
+      );
+      assert.deepEqual(requests, [], 'warm interaction makes no resource requests, even cache hits');
+      assert.match(await page.$eval('#render-status', (el) => el.textContent), /ms total .* ms render/);
+    } finally {
+      page.off('request', record);
+    }
+  });
+
+  await test('run cleanup, latest-edit queueing, and explicit runtime reset', async () => {
+    const notes = examples.find((e) => e.id === 'notes');
+    await visit(notes);
+    const frame = page.frames().find((f) => f.url() === 'about:srcdoc');
+    await edit(`${notes.code}
+window.effectCount = 0;
+setTimeout(() => { window.effectCount++; }, 1000);
+setInterval(() => { window.effectCount++; }, 1000);
+function animate() { window.effectCount++; requestAnimationFrame(animate); }
+requestAnimationFrame(animate);
+window.addEventListener('probe', () => { window.effectCount++; });
+document.addEventListener('probe', () => { window.effectCount++; });`);
+    await assertRendered('effects registered');
+    await edit(notes.code);
+    await assertRendered('effects removed');
+    const count = await frame.evaluate(() => window.effectCount);
+    await frame.evaluate(async () => {
+      window.dispatchEvent(new Event('probe'));
+      document.dispatchEvent(new Event('probe'));
+      await new Promise((resolve) => setTimeout(resolve, 1100));
+    });
+    assert.equal(
+      await frame.evaluate(() => window.effectCount),
+      count,
+      'old timers, animation frames, and listeners stop'
+    );
+    assert.equal(await frame.evaluate(() => VexFlow.Registry.getDefaultRegistry()), undefined);
+
+    await edit(`window.executionOrder = ['slow'];
+await new Promise(resolve => { window.releaseProbe = resolve; });
+throw new Error('Superseded error');`);
+    await frame.waitForFunction(() => typeof window.releaseProbe === 'function');
+    await edit("window.executionOrder.push('intermediate'); throw new Error('Skipped edit');");
+    await edit(`${notes.code}\nwindow.executionOrder.push('latest');`);
+    await frame.evaluate(() => window.releaseProbe());
+    await assertRendered('latest queued edit');
+    assert.deepEqual(await frame.evaluate(() => window.executionOrder), ['slow', 'latest']);
+    assert.equal(
+      page.frames().find((f) => f.url() === 'about:srcdoc'),
+      frame
+    );
+
+    const draft = await page.$eval('#editor', (el) => el.value);
+    // This global mutation intentionally persists until the user asks for a full reset.
+    await frame.evaluate(() => {
+      VexFlow.explorerMutation = true;
+    });
+    // Keep the draft valid in a fresh runtime too.
+    await edit(draft.replace("window.executionOrder.push('latest');", '// keep this draft'));
+    await assertRendered('reset draft');
+    const preserved = await page.$eval('#editor', (el) => el.value);
+    await page.click('#reset-runtime');
+    await assertRendered('runtime reset');
+    const replacement = page.frames().find((f) => f.url() === 'about:srcdoc');
+    assert.notEqual(replacement, frame);
+    assert.equal(await replacement.evaluate(() => VexFlow.explorerMutation), undefined);
+    assert.equal(await page.$eval('#editor', (el) => el.value), preserved);
+    await page.click('#reset');
+    await assertRendered('restore original');
+  });
+
+  await test('a stalled async run is discarded before the latest queued edit executes', async () => {
+    const notes = examples.find((e) => e.id === 'notes');
+    await visit(notes);
+    const frame = page.frames().find((f) => f.url() === 'about:srcdoc');
+    await edit('window.stalled = true; await new Promise(() => {});');
+    await frame.waitForFunction(() => window.stalled);
+    await edit(notes.code);
+    await assertRendered('queued edit after watchdog');
+    assert.notEqual(
+      page.frames().find((f) => f.url() === 'about:srcdoc'),
+      frame
+    );
   });
 
   await test('hover, click, bounds, related elements, and theme controls', async () => {
