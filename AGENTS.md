@@ -1,21 +1,21 @@
-# Vexflow repository guidance
+# VexFlow repository guidance
 
-## Github Issues
+## GitHub Issues
 
-If addresing Github issues, first:
+If addressing GitHub issues, first:
 
-- Do an initial assessement, and Post an update around what you observerd, and your inital plan
+- Do an initial assessment, and post an update around what you observed, and your initial plan
 - Assign the issue to me, label as in progress.
 - Fix the issue
-- Post another update after the work is commited and pushed.
+- Post another update after the work is committed and pushed.
 - Otherwise, just post an issue with the work is done.
 - If successful, close the issue.
 
 Where relevant, if there are visual implications, attach some before/after screenshots with a couple of representative examples. Attach to the issue, not into the commit. Screenshots should have a white background, not transparent. Use the `--attach` flag of `gh` for this.
 
-Github comments should be short and easy to read with simple sentences, but do include detail where necessary. Try and stick to the documentation guidelines below.
+GitHub comments should be short and easy to read with simple sentences, but do include detail where necessary. Try and stick to the documentation guidelines below.
 
-Keep any issue-specfic files (like repro tests or notes) in the issues/ directory. Use this only when needed.
+Keep any issue-specific files (like repro tests or notes) in the issues/ directory. Use this only when needed.
 
 If an issue is labeled ai_todo, remove it after completion.
 
