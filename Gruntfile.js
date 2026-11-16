@@ -470,6 +470,7 @@ module.exports = (grunt) => {
         'tests/node/tool-security-tests.mjs',
         'tests/node/metrics-tests.mjs',
         'tests/node/chord-kerning-tests.mjs',
+        'tests/node/proportional-spacing-tests.mjs',
         'tests/node/svg-export-tests.mjs',
         'tests/node/rendering-tests.mjs',
         'tests/node/sheet-tests.mjs',

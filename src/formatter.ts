@@ -1,11 +1,13 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
+// Engraving layout and opt-in placement on a strict musical-time grid.
 
 import { Beam } from './beam';
 import { BoundingBox } from './boundingbox';
 import { Fraction } from './fraction';
 import { Metrics } from './metrics';
 import { ModifierContext } from './modifiercontext';
+import { ProportionalFormatter, ProportionalSpacing } from './proportionalformatter';
 import { RenderContext } from './rendercontext';
 import { Stave } from './stave';
 import { StaveConnector } from './staveconnector';
@@ -27,7 +29,12 @@ interface Distance {
   fromTickablePx?: number;
 }
 
+export type { ProportionalSpacing } from './proportionalformatter';
+
 export interface FormatterOptions {
+  /** Omit to use the default engraving layout. */
+  spacing?: ProportionalSpacing;
+
   /** Defaults to Tables.SOFTMAX_FACTOR. */
   softmaxFactor?: number;
 
@@ -134,7 +141,9 @@ export class Formatter {
   // note: this is poorly named because there is an object type TickContext,
   // and this does not store it (similarly with modifierContexts).
   protected tickContexts: AlignmentTickContexts;
-  protected formatterOptions: Required<FormatterOptions>;
+  protected formatterOptions: Required<Omit<FormatterOptions, 'spacing'>> & Pick<FormatterOptions, 'spacing'>;
+  /** Present only for the opt-in rational timeline. */
+  private proportional?: ProportionalFormatter;
   // note that this is an array of AlignmentModifierContexts, not one like tickContexts.
   protected modifierContexts: AlignmentModifierContexts[];
   protected voices: Voice[];
@@ -361,6 +370,9 @@ export class Formatter {
       maxIterations: 5,
       ...options,
     };
+    if (options?.spacing && options.spacing.mode !== 'proportional') {
+      throw new RuntimeError('BadArgument', 'Unknown formatter spacing mode.');
+    }
     this.justifyWidth = 0;
     this.totalCost = 0;
     this.totalShift = 0;
@@ -428,6 +440,12 @@ export class Formatter {
    * @returns the estimated width in pixels
    */
   preCalculateMinTotalWidth(voices: Voice[]): number {
+    if (this.formatterOptions.spacing) {
+      this.createTickContexts(voices);
+      this.minTotalWidth = this.proportional!.minimumWidth(this.formatterOptions.spacing);
+      this.hasMinTotalWidth = true;
+      return this.minTotalWidth;
+    }
     const unalignedPadding = Metrics.get('Stave.unalignedNotePadding');
     // Calculate additional padding based on 3 methods:
     // 1) unaligned beats in voices, 2) variance of width, 3) variance of durations
@@ -559,7 +577,7 @@ export class Formatter {
         // Add this tickable to the TickContext.
 
         tickable.addToModifierContext(staveTickToContextMap![integerTicks]);
-        ticksUsed.add(tickable.getTicks());
+        if (!this.formatterOptions.spacing || !tickable.shouldIgnoreTicks()) ticksUsed.add(tickable.getTicks());
       });
     });
 
@@ -576,6 +594,7 @@ export class Formatter {
    */
   createTickContexts(voices: Voice[]): AlignmentTickContexts {
     if (voices.length === 0) {
+      if (this.formatterOptions.spacing) throw new RuntimeError('BadArgument', 'No voices to format');
       // We need to short-circuit this since at present, Formatter.getResolutionMultiplier
       // throws an error on no voices.
       return {
@@ -584,6 +603,12 @@ export class Formatter {
         list: [],
         resolutionMultiplier: 0,
       } as AlignmentTickContexts;
+    }
+
+    if (this.formatterOptions.spacing) {
+      this.proportional = new ProportionalFormatter(voices, Formatter.getResolutionMultiplier(voices));
+      this.tickContexts = this.proportional.contexts;
+      return this.tickContexts;
     }
 
     // Initialize tick maps.
@@ -665,6 +690,14 @@ export class Formatter {
     // and preFormat to apply Y values to the notes;
     if (voicesParam && stave) {
       voicesParam.forEach((voice: Voice): Voice => voice.setStave(stave).preFormat());
+    }
+
+    if (this.proportional && this.formatterOptions.spacing) {
+      const spacing = this.formatterOptions.spacing;
+      this.minTotalWidth = this.proportional.minimumWidth(spacing);
+      this.justifyWidth = this.proportional.format(spacing, justifyWidth);
+      this.hasMinTotalWidth = true;
+      return this.evaluate();
     }
 
     // Now distribute the ticks to each tick context, and assign them their
@@ -988,6 +1021,8 @@ export class Formatter {
    * the formatter should make based on its cost function.  Defaults to 0.5.
    */
   tune(options?: { alpha?: number }): number {
+    // Tuning must never move strict rhythmic anchors, including when called by System.
+    if (this.proportional) return this.totalCost;
     const contexts = this.tickContexts;
     if (!contexts) {
       return 0;
@@ -1036,9 +1071,10 @@ export class Formatter {
       modifierContexts.array.forEach((mc) => mc.postFormat());
     });
 
-    this.tickContexts.list.forEach((tick: number): void => {
-      this.tickContexts.map[tick].postFormat();
-    });
+    const contexts = this.proportional
+      ? this.tickContexts.array
+      : this.tickContexts.list.map((tick) => this.tickContexts.map[tick]);
+    contexts.forEach((context) => context.postFormat());
 
     return this;
   }

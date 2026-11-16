@@ -82,6 +82,7 @@ const FormatterTests = {
     run('Notes with Tab', notesWithTab);
     run('Multiple Staves - Justified', multiStaves, { debug: true });
     run('Softmax', softMax);
+    run('Strict proportional spacing', strictProportionalSpacing);
     run('Mixtime', mixTime);
     run('Tight', tightNotes1);
     run('Tight 2', tightNotes2);
@@ -944,3 +945,44 @@ function annotations(options: TestOptions): void {
 
 VexFlowTests.register(FormatterTests);
 export { FormatterTests };
+
+/** Compare engraving with fixed beats, including rational rhythms on separate staves. */
+function strictProportionalSpacing(options: TestOptions): void {
+  const f = VexFlowTests.makeFactory(options, 850, 540);
+  const score = f.EasyScore();
+  const notes = score.notes('C5/16, D5, E5, F5, G5/8, A5, B5/q, C6', { stem: 'up' });
+  score.beam(notes.slice(0, 4));
+  score.beam(notes.slice(4, 6));
+  const quarters = score.notes('C4/q, E4, G4, E4', { stem: 'down' });
+  const system = f.System({
+    x: 25,
+    y: 40,
+    autoWidth: true,
+    formatIterations: 4,
+    details: { spacing: { mode: 'proportional', pixelsPerQuarter: 140 } },
+  });
+  system.addStave({ voices: [score.voice(notes), score.voice(quarters)] }).addClef('treble');
+  const thirds = score.notes('C5/8, D5, E5, F5/q, G5/h');
+  const sevenths = score.notes('C4/8, D4, E4, F4, G4, A4, B4, C5/h');
+  score.tuplet(thirds.slice(0, 3), { numNotes: 3, notesOccupied: 2 });
+  score.tuplet(sevenths.slice(0, 7), { numNotes: 7, notesOccupied: 4 });
+  score.beam(thirds.slice(0, 3));
+  score.beam(sevenths.slice(0, 7));
+  system.addStave({ voices: [score.voice(thirds)] }).addClef('treble');
+  system.addStave({ voices: [score.voice(sevenths)] }).addClef('bass');
+  f.draw();
+  const close = (a: number, b: number, label: string) => options.assert.ok(Math.abs(a - b) < 1e-7, label);
+  const origin = notes[0].getAbsoluteX();
+  [0, 35, 70, 105, 140, 210, 280, 420].forEach((offset, i) =>
+    close(notes[i].getAbsoluteX(), origin + offset, 'Fixed onset')
+  );
+  quarters.forEach((note, i) => close(note.getAbsoluteX(), origin + i * 140, 'Voices align'));
+  close(thirds[4].getAbsoluteX(), sevenths[7].getAbsoluteX(), 'Rational endpoints align');
+  const ctx = f.getContext();
+  ctx.save().setStrokeStyle('#b6c4c0').setLineWidth(0.5);
+  for (let beat = 0; beat <= 4; beat++) {
+    const x = origin + beat * 140;
+    ctx.beginPath().moveTo(x, 55).lineTo(x, 505).stroke();
+  }
+  ctx.restore();
+}

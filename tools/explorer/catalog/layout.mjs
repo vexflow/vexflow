@@ -4,6 +4,54 @@ import { example as e, number, select, setup, staff, text } from './helpers.mjs'
 const group = 'Layout & composition';
 export const layout = [
   e(
+    'proportional-spacing',
+    'Proportional spacing',
+    group,
+    'Compare engraving spacing with an exact musical-time grid. Equal durations occupy equal widths.',
+    'Formatter Voice TickContext System Tuplet',
+    `${setup}
+const ctx = factory.getContext();
+// Auto width preserves the chosen scale. Resize the surface to fit both rows.
+const systems = [];
+const rows = [];
+['engraving', 'proportional'].forEach((mode, row) => {
+  const notes = score.notes('C5/16, D5, E5, F5, G5/8, A5, B5/q, C6', { stem: 'up' });
+  score.beam(notes.slice(0, 4));
+  score.beam(notes.slice(4, 6));
+  const voices = [score.voice(notes)];
+  if (params.voices === 'two') {
+    voices.push(score.voice(score.notes('C4/q, E4, G4, E4', { stem: 'down' })));
+  }
+  const spacing = mode === 'proportional'
+    ? { mode: 'proportional', pixelsPerQuarter: params.scale }
+    : undefined;
+  const system = factory.System({
+    x: 30, y: 45 + row * 155,
+    ...(mode === 'engraving' ? { width: params.scale * 4 + 100 } : {}),
+    details: { spacing },
+  });
+  system.addStave({ voices }).addClef('treble').addTimeSignature('4/4');
+  system.format();
+  systems.push(system);
+  rows.push(notes);
+});
+ctx.resize(Math.max(width, ...systems.map(system => system.getWidth() + 60)), 360);
+factory.draw();
+ctx.setFont('sans-serif', 10);
+ctx.fillText('Default engraving', 30, 20);
+ctx.fillText('Strict proportional spacing', 30, 175);
+// Guides mark quarter-note onsets, plus the end of the four-beat span.
+const origin = rows[1][0].getAbsoluteX();
+ctx.save().setStrokeStyle('#b6c4c0').setLineWidth(0.5);
+for (let beat = 0; beat <= 4; beat++) {
+  const x = origin + beat * params.scale;
+  ctx.beginPath().moveTo(x, 210).lineTo(x, 310).stroke();
+}
+ctx.restore();`,
+    [number('scale', 'Pixels per quarter', 140, 120, 180, 10), select('voices', 'Voices', 'two', ['one', 'two'])],
+    'Set spacing on Formatter, or System.details. Omit pixelsPerQuarter to fit a supplied width. Crowded notation reports the minimum scale and width instead of moving notes off the grid.'
+  ),
+  e(
     'voices',
     'Multiple voices',
     group,
