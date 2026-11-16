@@ -252,7 +252,7 @@ export class StaveNote extends StemmableNote {
                   //same line, swap stem direction for one note
                   if (noteL.stemDirection === 1) {
                     noteL.stemDirection = -1;
-                    noteL.note.setStemDirection(-1);
+                    noteL.note.setStemDirection(-1, noteL.note.isAutoStem());
                   }
                 }
               }
@@ -268,10 +268,10 @@ export class StaveNote extends StemmableNote {
             }
           } else if (noteU.note.hasStem()) {
             noteU.stemDirection = -noteU.note.getStemDirection();
-            noteU.note.setStemDirection(noteU.stemDirection);
+            noteU.note.setStemDirection(noteU.stemDirection, noteU.note.isAutoStem());
           } else if (noteL.note.hasStem()) {
             noteL.stemDirection = -noteL.note.getStemDirection();
-            noteL.note.setStemDirection(noteL.stemDirection);
+            noteL.note.setStemDirection(noteL.stemDirection, noteL.note.isAutoStem());
           }
         }
       }
@@ -299,11 +299,11 @@ export class StaveNote extends StemmableNote {
           noteM.note.setXShift(xShift);
           if (noteL.note.hasBeam() === false) {
             noteL.stemDirection = -1;
-            noteL.note.setStemDirection(-1);
+            noteL.note.setStemDirection(-1, noteL.note.isAutoStem());
           }
           if (noteU.minLine <= noteL.maxLine && noteU.note.hasBeam() === false) {
             noteU.stemDirection = 1;
-            noteU.note.setStemDirection(1);
+            noteU.note.setStemDirection(1, noteU.note.isAutoStem());
           }
         }
         // format complete
@@ -347,11 +347,11 @@ export class StaveNote extends StemmableNote {
       noteM.note.setXShift(xShift);
       if (noteL.note.hasBeam() === false) {
         noteL.stemDirection = -1;
-        noteL.note.setStemDirection(-1);
+        noteL.note.setStemDirection(-1, noteL.note.isAutoStem());
       }
       if (noteU.minLine <= noteL.maxLine && noteU.note.hasBeam() === false) {
         noteU.stemDirection = 1;
-        noteU.note.setStemDirection(1);
+        noteU.note.setStemDirection(1, noteU.note.isAutoStem());
       }
     }
 
@@ -532,7 +532,7 @@ export class StaveNote extends StemmableNote {
 
   // Automatically sets the stem direction based on the keys in the note
   autoStem(): void {
-    this.setStemDirection(this.calculateOptimalStemDirection());
+    this.setStemDirection(this.calculateOptimalStemDirection(), true);
   }
 
   calculateOptimalStemDirection(): number {

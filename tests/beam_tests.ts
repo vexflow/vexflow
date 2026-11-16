@@ -13,6 +13,7 @@ import {
   Dot,
   FontStyle,
   FontWeight,
+  StaveNote,
   StaveNoteStruct,
   Stem,
   StemmableNote,
@@ -31,6 +32,7 @@ const BeamTests = {
     run('Sixteenth Beam', sixteenth);
     run('Slopey Beam', slopey);
     run('Auto-stemmed Beam', autoStem);
+    run('Auto-stemmed tuplets across middle line', autoStemTuplets);
     run('Mixed Beam 1', mixed);
     run('Mixed Beam 2', mixed2);
     run('Mixed Beam 3', mixed3);
@@ -937,3 +939,49 @@ function complexWithArticulation2(options: TestOptions): void {
 
 VexFlowTests.register(BeamTests);
 export { BeamTests };
+
+/** Automatic beam direction must agree with every stem, even across the middle line. */
+function autoStemTuplets(options: TestOptions): void {
+  const f = VexFlowTests.makeFactory(options, 720, 650);
+  const score = f.EasyScore();
+  const groups: StaveNote[][] = [];
+  const phrases = ['C4/8, D4, E4, F4, G4, A4, B4', 'A5/8, G5, F5, E5, D5, C5, A4'];
+  for (const proportional of [false, true]) {
+    for (const phrase of phrases) {
+      const notes = score.notes(phrase) as StaveNote[];
+      options.assert.equal(
+        new Set(notes.map((note) => note.getStemDirection())).size,
+        2,
+        'Fixture crosses stem boundary'
+      );
+      score.tuplet(notes, { numNotes: 7, notesOccupied: 4, ratioed: true });
+      score.beam(notes);
+      const system = f.System({
+        x: 25,
+        y: 30 + groups.length * 155,
+        width: 660,
+        details: proportional ? { spacing: { mode: 'proportional', pixelsPerQuarter: 200 } } : {},
+      });
+      system.addStave({ voices: [score.voice(notes, { time: '2/4' })] }).addClef('treble');
+      groups.push(notes);
+    }
+  }
+  f.draw({ retain: true });
+  const positions = groups.map((notes) => notes.map((note) => note.getAbsoluteX()));
+  // Redrawing exercises notehead rebuilding and beam post-format caches as well.
+  f.draw({ retain: true });
+  groups.forEach((notes, row) =>
+    notes.forEach((note, index) => {
+      const direction = note.getBeam()!.getStemDirection();
+      options.assert.equal(note.getStemDirection(), direction, 'All stems agree with the beam');
+      const head = note.noteHeads[0];
+      options.assert.notOk(head.isDisplaced(), 'A single head has no chord displacement');
+      const attachment = direction === Stem.UP ? head.getAbsoluteX() + head.getWidth() : head.getAbsoluteX();
+      options.assert.ok(
+        Math.abs(note.getStemX() - (attachment - (direction * Stem.WIDTH) / 2)) < 1e-7,
+        'Stem attaches to correct edge of head'
+      );
+      options.assert.equal(note.getAbsoluteX(), positions[row][index], 'Redraw preserves rhythmic anchor');
+    })
+  );
+}

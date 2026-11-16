@@ -373,7 +373,7 @@ export class Beam extends Element {
 
     function applyStemDirection(group: StemmableNote[], direction: number) {
       group.forEach((note) => {
-        note.setStemDirection(direction);
+        note.setStemDirection(direction, config.stemDirection === undefined && note.isAutoStem());
       });
     }
 
@@ -487,7 +487,7 @@ export class Beam extends Element {
     for (i = 0; i < notes.length; ++i) {
       note = notes[i];
       if (autoStem) {
-        note.setStemDirection(stemDirection);
+        note.setStemDirection(stemDirection, true);
         this._stemDirection = stemDirection;
       }
       note.setBeam(this);

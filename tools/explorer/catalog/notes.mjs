@@ -1,5 +1,5 @@
 // Pitched notation, duration, rhythm, and note-level modifiers.
-import { example as e, number, select, staff, text } from './helpers.mjs';
+import { example as e, number, select, setup, staff, text } from './helpers.mjs';
 
 const group = 'Notes & rhythm';
 export const notes = [
@@ -61,8 +61,34 @@ export const notes = [
     group,
     'Group eighth notes under a beam. Edit pitches to change its slope.',
     'Beam StemmableNote',
-    staff('score.notes(params.phrase)', 'score.beam(notes);'),
+    staff('score.notes(params.phrase)', '// Automatic stems are resolved for the complete group.\nscore.beam(notes);'),
     [text('phrase', 'Eighth notes', 'C5/8, D5, E5, G5, A5, G5, E5, D5')]
+  ),
+  e(
+    'beamed-tuplets',
+    'Beamed tuplets',
+    group,
+    'Keep all seven stems on the same side of a 7:4 beam, including when pitches cross the middle line.',
+    'Tuplet Beam EasyScore Formatter',
+    `${setup}
+const phrase = params.phrase === 'ascending'
+  ? 'C4/8, D4, E4, F4, G4, A4, B4'
+  : 'A5/8, G5, F5, E5, D5, C5, A4';
+const notes = score.notes(phrase);
+score.tuplet(notes, { numNotes: 7, notesOccupied: 4, ratioed: true });
+// EasyScore resolves the automatic stems for the complete beam.
+score.beam(notes);
+const details = params.spacing === 'proportional'
+  ? { spacing: { mode: 'proportional', pixelsPerQuarter: 140 } }
+  : {};
+factory.System({ x: 30, y: 65, width: width - 60, details })
+  .addStave({ voices: [score.voice(notes, { time: '2/4' })] }).addClef('treble');
+factory.draw();`,
+    [
+      select('phrase', 'Phrase', 'ascending', ['ascending', 'descending']),
+      select('spacing', 'Spacing', 'proportional', ['proportional', 'engraving']),
+    ],
+    'Automatic stems use a shared direction. Explicit stem choices are preserved. Use beam options autoStem: false for intentional mixed automatic stems.'
   ),
   e(
     'tuplets',

@@ -966,10 +966,11 @@ function strictProportionalSpacing(options: TestOptions): void {
   const sevenths = score.notes('C4/8, D4, E4, F4, G4, A4, B4, C5/h');
   score.tuplet(thirds.slice(0, 3), { numNotes: 3, notesOccupied: 2 });
   score.tuplet(sevenths.slice(0, 7), { numNotes: 7, notesOccupied: 4 });
+  // EasyScore resolves automatic stems for each complete beam.
   score.beam(thirds.slice(0, 3));
   score.beam(sevenths.slice(0, 7));
   system.addStave({ voices: [score.voice(thirds)] }).addClef('treble');
-  system.addStave({ voices: [score.voice(sevenths)] }).addClef('bass');
+  system.addStave({ voices: [score.voice(sevenths)] }).addClef('treble');
   f.draw();
   const close = (a: number, b: number, label: string) => options.assert.ok(Math.abs(a - b) < 1e-7, label);
   const origin = notes[0].getAbsoluteX();
@@ -978,6 +979,9 @@ function strictProportionalSpacing(options: TestOptions): void {
   );
   quarters.forEach((note, i) => close(note.getAbsoluteX(), origin + i * 140, 'Voices align'));
   close(thirds[4].getAbsoluteX(), sevenths[7].getAbsoluteX(), 'Rational endpoints align');
+  sevenths.slice(0, 7).forEach((note) => {
+    options.assert.equal(note.getStemDirection(), note.getBeam()!.getStemDirection(), 'Tuplet stem agrees with beam');
+  });
   const ctx = f.getContext();
   ctx.save().setStrokeStyle('#b6c4c0').setLineWidth(0.5);
   for (let beat = 0; beat <= 4; beat++) {

@@ -2,7 +2,8 @@
 //
 // ## Description
 // `StemmableNote` is an abstract interface for notes with optional stems.
-// Examples of stemmable notes are `StaveNote` and `TabNote`
+// Examples of stemmable notes are `StaveNote` and `TabNote`.
+// Retains whether stem direction is automatic or explicitly chosen.
 
 import { Flag } from './flag';
 import { Glyphs } from './glyphs';
@@ -19,6 +20,9 @@ export abstract class StemmableNote extends Note {
 
   stemDirection?: number;
   stem?: Stem;
+
+  /** Automatic stems may be resolved again when notes are grouped into a beam. */
+  protected autoStemEnabled = false;
 
   protected flag = new Flag();
   protected stemExtensionOverride?: number;
@@ -134,13 +138,20 @@ export abstract class StemmableNote extends Note {
     return this.stemDirection;
   }
 
-  setStemDirection(direction?: number): this {
+  /** True when layout, rather than the caller, chooses the stem direction. */
+  isAutoStem(): boolean {
+    return this.autoStemEnabled;
+  }
+
+  /** Set direction; automatic layout passes true to retain the automatic policy. */
+  setStemDirection(direction?: number, autoStem = false): this {
     if (!direction) direction = Stem.UP;
     if (direction !== Stem.UP && direction !== Stem.DOWN) {
       throw new RuntimeError('BadArgument', `Invalid stem direction: ${direction}`);
     }
 
     this.stemDirection = direction;
+    this.autoStemEnabled = autoStem;
 
     // Reset and reformat everything. Flag has to be built before calling getStemExtension.
     this.reset();

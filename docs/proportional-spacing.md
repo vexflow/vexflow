@@ -34,6 +34,23 @@ At 120 px per quarter, eighth-note onsets are 60 px apart. Eighth-note triplet o
 
 A 7/8 measure contains 3.5 quarter-note units. Its rhythmic span is 420 px at this scale. Grouping it as 2+2+3 affects beaming, not spacing. Dotted-quarter beats in 6/8 occupy 180 px.
 
+## Beamed tuplets
+
+Stem direction is independent of spacing. EasyScore resolves automatic stems for the whole beam, including when pitches cross the middle line:
+
+```ts
+const notes = score.notes('C4/8, D4, E4, F4, G4, A4, B4');
+score.tuplet(notes, { numNotes: 7, notesOccupied: 4 });
+score.beam(notes);
+```
+
+- Explicit `stem: 'up'` / `'down'` choices, including per-note overrides and `setStemDirection()`, are preserved. Automatic notes follow a single explicit direction in the group.
+- Conflicting explicit directions remain mixed for cross-staff notation.
+- `beam(notes, { autoStem: false })` preserves every current direction.
+- `beam(notes, { autoStem: true })` chooses a shared direction even for explicitly stemmed notes.
+
+The low-level `Beam` constructor and `Factory.Beam` still preserve directions unless their `autoStem` option is true.
+
 ## Crowded notation
 
 The formatter measures notes, displaced heads, modifiers, and inline objects on each stave. If a fixed scale or width is too small, it throws `InsufficientProportionalSpace`. The message gives the minimum scale and required formatting width. Increase the scale/width or use automatic sizing.

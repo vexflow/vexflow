@@ -1,5 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
-// Parse compact notation and optional bar-separated measures.
+// Parse compact notation and measures; resolve automatic stems when grouping beams.
 // MIT License
 
 import { Accidental } from './accidental';
@@ -503,6 +503,10 @@ export class EasyScore {
     return result;
   }
 
+  /**
+   * Resolve automatic stems for the whole group while respecting explicit stems.
+   * autoStem: true overrides explicit directions; false preserves all directions.
+   */
   beam(
     notes: StemmableNote[],
     options?: {
@@ -513,8 +517,23 @@ export class EasyScore {
       };
     }
   ): StemmableNote[] {
-    this.factory.Beam({ notes, options });
+    const autoStem = options?.autoStem ?? this.resolveBeamStems(notes);
+    this.factory.Beam({ notes, options: { ...options, autoStem } });
     return notes;
+  }
+
+  /** Explicit pitched stems constrain the group; conflicting explicit stems remain mixed. */
+  private resolveBeamStems(notes: StemmableNote[]): boolean {
+    const directions = new Set(
+      notes.filter((note) => !note.isRest() && !note.isAutoStem()).map((note) => note.getStemDirection())
+    );
+    // With no explicit direction, Beam chooses from the complete group's pitches.
+    if (directions.size === 0) return true;
+    if (directions.size === 1) {
+      const direction = directions.values().next().value!;
+      notes.filter((note) => note.isAutoStem()).forEach((note) => note.setStemDirection(direction, true));
+    }
+    return false;
   }
 
   tuplet(notes: StemmableNote[], options?: TupletOptions): StemmableNote[] {

@@ -7,6 +7,7 @@ import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Articulation } from '../src/articulation';
 import { EasyScore } from '../src/easyscore';
+import { Factory } from '../src/factory';
 import { FretHandFinger } from '../src/frethandfinger';
 import { Modifier } from '../src/modifier';
 import { Parenthesis } from '../src/parenthesis';
@@ -24,6 +25,7 @@ const EasyScoreTests = {
     QUnit.test('Dots', dots);
     QUnit.test('Types', types);
     QUnit.test('Options', options);
+    QUnit.test('Automatic beam stem policy', beamStemPolicy);
     const run = VexFlowTests.runTests;
     run('Draw Basic', drawBasicTest);
     run('Draw Different KeySignature', drawDiffKeysig);
@@ -609,3 +611,63 @@ function keys(options: TestOptions): void {
 
 VexFlowTests.register(EasyScoreTests);
 export { EasyScoreTests };
+
+/** Automatic grouping must respect explicit choices and remain automatic when regrouped. */
+function beamStemPolicy(assert: Assert): void {
+  const factory = new Factory({ renderer: { elementId: null, width: 500, height: 200 } });
+  const score = factory.EasyScore();
+  const phrase = 'C4/8, D4, E4, F4, G4, A4, B4';
+  const directions = (notes: ReturnType<typeof score.notes>) => notes.map((note) => note.getStemDirection());
+  const automatic = score.notes(phrase);
+  assert.equal(new Set(directions(automatic)).size, 2, 'Unbeamed phrase crosses stem boundary');
+  score.beam(automatic);
+  assert.ok(
+    automatic.every((note) => note.getStemDirection() === Stem.UP),
+    'Group chooses up stems'
+  );
+  assert.ok(
+    automatic.every((note) => note.isAutoStem()),
+    'Beaming retains automatic policy'
+  );
+  const extended = [...automatic, ...score.notes('C6/8, C6, C6, C6, C6, C6, C6, C6')];
+  score.beam(extended);
+  assert.ok(
+    extended.every((note) => note.getStemDirection() === Stem.DOWN),
+    'Regrouping recalculates direction'
+  );
+
+  const explicit = score.notes(phrase, { stem: 'down' });
+  score.beam(explicit);
+  assert.ok(
+    explicit.every((note) => note.getStemDirection() === Stem.DOWN && !note.isAutoStem()),
+    'Explicit voice stays down'
+  );
+  score.beam(explicit, { autoStem: true });
+  assert.ok(
+    explicit.every((note) => note.getStemDirection() === Stem.UP),
+    'Explicit beam override selects group direction'
+  );
+
+  const pinned = score.notes('C4/8, D4[stem="down"], E4');
+  score.beam(pinned);
+  assert.deepEqual(directions(pinned), [Stem.DOWN, Stem.DOWN, Stem.DOWN], 'Automatic stems follow one explicit pitch');
+  assert.notOk(pinned[1].isAutoStem(), 'Per-note override stays explicit');
+
+  const manual = score.notes('C4/8, D4, E4');
+  manual[0].setStemDirection(Stem.DOWN);
+  score.beam(manual);
+  assert.deepEqual(directions(manual), [Stem.DOWN, Stem.DOWN, Stem.DOWN], 'Setter opts out of automatic direction');
+
+  const mixed = score.notes('C4/8[stem="up"], B4[stem="down"], D4');
+  const before = directions(mixed);
+  score.beam(mixed);
+  assert.deepEqual(directions(mixed), before, 'Conflicting explicit directions remain mixed');
+
+  const preserved = score.notes(phrase);
+  const individual = directions(preserved);
+  score.beam(preserved, { autoStem: false });
+  assert.deepEqual(directions(preserved), individual, 'Explicit false preserves per-note automatic directions');
+  const lowLevel = score.notes(phrase);
+  factory.Beam({ notes: lowLevel });
+  assert.deepEqual(directions(lowLevel), individual, 'Factory keeps its low-level direction-preserving default');
+}
