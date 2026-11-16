@@ -59,7 +59,7 @@ The build formats all assembled examples with Prettier at 80 columns. The browse
 
 The shared `staff()` helper creates a soft voice before adding tickables. This lets duration controls explore incomplete or long measures. Use a strict voice when a complete meter is part of the example.
 
-The test suite renders every default, every select value, and numeric endpoints. It also renders each example with Petaluma. A warm-runtime pass switches through the full catalog and asserts zero resource requests and unchanged library/font objects.
+The test suite renders every default, every select value, and numeric endpoints. It also renders each example with Petaluma. A warm-runtime pass switches through the full catalog and asserts zero application resource requests and unchanged library/font objects. Browser favicon refreshes are excluded. Each test uses an isolated browser context.
 
 Tests cover run cleanup, queued edits, timeout recovery, runtime reset, editing, error recovery, saved drafts, search, hover/pin inspection, overlays, dark paper, glyph lookup, SVG download, mobile layout, and upload failures. Screenshots stay in the system temporary directory.
 

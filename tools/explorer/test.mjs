@@ -192,10 +192,9 @@ try {
       }
     });
     assert.equal(isolation, 'isolated');
-    const download = await page.target().createCDPSession();
     const directory = await mkdtemp(join(tmpdir(), 'vexflow-explorer-svg-'));
     try {
-      await download.send('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: directory });
+      await context.setDownloadBehavior({ policy: 'allow', downloadPath: directory });
       await page.click('#download');
       for (let i = 0; i < 50; i++) {
         if ((await readdir(directory)).some((name) => name.endsWith('.svg'))) break;
@@ -221,7 +220,12 @@ try {
       window.originalFonts = [...document.fonts];
     });
     const requests = [];
-    const record = (request) => requests.push(request.url());
+    const favicon = await page.$eval('link[rel="icon"]', (element) => element.href);
+    const record = (request) => {
+      // Chromium may refetch the tab icon on hash navigation in a fresh context.
+      // Keep every application request, including cached scripts and fonts, under test.
+      if (request.url() !== favicon) requests.push(request.url());
+    };
     page.on('request', record);
     try {
       for (let i = 0; i < 4; i++) {
@@ -255,7 +259,7 @@ try {
             [...document.fonts].every((font, i) => font === window.originalFonts[i])
         )
       );
-      assert.deepEqual(requests, [], 'warm interaction makes no resource requests, even cache hits');
+      assert.deepEqual(requests, [], 'warm interaction makes no application resource requests, even cache hits');
       assert.match(await page.$eval('#render-status', (el) => el.textContent), /ms total .* ms render/);
     } finally {
       page.off('request', record);
@@ -342,10 +346,19 @@ throw new Error('Superseded error');`);
     const frame = page.frames().find((frame) => frame.url() === 'about:srcdoc');
     const note = await frame.$('g.vf-stavenote');
     assert.ok(note);
-    const rect = await note.boundingBox();
-    await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);
+    // Puppeteer adds iframe offsets but does not scale child boxes for a transformed frame.
+    // Convert the note's local center to page coordinates using the displayed frame size.
+    const point = await note.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2, width: innerWidth, height: innerHeight };
+    });
+    const frameElement = await frame.frameElement();
+    const rect = await frameElement.boundingBox();
+    const x = rect.x + (point.x * rect.width) / point.width;
+    const y = rect.y + (point.y * rect.height) / point.height;
+    await page.mouse.move(x, y);
     await page.waitForFunction(() => !document.querySelector('#inspection').hidden);
-    await page.mouse.click(rect.x + rect.width / 2, rect.y + rect.height / 2);
+    await page.mouse.click(x, y);
     await page.waitForFunction(() => document.querySelector('#inspection').textContent.includes('Unpin'));
     assert.match(await page.$eval('#inspection', (el) => el.textContent), /Layout bounds/);
     await page.click('#bounds-toggle');
