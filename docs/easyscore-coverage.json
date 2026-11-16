@@ -536,10 +536,21 @@
       "guide": "docs/easyscore.md",
       "example": "easyscore-structure",
       "test": "staff helpers attach once and preserve native options without standalone drawing"
+    },
+    {
+      "api": "compose()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-composition",
+      "test": "structured composition reflows wide narrow wide with stable native geometry"
+    },
+    {
+      "api": "withDefaults()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-composition",
+      "test": "composition scopes defaults, validates pickups and rational voices, and resolves forward spans"
     }
   ],
   "pending": [
-    "Structured composition and explicit musical policies",
     "Complete guide, paired examples, and option-level coverage"
   ]
 }

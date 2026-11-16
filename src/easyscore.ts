@@ -7,6 +7,7 @@ import { Articulation } from './articulation';
 import { PartialBeamDirection } from './beam';
 import { Clef } from './clef';
 import { Dot } from './dot';
+import { compose, EasyScoreComposition, EasyScoreCompositionSpec } from './easyscore/composition';
 import { EasyScoreReferences, EasyScoreSource } from './easyscore/elementindex';
 import { EasyScoreElements } from './easyscore/elements';
 import { autoBeam, EasyScoreAutoBeamOptions } from './easyscore/rhythm';
@@ -33,6 +34,17 @@ import { TupletOptions } from './tuplet';
 import { defined, log, RuntimeError } from './util';
 import { Voice, VoiceMode, VoiceTime } from './voice';
 
+export type {
+  EasyScoreComposition,
+  EasyScoreCompositionDiagnostic,
+  EasyScoreCompositionSpec,
+  EasyScoreContent,
+  EasyScoreMeasureSpec,
+  EasyScoreSpanSpec,
+  EasyScoreStaffState,
+  EasyScoreStaveSpec,
+  EasyScoreVoiceSpec,
+} from './easyscore/composition';
 export type { EasyScoreSource } from './easyscore/elementindex';
 export type { EasyScoreAutoBeamOptions } from './easyscore/rhythm';
 
@@ -643,6 +655,25 @@ export class EasyScore {
       stave.addModifier(modifier, position);
       return stave;
     });
+  }
+
+  /** Apply temporary defaults to synchronous managed construction; restore them on success or failure. */
+  withDefaults<T>(
+    defaults: EasyScoreDefaults,
+    construct: (score: EasyScore) => T & (T extends PromiseLike<unknown> ? never : unknown)
+  ): T {
+    const previous = this.defaults;
+    try {
+      this.set(defaults);
+      return this.build(construct);
+    } finally {
+      this.defaults = previous;
+    }
+  }
+
+  /** Construct aligned measures and resolve forward references before layout or drawing. */
+  compose(spec: EasyScoreCompositionSpec): EasyScoreComposition {
+    return compose(this, spec);
   }
 
   /** Build a normal System; its staff API and formatter options stay available. */

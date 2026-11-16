@@ -8,6 +8,18 @@ export function easyScoreTypes(): void {
   score.make.tuplet({ notes: score.notes('C4/8, D4, E4'), options: { numNotes: 3, notesOccupied: 2 } });
   // @ts-expect-error The native hairpin renderer requires complete endpoints.
   score.make.hairpin({ type: 1 });
+  const composed = score.compose({
+    staves: [
+      { id: 'staff', measures: [{ voices: [{ notes: [{ note: { keys: ['c/4'], duration: 'w' }, id: 'whole' }] }] }] },
+    ],
+    spans: [{ kind: 'tie', from: 'whole' }],
+  });
+  composed.sheet.setWidth(400);
+  score.withDefaults({ clef: 'bass' }, (s) => s.notes('C3/w'));
+  // @ts-expect-error Composition policies are named choices.
+  score.compose({ staves: [], accidentals: 'automatic' });
+  // @ts-expect-error Defaults cannot outlive their synchronous callback.
+  score.withDefaults({}, async () => 1);
   const tab = score.make.tabNote({ positions: [{ str: 2, fret: 'X' }], duration: 'q' }, true);
   score.make.tabTie({ firstNote: tab }, 'H');
   score.attachToStave(score.make.tabStave(), score.make.clef('tab'));

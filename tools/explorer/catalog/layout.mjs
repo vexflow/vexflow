@@ -1,4 +1,5 @@
 // Higher-level formatting, invisible timing, and unusual rhythmic glyphs.
+import { renderEasyScoreComposition } from '../../easyscore-composition.mjs';
 import { createEasyScoreExample } from '../../easyscore-example.mjs';
 import { renderEasyScoreFamilies } from '../../easyscore-families.mjs';
 import { createEasyScoreReferencesExample } from '../../easyscore-references-example.mjs';
@@ -70,6 +71,14 @@ export const layout = [
     `(${renderEasyScoreStructure.toString()})(VF, { elementId: 'score', width, height }, params.family, ink);`,
     [select('family', 'Family', 'tab', ['tab', 'grace-tab', 'rest', 'inline', 'repeat', 'labels', 'endings'])],
     'Staff modifiers draw through their stave. Inline clefs and signatures change appearance; update note options explicitly. Tab tuning stays a separate native utility.'
+  ),
+  e(
+    'easyscore-composition', 'EasyScore: responsive composition', group,
+    'A grand staff with pickup, opposing voices, triplets, changing meter, key-aware accidentals, and inline state.',
+    'EasyScore compose Sheet System Voice Fraction Accidental',
+    `(${renderEasyScoreComposition.toString()})(VF, { elementId: 'score', width: params.sheetWidth, height }, params.spacing, ink);`,
+    [number('sheetWidth', 'Width', 640, 320, 1000, 20), select('spacing', 'Spacing', 'engraving', ['engraving', 'proportional'])],
+    'Each measure is a native System. Tuplets precede voices; all voices share the actual span. Signatures repeat at every measure here, so any measure can begin a row. Use Sheet.getRows() to inspect overflow.'
   ),
   e(
     'proportional-spacing',

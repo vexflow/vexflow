@@ -9,6 +9,7 @@
       "constructor(type: string)",
       "setNote(note: Note): this",
       "setAsCautionary(): this",
+      "isCautionary(): boolean",
       "draw(): void"
     ]
   },
@@ -547,6 +548,8 @@
       "make",
       "attach(note: T, modifier: Modifier, index = 0): T",
       "attachToStave(stave: T, modifier: StaveModifier, position?: number): T",
+      "withDefaults(defaults: EasyScoreDefaults, construct: (score: EasyScore) => T & (T extends PromiseLike<unknown> ? never : unknown)): T",
+      "compose(spec: EasyScoreCompositionSpec): EasyScoreComposition",
       "system(options: SystemOptions = {}): System",
       "sheet(options: Omit<SheetOptions, 'factory'> = {}): Sheet",
       "build(construct: (score: EasyScore) => T & (T extends PromiseLike<unknown> ? never : unknown)): T",
@@ -1247,6 +1250,7 @@
       "isRest(): boolean",
       "addStroke(index: number, stroke: Stroke): this",
       "getStave(): Stave | undefined",
+      "clearStave(): this",
       "checkStave(): Stave",
       "setStave(stave: Stave): this",
       "getLeftDisplacedHeadPx(): number",
@@ -1842,7 +1846,7 @@
       "autoStem(): void",
       "calculateOptimalStemDirection(): number",
       "calculateKeyProps(): void",
-      "getBoundingBox(): BoundingBox",
+      "getBoundingBox(includeModifiers = true): BoundingBox",
       "getLineNumber(isTopNote?: boolean): number",
       "isRest(): boolean",
       "isChord(): boolean",
@@ -2873,5 +2877,87 @@
       "textDynamics(params: Parameters<Factory['TextDynamics']>[0] = {})",
       "crescendo(...args: Parameters<Factory['Crescendo']>)"
     ]
+  },
+  "easyscore/composition": {
+    "EasyScoreStaffState": {
+      "extends": [],
+      "fields": [
+        "clef?: string;",
+        "key?: string;",
+        "time?: string;"
+      ]
+    },
+    "EasyScoreContent": "export type EasyScoreContent = | string | StaveNoteStruct | Tickable | { note: StaveNoteStruct; id?: string; stave?: string } | { tab: TabNoteStruct; id?: string; stave?: string; drawStem?: boolean } | { change: EasyScoreStaffState };",
+    "EasyScoreVoiceSpec": {
+      "extends": [],
+      "fields": [
+        "notes: string | readonly EasyScoreContent[];",
+        "stem?: 'auto' | 'up' | 'down';",
+        "options?: Omit<EasyScoreVoiceOptions, 'time' | 'mode'>;",
+        "tuplets?: readonly { start: number; count: number; options?: TupletOptions }[];",
+        "autoBeam?: boolean | EasyScoreAutoBeamOptions;"
+      ]
+    },
+    "EasyScoreMeasureSpec": {
+      "extends": [
+        "extends EasyScoreStaffState"
+      ],
+      "fields": [
+        "voices: readonly EasyScoreVoiceSpec[];",
+        "span?: VoiceTime | string;"
+      ]
+    },
+    "EasyScoreStaveSpec": {
+      "extends": [
+        "extends EasyScoreStaffState"
+      ],
+      "fields": [
+        "id: string;",
+        "kind?: 'stave' | 'tab';",
+        "options?: StaveOptions;",
+        "spaceAbove?: number;",
+        "spaceBelow?: number;",
+        "measures: readonly EasyScoreMeasureSpec[];"
+      ]
+    },
+    "EasyScoreSpanSpec": "export type EasyScoreSpanSpec = | { kind: 'tie'; from?: string; to?: string; firstIndexes?: number[]; lastIndexes?: number[]; text?: string } | { kind: 'curve'; from?: string; to?: string; options?: Parameters<Factory['Curve']>[0]['options'] } | { kind: 'hairpin'; from: string; to: string; type: number; options?: Parameters<Factory['StaveHairpin']>[0]['options']; };",
+    "EasyScoreCompositionSpec": {
+      "extends": [],
+      "fields": [
+        "staves: readonly EasyScoreStaveSpec[];",
+        "sheet?: Omit<SheetOptions, 'factory'>;",
+        "system?: Omit<SystemOptions, 'factory' | 'width' | 'autoWidth' | 'noJustification'>;",
+        "accidentals?: 'literal' | 'key-aware';",
+        "signatures?: 'changes' | 'every-measure';",
+        "spans?: readonly EasyScoreSpanSpec[];",
+        "crossMeasureSpans?: 'reject' | 'manual';"
+      ]
+    },
+    "EasyScoreCompositionDiagnostic": {
+      "extends": [],
+      "fields": [
+        "code: 'ManualSpan' | 'SignaturePolicy';",
+        "message: string;"
+      ]
+    },
+    "EasyScoreComposition": {
+      "extends": [],
+      "fields": [
+        "sheet: Sheet;",
+        "systems: System[];",
+        "staves: Stave[][];",
+        "voices: Voice[][][];",
+        "notes: Tickable[][][][];",
+        "spans: Element[];",
+        "diagnostics: EasyScoreCompositionDiagnostic[];",
+        "getElement: (id: string) => Element | undefined;",
+        "getNote: (id: string) => Note;"
+      ]
+    },
+    "compose": "(score: EasyScore, spec: EasyScoreCompositionSpec): EasyScoreComposition"
+  },
+  "easyscore/rhythm": {
+    "EasyScoreAutoBeamOptions": "export type EasyScoreAutoBeamOptions = Omit<NonNullable<Parameters<typeof Beam.generateBeams>[1]>, 'stemPolicy'> & { autoStem?: boolean; };",
+    "autoBeam": "(score: EasyScore, notes: StemmableNote[], options: EasyScoreAutoBeamOptions): Beam[]"
   }
 }

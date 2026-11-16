@@ -459,3 +459,88 @@ Supply the new clef to subsequent `notes()` calls and the actual meter to `voice
 `make.repeatNote()` and `make.glyphNote()` create timed notes. Their native duration and alignment options remain available.
 
 The Explorer's **EasyScore: tablature & staff structure** example covers these paths on both backends.
+
+## Structured composition
+
+`compose()` builds native objects from aligned staff measures. It returns a Sheet, Systems, Staves, Voices, note arrays, spans, lookup functions, and policy diagnostics.
+Nothing is drawn until `draw()`. Failed construction releases new queues and references.
+
+```js
+const result = score.compose({
+  sheet: { width: 640, rowGap: 50 },
+  signatures: 'every-measure',
+  accidentals: 'key-aware',
+  staves: [{
+    id: 'melody', clef: 'treble', key: 'G', time: '4/4',
+    measures: [
+      { span: '1/4', voices: [{ notes: 'D5/q' }] }, // Pickup; still displays 4/4.
+      { time: '2/4', voices: [{ notes: 'F#5/q[id="a"], G5[id="b"]' }] },
+    ],
+  }],
+  spans: [{ kind: 'curve', from: 'a', to: 'b' }],
+});
+result.sheet.format();
+score.factory.getContext().resize(680, result.sheet.getHeight() + 30);
+score.draw({ retain: true });
+```
+
+Each staff must have the same number of measures. Every voice must fill the actual measure span exactly.
+All staves in one System share that span. Independent meters need explicit native layout.
+No silent rests or padding are inserted. A note cannot belong to two voices.
+
+Voice `notes` accepts a string or an array of strings, typed note structs, and owned native tickables.
+Each string starts its own duration inheritance. Use `{ note: nativeStruct, id: 'name' }` or `{ tab: nativeStruct, id: 'name', drawStem: true }` for named typed notes.
+Adopt native notes before passing them in. They must not already belong to a voice.
+When native inputs are present, apply beams, tuplets, and accidental policy beforehand. This keeps failed composition from rewriting caller-owned notation.
+
+Voice options include explicit `stem: 'up' | 'down' | 'auto'`, native spacing options, `autoBeam`, and `tuplets`.
+Tuplet ranges use `{ start, count, options }` and count timed notes only. Ranges apply in array order, so nested tuplets are supported.
+Tuplets are constructed before Voice insertion. Timing comparisons use native Fractions.
+Set `system.details.spacing` to the native engraving/proportional options; no separate spacing engine is used.
+
+Staff clef, key, and time carry forward through measures. A measure can override them.
+Inside a voice, `{ change: { clef: 'bass', key: 'C' } }` inserts inline notation and updates subsequent construction.
+Every voice on that staff must declare the same changes at the same rational onsets. The first voice draws the shared inline markings.
+An inline time change affects the displayed signature and the next measure's inherited meter; the current measure's actual span stays explicit.
+
+Typed note wrappers can include `stave: 'other-staff-id'` for cross-staff placement in the same measure.
+Supply the appropriate native note `clef` when its target differs from its voice's staff.
+Assignments survive Sheet reflow. Key-aware accidentals follow the target stave.
+
+`withDefaults()` scopes imperative defaults to a synchronous construction callback. It restores them on success or failure.
+
+```js
+const bass = score.withDefaults({ clef: 'bass', stem: 'down' }, (s) => s.notes('C3/h, G2'));
+```
+
+### Accidental policy
+
+The default is `literal`: existing EasyScore accidental behavior stays unchanged.
+`key-aware` compares literal written pitches against the staff key. `F4` is always F natural; a G signature does not turn it into F sharp.
+
+The opt-in policy:
+
+- Processes all voices on the target stave together, in exact rational onset order.
+- Resets at measure boundaries and inline key changes.
+- Suppresses redundant ordinary parser-generated signs.
+- Preserves explicit native marks, cautionary signs, and microtonal signs.
+- Shows both signs for conflicting simultaneous spellings. The next occurrence also gets a sign.
+
+Grace-note accidentals retain their explicit native notation. The policy does not rewrite grace groups.
+The native `Accidental.applyAccidentals()` API remains unchanged.
+
+### Reflow and spans
+
+Call `result.sheet.setWidth(width).format()`, resize/clear the context, then call `draw({ retain: true })`.
+`getRows()` reports row bounds and overflow. An oversized measure stays readable on its own row.
+Text and spanning marks may need additional `rowGap`; Sheet is not a general collision solver.
+
+`signatures: 'changes'` is the default. It shows initial signatures and explicit changes, with a diagnostic that wrapped row starts do not repeat them.
+`signatures: 'every-measure'` makes every measure suitable for a new row. Automatic row-start-only repetition is not implemented.
+
+Structured `spans` accepts ties, curves, and hairpins with forward note IDs.
+Use returned notes and `make.*` for other native relationships.
+Cross-measure spans are rejected by default. `crossMeasureSpans: 'manual'` permits them and returns a diagnostic.
+The caller must replace them with native partial segments if they cross a row after reflow. Sheet never splits them silently.
+
+The Explorer's **EasyScore: responsive composition** example covers a grand staff, pickup, multiple voices, tuplets, changing meter, inline state, and both spacing modes.
