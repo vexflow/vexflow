@@ -1,3 +1,25 @@
+# 5.1.2
+
+## Notation
+
+- Add opt-in chord-symbol kerning for Academico/Bravura and Petaluma Script/Petaluma.
+- Support custom kerning profiles with shared Canvas/SVG positioning and stable script bounds.
+- Add an Explorer comparison for chord kerning.
+
+## Testing and deployment
+
+- Add `npm run tests:upload` to publish the complete visual test gallery to `vexflow.com/tests/`.
+- Bundle QUnit, the test library, source maps, and fonts with no runtime CDN dependency.
+- Share the Explorer's verified upload path, immutable assets, and short HTML cache.
+- Test the standalone gallery, filtering, and deployment behavior in CI.
+
+## Security and tooling
+
+- Update development dependencies and remove vulnerable transitive packages.
+- Use argument arrays for release commands and reject invalid version inputs.
+- Render uploaded font metadata as text instead of HTML.
+- Update CI actions and pin Node 26.13.1. Use read-only permissions and audit dependencies in CI.
+
 # 5.1.1
 
 ## Fixes and performance

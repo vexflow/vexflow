@@ -1,6 +1,6 @@
 {
   "name": "vexflow",
-  "version": "5.1.1",
+  "version": "5.1.2",
   "description": "A JavaScript library for rendering music notation and guitar tablature.",
   "exports": {
     ".": {
@@ -132,7 +132,10 @@
     "explorer": "node tools/explorer/cli.mjs serve",
     "explorer:build": "node tools/explorer/cli.mjs build",
     "explorer:test": "node tools/explorer/test.mjs",
-    "explorer:upload": "node tools/explorer/upload.mjs"
+    "explorer:upload": "node tools/explorer/upload.mjs",
+    "tests:build": "node tools/tests-site.mjs build",
+    "tests:upload": "node tools/tests-site.mjs upload",
+    "tests:test": "node tools/tests-site.test.mjs"
   },
   "homepage": "https://vexflow.com/",
   "keywords": [

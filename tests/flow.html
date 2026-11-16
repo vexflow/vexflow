@@ -124,14 +124,16 @@
       // When flow.html is hosted on unpkg.com, the query string is not available.
       // Allow the user to specify params via the # fragment identifier.
       const hashParams = new URLSearchParams(location.hash.substr(1));
+      // Static deployments supply a local, fingerprinted bundle. Keep all test filters available.
+      const bundledSource = document.querySelector('meta[name="vexflow-test-bundle"]')?.content;
 
       // Optional: Specify the QUnit module or filter in the query params or fragment identifier.
       let QUnitModule = queryParams.get('module') ?? hashParams.get('module');
       let QUnitFilter = queryParams.get('filter') ?? hashParams.get('filter');
 
       // The `ver` query param chooses which VexFlow version to load. If omitted, `ver` defaults to 'build'.
-      const ver = queryParams.get('ver') ?? hashParams.get('ver') ?? 'build';
-      let useESM = queryParams.get('esm') === 'true' || hashParams.get('esm') === 'true';
+      const ver = bundledSource ? 'bundled build' : (queryParams.get('ver') ?? hashParams.get('ver') ?? 'build');
+      let useESM = !bundledSource && (queryParams.get('esm') === 'true' || hashParams.get('esm') === 'true');
       const isFileProtocol = location.protocol === 'file:';
 
       // Determine if we are loading VexFlow from a CDN.
@@ -148,7 +150,9 @@
       const pathCJSorESM = (useESM ? 'esm/entry' : 'cjs') + '/vexflow-debug-with-tests.js';
 
       let vexPlusTestsURL;
-      if (useCDN) {
+      if (bundledSource) {
+        vexPlusTestsURL = bundledSource;
+      } else if (useCDN) {
         // `ver` can specify a version hosted on the unpkg.com / jsdelivr.com CDN. We only support VexFlow 4 or newer:
         //   ver=unpkg@4.2.3     =>  https://unpkg.com/vexflow@4.2.3/build/cjs/vexflow-debug-with-tests.js
         //   ver=unpkg@alpha     =>  https://unpkg.com/vexflow@alpha/build/cjs/vexflow-debug-with-tests.js
@@ -182,11 +186,14 @@
         };
       }
 
+      // Load deployed faces before tests measure them, even when the preload spans are empty.
+      if (bundledSource) await Promise.all([...document.fonts].map((face) => face.load()));
       const fontFaceSet = await document.fonts.ready;
 
       showFontLoadingStatus();
 
       const VF = await loadVexFlow();
+      if (bundledSource) await document.fonts.ready;
 
       // If you did not load the fonts via the div#font-preload above, you can load them with this API:
       // await VF.loadFonts(); // Load all web fonts that VexFlow knows about (Font.FILES).
