@@ -20,11 +20,19 @@ const browser = await puppeteer.launch({
   headless: true,
   args: process.env.CI ? ['--no-sandbox', '--disable-setuid-sandbox'] : [],
 });
-const page = await browser.newPage();
-await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
-await page.setViewport({ width: 1440, height: 1000 });
+let context, page;
 const errors = [];
-page.on('pageerror', (error) => errors.push(error.message));
+
+// A failed test must not leak drafts, editor options, or held keys into the next one.
+test.beforeEach(async () => {
+  context = await browser.createBrowserContext();
+  page = await context.newPage();
+  errors.length = 0;
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
+  await page.setViewport({ width: 1440, height: 1000 });
+});
+test.afterEach(async () => context?.close());
 const waitRender = () =>
   page.waitForFunction(
     () =>
@@ -84,7 +92,13 @@ try {
     await assertRendered('editor reset');
     const restored = await page.$eval('#editor', (el) => el.textContent);
     await page.click('#editor');
-    await page.keyboard.press(process.platform === 'darwin' ? 'Meta+z' : 'Control+z');
+    const modifier = process.platform === 'darwin' ? 'Meta' : 'Control';
+    await page.keyboard.down(modifier);
+    try {
+      await page.keyboard.press('z');
+    } finally {
+      await page.keyboard.up(modifier);
+    }
     assert.equal(await page.$eval('#editor', (el) => el.textContent), restored, 'reset discards old undo history');
     await page.click('#auto-run');
   });
