@@ -2,6 +2,7 @@
 import { createEasyScoreExample } from '../../easyscore-example.mjs';
 import { renderEasyScoreFamilies } from '../../easyscore-families.mjs';
 import { createEasyScoreReferencesExample } from '../../easyscore-references-example.mjs';
+import { renderEasyScoreRhythm } from '../../easyscore-rhythm.mjs';
 import { example as e, number, select, setup, staff, text } from './helpers.mjs';
 
 const group = 'Layout & composition';
@@ -37,6 +38,29 @@ export const layout = [
     `(${renderEasyScoreFamilies.toString()})(VF, { elementId: 'score', width, height }, params.family, ink);`,
     [select('family', 'Family', 'modifiers', ['modifiers', 'accidentals', 'text', 'grace', 'percussion', 'sequence'])],
     'Typed notes preserve native fields and head codes. Grace/subnote groups own their children. Set note duration dots explicitly; a Dot modifier alone changes only the appearance.'
+  ),
+  e(
+    'easyscore-rhythm',
+    'EasyScore: rhythm & relationships',
+    group,
+    'Odd-meter voices, nested tuplets, owned spans, partial endpoints, and timed dynamics.',
+    'EasyScore Beam Tuplet StaveTie Curve StaveHairpin StaveLine TextBracket VibratoBracket PedalMarking TextDynamics Crescendo',
+    `(${renderEasyScoreRhythm.toString()})(VF, { elementId: 'score', width, height }, params.family, ink);`,
+    [
+      select('family', 'Family', 'odd-meter', [
+        'odd-meter',
+        'tuplets',
+        'ties',
+        'curves',
+        'hairpins',
+        'lines',
+        'brackets',
+        'pedal',
+        'partial-spans',
+        'dynamics',
+      ]),
+    ],
+    'Beam groups use exact Fractions and preserve explicit stems by default. Create tuplets before voices. Spans draw through the score; row-break segments remain explicit.'
   ),
   e(
     'proportional-spacing',

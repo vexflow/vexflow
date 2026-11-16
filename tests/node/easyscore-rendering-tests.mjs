@@ -223,16 +223,36 @@ test('adopted native notation matches rendering and retained redraw lifecycle', 
 
 test('EasyScore notation families draw once and redraw identically on both backends', async (t) => {
   const { renderEasyScoreFamilies } = await import('../../tools/easyscore-families.mjs');
+  const { renderEasyScoreRhythm } = await import('../../tools/easyscore-rhythm.mjs');
   const browser = await puppeteer.launch({ headless: true, args: process.env.CI ? ['--no-sandbox'] : [] });
   try {
     const page = await browser.newPage();
     await page.setViewport({ width: 640, height: 240, deviceScaleFactor: 1 });
     await page.setContent('<style>body{margin:0;background:white}</style><div id="host"></div>');
     await page.addScriptTag({ path: `${root}build/cjs/vexflow-debug.js` });
-    await page.evaluate(`window.renderFamilies = ${renderEasyScoreFamilies.toString()}`);
+    await page.evaluate(
+      `window.renderFamilies = ${renderEasyScoreFamilies.toString()}; window.renderRhythm = ${renderEasyScoreRhythm.toString()}`
+    );
     for (const font of ['Bravura', 'Petaluma'])
       for (const backend of ['svg', 'canvas']) {
-        for (const kind of ['modifiers', 'accidentals', 'text', 'grace', 'percussion', 'sequence']) {
+        for (const kind of [
+          'modifiers',
+          'accidentals',
+          'text',
+          'grace',
+          'percussion',
+          'sequence',
+          'odd-meter',
+          'tuplets',
+          'ties',
+          'curves',
+          'hairpins',
+          'lines',
+          'brackets',
+          'pedal',
+          'partial-spans',
+          'dynamics',
+        ]) {
           await t.test(`${font} ${backend} ${kind}`, async () => {
             await page.evaluate(
               async ({ font, backend, kind }) => {
@@ -243,7 +263,10 @@ test('EasyScore notation families draw once and redraw identically on both backe
                 host.replaceChildren();
                 const target = host.appendChild(document.createElement(backend === 'canvas' ? 'canvas' : 'div'));
                 target.id = 'score';
-                window.example = window.renderFamilies(VF, { elementId: 'score', width: 640, height: 240 }, kind);
+                const render = ['modifiers', 'accidentals', 'text', 'grace', 'percussion', 'sequence'].includes(kind)
+                  ? window.renderFamilies
+                  : window.renderRhythm;
+                window.example = render(VF, { elementId: 'score', width: 640, height: 240 }, kind);
               },
               { font, backend, kind }
             );

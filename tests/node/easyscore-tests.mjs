@@ -552,3 +552,121 @@ test('grace and subnote groups own children exactly once and restore them after 
   score.voice([voiced]);
   assert.throws(() => score.make.noteSubGroup({ notes: [voiced] }), /voiced note/);
 });
+
+test('automatic beams preserve explicit stems, rational ticks, and native grouping options', () => {
+  const score = create().set({ time: '7/8' });
+  const notes = score.notes('C4/8[stem="down"], D4, E4, F4, G4, A4, B4');
+  const ticks = notes.map((note) => note.getTicks().toString());
+  const groups = [new VF.Fraction(2, 8), new VF.Fraction(2, 8), new VF.Fraction(3, 8)];
+  const beams = score.autoBeam(notes, { groups, flatBeams: true, flatBeamOffset: 20 });
+  assert.deepEqual(
+    beams.map((beam) => beam.getNotes().length),
+    [2, 2, 3]
+  );
+  assert.deepEqual(
+    notes.map((note) => note.getTicks().toString()),
+    ticks
+  );
+  assert.deepEqual(
+    groups.map((group) => group.toString()),
+    ['2/8', '2/8', '3/8']
+  );
+  assert.equal(notes[1].getStemDirection(), VF.Stem.DOWN);
+  assert.equal(beams[0].renderOptions.flatBeamOffset, 20);
+  assert.ok(beams.every((beam) => VF.Factory.getOwner(beam) === score.factory));
+  score.voice(notes, { time: '7/8' });
+  assert.throws(() => score.autoBeam(notes), /already belongs/);
+  const mixed = score.notes('C4/8[stem="down"], D4[stem="up"]');
+  score.autoBeam(mixed);
+  assert.deepEqual(
+    mixed.map((note) => note.getStemDirection()),
+    [VF.Stem.DOWN, VF.Stem.UP]
+  );
+  const preserve = score.notes('C4/8, C6');
+  const before = preserve.map((note) => note.getStemDirection());
+  score.autoBeam(preserve, { autoStem: false });
+  assert.deepEqual(
+    preserve.map((note) => note.getStemDirection()),
+    before
+  );
+  const override = score.notes('C4/8[stem="down"], D4[stem="down"]');
+  score.autoBeam(override, { autoStem: true });
+  assert.deepEqual(
+    override.map((note) => note.getStemDirection()),
+    [VF.Stem.UP, VF.Stem.UP]
+  );
+  const rests = score.notes('C4/8, B4/8/r, D4/8, E4/8');
+  assert.equal(
+    score.autoBeam(rests, {
+      groups: [new VF.Fraction(4, 8)],
+      beamRests: true,
+      beamMiddleOnly: true,
+      showStemlets: true,
+    }).length,
+    1
+  );
+  const untouched = score.notes('C4/8, D4');
+  assert.throws(() => score.autoBeam(untouched, { groups: [new VF.Fraction(0, 1)] }), /positive finite/);
+  assert.ok(untouched.every((note) => !note.hasBeam()));
+  assert.throws(() => score.autoBeam([create().notes('C4/8')[0]]), /this Factory/);
+});
+
+test('tuplet handles preserve nested ratios and reject invalid late timing changes', () => {
+  const score = create();
+  const notes = score.notes('C4/8, D4, E4, F4, G4, A4');
+  const inner = score.make.tuplet({
+    notes: notes.slice(0, 3),
+    options: { numNotes: 3, notesOccupied: 2, yOffset: 0, textYOffset: 0 },
+  });
+  const outer = score.make.tuplet({ notes, options: { numNotes: 5, notesOccupied: 4, ratioed: true } });
+  assert.ok(inner instanceof VF.Tuplet && outer instanceof VF.Tuplet);
+  assert.equal(inner.options.yOffset, 0);
+  const eighth = new VF.Fraction(VF.VexFlow.RESOLUTION, 8);
+  assert.ok(notes[0].getTicks().equals(eighth.clone().multiply(2, 3).multiply(4, 5)));
+  score.autoBeam(notes, { groups: [new VF.Fraction(1, 4)] });
+  score.voice(notes, { mode: 'soft' });
+  assert.throws(() => score.make.tuplet({ notes }), /before inserting/);
+  const fresh = score.notes('C4/8, D4, E4');
+  const ticks = fresh.map((note) => note.getTicks().toString());
+  assert.throws(() => score.make.tuplet({ notes: fresh, options: { notesOccupied: 0 } }), /positive integers/);
+  assert.deepEqual(
+    fresh.map((note) => note.getTicks().toString()),
+    ticks
+  );
+});
+
+test('relationship helpers reject foreign or invalid endpoints and preserve native customization', () => {
+  const score = create();
+  const [from, to] = score.notes('(C4 E4)/h, (C5 E5)');
+  const spans = [
+    score.make.curve({ from, to, options: { thickness: 3 } }),
+    score.make.hairpin({ from, to, type: 1, options: { height: 14, yShift: 0 } }),
+    score.make.line({ from, to, firstIndexes: [1], lastIndexes: [0], options: { text: 'gliss.' } }),
+    score.make.textBracket({ from, to, text: '8', options: { superscript: 'va', position: 'top', line: 0 } }),
+    score.make.vibratoBracket({ from, to, options: { line: 0 } }),
+    score.make.pedalMarking({ notes: [from, to], options: { style: 'mixed' } }),
+  ];
+  assert.ok(spans.every((span) => VF.Factory.getOwner(span) === score.factory));
+  assert.equal(spans[0].renderOptions.thickness, 3);
+  assert.equal(spans[1].renderOptions.height, 14);
+  const count = queued(score);
+  const foreign = create().notes('C4/w')[0];
+  for (const build of [
+    () => score.make.curve({ from, to: foreign }),
+    () => score.make.hairpin({ type: 1 }),
+    () => score.make.line({ from, to, firstIndexes: [2], lastIndexes: [0] }),
+    () => score.make.textBracket({ from, text: '8', options: { superscript: 'va', position: 'top' } }),
+    () => score.make.pedalMarking({ notes: [foreign] }),
+    () => score.make.tie({ from: score.make.annotation({ text: 'not a note' }) }),
+  ])
+    assert.throws(build);
+  assert.equal(queued(score), count);
+  assert.ok(score.make.curve({ from }) instanceof VF.Curve);
+  assert.throws(() => score.make.hairpin({ to, type: 2 }), /endpoint/);
+  assert.ok(score.make.vibratoBracket({ from: null, to, options: { line: 1 } }) instanceof VF.VibratoBracket);
+  const duration = new VF.Fraction(1, 8);
+  const dynamics = score.make.textDynamics({ text: 'sfz', duration: 'q', durationOverride: duration, line: 2 });
+  assert.ok(dynamics.getTicks().equals(duration.clone().multiply(VF.VexFlow.RESOLUTION, 1)));
+  assert.ok(score.make.crescendo({ duration: 'q' }).setDecrescendo(true) instanceof VF.Crescendo);
+  assert.throws(() => score.make.textDynamics({ text: 'bad' }), /dynamics glyph/);
+});

@@ -162,6 +162,41 @@ Create tuplets before inserting their notes into a strict voice.
 Existing `beam()` and `tuplet()` still return the original note array.
 See [tuplets and layout](score-layout.md) and [proportional spacing](proportional-spacing.md) for rational timing and automatic-stem rules.
 
+## Automatic beams and tuplets
+
+`autoBeam()` returns owned native Beam objects. Group lengths use exact Fractions of a whole note:
+
+```js
+score.set({ time: '7/8' });
+const notes = score.notes('C5/8, D5, E5, F5, G5, A5, B5');
+const beams = score.autoBeam(notes, {
+  groups: [new VF.Fraction(2, 8), new VF.Fraction(2, 8), new VF.Fraction(3, 8)],
+});
+```
+
+Without explicit groups, the native meter defaults apply. Use explicit groups to express asymmetric beats.
+Beam grouping never changes note durations. Rests, middle-only rests, stemlets, flat beams, secondary breaks, and native stem-direction options remain available.
+
+- Default: a sole explicit direction constrains automatic notes in that group. Conflicting explicit directions remain mixed.
+- `autoStem: true`: choose the direction for the complete group, overriding explicit note stems.
+- `autoStem: false`: preserve note directions.
+- Native `maintainStemDirections` additionally splits groups at direction changes.
+- A note cannot belong to two generated beams. Keep and customize the returned handles.
+
+`make.beam()` returns a manual Beam handle. `make.tuplet()` returns a native Tuplet. Both accept `{ notes, options }`.
+The older `beam()` and `tuplet()` methods still return their input array.
+
+```js
+const notes = score.notes('C5/8, D5, E5');
+const tuplet = score.make.tuplet({ notes, options: { numNotes: 3, notesOccupied: 2, bracketed: true } });
+score.autoBeam(notes);
+const voice = score.voice(notes, { time: '1/4' });
+```
+
+Create tuplets before voices, so cached voice totals are correct. Positive integer ratios and nested tuplets use native rational tick multipliers.
+Native y-offsets, ratios, bracket settings, locations, and suffixes remain available. Automatic beaming updates native tuplet bracket/location defaults; apply final display overrides afterward.
+`durationOverride` also uses a Fraction of a whole note, such as `new VF.Fraction(1, 8)` for an eighth.
+
 ## Attachments and relationships
 
 `make.annotation()` accepts Factory annotation options and returns an Annotation.
@@ -183,6 +218,28 @@ annotation.setTextBaseline(40);
 ```
 
 Attached modifiers draw through their notes. Ties draw through the Factory queue. Do not call their `draw()` methods separately.
+
+### Other spans and dynamics
+
+| Helper                  | Endpoint / timing contract                                                                                  |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `make.curve()`          | Native Curve options; one or two note endpoints.                                                            |
+| `make.hairpin()`        | Two note endpoints, crescendo/decrescendo type, native render offsets.                                      |
+| `make.line()`           | Two StaveNotes and nonempty, matched chord-index arrays.                                                    |
+| `make.textBracket()`    | Two endpoints, text/superscript, position, line, font.                                                      |
+| `make.vibratoBracket()` | One or two endpoints, code and line.                                                                        |
+| `make.pedalMarking()`   | Explicit ordered staff-note events; text, bracket, or mixed style. Repeated points represent pedal changes. |
+| `make.textDynamics()`   | A timed native TextDynamics note; full TextNoteStruct fields.                                               |
+| `make.crescendo()`      | A timed native Crescendo note, with line/height/direction setters.                                          |
+
+These objects draw through the score. Do not draw them separately.
+Span endpoints must belong to the score's Factory. Missing endpoints, invalid types, and invalid chord indexes fail before queuing the new mark.
+
+Ties, curves, and vibrato brackets support explicit partial endpoints at stave boundaries.
+Hairpins, lines, and text brackets need complete endpoints. Sheet does not split these automatically; create explicit per-row segments or keep the measure group on one row.
+A native hairpin constructor accepts a partial definition, but its renderer cannot draw it. EasyScore rejects that request early.
+
+The **EasyScore: rhythm & relationships** Explorer study covers two voices in 7/8, nested tuplets, every span helper, partial spans, and timed dynamics.
 
 ## Local references and source
 

@@ -81,7 +81,7 @@
       "getStemDirection(): number",
       "getDefaultBeamGroups(timeSig: string): Fraction[]",
       "applyAndGetBeams(voice: Voice, stemDirection?: number, groups?: Fraction[]): Beam[]",
-      "generateBeams(notes: StemmableNote[], config: { flatBeamOffset?: number; flatBeams?: boolean; secondaryBreaks?: string; showStemlets?: boolean; maintainStemDirections?: boolean; beamMiddleOnly?: boolean; beamRests?: boolean; groups?: Fraction[]; stemDirection?: number; } = {}): Beam[]",
+      "generateBeams(notes: StemmableNote[], config: { flatBeamOffset?: number; flatBeams?: boolean; secondaryBreaks?: string; showStemlets?: boolean; maintainStemDirections?: boolean; /** Optional facade policy. Omitted preserves the native generator's historical behavior. */ stemPolicy?: 'auto' | 'explicit' | 'preserve'; beamMiddleOnly?: boolean; beamRests?: boolean; groups?: Fraction[]; stemDirection?: number; } = {}): Beam[]",
       "constructor(notes: StemmableNote[], autoStem: boolean = false)",
       "getNotes(): StemmableNote[]",
       "getBeamCount(): number",
@@ -504,6 +504,7 @@
       "parseNotation(line: string, options: BuilderOptions = {}): EasyScoreParseResult",
       "parse(line: string, options: BuilderOptions = {}): Result",
       "beam(notes: StemmableNote[], options?: { autoStem?: boolean; secondaryBeamBreaks?: number[]; partialBeamDirections?: { [noteIndex: number]: PartialBeamDirection; }; }): StemmableNote[]",
+      "autoBeam(notes: StemmableNote[], options: EasyScoreAutoBeamOptions = {})",
       "tuplet(notes: StemmableNote[], options?: TupletOptions): StemmableNote[]",
       "notes(line: string, options: BuilderOptions = {}): StemmableNote[]",
       "sequence(items: readonly (string | StaveNoteStruct | Tickable)[], options: BuilderOptions = {}): Tickable[]",
@@ -649,7 +650,7 @@
       "ChordSymbol(params?: { vJustify?: string; hJustify?: string; fontFamily?: string; fontSize?: number; fontWeight?: string; }): ChordSymbol",
       "Articulation(params?: { betweenLines?: boolean; type?: string; position?: string | number }): Articulation",
       "Ornament(type: string, params?: { position?: string | number; upperAccidental?: string; lowerAccidental?: string; delayed?: boolean })",
-      "TextDynamics(params?: { text?: string; duration?: string; dots?: number; line?: number }): TextDynamics",
+      "TextDynamics(params?: Partial<TextNoteStruct>): TextDynamics",
       "Fingering(params: { number?: string; position?: string }): FretHandFinger",
       "StringNumber(params: { number: string; position: string }, drawCircle = true): StringNumber",
       "TickContext(): TickContext",
@@ -675,6 +676,8 @@
       "Stroke(...args: ConstructorParameters<typeof Stroke>): Stroke",
       "Tremolo(...args: ConstructorParameters<typeof Tremolo>): Tremolo",
       "Vibrato(...args: ConstructorParameters<typeof Vibrato>): Vibrato",
+      "Crescendo(...args: ConstructorParameters<typeof Crescendo>): Crescendo",
+      "StaveHairpin(params: { from: Note; to: Note; type: number; options?: Partial<StaveHairpinRenderOptions>; }): StaveHairpin",
       "draw(options: { retain?: boolean } = {}): void"
     ]
   },
@@ -2601,7 +2604,8 @@
         "manage: <T extends Element>(construct: () => T) => T;",
         "owned: (element: Element) => void;",
         "checkIndex: (note: Note, index: number) => void;",
-        "noteDefaults: () => Partial<StaveNoteStruct>;"
+        "noteDefaults: () => Partial<StaveNoteStruct>;",
+        "beamStems: (notes: StemmableNote[]) => boolean;"
       ]
     },
     "EasyScoreElements": [
@@ -2624,7 +2628,17 @@
       "stringNumber(...args: Parameters<Factory['StringNumber']>)",
       "graceNoteGroup(options: Parameters<Factory['GraceNoteGroup']>[0])",
       "noteSubGroup(options: { notes: Note[] })",
-      "tie(options: Parameters<Factory['StaveTie']>[0])"
+      "tie(options: Parameters<Factory['StaveTie']>[0])",
+      "beam(params: Parameters<Factory['Beam']>[0])",
+      "tuplet(params: { notes: Note[]; options?: TupletOptions })",
+      "curve(params: { from?: Note; to?: Note; options?: Parameters<Factory['Curve']>[0]['options'] })",
+      "hairpin(params: Parameters<Factory['StaveHairpin']>[0])",
+      "line(params: Parameters<Factory['StaveLine']>[0])",
+      "textBracket(params: Parameters<Factory['TextBracket']>[0])",
+      "vibratoBracket(params: Parameters<Factory['VibratoBracket']>[0])",
+      "pedalMarking(params: { notes: StaveNote[]; options?: { style: 'text' | 'bracket' | 'mixed' } })",
+      "textDynamics(params: Parameters<Factory['TextDynamics']>[0] = {})",
+      "crescendo(...args: Parameters<Factory['Crescendo']>)"
     ]
   }
 }

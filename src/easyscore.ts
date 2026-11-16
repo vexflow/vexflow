@@ -9,6 +9,7 @@ import { Clef } from './clef';
 import { Dot } from './dot';
 import { EasyScoreReferences, EasyScoreSource } from './easyscore/elementindex';
 import { EasyScoreElements } from './easyscore/elements';
+import { autoBeam, EasyScoreAutoBeamOptions } from './easyscore/rhythm';
 import { Element, ElementStyle } from './element';
 import { Factory, FactoryElementRole, FactoryOptions } from './factory';
 import { Fraction } from './fraction';
@@ -30,6 +31,7 @@ import { defined, log, RuntimeError } from './util';
 import { Voice, VoiceMode, VoiceTime } from './voice';
 
 export type { EasyScoreSource } from './easyscore/elementindex';
+export type { EasyScoreAutoBeamOptions } from './easyscore/rhythm';
 
 // To enable logging for this class. Set `VexFlow.EasyScore.DEBUG` to `true`.
 // eslint-disable-next-line
@@ -586,6 +588,7 @@ export class EasyScore {
     manage: (construct) => this.transaction(() => this.references.add(construct())),
     owned: (element) => this.requireOwned(element),
     checkIndex: (note, index) => this.checkIndex(note, index),
+    beamStems: (notes) => this.resolveBeamStems(notes),
     noteDefaults: () => ({
       clef: this.defaults.clef,
       autoStem: this.defaults.stem === 'auto',
@@ -907,9 +910,17 @@ export class EasyScore {
       };
     }
   ): StemmableNote[] {
-    const autoStem = options?.autoStem ?? this.resolveBeamStems(notes);
-    this.transaction(() => this.references.add(this.factory.Beam({ notes, options: { ...options, autoStem } })));
+    if (this.options.strictOptions) this.make.beam({ notes, options });
+    else {
+      const autoStem = options?.autoStem ?? this.resolveBeamStems(notes);
+      this.transaction(() => this.references.add(this.factory.Beam({ notes, options: { ...options, autoStem } })));
+    }
     return notes;
+  }
+
+  /** Generate and own native beam groups without changing rhythmic duration. */
+  autoBeam(notes: StemmableNote[], options: EasyScoreAutoBeamOptions = {}) {
+    return autoBeam(this, notes, options);
   }
 
   /** Explicit pitched stems constrain the group; conflicting explicit stems remain mixed. */
@@ -927,7 +938,8 @@ export class EasyScore {
   }
 
   tuplet(notes: StemmableNote[], options?: TupletOptions): StemmableNote[] {
-    this.transaction(() => this.references.add(this.factory.Tuplet({ notes, options })));
+    if (this.options.strictOptions) this.make.tuplet({ notes, options });
+    else this.transaction(() => this.references.add(this.factory.Tuplet({ notes, options })));
     return notes;
   }
 

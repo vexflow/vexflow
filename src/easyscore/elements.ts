@@ -2,8 +2,11 @@
 import { Articulation } from '../articulation';
 import type { Element } from '../element';
 import type { Factory } from '../factory';
-import type { Note } from '../note';
-import type { StaveNoteStruct } from '../stavenote';
+import { Note } from '../note';
+import { StaveNote, StaveNoteStruct } from '../stavenote';
+import { StemmableNote } from '../stemmablenote';
+import { Tables } from '../tables';
+import type { TupletOptions } from '../tuplet';
 import { RuntimeError } from '../util';
 
 /** Internal bridge avoids a runtime import cycle back to the facade. */
@@ -13,6 +16,7 @@ export interface EasyScoreElementHost {
   owned: (element: Element) => void;
   checkIndex: (note: Note, index: number) => void;
   noteDefaults: () => Partial<StaveNoteStruct>;
+  beamStems: (notes: StemmableNote[]) => boolean;
 }
 
 /** Explicit methods keep native constructor signatures visible in editor completion. */
@@ -132,7 +136,7 @@ export class EasyScoreElements {
   /** Ties validate ownership and chord-head indexes before construction. */
   tie(options: Parameters<Factory['StaveTie']>[0]) {
     const { from, to } = options;
-    if (!from && !to) throw new RuntimeError('BadArguments', 'A tie needs at least one endpoint.');
+    this.endpoints(from, to, true);
     const first = options.firstIndexes ?? [0];
     const last = options.lastIndexes ?? [0];
     if (!first.length || first.length !== last.length) {
@@ -147,5 +151,130 @@ export class EasyScoreElements {
       indices.forEach((index) => this.host.checkIndex(note, index));
     }
     return this.host.manage(() => this.factory.StaveTie(options));
+  }
+  /** Validate complete or explicitly partial spans before native constructors run. */
+  private endpoints(from: Note | null | undefined, to: Note | null | undefined, partial = false): void {
+    if ((!from && !to) || (!partial && (!from || !to)))
+      throw new RuntimeError('BadArguments', 'Missing span endpoint.');
+    for (const note of [from, to]) {
+      if (!note) continue;
+      if (!(note instanceof Note)) throw new RuntimeError('BadArguments', 'Span endpoints must be notes.');
+      this.host.owned(note);
+    }
+  }
+
+  /** Return a beam handle while preserving EasyScore's automatic/explicit stem policy. */
+  beam(params: Parameters<Factory['Beam']>[0]) {
+    const { notes, options } = params;
+    if (notes.length < 2 || new Set(notes).size !== notes.length)
+      throw new RuntimeError('BadArguments', 'A beam needs at least two distinct notes.');
+    notes.forEach((note) => {
+      if (!(note instanceof StemmableNote))
+        throw new RuntimeError('BadArguments', 'Beam endpoints must be stemmable notes.');
+      this.host.owned(note);
+      if (note.hasBeam()) throw new RuntimeError('BadArguments', 'Note already belongs to a beam.');
+      if (note.getIntrinsicTicks() >= Tables.durationToTicks('4'))
+        throw new RuntimeError('BadArguments', 'Beamed notes must be shorter than a quarter note.');
+    });
+    for (const index of options?.secondaryBeamBreaks ?? []) this.noteIndex(notes.length, index);
+    for (const [index, direction] of Object.entries(options?.partialBeamDirections ?? {})) {
+      this.noteIndex(notes.length, Number(index));
+      if (!['L', 'R', 'B'].includes(direction))
+        throw new RuntimeError('BadArguments', 'Invalid partial beam direction.');
+    }
+    const autoStem = options?.autoStem ?? this.host.beamStems(notes);
+    return this.host.manage(() => this.factory.Beam({ notes, options: { ...options, autoStem } }));
+  }
+
+  /** Reject non-integer and out-of-range note indices before native mutation. */
+  private noteIndex(length: number, index: number): void {
+    if (!Number.isInteger(index) || index < 0 || index >= length)
+      throw new RuntimeError('BadArguments', 'Invalid beam note index.');
+  }
+
+  /** Tuplets change rational timing before voice insertion. Nested tuplets retain native behavior. */
+  tuplet(params: { notes: Note[]; options?: TupletOptions }) {
+    const { notes, options } = params;
+    if (!notes.length || new Set(notes).size !== notes.length)
+      throw new RuntimeError('BadArguments', 'A tuplet needs distinct notes.');
+    notes.forEach((note) => {
+      if (!(note instanceof Note)) throw new RuntimeError('BadArguments', 'Tuplets require notes.');
+      this.host.owned(note);
+      let voiced = false;
+      try {
+        note.getVoice();
+        voiced = true;
+      } catch (error) {
+        if (!(error instanceof RuntimeError) || error.code !== 'NoVoice') throw error;
+      }
+      if (voiced) throw new RuntimeError('BadArguments', 'Create tuplets before inserting notes into a voice.');
+    });
+    for (const ratio of [options?.numNotes ?? notes.length, options?.notesOccupied ?? 2]) {
+      if (!Number.isSafeInteger(ratio) || ratio <= 0)
+        throw new RuntimeError('BadArguments', 'Tuplet ratios must be positive integers.');
+    }
+    return this.host.manage(() => this.factory.Tuplet(params));
+  }
+
+  /** Native curves support explicit partial spans at stave boundaries. */
+  curve(params: { from?: Note; to?: Note; options?: Parameters<Factory['Curve']>[0]['options'] }) {
+    this.endpoints(params.from, params.to, true);
+    return this.host.manage(() =>
+      this.factory.Curve({ from: params.from, to: params.to, options: params.options ?? {} })
+    );
+  }
+
+  /** Hairpins require two endpoints; native render offsets remain editable. */
+  hairpin(params: Parameters<Factory['StaveHairpin']>[0]) {
+    this.endpoints(params.from, params.to);
+    if (![1, 2].includes(params.type)) throw new RuntimeError('BadArguments', 'Unknown hairpin type.');
+    return this.host.manage(() => this.factory.StaveHairpin(params));
+  }
+
+  /** Lines require two staff-note endpoints and matched chord-head indexes. */
+  line(params: Parameters<Factory['StaveLine']>[0]) {
+    this.endpoints(params.from, params.to);
+    if (!(params.from instanceof StaveNote) || !(params.to instanceof StaveNote))
+      throw new RuntimeError('BadArguments', 'Lines require staff notes.');
+    if (!params.firstIndexes.length || params.firstIndexes.length !== params.lastIndexes.length)
+      throw new RuntimeError('BadArguments', 'Line index lists must be nonempty and matched.');
+    params.firstIndexes.forEach((index) => this.host.checkIndex(params.from, index));
+    params.lastIndexes.forEach((index) => this.host.checkIndex(params.to, index));
+    return this.host.manage(() => this.factory.StaveLine(params));
+  }
+
+  /** Text brackets have two complete endpoints; use explicit segments at row breaks. */
+  textBracket(params: Parameters<Factory['TextBracket']>[0]) {
+    this.endpoints(params.from, params.to);
+    return this.host.manage(() => this.factory.TextBracket(params));
+  }
+
+  /** Vibrato brackets accept native partial endpoints. */
+  vibratoBracket(params: Parameters<Factory['VibratoBracket']>[0]) {
+    this.endpoints(params.from, params.to, true);
+    return this.host.manage(() => this.factory.VibratoBracket(params));
+  }
+
+  /** Pedal points are explicit ordered staff-note events, including repeated depress/release points. */
+  pedalMarking(params: { notes: StaveNote[]; options?: { style: 'text' | 'bracket' | 'mixed' } }) {
+    if (!params.notes.length) throw new RuntimeError('BadArguments', 'Pedal markings need notes.');
+    params.notes.forEach((note) => {
+      if (!(note instanceof StaveNote)) throw new RuntimeError('BadArguments', 'Pedal points must be staff notes.');
+      this.host.owned(note);
+    });
+    if (!['text', 'bracket', 'mixed'].includes(params.options?.style ?? 'mixed'))
+      throw new RuntimeError('BadArguments', 'Unknown pedal style.');
+    return this.host.manage(() => this.factory.PedalMarking(params));
+  }
+
+  /** Timed dynamics retain all native text-note fields. */
+  textDynamics(params: Parameters<Factory['TextDynamics']>[0] = {}) {
+    if (!/^[pmfsrz]*$/i.test(params.text ?? 'p')) throw new RuntimeError('BadArguments', 'Unknown dynamics glyph.');
+    return this.host.manage(() => this.factory.TextDynamics(params));
+  }
+
+  /** Timed crescendo notes expose their native direction and height setters. */
+  crescendo(...args: Parameters<Factory['Crescendo']>) {
+    return this.host.manage(() => this.factory.Crescendo(...args));
   }
 }

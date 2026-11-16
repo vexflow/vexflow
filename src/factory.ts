@@ -11,6 +11,7 @@ import { BarNote } from './barnote';
 import { Beam, PartialBeamDirection } from './beam';
 import { ChordSymbol } from './chordsymbol';
 import { ClefNote } from './clefnote';
+import { Crescendo } from './crescendo';
 import { Curve, CurveOptions } from './curve';
 import { Dot } from './dot';
 import { EasyScore, EasyScoreOptions } from './easyscore';
@@ -39,6 +40,7 @@ import { Sheet, SheetOptions } from './sheet';
 import { Stave, StaveOptions } from './stave';
 import { BarlineType } from './stavebarline';
 import { StaveConnector, StaveConnectorType } from './staveconnector';
+import { StaveHairpin, StaveHairpinRenderOptions } from './stavehairpin';
 import { StaveLine } from './staveline';
 import { StaveModifier } from './stavemodifier';
 import { StaveNote, StaveNoteStruct } from './stavenote';
@@ -530,21 +532,8 @@ export class Factory {
     return this.own(ornament);
   }
 
-  TextDynamics(params?: { text?: string; duration?: string; dots?: number; line?: number }): TextDynamics {
-    const p = {
-      text: 'p',
-      duration: 'q',
-      dots: 0,
-      line: 0,
-      ...params,
-    };
-
-    const text = new TextDynamics({
-      text: p.text,
-      line: p.line,
-      duration: p.duration,
-      dots: p.dots,
-    });
+  TextDynamics(params?: Partial<TextNoteStruct>): TextDynamics {
+    const text = new TextDynamics({ text: 'p', duration: 'q', dots: 0, line: 0, ...params });
 
     if (this.stave) text.setStave(this.stave);
     text.setContext(this.context);
@@ -852,6 +841,26 @@ export class Factory {
   /** Construct a native Vibrato for attachment; preserve its full constructor options. */
   Vibrato(...args: ConstructorParameters<typeof Vibrato>): Vibrato {
     return this.adopt(new Vibrato(...args).setContext(this.context), 'modifier');
+  }
+
+  /** Timed crescendo note; span hairpins have a separate constructor. */
+  Crescendo(...args: ConstructorParameters<typeof Crescendo>): Crescendo {
+    const note = new Crescendo(...args).setContext(this.context);
+    if (this.stave) note.setStave(this.stave);
+    return this.adopt(note, 'note');
+  }
+
+  /** Stave-bound hairpin. The native renderer requires both endpoints. */
+  StaveHairpin(params: {
+    from: Note;
+    to: Note;
+    type: number;
+    options?: Partial<StaveHairpinRenderOptions>;
+  }): StaveHairpin {
+    const notes = { ...(params.from && { firstNote: params.from }), ...(params.to && { lastNote: params.to }) };
+    const hairpin = new StaveHairpin(notes, params.type).setContext(this.context);
+    if (params.options) hairpin.setRenderOptions({ ...hairpin.renderOptions, ...params.options });
+    return this.adopt(hairpin, 'drawable');
   }
 
   /** Render the score. */

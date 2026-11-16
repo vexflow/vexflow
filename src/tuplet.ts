@@ -110,8 +110,8 @@ export class Tuplet extends Element {
     const bracketed = options.bracketed !== undefined ? options.bracketed : notes.some((note) => !note.hasBeam());
     const ratioed = options.ratioed !== undefined ? options.ratioed : Math.abs(notesOccupied - numNotes) > 1;
     const location = options.location || Tuplet.LOCATION_TOP;
-    const yOffset = options.yOffset || Metrics.get('Tuplet.yOffset');
-    const textYOffset = options.textYOffset || Metrics.get('Tuplet.textYOffset');
+    const yOffset = options.yOffset ?? Metrics.get('Tuplet.yOffset');
+    const textYOffset = options.textYOffset ?? Metrics.get('Tuplet.textYOffset');
     const suffix = options.suffix || '';
 
     this.options = {

@@ -4,6 +4,10 @@ import { Annotation, EasyScore, EasyScoreSource, Element, Fraction, Note, StaveT
 /** Keep native return types and reject invalid built-in option types. */
 export function easyScoreTypes(): void {
   const score = EasyScore.create({ renderer: { elementId: 'score', width: 500, height: 240 } });
+  score.autoBeam(score.notes('C4/8, D4'), { groups: [new Fraction(2, 8)], autoStem: false });
+  score.make.tuplet({ notes: score.notes('C4/8, D4, E4'), options: { numNotes: 3, notesOccupied: 2 } });
+  // @ts-expect-error The native hairpin renderer requires complete endpoints.
+  score.make.hairpin({ type: 1 });
   const nativeNote = score.make.note({ keys: ['c/4/x'], duration: 'q', autoStem: true });
   score.sequence(['C4/q', nativeNote, { keys: ['d/4'], duration: 'q' }]);
   score.make.graceNoteGroup({ notes: [score.make.graceNote({ keys: ['d/4'], duration: '16', slash: true })] });
@@ -14,7 +18,7 @@ export function easyScoreTypes(): void {
   score.make.note({ keys: ['c/4'] });
   // @ts-expect-error Native tremolo counts are numbers.
   score.make.tremolo('three');
-  const notes = score.notes('C4/h, C4', { octaveShift: 1, durationOverride: new Fraction(4096, 1) });
+  const notes = score.notes('C4/h, C4', { octaveShift: 1, durationOverride: new Fraction(1, 2) });
   const annotation: Annotation = score.make.annotation({ text: 'dolce' });
   score.attach(notes[0], annotation);
   const tie: StaveTie = score.make.tie({ from: notes[0], to: notes[1] });

@@ -257,8 +257,8 @@ try {
     await page.click('#reset');
     await assertRendered('reset');
     await page.type('#search', 'pedal');
-    assert.equal(await page.$$eval('.nav-item', (els) => els.length), 1);
-    await page.click('.nav-item');
+    assert.ok(await page.$$eval('.nav-item', (els) => els.some((el) => el.textContent.includes('Pedal markings'))));
+    await page.locator('.nav-item ::-p-text(Pedal markings)').click();
     await page.waitForFunction(() => document.querySelector('#title').textContent === 'Pedal markings');
     await assertRendered('search navigation');
     assert.equal(await page.$eval('.repo-link', (el) => el.href), 'https://github.com/vexflow/vexflow');
