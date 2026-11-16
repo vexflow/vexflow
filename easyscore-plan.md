@@ -24,7 +24,7 @@ Second slice:
 Validation for slice two: 105 Node checks, 1,891 QUnit tests, and 12 Explorer checks pass. Source types, emitted-declaration consumer checks, and lint pass. Native-extension rendering matches SVG/Canvas with Bravura and Petaluma, including retained redraw.
 
 Still pending: the remaining `make.*` families, automatic beaming, typed note sequences, and structured composition.
-Milestone 0 is complete: [contracts](docs/easyscore-contracts.md) map every notation family to a typed path and lifecycle. A checked native API snapshot records exported types, constructors, options, and public members. Beginner, piano, tab, and percussion workflows are reviewed. Milestone 1 is complete: typed pure validators complement source diagnostics and transactional construction. Native zero-valued bracket options are honored, and Factory setup leaves caller options untouched. Milestones 2–7 remain.
+Milestone 0 is complete: [contracts](docs/easyscore-contracts.md) map every notation family to a typed path and lifecycle. A checked native API snapshot records exported types, constructors, options, and public members. Beginner, piano, tab, and percussion workflows are reviewed. Milestone 1 is complete: typed pure validators complement source diagnostics and transactional construction. Native zero-valued bracket options are honored, and Factory setup leaves caller options untouched. Milestone 2 is complete: the facade includes native Sheet access and nested batch construction, alongside lookup, provenance, adoption, style, reset, and retained drawing. Milestones 3–7 remain.
 Reviewed against `main` at `91e753e79e1fed1ef87a669b884dab50e7dca463` on November 16, 2026.
 
 ## Recommendation

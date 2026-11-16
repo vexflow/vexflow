@@ -21,6 +21,11 @@ export function easyScoreTypes(): void {
   score.make.tie({ from: score.getElement('note') });
   const voice: Voice = score.voice(notes, { time: { numBeats: 4, beatValue: 4 }, mode: 'soft', softmaxFactor: 1 });
   const system: System = score.system();
+  score.sheet({ width: 600 }).addSystem();
+  const built: Annotation = score.build((builder) => builder.make.annotation({ text: 'batch' }));
+  built.setText('native');
+  // @ts-expect-error Batch construction cannot extend beyond its synchronous transaction.
+  score.build(async () => 1);
   system.addStave({ voices: [voice] });
   // @ts-expect-error Known note fields retain their native types, despite legacy extension options.
   score.notes('C4/q', { octaveShift: 'one' });

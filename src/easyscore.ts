@@ -18,6 +18,7 @@ import { Music } from './music';
 import { Note } from './note';
 import { Grammar, Match, Parser, Result, Rule, RuleFunction } from './parser';
 import { RenderContext } from './rendercontext';
+import { Sheet, SheetOptions } from './sheet';
 import { StaveNoteStruct } from './stavenote';
 import { StaveTie } from './stavetie';
 import { Stem } from './stem';
@@ -630,6 +631,36 @@ export class EasyScore {
   /** Build a normal System; its staff API and formatter options stay available. */
   system(options: SystemOptions = {}): System {
     return this.transaction(() => this.references.add(this.factory.System(options)));
+  }
+
+  /** Create a native responsive Sheet. Its systems remain managed by this Factory. */
+  sheet(options: Omit<SheetOptions, 'factory'> = {}): Sheet {
+    return this.transaction(() => this.factory.Sheet(options));
+  }
+
+  /**
+   * Stage a group of synchronous construction calls. Failed groups release their new objects and IDs.
+   * Existing-object setters and application side effects remain the caller's responsibility.
+   */
+  build<T>(construct: (score: EasyScore) => T & (T extends PromiseLike<unknown> ? never : unknown)): T {
+    const snapshot = {
+      elements: this.builder.elements,
+      options: this.builder.options,
+      piece: this.builder.piece,
+      rollingDuration: this.builder.rollingDuration,
+    };
+    try {
+      return this.transaction(() => {
+        const result = construct(this);
+        if (result && typeof result === 'object' && 'then' in result) {
+          throw new RuntimeError('BadArguments', 'EasyScore.build() requires a synchronous callback.');
+        }
+        return result;
+      });
+    } catch (error) {
+      Object.assign(this.builder, snapshot);
+      throw error;
+    }
   }
 
   /** Apply the Factory foreground defaults without changing global metrics or fonts. */

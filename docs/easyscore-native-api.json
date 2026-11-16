@@ -486,6 +486,8 @@
       "make",
       "attach(note: T, modifier: Modifier, index = 0): T",
       "system(options: SystemOptions = {}): System",
+      "sheet(options: Omit<SheetOptions, 'factory'> = {}): Sheet",
+      "build(construct: (score: EasyScore) => T & (T extends PromiseLike<unknown> ? never : unknown)): T",
       "setStyle(style: Pick<ElementStyle, 'fillStyle' | 'strokeStyle'>): this",
       "draw(options: { retain?: boolean } = {}): void",
       "reset(): this",

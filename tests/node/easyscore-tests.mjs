@@ -436,3 +436,42 @@ test('pure typed validators reject custom options before construction and preser
   );
   assert.equal(factory.VibratoBracket({ from: note, to: note, options: { line: 0 } }).line, 0);
 });
+
+test('facade sheets and nested build groups share ownership and rollback', () => {
+  const score = create();
+  score.setContext(new VF.CanvasContext(createCanvas(500, 240).getContext('2d')));
+  const [keep] = score.notes('C4/w[id="keep"]');
+  const original = score.builder.elements;
+  let discarded;
+  assert.throws(
+    () =>
+      score.build(() => {
+        score.notes('D4/w[id="temporary"]');
+        score.build(() => {
+          discarded = score.make.annotation({ text: 'temporary' });
+        });
+        score.sheet({ width: 500 }).addSystem();
+        throw new Error('cancel group');
+      }),
+    /cancel group/
+  );
+  assert.equal(score.getElement('temporary'), undefined);
+  assert.equal(score.getElement(discarded.getAttribute('id')), undefined);
+  assert.equal(VF.Factory.getOwner(discarded), undefined);
+  assert.equal(score.factory.sheets.length, 0);
+  assert.equal(score.factory.systems.length, 0);
+  assert.equal(score.builder.elements, original);
+  assert.equal(score.getNote('keep'), keep);
+  const sheet = score.build((builder) => builder.sheet({ width: 500 }));
+  const system = sheet.addSystem();
+  const voice = score.voice([keep]);
+  system.addStave({ voices: [voice] }).addClef('treble');
+  assert.equal(VF.Factory.getOwner(system), score.factory);
+  assert.deepEqual(sheet.getSystems(), [system]);
+  assert.equal(score.factory.sheets.length, 1);
+  score.draw({ retain: true });
+  assert.equal(sheet.getRows().length, 1);
+  assert.throws(() => score.build(() => Promise.resolve()), /synchronous callback/);
+  score.reset();
+  assert.equal(score.factory.sheets.length, 0);
+});

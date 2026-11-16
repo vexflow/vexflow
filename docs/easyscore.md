@@ -242,6 +242,36 @@ Validators must be pure; measure preflight can evaluate them more than once. The
 Use commit hooks to apply validated values to native objects. Built-in option names keep their built-in meaning.
 Custom builders and commit hooks still run during actual construction, once per note.
 
+## Sheets and batch construction
+
+`sheet()` returns a native Sheet, managed by the same Factory:
+
+```js
+const sheet = score.sheet({ width: 600, rowGap: 60 });
+const system = sheet.addSystem();
+system.addStave({ voices: [score.voice(score.notes('C4/w'))] }).addClef('treble');
+score.draw({ retain: true });
+sheet.setWidth(400); // Reflow on the next draw.
+```
+
+Sheet systems and staves use native layout options. They are not automatically added to EasyScore's local ID index.
+`sheet.getRows()` reports overflow after formatting. Sheet is not an Element and has no element ID.
+See [sheets and themes](sheets-and-themes.md) for row spacing and current layout limits.
+
+Use `build()` to group synchronous managed construction:
+
+```js
+const result = score.build((builder) => {
+  const notes = builder.notes('C4/h[id="first"], C4[id="last"]');
+  const tie = builder.make.tie({ from: notes[0], to: notes[1] });
+  return { notes, tie };
+});
+```
+
+A thrown error restores the prior queues, references, and builder result, including nested successful groups.
+Do not draw, reset, return a Promise, or mutate existing objects inside this construction callback.
+This transaction cannot undo application side effects or native setters on existing objects.
+
 ## Drawing and styling
 
 `system()` returns a native System. Existing staff, connector, and formatter options remain available.
