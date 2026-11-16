@@ -1,22 +1,32 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
-// Parse compact notation and measures; resolve automatic stems when grouping beams.
+// Compose native notation through EasyScore, with pure diagnostics and staged strict construction.
 // MIT License
 
 import { Accidental } from './accidental';
+import { Annotation } from './annotation';
 import { Articulation } from './articulation';
 import { PartialBeamDirection } from './beam';
+import { Clef } from './clef';
 import { Dot } from './dot';
-import { Factory } from './factory';
+import { ElementStyle } from './element';
+import { Factory, FactoryOptions } from './factory';
+import { Fraction } from './fraction';
 import { FretHandFinger } from './frethandfinger';
+import { Modifier } from './modifier';
 import { Music } from './music';
 import { Note } from './note';
 import { Grammar, Match, Parser, Result, Rule, RuleFunction } from './parser';
 import { RenderContext } from './rendercontext';
+import { StaveNoteStruct } from './stavenote';
+import { StaveTie } from './stavetie';
 import { Stem } from './stem';
 import { StemmableNote } from './stemmablenote';
+import { System, SystemOptions } from './system';
+import { Tables } from './tables';
+import { Tickable } from './tickable';
 import { TupletOptions } from './tuplet';
 import { defined, log, RuntimeError } from './util';
-import { Voice } from './voice';
+import { Voice, VoiceMode, VoiceTime } from './voice';
 
 // To enable logging for this class. Set `VexFlow.EasyScore.DEBUG` to `true`.
 // eslint-disable-next-line
@@ -46,7 +56,7 @@ export class EasyScoreGrammar implements Grammar {
   PIECE(): Rule {
     return {
       expect: [this.CHORDORNOTE, this.PARAMS],
-      run: () => this.builder.commitPiece(),
+      run: (state) => this.builder.commitPiece(state && { start: state.start, end: state.end }),
     };
   }
   PIECES(): Rule {
@@ -218,6 +228,8 @@ export interface NotePiece {
 }
 
 export class Piece {
+  /** Range of this piece in the most recently parsed input. */
+  source?: EasyScoreSourceSpan;
   chord: NotePiece[] = [];
   duration: string;
   dots: number = 0;
@@ -236,6 +248,16 @@ export interface BuilderElements {
 // Extending Record<string, any> allows arbitrary properties via Builder.reset() & EasyScore.parse().
 // eslint-disable-next-line
 export interface BuilderOptions extends Record<string, any> {
+  /** Native note options. String notation still supplies keys, duration, dots, and type. */
+  octaveShift?: StaveNoteStruct['octaveShift'];
+  strokePx?: StaveNoteStruct['strokePx'];
+  alignCenter?: StaveNoteStruct['alignCenter'];
+  line?: StaveNoteStruct['line'];
+  durationOverride?: StaveNoteStruct['durationOverride'];
+  id?: string;
+  class?: string;
+  articulations?: string;
+  fingerings?: string;
   stem?: string;
   clef?: string;
   /** Initial duration for notes that omit one. Defaults to an eighth note. */
@@ -253,8 +275,9 @@ export class Builder {
   commitHooks: CommitHook[] = [];
   rollingDuration!: string;
 
-  constructor(factory: Factory) {
-    this.factory = factory;
+  constructor(factory?: Factory) {
+    // A factory-less builder is also used by syntax-only parsing.
+    this.factory = factory!;
     this.reset();
   }
 
@@ -270,7 +293,7 @@ export class Builder {
   }
 
   getFactory(): Factory {
-    return this.factory;
+    return defined(this.factory, 'NoFactory', 'Create EasyScore with a Factory before constructing notes.');
   }
 
   getElements(): BuilderElements {
@@ -333,7 +356,8 @@ export class Builder {
     L('endChord');
   }
 
-  commitPiece(): void {
+  commitPiece(source?: EasyScoreSourceSpan): void {
+    this.piece.source = source;
     L('commitPiece');
     const { factory } = this;
 
@@ -360,13 +384,20 @@ export class Builder {
         '/' +
         notePiece.octave
     );
+    const nativeOptions = {
+      octaveShift: options.octaveShift === undefined ? undefined : Number(options.octaveShift),
+      strokePx: options.strokePx === undefined ? undefined : Number(options.strokePx),
+      line: options.line === undefined ? undefined : Number(options.line),
+      alignCenter: String(options.alignCenter) === 'true',
+      durationOverride: options.durationOverride,
+    };
     const autoStem = stem === 'auto'; // StaveNoteStruct expects the underscore & lowercase.
 
     // Build a GhostNote or StaveNote using the information we gathered.
     const note =
       type?.toLowerCase() === 'g'
-        ? factory.GhostNote({ duration, dots })
-        : factory.StaveNote({ keys, duration, dots, type, clef, autoStem });
+        ? factory.GhostNote({ ...nativeOptions, duration, dots })
+        : factory.StaveNote({ ...nativeOptions, keys, duration, dots, type, clef, autoStem });
     if (!autoStem) note.setStemDirection(stem === 'up' ? Stem.UP : Stem.DOWN);
 
     // Attach accidentals.
@@ -393,18 +424,80 @@ export class Builder {
   }
 }
 
+/** Zero-based, end-exclusive source range. */
+export interface EasyScoreSourceSpan {
+  start: number;
+  end: number;
+}
+
+/** Editor-friendly error. Line and column are one-based. */
+export interface EasyScoreDiagnostic extends EasyScoreSourceSpan {
+  code: string;
+  message: string;
+  line: number;
+  column: number;
+  measure?: number;
+}
+
+/** Parsed notation contains data only; no VexFlow elements or render context. */
+export interface EasyScoreParsedPiece extends Piece {
+  source: EasyScoreSourceSpan;
+}
+
+export interface EasyScoreParseResult {
+  success: boolean;
+  pieces: EasyScoreParsedPiece[];
+  diagnostics: EasyScoreDiagnostic[];
+}
+
+/** The same diagnostics are available to callers that prefer exceptions. */
+export class EasyScoreError extends RuntimeError {
+  constructor(public readonly diagnostics: EasyScoreDiagnostic[]) {
+    super('EasyScoreError', diagnostics.map((d) => `${d.message} (${d.line}:${d.column})`).join('; '));
+  }
+}
+
+/** Voice settings are applied before inserting notes, including strictness and resolution. */
+export interface EasyScoreVoiceOptions {
+  time?: VoiceTime | string;
+  mode?: 'strict' | 'soft' | 'full' | VoiceMode;
+  softmaxFactor?: number;
+  /** Legacy spelling remains supported. */
+  options?: { softmaxFactor: number };
+}
+
+/** Collect pieces without calling Factory constructors or commit hooks. */
+class NotationBuilder extends Builder {
+  pieces: EasyScoreParsedPiece[] = [];
+
+  override commitPiece(source: EasyScoreSourceSpan = { start: 0, end: 0 }): void {
+    this.pieces.push({ ...this.piece, source });
+    this.resetPiece();
+  }
+}
+
+/** Convert a source range into the common diagnostic shape. */
+function diagnostic(line: string, code: string, message: string, source: EasyScoreSourceSpan): EasyScoreDiagnostic {
+  const prefix = line.slice(0, source.start);
+  return { ...source, code, message, line: prefix.split('\n').length, column: source.start - prefix.lastIndexOf('\n') };
+}
+
 export interface EasyScoreOptions {
   factory?: Factory;
   builder?: Builder;
   commitHooks?: CommitHook[];
   throwOnError?: boolean;
+  /** Reject unknown built-in options. Enabled by create(); legacy factories keep their extension behavior. */
+  strictOptions?: boolean;
+  /** Extra option names consumed by application commit hooks in strict mode. */
+  extensions?: readonly string[];
 }
 
 // Extending Record<string, any> allows arbitrary properties via set(defaults).
 // eslint-disable-next-line
 export interface EasyScoreDefaults extends Record<string, any> {
   clef?: string;
-  time?: string;
+  time?: VoiceTime | string;
   stem?: string;
 }
 
@@ -432,6 +525,95 @@ function setClass(options: { class?: string }, note: StemmableNote) {
  */
 export class EasyScore {
   static DEBUG: boolean = false;
+
+  /** Create a strict EasyScore facade with its own Factory. Load fonts before constructing notation. */
+  static create(options: FactoryOptions, scoreOptions: Omit<EasyScoreOptions, 'factory' | 'builder'> = {}): EasyScore {
+    return new Factory(options).EasyScore({ throwOnError: true, strictOptions: true, ...scoreOptions });
+  }
+
+  /** Native constructors for this first slice. More feature families will be added incrementally. */
+  readonly make = {
+    annotation: (options?: Parameters<Factory['Annotation']>[0]): Annotation =>
+      this.factory.transaction(() => this.factory.Annotation(options)),
+    tie: (options: Parameters<Factory['StaveTie']>[0]): StaveTie => {
+      const { from, to } = options;
+      if (!from && !to) throw new RuntimeError('BadArguments', 'A tie needs at least one endpoint.');
+      const first = options.firstIndexes ?? [0];
+      const last = options.lastIndexes ?? [0];
+      if (!first.length || first.length !== last.length) {
+        throw new RuntimeError('BadArguments', 'Tie index lists must be nonempty and have the same length.');
+      }
+      for (const [note, indices] of [
+        [from, first],
+        [to, last],
+      ] as const) {
+        if (!note) continue;
+        this.requireOwned(note);
+        indices.forEach((index) => this.checkIndex(note, index));
+      }
+      return this.factory.transaction(() => this.factory.StaveTie(options));
+    },
+  };
+
+  /** Attach a modifier once. Native custom modifiers are welcome; foreign Factory objects are rejected. */
+  attach<T extends Note>(note: T, modifier: Modifier, index = 0): T {
+    this.requireOwned(note);
+    this.checkIndex(note, index);
+    const owner = Factory.getOwner(modifier);
+    if (owner && owner !== this.factory) throw new RuntimeError('BadArguments', 'Modifier belongs to another Factory.');
+    let attached: Note | undefined;
+    try {
+      attached = modifier.getNote();
+    } catch (error) {
+      // Only the native unattached-modifier error means there is no existing owner.
+      if (!(error instanceof RuntimeError) || error.code !== 'NoNote') throw error;
+    }
+    if (attached) {
+      if (attached === note && modifier.getIndex() === index && note.getModifiers().includes(modifier)) return note;
+      throw new RuntimeError('BadArguments', 'Modifier is already attached. Create a separate modifier.');
+    }
+    return note.addModifier(modifier, index);
+  }
+
+  /** Build a normal System; its staff API and formatter options stay available. */
+  system(options: SystemOptions = {}): System {
+    return this.factory.transaction(() => this.factory.System(options));
+  }
+
+  /** Apply the Factory foreground defaults without changing global metrics or fonts. */
+  setStyle(style: Pick<ElementStyle, 'fillStyle' | 'strokeStyle'>): this {
+    this.factory.setStyle(style);
+    return this;
+  }
+
+  /** Delegate drawing and the existing opt-in retained lifecycle to Factory. */
+  draw(options: { retain?: boolean } = {}): void {
+    this.factory.draw(options);
+  }
+
+  /** Release queued notation and the builder's last result. */
+  reset(): this {
+    this.factory.reset();
+    this.builder.reset();
+    return this;
+  }
+
+  /** Endpoints and voice notes must share this facade's Factory. */
+  private requireOwned(note: Tickable): void {
+    if (Factory.getOwner(note) !== this.factory) {
+      throw new RuntimeError(
+        'BadArguments',
+        'Note belongs to another Factory or was constructed outside this Factory.'
+      );
+    }
+  }
+
+  /** Reject invalid chord-head references before attaching or queuing notation. */
+  private checkIndex(note: Note, index: number): void {
+    if (!Number.isInteger(index) || index < 0 || index >= note.getKeys().length) {
+      throw new RuntimeError('BadArguments', `Invalid chord index: ${index}`);
+    }
+  }
 
   defaults: EasyScoreDefaults = {
     clef: 'treble',
@@ -493,14 +675,116 @@ export class EasyScore {
     return this;
   }
 
-  parse(line: string, options: BuilderOptions = {}): Result {
-    this.builder.reset(options);
-    const result = this.parser.parse(line);
-    if (!result.success && this.options.throwOnError) {
-      L(result);
-      throw new RuntimeError('Error parsing line: ' + line);
+  /** Parse and validate without touching this builder, its hooks, Factory queues, or registries. */
+  parseNotation(line: string, options: BuilderOptions = {}): EasyScoreParseResult {
+    const builder = new NotationBuilder();
+    builder.reset({ clef: this.defaults.clef, stem: this.defaults.stem, ...options });
+    const result = new Parser(new EasyScoreGrammar(builder)).parse(line);
+    if (!result.success) {
+      const start = Math.max(0, result.furthestErrorPos ?? result.errorPos ?? 0);
+      return {
+        success: false,
+        pieces: [],
+        diagnostics: [
+          diagnostic(line, 'SyntaxError', 'Invalid EasyScore notation', {
+            start,
+            end: Math.min(line.length, start + 1),
+          }),
+        ],
+      };
     }
-    return result;
+    const diagnostics: EasyScoreDiagnostic[] = [];
+    for (const piece of builder.pieces) {
+      try {
+        this.validatePiece(piece, { ...builder.options, ...piece.options });
+      } catch (error) {
+        diagnostics.push(
+          diagnostic(line, 'InvalidNotation', error instanceof Error ? error.message : String(error), piece.source)
+        );
+      }
+    }
+    return { success: diagnostics.length === 0, pieces: diagnostics.length ? [] : builder.pieces, diagnostics };
+  }
+
+  /** Validate built-in fields before allocating notes. Extension values are left to application hooks. */
+  private validatePiece(piece: Piece, options: BuilderOptions): void {
+    Tables.durationToTicks(piece.duration);
+    if (!['auto', 'up', 'down'].includes(String(options.stem).toLowerCase())) {
+      throw new RuntimeError('BadArguments', `Invalid stem: ${options.stem}`);
+    }
+    if (!Object.hasOwnProperty.call(Clef.types, String(options.clef).toLowerCase())) {
+      throw new RuntimeError('BadArguments', `Invalid clef: ${options.clef}`);
+    }
+    for (const name of ['octaveShift', 'strokePx', 'line'] as const) {
+      if (options[name] !== undefined && !Number.isFinite(Number(options[name]))) {
+        throw new RuntimeError('BadArguments', `Invalid numeric option: ${name}`);
+      }
+    }
+    if (options.alignCenter !== undefined && ![true, false, 'true', 'false'].includes(options.alignCenter)) {
+      throw new RuntimeError('BadArguments', 'alignCenter must be true or false.');
+    }
+    if (
+      options.durationOverride !== undefined &&
+      (!(options.durationOverride instanceof Fraction) ||
+        !Number.isFinite(options.durationOverride.value()) ||
+        options.durationOverride.value() <= 0)
+    ) {
+      throw new RuntimeError('BadArguments', 'durationOverride must be a positive finite Fraction.');
+    }
+    if (options.articulations && this.builder.commitHooks.includes(Articulation.easyScoreHook)) {
+      Articulation.parseEasyScore(options.articulations);
+    }
+    if (this.options.strictOptions) {
+      const known = new Set([
+        'stem',
+        'clef',
+        'duration',
+        'id',
+        'class',
+        'articulations',
+        'fingerings',
+        'octaveShift',
+        'strokePx',
+        'line',
+        'alignCenter',
+        'durationOverride',
+        ...(this.options.extensions ?? []),
+      ]);
+      for (const name of Object.keys(options)) {
+        if (!known.has(name)) throw new RuntimeError('BadArguments', `Unknown EasyScore option: ${name}`);
+      }
+    }
+  }
+
+  parse(line: string, options: BuilderOptions = {}): Result {
+    if (!this.options.throwOnError) {
+      this.builder.reset(options);
+      return this.parser.parse(line);
+    }
+    // parse() retains Builder's defaults; notes() supplies EasyScore's defaults explicitly.
+    const parsed = this.parseNotation(line, { clef: 'treble', stem: 'auto', ...options });
+    if (!parsed.success) throw new EasyScoreError(parsed.diagnostics);
+    const snapshot = {
+      elements: this.builder.elements,
+      options: this.builder.options,
+      piece: this.builder.piece,
+      rollingDuration: this.builder.rollingDuration,
+    };
+    const build = () => {
+      this.builder.reset(options);
+      const result = this.parser.parse(line);
+      if (!result.success) throw new RuntimeError('BadArguments', 'Error parsing line: ' + line);
+      return result;
+    };
+    try {
+      return this.factory ? this.factory.transaction(build) : build();
+    } catch (error) {
+      const source = parsed.pieces[this.builder.elements.notes.length]?.source ?? { start: 0, end: line.length };
+      Object.assign(this.builder, snapshot);
+      throw new EasyScoreError([
+        diagnostic(line, 'ConstructionError', error instanceof Error ? error.message : String(error), source),
+      ]);
+    }
   }
 
   /**
@@ -553,7 +837,65 @@ export class EasyScore {
    * Empty measures and invalid notation throw, rather than returning partial music.
    */
   measures(line: string, options: BuilderOptions = {}): StemmableNote[][] {
+    const measures = this.splitMeasures(line);
+    // Validate every measure before constructing any of them. A transaction also covers hook/constructor failures.
+    let duration = options.duration;
+    for (const [index, { text, offset }] of measures.entries()) {
+      const parsed = this.parseNotation(text, { ...options, duration });
+      if (!parsed.success)
+        throw new EasyScoreError(
+          parsed.diagnostics.map((d) => ({
+            ...diagnostic(line, d.code, d.message, { start: offset + d.start, end: offset + d.end }),
+            measure: index + 1,
+          }))
+        );
+      duration = parsed.pieces[parsed.pieces.length - 1].duration;
+    }
+    const build = () => {
+      duration = options.duration;
+      return measures.map(({ text, offset }, index) => {
+        try {
+          const result = this.parse(text, { clef: this.defaults.clef, stem: this.defaults.stem, ...options, duration });
+          if (!result.success) throw new RuntimeError('BadArguments', `Invalid EasyScore measure: ${text}`);
+          duration = this.builder.rollingDuration;
+          return this.builder.getElements().notes;
+        } catch (error) {
+          const diagnostics =
+            error instanceof EasyScoreError
+              ? error.diagnostics
+              : [
+                  diagnostic(text, 'ConstructionError', error instanceof Error ? error.message : String(error), {
+                    start: 0,
+                    end: text.length,
+                  }),
+                ];
+          throw new EasyScoreError(
+            diagnostics.map((d) => ({
+              ...diagnostic(line, d.code, d.message, { start: offset + d.start, end: offset + d.end }),
+              measure: index + 1,
+            }))
+          );
+        }
+      });
+    };
+    const snapshot = {
+      elements: this.builder.elements,
+      options: this.builder.options,
+      piece: this.builder.piece,
+      rollingDuration: this.builder.rollingDuration,
+    };
+    try {
+      return this.factory ? this.factory.transaction(build) : build();
+    } catch (error) {
+      Object.assign(this.builder, snapshot);
+      throw error;
+    }
+  }
+
+  /** Split only unquoted bars and retain each trimmed measure's original source offset. */
+  private splitMeasures(line: string): { text: string; offset: number }[] {
     const parts: string[] = [];
+    const starts = [0];
     let start = 0;
     let quote = '';
     for (let i = 0; i < line.length; i++) {
@@ -565,28 +907,56 @@ export class EasyScore {
       } else if (char === '|') {
         parts.push(line.slice(start, i));
         start = i + 1;
+        starts.push(start);
       }
     }
     parts.push(line.slice(start));
-    const measures = parts.map((part, index) => {
+    return parts.map((part, index) => {
       let text = part.trim();
       if (index > 0) text = text.replace(/^,\s*/, '');
       if (index < parts.length - 1) text = text.replace(/\s*,$/, '');
-      if (!text) throw new RuntimeError('BadArguments', 'Empty EasyScore measure. Use an explicit rest.');
-      return text;
-    });
-    let duration = options.duration;
-    return measures.map((text) => {
-      const result = this.parse(text, { clef: this.defaults.clef, stem: this.defaults.stem, ...options, duration });
-      if (!result.success) throw new RuntimeError('BadArguments', `Invalid EasyScore measure: ${text}`);
-      duration = this.builder.rollingDuration;
-      return this.builder.getElements().notes;
+      if (!text)
+        throw new EasyScoreError([
+          {
+            ...diagnostic(line, 'EmptyMeasure', 'Empty EasyScore measure. Use an explicit rest.', {
+              start: starts[index],
+              end: starts[index] + part.length,
+            }),
+            measure: index + 1,
+          },
+        ]);
+      return { text, offset: starts[index] + part.indexOf(text) };
     });
   }
 
-  voice(notes: Note[], options: { time?: string; options?: { softmaxFactor: number } } = {}): Voice {
-    options = { time: this.defaults.time, ...options };
-    return this.factory.Voice(options).addTickables(notes);
+  /** Configure time, mode, and spacing before inserting tickables. */
+  voice(notes: Tickable[], options: EasyScoreVoiceOptions = {}): Voice {
+    const mode =
+      typeof options.mode === 'string'
+        ? { strict: VoiceMode.STRICT, soft: VoiceMode.SOFT, full: VoiceMode.FULL }[options.mode]
+        : (options.mode ?? VoiceMode.STRICT);
+    if (![VoiceMode.STRICT, VoiceMode.SOFT, VoiceMode.FULL].includes(mode)) {
+      throw new RuntimeError('BadArguments', 'Invalid voice mode.');
+    }
+    const factor = options.softmaxFactor ?? options.options?.softmaxFactor;
+    if (factor !== undefined && (!Number.isFinite(factor) || factor <= 0)) {
+      throw new RuntimeError('BadArguments', 'softmaxFactor must be positive and finite.');
+    }
+    if (this.options.strictOptions) notes.forEach((note) => this.requireOwned(note));
+    return this.factory.transaction(() => {
+      const voice = this.factory.Voice({ time: options.time ?? this.defaults.time });
+      voice.setMode(mode);
+      if (factor !== undefined) voice.setSoftmaxFactor(factor);
+      // Check overflow before addTickables() changes the notes' voice assignments.
+      const ticks = notes.reduce(
+        (total, note) => (note.shouldIgnoreTicks() ? total : total.add(note.getTicks())),
+        new Fraction(0, 1)
+      );
+      if (mode !== VoiceMode.SOFT && ticks.greaterThan(voice.getTotalTicks())) {
+        throw new RuntimeError('BadArguments', 'Too many ticks for this voice.');
+      }
+      return voice.addTickables(notes);
+    });
   }
 
   addCommitHook(commitHook: CommitHook): void {

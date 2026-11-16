@@ -467,6 +467,8 @@ module.exports = (grunt) => {
       [
         '--test',
         'tests/node/package-input-tests.mjs',
+        'tests/node/easyscore-tests.mjs',
+        'tests/node/easyscore-rendering-tests.mjs',
         'tests/node/tool-security-tests.mjs',
         'tests/node/metrics-tests.mjs',
         'tests/node/chord-kerning-tests.mjs',

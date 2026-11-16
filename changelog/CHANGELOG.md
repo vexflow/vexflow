@@ -1,3 +1,14 @@
+# Unreleased
+
+## EasyScore
+
+- Add the first typed composition slice: `EasyScore.create()`, annotation/tie constructors, attachment, systems, styling, and drawing.
+- Add pure notation parsing with source diagnostics and rollback for failed strict construction and measure requests.
+- Apply native note options and voice modes, meter objects, resolution, and softmax settings.
+- Support validated articulation aliases, codes, and glyphs. Unknown names no longer silently become staccato.
+- Preserve legacy non-throwing parsing, custom builders, and commit hooks.
+- Add a user guide, Explorer example, feature coverage checklist, and native-rendering parity tests.
+
 # 5.1.2
 
 ## Notation

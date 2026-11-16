@@ -14,7 +14,8 @@ const NO_ERROR_POS = -1;
 
 export type Match = string | Match[] | null;
 export type RuleFunction = () => Rule;
-export type TriggerFunction = (state?: { matches: Match[] }) => void;
+/** Matched rule range uses zero-based, end-exclusive offsets in the input. */
+export type TriggerFunction = (state?: { matches: Match[]; start: number; end: number }) => void;
 
 export interface Rule {
   // Lexer Rules
@@ -42,6 +43,7 @@ export interface Result {
   matches?: Match[];
   numMatches?: number;
   results?: GroupedResults;
+  furthestErrorPos?: number; // Furthest failed token, for editor diagnostics.
   errorPos?: number; // Set to NO_ERROR if successful. N if there is an error in the string.
 }
 
@@ -78,6 +80,7 @@ export class Parser {
   protected line: string; // Use RegExp to extract tokens from this line.
   protected pos: number;
   protected errorPos: number;
+  protected furthestErrorPos = NO_ERROR_POS;
 
   // For an example of a simple grammar, take a look at tests/parser_tests.ts or
   // the EasyScore grammar in easyscore.ts.
@@ -95,8 +98,10 @@ export class Parser {
     this.line = line;
     this.pos = 0;
     this.errorPos = NO_ERROR_POS;
+    this.furthestErrorPos = NO_ERROR_POS;
     const result = this.expect(this.grammar.begin());
     result.errorPos = this.errorPos;
+    result.furthestErrorPos = result.success ? NO_ERROR_POS : this.furthestErrorPos;
     return result;
   }
 
@@ -123,6 +128,7 @@ export class Parser {
         pos: this.pos,
       };
     } else {
+      this.furthestErrorPos = Math.max(this.furthestErrorPos, this.pos);
       return { success: false, pos: this.pos };
     }
   }
@@ -214,6 +220,7 @@ export class Parser {
     if (!ruleFunc) {
       throw new RuntimeError('Invalid rule function');
     }
+    const start = this.pos;
     let result: Result;
 
     // Get rule from Grammar class.
@@ -256,7 +263,7 @@ export class Parser {
       result.results.forEach((r) => matches.push(flattenMatches(r)));
     }
     if (rule.run && result.success) {
-      rule.run({ matches });
+      rule.run({ matches, start, end: this.pos });
     }
     return result;
   }

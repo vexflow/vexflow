@@ -2,7 +2,19 @@
 
 Plan for [#354](https://github.com/vexflow/vexflow/issues/354).
 
-Status: proposed. No API changes are implemented by this document.
+Status: first implementation slice complete and validated locally. It is not pushed. All upstream pushes are deferred until the complete milestone rollout is finished.
+
+The [user guide](docs/easyscore.md) documents the shipped surface. The [coverage manifest](docs/easyscore-coverage.json) classifies public modules and tracks first-slice contracts.
+
+Implemented in this slice:
+
+- Strict `EasyScore.create()`, `make.annotation()`, `make.tie()`, `attach()`, `system()`, style, draw, and reset helpers.
+- Pure `parseNotation()` results with source diagnostics. Strict construction and measure requests clean up failed managed work.
+- Native note options, voice modes/time/resolution, working softmax options, and validated articulation names/codes/glyphs.
+- A guide and Explorer example, native-rendering parity checks, and compatibility/ownership regressions.
+
+Still pending: the remaining `make.*` families, automatic beaming, typed note sequences, score-local lookup, source-to-element mapping, generic adoption, and structured composition.
+This slice does not complete Milestones 0–2 in full: module classification is established, but exhaustive option-level coverage and the broader extension/reference APIs remain open.
 Reviewed against `main` at `91e753e79e1fed1ef87a669b884dab50e7dca463` on November 16, 2026.
 
 ## Recommendation
@@ -88,7 +100,7 @@ These findings come from source inspection and small probes against a freshly re
 
 The softmax probe used a half note and two quarter notes. The accepted option produced weights of about `0.471, 0.265, 0.265`. Calling the native setter produced the expected equal thirds.
 
-These are planning findings, not fixes made in this change.
+The first slice now fixes the listed option forwarding, articulation fallback, and strict/measure failure cleanup. Broader coverage and score-local registry work remain pending. The table records the pre-implementation behavior.
 
 ## Feature coverage and gaps
 
@@ -126,7 +138,7 @@ The export audit must also classify infrastructure such as BoundingBox, Font, Me
 
 ## Proposed API shape
 
-All APIs in this section are **proposals**, not commands that work today. Final names should be settled in Milestone 0.
+This section describes the target API. Some methods are now implemented; use the [user guide](docs/easyscore.md) for runnable current examples. Methods not listed there remain proposals.
 
 ### One entry point, native objects underneath
 

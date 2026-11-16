@@ -1,8 +1,20 @@
 // Higher-level formatting, invisible timing, and unusual rhythmic glyphs.
+import { createEasyScoreExample } from '../../easyscore-example.mjs';
 import { example as e, number, select, setup, staff, text } from './helpers.mjs';
 
 const group = 'Layout & composition';
 export const layout = [
+  e(
+    'easyscore-first-score',
+    'EasyScore: first score',
+    group,
+    'Create notes, an annotation, a tie, a voice, and a system through EasyScore.',
+    'EasyScore Annotation StaveTie Voice System',
+    `// The function body is shared with the tested user-guide example.
+(${createEasyScoreExample.toString()})(VF, { elementId: 'score', width, height }, ink);`,
+    [],
+    'EasyScore.create() validates before construction. Helpers return native VexFlow objects. This is the first API slice; other notation families remain available through Factory.'
+  ),
   e(
     'proportional-spacing',
     'Proportional spacing',

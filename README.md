@@ -64,7 +64,7 @@ factory.draw();
 
 [See it running here.](https://vexflow.github.io/vexflow-examples/guides/getting-started/)
 
-[Learn more about EasyScore here.](https://github.com/0xfe/vexflow/wiki/Using-EasyScore)
+[Read the EasyScore guide.](docs/easyscore.md)
 
 ## Native API
 

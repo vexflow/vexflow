@@ -321,7 +321,7 @@ export class Element {
   }
 
   /** Call back from registry after the element is registered. */
-  onRegister(registry: Registry): this {
+  onRegister(registry?: Registry): this {
     this.registry = registry;
     return this;
   }

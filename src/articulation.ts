@@ -27,6 +27,8 @@ function L(...args: any[]) {
 }
 
 const { ABOVE, BELOW } = Modifier.Position;
+/** SMuFL values accepted by the native articulation constructor, cached for notation validation. */
+const easyScoreGlyphs = new Set<string>(Object.values(Glyphs));
 
 function roundToNearestHalf(mathFn: (a: number) => number, value: number): number {
   return mathFn(value / 0.5) * 0.5;
@@ -269,24 +271,40 @@ export class Articulation extends Modifier {
     return true;
   }
 
-  static easyScoreHook({ articulations }: { articulations: string }, note: StemmableNote, builder: Builder): void {
-    if (!articulations) return;
-
-    const articNameToCode: Record<string, string> = {
+  /** Resolve EasyScore aliases, native codes, or named SMuFL glyphs without constructing a modifier. */
+  static parseEasyScore(articulations: string): { type: string; position?: number }[] {
+    const aliases: Record<string, string> = {
       staccato: 'a.',
       tenuto: 'a-',
       accent: 'a>',
+      fermata: 'a@',
+      marcato: 'a^',
+      staccatissimo: 'av',
     };
+    const singleCode = articulations.trim().replace(/\.(above|below|left|right)$/, '');
+    const items = Tables.articulationCodes(singleCode) ? [articulations] : articulations.split(',');
+    return items.map((value) => {
+      // A native code can itself contain a dot (a.). Only consume a named position suffix.
+      const match = /^(.*)\.(above|below|left|right)$/.exec(value.trim());
+      const name = match ? match[1] : value.trim();
+      const type = Object.hasOwnProperty.call(aliases, name) ? aliases[name] : name;
+      const glyph = Object.hasOwnProperty.call(Glyphs, type) ? Glyphs[type as keyof typeof Glyphs] : type;
+      if (
+        !Object.hasOwnProperty.call(Tables.articulationCodes(type) ?? {}, 'betweenLines') &&
+        !easyScoreGlyphs.has(glyph)
+      ) {
+        throw new RuntimeError('BadArguments', `Unknown EasyScore articulation: ${name}`);
+      }
+      return { type: glyph, position: match ? Modifier.PositionString[match[2]] : undefined };
+    });
+  }
 
-    articulations
-      .split(',')
-      .map((articString) => articString.trim().split('.'))
-      .map(([name, position]) => {
-        const artic: { type: string; position?: number } = { type: articNameToCode[name] };
-        if (position) artic.position = Modifier.PositionString[position];
-        return builder.getFactory().Articulation(artic);
-      })
-      .map((artic) => note.addModifier(artic, 0));
+  /** Attach validated EasyScore articulations once, after note construction. */
+  static easyScoreHook({ articulations }: { articulations: string }, note: StemmableNote, builder: Builder): void {
+    if (!articulations) return;
+    Articulation.parseEasyScore(articulations).forEach((params) => {
+      note.addModifier(builder.getFactory().Articulation(params), 0);
+    });
   }
 
   /**

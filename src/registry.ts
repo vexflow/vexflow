@@ -64,6 +64,32 @@ export class Registry {
   }
 
   protected index: Index;
+  /** Registrations made during nested synchronous construction scopes. */
+  private transactions: Set<Element>[] = [];
+
+  /** Restore indexes and detach new elements if construction fails. External mutations are not undone. */
+  transaction<T>(build: () => T): T {
+    const before = new Index();
+    for (const name of Object.keys(this.index)) {
+      for (const [value, elements] of Object.entries(this.index[name])) {
+        before[name][value] = Object.assign(Object.create(null), elements);
+      }
+    }
+    const existing = new Set(Object.values(before.id).flatMap((elements) => Object.values(elements)));
+    const created = new Set<Element>();
+    this.transactions.push(created);
+    try {
+      return build();
+    } catch (error) {
+      created.forEach((element) => {
+        if (!existing.has(element)) element.onRegister(undefined);
+      });
+      this.index = before;
+      throw error;
+    } finally {
+      this.transactions.pop();
+    }
+  }
 
   constructor() {
     this.index = new Index();
@@ -113,6 +139,8 @@ export class Registry {
     if (!id) {
       throw new RuntimeError("Can't add element without `id` attribute to registry");
     }
+
+    this.transactions.forEach((transaction) => transaction.add(elem));
 
     // Manually add id to index, then update other indexes.
     elem.setAttribute('id', id);

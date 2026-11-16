@@ -28,6 +28,7 @@ import { Note, NoteStruct } from './note';
 import { NoteSubGroup } from './notesubgroup';
 import { Ornament } from './ornament';
 import { PedalMarking } from './pedalmarking';
+import { Registry } from './registry';
 import { RenderContext } from './rendercontext';
 import { Renderer } from './renderer';
 import { RepeatNote } from './repeatnote';
@@ -102,6 +103,49 @@ export class Factory {
   protected systems!: System[];
   protected sheets!: Sheet[];
   private retained = false;
+  /** Ownership survives drawing; weak keys do not retain discarded notation. */
+  private static owners = new WeakMap<Element, Factory>();
+  private constructionScopes: Element[][] = [];
+
+  /** Identify the Factory that created an element, without changing its draw role. */
+  static getOwner(element: Element): Factory | undefined {
+    return Factory.owners.get(element);
+  }
+
+  /** Record ownership independently of whether the element draws itself or attaches to a note. */
+  private own<T extends Element>(element: T): T {
+    Factory.owners.set(element, this);
+    this.constructionScopes.forEach((scope) => scope.push(element));
+    return element;
+  }
+
+  /** Stage synchronous construction. Failed operations preserve existing queues and registry entries. */
+  transaction<T>(build: () => T): T {
+    const snapshot = {
+      staves: this.staves.slice(),
+      voices: this.voices.slice(),
+      renderQ: this.renderQ.slice(),
+      systems: this.systems.slice(),
+      sheets: this.sheets.slice(),
+      stave: this.stave,
+      retained: this.retained,
+    };
+    const created: Element[] = [];
+    this.constructionScopes.push(created);
+    const run = () => {
+      try {
+        return build();
+      } catch (error) {
+        Object.assign(this, snapshot);
+        created.forEach((element) => Factory.owners.delete(element));
+        throw error;
+      } finally {
+        this.constructionScopes.pop();
+      }
+    };
+    const registry = Registry.getDefaultRegistry();
+    return registry ? registry.transaction(run) : run();
+  }
   /** Foreground defaults survive reset(), like renderer options. */
   protected style: { fillStyle?: string; strokeStyle?: string } = {};
 
@@ -219,7 +263,7 @@ export class Factory {
     this.staves.push(stave);
     stave.setContext(this.context);
     this.stave = stave;
-    return stave;
+    return this.own(stave);
   }
 
   TabStave(params?: { x?: number; y?: number; width?: number; options?: StaveOptions }): TabStave {
@@ -236,7 +280,7 @@ export class Factory {
     this.staves.push(stave);
     stave.setContext(this.context);
     this.stave = stave;
-    return stave;
+    return this.own(stave);
   }
 
   StaveNote(noteStruct: StaveNoteStruct): StaveNote {
@@ -244,7 +288,7 @@ export class Factory {
     if (this.stave) note.setStave(this.stave);
     note.setContext(this.context);
     this.renderQ.push(note);
-    return note;
+    return this.own(note);
   }
 
   GlyphNote(glyph: string, noteStruct: NoteStruct, options?: GlyphNoteOptions): GlyphNote {
@@ -252,7 +296,7 @@ export class Factory {
     if (this.stave) note.setStave(this.stave);
     note.setContext(this.context);
     this.renderQ.push(note);
-    return note;
+    return this.own(note);
   }
 
   RepeatNote(type: string, noteStruct?: NoteStruct, options?: GlyphNoteOptions): RepeatNote {
@@ -260,7 +304,7 @@ export class Factory {
     if (this.stave) note.setStave(this.stave);
     note.setContext(this.context);
     this.renderQ.push(note);
-    return note;
+    return this.own(note);
   }
 
   GhostNote(noteStruct: string | NoteStruct): GhostNote {
@@ -268,7 +312,7 @@ export class Factory {
     if (this.stave) ghostNote.setStave(this.stave);
     ghostNote.setContext(this.context);
     this.renderQ.push(ghostNote);
-    return ghostNote;
+    return this.own(ghostNote);
   }
 
   TextNote(noteStruct: TextNoteStruct): TextNote {
@@ -276,7 +320,7 @@ export class Factory {
     if (this.stave) textNote.setStave(this.stave);
     textNote.setContext(this.context);
     this.renderQ.push(textNote);
-    return textNote;
+    return this.own(textNote);
   }
 
   BarNote(params: { type?: BarlineType | string } = {}): BarNote {
@@ -284,7 +328,7 @@ export class Factory {
     if (this.stave) barNote.setStave(this.stave);
     barNote.setContext(this.context);
     this.renderQ.push(barNote);
-    return barNote;
+    return this.own(barNote);
   }
 
   ClefNote(params?: { type?: string; options?: { size?: string; annotation?: string } }): ClefNote {
@@ -301,7 +345,7 @@ export class Factory {
     if (this.stave) clefNote.setStave(this.stave);
     clefNote.setContext(this.context);
     this.renderQ.push(clefNote);
-    return clefNote;
+    return this.own(clefNote);
   }
 
   TimeSigNote(params?: { time?: string }): TimeSigNote {
@@ -314,7 +358,7 @@ export class Factory {
     if (this.stave) timeSigNote.setStave(this.stave);
     timeSigNote.setContext(this.context);
     this.renderQ.push(timeSigNote);
-    return timeSigNote;
+    return this.own(timeSigNote);
   }
 
   KeySigNote(params: { key: string; cancelKey?: string; alterKey?: string[] }): KeySigNote {
@@ -322,7 +366,7 @@ export class Factory {
     if (this.stave) keySigNote.setStave(this.stave);
     keySigNote.setContext(this.context);
     this.renderQ.push(keySigNote);
-    return keySigNote;
+    return this.own(keySigNote);
   }
 
   TabNote(noteStruct: TabNoteStruct): TabNote {
@@ -330,26 +374,26 @@ export class Factory {
     if (this.stave) note.setStave(this.stave);
     note.setContext(this.context);
     this.renderQ.push(note);
-    return note;
+    return this.own(note);
   }
 
   GraceNote(noteStruct: GraceNoteStruct): GraceNote {
     const note = new GraceNote(noteStruct);
     if (this.stave) note.setStave(this.stave);
     note.setContext(this.context);
-    return note;
+    return this.own(note);
   }
 
   GraceNoteGroup(params: { notes: StemmableNote[]; slur?: boolean }): GraceNoteGroup {
     const group = new GraceNoteGroup(params.notes, params.slur);
     group.setContext(this.context);
-    return group;
+    return this.own(group);
   }
 
   Accidental(params: { type: string }): Accidental {
     const accid = new Accidental(params.type);
     accid.setContext(this.context);
-    return accid;
+    return this.own(accid);
   }
 
   Annotation(params?: {
@@ -370,7 +414,7 @@ export class Factory {
     annotation.setVerticalJustification(p.vJustify);
     annotation.setFont(p.font);
     annotation.setContext(this.context);
-    return annotation;
+    return this.own(annotation);
   }
 
   ChordSymbol(params?: {
@@ -398,7 +442,7 @@ export class Factory {
       chordSymbol.setFontSize(p.fontSize);
     }
     chordSymbol.setContext(this.context);
-    return chordSymbol;
+    return this.own(chordSymbol);
   }
 
   Articulation(params?: { betweenLines?: boolean; type?: string; position?: string | number }): Articulation {
@@ -407,7 +451,7 @@ export class Factory {
     if (params?.position !== undefined) articulation.setPosition(params.position);
     if (params?.betweenLines !== undefined) articulation.setBetweenLines(params.betweenLines);
     articulation.setContext(this.context);
-    return articulation;
+    return this.own(articulation);
   }
 
   Ornament(
@@ -433,7 +477,7 @@ export class Factory {
       ornament.setDelayed(options.delayed);
     }
     ornament.setContext(this.context);
-    return ornament;
+    return this.own(ornament);
   }
 
   TextDynamics(params?: { text?: string; duration?: string; dots?: number; line?: number }): TextDynamics {
@@ -455,7 +499,7 @@ export class Factory {
     if (this.stave) text.setStave(this.stave);
     text.setContext(this.context);
     this.renderQ.push(text);
-    return text;
+    return this.own(text);
   }
 
   Fingering(params: { number?: string; position?: string }): FretHandFinger {
@@ -468,7 +512,7 @@ export class Factory {
     const fingering = new FretHandFinger(p.number);
     fingering.setPosition(p.position);
     fingering.setContext(this.context);
-    return fingering;
+    return this.own(fingering);
   }
 
   StringNumber(params: { number: string; position: string }, drawCircle = true): StringNumber {
@@ -476,7 +520,7 @@ export class Factory {
     stringNumber.setPosition(params.position);
     stringNumber.setContext(this.context);
     stringNumber.setDrawCircle(drawCircle);
-    return stringNumber;
+    return this.own(stringNumber);
   }
 
   TickContext(): TickContext {
@@ -492,7 +536,7 @@ export class Factory {
     const multiMeasureRest = new MultiMeasureRest(numMeasures, params);
     multiMeasureRest.setContext(this.context);
     this.renderQ.push(multiMeasureRest);
-    return multiMeasureRest;
+    return this.own(multiMeasureRest);
   }
 
   Voice(params?: { time?: VoiceTime | string }): Voice {
@@ -502,14 +546,14 @@ export class Factory {
     };
     const voice = new Voice(p.time);
     this.voices.push(voice);
-    return voice;
+    return this.own(voice);
   }
 
   StaveConnector(params: { topStave: Stave; bottomStave: Stave; type: StaveConnectorType }): StaveConnector {
     const connector = new StaveConnector(params.topStave, params.bottomStave);
     connector.setType(params.type).setContext(this.context);
     this.renderQ.push(connector);
-    return connector;
+    return this.own(connector);
   }
 
   Formatter(options?: FormatterOptions): Formatter {
@@ -525,7 +569,7 @@ export class Factory {
 
     const tuplet = new Tuplet(p.notes, p.options).setContext(this.context);
     this.renderQ.push(tuplet);
-    return tuplet;
+    return this.own(tuplet);
   }
 
   Beam(params: {
@@ -546,13 +590,13 @@ export class Factory {
       });
     }
     this.renderQ.push(beam);
-    return beam;
+    return this.own(beam);
   }
 
   Curve(params: { from: Note | undefined; to: Note | undefined; options: CurveOptions }): Curve {
     const curve = new Curve(params.from, params.to, params.options).setContext(this.context);
     this.renderQ.push(curve);
-    return curve;
+    return this.own(curve);
   }
 
   StaveTie(params: {
@@ -576,7 +620,7 @@ export class Factory {
     if (params.options?.direction) tie.setDirection(params.options.direction);
     tie.setContext(this.context);
     this.renderQ.push(tie);
-    return tie;
+    return this.own(tie);
   }
 
   StaveLine(params: {
@@ -598,7 +642,7 @@ export class Factory {
 
     line.setContext(this.context);
     this.renderQ.push(line);
-    return line;
+    return this.own(line);
   }
 
   VibratoBracket(params: {
@@ -620,7 +664,7 @@ export class Factory {
     vibratoBracket.setContext(this.context);
     this.renderQ.push(vibratoBracket);
 
-    return vibratoBracket;
+    return this.own(vibratoBracket);
   }
 
   TextBracket(params: {
@@ -647,14 +691,14 @@ export class Factory {
 
     textBracket.setContext(this.context);
     this.renderQ.push(textBracket);
-    return textBracket;
+    return this.own(textBracket);
   }
 
   System(params: SystemOptions = {}): System {
     params.factory = this;
     const system = new System(params).setContext(this.context);
     this.systems.push(system);
-    return system;
+    return this.own(system);
   }
 
   /**
@@ -686,7 +730,7 @@ export class Factory {
     pedal.setType(PedalMarking.typeString[p.options.style]);
     pedal.setContext(this.context);
     this.renderQ.push(pedal);
-    return pedal;
+    return this.own(pedal);
   }
 
   NoteSubGroup(params?: { notes?: Note[] }): NoteSubGroup {
@@ -697,7 +741,7 @@ export class Factory {
 
     const group = new NoteSubGroup(p.notes);
     group.setContext(this.context);
-    return group;
+    return this.own(group);
   }
 
   /** Render the score. */

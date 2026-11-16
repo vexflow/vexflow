@@ -13,7 +13,7 @@ import { ClefNote } from './clefnote';
 import { Crescendo } from './crescendo';
 import { Curve, CurvePosition } from './curve';
 import { Dot } from './dot';
-import { EasyScore } from './easyscore';
+import { EasyScore, EasyScoreError } from './easyscore';
 import { Element } from './element';
 import { Factory } from './factory';
 import { Font, FontStyle, FontWeight } from './font';
@@ -113,6 +113,7 @@ export class VexFlow {
   static Curve = Curve;
   static Dot = Dot;
   static EasyScore = EasyScore;
+  static EasyScoreError = EasyScoreError;
   static Element = Element;
   static Factory = Factory;
   static Font = Font;
