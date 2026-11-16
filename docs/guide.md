@@ -1,0 +1,129 @@
+# Interactive user guide
+
+The guide lives in [`guide/`](../guide/) and publishes to <https://vexflow.com/guide/>.
+It includes Quickstart, EasyScore, native API lessons, and an interactive playground.
+
+## Develop
+
+```sh
+npm ci
+npm run guide
+```
+
+Open <http://127.0.0.1:5174/guide/>. Use `npm run guide -- --port=8080` for another port.
+Restart the command after changing source files; the preview serves a frozen build.
+
+```sh
+npm run guide:build
+npm run guide:test
+```
+
+Build output is `build/guide/`. Tests build first and run headless Chrome using Puppeteer.
+Set `PUPPETEER_EXECUTABLE_PATH` to an installed Chrome if needed, as described in [build setup](build.md#local-setup).
+
+`GUIDE_SCREENSHOTS=1 npm run guide:test` also saves desktop/mobile screenshots and exported examples
+in a temporary directory printed at the end. Screenshots have an opaque page background and white score surfaces.
+Do not commit generated screenshots. Attach relevant ones to the issue with `gh issue comment --attach`.
+
+## Edit lessons and examples
+
+| File                 | Purpose                                                          |
+| -------------------- | ---------------------------------------------------------------- |
+| `guide/content.mjs`  | Sections, lesson prose, exercises, related lessons, source links |
+| `guide/examples.mjs` | Complete teaching snippets                                       |
+| `guide/app.mjs`      | Navigation, controls, editor, drafts, export                     |
+| `guide/style.css`    | Responsive layout and typography                                 |
+| `guide/index.html`   | Accessible page shell                                            |
+| `guide/cli.mjs`      | Build, preview server, upload command                            |
+| `guide/test.mjs`     | Browser and upload regressions                                   |
+
+Lesson IDs are stable fragment links: `#lesson/notation`. Playground links use `#playground/notes`.
+Keep IDs unchanged when revising titles. These routes need no server-side rewrite rules.
+
+Write short paragraphs, concrete examples, and one useful exercise per lesson.
+Lesson bodies are trusted, repository-authored HTML. Do not insert user input into this HTML.
+Use `repo:docs/example.md` source links for files in the same revision as the bundled library.
+The build records the package version and Git commit. Uncommitted library changes are included in builds,
+but the commit link cannot describe those edits; commit before publishing.
+
+Each teaching example follows Explorer's metadata shape: `id`, `title`, `group`, `description`,
+`code`, `api`, `controls`, and `tips`. Snippets receive `VF`, `width`, `height`, `ink`, and `params`.
+They render SVG into `div#score`. The runtime loads fonts before drawing.
+Keep beginner examples in strict voice mode. Explain any deliberate soft-mode example.
+
+The playground includes the Explorer catalog directly. Add general notation examples there when both tools
+should show them. Keep tutorial-specific examples in `guide/examples.mjs`.
+
+## Shared components and EasyScore updates
+
+The build first invokes the existing Explorer builder. It copies the same CodeJar/Prism editor,
+Preview class, sandbox runtime, font data, and current-source VexFlow bundle into the guide's asset graph.
+It does not use an npm VexFlow release or a runtime CDN. No new runtime dependency is required.
+
+The guide does not modify EasyScore or Explorer implementation files. This keeps it separate from
+[#354](https://github.com/vexflow/vexflow/issues/354). The current guide branch starts from the first
+EasyScore composition slice. New helpers should be documented only after their implementation is available.
+After integrating further EasyScore work:
+
+1. Review `docs/easyscore.md` and `docs/easyscore-coverage.json`.
+2. Update the relevant lessons and add complete teaching examples.
+3. Run `npm run guide:test` against the combined source.
+4. Check the version link and new examples before uploading.
+
+Tests render every lesson and every playground example in the guide, including the shared Explorer examples.
+This catches runtime and catalog drift when the two branches are integrated.
+
+## Editing and export behavior
+
+- Drafts are stored by example ID in browser local storage. Storage failure leaves editing usable.
+- Reset restores the original code and parameter values and recreates the sandbox.
+- Run as you type is opt-in. Ctrl/Command+Enter runs immediately. Escape, then Tab leaves the editor.
+- Copy link points to the original example. It does not upload or share a draft.
+- Save JS includes parameter values and the environment variables the app must provide.
+- Save HTML includes the current library, selected fonts, code, and controls in a standalone page.
+- Save SVG embeds the selected music and text fonts. It does not convert glyphs to paths.
+  See [portable SVG](portable-svg.md) for path-only export and font-license requirements.
+- User code runs inside Explorer's `sandbox="allow-scripts"` iframe with network access disabled.
+  As with Explorer, arbitrary synchronous infinite loops are outside the timeout's guarantees.
+
+## Validate and publish
+
+`npm run guide:test` covers:
+
+- All lesson routes, related links, and repository source paths.
+- Every teaching and Explorer example with Bravura, Petaluma, and Gonville.
+- Editing, literal source text, keyboard access, drafts, reset, and errors.
+- Mobile layout, navigation, disabled storage, and sandbox attributes.
+- Standalone HTML/SVG/JS exports and bundled-only page requests.
+- Upload ordering, cache headers, destination validation, and changed-build rejection.
+
+Upload tests use a fake `gcloud` command. They never publish remotely.
+
+```sh
+npm run guide:upload -- --dry-run
+npm run guide:upload
+```
+
+The default destination is `gs://vexflow.com/guide/`. Override it with
+`--destination=gs://another-bucket/guide/`. A nonempty prefix and trailing slash are required.
+
+The shared uploader validates hashes, freezes the manifest members, uploads immutable assets first,
+and uploads `index.html` last with a 60-second cache. It reads the HTML back to verify its hash.
+Old assets remain available for cached pages. The guide command does not change hosting configuration.
+See [deployment setup](build.md#upload-static-sites) for authentication and public ACL requirements.
+
+After publishing, open `/guide/`, a lesson fragment, and a playground fragment on desktop and mobile.
+Edit a note, select another font, and save an SVG. Verify that the sidebar identifies the intended source revision.
+
+## Sources
+
+The lessons synthesize and update these project-owned references:
+
+- [Original VexFlow tutorial](https://vexflow.github.io/vexflow-examples/guides/tutorial/).
+- [Original EasyScore wiki](https://github.com/0xfe/vexflow/wiki/Using-EasyScore).
+- [Current EasyScore documentation](easyscore.md) and [coverage manifest](easyscore-coverage.json).
+- [Explorer](explorer.md), [score layout](score-layout.md), [sheets and themes](sheets-and-themes.md),
+  [proportional spacing](proportional-spacing.md), [text and lyrics](text-and-lyrics.md),
+  [chord symbols](chord-symbols.md), [portable SVG](portable-svg.md), and [Node setup](jsdom.md).
+
+Each lesson links its relevant sources. Current source and executable examples take precedence over old API spellings.

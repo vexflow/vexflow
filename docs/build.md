@@ -76,6 +76,14 @@ Open <http://127.0.0.1:5173/explorer/>. This builds the library and Explorer, th
 
 Use another port with `npm run explorer -- --port=8080`. See the [Explorer guide](explorer.md) for editing examples and inspecting notation.
 
+### Interactive user guide
+
+```sh
+npm run guide
+```
+
+Open <http://127.0.0.1:5174/guide/>. This builds the current library and guide, then serves them locally. Use `-- --port=8080` for another port. Restart after source changes. See [guide authoring and validation](guide.md).
+
 ### Clean generated files
 
 ```sh
@@ -94,11 +102,13 @@ npm run lint
 npm test
 npm run explorer:test
 npm run tests:test
+npm run guide:test
 ```
 
 - `npm test` builds debug and ESM outputs, runs Node integration checks, and runs QUnit in headless Chrome.
 - `explorer:test` checks examples, controls, editing, inspection, and upload behavior.
 - `tests:test` builds and checks the standalone test gallery and its upload behavior.
+- `guide:test` checks lesson routes, all editable examples, mobile layout, exports, and upload behavior.
 - Upload tests use a fake cloud command. They do not publish anything.
 
 Run build and test tasks sequentially because they share `build/`. `npm test` cleans that directory and does not recreate the production bundles or declarations.
@@ -257,10 +267,11 @@ For prereleases, use `--tag beta` (or `alpha` / `rc`) instead of `--tag latest`.
 
 ## Upload static sites
 
-The Explorer and visual test gallery are self-contained static sites. Their upload commands build current source and bundle the required scripts and fonts.
+The guide, Explorer, and visual test gallery are self-contained static sites. Their upload commands build current source and bundle the required scripts and fonts.
 
 | Site         | Build only               | Upload                    | Bucket prefix                | Public URL                      |
 | ------------ | ------------------------ | ------------------------- | ---------------------------- | ------------------------------- |
+| User guide   | `npm run guide:build`    | `npm run guide:upload`    | `gs://vexflow.com/guide/`    | <https://vexflow.com/guide/>    |
 | Explorer     | `npm run explorer:build` | `npm run explorer:upload` | `gs://vexflow.com/explorer/` | <https://vexflow.com/explorer/> |
 | Test gallery | `npm run tests:build`    | `npm run tests:upload`    | `gs://vexflow.com/tests/`    | <https://vexflow.com/tests/>    |
 
@@ -273,17 +284,20 @@ gcloud auth login
 Preview the upload commands, then publish:
 
 ```sh
+npm run guide:upload -- --dry-run
 npm run explorer:upload -- --dry-run
 npm run tests:upload -- --dry-run
+npm run guide:upload
 npm run explorer:upload
 npm run tests:upload
 ```
 
-Dry runs still build and validate locally, but do not invoke `gcloud` or upload files. Build output is in `build/explorer/` and `build/tests-site/`.
+Dry runs still build and validate locally, but do not invoke `gcloud` or upload files. Build output is in `build/guide/`, `build/explorer/`, and `build/tests-site/`.
 
 To use another bucket, include a nonempty prefix and trailing slash:
 
 ```sh
+npm run guide:upload -- --destination=gs://another-bucket/guide/
 npm run explorer:upload -- --destination=gs://another-bucket/explorer/
 npm run tests:upload -- --destination=gs://another-bucket/tests/
 ```
@@ -292,4 +306,4 @@ The destination must support the uploader's `publicRead` object ACLs. Custom hos
 
 Assets use fingerprinted paths and a one-year immutable cache. They upload first. `index.html` uploads last with a 60-second cache and mandatory revalidation, then is read back for a hash check. Old assets remain available for cached pages; the scripts do not delete remote objects.
 
-Verify the public pages after uploading. For the test gallery, filters such as `/tests/?module=StaveNote` still work. Hosted tests use their bundled VexFlow build, regardless of `ver` or `esm` query parameters.
+Verify the public pages after uploading. For the guide, check `/guide/#lesson/notation` and `/guide/#playground/notes`, edit a note, and verify the source revision in the sidebar. For the test gallery, filters such as `/tests/?module=StaveNote` still work. Hosted tests use their bundled VexFlow build, regardless of `ver` or `esm` query parameters.
