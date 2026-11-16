@@ -1,5 +1,9 @@
 // Parent-side preview lifecycle. A fresh sandbox isolates every edited example.
+import { runPreview } from './runner.mjs';
+
 const channel = 'vexflow-explorer';
+// Inline our own runtime so delayed user errors are not masked as cross-origin script errors.
+const runtime = `(${runPreview.toString()})();`.replace(/<\/script/gi, '<\\/script');
 export class Preview {
   constructor(host, onMessage) {
     this.host = host;
@@ -27,7 +31,7 @@ export class Preview {
     // Classic scripts can load in an opaque-origin frame without bucket CORS settings.
     const asset = (name) => new URL(name, import.meta.url).href.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
     const origin = new URL(import.meta.url).origin;
-    frame.srcdoc = `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' ${origin}; style-src 'unsafe-inline'; font-src data:; img-src data: blob:; connect-src 'none';"><style>html,body{margin:0;padding:0;background:transparent;overflow:hidden}#score{max-width:100%}svg{display:block}svg *{cursor:crosshair}</style></head><body><div id="score"></div><script src="${asset('vexflow.js')}"></script><script src="${asset('runner.js')}"></script></body></html>`;
+    frame.srcdoc = `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' ${origin}; style-src 'unsafe-inline'; font-src data:; img-src data: blob:; connect-src 'none';"><style>html,body{margin:0;padding:0;background:transparent;overflow:hidden}#score{max-width:100%}svg{display:block}svg *{cursor:crosshair}</style></head><body><div id="score"></div><script src="${asset('vexflow.js')}"></script><script>${runtime}</script></body></html>`;
     this.frame = frame;
     this.host.replaceChildren(frame);
     this.timer = setTimeout(() => {

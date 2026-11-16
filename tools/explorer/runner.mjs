@@ -1,5 +1,5 @@
 // Runs one edited example in an opaque-origin iframe and reports only serializable diagnostics.
-(() => {
+export function runPreview() {
   'use strict';
   const channel = 'vexflow-explorer';
   let token,
@@ -245,4 +245,4 @@
     }
   });
   parent.postMessage({ channel, type: 'ready' }, '*');
-})();
+}

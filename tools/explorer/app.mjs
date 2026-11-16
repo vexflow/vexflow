@@ -196,6 +196,7 @@ function run() {
   const width = Math.max(280, Math.round($('preview').clientWidth));
   lastWidth = width;
   $('render-error').hidden = true;
+  $('error-message').textContent = '';
   $('render-pending').hidden = false;
   $('download').disabled = true;
   $('render-status').textContent = 'Rendering…';

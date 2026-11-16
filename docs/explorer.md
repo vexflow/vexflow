@@ -59,7 +59,7 @@ The test suite renders every default, every select value, and numeric endpoints.
 
 ## Runtime boundaries
 
-Edited code runs in a fresh iframe with `sandbox="allow-scripts"`. The frame has an opaque origin. It cannot access the explorer's DOM, local storage, or other pages on `vexflow.com`. Its content policy blocks network connections. The parent accepts messages only from the current frame and run token.
+Edited code runs in a fresh iframe with `sandbox="allow-scripts"`. The frame has an opaque origin. It cannot access the explorer's DOM, local storage, or other pages on `vexflow.com`. Its content policy blocks network connections. The parent accepts messages only from the current frame and run token. The preview runtime is inserted inline into that frame, so delayed user-code errors retain their messages without requiring bucket CORS changes.
 
 The sandbox is an origin boundary, not a CPU or memory limit. An infinite synchronous loop can still stall a browser tab. The watchdog handles asynchronous runs that never settle. Use local examples you trust; this tool is not a hosted service for running arbitrary third-party programs.
 

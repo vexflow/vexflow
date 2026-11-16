@@ -90,6 +90,25 @@ try {
     assert.match(await page.$eval('#error-message', (el) => el.textContent), /A useful error/);
     await page.click('#recover');
     await assertRendered('recovery');
+    for (const code of [
+      'setTimeout(() => { throw new Error("Delayed example error"); }, 20);',
+      'Promise.reject(new Error("Delayed example error"));',
+    ]) {
+      await page.$eval(
+        '#editor',
+        (el, code) => {
+          el.value += '\n' + code;
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+        },
+        code
+      );
+      await page.waitForFunction(() =>
+        document.querySelector('#error-message').textContent.includes('Delayed example error')
+      );
+      await page.click('#recover');
+      await assertRendered('asynchronous error recovery');
+    }
+
     await page.$eval('#editor', (el) => {
       el.value += '\n// saved draft';
       el.dispatchEvent(new Event('input', { bubbles: true }));
