@@ -1,9 +1,27 @@
 # Vexflow repository guidance
 
-## Scope and workflow
+## Github Issues
+
+If addresing Github issues, first:
+
+- Do an initial assessement, and Post an update around what you observerd, and your inital plan
+- Assign the issue to me, label as in progress.
+- Fix the issue
+- Post another update after the work is commited and pushed.
+- Otherwise, just post an issue with the work is done.
+- If successful, close the issue.
+
+Where relevant, if there are visual implications, attach some before/after screenshots with a couple of representative examples. Attach to the issue, not into the commit.
+
+Github comments should be short and easy to read with simple sentences, but do include detail where necessary. Try and stick to the documentation guidelines below.
+
+Keep any issue-specfic files (like repro tests or notes) in the issues/ directory. Use this only when needed.
+
+If an issue is labeled ai_todo, remove it after completion.
 
 ## Dependencies
 
+- In general, we try to minimize external runtime dependencies.
 - Prefer the language/platform standard library and small, readable local implementations.
 - Remove dependencies when doing so is simpler and safer than retaining them.
 - Use well-known, trusted, maintained packages when a dependency earns its complexity.
@@ -12,12 +30,12 @@
 
 ## Code readability
 
-- Write for human debugging, audit, and interpretation.
-- Add a short file header describing the contents of each new or substantively changed source file.
+- Write for human understanding, debugging, audit, and interpretation. This means clear simple comments, clear readable code.
 - Comment constants, functions, methods, structs, interfaces, and other significant declarations.
 - Explain intent, invariants, failure behavior, and non-obvious decisions.
-- Split long functions into named steps. Clearly comment complex blocks that remain.
+- Split long functions into named steps (or shorter functions.) Clearly comment complex blocks that remain.
 - Prefer explicit control flow, descriptive names, and straightforward data structures.
+- Add a short file header describing the contents of each new or substantively changed source file.
 - Keep generated/vendor assets clearly identified; do not manually annotate generated code.
 
 ## Documentation
