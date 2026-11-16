@@ -839,3 +839,22 @@ test('composition keeps cross-staff placement and applies accidentals on the tar
   assert.equal(note.getStave(), result.staves[0][1]);
   assert.ok(Number.isFinite(note.getYs()[0]));
 });
+
+test('composition carries clef state and cancels inline key signatures on the correct staff lines', () => {
+  const score = create();
+  const result = score.compose({ staves: [{ id: 'bass', clef: 'bass', key: 'G', measures: [
+    { voices: [{ notes: 'G3/w' }] },
+    { key: 'D', voices: [{ notes: ['D3/h', { change: { clef: 'treble', key: 'C' } }, 'C5/h'] }] },
+  ] }] });
+  assert.equal(result.staves[0][0].getClef(), 'bass');
+  assert.equal(result.staves[1][0].getClef(), 'bass');
+  const inline = result.notes[1][0][0].find((note) => note instanceof VF.KeySigNote);
+  inline.preFormat();
+  assert.equal(inline.keySignature.accList.length, 2, 'D major is cancelled with two naturals');
+  const native = new VF.KeySignature('C', 'D').setStave(new VF.Stave(0, 0, 200).addClef('treble'));
+  native.format();
+  assert.deepEqual(inline.keySignature.accList, native.accList, 'inline cancellation follows the new clef');
+  const attached = score.make.stave();
+  score.attachToStave(attached, score.make.clef('alto'));
+  assert.equal(attached.getClef(), 'alto');
+});

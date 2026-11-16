@@ -22,6 +22,7 @@ export class KeySignature extends StaveModifier {
 
   protected paddingForced: boolean;
   protected formatted?: boolean;
+  protected clefOverride?: string;
   protected cancelKeySpec?: string;
   protected accList: { type: string; line: number }[] = [];
   protected keySpec?: string;
@@ -216,6 +217,14 @@ export class KeySignature extends StaveModifier {
     return this.width;
   }
 
+  /** Override staff clef for an inline signature following an inline clef change. */
+  setClef(clef?: string): this {
+    if (clef !== undefined) Tables.clefProperties(clef);
+    this.clefOverride = clef;
+    this.formatted = false;
+    return this;
+  }
+
   // Set the key signature to a specific key, ie: 'C' or 'Gm'
   setKeySig(keySpec: string, cancelKeySpec?: string, alterKeySpec?: string[]): this {
     this.formatted = false;
@@ -272,7 +281,8 @@ export class KeySignature extends StaveModifier {
 
     if (this.accList.length > 0) {
       const clef =
-        (this.position === StaveModifierPosition.END ? stave.getEndClef() : stave.getClef()) || stave.getClef();
+        this.clefOverride ??
+        ((this.position === StaveModifierPosition.END ? stave.getEndClef() : stave.getClef()) || stave.getClef());
       if (cancelAccList) {
         this.convertAccLines(clef, cancelAccList.type, cancelAccList.accList);
       }

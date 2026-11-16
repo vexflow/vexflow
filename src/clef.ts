@@ -105,6 +105,11 @@ export class Clef extends StaveModifier {
     L('Creating clef:', type);
   }
 
+  /** Return the named clef so staff attachments can retain musical state. */
+  getType(): string {
+    return this.type;
+  }
+
   /** Set clef type, size and annotation. */
   setType(type: string, size: string = 'default', annotation?: string): this {
     this.type = type;

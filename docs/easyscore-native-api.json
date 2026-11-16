@@ -273,6 +273,7 @@
       "line",
       "types(): Record<string, { code: string; line: number }>",
       "constructor(type: string, size?: string, annotation?: string)",
+      "getType(): string",
       "setType(type: string, size: string = 'default', annotation?: string): this",
       "getPoint(size?: string): number",
       "setStave(stave: Stave): this",
@@ -724,7 +725,7 @@
       "BarNote(params: { type?: BarlineType | string } = {}): BarNote",
       "ClefNote(params?: { type?: string; options?: { size?: string; annotation?: string } }): ClefNote",
       "TimeSigNote(params?: { time?: string }): TimeSigNote",
-      "KeySigNote(params: { key: string; cancelKey?: string; alterKey?: string[] }): KeySigNote",
+      "KeySigNote(params: { key: string; cancelKey?: string; alterKey?: string[]; clef?: string }): KeySigNote",
       "TabNote(noteStruct: TabNoteStruct, drawStem = false): TabNote",
       "GraceNote(noteStruct: GraceNoteStruct): GraceNote",
       "GraceNoteGroup(params: { notes: StemmableNote[]; slur?: boolean }): GraceNoteGroup",
@@ -994,6 +995,7 @@
       "getBoundingBox(): BoundingBox",
       "getPadding(index: number): number",
       "getWidth(): number",
+      "setClef(clef?: string): this",
       "setKeySig(keySpec: string, cancelKeySpec?: string, alterKeySpec?: string[]): this",
       "alterKey(alterKeySpec: string[]): this",
       "format(): void",
@@ -1003,7 +1005,7 @@
   "keysignote": {
     "KeySigNote": [
       "CATEGORY(): string",
-      "constructor(keySpec: string, cancelKeySpec?: string, alterKeySpec?: string[])",
+      "constructor(keySpec: string, cancelKeySpec?: string, alterKeySpec?: string[], clef?: string)",
       "addToModifierContext(mc: ModifierContext): this",
       "preFormat(): this",
       "draw(): void"
@@ -1597,6 +1599,7 @@
     "StaveOptions": {
       "extends": [],
       "fields": [
+        "clef?: string;",
         "bottomTextPosition?: number;",
         "lineConfig?: StaveLineConfig[];",
         "spaceBelowStaffLn?: number;",

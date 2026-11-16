@@ -484,8 +484,8 @@ export class Factory {
     return this.own(timeSigNote);
   }
 
-  KeySigNote(params: { key: string; cancelKey?: string; alterKey?: string[] }): KeySigNote {
-    const keySigNote = new KeySigNote(params.key, params.cancelKey, params.alterKey);
+  KeySigNote(params: { key: string; cancelKey?: string; alterKey?: string[]; clef?: string }): KeySigNote {
+    const keySigNote = new KeySigNote(params.key, params.cancelKey, params.alterKey, params.clef);
     if (this.stave) keySigNote.setStave(this.stave);
     keySigNote.setContext(this.context);
     this.renderQ.push(keySigNote);

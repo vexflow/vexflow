@@ -152,11 +152,13 @@ function buildVoice(
         }
         notes.push(item);
       } else if ('change' in item) {
+        const previous = state;
         state = { ...state, ...item.change };
         changes.push({ index: notes.length, state: { ...state } });
         if (display) {
           if (item.change.clef) notes.push(score.make.clefNote({ type: state.clef, options: { size: 'small' } }));
-          if (item.change.key) notes.push(score.make.keySigNote({ key: state.key }));
+          if (item.change.key)
+            notes.push(score.make.keySigNote({ key: state.key, cancelKey: previous.key, clef: state.clef }));
           if (item.change.time) notes.push(score.make.timeSigNote({ time: state.time }));
         }
         score.set({ clef: state.clef, time: state.time });
@@ -300,7 +302,7 @@ function buildStaffMeasure(
   const stave =
     staff.kind === 'tab'
       ? score.make.tabStave({ options: staff.options })
-      : score.make.stave({ options: staff.options });
+      : score.make.stave({ options: { ...staff.options, clef: state.clef } });
   addSignatures(score, stave, state, index && spec.signatures !== 'every-measure' ? previous : undefined);
 
   return {
