@@ -119,7 +119,7 @@ export class Repetition extends StaveModifier {
 
     this.text = text;
     if (drawCoda) {
-      this.text += ' \ue048' /*coda*/;
+      this.text += ' \ue048'; /*coda*/
     }
     this.setFont(Metrics.getFontInfo('Repetition.text'));
     switch (this.symbolType) {

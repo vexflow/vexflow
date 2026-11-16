@@ -17,7 +17,8 @@ interface OffscreenCanvas extends EventTarget {
 
 // https://html.spec.whatwg.org/multipage/canvas.html#offscreencanvasrenderingcontext2d
 interface OffscreenCanvasRenderingContext2D
-  extends CanvasState,
+  extends
+    CanvasState,
     CanvasTransform,
     CanvasCompositing,
     CanvasImageSmoothing,

@@ -94,7 +94,7 @@ export class TimeSignature extends StaveModifier {
         code = smallSig ? Glyphs.timeSigParensRightSmall : Glyphs.timeSigParensRight;
         break;
       default:
-        code = String.fromCodePoint(0xe080 + Number(key[0])) /* timeSigN = Glyphs.timeSig0 + N */;
+        code = String.fromCodePoint(0xe080 + Number(key[0])); /* timeSigN = Glyphs.timeSig0 + N */
         break;
     }
     return code;

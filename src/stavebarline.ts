@@ -19,7 +19,7 @@ export enum BarlineType {
 export enum RepeatBracketType {
   NONE = 0,
   STRAIGHT = 1,
-  CURVED = 2
+  CURVED = 2,
 }
 export class Barline extends StaveModifier {
   static override get CATEGORY(): string {
@@ -118,7 +118,7 @@ export class Barline extends StaveModifier {
     };
     this.setPosition(StaveModifierPosition.BEGIN);
     this.setType(type);
-  }  
+  }
   setRepeatBracket(val: RepeatBracketType) {
     this.repeatBrackets = val;
   }
@@ -203,7 +203,7 @@ export class Barline extends StaveModifier {
     const rptBracketH = Math.round(0.6 * Tables.STAVE_LINE_DISTANCE);
     const rptBracketMH = Math.round(rptBracketH / 2);
     const brY = startY + yDirection;
-    const brX = xDirection > 0 ? startX -2 : startX;
+    const brX = xDirection > 0 ? startX - 2 : startX;
     staveCtx.moveTo(brX, brY);
     staveCtx.lineTo(brX, brY + rptBracketH * (-1 * yDirection));
     staveCtx.lineTo(brX + rptBracketW, brY + rptBracketH * yDirection);
@@ -218,14 +218,18 @@ export class Barline extends StaveModifier {
     const rptBracketH = Math.round(0.6 * Tables.STAVE_LINE_DISTANCE);
     const rptBracketMH = Math.round(rptBracketH / 2);
     const brY = startY + yDirection;
-    const brX = xDirection > 0 ? startX -2 : startX;
+    const brX = xDirection > 0 ? startX - 2 : startX;
 
     staveCtx.moveTo(brX, brY);
     staveCtx.lineTo(brX, brY + rptBracketH * (-1 * yDirection));
-    staveCtx.quadraticCurveTo(brX + rptBracketW/2, brY + rptBracketH * (-1 * yDirection), 
-      brX + rptBracketW, brY + rptBracketH * yDirection);
+    staveCtx.quadraticCurveTo(
+      brX + rptBracketW / 2,
+      brY + rptBracketH * (-1 * yDirection),
+      brX + rptBracketW,
+      brY + rptBracketH * yDirection
+    );
     staveCtx.lineTo(brX + rptBracketW, brY + yDirection * (rptBracketH + rptBracketMH));
-    staveCtx.quadraticCurveTo(brX + rptBracketW/2, brY, brX, brY);
+    staveCtx.quadraticCurveTo(brX + rptBracketW / 2, brY, brX, brY);
     staveCtx.fill();
   }
 

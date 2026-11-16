@@ -289,7 +289,7 @@ function drawEndModifiers(options: TestOptions, contextBuilder: ContextBuilder):
   const blockHeight = 80;
   let x = 10;
   let y = 0;
-  let bracketType:RepeatBracketType = RepeatBracketType.NONE;
+  let bracketType: RepeatBracketType = RepeatBracketType.NONE;
 
   const ctx = contextBuilder(options.elementId, 800, 700);
 
