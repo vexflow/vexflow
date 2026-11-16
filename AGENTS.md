@@ -11,13 +11,17 @@ If addresing Github issues, first:
 - Otherwise, just post an issue with the work is done.
 - If successful, close the issue.
 
-Where relevant, if there are visual implications, attach some before/after screenshots with a couple of representative examples. Attach to the issue, not into the commit.
+Where relevant, if there are visual implications, attach some before/after screenshots with a couple of representative examples. Attach to the issue, not into the commit. Screenshots should have a white background, not transparent.
 
 Github comments should be short and easy to read with simple sentences, but do include detail where necessary. Try and stick to the documentation guidelines below.
 
 Keep any issue-specfic files (like repro tests or notes) in the issues/ directory. Use this only when needed.
 
 If an issue is labeled ai_todo, remove it after completion.
+
+### Issue Triaging
+
+If I ask you to triage issues, then go through all open issues and assign a priority and a type (bug/feature/etc.) and any relevant labels (if necessary). Also add a "triaged" label, and a short comment with any further thoughts/observations/next steps. Mention that you're a bot.
 
 ## Dependencies
 
