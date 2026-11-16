@@ -38,7 +38,12 @@
   "articulation": {
     "ArticulationStruct": {
       "extends": [],
-      "fields": ["code?: string;", "aboveCode?: string;", "belowCode?: string;", "betweenLines: boolean;"]
+      "fields": [
+        "code?: string;",
+        "aboveCode?: string;",
+        "belowCode?: string;",
+        "betweenLines: boolean;"
+      ]
     },
     "getTopY": "(note: Note, textLine: number): number",
     "getBottomY": "(note: Note, textLine: number): number",
@@ -103,7 +108,13 @@
   "bend": {
     "BendPhrase": {
       "extends": [],
-      "fields": ["x?: number;", "type: number;", "text: string;", "width?: number;", "drawWidth?: number;"]
+      "fields": [
+        "x?: number;",
+        "type: number;",
+        "text: string;",
+        "width?: number;",
+        "drawWidth?: number;"
+      ]
     },
     "Bend": [
       "CATEGORY(): string",
@@ -123,7 +134,12 @@
   "boundingbox": {
     "Bounds": {
       "extends": [],
-      "fields": ["x: number;", "y: number;", "w: number;", "h: number;"]
+      "fields": [
+        "x: number;",
+        "y: number;",
+        "w: number;",
+        "h: number;"
+      ]
     },
     "BoundingBox": [
       "x: number",
@@ -276,7 +292,13 @@
   "crescendo": {
     "CrescendoParams": {
       "extends": [],
-      "fields": ["reverse: boolean;", "height: number;", "y: number;", "beginX: number;", "endX: number;"]
+      "fields": [
+        "reverse: boolean;",
+        "height: number;",
+        "y: number;",
+        "beginX: number;",
+        "endX: number;"
+      ]
     },
     "Crescendo": [
       "DEBUG: boolean",
@@ -374,7 +396,11 @@
     ],
     "NotePiece": {
       "extends": [],
-      "fields": ["key: string;", "accid?: string | null;", "octave?: string;"]
+      "fields": [
+        "key: string;",
+        "accid?: string | null;",
+        "octave?: string;"
+      ]
     },
     "Piece": [
       "source: EasyScoreSourceSpan",
@@ -387,10 +413,15 @@
     ],
     "BuilderElements": {
       "extends": [],
-      "fields": ["notes: StemmableNote[];", "accidentals: (Accidental | undefined)[][];"]
+      "fields": [
+        "notes: StemmableNote[];",
+        "accidentals: (Accidental | undefined)[][];"
+      ]
     },
     "BuilderOptions": {
-      "extends": ["extends Record<string, any>"],
+      "extends": [
+        "extends Record<string, any>"
+      ],
       "fields": [
         "octaveShift?: StaveNoteStruct['octaveShift'];",
         "strokePx?: StaveNoteStruct['strokePx'];",
@@ -431,21 +462,42 @@
     ],
     "EasyScoreSourceSpan": {
       "extends": [],
-      "fields": ["start: number;", "end: number;"]
+      "fields": [
+        "start: number;",
+        "end: number;"
+      ]
     },
     "EasyScoreDiagnostic": {
-      "extends": ["extends EasyScoreSourceSpan"],
-      "fields": ["code: string;", "message: string;", "line: number;", "column: number;", "measure?: number;"]
+      "extends": [
+        "extends EasyScoreSourceSpan"
+      ],
+      "fields": [
+        "code: string;",
+        "message: string;",
+        "line: number;",
+        "column: number;",
+        "measure?: number;"
+      ]
     },
     "EasyScoreParsedPiece": {
-      "extends": ["extends Piece"],
-      "fields": ["source: EasyScoreSourceSpan;"]
+      "extends": [
+        "extends Piece"
+      ],
+      "fields": [
+        "source: EasyScoreSourceSpan;"
+      ]
     },
     "EasyScoreParseResult": {
       "extends": [],
-      "fields": ["success: boolean;", "pieces: EasyScoreParsedPiece[];", "diagnostics: EasyScoreDiagnostic[];"]
+      "fields": [
+        "success: boolean;",
+        "pieces: EasyScoreParsedPiece[];",
+        "diagnostics: EasyScoreDiagnostic[];"
+      ]
     },
-    "EasyScoreError": ["constructor(public readonly diagnostics: EasyScoreDiagnostic[])"],
+    "EasyScoreError": [
+      "constructor(public readonly diagnostics: EasyScoreDiagnostic[])"
+    ],
     "EasyScoreVoiceOptions": {
       "extends": [],
       "fields": [
@@ -457,7 +509,10 @@
     },
     "EasyScoreValidationContext": {
       "extends": [],
-      "fields": ["piece: Readonly<EasyScoreParsedPiece>;", "options: Readonly<BuilderOptions>;"]
+      "fields": [
+        "piece: Readonly<EasyScoreParsedPiece>;",
+        "options: Readonly<BuilderOptions>;"
+      ]
     },
     "EasyScoreOptions": {
       "extends": [],
@@ -472,8 +527,14 @@
       ]
     },
     "EasyScoreDefaults": {
-      "extends": ["extends Record<string, any>"],
-      "fields": ["clef?: string;", "time?: VoiceTime | string;", "stem?: string;"]
+      "extends": [
+        "extends Record<string, any>"
+      ],
+      "fields": [
+        "clef?: string;",
+        "time?: VoiceTime | string;",
+        "stem?: string;"
+      ]
     },
     "EasyScore": [
       "DEBUG: boolean",
@@ -485,6 +546,7 @@
       "create(options: FactoryOptions, scoreOptions: Omit<EasyScoreOptions, 'factory' | 'builder'> = {}): EasyScore",
       "make",
       "attach(note: T, modifier: Modifier, index = 0): T",
+      "attachToStave(stave: T, modifier: StaveModifier, position?: number): T",
       "system(options: SystemOptions = {}): System",
       "sheet(options: Omit<SheetOptions, 'factory'> = {}): Sheet",
       "build(construct: (score: EasyScore) => T & (T extends PromiseLike<unknown> ? never : unknown)): T",
@@ -516,7 +578,12 @@
   "element": {
     "ElementAttributes": {
       "extends": [],
-      "fields": ["[name: string]: string | undefined;", "id: string;", "type: string;", "class: string;"]
+      "fields": [
+        "[name: string]: string | undefined;",
+        "id: string;",
+        "type: string;",
+        "class: string;"
+      ]
     },
     "ElementStyle": {
       "extends": [],
@@ -606,7 +673,7 @@
     ]
   },
   "factory": {
-    "FactoryElementRole": "export type FactoryElementRole = 'note' | 'modifier' | 'drawable';",
+    "FactoryElementRole": "export type FactoryElementRole = 'note' | 'modifier' | 'staveModifier' | 'drawable';",
     "FactoryOptions": {
       "extends": [],
       "fields": [
@@ -633,6 +700,19 @@
       "Sheet(options: Omit<SheetOptions, 'factory'> = {}): Sheet",
       "Stave(params?: { x?: number; y?: number; width?: number; options?: StaveOptions }): Stave",
       "TabStave(params?: { x?: number; y?: number; width?: number; options?: StaveOptions }): TabStave",
+      "Bend(...args: ConstructorParameters<typeof Bend>): Bend",
+      "Clef(...args: ConstructorParameters<typeof Clef>): Clef",
+      "KeySignature(...args: ConstructorParameters<typeof KeySignature>): KeySignature",
+      "TimeSignature(...args: ConstructorParameters<typeof TimeSignature>): TimeSignature",
+      "Barline(...args: ConstructorParameters<typeof Barline>): Barline",
+      "Repetition(...args: ConstructorParameters<typeof Repetition>): Repetition",
+      "Volta(...args: ConstructorParameters<typeof Volta>): Volta",
+      "StaveSection(...args: ConstructorParameters<typeof StaveSection>): StaveSection",
+      "StaveTempo(...args: ConstructorParameters<typeof StaveTempo>): StaveTempo",
+      "StaveText(...args: ConstructorParameters<typeof StaveText>): StaveText",
+      "TabTie(...args: ConstructorParameters<typeof TabTie>): TabTie",
+      "TabSlide(...args: ConstructorParameters<typeof TabSlide>): TabSlide",
+      "GraceTabNote(options: TabNoteStruct): GraceTabNote",
       "StaveNote(noteStruct: StaveNoteStruct): StaveNote",
       "GlyphNote(glyph: string, noteStruct: NoteStruct, options?: GlyphNoteOptions): GlyphNote",
       "RepeatNote(type: string, noteStruct?: NoteStruct, options?: GlyphNoteOptions): RepeatNote",
@@ -642,7 +722,7 @@
       "ClefNote(params?: { type?: string; options?: { size?: string; annotation?: string } }): ClefNote",
       "TimeSigNote(params?: { time?: string }): TimeSigNote",
       "KeySigNote(params: { key: string; cancelKey?: string; alterKey?: string[] }): KeySigNote",
-      "TabNote(noteStruct: TabNoteStruct): TabNote",
+      "TabNote(noteStruct: TabNoteStruct, drawStem = false): TabNote",
       "GraceNote(noteStruct: GraceNoteStruct): GraceNote",
       "GraceNoteGroup(params: { notes: StemmableNote[]; slur?: boolean }): GraceNoteGroup",
       "Accidental(params: { type: string }): Accidental",
@@ -684,7 +764,12 @@
   "font": {
     "FontInfo": {
       "extends": [],
-      "fields": ["family?: string;", "size?: number | string;", "weight?: string | number;", "style?: string;"]
+      "fields": [
+        "family?: string;",
+        "size?: number | string;",
+        "weight?: string | number;",
+        "style?: string;"
+      ]
     },
     "FontWeight": "export enum FontWeight { NORMAL = 'normal', BOLD = 'bold', }",
     "FontStyle": "export enum FontStyle { NORMAL = 'normal', ITALIC = 'italic', }",
@@ -706,7 +791,11 @@
     ]
   },
   "flag": {
-    "Flag": ["DEBUG: boolean", "CATEGORY(): string", "draw(): void"]
+    "Flag": [
+      "DEBUG: boolean",
+      "CATEGORY(): string",
+      "draw(): void"
+    ]
   },
   "formatter": {
     "FormatterOptions": {
@@ -720,7 +809,12 @@
     },
     "FormatParams": {
       "extends": [],
-      "fields": ["alignRests?: boolean;", "autoBeam?: boolean;", "stave?: Stave;", "context?: RenderContext;"]
+      "fields": [
+        "alignRests?: boolean;",
+        "autoBeam?: boolean;",
+        "stave?: Stave;",
+        "context?: RenderContext;"
+      ]
     },
     "AlignmentTickContexts": {
       "extends": [],
@@ -823,7 +917,10 @@
   "glyphnote": {
     "GlyphNoteOptions": {
       "extends": [],
-      "fields": ["ignoreTicks?: boolean;", "line?: number;"]
+      "fields": [
+        "ignoreTicks?: boolean;",
+        "line?: number;"
+      ]
     },
     "GlyphNote": [
       "CATEGORY(): string",
@@ -836,8 +933,12 @@
   },
   "gracenote": {
     "GraceNoteStruct": {
-      "extends": ["extends StaveNoteStruct"],
-      "fields": ["slash?: boolean;"]
+      "extends": [
+        "extends StaveNoteStruct"
+      ],
+      "fields": [
+        "slash?: boolean;"
+      ]
     },
     "GraceNote": [
       "CATEGORY(): string",
@@ -865,7 +966,10 @@
     ]
   },
   "gracetabnote": {
-    "GraceTabNote": ["CATEGORY(): string", "constructor(noteStruct: TabNoteStruct)"]
+    "GraceTabNote": [
+      "CATEGORY(): string",
+      "constructor(noteStruct: TabNoteStruct)"
+    ]
   },
   "keymanager": {
     "KeyManager": [
@@ -942,11 +1046,19 @@
   "modifiercontext": {
     "ModifierContextState": {
       "extends": [],
-      "fields": ["leftShift: number;", "rightShift: number;", "textLine: number;", "topTextLine: number;"]
+      "fields": [
+        "leftShift: number;",
+        "rightShift: number;",
+        "textLine: number;",
+        "topTextLine: number;"
+      ]
     },
     "ModifierContextMetrics": {
       "extends": [],
-      "fields": ["width: number;", "spacing: number;"]
+      "fields": [
+        "width: number;",
+        "spacing: number;"
+      ]
     },
     "ModifierContextMember": "export type ModifierContextMember = Tickable | Modifier | StaveNote | TabNote;",
     "ModifierContext": [
@@ -1000,22 +1112,35 @@
   "music": {
     "NoteAccidental": {
       "extends": [],
-      "fields": ["note: number;", "accidental: AccidentalValue;"]
+      "fields": [
+        "note: number;",
+        "accidental: AccidentalValue;"
+      ]
     },
     "NoteParts": {
       "extends": [],
-      "fields": ["root: string;", "accidental: string;"]
+      "fields": [
+        "root: string;",
+        "accidental: string;"
+      ]
     },
     "KeyParts": {
       "extends": [],
-      "fields": ["root: string;", "accidental: string;", "type: string;"]
+      "fields": [
+        "root: string;",
+        "accidental: string;",
+        "type: string;"
+      ]
     },
     "KeyValue": "export type KeyValue = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;",
     "RootValue": "export type RootValue = 0 | 1 | 2 | 3 | 4 | 5 | 6;",
     "AccidentalValue": "export type AccidentalValue = -2 | -1 | 0 | 1 | 2;",
     "Key": {
       "extends": [],
-      "fields": ["rootIndex: RootValue;", "intVal: KeyValue;"]
+      "fields": [
+        "rootIndex: RootValue;",
+        "intVal: KeyValue;"
+      ]
     },
     "Music": [
       "NUM_TONES(): number",
@@ -1080,11 +1205,21 @@
     },
     "NoteDuration": {
       "extends": [],
-      "fields": ["duration: string;", "dots: number;", "type: string;"]
+      "fields": [
+        "duration: string;",
+        "dots: number;",
+        "type: string;"
+      ]
     },
     "ParsedNote": {
       "extends": [],
-      "fields": ["duration: string;", "type: string;", "customTypes: string[];", "dots: number;", "ticks: number;"]
+      "fields": [
+        "duration: string;",
+        "type: string;",
+        "customTypes: string[];",
+        "dots: number;",
+        "ticks: number;"
+      ]
     },
     "NoteStruct": {
       "extends": [],
@@ -1157,7 +1292,9 @@
   },
   "notehead": {
     "NoteHeadStruct": {
-      "extends": ["extends NoteStruct"],
+      "extends": [
+        "extends NoteStruct"
+      ],
       "fields": [
         "line?: number;",
         "slashed?: boolean;",
@@ -1263,7 +1400,9 @@
     "GroupedResults": "export type GroupedResults = (Result | Result[])[];",
     "Grammar": {
       "extends": [],
-      "fields": ["begin(): RuleFunction;"]
+      "fields": [
+        "begin(): RuleFunction;"
+      ]
     },
     "Parser": [
       "DEBUG: boolean",
@@ -1302,7 +1441,12 @@
   "registry": {
     "RegistryUpdate": {
       "extends": [],
-      "fields": ["id: string;", "name: string;", "value: string | undefined;", "oldValue: string | undefined;"]
+      "fields": [
+        "id: string;",
+        "name: string;",
+        "value: string | undefined;",
+        "oldValue: string | undefined;"
+      ]
     },
     "Registry": [
       "getDefaultRegistry(): Registry | undefined",
@@ -1324,7 +1468,12 @@
   "rendercontext": {
     "TextMeasure": {
       "extends": [],
-      "fields": ["x: number;", "y: number;", "width: number;", "height: number;"]
+      "fields": [
+        "x: number;",
+        "y: number;",
+        "width: number;",
+        "height: number;"
+      ]
     },
     "RenderContext": [
       "setDefaultStyle(style: { fillStyle?: string; strokeStyle?: string }): this",
@@ -1437,7 +1586,9 @@
   "stave": {
     "StaveLineConfig": {
       "extends": [],
-      "fields": ["visible?: boolean;"]
+      "fields": [
+        "visible?: boolean;"
+      ]
     },
     "StaveOptions": {
       "extends": [],
@@ -1586,7 +1737,12 @@
   "staveline": {
     "StaveLineNotes": {
       "extends": [],
-      "fields": ["firstNote: StaveNote;", "firstIndexes: number[];", "lastNote: StaveNote;", "lastIndexes: number[];"]
+      "fields": [
+        "firstNote: StaveNote;",
+        "firstIndexes: number[];",
+        "lastNote: StaveNote;",
+        "lastIndexes: number[];"
+      ]
     },
     "StaveLine": [
       "CATEGORY(): string",
@@ -1603,7 +1759,12 @@
   "stavemodifier": {
     "LayoutMetrics": {
       "extends": [],
-      "fields": ["xMin: number;", "xMax: number;", "paddingLeft: number;", "paddingRight: number;"]
+      "fields": [
+        "xMin: number;",
+        "xMax: number;",
+        "paddingLeft: number;",
+        "paddingRight: number;"
+      ]
     },
     "StaveModifierPosition": "export enum StaveModifierPosition { CENTER = 0, LEFT = 1, RIGHT = 2, ABOVE = 3, BELOW = 4, BEGIN = 5, END = 6, }",
     "StaveModifier": [
@@ -1653,7 +1814,9 @@
       ]
     },
     "StaveNoteStruct": {
-      "extends": ["extends NoteStruct"],
+      "extends": [
+        "extends NoteStruct"
+      ],
       "fields": [
         "stemDirection?: number;",
         "autoStem?: boolean;",
@@ -1914,7 +2077,10 @@
     "Attributes": "export type Attributes = { [name: string]: string | number | undefined; 'font-family'?: string; 'font-size'?: string | number; 'font-style'?: string; 'font-weight'?: string | number; scaleX?: number; scaleY?: number; };",
     "State": {
       "extends": [],
-      "fields": ["state: Attributes;", "attributes: Attributes;"]
+      "fields": [
+        "state: Attributes;",
+        "attributes: Attributes;"
+      ]
     },
     "SVGContext": [
       "toSVG(svg: SVGSVGElement, fonts?: SVGFont[]): string",
@@ -1993,14 +2159,23 @@
     },
     "SVGFont": {
       "extends": [],
-      "fields": ["family: string;", "font: SVGOutlineFont;", "weight?: string | number;", "style?: string;"]
+      "fields": [
+        "family: string;",
+        "font: SVGOutlineFont;",
+        "weight?: string | number;",
+        "style?: string;"
+      ]
     },
     "svgWithFontPaths": "(svg: SVGSVGElement, fonts: SVGFont[]): SVGSVGElement"
   },
   "system": {
     "SystemFormatterOptions": {
-      "extends": ["extends FormatterOptions"],
-      "fields": ["alpha?: number;"]
+      "extends": [
+        "extends FormatterOptions"
+      ],
+      "fields": [
+        "alpha?: number;"
+      ]
     },
     "SystemStave": {
       "extends": [],
@@ -2055,11 +2230,18 @@
   "tabnote": {
     "TabNotePosition": {
       "extends": [],
-      "fields": ["str: number;", "fret: number | string;"]
+      "fields": [
+        "str: number;",
+        "fret: number | string;"
+      ]
     },
     "TabNoteStruct": {
-      "extends": ["extends StaveNoteStruct"],
-      "fields": ["positions: TabNotePosition[];"]
+      "extends": [
+        "extends StaveNoteStruct"
+      ],
+      "fields": [
+        "positions: TabNotePosition[];"
+      ]
     },
     "TabNote": [
       "CATEGORY(): string",
@@ -2158,7 +2340,9 @@
   "textnote": {
     "TextJustification": "export enum TextJustification { LEFT = 1, CENTER = 2, RIGHT = 3, }",
     "TextNoteStruct": {
-      "extends": ["extends NoteStruct"],
+      "extends": [
+        "extends NoteStruct"
+      ],
       "fields": [
         "text?: string;",
         "glyph?: string;",
@@ -2243,12 +2427,19 @@
   },
   "tickcontext": {
     "TickContextMetrics": {
-      "extends": ["extends NoteMetrics"],
-      "fields": ["totalLeftPx: number;", "totalRightPx: number;"]
+      "extends": [
+        "extends NoteMetrics"
+      ],
+      "fields": [
+        "totalLeftPx: number;",
+        "totalRightPx: number;"
+      ]
     },
     "TickContextOptions": {
       "extends": [],
-      "fields": ["tickID: number;"]
+      "fields": [
+        "tickID: number;"
+      ]
     },
     "TickContext": [
       "tContexts: TickContext[]",
@@ -2286,7 +2477,11 @@
   "timesignature": {
     "TimeSignatureInfo": {
       "extends": [],
-      "fields": ["glyph: string;", "line: number;", "num: boolean;"]
+      "fields": [
+        "glyph: string;",
+        "line: number;",
+        "num: boolean;"
+      ]
     },
     "TimeSignature": [
       "CATEGORY(): string",
@@ -2316,7 +2511,11 @@
     ]
   },
   "tremolo": {
-    "Tremolo": ["CATEGORY(): string", "constructor(num: number)", "draw(): void"]
+    "Tremolo": [
+      "CATEGORY(): string",
+      "constructor(num: number)",
+      "draw(): void"
+    ]
   },
   "tuning": {
     "Tuning": [
@@ -2383,7 +2582,10 @@
     "Category": "export const enum Category { Accidental = 'Accidental', Annotation = 'Annotation', Articulation = 'Articulation', Barline = 'Barline', BarNote = 'BarNote', Beam = 'Beam', Bend = 'Bend', ChordSymbol = 'ChordSymbol', Clef = 'Clef', ClefNote = 'ClefNote', Crescendo = 'Crescendo', Curve = 'Curve', Dot = 'Dot', Element = 'Element', Flag = 'Flag', Fraction = 'Fraction', FretHandFinger = 'FretHandFinger', GhostNote = 'GhostNote', Glyph = 'Glyph', GlyphNote = 'GlyphNote', GraceNote = 'GraceNote', GraceNoteGroup = 'GraceNoteGroup', GraceTabNote = 'GraceTabNote', KeySignature = 'KeySignature', KeySigNote = 'KeySigNote', Modifier = 'Modifier', MultiMeasureRest = 'MultiMeasureRest', Note = 'Note', NoteHead = 'NoteHead', NoteSubGroup = 'NoteSubGroup', Ornament = 'Ornament', Parenthesis = 'Parenthesis', PedalMarking = 'PedalMarking', RenderContext = 'RenderContext', RepeatNote = 'RepeatNote', Repetition = 'Repetition', Stave = 'Stave', StaveConnector = 'StaveConnector', StaveHairpin = 'StaveHairpin', StaveLine = 'StaveLine', StaveModifier = 'StaveModifier', StaveNote = 'StaveNote', StaveSection = 'StaveSection', StaveTempo = 'StaveTempo', StaveText = 'StaveText', StaveTie = 'StaveTie', Stem = 'Stem', StemmableNote = 'StemmableNote', StringNumber = 'StringNumber', Stroke = 'Stroke', System = 'System', TabNote = 'TabNote', TabSlide = 'TabSlide', TabStave = 'TabStave', TabTie = 'TabTie', TextBracket = 'TextBracket', TextDynamics = 'TextDynamics', TextNote = 'TextNote', Tickable = 'Tickable', TimeSignature = 'TimeSignature', TimeSigNote = 'TimeSigNote', Tremolo = 'Tremolo', Tuplet = 'Tuplet', Vibrato = 'Vibrato', VibratoBracket = 'VibratoBracket', Voice = 'Voice', Volta = 'Volta', }"
   },
   "util": {
-    "RuntimeError": ["code: string", "constructor(code: string, message: string = '')"],
+    "RuntimeError": [
+      "code: string",
+      "constructor(code: string, message: string = '')"
+    ],
     "globalObject": "(): typeof globalThis & any",
     "defined": "(x?: T, code: string = 'undefined', message: string = ''): T",
     "log": "(block: string, ...args: any[]): void",
@@ -2537,7 +2739,10 @@
   "vibrato": {
     "VibratoRenderOptions": {
       "extends": [],
-      "fields": ["code: number;", "width: number;"]
+      "fields": [
+        "code: number;",
+        "width: number;"
+      ]
     },
     "Vibrato": [
       "CATEGORY(): string",
@@ -2561,7 +2766,11 @@
   "voice": {
     "VoiceTime": {
       "extends": [],
-      "fields": ["numBeats: number;", "beatValue: number;", "resolution?: number;"]
+      "fields": [
+        "numBeats: number;",
+        "beatValue: number;",
+        "resolution?: number;"
+      ]
     },
     "VoiceMode": "export enum VoiceMode { STRICT = 1, SOFT = 2, FULL = 3, }",
     "Voice": [
@@ -2610,6 +2819,30 @@
     },
     "EasyScoreElements": [
       "constructor(private host: EasyScoreElementHost)",
+      "stave(...args: Parameters<Factory['Stave']>)",
+      "tabStave(...args: Parameters<Factory['TabStave']>)",
+      "glyphNote(...args: Parameters<Factory['GlyphNote']>)",
+      "repeatNote(...args: Parameters<Factory['RepeatNote']>)",
+      "barNote(...args: Parameters<Factory['BarNote']>)",
+      "clefNote(...args: Parameters<Factory['ClefNote']>)",
+      "keySigNote(...args: Parameters<Factory['KeySigNote']>)",
+      "timeSigNote(...args: Parameters<Factory['TimeSigNote']>)",
+      "clef(...args: Parameters<Factory['Clef']>)",
+      "keySignature(...args: Parameters<Factory['KeySignature']>)",
+      "timeSignature(...args: Parameters<Factory['TimeSignature']>)",
+      "barline(...args: Parameters<Factory['Barline']>)",
+      "repetition(...args: Parameters<Factory['Repetition']>)",
+      "volta(...args: Parameters<Factory['Volta']>)",
+      "section(...args: Parameters<Factory['StaveSection']>)",
+      "tempo(...args: Parameters<Factory['StaveTempo']>)",
+      "staveText(...args: Parameters<Factory['StaveText']>)",
+      "tabNote(options: TabNoteStruct, drawStem = false)",
+      "graceTabNote(options: TabNoteStruct)",
+      "bend(...args: Parameters<Factory['Bend']>)",
+      "tabTie(...args: Parameters<Factory['TabTie']>)",
+      "tabSlide(...args: Parameters<Factory['TabSlide']>)",
+      "connector(params: Parameters<Factory['StaveConnector']>[0])",
+      "multiMeasureRest(params: Parameters<Factory['MultiMeasureRest']>[0])",
       "note(options: StaveNoteStruct)",
       "annotation(...args: Parameters<Factory['Annotation']>)",
       "ghostNote(...args: Parameters<Factory['GhostNote']>)",

@@ -6,6 +6,7 @@ import { Note } from '../note';
 import { StaveNote, StaveNoteStruct } from '../stavenote';
 import { StemmableNote } from '../stemmablenote';
 import { Tables } from '../tables';
+import { TabNote, TabNoteStruct } from '../tabnote';
 import type { TupletOptions } from '../tuplet';
 import { RuntimeError } from '../util';
 
@@ -25,6 +26,171 @@ export class EasyScoreElements {
 
   private get factory(): Factory {
     return this.host.factory();
+  }
+
+  /** Construct a native Stave; attach staff modifiers with attachToStave(). */
+  stave(...args: Parameters<Factory['Stave']>) {
+    return this.host.manage(() => this.factory.Stave(...args));
+  }
+
+  /** Construct a native TabStave; attach staff modifiers with attachToStave(). */
+  tabStave(...args: Parameters<Factory['TabStave']>) {
+    return this.host.manage(() => this.factory.TabStave(...args));
+  }
+
+  /** Construct a native GlyphNote; attach staff modifiers with attachToStave(). */
+  glyphNote(...args: Parameters<Factory['GlyphNote']>) {
+    return this.host.manage(() => this.factory.GlyphNote(...args));
+  }
+
+  /** Construct a native RepeatNote; attach staff modifiers with attachToStave(). */
+  repeatNote(...args: Parameters<Factory['RepeatNote']>) {
+    return this.host.manage(() => this.factory.RepeatNote(...args));
+  }
+
+  /** Construct a native BarNote; attach staff modifiers with attachToStave(). */
+  barNote(...args: Parameters<Factory['BarNote']>) {
+    return this.host.manage(() => this.factory.BarNote(...args));
+  }
+
+  /** Construct a native ClefNote; attach staff modifiers with attachToStave(). */
+  clefNote(...args: Parameters<Factory['ClefNote']>) {
+    return this.host.manage(() => this.factory.ClefNote(...args));
+  }
+
+  /** Construct a native KeySigNote; attach staff modifiers with attachToStave(). */
+  keySigNote(...args: Parameters<Factory['KeySigNote']>) {
+    return this.host.manage(() => this.factory.KeySigNote(...args));
+  }
+
+  /** Construct a native TimeSigNote; attach staff modifiers with attachToStave(). */
+  timeSigNote(...args: Parameters<Factory['TimeSigNote']>) {
+    return this.host.manage(() => this.factory.TimeSigNote(...args));
+  }
+
+  /** Construct a native Clef; attach staff modifiers with attachToStave(). */
+  clef(...args: Parameters<Factory['Clef']>) {
+    return this.host.manage(() => this.factory.Clef(...args));
+  }
+
+  /** Construct a native KeySignature; attach staff modifiers with attachToStave(). */
+  keySignature(...args: Parameters<Factory['KeySignature']>) {
+    return this.host.manage(() => this.factory.KeySignature(...args));
+  }
+
+  /** Construct a native TimeSignature; attach staff modifiers with attachToStave(). */
+  timeSignature(...args: Parameters<Factory['TimeSignature']>) {
+    return this.host.manage(() => this.factory.TimeSignature(...args));
+  }
+
+  /** Construct a native Barline; attach staff modifiers with attachToStave(). */
+  barline(...args: Parameters<Factory['Barline']>) {
+    return this.host.manage(() => this.factory.Barline(...args));
+  }
+
+  /** Construct a native Repetition; attach staff modifiers with attachToStave(). */
+  repetition(...args: Parameters<Factory['Repetition']>) {
+    return this.host.manage(() => this.factory.Repetition(...args));
+  }
+
+  /** Construct a native Volta; attach staff modifiers with attachToStave(). */
+  volta(...args: Parameters<Factory['Volta']>) {
+    return this.host.manage(() => this.factory.Volta(...args));
+  }
+
+  /** Construct a native StaveSection; attach staff modifiers with attachToStave(). */
+  section(...args: Parameters<Factory['StaveSection']>) {
+    return this.host.manage(() => this.factory.StaveSection(...args));
+  }
+
+  /** Construct a native StaveTempo; attach staff modifiers with attachToStave(). */
+  tempo(...args: Parameters<Factory['StaveTempo']>) {
+    return this.host.manage(() => this.factory.StaveTempo(...args));
+  }
+
+  /** Construct a native StaveText; attach staff modifiers with attachToStave(). */
+  staveText(...args: Parameters<Factory['StaveText']>) {
+    return this.host.manage(() => this.factory.StaveText(...args));
+  }
+
+  /** Preserve native fret text and arbitrary string counts; reject invalid positions early. */
+  private tabPositions(options: TabNoteStruct): void {
+    if (!options.positions.length) throw new RuntimeError('BadArguments', 'Tab notes need positions.');
+    for (const { str, fret } of options.positions) {
+      if (
+        !Number.isSafeInteger(str) ||
+        str < 1 ||
+        (typeof fret === 'number' ? !Number.isFinite(fret) || fret < 0 : typeof fret !== 'string' || !fret.length)
+      )
+        throw new RuntimeError('BadArguments', 'Invalid tablature position.');
+    }
+  }
+
+  /** Construct tablature with all native note fields. */
+  tabNote(options: TabNoteStruct, drawStem = false) {
+    this.tabPositions(options);
+    return this.host.manage(() => this.factory.TabNote(options, drawStem));
+  }
+
+  /** Grace tablature shares the same group ownership as pitched grace notes. */
+  graceTabNote(options: TabNoteStruct) {
+    this.tabPositions(options);
+    return this.host.manage(() => this.factory.GraceTabNote(options));
+  }
+
+  /** Preserve the complete native bend phrase, including custom widths. */
+  bend(...args: Parameters<Factory['Bend']>) {
+    if (!args[0].length || args[0].some((part) => part.type !== 0 && part.type !== 1))
+      throw new RuntimeError('BadArguments', 'A bend needs valid phrase directions.');
+    return this.host.manage(() => this.factory.Bend(...args));
+  }
+
+  /** Validate tab endpoint types and head indexes before native span construction. */
+  private tabEndpoints(notes: Parameters<Factory['TabTie']>[0]): void {
+    this.endpoints(notes.firstNote, notes.lastNote, true);
+    const first = notes.firstIndexes ?? [0],
+      last = notes.lastIndexes ?? [0];
+    if (!first.length || first.length !== last.length)
+      throw new RuntimeError('BadArguments', 'Tab span index lists must match.');
+    for (const [note, indices] of [
+      [notes.firstNote, first],
+      [notes.lastNote, last],
+    ] as const) {
+      if (!note) continue;
+      if (!(note instanceof TabNote)) throw new RuntimeError('BadArguments', 'Tab spans need tab notes.');
+      indices.forEach((index) => this.host.checkIndex(note, index));
+    }
+  }
+
+  /** Tab ties support native hammer-on/pull-off text and explicit partial endpoints. */
+  tabTie(...args: Parameters<Factory['TabTie']>) {
+    this.tabEndpoints(args[0]);
+    return this.host.manage(() => this.factory.TabTie(...args));
+  }
+
+  /** A partial slide needs an explicit direction; there are not two frets to compare. */
+  tabSlide(...args: Parameters<Factory['TabSlide']>) {
+    this.tabEndpoints(args[0]);
+    if (
+      (args[1] !== undefined && args[1] !== 1 && args[1] !== -1) ||
+      (args[1] === undefined && (!args[0].firstNote || !args[0].lastNote))
+    )
+      throw new RuntimeError('BadArguments', 'Partial tab slides need direction 1 or -1.');
+    return this.host.manage(() => this.factory.TabSlide(...args));
+  }
+
+  /** Connect owned staves without introducing another layout owner. */
+  connector(params: Parameters<Factory['StaveConnector']>[0]) {
+    this.host.owned(params.topStave);
+    this.host.owned(params.bottomStave);
+    return this.host.manage(() => this.factory.StaveConnector(params));
+  }
+
+  /** Multi-measure rests are standalone drawables; set their stave explicitly. */
+  multiMeasureRest(params: Parameters<Factory['MultiMeasureRest']>[0]) {
+    if (!Number.isSafeInteger(params.numberOfMeasures) || (params.numberOfMeasures ?? 0) < 1)
+      throw new RuntimeError('BadArguments', 'A multi-measure rest needs a positive measure count.');
+    return this.host.manage(() => this.factory.MultiMeasureRest(params));
   }
 
   /** Typed notes inherit score clef/stem defaults; explicit native fields win. */

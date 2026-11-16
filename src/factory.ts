@@ -9,7 +9,9 @@ import { Annotation, AnnotationHorizontalJustify, AnnotationVerticalJustify } fr
 import { Articulation } from './articulation';
 import { BarNote } from './barnote';
 import { Beam, PartialBeamDirection } from './beam';
+import { Bend } from './bend';
 import { ChordSymbol } from './chordsymbol';
+import { Clef } from './clef';
 import { ClefNote } from './clefnote';
 import { Crescendo } from './crescendo';
 import { Curve, CurveOptions } from './curve';
@@ -23,6 +25,8 @@ import { GhostNote } from './ghostnote';
 import { GlyphNote, GlyphNoteOptions } from './glyphnote';
 import { GraceNote, GraceNoteStruct } from './gracenote';
 import { GraceNoteGroup } from './gracenotegroup';
+import { GraceTabNote } from './gracetabnote';
+import { KeySignature } from './keysignature';
 import { KeySigNote } from './keysignote';
 import { Modifier } from './modifier';
 import { ModifierContext } from './modifiercontext';
@@ -38,23 +42,31 @@ import { Renderer } from './renderer';
 import { RepeatNote } from './repeatnote';
 import { Sheet, SheetOptions } from './sheet';
 import { Stave, StaveOptions } from './stave';
-import { BarlineType } from './stavebarline';
+import { Barline, BarlineType } from './stavebarline';
 import { StaveConnector, StaveConnectorType } from './staveconnector';
 import { StaveHairpin, StaveHairpinRenderOptions } from './stavehairpin';
 import { StaveLine } from './staveline';
 import { StaveModifier } from './stavemodifier';
 import { StaveNote, StaveNoteStruct } from './stavenote';
+import { Repetition } from './staverepetition';
+import { StaveSection } from './stavesection';
+import { StaveTempo } from './stavetempo';
+import { StaveText } from './stavetext';
 import { StaveTie } from './stavetie';
+import { Volta } from './stavevolta';
 import { StemmableNote } from './stemmablenote';
 import { StringNumber } from './stringnumber';
 import { Stroke } from './strokes';
 import { System, SystemOptions } from './system';
 import { TabNote, TabNoteStruct } from './tabnote';
+import { TabSlide } from './tabslide';
 import { TabStave } from './tabstave';
+import { TabTie } from './tabtie';
 import { TextBracket } from './textbracket';
 import { TextDynamics } from './textdynamics';
 import { TextNote, TextNoteStruct } from './textnote';
 import { TickContext } from './tickcontext';
+import { TimeSignature } from './timesignature';
 import { TimeSigNote } from './timesignote';
 import { Tremolo } from './tremolo';
 import { Tuplet, TupletOptions } from './tuplet';
@@ -65,7 +77,7 @@ import { Voice, VoiceTime } from './voice';
 import { isHTMLCanvas } from './web';
 
 /** Explicit drawing role for a native extension adopted into a Factory. */
-export type FactoryElementRole = 'note' | 'modifier' | 'drawable';
+export type FactoryElementRole = 'note' | 'modifier' | 'staveModifier' | 'drawable';
 
 export interface FactoryOptions {
   stave?: {
@@ -149,6 +161,7 @@ export class Factory {
     const valid =
       (role === 'note' && element instanceof Note) ||
       (role === 'modifier' && element instanceof Modifier) ||
+      (role === 'staveModifier' && element instanceof StaveModifier) ||
       (role === 'drawable' &&
         element instanceof Element &&
         !(element instanceof Note) &&
@@ -162,7 +175,7 @@ export class Factory {
       throw new RuntimeError('BadArguments', 'A grouped note cannot be queued independently.');
     }
     this.own(element);
-    if (role !== 'modifier' && !this.renderQ.includes(element)) this.renderQ.push(element);
+    if ((role === 'note' || role === 'drawable') && !this.renderQ.includes(element)) this.renderQ.push(element);
     return element;
   }
 
@@ -337,6 +350,71 @@ export class Factory {
     return this.own(stave);
   }
 
+  /** Construct a native Bend with an explicit drawing role. */
+  Bend(...args: ConstructorParameters<typeof Bend>): Bend {
+    return this.adopt(new Bend(...args).setContext(this.context), 'modifier');
+  }
+
+  /** Construct a native Clef with an explicit drawing role. */
+  Clef(...args: ConstructorParameters<typeof Clef>): Clef {
+    return this.adopt(new Clef(...args).setContext(this.context), 'staveModifier');
+  }
+
+  /** Construct a native KeySignature with an explicit drawing role. */
+  KeySignature(...args: ConstructorParameters<typeof KeySignature>): KeySignature {
+    return this.adopt(new KeySignature(...args).setContext(this.context), 'staveModifier');
+  }
+
+  /** Construct a native TimeSignature with an explicit drawing role. */
+  TimeSignature(...args: ConstructorParameters<typeof TimeSignature>): TimeSignature {
+    return this.adopt(new TimeSignature(...args).setContext(this.context), 'staveModifier');
+  }
+
+  /** Construct a native Barline with an explicit drawing role. */
+  Barline(...args: ConstructorParameters<typeof Barline>): Barline {
+    return this.adopt(new Barline(...args).setContext(this.context), 'staveModifier');
+  }
+
+  /** Construct a native Repetition with an explicit drawing role. */
+  Repetition(...args: ConstructorParameters<typeof Repetition>): Repetition {
+    return this.adopt(new Repetition(...args).setContext(this.context), 'staveModifier');
+  }
+
+  /** Construct a native Volta with an explicit drawing role. */
+  Volta(...args: ConstructorParameters<typeof Volta>): Volta {
+    return this.adopt(new Volta(...args).setContext(this.context), 'staveModifier');
+  }
+
+  /** Construct a native StaveSection with an explicit drawing role. */
+  StaveSection(...args: ConstructorParameters<typeof StaveSection>): StaveSection {
+    return this.adopt(new StaveSection(...args).setContext(this.context), 'staveModifier');
+  }
+
+  /** Construct a native StaveTempo with an explicit drawing role. */
+  StaveTempo(...args: ConstructorParameters<typeof StaveTempo>): StaveTempo {
+    return this.adopt(new StaveTempo(...args).setContext(this.context), 'staveModifier');
+  }
+
+  /** Construct a native StaveText with an explicit drawing role. */
+  StaveText(...args: ConstructorParameters<typeof StaveText>): StaveText {
+    return this.adopt(new StaveText(...args).setContext(this.context), 'staveModifier');
+  }
+
+  /** Construct a native TabTie with an explicit drawing role. */
+  TabTie(...args: ConstructorParameters<typeof TabTie>): TabTie {
+    return this.adopt(new TabTie(...args).setContext(this.context), 'drawable');
+  }
+
+  /** Construct a native TabSlide with an explicit drawing role. */
+  TabSlide(...args: ConstructorParameters<typeof TabSlide>): TabSlide {
+    return this.adopt(new TabSlide(...args).setContext(this.context), 'drawable');
+  }
+
+  /** Grace tab children draw through a GraceNoteGroup, never as standalone tickables. */
+  GraceTabNote(options: TabNoteStruct): GraceTabNote {
+    return this.own(new GraceTabNote(options).setContext(this.context));
+  }
+
   StaveNote(noteStruct: StaveNoteStruct): StaveNote {
     const note = new StaveNote(noteStruct);
     if (this.stave) note.setStave(this.stave);
@@ -386,16 +464,7 @@ export class Factory {
   }
 
   ClefNote(params?: { type?: string; options?: { size?: string; annotation?: string } }): ClefNote {
-    const p = {
-      type: 'treble',
-      options: {
-        size: 'default',
-        annotation: undefined,
-      },
-      ...params,
-    };
-
-    const clefNote = new ClefNote(p.type, p.options.size, p.options.annotation);
+    const clefNote = new ClefNote(params?.type ?? 'treble', params?.options?.size, params?.options?.annotation);
     if (this.stave) clefNote.setStave(this.stave);
     clefNote.setContext(this.context);
     this.renderQ.push(clefNote);
@@ -423,8 +492,8 @@ export class Factory {
     return this.own(keySigNote);
   }
 
-  TabNote(noteStruct: TabNoteStruct): TabNote {
-    const note = new TabNote(noteStruct);
+  TabNote(noteStruct: TabNoteStruct, drawStem = false): TabNote {
+    const note = new TabNote(noteStruct, drawStem);
     if (this.stave) note.setStave(this.stave);
     note.setContext(this.context);
     this.renderQ.push(note);

@@ -20,11 +20,14 @@ import { Note } from './note';
 import { Grammar, Match, Parser, Result, Rule, RuleFunction } from './parser';
 import { RenderContext } from './rendercontext';
 import { Sheet, SheetOptions } from './sheet';
+import { Stave } from './stave';
+import { StaveModifier } from './stavemodifier';
 import { StaveNoteStruct } from './stavenote';
 import { Stem } from './stem';
 import { StemmableNote } from './stemmablenote';
 import { System, SystemOptions } from './system';
 import { Tables } from './tables';
+import { TabNote } from './tabnote';
 import { Tickable } from './tickable';
 import { TupletOptions } from './tuplet';
 import { defined, log, RuntimeError } from './util';
@@ -619,6 +622,29 @@ export class EasyScore {
     });
   }
 
+  /** Attach staff notation once; the stave owns its drawing lifecycle. */
+  attachToStave<T extends Stave>(stave: T, modifier: StaveModifier, position?: number): T {
+    this.requireOwned(stave);
+    const owner = Factory.getOwner(modifier);
+    if (owner && owner !== this.factory) throw new RuntimeError('BadArguments', 'Modifier belongs to another Factory.');
+    if (position !== undefined && (!Number.isInteger(position) || position < 0 || position > 6))
+      throw new RuntimeError('BadArguments', 'Invalid stave modifier position.');
+    if (modifier.getStave()) {
+      if (
+        modifier.getStave() === stave &&
+        stave.getModifiers().includes(modifier) &&
+        (position === undefined || position === modifier.getPosition())
+      )
+        return stave;
+      throw new RuntimeError('BadArguments', 'Stave modifier is already attached.');
+    }
+    return this.transaction(() => {
+      this.adopt(modifier, 'staveModifier');
+      stave.addModifier(modifier, position);
+      return stave;
+    });
+  }
+
   /** Build a normal System; its staff API and formatter options stay available. */
   system(options: SystemOptions = {}): System {
     return this.transaction(() => this.references.add(this.factory.System(options)));
@@ -685,7 +711,11 @@ export class EasyScore {
 
   /** Reject invalid chord-head references before attaching or queuing notation. */
   private checkIndex(note: Note, index: number): void {
-    if (!Number.isInteger(index) || index < 0 || index >= note.getKeys().length) {
+    if (
+      !Number.isInteger(index) ||
+      index < 0 ||
+      index >= (note instanceof TabNote ? note.getPositions().length : note.getKeys().length)
+    ) {
       throw new RuntimeError('BadArguments', `Invalid chord index: ${index}`);
     }
   }

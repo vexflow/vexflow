@@ -8,6 +8,13 @@ export function easyScoreTypes(): void {
   score.make.tuplet({ notes: score.notes('C4/8, D4, E4'), options: { numNotes: 3, notesOccupied: 2 } });
   // @ts-expect-error The native hairpin renderer requires complete endpoints.
   score.make.hairpin({ type: 1 });
+  const tab = score.make.tabNote({ positions: [{ str: 2, fret: 'X' }], duration: 'q' }, true);
+  score.make.tabTie({ firstNote: tab }, 'H');
+  score.attachToStave(score.make.tabStave(), score.make.clef('tab'));
+  // @ts-expect-error Tablature positions require numeric string indexes.
+  score.make.tabNote({ positions: [{ str: 'one', fret: 3 }], duration: 'q' });
+  // @ts-expect-error Staff modifiers cannot be attached as note modifiers.
+  score.attach(tab, score.make.clef('tab'));
   const nativeNote = score.make.note({ keys: ['c/4/x'], duration: 'q', autoStem: true });
   score.sequence(['C4/q', nativeNote, { keys: ['d/4'], duration: 'q' }]);
   score.make.graceNoteGroup({ notes: [score.make.graceNote({ keys: ['d/4'], duration: '16', slash: true })] });

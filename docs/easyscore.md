@@ -414,3 +414,48 @@ Native option and setter additions still need review.
 
 The [implementation plan](../easyscore-plan.md) tracks the remaining helpers and structured composition.
 The complete EasyScore feature rollout remains tracked by [#354](https://github.com/vexflow/vexflow/issues/354).
+
+## Tablature and staff structure
+
+`make.tabNote()` accepts every native TabNote field. Its optional second argument enables stems.
+`make.graceTabNote()` joins `make.graceNoteGroup()` like pitched grace notes.
+`make.bend()`, `make.tabTie()`, and `make.tabSlide()` return native handles.
+Tab spans use native `firstNote`, `lastNote`, `firstIndexes`, and `lastIndexes` fields.
+Partial slides require an explicit direction (`1` or `-1`).
+
+```js
+const notes = [3, 5].map((fret) => score.make.tabNote({ positions: [{ str: 2, fret }], duration: 'h' }));
+score.attach(notes[0], score.make.bend([{ type: VF.Bend.UP, text: 'Full' }]));
+score.make.tabSlide({ firstNote: notes[0], lastNote: notes[1] });
+const stave = score.make.tabStave();
+score.attachToStave(stave, score.make.clef('tab'));
+score.system().addStave({ stave, voices: [score.voice(notes)] });
+```
+
+Tuning remains a native calculation utility. `new VF.Tuning('dropd').getNoteForFret(3, 6)` converts a position to a pitch.
+The tab note itself displays the supplied fret. Custom fret text and instruments with more than six strings are supported.
+Choose enough lines in `make.tabStave({ options: { numLines: 7 } })` for the instrument.
+
+`make.stave()` and `make.tabStave()` create owned staves. `make.connector()` joins owned staves.
+Use `attachToStave()` for the following modifiers. Repeating the same attachment is harmless.
+An attached modifier cannot move to another stave. Create a new one instead.
+
+| Helpers | Native notation |
+| --- | --- |
+| `make.clef()`, `make.keySignature()`, `make.timeSignature()` | Clefs and signatures |
+| `make.barline()`, `make.repetition()`, `make.volta()` | Barlines, navigation, endings |
+| `make.section()`, `make.tempo()`, `make.staveText()` | Rehearsal labels, tempo, staff text |
+
+These constructors accept native constructor arguments and return native objects.
+`attachToStave(stave, mark, position)` optionally overrides the native position.
+Custom StaveModifier subclasses use `adopt(mark, 'staveModifier')` and the same attachment helper.
+They draw through their stave, never through a second queue.
+
+`make.barNote()`, `make.clefNote()`, `make.keySigNote()`, and `make.timeSigNote()` create inline changes for `sequence()`.
+They consume no musical time. Imperative clef/key/time markings change the display only.
+Supply the new clef to subsequent `notes()` calls and the actual meter to `voice()`.
+
+`make.multiMeasureRest()` returns a standalone rest; pass `{ numberOfMeasures: 8 }`, for example. Call `.setStave(stave)` before drawing.
+`make.repeatNote()` and `make.glyphNote()` create timed notes. Their native duration and alignment options remain available.
+
+The Explorer's **EasyScore: tablature & staff structure** example covers these paths on both backends.

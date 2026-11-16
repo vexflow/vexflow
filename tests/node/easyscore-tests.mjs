@@ -670,3 +670,64 @@ test('relationship helpers reject foreign or invalid endpoints and preserve nati
   assert.ok(score.make.crescendo({ duration: 'q' }).setDecrescendo(true) instanceof VF.Crescendo);
   assert.throws(() => score.make.textDynamics({ text: 'bad' }), /dynamics glyph/);
 });
+
+test('tab helpers preserve native options and validate span heads and grace ownership', () => {
+  const score = create();
+  const options = { positions: [{ str: 7, fret: 'X' }, { str: 2, fret: 12 }], duration: 'q', stemDirection: -1 };
+  const from = score.make.tabNote(options, true);
+  const to = score.make.tabNote({ ...options, positions: [{ str: 7, fret: 5 }, { str: 2, fret: 14 }] });
+  assert.deepEqual(from.getPositions(), options.positions);
+  assert.equal(from.renderOptions.drawStem, true);
+  assert.equal(from.getStemDirection(), -1);
+  const bend = score.make.bend([{ type: VF.Bend.UP, text: '1/2', width: 25 }]);
+  score.attach(from, bend, 1);
+  assert.equal(bend.getIndex(), 1);
+  const tie = score.make.tabTie({ firstNote: from, lastNote: to, firstIndexes: [1], lastIndexes: [1] }, 'P');
+  assert.ok(tie instanceof VF.TabTie);
+  assert.ok(score.make.tabSlide({ firstNote: from, lastNote: to }, -1) instanceof VF.TabSlide);
+  assert.ok(score.make.tabSlide({ firstNote: from }, 1) instanceof VF.TabSlide);
+  const grace = score.make.graceTabNote({ positions: [{ str: 1, fret: 2 }], duration: '16' });
+  const group = score.make.graceNoteGroup({ notes: [grace], slur: true });
+  score.attach(to, group);
+  assert.equal(VF.Factory.getGroup(grace), group);
+  assert.throws(() => score.voice([grace], { mode: 'soft' }), /group/i);
+  const count = queued(score);
+  assert.throws(() => score.make.tabNote({ positions: [{ str: 0, fret: 2 }], duration: 'q' }), /position/i);
+  assert.throws(() => score.make.tabSlide({ firstNote: from }), /direction/i);
+  assert.throws(() => score.make.tabTie({ firstNote: from, firstIndexes: [2] }), /index/i);
+  assert.throws(() => score.make.tabTie({ firstNote: create().make.tabNote(options) }), /Factory/i);
+  assert.throws(() => score.make.bend([{ type: 5, text: 'x' }]), /direction/i);
+  assert.equal(queued(score), count);
+});
+
+test('staff helpers attach once and preserve native options without standalone drawing', () => {
+  const score = create();
+  const stave = score.make.stave({ x: 10, y: 20, width: 400 });
+  const count = queued(score);
+  const modifiers = [score.make.clef('bass', 'small', '8vb'), score.make.keySignature('D', 'C'),
+    score.make.timeSignature('7/8', 0), score.make.barline(VF.Barline.type.DOUBLE),
+    score.make.repetition(VF.Repetition.type.DC, 0, 0), score.make.volta(VF.Volta.type.BEGIN, '1.', 0, 0),
+    score.make.section('A', 0, 0, false), score.make.tempo({ bpm: 100, duration: 'q', dots: 1 }, 0, 0),
+    score.make.staveText('text', VF.StaveModifier.Position.ABOVE, { shiftX: 0, shiftY: 0 })];
+  for (const mark of modifiers) {
+    score.attachToStave(stave, mark);
+    score.attachToStave(stave, mark);
+    assert.equal(mark.getStave(), stave);
+    assert.equal(stave.getModifiers().filter((m) => m === mark).length, 1);
+    assert.equal(VF.Factory.getOwner(mark), score.factory);
+    assert.equal(score.getElement(mark.getAttribute('id')), mark);
+  }
+  assert.equal(queued(score), count);
+  const other = score.make.tabStave();
+  assert.throws(() => score.attachToStave(other, modifiers[0]), /already attached/i);
+  assert.throws(() => score.attachToStave(stave, create().make.clef('treble')), /Factory/i);
+  assert.throws(() => score.attachToStave(stave, score.make.clef('treble'), 99), /position/i);
+  assert.ok(score.make.connector({ topStave: stave, bottomStave: other, type: 'single' }) instanceof VF.StaveConnector);
+  assert.throws(() => score.make.multiMeasureRest({ numberOfMeasures: 0 }), /positive/i);
+  assert.ok(score.make.multiMeasureRest({ numberOfMeasures: 3 }).setStave(stave) instanceof VF.MultiMeasureRest);
+  const inline = [score.make.barNote(), score.make.clefNote({ options: undefined }), score.make.keySigNote({ key: 'G' }), score.make.timeSigNote({ time: '3/4' })];
+  assert.ok(inline.every((note) => note.shouldIgnoreTicks()));
+  assert.equal(score.voice([...inline, ...score.notes('C4/w')]).getTicksUsed().value(), VF.VexFlow.RESOLUTION);
+  assert.ok(score.make.glyphNote('\uE047', { duration: 'q' }) instanceof VF.GlyphNote);
+  assert.ok(score.make.repeatNote('2', { duration: 'w' }) instanceof VF.RepeatNote);
+});

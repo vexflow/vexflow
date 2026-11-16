@@ -2,6 +2,7 @@
 import { createEasyScoreExample } from '../../easyscore-example.mjs';
 import { renderEasyScoreFamilies } from '../../easyscore-families.mjs';
 import { createEasyScoreReferencesExample } from '../../easyscore-references-example.mjs';
+import { renderEasyScoreStructure } from '../../easyscore-structure.mjs';
 import { renderEasyScoreRhythm } from '../../easyscore-rhythm.mjs';
 import { example as e, number, select, setup, staff, text } from './helpers.mjs';
 
@@ -61,6 +62,14 @@ export const layout = [
       ]),
     ],
     'Beam groups use exact Fractions and preserve explicit stems by default. Create tuplets before voices. Spans draw through the score; row-break segments remain explicit.'
+  ),
+  e(
+    'easyscore-structure', 'EasyScore: tablature & staff structure', group,
+    'Tablature, bends, grace groups, inline changes, rests, repeats, and staff markings.',
+    'EasyScore TabNote GraceTabNote TabSlide TabTie Bend Stave Clef KeySignature TimeSignature MultiMeasureRest RepeatNote GlyphNote',
+    `(${renderEasyScoreStructure.toString()})(VF, { elementId: 'score', width, height }, params.family, ink);`,
+    [select('family', 'Family', 'tab', ['tab', 'grace-tab', 'rest', 'inline', 'repeat', 'labels', 'endings'])],
+    'Staff modifiers draw through their stave. Inline clefs and signatures change appearance; update note options explicitly. Tab tuning stays a separate native utility.'
   ),
   e(
     'proportional-spacing',
