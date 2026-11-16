@@ -1,6 +1,6 @@
 # Explorer
 
-The explorer is a static single-page application in `tools/explorer`. It uses browser APIs and the existing VexFlow build. It adds no packages.
+The explorer is a static single-page application in `tools/explorer`. It uses browser APIs and the existing VexFlow build. The editor uses locally bundled CodeJar and Prism.js. Both are pinned development dependencies; the VexFlow library has no new runtime dependencies.
 
 ## Commands
 
@@ -17,8 +17,9 @@ Use `npm run explorer -- --port=8080` for another local port. The server listens
 ## Explore
 
 - Search notation names, descriptions, or class names. Cmd/Ctrl+K focuses search. Enter opens the first result.
-- Each recipe has a consistent score frame, code editor, controls, and API notes.
+- Each example has a consistent score frame, code editor, controls, and API notes.
 - Code updates after a short pause. Turn off live updates to run manually with Cmd/Ctrl+Enter.
+- Tab and Shift+Tab indent code. Escape then Tab moves focus out of the editor. Undo/redo stays within the current example.
 - Drafts and control values stay in local storage on the current browser. Reset restores one example.
 - Reset runtime reloads VexFlow and clears global changes. It keeps your code and controls.
 - Copy produces a complete snippet, including parameter values. Use it in a module script or async function after loading VexFlow.
@@ -53,6 +54,8 @@ The glyph atlas reads VexFlow's glyph names. Font coverage comes from each insta
 3. Use `VF`, `width`, `height`, `ink`, and `params` in the source. Render into the `score` container.
 4. Add a short tip when behavior needs explanation.
 5. Run `npm run explorer:test` and inspect the example in both fonts and on a narrow screen.
+
+The build formats all assembled examples with Prettier at 80 columns. The browser receives formatted code, without loading Prettier. CodeJar, the Prism JavaScript grammar, and their licenses are included in the hashed asset directory.
 
 The shared `staff()` helper creates a soft voice before adding tickables. This lets duration controls explore incomplete or long measures. Use a strict voice when a complete meter is part of the example.
 

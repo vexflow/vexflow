@@ -1,4 +1,6 @@
 // Searchable, paged glyph atlas with font coverage and copyable API references.
+import { highlightCode } from './editor.mjs';
+
 export function createGlyphAtlas(toast) {
   const $ = (id) => document.getElementById(id);
   let entries = [],
@@ -53,6 +55,8 @@ export function createGlyphAtlas(toast) {
       'pre',
       `const glyph = new VF.Element();\nglyph.setText(VF.Glyphs.${key});\nglyph.setFont('${font}', 32);\nglyph.renderText(context, 40, 80);`
     );
+    highlightCode(code);
+    highlightCode(sample);
     pane.append(node('h3', 'Draw this glyph'), sample);
     document
       .querySelectorAll('.glyph-cell')

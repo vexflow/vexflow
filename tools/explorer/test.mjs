@@ -1,4 +1,4 @@
-// End-to-end coverage for every recipe, the editor/inspector, and safe static publication.
+// End-to-end coverage for every example, the editor/inspector, and safe static publication.
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import { chmod, cp, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
@@ -49,7 +49,7 @@ async function edit(code) {
   await page.$eval(
     '#editor',
     (el, code) => {
-      el.value = code;
+      el.textContent = code;
       el.dispatchEvent(new Event('input', { bubbles: true }));
       document.querySelector('#run').click();
     },
@@ -58,7 +58,38 @@ async function edit(code) {
 }
 
 try {
-  await test('all curated recipes and every select/range endpoint render', async () => {
+  await test('highlighted editor preserves literal code, indentation, and isolated undo history', async () => {
+    await visit(examples[0]);
+    await page.click('#auto-run');
+    const code = 'const markup = "<script>example</script>";\n// End';
+    await edit(code);
+    await page.waitForSelector('#editor .token.keyword');
+    assert.equal(await page.$eval('#editor', (el) => el.textContent), code);
+    assert.equal(await page.$('#editor script'), null, 'source HTML remains literal text');
+    await page.$eval('#editor', (el) => {
+      el.focus();
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(false);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+    });
+    await page.keyboard.press('Tab');
+    assert.equal(await page.$eval('#editor', (el) => el.textContent), code + '  ');
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Tab');
+    assert.equal(await page.$eval('#editor', (el) => document.activeElement === el), false);
+    await page.click('#reset');
+    await assertRendered('editor reset');
+    const restored = await page.$eval('#editor', (el) => el.textContent);
+    await page.click('#editor');
+    await page.keyboard.press(process.platform === 'darwin' ? 'Meta+z' : 'Control+z');
+    assert.equal(await page.$eval('#editor', (el) => el.textContent), restored, 'reset discards old undo history');
+    await page.click('#auto-run');
+  });
+
+  await test('all curated examples and every select/range endpoint render', async () => {
     for (const example of examples) {
       await visit(example);
       for (const control of example.controls) {
@@ -96,7 +127,7 @@ try {
   await test('live edits, errors, recovery, drafts, navigation, and SVG export', async () => {
     await visit(examples[0]);
     await page.$eval('#editor', (el) => {
-      el.value += '\nthrow new Error("A useful error");';
+      el.textContent += '\nthrow new Error("A useful error");';
       el.dispatchEvent(new Event('input', { bubbles: true }));
     });
     await page.waitForFunction(() => !document.querySelector('#render-error').hidden);
@@ -110,7 +141,7 @@ try {
       await page.$eval(
         '#editor',
         (el, code) => {
-          el.value += '\n' + code;
+          el.textContent += '\n' + code;
           el.dispatchEvent(new Event('input', { bubbles: true }));
         },
         code
@@ -123,13 +154,13 @@ try {
     }
 
     await page.$eval('#editor', (el) => {
-      el.value += '\n// saved draft';
+      el.textContent += '\n// saved draft';
       el.dispatchEvent(new Event('input', { bubbles: true }));
     });
     await page.waitForFunction(() => document.querySelector('#draft-state').textContent.includes('Saved'));
     await page.reload();
     await assertRendered('draft reload');
-    assert.match(await page.$eval('#editor', (el) => el.value), /saved draft/);
+    assert.match(await page.$eval('#editor', (el) => el.textContent), /saved draft/);
     await page.click('#reset');
     await assertRendered('reset');
     await page.type('#search', 'pedal');
@@ -259,7 +290,7 @@ throw new Error('Superseded error');`);
       frame
     );
 
-    const draft = await page.$eval('#editor', (el) => el.value);
+    const draft = await page.$eval('#editor', (el) => el.textContent);
     // This global mutation intentionally persists until the user asks for a full reset.
     await frame.evaluate(() => {
       VexFlow.explorerMutation = true;
@@ -267,13 +298,13 @@ throw new Error('Superseded error');`);
     // Keep the draft valid in a fresh runtime too.
     await edit(draft.replace("window.executionOrder.push('latest');", '// keep this draft'));
     await assertRendered('reset draft');
-    const preserved = await page.$eval('#editor', (el) => el.value);
+    const preserved = await page.$eval('#editor', (el) => el.textContent);
     await page.click('#reset-runtime');
     await assertRendered('runtime reset');
     const replacement = page.frames().find((f) => f.url() === 'about:srcdoc');
     assert.notEqual(replacement, frame);
     assert.equal(await replacement.evaluate(() => VexFlow.explorerMutation), undefined);
-    assert.equal(await page.$eval('#editor', (el) => el.value), preserved);
+    assert.equal(await page.$eval('#editor', (el) => el.textContent), preserved);
     await page.click('#reset');
     await assertRendered('restore original');
   });

@@ -7,7 +7,7 @@ export const expression = [
     'annotations',
     'Lyrics & annotations',
     group,
-    'Align words beneath the melody, or float an instruction above it.',
+    'Align lyrics below notes or annotations above them.',
     'Annotation',
     staff(
       "score.notes('C5/q, E5, G5, C6')",
@@ -15,7 +15,7 @@ export const expression = [
   notes[i].addModifier(factory.Annotation({ text: word, vJustify: params.position }), 0);
 });`
     ),
-    [text('words', 'Words', 'Let the music flow'), select('position', 'Position', 'bottom', ['bottom', 'top'])]
+    [text('words', 'Words', 'One two three four'), select('position', 'Position', 'bottom', ['bottom', 'top'])]
   ),
   e(
     'chord-symbols',
@@ -70,7 +70,7 @@ factory.draw();`,
     'slurs',
     'Slurs & curves',
     group,
-    'Shape a musical phrase with a curved line.',
+    'Connect notes with a slur and adjust its thickness.',
     'Curve',
     staff(
       "score.notes('C5/q, D5, E5, G5')",
@@ -82,7 +82,7 @@ factory.draw();`,
     'hairpins',
     'Hairpins',
     group,
-    'A growing or shrinking wedge describes a change in loudness.',
+    'Draw crescendo and decrescendo hairpins below the staff.',
     'StaveHairpin',
     staff(
       "score.notes('C5/q, D5, E5, G5')",
@@ -133,7 +133,7 @@ factory.draw();`,
     'vibrato-bracket',
     'Vibrato brackets',
     group,
-    'A wavy line extends a gesture over several notes.',
+    'Draw a vibrato bracket spanning several notes.',
     'VibratoBracket',
     staff(
       "score.notes('C5/q, D5, E5, G5')",

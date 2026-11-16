@@ -8,16 +8,17 @@ const notes = [3, 5, 7, 8].map(fret => factory.TabNote({ positions: [{ str: para
 ${modifications}
 const stave = factory.TabStave({ x: 30, y: 60, width: width - 60 }).addClef('tab');
 const voice = factory.Voice().setStave(stave).addTickables(notes);
+// Align the voice to the available space between the stave margins.
 factory.Formatter().joinVoices([voice]).formatToStave([voice], stave);
 factory.draw();
-${after}`.trim();
+${after ? '\n// Draw the connection after the fret positions have been calculated.\n' + after : ''}`.trim();
 }
 export const strings = [
   e(
     'tablature',
     'Tablature',
     group,
-    'Fret numbers sit on strings, with optional rhythmic stems.',
+    'Render fret numbers on a six-string tablature staff.',
     'TabNote TabStave',
     tab(),
     [number('string', 'String', 2, 1, 6)]
@@ -34,7 +35,7 @@ export const strings = [
     'vibrato',
     'Vibrato',
     group,
-    'A small wave gives a sustained note movement.',
+    'Attach a vibrato mark to a tablature note and adjust its width.',
     'Vibrato',
     tab('notes[1].addModifier(new VF.Vibrato().setVibratoWidth(params.length), 0);'),
     [number('length', 'Wave length', 45, 15, 90)]
@@ -55,7 +56,7 @@ export const strings = [
     'tab-ties',
     'Hammer-ons & pull-offs',
     group,
-    'A curved link and a short label describe a fretting-hand gesture.',
+    'Label a tablature tie as a hammer-on or pull-off.',
     'TabTie',
     tab(
       '',

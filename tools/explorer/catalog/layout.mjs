@@ -20,13 +20,14 @@ factory.draw();`
     'sheet',
     'Responsive sheets',
     group,
-    'Let measures find their place. Narrow the layout to move music onto another row.',
+    'Wrap measures into rows at a configurable width.',
     'Sheet System Factory',
     `${setup}
 const sheet = factory.Sheet({ width: Math.min(params.rowWidth, width - 60), x: 30, y: 25, rowGap: 15 });
 for (const notes of score.measures('C5/h, E5 | G5/q, E5, D5, C5 | E5/h, G5 | C5/w')) {
   sheet.addSystem().addStave({ voices: [score.voice(notes)] }).addClef('treble');
 }
+// Format first so the renderer can use the height of the wrapped rows.
 sheet.format();
 factory.getContext().resize(width, sheet.getHeight() + 30);
 factory.draw();`,

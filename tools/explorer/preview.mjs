@@ -2,12 +2,16 @@
 import { runPreview } from './runner.mjs';
 
 const channel = 'vexflow-explorer';
+// Scale the display only. Inspection coordinates and exported SVG retain score units.
+const previewScale = 0.8;
+const defaultHeight = 245;
 // Inline our own runtime so delayed user errors are not masked as cross-origin script errors.
 const runtime = `(${runPreview.toString()})();`.replace(/<\/script/gi, '<\\/script');
 export class Preview {
   constructor(host, onMessage) {
     this.host = host;
     this.onMessage = onMessage;
+    this.host.style.height = `${defaultHeight * previewScale}px`;
     window.addEventListener('message', (event) => {
       if (event.source !== this.frame?.contentWindow || event.data?.channel !== channel) return;
       if (event.data.type === 'ready') {
@@ -25,11 +29,22 @@ export class Preview {
       }
       if (event.data.token !== this.token) return;
       if (event.data.type === 'rendered') {
-        this.frame.style.height = `${Math.max(245, Math.min(4000, event.data.height || 245))}px`;
+        this.resize(event.data.height);
         event.data.totalDuration = Math.round((performance.now() - this.started) * 10) / 10;
       }
       this.onMessage(event.data);
     });
+  }
+  /** Lay out at full score resolution, then fit the scaled result to the preview column. */
+  getWidth() {
+    return Math.max(280, Math.round(this.host.clientWidth / previewScale));
+  }
+
+  /** Reserve the scaled height, including examples that resize their renderer. */
+  resize(height = defaultHeight) {
+    const scoreHeight = Math.max(defaultHeight, Math.min(4000, height || defaultHeight));
+    this.frame.style.height = `${scoreHeight}px`;
+    this.host.style.height = `${scoreHeight * previewScale}px`;
   }
   run(request) {
     this.token = crypto.randomUUID();
@@ -89,6 +104,9 @@ export class Preview {
     const origin = new URL(import.meta.url).origin;
     frame.srcdoc = `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' ${origin}; style-src 'unsafe-inline'; font-src data:; img-src data: blob:; connect-src 'none';"><style>html,body{margin:0;padding:0;background:transparent;overflow:hidden}#score{max-width:100%}svg{display:block}svg *{cursor:crosshair}</style></head><body><div id="score"></div><script src="${asset('vexflow.js')}"></script><script>${runtime}</script></body></html>`;
     this.frame = frame;
+    frame.style.width = `${100 / previewScale}%`;
+    frame.style.transform = `scale(${previewScale})`;
+    this.resize();
     this.host.replaceChildren(frame);
     this.watch();
   }

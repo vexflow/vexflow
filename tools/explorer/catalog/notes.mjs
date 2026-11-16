@@ -7,7 +7,7 @@ export const notes = [
     'notes',
     'Notes & stems',
     group,
-    'A melody begins with pitch, duration, and a little space. Change the phrase or turn the stems.',
+    'Create notes from pitch and duration strings. Adjust stem direction.',
     'StaveNote Stem Flag EasyScore',
     staff('score.notes(params.phrase, { stem: params.stem })'),
     [
@@ -20,7 +20,7 @@ export const notes = [
     'rests',
     'Rests',
     group,
-    'Silence has shape. Compare rests across common durations.',
+    'Compare whole, half, quarter, eighth, and sixteenth rests.',
     'StaveNote EasyScore',
     staff("score.notes('B4/w/r, B4/h/r, B4/q/r, B4/8/r, B4/16/r')")
   ),
@@ -40,7 +40,7 @@ export const notes = [
     'noteheads',
     'Notehead shapes',
     group,
-    'Crosses, diamonds, and slash notation give a note a different voice.',
+    'Compare cross, diamond, triangle, and slash noteheads.',
     'StaveNote NoteHead',
     staff(
       "['c/4', 'd/4', 'e/4', 'f/4'].map(key => factory.StaveNote({ keys: [key + '/' + params.shape], duration: 'q' }))"
@@ -51,7 +51,7 @@ export const notes = [
     'dots',
     'Dotted notes',
     group,
-    'Dots extend a duration and find their own vertical space beside a notehead.',
+    'Render single and double augmentation dots beside noteheads.',
     'Dot StaveNote',
     staff("score.notes('C5/q., D5/8, E5/q.., G5/16')")
   ),
@@ -59,7 +59,7 @@ export const notes = [
     'beams',
     'Beams',
     group,
-    'A shared beam makes the rhythm visible. Try a rising or falling phrase.',
+    'Group eighth notes under a beam. Edit pitches to change its slope.',
     'Beam StemmableNote',
     staff('score.notes(params.phrase)', 'score.beam(notes);'),
     [text('phrase', 'Eighth notes', 'C5/8, D5, E5, G5, A5, G5, E5, D5')]
@@ -135,7 +135,7 @@ notes[0].addModifier(factory.GraceNoteGroup({ notes: grace, slur: true }), 0);`
     'ornaments',
     'Ornaments',
     'Marks & expression',
-    'Turns, mordents, and trills add a gesture around the written pitch.',
+    'Attach turns, mordents, trills, and other ornaments to notes.',
     'Ornament',
     staff(
       "score.notes('C5/q, D5, E5, G5')",

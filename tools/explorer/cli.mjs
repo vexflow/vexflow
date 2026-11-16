@@ -7,6 +7,10 @@ import { createRequire } from 'node:module';
 import { dirname, extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
+import prettier from 'prettier';
+
+import { examples } from './catalog.mjs';
+
 const requireTool = createRequire(import.meta.url);
 export const source = dirname(fileURLToPath(import.meta.url));
 export const root = resolve(source, '../..');
@@ -63,6 +67,43 @@ export async function build() {
   }
   assets.set('vexflow.js', await readFile(library));
   assets.set('render-metrics.mjs', await readFile(join(root, 'tools/render-metrics.mjs')));
+  // Ship only the editor and JavaScript grammar, with licenses. No runtime CDN or bundler.
+  for (const [name, packagePath] of Object.entries({
+    'codejar.js': 'codejar/dist/codejar.js',
+    'codejar.js.map': 'codejar/dist/codejar.js.map',
+    'codejar.LICENSE': 'codejar/LICENSE',
+    'prism.LICENSE': 'prismjs/LICENSE',
+  })) {
+    assets.set(`vendor/${name}`, await readFile(join(root, 'node_modules', packagePath)));
+  }
+  const prism = await Promise.all(
+    ['core', 'clike', 'javascript'].map((name) =>
+      readFile(join(root, `node_modules/prismjs/components/prism-${name}.min.js`), 'utf8')
+    )
+  );
+  assets.set('vendor/prism.js', Buffer.from('window.Prism = { manual: true };\n' + prism.join('\n')));
+  // Format the assembled snippets at build time; Prettier never reaches the browser.
+  const formatted = await Promise.all(
+    examples.map(async (example) => ({
+      ...example,
+      code: (
+        await prettier.format(example.code, {
+          parser: 'babel',
+          printWidth: 80,
+          tabWidth: 2,
+          singleQuote: true,
+          trailingComma: 'es5',
+        })
+      ).trimEnd(),
+    }))
+  );
+  assets.set(
+    'catalog/entries.mjs',
+    Buffer.from(
+      '// Generated formatted examples. Edit tools/explorer/catalog/ source files.\n' +
+        `export const entries = ${JSON.stringify(formatted)};\n`
+    )
+  );
   const fonts = {},
     coverage = {};
   const opentype = requireTool('opentype.js');

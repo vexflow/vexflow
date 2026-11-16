@@ -1,5 +1,6 @@
 // SPA navigation, editable examples, inspection, diagnostics, and local drafts.
 import { defaults, examples, groups, searchExamples } from './catalog.mjs';
+import { createEditor, highlightCode } from './editor.mjs';
 import { createGlyphAtlas } from './glyphs.mjs';
 import { Preview } from './preview.mjs';
 import { analyzeLayout } from './render-metrics.mjs';
@@ -39,10 +40,15 @@ const toast = (message) => {
 if (!drafts || typeof drafts !== 'object' || Array.isArray(drafts)) drafts = {};
 const glyphs = createGlyphAtlas(toast);
 const preview = new Preview($('frame-host'), receive);
+const editor = createEditor($('editor'), () => {
+  lineNumbers();
+  saveDraft();
+  schedule();
+});
 $('example-count').textContent = examples.length;
 $('version').textContent = VexFlow.BUILD?.VERSION ?? '';
 
-/** All dynamic UI text uses textContent, including errors from edited code. */
+/** Navigation text uses textContent; code highlighting is isolated in editor.mjs. */
 function renderNavigation() {
   const found = searchExamples($('search').value);
   const nav = $('navigation');
@@ -70,30 +76,30 @@ function renderNavigation() {
 /** Keep code and controls together; storage failure never blocks editing. */
 function saveDraft() {
   if (!current) return;
-  drafts[current.id] = { code: $('editor').value, params };
+  const original = editor.getCode() === current.code && JSON.stringify(params) === JSON.stringify(defaults(current));
+  if (original) delete drafts[current.id];
+  else drafts[current.id] = { code: editor.getCode(), params };
   try {
     localStorage.setItem(draftsKey, JSON.stringify(drafts));
   } catch {
     /* The current edit remains usable if storage is full. */
   }
-  $('draft-state').textContent =
-    $('editor').value === current.code && JSON.stringify(params) === JSON.stringify(defaults(current))
-      ? 'Original example'
-      : 'Saved on this device';
+  $('draft-state').textContent = original ? 'Original example' : 'Saved on this device';
 }
 function lineNumbers() {
-  const editor = $('editor');
-  $('line-numbers').textContent = editor.value
+  $('line-numbers').textContent = editor
+    .getCode()
     .split('\n')
     .map((_, i) => i + 1)
     .join('\n');
-  $('line-numbers').scrollTop = editor.scrollTop;
+  $('line-numbers').scrollTop = $('editor').scrollTop;
 }
 function environment() {
   $('params-code').textContent = `const params = ${JSON.stringify(params, null, 2)};`;
+  highlightCode($('params-code'));
 }
 
-/** Create controls from catalog metadata without replacing the edited recipe. */
+/** Create controls from catalog metadata without replacing the edited example. */
 function renderControls() {
   const form = $('controls');
   form.replaceChildren();
@@ -136,13 +142,13 @@ function renderControls() {
   environment();
 }
 
-/** Load a recipe, its saved draft, API links, and neighboring navigation. */
+/** Load an example, its saved draft, API links, and neighboring navigation. */
 function showExample(id) {
   current = examples.find((e) => e.id === id) ?? examples[0];
   const saved = drafts[current.id];
   params = { ...defaults(current), ...saved?.params };
-  $('editor').value = typeof saved?.code === 'string' ? saved.code : current.code;
-  $('category').textContent = `${String(groups.indexOf(current.group) + 1).padStart(2, '0')} / ${current.group}`;
+  editor.setCode(typeof saved?.code === 'string' ? saved.code : current.code);
+  $('category').textContent = current.group;
   $('title').textContent = current.title;
   $('description').textContent = current.description;
   document.title = `${current.title} · VexFlow Explorer`;
@@ -193,19 +199,19 @@ function run() {
   if (!current || $('example-view').hidden) return;
   clearTimeout(debounce);
   pending = true;
-  const width = Math.max(280, Math.round($('preview').clientWidth));
+  const width = preview.getWidth();
   lastWidth = width;
   $('render-error').hidden = true;
   $('error-message').textContent = '';
   $('render-pending').hidden = false;
   $('download').disabled = true;
   $('render-status').textContent = 'Rendering…';
-  $('pointer-position').textContent = 'Hover to explore · click to pin';
+  $('pointer-position').textContent = 'Hover to inspect · click to pin';
   $('elements').disabled = true;
   $('inspection').hidden = true;
   document.querySelector('.inspector-hint').hidden = false;
   preview.run({
-    code: $('editor').value,
+    code: editor.getCode(),
     params,
     width,
     height: 245,
@@ -225,13 +231,13 @@ function receive(message) {
     $('render-error').hidden = false;
     $('error-message').textContent =
       `${message.name || 'Error'}${message.line ? ` · line ${message.line}` : ''}\n${message.message}`;
-    $('render-status').textContent = 'Example needs attention';
+    $('render-status').textContent = 'Render failed';
     lastSVG = '';
     return;
   }
   if (message.type === 'inspect') {
     if (!message.element && !message.pinned) {
-      $('pointer-position').textContent = 'Hover to explore · click to pin';
+      $('pointer-position').textContent = 'Hover to inspect · click to pin';
       $('inspection').hidden = true;
       document.querySelector('.inspector-hint').hidden = false;
     }
@@ -259,7 +265,7 @@ function receive(message) {
     select.append(option);
   }
   showDiagnostics(message);
-  if (Math.abs($('preview').clientWidth - lastWidth) > 2) {
+  if (Math.abs(preview.getWidth() - lastWidth) > 2) {
     clearTimeout(debounce);
     debounce = setTimeout(run, 100);
   }
@@ -349,7 +355,7 @@ function showDiagnostics(message) {
 
 function reset() {
   delete drafts[current.id];
-  $('editor').value = current.code;
+  editor.setCode(current.code);
   params = defaults(current);
   renderControls();
   lineNumbers();
@@ -366,22 +372,7 @@ $('search').onkeydown = (event) => {
     if (first) location.hash = first.hash;
   }
 };
-$('editor').oninput = () => {
-  lineNumbers();
-  saveDraft();
-  schedule();
-};
 $('editor').onscroll = () => ($('line-numbers').scrollTop = $('editor').scrollTop);
-$('editor').onkeydown = (event) => {
-  if (event.key === 'Tab') {
-    event.preventDefault();
-    const el = event.target;
-    el.setRangeText('  ', el.selectionStart, el.selectionEnd, 'end');
-    lineNumbers();
-    saveDraft();
-    schedule();
-  }
-};
 $('controls').onsubmit = (event) => event.preventDefault();
 $('run').onclick = run;
 $('reset').onclick = reset;
@@ -436,7 +427,7 @@ for (const tab of ['inspect', 'api']) {
   });
 }
 $('copy-code').onclick = () => {
-  const code = `// Load VexFlow and add <div id="score"></div> to the page.\nconst VF = VexFlow;\nconst width = ${lastWidth};\nconst height = 245;\nconst ink = '${dark ? '#eeeadd' : '#30382d'}';\nconst params = ${JSON.stringify(params, null, 2)};\nVF.setFonts('${$('font').value}', '${$('font').value === 'Petaluma' ? 'Petaluma Script' : 'Academico'}');\nawait document.fonts.ready;\n\n${$('editor').value}`;
+  const code = `// Load VexFlow and add <div id="score"></div> to the page.\nconst VF = VexFlow;\nconst width = ${lastWidth};\nconst height = 245;\nconst ink = '${dark ? '#eeeadd' : '#30382d'}';\nconst params = ${JSON.stringify(params, null, 2)};\nVF.setFonts('${$('font').value}', '${$('font').value === 'Petaluma' ? 'Petaluma Script' : 'Academico'}');\nawait document.fonts.ready;\n\n${editor.getCode()}`;
   navigator.clipboard
     .writeText(code)
     .then(() => toast('Runnable example copied'))
@@ -483,7 +474,7 @@ document.addEventListener('keydown', (event) => {
   }
 });
 new ResizeObserver(() => {
-  if (!pending && Math.abs($('preview').clientWidth - lastWidth) > 2 && !$('example-view').hidden) {
+  if (!pending && Math.abs(preview.getWidth() - lastWidth) > 2 && !$('example-view').hidden) {
     clearTimeout(debounce);
     debounce = setTimeout(run, 200);
   }

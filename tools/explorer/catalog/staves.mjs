@@ -7,7 +7,7 @@ export const staves = [
     'clefs',
     'Clefs',
     group,
-    'A clef maps the lines of a staff to pitches. Compare the familiar and the less familiar.',
+    'Compare clefs and their positions on the staff.',
     'Stave Clef',
     `${setup}
 const stave = factory.Stave({ x: 35, y: 65, width: width - 70 });
@@ -45,7 +45,7 @@ factory.draw();`,
     'keys',
     'Key signatures',
     group,
-    'Sharps and flats set the tonal landscape for a measure.',
+    'Render sharp and flat key signatures.',
     'KeySignature Stave',
     staff("score.notes('C5/q, D5, E5, G5')", '', '', ".addClef('treble').addKeySignature(params.key)"),
     [select('key', 'Key', 'D', ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb'])]
@@ -191,7 +191,7 @@ factory.draw();`
     'multirests',
     'Multi-measure rests',
     group,
-    'A single sign can hold several empty measures.',
+    'Render multi-measure rests as a bar or rest symbols.',
     'MultiMeasureRest',
     `${setup}
 const stave = factory.Stave({ x: 35, y: 65, width: width - 70 }).addClef('treble');
