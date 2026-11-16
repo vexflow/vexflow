@@ -185,10 +185,129 @@
       "guide": "docs/easyscore.md",
       "example": "easyscore-references",
       "test": "adopted native notation matches rendering and retained redraw lifecycle"
+    },
+    {
+      "api": "make.note()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-families",
+      "test": "EasyScore notation families draw once and redraw identically on both backends"
+    },
+    {
+      "api": "sequence()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-families",
+      "test": "EasyScore notation families draw once and redraw identically on both backends"
+    },
+    {
+      "api": "make.ghostNote()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-families",
+      "test": "EasyScore notation families draw once and redraw identically on both backends"
+    },
+    {
+      "api": "make.textNote()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-families",
+      "test": "EasyScore notation families draw once and redraw identically on both backends"
+    },
+    {
+      "api": "make.accidental()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-families",
+      "test": "EasyScore notation families draw once and redraw identically on both backends"
+    },
+    {
+      "api": "make.articulation()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-families",
+      "test": "EasyScore notation families draw once and redraw identically on both backends"
+    },
+    {
+      "api": "make.ornament()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-families",
+      "test": "EasyScore notation families draw once and redraw identically on both backends"
+    },
+    {
+      "api": "make.dot()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-families",
+      "test": "EasyScore notation families draw once and redraw identically on both backends"
+    },
+    {
+      "api": "make.parenthesis()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-families",
+      "test": "EasyScore notation families draw once and redraw identically on both backends"
+    },
+    {
+      "api": "make.tremolo()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-families",
+      "test": "EasyScore notation families draw once and redraw identically on both backends"
+    },
+    {
+      "api": "make.stroke()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-families",
+      "test": "EasyScore notation families draw once and redraw identically on both backends"
+    },
+    {
+      "api": "make.vibrato()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-families",
+      "test": "EasyScore notation families draw once and redraw identically on both backends"
+    },
+    {
+      "api": "make.chordSymbol()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-families",
+      "test": "EasyScore notation families draw once and redraw identically on both backends"
+    },
+    {
+      "api": "make.fingering()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-families",
+      "test": "EasyScore notation families draw once and redraw identically on both backends"
+    },
+    {
+      "api": "make.stringNumber()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-families",
+      "test": "EasyScore notation families draw once and redraw identically on both backends"
+    },
+    {
+      "api": "make.graceNote()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-families",
+      "test": "EasyScore notation families draw once and redraw identically on both backends"
+    },
+    {
+      "api": "make.graceNoteGroup()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-families",
+      "test": "EasyScore notation families draw once and redraw identically on both backends"
+    },
+    {
+      "api": "make.noteSubGroup()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-families",
+      "test": "EasyScore notation families draw once and redraw identically on both backends"
+    },
+    {
+      "api": "sheet()",
+      "guide": "docs/easyscore.md",
+      "example": null,
+      "test": "facade sheets and nested build groups share ownership and rollback"
+    },
+    {
+      "api": "build()",
+      "guide": "docs/easyscore.md",
+      "example": null,
+      "test": "facade sheets and nested build groups share ownership and rollback"
     }
   ],
   "pending": [
-    "Complete typed note and modifier construction",
     "Automatic beam groups and advanced rhythm helpers",
     "Other spans, dynamics, and string techniques",
     "Tablature and remaining stave structure",

@@ -475,3 +475,80 @@ test('facade sheets and nested build groups share ownership and rollback', () =>
   score.reset();
   assert.equal(score.factory.sheets.length, 0);
 });
+
+test('typed sequences and modifier constructors preserve native fields and ownership', () => {
+  const score = create().set({ clef: 'bass', stem: 'down' });
+  const note = score.make.note({
+    keys: ['c/3/x'],
+    duration: 'q',
+    octaveShift: 1,
+    strokePx: 4,
+    stemDirection: VF.Stem.UP,
+  });
+  assert.equal(note.getStemDirection(), VF.Stem.UP);
+  assert.equal(note.isAutoStem(), false);
+  assert.equal(
+    note.getKeyProps()[0].code,
+    new VF.StaveNote({ keys: ['c/3/x'], duration: 'q', clef: 'bass', octaveShift: 1 }).getKeyProps()[0].code
+  );
+  const constructors = [
+    ['accidental', [{ type: '++' }], VF.Accidental],
+    ['articulation', [{ type: 'fermata.below' }], VF.Articulation],
+    ['ornament', ['tr', { delayed: true, upperAccidental: '#' }], VF.Ornament],
+    ['dot', [], VF.Dot],
+    ['parenthesis', [VF.Modifier.Position.LEFT], VF.Parenthesis],
+    ['stroke', [VF.Stroke.Type.ROLL_UP, { allVoices: false }], VF.Stroke],
+    ['tremolo', [3], VF.Tremolo],
+    ['vibrato', [], VF.Vibrato],
+    ['chordSymbol', [{ fontSize: 14 }], VF.ChordSymbol],
+    ['fingering', [{ number: '2', position: 'left' }], VF.FretHandFinger],
+    ['stringNumber', [{ number: '4', position: 'above' }, false], VF.StringNumber],
+  ];
+  for (const [name, args, Native] of constructors) {
+    const modifier = score.make[name](...args);
+    assert.ok(modifier instanceof Native, name);
+    assert.equal(VF.Factory.getOwner(modifier), score.factory, name);
+    score.attach(note, modifier);
+    assert.equal(modifier.getNote(), note, name);
+  }
+  assert.throws(() => score.make.articulation({ type: 'no-such-mark' }), /Unknown EasyScore articulation/);
+  const ghost = score.make.ghostNote('q');
+  const text = score.make.textNote({ text: 'rit.', duration: 'q', line: 2, smooth: true });
+  const sequence = score.sequence([note, ghost, text, { keys: ['d/3'], duration: 'q' }]);
+  assert.equal(score.voice(sequence).getTicksUsed().value(), VF.VexFlow.RESOLUTION);
+  const count = queued(score);
+  assert.throws(() => score.sequence(['C4/q[id="rolled-back"]', create().notes('D4/q')[0]]), /another Factory/);
+  assert.equal(score.getElement('rolled-back'), undefined);
+  assert.equal(queued(score), count);
+});
+
+test('grace and subnote groups own children exactly once and restore them after failed batches', () => {
+  const score = create();
+  const [parent, child] = score.notes('C4/h, D4');
+  const grace = score.make.graceNote({ keys: ['e/4'], duration: '16', slash: true });
+  assert.throws(
+    () =>
+      score.build(() => {
+        score.make.noteSubGroup({ notes: [child] });
+        throw new Error('cancel group');
+      }),
+    /cancel group/
+  );
+  assert.equal(VF.Factory.getGroup(child), undefined);
+  assert.throws(() => child.getVoice(), /NoVoice/);
+  assert.equal(queued(score), 2, 'batch rollback restores standalone drawing');
+  const group = score.make.graceNoteGroup({ notes: [grace], slur: true });
+  score.attach(parent, group);
+  assert.equal(VF.Factory.getGroup(grace), group);
+  assert.throws(() => score.make.graceNoteGroup({ notes: [grace] }), /already belongs to a group/);
+  assert.throws(() => score.voice([grace]), /Grouped notes/);
+  assert.throws(() => score.adopt(grace, 'note'), /grouped note/);
+  const sub = score.make.noteSubGroup({ notes: [child] });
+  score.attach(parent, sub);
+  assert.equal(queued(score), 1, 'subnotes are removed from the standalone queue');
+  const foreign = create().make.graceNote({ keys: ['c/4'], duration: '16' });
+  assert.throws(() => score.make.graceNoteGroup({ notes: [foreign] }), /another Factory/);
+  const voiced = score.notes('F4/w')[0];
+  score.voice([voiced]);
+  assert.throws(() => score.make.noteSubGroup({ notes: [voiced] }), /voiced note/);
+});

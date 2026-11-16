@@ -4,6 +4,16 @@ import { Annotation, EasyScore, EasyScoreSource, Element, Fraction, Note, StaveT
 /** Keep native return types and reject invalid built-in option types. */
 export function easyScoreTypes(): void {
   const score = EasyScore.create({ renderer: { elementId: 'score', width: 500, height: 240 } });
+  const nativeNote = score.make.note({ keys: ['c/4/x'], duration: 'q', autoStem: true });
+  score.sequence(['C4/q', nativeNote, { keys: ['d/4'], duration: 'q' }]);
+  score.make.graceNoteGroup({ notes: [score.make.graceNote({ keys: ['d/4'], duration: '16', slash: true })] });
+  score.make.articulation({ type: 'fermata' }).setBetweenLines(false);
+  score.make.ornament('tr', { upperAccidental: '#' });
+  score.make.tremolo(3);
+  // @ts-expect-error Typed notes require a duration.
+  score.make.note({ keys: ['c/4'] });
+  // @ts-expect-error Native tremolo counts are numbers.
+  score.make.tremolo('three');
   const notes = score.notes('C4/h, C4', { octaveShift: 1, durationOverride: new Fraction(4096, 1) });
   const annotation: Annotation = score.make.annotation({ text: 'dolce' });
   score.attach(notes[0], annotation);

@@ -12,6 +12,10 @@
 - Adopt native notes, modifiers, and standalone drawables with explicit roles and ownership checks.
 - Select parsed notation from Explorer clicks without guessing ambiguous or stale editor locations.
 
+- Add typed note sequences, percussion heads, native modifier helpers, and single-owner grace/subnote groups.
+- Add pure extension validation, Sheet access, and synchronous construction batches.
+- Preserve native dot and parenthesis fonts without requiring a browser document in Node.
+
 # 5.1.2
 
 ## Notation

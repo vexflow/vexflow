@@ -23,8 +23,8 @@ Second slice:
 
 Validation for slice two: 105 Node checks, 1,891 QUnit tests, and 12 Explorer checks pass. Source types, emitted-declaration consumer checks, and lint pass. Native-extension rendering matches SVG/Canvas with Bravura and Petaluma, including retained redraw.
 
-Still pending: the remaining `make.*` families, automatic beaming, typed note sequences, and structured composition.
-Milestone 0 is complete: [contracts](docs/easyscore-contracts.md) map every notation family to a typed path and lifecycle. A checked native API snapshot records exported types, constructors, options, and public members. Beginner, piano, tab, and percussion workflows are reviewed. Milestone 1 is complete: typed pure validators complement source diagnostics and transactional construction. Native zero-valued bracket options are honored, and Factory setup leaves caller options untouched. Milestone 2 is complete: the facade includes native Sheet access and nested batch construction, alongside lookup, provenance, adoption, style, reset, and retained drawing. Milestones 3–7 remain.
+Still pending: rhythm/span helpers, automatic beaming, tablature/structure helpers, and structured composition.
+Milestone 0 is complete: [contracts](docs/easyscore-contracts.md) map every notation family to a typed path and lifecycle. A checked native API snapshot records exported types, constructors, options, and public members. Beginner, piano, tab, and percussion workflows are reviewed. Milestone 1 is complete: typed pure validators complement source diagnostics and transactional construction. Native zero-valued bracket options are honored, and Factory setup leaves caller options untouched. Milestone 2 is complete: the facade includes native Sheet access and nested batch construction, alongside lookup, provenance, adoption, style, reset, and retained drawing. Milestone 3 is complete: typed sequences, percussion heads, all note-modifier constructors, and grace/subnote ownership have executable examples and semantic/rendering checks. Milestones 4–7 remain.
 Reviewed against `main` at `91e753e79e1fed1ef87a669b884dab50e7dca463` on November 16, 2026.
 
 ## Recommendation
@@ -110,7 +110,7 @@ These findings come from source inspection and small probes against a freshly re
 
 The softmax probe used a half note and two quarter notes. The accepted option produced weights of about `0.471, 0.265, 0.265`. Calling the native setter produced the expected equal thirds.
 
-The first slice now fixes the listed option forwarding, articulation fallback, and strict/measure failure cleanup. Broader coverage and score-local registry work remain pending. The table records the pre-implementation behavior.
+The first slice now fixes the listed option forwarding, articulation fallback, and strict/measure failure cleanup. Broader coverage remains in progress; score-local lookup is implemented. The table records the pre-implementation behavior.
 
 ## Feature coverage and gaps
 

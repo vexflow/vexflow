@@ -12,6 +12,7 @@ import { Beam, PartialBeamDirection } from './beam';
 import { ChordSymbol } from './chordsymbol';
 import { ClefNote } from './clefnote';
 import { Curve, CurveOptions } from './curve';
+import { Dot } from './dot';
 import { EasyScore, EasyScoreOptions } from './easyscore';
 import { Element } from './element';
 import { FontInfo } from './font';
@@ -28,6 +29,7 @@ import { MultiMeasureRest, MultimeasureRestRenderOptions } from './multimeasurer
 import { Note, NoteStruct } from './note';
 import { NoteSubGroup } from './notesubgroup';
 import { Ornament } from './ornament';
+import { Parenthesis } from './parenthesis';
 import { PedalMarking } from './pedalmarking';
 import { Registry } from './registry';
 import { RenderContext } from './rendercontext';
@@ -43,6 +45,7 @@ import { StaveNote, StaveNoteStruct } from './stavenote';
 import { StaveTie } from './stavetie';
 import { StemmableNote } from './stemmablenote';
 import { StringNumber } from './stringnumber';
+import { Stroke } from './strokes';
 import { System, SystemOptions } from './system';
 import { TabNote, TabNoteStruct } from './tabnote';
 import { TabStave } from './tabstave';
@@ -51,8 +54,10 @@ import { TextDynamics } from './textdynamics';
 import { TextNote, TextNoteStruct } from './textnote';
 import { TickContext } from './tickcontext';
 import { TimeSigNote } from './timesignote';
+import { Tremolo } from './tremolo';
 import { Tuplet, TupletOptions } from './tuplet';
 import { defined, log, RuntimeError } from './util';
+import { Vibrato } from './vibrato';
 import { VibratoBracket } from './vibratobracket';
 import { Voice, VoiceTime } from './voice';
 import { isHTMLCanvas } from './web';
@@ -111,6 +116,13 @@ export class Factory {
   /** Ownership survives drawing; weak keys do not retain discarded notation. */
   private static owners = new WeakMap<Element, Factory>();
   private constructionScopes: Element[][] = [];
+  private groupScopes: (() => void)[][] = [];
+  private static groups = new WeakMap<Note, Modifier>();
+
+  /** A grouped note draws only through its modifier, never through a main voice or queue. */
+  static getGroup(note: Note): Modifier | undefined {
+    return Factory.groups.get(note);
+  }
 
   /** Identify the Factory that created an element, without changing its draw role. */
   static getOwner(element: Element): Factory | undefined {
@@ -144,6 +156,9 @@ export class Factory {
         !(element instanceof StaveModifier) &&
         !(element instanceof System));
     if (!valid) throw new RuntimeError('BadArguments', `Invalid adopted element role: ${role}`);
+    if (element instanceof Note && Factory.groups.has(element)) {
+      throw new RuntimeError('BadArguments', 'A grouped note cannot be queued independently.');
+    }
     this.own(element);
     if (role !== 'modifier' && !this.renderQ.includes(element)) this.renderQ.push(element);
     return element;
@@ -161,16 +176,23 @@ export class Factory {
       retained: this.retained,
     };
     const created: Element[] = [];
+    const grouped: (() => void)[] = [];
     this.constructionScopes.push(created);
+    this.groupScopes.push(grouped);
     const run = () => {
       try {
         return build();
       } catch (error) {
         Object.assign(this, snapshot);
         created.forEach((element) => Factory.owners.delete(element));
+        grouped
+          .slice()
+          .reverse()
+          .forEach((restore) => restore());
         throw error;
       } finally {
         this.constructionScopes.pop();
+        this.groupScopes.pop();
       }
     };
     const registry = Registry.getDefaultRegistry();
@@ -415,9 +437,7 @@ export class Factory {
   }
 
   GraceNoteGroup(params: { notes: StemmableNote[]; slur?: boolean }): GraceNoteGroup {
-    const group = new GraceNoteGroup(params.notes, params.slur);
-    group.setContext(this.context);
-    return this.own(group);
+    return this.own(new GraceNoteGroup(params.notes, params.slur).setContext(this.context));
   }
 
   Accidental(params: { type: string }): Accidental {
@@ -767,9 +787,71 @@ export class Factory {
       ...params,
     };
 
-    const group = new NoteSubGroup(p.notes);
-    group.setContext(this.context);
-    return this.own(group);
+    return this.own(new NoteSubGroup(p.notes).setContext(this.context));
+  }
+
+  /** Transfer unvoiced notes to one modifier. Validation happens before native voice assignment. */
+  groupNotes<T extends Modifier>(notes: Note[], construct: () => T): T {
+    if (!notes.length || new Set(notes).size !== notes.length) {
+      throw new RuntimeError('BadArguments', 'A note group needs distinct notes.');
+    }
+    notes.forEach((note) => {
+      const owner = Factory.getOwner(note);
+      if (owner && owner !== this) throw new RuntimeError('BadArguments', 'Group note belongs to another Factory.');
+      if (Factory.groups.has(note)) throw new RuntimeError('BadArguments', 'Note already belongs to a group.');
+      let voice: Voice | undefined;
+      try {
+        voice = note.getVoice();
+      } catch (error) {
+        if (!(error instanceof RuntimeError) || error.code !== 'NoVoice') throw error;
+      }
+      if (voice) throw new RuntimeError('BadArguments', 'A voiced note cannot be moved into a group.');
+    });
+    const ignored = notes.map((note) => note.shouldIgnoreTicks());
+    const restore = () =>
+      notes.forEach((note, index) => {
+        Factory.groups.delete(note);
+        note.clearVoice().setIgnoreTicks(ignored[index]);
+      });
+    let group: T;
+    try {
+      group = this.own(construct().setContext(this.context));
+    } catch (error) {
+      restore();
+      throw error;
+    }
+    this.groupScopes.forEach((scope) => scope.push(restore));
+    notes.forEach((note) => {
+      this.own(note);
+      Factory.groups.set(note, group);
+    });
+    this.renderQ = this.renderQ.filter((element) => !notes.includes(element as Note));
+    return group;
+  }
+
+  /** Construct a native Dot for attachment; preserve its full constructor options. */
+  Dot(...args: ConstructorParameters<typeof Dot>): Dot {
+    return this.adopt(new Dot(...args).setContext(this.context), 'modifier');
+  }
+
+  /** Construct a native Parenthesis for attachment; preserve its full constructor options. */
+  Parenthesis(...args: ConstructorParameters<typeof Parenthesis>): Parenthesis {
+    return this.adopt(new Parenthesis(...args).setContext(this.context), 'modifier');
+  }
+
+  /** Construct a native Stroke for attachment; preserve its full constructor options. */
+  Stroke(...args: ConstructorParameters<typeof Stroke>): Stroke {
+    return this.adopt(new Stroke(...args).setContext(this.context), 'modifier');
+  }
+
+  /** Construct a native Tremolo for attachment; preserve its full constructor options. */
+  Tremolo(...args: ConstructorParameters<typeof Tremolo>): Tremolo {
+    return this.adopt(new Tremolo(...args).setContext(this.context), 'modifier');
+  }
+
+  /** Construct a native Vibrato for attachment; preserve its full constructor options. */
+  Vibrato(...args: ConstructorParameters<typeof Vibrato>): Vibrato {
+    return this.adopt(new Vibrato(...args).setContext(this.context), 'modifier');
   }
 
   /** Render the score. */

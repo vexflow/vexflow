@@ -3,12 +3,12 @@
 // MIT License
 
 import { Accidental } from './accidental';
-import { Annotation } from './annotation';
 import { Articulation } from './articulation';
 import { PartialBeamDirection } from './beam';
 import { Clef } from './clef';
 import { Dot } from './dot';
 import { EasyScoreReferences, EasyScoreSource } from './easyscore/elementindex';
+import { EasyScoreElements } from './easyscore/elements';
 import { Element, ElementStyle } from './element';
 import { Factory, FactoryElementRole, FactoryOptions } from './factory';
 import { Fraction } from './fraction';
@@ -20,7 +20,6 @@ import { Grammar, Match, Parser, Result, Rule, RuleFunction } from './parser';
 import { RenderContext } from './rendercontext';
 import { Sheet, SheetOptions } from './sheet';
 import { StaveNoteStruct } from './stavenote';
-import { StaveTie } from './stavetie';
 import { Stem } from './stem';
 import { StemmableNote } from './stemmablenote';
 import { System, SystemOptions } from './system';
@@ -581,29 +580,18 @@ export class EasyScore {
     return new Factory(options).EasyScore({ throwOnError: true, strictOptions: true, ...scoreOptions });
   }
 
-  /** Native constructors for this first slice. More feature families will be added incrementally. */
-  readonly make = {
-    annotation: (options?: Parameters<Factory['Annotation']>[0]): Annotation =>
-      this.transaction(() => this.references.add(this.factory.Annotation(options))),
-    tie: (options: Parameters<Factory['StaveTie']>[0]): StaveTie => {
-      const { from, to } = options;
-      if (!from && !to) throw new RuntimeError('BadArguments', 'A tie needs at least one endpoint.');
-      const first = options.firstIndexes ?? [0];
-      const last = options.lastIndexes ?? [0];
-      if (!first.length || first.length !== last.length) {
-        throw new RuntimeError('BadArguments', 'Tie index lists must be nonempty and have the same length.');
-      }
-      for (const [note, indices] of [
-        [from, first],
-        [to, last],
-      ] as const) {
-        if (!note) continue;
-        this.requireOwned(note);
-        indices.forEach((index) => this.checkIndex(note, index));
-      }
-      return this.transaction(() => this.references.add(this.factory.StaveTie(options)));
-    },
-  };
+  /** Typed constructors return native objects and share the facade's transaction boundary. */
+  readonly make = new EasyScoreElements({
+    factory: () => this.factory,
+    manage: (construct) => this.transaction(() => this.references.add(construct())),
+    owned: (element) => this.requireOwned(element),
+    checkIndex: (note, index) => this.checkIndex(note, index),
+    noteDefaults: () => ({
+      clef: this.defaults.clef,
+      autoStem: this.defaults.stem === 'auto',
+      stemDirection: this.defaults.stem === 'down' ? Stem.DOWN : Stem.UP,
+    }),
+  });
 
   /** Attach a modifier once. Native custom modifiers are welcome; foreign Factory objects are rejected. */
   attach<T extends Note>(note: T, modifier: Modifier, index = 0): T {
@@ -683,7 +671,7 @@ export class EasyScore {
   }
 
   /** Endpoints and voice notes must share this facade's Factory. */
-  private requireOwned(note: Tickable): void {
+  private requireOwned(note: Element): void {
     if (Factory.getOwner(note) !== this.factory) {
       throw new RuntimeError(
         'BadArguments',
@@ -949,6 +937,22 @@ export class EasyScore {
     return this.builder.getElements().notes;
   }
 
+  /** Mix notation fragments, full native note structs, and already-owned native tickables. */
+  sequence(items: readonly (string | StaveNoteStruct | Tickable)[], options: BuilderOptions = {}): Tickable[] {
+    return this.build(() =>
+      items.flatMap((item): Tickable[] => {
+        if (typeof item === 'string') return this.notes(item, options);
+        if (item instanceof Tickable) {
+          this.requireOwned(item);
+          if (item instanceof Note && Factory.getGroup(item))
+            throw new RuntimeError('BadArguments', 'Grouped notes cannot be sequence entries.');
+          return [item];
+        }
+        return [this.make.note(item)];
+      })
+    );
+  }
+
   /**
    * Parse bar-separated measures. Durations carry across bars; notes() is unchanged.
    * A bar may have adjacent commas. Quoted option values may contain literal bars.
@@ -1065,6 +1069,9 @@ export class EasyScore {
       throw new RuntimeError('BadArguments', 'softmaxFactor must be positive and finite.');
     }
     if (this.options.strictOptions) notes.forEach((note) => this.requireOwned(note));
+    if (notes.some((note) => note instanceof Note && Factory.getGroup(note))) {
+      throw new RuntimeError('BadArguments', 'Grouped notes cannot be inserted into a main voice.');
+    }
     return this.transaction(() => {
       const voice = this.factory.Voice({ time: options.time ?? this.defaults.time });
       voice.setMode(mode);

@@ -220,3 +220,58 @@ test('adopted native notation matches rendering and retained redraw lifecycle', 
     await browser.close();
   }
 });
+
+test('EasyScore notation families draw once and redraw identically on both backends', async (t) => {
+  const { renderEasyScoreFamilies } = await import('../../tools/easyscore-families.mjs');
+  const browser = await puppeteer.launch({ headless: true, args: process.env.CI ? ['--no-sandbox'] : [] });
+  try {
+    const page = await browser.newPage();
+    await page.setViewport({ width: 640, height: 240, deviceScaleFactor: 1 });
+    await page.setContent('<style>body{margin:0;background:white}</style><div id="host"></div>');
+    await page.addScriptTag({ path: `${root}build/cjs/vexflow-debug.js` });
+    await page.evaluate(`window.renderFamilies = ${renderEasyScoreFamilies.toString()}`);
+    for (const font of ['Bravura', 'Petaluma'])
+      for (const backend of ['svg', 'canvas']) {
+        for (const kind of ['modifiers', 'accidentals', 'text', 'grace', 'percussion', 'sequence']) {
+          await t.test(`${font} ${backend} ${kind}`, async () => {
+            await page.evaluate(
+              async ({ font, backend, kind }) => {
+                const VF = VexFlow;
+                VF.setFonts(font, font === 'Bravura' ? 'Academico' : 'Petaluma Script');
+                await document.fonts.ready;
+                const host = document.getElementById('host');
+                host.replaceChildren();
+                const target = host.appendChild(document.createElement(backend === 'canvas' ? 'canvas' : 'div'));
+                target.id = 'score';
+                window.example = window.renderFamilies(VF, { elementId: 'score', width: 640, height: 240 }, kind);
+              },
+              { font, backend, kind }
+            );
+            const original = await page.screenshot({ omitBackground: false });
+            const counts = await page.evaluate(() => {
+              const { score, notes, marks } = window.example;
+              const elements = [...notes, ...marks, ...marks.flatMap((mark) => mark.getGraceNotes?.() ?? [])];
+              const counts = elements.map(() => 0);
+              elements.forEach((element, index) => {
+                const draw = element.draw.bind(element);
+                element.draw = () => {
+                  counts[index]++;
+                  return draw();
+                };
+              });
+              score.factory.getContext().clear();
+              score.draw({ retain: true });
+              return counts;
+            });
+            assert.ok(
+              counts.every((count) => count === 1),
+              `one drawing owner: ${counts}`
+            );
+            assert.deepEqual(await page.screenshot({ omitBackground: false }), original);
+          });
+        }
+      }
+  } finally {
+    await browser.close();
+  }
+});

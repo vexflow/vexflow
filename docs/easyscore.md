@@ -69,6 +69,65 @@ const shifted = score.notes('C4/h, D4', { octaveShift: 1 });
 
 String notation supplies keys, duration, dots, and type. Typed custom heads, tablature, and the remaining constructors are planned separately.
 
+## Typed notes and modifiers
+
+`make.note()` accepts the complete native `StaveNoteStruct`. Score clef/stem defaults apply first; explicit fields win.
+An explicit `stemDirection` disables automatic stems unless you also pass `autoStem`.
+Native key suffixes choose individual head shapes. Use native setters for precise positions and per-key styling.
+
+```js
+const snare = score.make.note({ keys: ['c/5'], duration: 'q', clef: 'percussion' });
+const hiHat = score.make.note({ keys: ['g/5/x'], duration: 'q', clef: 'percussion', stemDirection: VF.Stem.UP });
+hiHat.setKeyLine(0, 4).setKeyStyle(0, { fillStyle: '#b74632' });
+```
+
+`sequence()` accepts strings, native note structs, and already-owned Tickables. It returns `Tickable[]` for `voice()`.
+Each string is a separate notation fragment with its own duration inheritance. Typed structs require explicit durations.
+A failed sequence removes its new objects. It preserves the existing objects passed in.
+
+```js
+const sequence = score.sequence([
+  'C5/q',
+  score.make.ghostNote('q'),
+  score.make.textNote({ text: 'rit.', duration: 'q', smooth: true }),
+  { keys: ['f/5'], duration: 'q' },
+]);
+```
+
+These named helpers preserve their Factory/native argument types and return the corresponding native object:
+
+| Helpers                                             | Native customization                                                                 |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `make.accidental()`                                 | All native codes, including microtonal signs; `setAsCautionary()`.                   |
+| `make.articulation()`, `make.ornament()`            | Articulation aliases/codes/glyphs; ornament codes, accidentals, delay, and position. |
+| `make.dot()`, `make.parenthesis()`                  | Dot displacement and left/right parentheses.                                         |
+| `make.tremolo()`, `make.stroke()`, `make.vibrato()` | Stroke counts, roll direction, widths, and native render options.                    |
+| `make.annotation()`, `make.chordSymbol()`           | Lyrics/text, fonts, alignment, baselines, harmony blocks, and kerning.               |
+| `make.fingering()`, `make.stringNumber()`           | Number, position, circle, and extension-line setters.                                |
+| `make.ghostNote()`, `make.textNote()`               | Native timed-note structs and text layout options.                                   |
+
+Attach modifiers with `score.attach(note, modifier, chordIndex)`.
+`make.dot()` adds a visual dot. Set `dots` or `durationOverride` in the typed note to change its musical duration.
+String dots continue to handle both duration and display automatically.
+
+## Grace and subnote groups
+
+```js
+const grace = ['d/5', 'e/5'].map((key) => score.make.graceNote({ keys: [key], duration: '16', slash: true }));
+const group = score.make.graceNoteGroup({ notes: grace, slur: true }).beamNotes();
+score.attach(mainNote, group);
+```
+
+`make.graceNote()` returns a native GraceNote with score clef defaults.
+`make.graceNoteGroup()` and `make.noteSubGroup()` move their children into group-only drawing.
+Create the group before adding those children to any main voice.
+A child cannot belong to two groups, be adopted as a standalone drawable, or be inserted into a main voice afterward.
+Failed managed batches restore the prior standalone queue, voice assignment, and ignored-tick state.
+Native group setters and grace-beam controls remain available. Legacy direct Factory group constructors retain their existing behavior; strict ownership is enforced by the EasyScore helpers.
+
+The **EasyScore: notes & modifiers** Explorer example covers modifiers, accidentals, text, grace groups, percussion, and mixed sequences.
+The executable studies are in [easyscore-families.mjs](../tools/easyscore-families.mjs).
+
 ## Articulations
 
 The string hook supports `staccato`, `tenuto`, `accent`, `fermata`, `marcato`, and `staccatissimo`.

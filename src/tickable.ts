@@ -179,6 +179,13 @@ export abstract class Tickable extends Element {
     this.voice = voice;
   }
 
+  /** Release a temporary voice assignment during managed construction rollback. */
+  clearVoice(): this {
+    this.voice = undefined;
+    this.preFormatted = false;
+    return this;
+  }
+
   /** Get the Tuplet if any.
    * If there are multiple Tuplets, the most recently added one is returned. */
   getTuplet(): Tuplet | undefined {

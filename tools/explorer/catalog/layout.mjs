@@ -1,5 +1,6 @@
 // Higher-level formatting, invisible timing, and unusual rhythmic glyphs.
 import { createEasyScoreExample } from '../../easyscore-example.mjs';
+import { renderEasyScoreFamilies } from '../../easyscore-families.mjs';
 import { createEasyScoreReferencesExample } from '../../easyscore-references-example.mjs';
 import { example as e, number, select, setup, staff, text } from './helpers.mjs';
 
@@ -26,6 +27,16 @@ export const layout = [
 (${createEasyScoreReferencesExample.toString()})(VF, { elementId: 'score', width, height }, ink);`,
     [],
     'IDs are local to each score. Adopted notes and drawables share the normal retained lifecycle. Native objects have no notation source. Inspector selection requires one unescaped matching literal; computed or ambiguous input is shown without guessing an editor location.'
+  ),
+  e(
+    'easyscore-families',
+    'EasyScore: notes & modifiers',
+    group,
+    'Typed notes, percussion heads, native modifiers, and grace groups through one score.',
+    'EasyScore StaveNote Accidental Articulation Ornament Tremolo Vibrato Parenthesis Dot ChordSymbol GraceNoteGroup NoteSubGroup Stroke TextNote',
+    `(${renderEasyScoreFamilies.toString()})(VF, { elementId: 'score', width, height }, params.family, ink);`,
+    [select('family', 'Family', 'modifiers', ['modifiers', 'accidentals', 'text', 'grace', 'percussion', 'sequence'])],
+    'Typed notes preserve native fields and head codes. Grace/subnote groups own their children. Set note duration dots explicitly; a Dot modifier alone changes only the appearance.'
   ),
   e(
     'proportional-spacing',

@@ -506,6 +506,7 @@
       "beam(notes: StemmableNote[], options?: { autoStem?: boolean; secondaryBeamBreaks?: number[]; partialBeamDirections?: { [noteIndex: number]: PartialBeamDirection; }; }): StemmableNote[]",
       "tuplet(notes: StemmableNote[], options?: TupletOptions): StemmableNote[]",
       "notes(line: string, options: BuilderOptions = {}): StemmableNote[]",
+      "sequence(items: readonly (string | StaveNoteStruct | Tickable)[], options: BuilderOptions = {}): Tickable[]",
       "measures(line: string, options: BuilderOptions = {}): StemmableNote[][]",
       "voice(notes: Tickable[], options: EasyScoreVoiceOptions = {}): Voice",
       "addCommitHook(commitHook: CommitHook): void"
@@ -615,6 +616,7 @@
     "Factory": [
       "DEBUG: boolean",
       "newFromElementId(elementId: string | null, width = 500, height = 200): Factory",
+      "getGroup(note: Note): Modifier | undefined",
       "getOwner(element: Element): Factory | undefined",
       "adopt(element: T, role: FactoryElementRole): T",
       "transaction(build: () => T): T",
@@ -667,6 +669,12 @@
       "EasyScore(options: EasyScoreOptions = {}): EasyScore",
       "PedalMarking(params?: { notes?: StaveNote[]; options?: { style: string } }): PedalMarking",
       "NoteSubGroup(params?: { notes?: Note[] }): NoteSubGroup",
+      "groupNotes(notes: Note[], construct: () => T): T",
+      "Dot(...args: ConstructorParameters<typeof Dot>): Dot",
+      "Parenthesis(...args: ConstructorParameters<typeof Parenthesis>): Parenthesis",
+      "Stroke(...args: ConstructorParameters<typeof Stroke>): Stroke",
+      "Tremolo(...args: ConstructorParameters<typeof Tremolo>): Tremolo",
+      "Vibrato(...args: ConstructorParameters<typeof Vibrato>): Vibrato",
       "draw(options: { retain?: boolean } = {}): void"
     ]
   },
@@ -2196,6 +2204,7 @@
       "setCenterAlignment(alignCenter: boolean): this",
       "getVoice(): Voice",
       "setVoice(voice: Voice): void",
+      "clearVoice(): this",
       "getTuplet(): Tuplet | undefined",
       "getTupletStack(): readonly Tuplet[]",
       "removeTuplet(tuplet: Tuplet): this",
@@ -2583,5 +2592,39 @@
   "web": {
     "isHTMLCanvas": "(element: any): element is HTMLCanvasElement",
     "isHTMLDiv": "(element: any): element is HTMLDivElement"
+  },
+  "easyscore/elements": {
+    "EasyScoreElementHost": {
+      "extends": [],
+      "fields": [
+        "factory: () => Factory;",
+        "manage: <T extends Element>(construct: () => T) => T;",
+        "owned: (element: Element) => void;",
+        "checkIndex: (note: Note, index: number) => void;",
+        "noteDefaults: () => Partial<StaveNoteStruct>;"
+      ]
+    },
+    "EasyScoreElements": [
+      "constructor(private host: EasyScoreElementHost)",
+      "note(options: StaveNoteStruct)",
+      "annotation(...args: Parameters<Factory['Annotation']>)",
+      "ghostNote(...args: Parameters<Factory['GhostNote']>)",
+      "graceNote(options: Parameters<Factory['GraceNote']>[0])",
+      "accidental(...args: Parameters<Factory['Accidental']>)",
+      "articulation(options: Parameters<Factory['Articulation']>[0] = {})",
+      "ornament(...args: Parameters<Factory['Ornament']>)",
+      "dot(...args: Parameters<Factory['Dot']>)",
+      "parenthesis(...args: Parameters<Factory['Parenthesis']>)",
+      "stroke(...args: Parameters<Factory['Stroke']>)",
+      "tremolo(...args: Parameters<Factory['Tremolo']>)",
+      "vibrato(...args: Parameters<Factory['Vibrato']>)",
+      "chordSymbol(...args: Parameters<Factory['ChordSymbol']>)",
+      "textNote(...args: Parameters<Factory['TextNote']>)",
+      "fingering(...args: Parameters<Factory['Fingering']>)",
+      "stringNumber(...args: Parameters<Factory['StringNumber']>)",
+      "graceNoteGroup(options: Parameters<Factory['GraceNoteGroup']>[0])",
+      "noteSubGroup(options: { notes: Note[] })",
+      "tie(options: Parameters<Factory['StaveTie']>[0])"
+    ]
   }
 }
