@@ -4,15 +4,9 @@ The explorer is a static single-page application in `tools/explorer`. It uses br
 
 ## Commands
 
-```sh
-npm run explorer                   # build and serve on port 5173
-npm run explorer:build             # build/explorer/
-npm run explorer:test              # browser checks and offline upload tests
-npm run explorer:upload -- --dry-run
-npm run explorer:upload            # gs://vexflow.com/explorer/
-```
+See the [build guide](build.md#explorer) to run locally, the [test commands](build.md#test-locally) for browser checks, and [static uploads](build.md#upload-static-sites) to publish to `vexflow.com/explorer/`.
 
-Use `npm run explorer -- --port=8080` for another local port. The server listens on localhost. Node 22 or newer and the repository's installed development dependencies are required. Tests use Puppeteer; set `PUPPETEER_EXECUTABLE_PATH` to use an installed Chrome.
+Use the Node version pinned in `.nvmrc` and install dependencies with `npm ci`.
 
 ## Explore
 
@@ -81,9 +75,7 @@ No server evaluates code. No analytics or external runtime resources are require
 
 ## Static deployment
 
-```sh
-npm run explorer:upload -- --destination=gs://another-bucket/explorer/
-```
+See [upload commands and authentication](build.md#upload-static-sites).
 
 A destination must include a nonempty prefix. The uploader does not publish to a bucket root or delete existing objects.
 

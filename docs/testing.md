@@ -1,35 +1,8 @@
 # Rendering tests
 
-Run the normal checks:
+See [Build, test, release, and upload](build.md#test-locally) for local setup and test commands. The [static upload instructions](build.md#upload-static-sites) cover publishing the bundled gallery to `vexflow.com/tests/`.
 
-```sh
-nvm install
-nvm use
-npm ci
-npm test
-npm run lint
-```
-
-`.nvmrc` pins the Node version used in CI. Run `npm audit` to check development and runtime dependencies.
-See [development dependencies](dependencies.md) for security overrides and regression coverage.
-
-The test task builds VexFlow, runs Node integration checks, and runs QUnit in Chrome. Set `PUPPETEER_EXECUTABLE_PATH` to use a locally installed Chrome executable.
-
-## Publish the test gallery
-
-```sh
-npm run tests:build
-npm run tests:upload -- --dry-run
-npm run tests:upload
-```
-
-The upload command builds current source and publishes to `gs://vexflow.com/tests/`, served at <https://vexflow.com/tests/>. It requires an authenticated Google Cloud CLI with write access to the bucket.
-
-The output in `build/tests-site/` includes the test gallery, QUnit, the VexFlow test bundle, source map, and fonts. No CDN or repository checkout is needed to run it. QUnit filters still work, for example `/tests/?module=StaveNote`. The hosted page always uses its bundled version; `ver` and `esm` parameters are ignored.
-
-Assets have fingerprinted paths and a one-year immutable cache. They upload before `index.html`, which has a 60-second cache. Old assets remain available for cached pages. The Explorer uses the same upload implementation.
-
-Use `--destination=gs://bucket/prefix/` to change the upload target. Run `npm run tests:test` to verify the standalone gallery and upload behavior locally.
+The gallery includes QUnit, VexFlow, source maps, and local fonts. It runs without a repository checkout or runtime CDN requests.
 
 ## Visual comparison
 

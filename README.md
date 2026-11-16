@@ -103,17 +103,17 @@ A good way to learn the API is to look at our examples & unit tests:
 
 ## More Resources
 
+- [Building, testing, releasing, and uploading static sites](docs/build.md).
+
 - [Text fonts and lyric layout](docs/text-and-lyrics.md), [jsdom rendering](docs/jsdom.md), and [score benchmarks](docs/benchmarks.md).
 - [Chord symbol kerning](docs/chord-symbols.md).
 - [Score layout](docs/score-layout.md), [proportional spacing](docs/proportional-spacing.md), and [responsive sheets and themes](docs/sheets-and-themes.md).
 - [Rendering tests and visual comparisons](docs/testing.md).
-- [VexFlow Explorer](tools/explorer/README.md): run `npm run explorer` to browse and edit notation.
+- [VexFlow Explorer](tools/explorer/README.md): browse and edit notation.
 
 - If you need help, start a [GitHub discussion](https://github.com/vexflow/vexflow/discussions).
 
 - Learn more on the [VexFlow wiki](https://github.com/vexflow/vexflow/wiki).
-
-- Build VexFlow from scratch by following the [build instructions](https://github.com/vexflow/vexflow/wiki/Build).
 
 - [VexFlow](https://vexflow.com) was created by [Mohit Muthanna Cheppudira](https://muthanna.com) in 2010. It is currently maintained by [Ron Yeh](https://github.com/ronyeh) and [Rodrigo Vilar](https://github.com/rvilarl). Many others have contributed with code, documentation, bug reports, and feature requests. See the [list of contributors](https://github.com/0xfe/vexflow/graphs/contributors).
 

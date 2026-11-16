@@ -3,7 +3,7 @@
 QUICK START
 
 For information on building and or developing Vexflow see:
-https://github.com/vexflow/vexflow/wiki/Build
+https://github.com/vexflow/vexflow/blob/main/docs/build.md
 
 grunt
   - Build the complete set of VexFlow libraries (with source-maps) for production and debug use.
@@ -741,8 +741,8 @@ module.exports = (grunt) => {
   //   GITHUB_TOKEN=XYZ grunt release:dry-run:alpha
   //   GITHUB_TOKEN=XYZ grunt release:dry-run:beta
   //   GITHUB_TOKEN=XYZ grunt release:dry-run:rc
-  // See the wiki for information on manual releases:
-  //   https://github.com/0xfe/vexflow/wiki/Build,-Test,-Release#publish-manually-to-npm-and-github
+  // See the build guide for staged GitHub releases and npm publication:
+  //   https://github.com/vexflow/vexflow/blob/main/docs/build.md#release-a-version
   grunt.registerTask('release', 'Produce the complete build. Release to npm and GitHub.', function (...args) {
     if (!process.env.GITHUB_TOKEN) {
       console.log(
