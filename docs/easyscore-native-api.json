@@ -455,6 +455,10 @@
         "options?: { softmaxFactor: number };"
       ]
     },
+    "EasyScoreValidationContext": {
+      "extends": [],
+      "fields": ["piece: Readonly<EasyScoreParsedPiece>;", "options: Readonly<BuilderOptions>;"]
+    },
     "EasyScoreOptions": {
       "extends": [],
       "fields": [
@@ -463,7 +467,8 @@
         "commitHooks?: CommitHook[];",
         "throwOnError?: boolean;",
         "strictOptions?: boolean;",
-        "extensions?: readonly string[];"
+        "extensions?: readonly string[];",
+        "validate?: (context: EasyScoreValidationContext) => void;"
       ]
     },
     "EasyScoreDefaults": {

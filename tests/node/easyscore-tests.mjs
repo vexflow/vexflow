@@ -404,3 +404,35 @@ test('native public option families match the reviewed coverage snapshot', async
   const { checkNativeSurface } = await import('../../tools/easyscore-api-audit.mjs');
   checkNativeSurface();
 });
+
+test('pure typed validators reject custom options before construction and preserve caller settings', () => {
+  let commits = 0;
+  const score = create({
+    extensions: ['label'],
+    validate: ({ piece, options }) => {
+      assert.equal(typeof piece.source.start, 'number');
+      if (options.label && options.label !== 'melody') throw new Error('Unknown label');
+      piece.chord[0].key = 'Z'; // The validator receives a copy, not mutable parser state.
+    },
+  });
+  score.addCommitHook(() => commits++);
+  const parsed = score.parseNotation('C4/q[label="melody"]');
+  assert.equal(parsed.pieces[0].chord[0].key, 'C');
+  assert.equal(score.parseNotation('D4/q[label="bad"]').diagnostics[0].message, 'Unknown label');
+  assert.throws(() => score.notes('C4/q[label="bad"]'), /Unknown label/);
+  assert.equal(commits, 0);
+  assert.equal(queued(score), 0);
+  score.notes('C4/w[label="melody"]');
+  assert.equal(commits, 1);
+  const factory = score.factory;
+  const options = Object.freeze({ throwOnError: true });
+  assert.doesNotThrow(() => factory.EasyScore(options));
+  assert.doesNotThrow(() => factory.System(Object.freeze({ x: 20, y: 20, width: 400 })));
+  const note = score.builder.elements.notes[0];
+  assert.equal(
+    factory.TextBracket({ from: note, to: note, text: '8', options: { superscript: 'va', position: 'top', line: 0 } })
+      .line,
+    0
+  );
+  assert.equal(factory.VibratoBracket({ from: note, to: note, options: { line: 0 } }).line, 0);
+});

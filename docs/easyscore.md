@@ -226,7 +226,20 @@ score.addCommitHook((options, note) => {
 score.notes('C4/q[label="melody"]');
 ```
 
-The application validates extension values. Built-in option names keep their built-in meaning.
+For typed pre-construction checks, provide `validate({ piece, options })` with `extensions`:
+
+```js
+const score = VF.EasyScore.create(rendererOptions, {
+  extensions: ['label'],
+  validate: ({ options }) => {
+    if (options.label && options.label !== 'melody') throw new Error('Unknown label');
+  },
+});
+```
+
+Validation runs during `parseNotation()` and strict preflight. Throwing produces a source diagnostic before managed objects exist.
+Validators must be pure; measure preflight can evaluate them more than once. They receive copies and cannot rewrite parsed notes.
+Use commit hooks to apply validated values to native objects. Built-in option names keep their built-in meaning.
 Custom builders and commit hooks still run during actual construction, once per note.
 
 ## Drawing and styling

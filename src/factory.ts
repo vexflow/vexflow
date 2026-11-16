@@ -688,8 +688,8 @@ export class Factory {
       stop: params.to,
     });
 
-    if (params.options.line) vibratoBracket.setLine(params.options.line);
-    if (params.options.code) vibratoBracket.setVibratoCode(params.options.code);
+    if (params.options.line !== undefined) vibratoBracket.setLine(params.options.line);
+    if (params.options.code !== undefined) vibratoBracket.setVibratoCode(params.options.code);
 
     vibratoBracket.setContext(this.context);
     this.renderQ.push(vibratoBracket);
@@ -716,7 +716,7 @@ export class Factory {
       position: params.options.position,
     });
 
-    if (params.options.line) textBracket.setLine(params.options.line);
+    if (params.options.line !== undefined) textBracket.setLine(params.options.line);
     if (params.options.font) textBracket.setFont(params.options.font);
 
     textBracket.setContext(this.context);
@@ -725,8 +725,7 @@ export class Factory {
   }
 
   System(params: SystemOptions = {}): System {
-    params.factory = this;
-    const system = new System(params).setContext(this.context);
+    const system = new System({ ...params, factory: this }).setContext(this.context);
     this.systems.push(system);
     return this.own(system);
   }
@@ -743,8 +742,7 @@ export class Factory {
    * @param options.throwOnError throw error in case of parsing error
    */
   EasyScore(options: EasyScoreOptions = {}): EasyScore {
-    options.factory = this;
-    return new EasyScore(options);
+    return new EasyScore({ ...options, factory: this });
   }
 
   PedalMarking(params?: { notes?: StaveNote[]; options?: { style: string } }): PedalMarking {

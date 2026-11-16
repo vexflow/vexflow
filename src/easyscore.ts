@@ -488,6 +488,12 @@ function diagnostic(line: string, code: string, message: string, source: EasySco
   return { ...source, code, message, line: prefix.split('\n').length, column: source.start - prefix.lastIndexOf('\n') };
 }
 
+/** Pure extension validation runs before any Factory construction or commit hook. */
+export interface EasyScoreValidationContext {
+  piece: Readonly<EasyScoreParsedPiece>;
+  options: Readonly<BuilderOptions>;
+}
+
 export interface EasyScoreOptions {
   factory?: Factory;
   builder?: Builder;
@@ -497,6 +503,8 @@ export interface EasyScoreOptions {
   strictOptions?: boolean;
   /** Extra option names consumed by application commit hooks in strict mode. */
   extensions?: readonly string[];
+  /** Throw to return a source diagnostic. Must not mutate input or application state. */
+  validate?: (context: EasyScoreValidationContext) => void;
 }
 
 // Extending Record<string, any> allows arbitrary properties via set(defaults).
@@ -741,7 +749,18 @@ export class EasyScore {
     const diagnostics: EasyScoreDiagnostic[] = [];
     for (const piece of builder.pieces) {
       try {
-        this.validatePiece(piece, { ...builder.options, ...piece.options });
+        const options = { ...builder.options, ...piece.options };
+        this.validatePiece(piece, options);
+        // Validation sees copies, so extensions cannot rewrite the parser's output accidentally.
+        this.options.validate?.({
+          piece: {
+            ...piece,
+            chord: piece.chord.map((note) => ({ ...note })),
+            options: { ...piece.options },
+            source: { ...piece.source },
+          },
+          options: { ...options },
+        });
       } catch (error) {
         diagnostics.push(
           diagnostic(line, 'InvalidNotation', error instanceof Error ? error.message : String(error), piece.source)
