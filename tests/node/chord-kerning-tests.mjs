@@ -59,9 +59,18 @@ for (const family of ['Academico,Bravura', 'Petaluma Script,Petaluma']) {
   test(`${family}: sizes and repeated formatting do not accumulate shifts`, () => {
     const small = format(diminished(chord('auto', family, 12)));
     const large = format(diminished(chord('auto', family, 24)));
-    close(large.getWidth(), small.getWidth() * 2);
+    // Ink extents can round to whole pixels (Pango on Linux), so test the em-based
+    // spacing independently of native glyph advances and the left-overhang shift.
+    const gap = (symbol) => {
+      const [root, script] = symbol.kernedRuns;
+      return script.x - root.x - root.metrics.width;
+    };
+    close(gap(large), gap(small) * 2);
     small.kernedRuns.forEach((run, i) => {
-      close(large.kernedRuns[i].x, run.x * 2);
+      close(
+        VF.Font.convertSizeToPixelValue(large.kernedRuns[i].font.size),
+        VF.Font.convertSizeToPixelValue(run.font.size) * 2
+      );
       close(large.kernedRuns[i].y, run.y * 2);
     });
     const before = JSON.stringify(large.kernedRuns);
