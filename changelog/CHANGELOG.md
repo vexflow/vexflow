@@ -1,3 +1,40 @@
+# 5.1.0
+
+## Features
+
+- Add `Sheet` and `EasyScore.measures()` for multi-measure scores that wrap to a chosen width.
+- Add retained Factory drawing and inherited score styles for reflow and theme changes.
+- Add portable SVG export with text and music glyphs converted to paths.
+- Add separate text-font selection and explicit lyric baselines.
+- Add optional repeat brackets, more key signatures, and tuplet label suffixes.
+- Support longa, maxima, and 256th, 512th, and 1024th note durations.
+- Add the [VexFlow Explorer](https://vexflow.com/explorer/) with editable examples, a glyph atlas, and visual inspection tools.
+
+## Fixes
+
+- Fix native ESM imports and package entry points.
+- Correct accidental ordering across voices and rest collisions.
+- Improve grace-note spacing, pedal placement, and ties near lyrics.
+- Fix nested tuplet timing and refresh voice totals when durations change.
+- Improve bounding boxes and keep repeated drawing stable.
+- Correct stem placement on cross noteheads.
+- Reject malformed durations, meters, and fractions. Protect Registry indexes from prototype-related keys.
+- Update dependencies, including critical security fixes in development tooling.
+
+## Upgrade notes
+
+- `setTuplet()` now replaces existing tuplets. Use `addTuplet()` to stack them.
+- `getTupletStack()` returns a readonly array in TypeScript. Use the tuplet methods to change it.
+- `resetTuplet()` is deprecated. Use `removeTuplet()` or `clearTuplets()`.
+- Text now prefers a text font. Call `setTextFonts()` after `setFonts()` to choose a custom face.
+- Invalid inputs may now throw instead of being accepted. Layout fixes can change existing renderings.
+
+## Development
+
+- Add geometry, overlap, color, and image-difference regression checks.
+- Add rendering benchmarks and update the Node/jsdom test setup.
+- Keep explorer output and generated reports out of the npm package.
+
 # 5.0.0
 
 - `vex.ts` and `flow.ts` modules are merged into vexflow.ts, which exports the `VexFlow` class.

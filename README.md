@@ -10,7 +10,7 @@ See this example: [https://jsfiddle.net/ck6erLhm/](https://jsfiddle.net/ck6erLhm
 
 ```html
 <div id="output"></div>
-<script src="https://cdn.jsdelivr.net/npm/vexflow@5.0.0/build/cjs/vexflow.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vexflow@5.1.0/build/cjs/vexflow.js"></script>
 <script>
   // YOUR CODE GOES HERE
 </script>

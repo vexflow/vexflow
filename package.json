@@ -36,7 +36,10 @@
   },
   "license": "MIT",
   "files": [
-    "build",
+    "build/cjs",
+    "build/esm",
+    "build/types",
+    "changelog/CHANGELOG.md",
     "tests/flow.html",
     "tests/flow.css",
     "tests/qunit/qunit.css",
