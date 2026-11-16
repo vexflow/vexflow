@@ -11,7 +11,7 @@ If addresing Github issues, first:
 - Otherwise, just post an issue with the work is done.
 - If successful, close the issue.
 
-Where relevant, if there are visual implications, attach some before/after screenshots with a couple of representative examples. Attach to the issue, not into the commit. Screenshots should have a white background, not transparent.
+Where relevant, if there are visual implications, attach some before/after screenshots with a couple of representative examples. Attach to the issue, not into the commit. Screenshots should have a white background, not transparent. Use the `--attach` flag of `gh` for this.
 
 Github comments should be short and easy to read with simple sentences, but do include detail where necessary. Try and stick to the documentation guidelines below.
 
