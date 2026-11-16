@@ -3,13 +3,14 @@
 
 import { ElementStyle } from './element';
 import { FontInfo } from './font';
-import { structuredClone } from './util';
+import { TextMetricsCache } from './textmetricscache';
 
 export class Metrics {
   protected static cacheStyle = new Map<string, ElementStyle>();
   protected static cacheFont = new Map<string, Required<FontInfo>>();
   /** Use the provided key to look up a FontInfo in CommonMetrics. **/
   static clear(key?: string) {
+    TextMetricsCache.clear();
     if (key) {
       this.cacheFont.delete(key);
       this.cacheStyle.delete(key);
@@ -30,7 +31,8 @@ export class Metrics {
       };
       this.cacheFont.set(key, font);
     }
-    return structuredClone(font);
+    // FontInfo contains only scalar values. Each caller still receives its own object.
+    return { ...font };
   }
 
   /** Keep text spaces in the text font while honoring class-specific font overrides. */
@@ -59,7 +61,8 @@ export class Metrics {
       };
       this.cacheStyle.set(key, style);
     }
-    return structuredClone(style);
+    // ElementStyle contains only scalar values, including the SVG lineDash string.
+    return { ...style };
   }
 
   /**

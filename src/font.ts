@@ -1,5 +1,6 @@
 // Font parsing, loading, and the built-in text faces used alongside SMuFL music fonts.
 import { Metrics } from './metrics';
+import { TextMetricsCache } from './textmetricscache';
 
 export interface FontInfo {
   /** CSS font-family, e.g., 'Arial', 'Helvetica Neue, Arial, sans-serif', 'Times, serif' */
@@ -349,7 +350,8 @@ export class Font {
       fontFaceSet = self.fonts as any;
     }
     fontFaceSet?.add(fontFace);
-    return fontFaceLoadPromise;
+    TextMetricsCache.clear();
+    return fontFaceLoadPromise.finally(() => TextMetricsCache.clear());
   }
 
   static getURLForFont(fontName: string): string | undefined {

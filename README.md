@@ -6,14 +6,25 @@ VexFlow is an open-source library for rendering sheet music. It is written in Ty
 
 The simplest way to add VexFlow to a web page is via a `<script>` tag.
 
+Save the page as UTF-8 and put `<meta charset="utf-8">` at the start of `<head>`. Without an explicit encoding, music symbols can appear as incorrect characters. A doctype alone does not set the encoding.
+
 See this example: [https://jsfiddle.net/ck6erLhm/](https://jsfiddle.net/ck6erLhm/)
 
 ```html
-<div id="output"></div>
-<script src="https://cdn.jsdelivr.net/npm/vexflow@5.1.0/build/cjs/vexflow.js"></script>
-<script>
-  // YOUR CODE GOES HERE
-</script>
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>VexFlow score</title>
+  </head>
+  <body>
+    <div id="output"></div>
+    <script src="https://cdn.jsdelivr.net/npm/vexflow@5.1.0/build/cjs/vexflow.js"></script>
+    <script>
+      // YOUR CODE GOES HERE
+    </script>
+  </body>
+</html>
 ```
 
 The URL above includes a version number <code>vexflow@x.y.z</code>. Specifying a version prevents a future update from breaking your deployment.
@@ -24,7 +35,7 @@ If your project uses a bundler, you can install VexFlow from npm:
 npm install vexflow
 ```
 
-[See our tutorial](https://vexflow.github.io/vexflow-examples/guides/tutorial).
+[See our tutorial](https://vexflow.github.io/vexflow-examples/guides/tutorial/).
 
 ## Factory and EasyScore
 

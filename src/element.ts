@@ -8,6 +8,7 @@ import { Font, FontInfo } from './font';
 import { Metrics } from './metrics';
 import { Registry } from './registry';
 import { RenderContext } from './rendercontext';
+import { TextMetricsCache } from './textmetricscache';
 import { Category } from './typeguard';
 import { defined, prefix, RuntimeError } from './util';
 
@@ -96,6 +97,12 @@ export class Element {
   // https://www.npmjs.com/package/canvas
   static setTextMeasurementCanvas(canvas: HTMLCanvasElement | OffscreenCanvas /* | Canvas */): void {
     Element.txtCanvas = canvas;
+    Element.clearTextMeasurementCache();
+  }
+
+  /** Clear shared measurements after external font registration or custom context changes. */
+  static clearTextMeasurementCache(): void {
+    TextMetricsCache.clear();
   }
 
   static getTextMeasurementCanvas(): HTMLCanvasElement | OffscreenCanvas | undefined {
@@ -649,7 +656,8 @@ export class Element {
       return this._textMetrics;
     }
     context.font = Font.toCSSString(Font.validate(this.fontInfo));
-    this._textMetrics = context.measureText(this.text);
+    // Keep per-element results independent, including writable node-canvas metrics.
+    this._textMetrics = { ...TextMetricsCache.measure(context, this.text) };
     this._height = this._textMetrics.actualBoundingBoxAscent + this._textMetrics.actualBoundingBoxDescent;
     this._width = this._textMetrics.width;
     this.metricsValid = true;
@@ -665,7 +673,7 @@ export class Element {
       return 0;
     }
     context.font = Font.toCSSString(Metrics.getFontInfo(key));
-    return context.measureText(text).width;
+    return TextMetricsCache.measure(context, text).width;
   }
 
   /** Get the text metrics. */
