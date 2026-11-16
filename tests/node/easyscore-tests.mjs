@@ -399,3 +399,8 @@ test('failed native attachment releases newly adopted ownership and references',
   assert.equal(queued(score), 1);
   label.setAttribute('id', note.getAttribute('id')); // The failed attachment left no ID subscription.
 });
+
+test('native public option families match the reviewed coverage snapshot', async () => {
+  const { checkNativeSurface } = await import('../../tools/easyscore-api-audit.mjs');
+  checkNativeSurface();
+});

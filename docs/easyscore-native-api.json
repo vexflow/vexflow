@@ -1,0 +1,2580 @@
+{
+  "accidental": {
+    "Accidental": [
+      "type: string",
+      "DEBUG: boolean",
+      "CATEGORY(): string",
+      "format(accidentals: Accidental[], state: ModifierContextState): void",
+      "applyAccidentals(voices: Voice[], keySignature: string): void",
+      "constructor(type: string)",
+      "setNote(note: Note): this",
+      "setAsCautionary(): this",
+      "draw(): void"
+    ]
+  },
+  "annotation": {
+    "AnnotationHorizontalJustify": "export enum AnnotationHorizontalJustify { LEFT = 1, CENTER = 2, RIGHT = 3, CENTER_STEM = 4, }",
+    "AnnotationVerticalJustify": "export enum AnnotationVerticalJustify { TOP = 1, CENTER = 2, BOTTOM = 3, CENTER_STEM = 4, }",
+    "Annotation": [
+      "DEBUG: boolean",
+      "CATEGORY(): string",
+      "HorizontalJustify",
+      "HorizontalJustifyString: Record<string, number>",
+      "VerticalJustify",
+      "VerticalJustifyString: Record<string, number>",
+      "minAnnotationPadding(): number",
+      "format(annotations: Annotation[], state: ModifierContextState): boolean",
+      "constructor(text: string)",
+      "setVerticalJustification(just: string | AnnotationVerticalJustify): this",
+      "getVerticalJustification(): AnnotationVerticalJustify",
+      "getJustification(): AnnotationHorizontalJustify",
+      "setJustification(just: string | AnnotationHorizontalJustify): this",
+      "setTextBaseline(y?: number): this",
+      "computeX(): { x: number; textWidth: number }",
+      "computeY(): { y: number; textHeight: number }",
+      "draw(): void"
+    ]
+  },
+  "articulation": {
+    "ArticulationStruct": {
+      "extends": [],
+      "fields": ["code?: string;", "aboveCode?: string;", "belowCode?: string;", "betweenLines: boolean;"]
+    },
+    "getTopY": "(note: Note, textLine: number): number",
+    "getBottomY": "(note: Note, textLine: number): number",
+    "getInitialOffset": "(note: Note, position: number): number",
+    "Articulation": [
+      "DEBUG: boolean",
+      "CATEGORY(): string",
+      "type: string",
+      "format(articulations: Articulation[], state: ModifierContextState): boolean",
+      "parseEasyScore(articulations: string): { type: string; position?: number }[]",
+      "easyScoreHook({ articulations }: { articulations: string }, note: StemmableNote, builder: Builder): void",
+      "constructor(type: string)",
+      "setBetweenLines(betweenLines = true): this",
+      "draw(): void"
+    ]
+  },
+  "barnote": {
+    "BarNote": [
+      "DEBUG: boolean",
+      "CATEGORY(): string",
+      "constructor(type: string | BarlineType = BarlineType.SINGLE)",
+      "getType(): BarlineType",
+      "setType(type: string | BarlineType): this",
+      "addToModifierContext(mc: ModifierContext): this",
+      "preFormat(): this",
+      "draw(): void"
+    ]
+  },
+  "beam": {
+    "BEAM_LEFT": "inferred",
+    "BEAM_RIGHT": "inferred",
+    "BEAM_BOTH": "inferred",
+    "PartialBeamDirection": "export type PartialBeamDirection = typeof BEAM_LEFT | typeof BEAM_RIGHT | typeof BEAM_BOTH;",
+    "Beam": [
+      "CATEGORY(): string",
+      "renderOptions: { flatBeamOffset?: number; flatBeams: boolean; secondaryBreakTicks?: number; showStemlets: boolean; beamWidth: number; maxSlope: number; minSlope: number; slopeIterations: number; slopeCost: number; stemletExtension: number; partialBeamLength: number; minFlatBeamOffset: number; }",
+      "notes: StemmableNote[]",
+      "postFormatted: boolean",
+      "slope: number",
+      "getStemDirection(): number",
+      "getDefaultBeamGroups(timeSig: string): Fraction[]",
+      "applyAndGetBeams(voice: Voice, stemDirection?: number, groups?: Fraction[]): Beam[]",
+      "generateBeams(notes: StemmableNote[], config: { flatBeamOffset?: number; flatBeams?: boolean; secondaryBreaks?: string; showStemlets?: boolean; maintainStemDirections?: boolean; beamMiddleOnly?: boolean; beamRests?: boolean; groups?: Fraction[]; stemDirection?: number; } = {}): Beam[]",
+      "constructor(notes: StemmableNote[], autoStem: boolean = false)",
+      "getNotes(): StemmableNote[]",
+      "getBeamCount(): number",
+      "breakSecondaryAt(indexes: number[]): this",
+      "setPartialBeamSideAt(noteIndex: number, side: PartialBeamDirection)",
+      "unsetPartialBeamSideAt(noteIndex: number)",
+      "getSlopeY(x: number, firstX: number, firstY: number, slope: number): number",
+      "calculateSlope(): void",
+      "calculateFlatSlope(): void",
+      "getBeamYToDraw(): number",
+      "applyStemExtensions(): void",
+      "lookupBeamDirection(duration: string, prevTick: number, tick: number, nextTick: number, noteIndex: number): PartialBeamDirection",
+      "getBeamLines(duration: string): { start: number; end?: number }[]",
+      "preFormat(): this",
+      "postFormat(): void",
+      "draw(): void"
+    ]
+  },
+  "bend": {
+    "BendPhrase": {
+      "extends": [],
+      "fields": ["x?: number;", "type: number;", "text: string;", "width?: number;", "drawWidth?: number;"]
+    },
+    "Bend": [
+      "CATEGORY(): string",
+      "UP(): number",
+      "DOWN(): number",
+      "format(bends: Bend[], state: ModifierContextState): boolean",
+      "setStyleLine(style: ElementStyle): this",
+      "getStyleLine(): ElementStyle",
+      "renderOptions: { releaseWidth: number; bendWidth: number; }",
+      "constructor(phrase: BendPhrase[])",
+      "setXShift(value: number): this",
+      "setTap(value: string): this",
+      "getTextHeight(): number",
+      "draw(): void"
+    ]
+  },
+  "boundingbox": {
+    "Bounds": {
+      "extends": [],
+      "fields": ["x: number;", "y: number;", "w: number;", "h: number;"]
+    },
+    "BoundingBox": [
+      "x: number",
+      "y: number",
+      "w: number",
+      "h: number",
+      "copy(that: BoundingBox): BoundingBox",
+      "constructor(x: number, y: number, w: number, h: number)",
+      "getX(): number",
+      "getY(): number",
+      "getW(): number",
+      "getH(): number",
+      "setX(x: number): this",
+      "setY(y: number): this",
+      "setW(w: number): this",
+      "setH(h: number): this",
+      "move(x: number, y: number): this",
+      "clone(): BoundingBox",
+      "mergeWith(boundingBox: BoundingBox): this"
+    ]
+  },
+  "canvascontext": {
+    "CanvasContext": [
+      "context2D: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D",
+      "curTransfrom: DOMMatrix",
+      "canvas: HTMLCanvasElement | OffscreenCanvas | { width: number; height: number }",
+      "textHeight: number",
+      "WIDTH(): number",
+      "HEIGHT(): number",
+      "CANVAS_BROWSER_SIZE_LIMIT(): number",
+      "sanitizeCanvasDims(width: number, height: number): [number, number]",
+      "constructor(context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D)",
+      "clear(): void",
+      "openGroup(cls?: string, id?: string): any",
+      "closeGroup(): void",
+      "openRotation(angleDegrees: number, x: number, y: number)",
+      "closeRotation()",
+      "add(child: any): void",
+      "setFillStyle(style: string): this",
+      "setBackgroundFillStyle(style: string): this",
+      "setStrokeStyle(style: string): this",
+      "setShadowColor(color: string): this",
+      "setShadowBlur(blur: number): this",
+      "setLineWidth(width: number): this",
+      "setLineCap(capType: CanvasLineCap): this",
+      "setLineDash(dash: number[]): this",
+      "scale(x: number, y: number): this",
+      "resize(width: number, height: number, devicePixelRatio?: number): this",
+      "rect(x: number, y: number, width: number, height: number): this",
+      "fillRect(x: number, y: number, width: number, height: number): this",
+      "pointerRect(x: number, y: number, width: number, height: number): this",
+      "clearRect(x: number, y: number, width: number, height: number): this",
+      "beginPath(): this",
+      "moveTo(x: number, y: number): this",
+      "lineTo(x: number, y: number): this",
+      "bezierCurveTo(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): this",
+      "quadraticCurveTo(cpx: number, cpy: number, x: number, y: number): this",
+      "arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterclockwise: boolean): this",
+      "fill(): this",
+      "stroke(): this",
+      "closePath(): this",
+      "measureText(text: string): TextMeasure",
+      "fillText(text: string, x: number, y: number): this",
+      "save(): this",
+      "restore(): this",
+      "fillStyle(style: string | CanvasGradient | CanvasPattern)",
+      "fillStyle(): string | CanvasGradient | CanvasPattern",
+      "strokeStyle(style: string | CanvasGradient | CanvasPattern)",
+      "strokeStyle(): string | CanvasGradient | CanvasPattern",
+      "setFont(f?: string | FontInfo, size?: string | number, weight?: string | number, style?: string): this",
+      "getFont(): string"
+    ]
+  },
+  "chordsymbol": {
+    "ChordSymbolBlock": [
+      "symbolModifier: SymbolModifiers",
+      "vAlign: boolean",
+      "constructor(text: string, symbolModifier: SymbolModifiers, xShift: number, yShift: number, vAlign: boolean)",
+      "isSuperscript(): boolean",
+      "isSubscript(): boolean"
+    ],
+    "ChordSymbolHorizontalJustify": "export enum ChordSymbolHorizontalJustify { LEFT = 1, CENTER = 2, RIGHT = 3, CENTER_STEM = 4, }",
+    "ChordSymbolVerticalJustify": "export enum ChordSymbolVerticalJustify { TOP = 1, BOTTOM = 2, }",
+    "SymbolModifiers": "export enum SymbolModifiers { NONE = 1, SUBSCRIPT = 2, SUPERSCRIPT = 3, }",
+    "ChordSymbol": [
+      "DEBUG: boolean",
+      "CATEGORY(): string",
+      "HorizontalJustify",
+      "HorizontalJustifyString: Record<string, ChordSymbolHorizontalJustify>",
+      "VerticalJustify",
+      "VerticalJustifyString: Record<string, ChordSymbolVerticalJustify>",
+      "superSubRatio(): number",
+      "spacingBetweenBlocks(): number",
+      "superscriptOffset(): number",
+      "subscriptOffset(): number",
+      "glyphs: Record<string, string>",
+      "symbolModifiers",
+      "minPadding(): number",
+      "format(symbols: ChordSymbol[], state: ModifierContextState): boolean",
+      "setKerning(mode: 'auto' | 'none'): this",
+      "getKerning(): 'auto' | 'none'",
+      "setKerningProfile(profile?: ChordSymbolKerningProfile): this",
+      "constructor()",
+      "superscriptOffset(): number",
+      "subscriptOffset(): number",
+      "setReportWidth(value: boolean): this",
+      "getReportWidth(): boolean",
+      "getSymbolBlock(params: Partial<{ text: string; symbolModifier: SymbolModifiers; }> = {}): ChordSymbolBlock",
+      "addSymbolBlock(parameters: Partial<{ text: string; symbolModifier: SymbolModifiers; }>): this",
+      "addText(text: string, parameters: Partial<{ symbolModifier: SymbolModifiers; }> = {}): this",
+      "addTextSuperscript(text: string): this",
+      "addTextSubscript(text: string): this",
+      "addGlyphSuperscript(glyph: string): this",
+      "addGlyph(glyph: string, params: Partial<{ symbolModifier: SymbolModifiers; }> = {}): this",
+      "addGlyphOrText(text: string, params: Partial<{ symbolModifier: SymbolModifiers; }> = {}): this",
+      "addLine(params: Partial<{ symbolModifier: SymbolModifiers; }> = {}): this",
+      "setVertical(vj: ChordSymbolVerticalJustify | string | number): this",
+      "getVertical(): number",
+      "setHorizontal(hj: ChordSymbolHorizontalJustify | string | number): this",
+      "getHorizontal(): number",
+      "draw(): void",
+      "getBoundingBox(): BoundingBox"
+    ]
+  },
+  "clef": {
+    "Clef": [
+      "DEBUG: boolean",
+      "CATEGORY(): string",
+      "code",
+      "line",
+      "types(): Record<string, { code: string; line: number }>",
+      "constructor(type: string, size?: string, annotation?: string)",
+      "setType(type: string, size: string = 'default', annotation?: string): this",
+      "getPoint(size?: string): number",
+      "setStave(stave: Stave): this",
+      "draw(): void"
+    ]
+  },
+  "clefnote": {
+    "ClefNote": [
+      "CATEGORY(): string",
+      "constructor(type: string, size: string = 'default', annotation?: string)",
+      "setType(type: string, size: string, annotation?: string): this",
+      "getClef(): Clef",
+      "preFormat(): this",
+      "draw(): void",
+      "getBoundingBox(): BoundingBox"
+    ]
+  },
+  "crescendo": {
+    "CrescendoParams": {
+      "extends": [],
+      "fields": ["reverse: boolean;", "height: number;", "y: number;", "beginX: number;", "endX: number;"]
+    },
+    "Crescendo": [
+      "DEBUG: boolean",
+      "CATEGORY(): string",
+      "constructor(noteStruct: NoteStruct)",
+      "setLine(line: number): this",
+      "setHeight(height: number): this",
+      "setDecrescendo(decresc: boolean): this",
+      "preFormat(): this",
+      "draw(): void"
+    ]
+  },
+  "curve": {
+    "CurveOptions": {
+      "extends": [],
+      "fields": [
+        "cps?: { x: number; y: number }[];",
+        "thickness?: number;",
+        "xShift?: number;",
+        "yShift?: number;",
+        "position?: string | number;",
+        "positionEnd?: string | number;",
+        "invert?: boolean;",
+        "openingDirection?: 'up' | 'down' | 'auto';"
+      ]
+    },
+    "CurvePosition": "export enum CurvePosition { NEAR_HEAD = 1, NEAR_TOP = 2, }",
+    "Curve": [
+      "CATEGORY(): string",
+      "renderOptions: Required<CurveOptions>",
+      "Position(): typeof CurvePosition",
+      "PositionString(): Record<string, number>",
+      "constructor(from: Note | undefined, to: Note | undefined, options: CurveOptions)",
+      "setNotes(from: Note | undefined, to: Note | undefined): this",
+      "isPartial(): boolean",
+      "renderCurve(params: CurveRenderParams): void",
+      "getBoundingBox(): BoundingBox",
+      "draw(): boolean"
+    ]
+  },
+  "dot": {
+    "Dot": [
+      "CATEGORY(): string",
+      "getDots(note: Note): Dot[]",
+      "buildAndAttach(notes: Note[], options?: { index?: number; all?: boolean }): void",
+      "format(dots: Dot[], state: ModifierContextState): boolean",
+      "constructor()",
+      "setNote(note: Note): this",
+      "setDotShiftY(y: number): this",
+      "draw(): void"
+    ]
+  },
+  "easyscore": {
+    "CommitHook": "export type CommitHook = (obj: any, note: StemmableNote, builder: Builder) => void;",
+    "EasyScoreGrammar": [
+      "builder: Builder",
+      "constructor(builder: Builder)",
+      "begin(): RuleFunction",
+      "LINE(): Rule",
+      "PIECE(): Rule",
+      "PIECES(): Rule",
+      "PARAMS(): Rule",
+      "CHORDORNOTE(): Rule",
+      "CHORD(): Rule",
+      "NOTES(): Rule",
+      "NOTE(): Rule",
+      "SINGLENOTE(): Rule",
+      "ACCIDENTAL(): Rule",
+      "DOTS(): Rule",
+      "TYPE(): Rule",
+      "DURATION(): Rule",
+      "OPTS(): Rule",
+      "KEYVALS(): Rule",
+      "KEYVAL(): Rule",
+      "VAL(): Rule",
+      "KEY(): Rule",
+      "DVAL(): Rule",
+      "SVAL(): Rule",
+      "NOTENAME(): Rule",
+      "OCTAVE(): Rule",
+      "ACCIDENTALS(): Rule",
+      "MICROTONES(): Rule",
+      "DURATIONS(): Rule",
+      "TYPES(): Rule",
+      "LPAREN(): Rule",
+      "RPAREN(): Rule",
+      "COMMA(): Rule",
+      "DOT(): Rule",
+      "SLASH(): Rule",
+      "MAYBESLASH(): Rule",
+      "EQUALS(): Rule",
+      "LBRACKET(): Rule",
+      "RBRACKET(): Rule",
+      "EOL(): Rule"
+    ],
+    "NotePiece": {
+      "extends": [],
+      "fields": ["key: string;", "accid?: string | null;", "octave?: string;"]
+    },
+    "Piece": [
+      "source: EasyScoreSourceSpan",
+      "chord: NotePiece[]",
+      "duration: string",
+      "dots: number",
+      "type: string",
+      "options: { [x: string]: string }",
+      "constructor(duration: string)"
+    ],
+    "BuilderElements": {
+      "extends": [],
+      "fields": ["notes: StemmableNote[];", "accidentals: (Accidental | undefined)[][];"]
+    },
+    "BuilderOptions": {
+      "extends": ["extends Record<string, any>"],
+      "fields": [
+        "octaveShift?: StaveNoteStruct['octaveShift'];",
+        "strokePx?: StaveNoteStruct['strokePx'];",
+        "alignCenter?: StaveNoteStruct['alignCenter'];",
+        "line?: StaveNoteStruct['line'];",
+        "durationOverride?: StaveNoteStruct['durationOverride'];",
+        "id?: string;",
+        "class?: string;",
+        "articulations?: string;",
+        "fingerings?: string;",
+        "stem?: string;",
+        "clef?: string;",
+        "duration?: string;"
+      ]
+    },
+    "Builder": [
+      "factory: Factory",
+      "elements: BuilderElements",
+      "options: BuilderOptions",
+      "piece: Piece",
+      "commitHooks: CommitHook[]",
+      "onNote: (note: StemmableNote, source?: EasyScoreSourceSpan) => void",
+      "rollingDuration: string",
+      "constructor(factory?: Factory)",
+      "reset(options?: BuilderOptions): void",
+      "getFactory(): Factory",
+      "getElements(): BuilderElements",
+      "addCommitHook(commitHook: CommitHook): void",
+      "resetPiece(): void",
+      "setNoteDots(dots: Match[]): void",
+      "setNoteDuration(duration?: string): void",
+      "setNoteType(type?: string): void",
+      "addNoteOption(key: string, value: string): void",
+      "addNote(key?: string, accid?: string | null, octave?: string): void",
+      "addSingleNote(key: string, accid?: string | null, octave?: string): void",
+      "addChord(notes: Match[]): void",
+      "commitPiece(source?: EasyScoreSourceSpan): void"
+    ],
+    "EasyScoreSourceSpan": {
+      "extends": [],
+      "fields": ["start: number;", "end: number;"]
+    },
+    "EasyScoreDiagnostic": {
+      "extends": ["extends EasyScoreSourceSpan"],
+      "fields": ["code: string;", "message: string;", "line: number;", "column: number;", "measure?: number;"]
+    },
+    "EasyScoreParsedPiece": {
+      "extends": ["extends Piece"],
+      "fields": ["source: EasyScoreSourceSpan;"]
+    },
+    "EasyScoreParseResult": {
+      "extends": [],
+      "fields": ["success: boolean;", "pieces: EasyScoreParsedPiece[];", "diagnostics: EasyScoreDiagnostic[];"]
+    },
+    "EasyScoreError": ["constructor(public readonly diagnostics: EasyScoreDiagnostic[])"],
+    "EasyScoreVoiceOptions": {
+      "extends": [],
+      "fields": [
+        "time?: VoiceTime | string;",
+        "mode?: 'strict' | 'soft' | 'full' | VoiceMode;",
+        "softmaxFactor?: number;",
+        "options?: { softmaxFactor: number };"
+      ]
+    },
+    "EasyScoreOptions": {
+      "extends": [],
+      "fields": [
+        "factory?: Factory;",
+        "builder?: Builder;",
+        "commitHooks?: CommitHook[];",
+        "throwOnError?: boolean;",
+        "strictOptions?: boolean;",
+        "extensions?: readonly string[];"
+      ]
+    },
+    "EasyScoreDefaults": {
+      "extends": ["extends Record<string, any>"],
+      "fields": ["clef?: string;", "time?: VoiceTime | string;", "stem?: string;"]
+    },
+    "EasyScore": [
+      "DEBUG: boolean",
+      "getSource(element: Element): EasyScoreSource | undefined",
+      "getElement(id: string): Element | undefined",
+      "getNote(id: string): Note",
+      "getSource(element: Element): EasyScoreSource | undefined",
+      "adopt(element: T, role: FactoryElementRole): T",
+      "create(options: FactoryOptions, scoreOptions: Omit<EasyScoreOptions, 'factory' | 'builder'> = {}): EasyScore",
+      "make",
+      "attach(note: T, modifier: Modifier, index = 0): T",
+      "system(options: SystemOptions = {}): System",
+      "setStyle(style: Pick<ElementStyle, 'fillStyle' | 'strokeStyle'>): this",
+      "draw(options: { retain?: boolean } = {}): void",
+      "reset(): this",
+      "defaults: EasyScoreDefaults",
+      "options: EasyScoreOptions",
+      "factory: Factory",
+      "builder: Builder",
+      "grammar: EasyScoreGrammar",
+      "parser: Parser",
+      "constructor(options: EasyScoreOptions = {})",
+      "set(defaults: EasyScoreDefaults): this",
+      "setOptions(options: EasyScoreOptions): this",
+      "setContext(context: RenderContext): this",
+      "parseNotation(line: string, options: BuilderOptions = {}): EasyScoreParseResult",
+      "parse(line: string, options: BuilderOptions = {}): Result",
+      "beam(notes: StemmableNote[], options?: { autoStem?: boolean; secondaryBeamBreaks?: number[]; partialBeamDirections?: { [noteIndex: number]: PartialBeamDirection; }; }): StemmableNote[]",
+      "tuplet(notes: StemmableNote[], options?: TupletOptions): StemmableNote[]",
+      "notes(line: string, options: BuilderOptions = {}): StemmableNote[]",
+      "measures(line: string, options: BuilderOptions = {}): StemmableNote[][]",
+      "voice(notes: Tickable[], options: EasyScoreVoiceOptions = {}): Voice",
+      "addCommitHook(commitHook: CommitHook): void"
+    ]
+  },
+  "element": {
+    "ElementAttributes": {
+      "extends": [],
+      "fields": ["[name: string]: string | undefined;", "id: string;", "type: string;", "class: string;"]
+    },
+    "ElementStyle": {
+      "extends": [],
+      "fields": [
+        "shadowColor?: string;",
+        "shadowBlur?: number;",
+        "fillStyle?: string;",
+        "strokeStyle?: string;",
+        "lineWidth?: number;",
+        "lineDash?: string;"
+      ]
+    },
+    "Element": [
+      "CATEGORY(): string",
+      "setTextMeasurementCanvas(canvas: HTMLCanvasElement | OffscreenCanvas): void",
+      "clearTextMeasurementCache(): void",
+      "getTextMeasurementCanvas(): HTMLCanvasElement | OffscreenCanvas | undefined",
+      "constructor(category?: string)",
+      "addChild(child: Element): this",
+      "getCategory(): string",
+      "setStyle(style: ElementStyle): this",
+      "setGroupStyle(style: ElementStyle): this",
+      "getStyle(): ElementStyle",
+      "applyStyle(context: RenderContext | undefined = this.context, style: ElementStyle = this.getStyle()): this",
+      "drawWithStyle(): this",
+      "draw(): void",
+      "hasClass(className: string): boolean",
+      "addClass(className: string): this",
+      "removeClass(className: string): this",
+      "onRegister(registry?: Registry): this",
+      "isRendered(): boolean",
+      "setRendered(rendered = true): this",
+      "getAttributes(): ElementAttributes",
+      "getAttribute(name: string): any",
+      "getSVGElement(suffix: string = ''): SVGElement | undefined",
+      "onIdChange(validate: (id: string | undefined) => void, changed: () => void): () => void",
+      "setAttribute(name: string, value: string | undefined): this",
+      "getBoundingBox(): BoundingBox",
+      "getContext(): RenderContext | undefined",
+      "drawPointerRect()",
+      "setContext(context?: RenderContext): this",
+      "checkContext(): RenderContext",
+      "font(f: string)",
+      "font(): string",
+      "setFont(font?: string | FontInfo, size?: string | number, weight?: string | number, style?: string): this",
+      "getFont(): string",
+      "fontInfo(): Required<FontInfo>",
+      "fontInfo(fontInfo: FontInfo)",
+      "setFontSize(size?: string | number): this",
+      "getFontSize(): string",
+      "getFontScale(): number",
+      "fontSize(size: string | number)",
+      "fontSize(): string",
+      "fontSizeInPoints(): number",
+      "fontSizeInPixels(): number",
+      "fontStyle(): string",
+      "fontStyle(style: string)",
+      "fontWeight(): string",
+      "fontWeight(weight: string | number)",
+      "getWidth(): number",
+      "width(): number",
+      "setWidth(width: number): this",
+      "width(width: number)",
+      "setX(x: number): this",
+      "getX(): number",
+      "getY(): number",
+      "setY(y: number): this",
+      "setYShift(yShift: number): this",
+      "getYShift(): number",
+      "setXShift(xShift: number): this",
+      "getXShift(): number",
+      "setText(text: string): this",
+      "text(text: string)",
+      "getText(): string",
+      "text(): string",
+      "renderText(ctx: RenderContext, xPos: number, yPos: number): void",
+      "measureText(): TextMetrics",
+      "measureWidth(text: string, key = ''): number",
+      "getTextMetrics(): TextMetrics",
+      "textMetrics(): TextMetrics",
+      "getHeight()",
+      "height()",
+      "height(height: number)",
+      "setOriginX(x: number): void",
+      "setOriginY(y: number): void",
+      "setOrigin(x: number, y: number): void"
+    ]
+  },
+  "factory": {
+    "FactoryElementRole": "export type FactoryElementRole = 'note' | 'modifier' | 'drawable';",
+    "FactoryOptions": {
+      "extends": [],
+      "fields": [
+        "stave?: { space: number; };",
+        "renderer?: { elementId: string | null; backend?: number; width: number; height: number; background?: string; };"
+      ]
+    },
+    "Factory": [
+      "DEBUG: boolean",
+      "newFromElementId(elementId: string | null, width = 500, height = 200): Factory",
+      "getOwner(element: Element): Factory | undefined",
+      "adopt(element: T, role: FactoryElementRole): T",
+      "transaction(build: () => T): T",
+      "constructor(options: FactoryOptions = {})",
+      "reset(): void",
+      "setOptions(options?: FactoryOptions): void",
+      "initRenderer(): void",
+      "getContext(): RenderContext",
+      "setContext(context: RenderContext): this",
+      "getStave(): Stave | undefined",
+      "getVoices(): Voice[]",
+      "setStyle(style: { fillStyle?: string; strokeStyle?: string }): this",
+      "Sheet(options: Omit<SheetOptions, 'factory'> = {}): Sheet",
+      "Stave(params?: { x?: number; y?: number; width?: number; options?: StaveOptions }): Stave",
+      "TabStave(params?: { x?: number; y?: number; width?: number; options?: StaveOptions }): TabStave",
+      "StaveNote(noteStruct: StaveNoteStruct): StaveNote",
+      "GlyphNote(glyph: string, noteStruct: NoteStruct, options?: GlyphNoteOptions): GlyphNote",
+      "RepeatNote(type: string, noteStruct?: NoteStruct, options?: GlyphNoteOptions): RepeatNote",
+      "GhostNote(noteStruct: string | NoteStruct): GhostNote",
+      "TextNote(noteStruct: TextNoteStruct): TextNote",
+      "BarNote(params: { type?: BarlineType | string } = {}): BarNote",
+      "ClefNote(params?: { type?: string; options?: { size?: string; annotation?: string } }): ClefNote",
+      "TimeSigNote(params?: { time?: string }): TimeSigNote",
+      "KeySigNote(params: { key: string; cancelKey?: string; alterKey?: string[] }): KeySigNote",
+      "TabNote(noteStruct: TabNoteStruct): TabNote",
+      "GraceNote(noteStruct: GraceNoteStruct): GraceNote",
+      "GraceNoteGroup(params: { notes: StemmableNote[]; slur?: boolean }): GraceNoteGroup",
+      "Accidental(params: { type: string }): Accidental",
+      "Annotation(params?: { text?: string; hJustify?: string | AnnotationHorizontalJustify; vJustify?: string | AnnotationVerticalJustify; font?: FontInfo; }): Annotation",
+      "ChordSymbol(params?: { vJustify?: string; hJustify?: string; fontFamily?: string; fontSize?: number; fontWeight?: string; }): ChordSymbol",
+      "Articulation(params?: { betweenLines?: boolean; type?: string; position?: string | number }): Articulation",
+      "Ornament(type: string, params?: { position?: string | number; upperAccidental?: string; lowerAccidental?: string; delayed?: boolean })",
+      "TextDynamics(params?: { text?: string; duration?: string; dots?: number; line?: number }): TextDynamics",
+      "Fingering(params: { number?: string; position?: string }): FretHandFinger",
+      "StringNumber(params: { number: string; position: string }, drawCircle = true): StringNumber",
+      "TickContext(): TickContext",
+      "ModifierContext(): ModifierContext",
+      "MultiMeasureRest(params: MultimeasureRestRenderOptions): MultiMeasureRest",
+      "Voice(params?: { time?: VoiceTime | string }): Voice",
+      "StaveConnector(params: { topStave: Stave; bottomStave: Stave; type: StaveConnectorType }): StaveConnector",
+      "Formatter(options?: FormatterOptions): Formatter",
+      "Tuplet(params?: { notes?: Note[]; options?: TupletOptions }): Tuplet",
+      "Beam(params: { notes: StemmableNote[]; options?: { autoStem?: boolean; secondaryBeamBreaks?: number[]; partialBeamDirections?: { [noteIndex: number]: PartialBeamDirection; }; }; }): Beam",
+      "Curve(params: { from: Note | undefined; to: Note | undefined; options: CurveOptions }): Curve",
+      "StaveTie(params: { from?: Note | null; to?: Note | null; firstIndexes?: number[]; lastIndexes?: number[]; text?: string; options?: { direction?: number }; }): StaveTie",
+      "StaveLine(params: { from: StaveNote; to: StaveNote; firstIndexes: number[]; lastIndexes: number[]; options?: { text?: string; font?: FontInfo }; }): StaveLine",
+      "VibratoBracket(params: { from: Note | null; to: Note | null; options: { code?: number; line?: number; }; }): VibratoBracket",
+      "TextBracket(params: { from: Note; to: Note; text: string; options: { superscript: string; position: string; line?: number; font?: FontInfo; }; }): TextBracket",
+      "System(params: SystemOptions = {}): System",
+      "EasyScore(options: EasyScoreOptions = {}): EasyScore",
+      "PedalMarking(params?: { notes?: StaveNote[]; options?: { style: string } }): PedalMarking",
+      "NoteSubGroup(params?: { notes?: Note[] }): NoteSubGroup",
+      "draw(options: { retain?: boolean } = {}): void"
+    ]
+  },
+  "font": {
+    "FontInfo": {
+      "extends": [],
+      "fields": ["family?: string;", "size?: number | string;", "weight?: string | number;", "style?: string;"]
+    },
+    "FontWeight": "export enum FontWeight { NORMAL = 'normal', BOLD = 'bold', }",
+    "FontStyle": "export enum FontStyle { NORMAL = 'normal', ITALIC = 'italic', }",
+    "Font": [
+      "TEXT_FONT_NAMES",
+      "scaleToPxFrom: Record<string, number>",
+      "convertSizeToPixelValue(fontSize: string | number): number",
+      "convertSizeToPointValue(fontSize: string | number): number",
+      "validate(f?: string | FontInfo, size?: string | number, weight?: string | number, style?: string): Required<FontInfo>",
+      "fromCSSString(cssFontShorthand: string): Required<FontInfo>",
+      "toCSSString(fontInfo?: FontInfo): string",
+      "scaleSize(fontSize: T, scaleFactor: number): T",
+      "isBold(weight?: string | number): boolean",
+      "isItalic(style?: string): boolean",
+      "HOST_URL",
+      "FILES: Record<string /* fontName */, string /* fontPath */>",
+      "load(fontName: string, url?: string, descriptors?: Record<string, string>): Promise<FontFace>",
+      "getURLForFont(fontName: string): string | undefined"
+    ]
+  },
+  "flag": {
+    "Flag": ["DEBUG: boolean", "CATEGORY(): string", "draw(): void"]
+  },
+  "formatter": {
+    "FormatterOptions": {
+      "extends": [],
+      "fields": [
+        "spacing?: ProportionalSpacing;",
+        "softmaxFactor?: number;",
+        "globalSoftmax?: boolean;",
+        "maxIterations?: number;"
+      ]
+    },
+    "FormatParams": {
+      "extends": [],
+      "fields": ["alignRests?: boolean;", "autoBeam?: boolean;", "stave?: Stave;", "context?: RenderContext;"]
+    },
+    "AlignmentTickContexts": {
+      "extends": [],
+      "fields": [
+        "list: number[];",
+        "map: Record<number, TickContext>;",
+        "array: TickContext[];",
+        "resolutionMultiplier: number;"
+      ]
+    },
+    "AlignmentModifierContexts": {
+      "extends": [],
+      "fields": [
+        "map: Map<Stave | undefined, Record<number, ModifierContext>>;",
+        "array: ModifierContext[];",
+        "resolutionMultiplier: number;"
+      ]
+    },
+    "Formatter": [
+      "DEBUG: boolean",
+      "SimpleFormat(notes: Tickable[], x = 0, { paddingBetween = 10 } = {}): void",
+      "plotDebugging(ctx: RenderContext, formatter: Formatter, xPos: number, y1: number, y2: number, options?: { stavePadding: number }): void",
+      "FormatAndDraw(ctx: RenderContext, stave: Stave, notes: StemmableNote[], params?: FormatParams | boolean): BoundingBox | undefined",
+      "FormatAndDrawTab(ctx: RenderContext, tabstave: TabStave, stave: Stave, tabnotes: TabNote[], notes: Tickable[], autoBeam: boolean, params: FormatParams): void",
+      "AlignRestsToNotes(tickables: Tickable[], alignAllNotes: boolean, alignTuplets: boolean = false): void",
+      "constructor(options?: FormatterOptions)",
+      "alignRests(voices: Voice[], alignAllNotes: boolean): void",
+      "preCalculateMinTotalWidth(voices: Voice[]): number",
+      "getMinTotalWidth(): number",
+      "getResolutionMultiplier(voices: Voice[]): number",
+      "createModifierContexts(voices: Voice[])",
+      "createTickContexts(voices: Voice[]): AlignmentTickContexts",
+      "getTickContexts(): AlignmentTickContexts | undefined",
+      "preFormat(justifyWidth = 0, renderingContext?: RenderContext, voicesParam?: Voice[], stave?: Stave): number",
+      "evaluate(): number",
+      "tune(options?: { alpha?: number }): number",
+      "postFormat(): this",
+      "joinVoices(voices: Voice[]): this",
+      "format(voices: Voice[], justifyWidth?: number, options?: FormatParams): this",
+      "formatToStave(voices: Voice[], stave: Stave, optionsParam?: FormatParams): this",
+      "getTickContext(tick: number): TickContext | undefined"
+    ]
+  },
+  "fraction": {
+    "Fraction": [
+      "CATEGORY(): string",
+      "GCD(a: number, b: number): number",
+      "LCM(a: number, b: number): number",
+      "LCMM(args: number[]): number",
+      "numerator: number",
+      "denominator: number",
+      "constructor(numerator?: number, denominator?: number)",
+      "set(numerator: number = 1, denominator: number = 1): this",
+      "value(): number",
+      "simplify(): this",
+      "add(param1: Fraction | number = 0, param2: number = 1): this",
+      "subtract(param1: Fraction | number = 0, param2: number = 1): this",
+      "multiply(param1: Fraction | number = 1, param2: number = 1): this",
+      "divide(param1: Fraction | number = 1, param2: number = 1): this",
+      "equals(compare: Fraction | number): boolean",
+      "greaterThan(compare: Fraction | number): boolean",
+      "greaterThanEquals(compare: Fraction | number): boolean",
+      "lessThan(compare: Fraction | number): boolean",
+      "lessThanEquals(compare: Fraction | number): boolean",
+      "clone(): Fraction",
+      "copy(other: Fraction | number): this",
+      "quotient(): number",
+      "remainder(): number",
+      "makeAbs(): this",
+      "toString(): string",
+      "toSimplifiedString(): string",
+      "toMixedString(): string",
+      "parse(str: string): this"
+    ]
+  },
+  "frethandfinger": {
+    "FretHandFinger": [
+      "CATEGORY(): string",
+      "format(nums: FretHandFinger[], state: ModifierContextState): boolean",
+      "easyScoreHook({ fingerings }: { fingerings?: string } = {}, note: StemmableNote, builder: Builder): void",
+      "constructor(finger: string)",
+      "setFretHandFinger(finger: string): this",
+      "getFretHandFinger(): string",
+      "setOffsetX(x: number): this",
+      "setOffsetY(y: number): this",
+      "draw(): void"
+    ]
+  },
+  "ghostnote": {
+    "GhostNote": [
+      "CATEGORY(): string",
+      "constructor(parameter: string | NoteStruct)",
+      "isRest(): boolean",
+      "setStave(stave: Stave): this",
+      "addToModifierContext(mc: ModifierContext): this",
+      "preFormat(): this",
+      "draw(): void"
+    ]
+  },
+  "glyphnote": {
+    "GlyphNoteOptions": {
+      "extends": [],
+      "fields": ["ignoreTicks?: boolean;", "line?: number;"]
+    },
+    "GlyphNote": [
+      "CATEGORY(): string",
+      "constructor(glyph: string, noteStruct: NoteStruct, options?: GlyphNoteOptions)",
+      "setGlyph(glyph: string): this",
+      "preFormat(): this",
+      "drawModifiers(): void",
+      "draw(): void"
+    ]
+  },
+  "gracenote": {
+    "GraceNoteStruct": {
+      "extends": ["extends StaveNoteStruct"],
+      "fields": ["slash?: boolean;"]
+    },
+    "GraceNote": [
+      "CATEGORY(): string",
+      "LEDGER_LINE_OFFSET(): number",
+      "constructor(noteStruct: GraceNoteStruct)",
+      "getStemExtension(): number",
+      "draw(): void",
+      "calcBeamedNotesSlashBBox(slashStemOffset: number, slashBeamOffset: number, protrusions: { beam: number; stem: number }): Record<string, number>"
+    ]
+  },
+  "gracenotegroup": {
+    "GraceNoteGroup": [
+      "DEBUG: boolean",
+      "CATEGORY(): string",
+      "renderOptions: { slurYShift: number }",
+      "format(gracenoteGroups: GraceNoteGroup[], state: ModifierContextState): boolean",
+      "constructor(graceNotes: StemmableNote[], showSlur?: boolean)",
+      "preFormat(): void",
+      "beamNotes(graceNotes?: StemmableNote[]): this",
+      "setWidth(width: number): this",
+      "getWidth(): number",
+      "getGraceNotes(): Note[]",
+      "getBoundingBox(): BoundingBox",
+      "draw(): void"
+    ]
+  },
+  "gracetabnote": {
+    "GraceTabNote": ["CATEGORY(): string", "constructor(noteStruct: TabNoteStruct)"]
+  },
+  "keymanager": {
+    "KeyManager": [
+      "constructor(key: string)",
+      "setKey(key: string): this",
+      "getKey(): string",
+      "reset(): this",
+      "getAccidental(key: string): { note: string; accidental?: string; change?: boolean; }",
+      "selectNote(note: string): { note: string; accidental?: string; change: boolean; }"
+    ]
+  },
+  "keysignature": {
+    "KeySignature": [
+      "CATEGORY(): string",
+      "constructor(keySpec: string, cancelKeySpec?: string, alterKeySpec?: string[])",
+      "cancelKey(spec: string): this",
+      "addToStave(stave: Stave): this",
+      "setStave(stave: Stave): this",
+      "getBoundingBox(): BoundingBox",
+      "getPadding(index: number): number",
+      "getWidth(): number",
+      "setKeySig(keySpec: string, cancelKeySpec?: string, alterKeySpec?: string[]): this",
+      "alterKey(alterKeySpec: string[]): this",
+      "format(): void",
+      "draw(): void"
+    ]
+  },
+  "keysignote": {
+    "KeySigNote": [
+      "CATEGORY(): string",
+      "constructor(keySpec: string, cancelKeySpec?: string, alterKeySpec?: string[])",
+      "addToModifierContext(mc: ModifierContext): this",
+      "preFormat(): this",
+      "draw(): void"
+    ]
+  },
+  "metrics": {
+    "Metrics": [
+      "clear(key?: string)",
+      "getFontInfo(key: string): Required<FontInfo>",
+      "getStyle(key: string): ElementStyle",
+      "get(key: string, defaultValue?: any): any"
+    ],
+    "MetricsDefaults": "Record<string, any>"
+  },
+  "modifier": {
+    "ModifierPosition": "export enum ModifierPosition { CENTER = 0, LEFT = 1, RIGHT = 2, ABOVE = 3, BELOW = 4, }",
+    "Modifier": [
+      "CATEGORY(): string",
+      "Position(): typeof ModifierPosition",
+      "PositionString(): Record<string, number>",
+      "constructor()",
+      "getNote(): Note",
+      "checkAttachedNote(): Note",
+      "setNote(note: Note): this",
+      "getIndex(): number | undefined",
+      "checkIndex(): number",
+      "setIndex(index: number): this",
+      "getModifierContext(): ModifierContext | undefined",
+      "checkModifierContext(): ModifierContext",
+      "setModifierContext(c: ModifierContext): this",
+      "getPosition(): number",
+      "setPosition(position: string | number): this",
+      "setTextLine(line: number): this",
+      "setYShift(y: number): this",
+      "setSpacingFromNextModifier(x: number): void",
+      "getSpacingFromNextModifier(): number",
+      "setXShift(x: number): this",
+      "getXShift(): number",
+      "draw(): void",
+      "alignSubNotesWithNote(subNotes: Note[], note: Note, position = Modifier.Position.LEFT): void"
+    ]
+  },
+  "modifiercontext": {
+    "ModifierContextState": {
+      "extends": [],
+      "fields": ["leftShift: number;", "rightShift: number;", "textLine: number;", "topTextLine: number;"]
+    },
+    "ModifierContextMetrics": {
+      "extends": [],
+      "fields": ["width: number;", "spacing: number;"]
+    },
+    "ModifierContextMember": "export type ModifierContextMember = Tickable | Modifier | StaveNote | TabNote;",
+    "ModifierContext": [
+      "DEBUG: boolean",
+      "addModifier(member: ModifierContextMember): this",
+      "addMember(member: ModifierContextMember): this",
+      "getModifiers(category: string): ModifierContextMember[]",
+      "getMembers(category: string): ModifierContextMember[]",
+      "getWidth(): number",
+      "getLeftShift(): number",
+      "getRightShift(): number",
+      "getRightShiftForTie(): number",
+      "getState(): ModifierContextState",
+      "getMetrics(): ModifierContextMetrics",
+      "preFormat(): void",
+      "postFormat(): void"
+    ]
+  },
+  "multimeasurerest": {
+    "MultimeasureRestRenderOptions": {
+      "extends": [],
+      "fields": [
+        "numberOfMeasures: number;",
+        "useSymbols?: boolean;",
+        "symbolSpacing?: number;",
+        "showNumber?: boolean;",
+        "numberLine?: number;",
+        "numberGlyphPoint?: number;",
+        "paddingLeft?: number;",
+        "paddingRight?: number;",
+        "line?: number;",
+        "spacingBetweenLinesPx?: number;",
+        "semibreveRestGlyphScale?: number;",
+        "lineThickness?: number;",
+        "serifThickness?: number;"
+      ]
+    },
+    "MultiMeasureRest": [
+      "CATEGORY(): string",
+      "renderOptions: Required<MultimeasureRestRenderOptions>",
+      "constructor(numberOfMeasures: number, options: MultimeasureRestRenderOptions)",
+      "getXs(): { left: number; right: number }",
+      "setStave(stave: Stave): this",
+      "getStave(): Stave | undefined",
+      "checkStave(): Stave",
+      "drawLine(stave: Stave, ctx: RenderContext, left: number, right: number): void",
+      "drawSymbols(stave: Stave, ctx: RenderContext, left: number, right: number): void",
+      "draw(): void"
+    ]
+  },
+  "music": {
+    "NoteAccidental": {
+      "extends": [],
+      "fields": ["note: number;", "accidental: AccidentalValue;"]
+    },
+    "NoteParts": {
+      "extends": [],
+      "fields": ["root: string;", "accidental: string;"]
+    },
+    "KeyParts": {
+      "extends": [],
+      "fields": ["root: string;", "accidental: string;", "type: string;"]
+    },
+    "KeyValue": "export type KeyValue = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;",
+    "RootValue": "export type RootValue = 0 | 1 | 2 | 3 | 4 | 5 | 6;",
+    "AccidentalValue": "export type AccidentalValue = -2 | -1 | 0 | 1 | 2;",
+    "Key": {
+      "extends": [],
+      "fields": ["rootIndex: RootValue;", "intVal: KeyValue;"]
+    },
+    "Music": [
+      "NUM_TONES(): number",
+      "roots(): string[]",
+      "rootValues(): KeyValue[]",
+      "rootIndexes(): Record<string, RootValue>",
+      "canonicalNotes(): string[]",
+      "diatonicIntervals(): string[]",
+      "diatonicAccidentals(): Record<string, NoteAccidental>",
+      "intervals(): Record<string, number>",
+      "scales(): Record<string, number[]>",
+      "scaleTypes(): Record<string, number[]>",
+      "accidentals(): string[]",
+      "noteValues(): Record<string, Key>",
+      "getNoteParts(noteString: string): NoteParts",
+      "getKeyParts(keyString: string): KeyParts",
+      "getNoteValue(noteString: string): number",
+      "getIntervalValue(intervalString: string): number",
+      "getCanonicalNoteName(noteValue: number): string",
+      "getCanonicalIntervalName(intervalValue: number): string",
+      "getRelativeNoteValue(noteValue: number, intervalValue: number, direction: number = 1): number",
+      "getRelativeNoteName(root: string, noteValue: number): string",
+      "getScaleTones(key: number, intervals: number[]): number[]",
+      "getIntervalBetween(note1: number, note2: number, direction: number = 1): number",
+      "createScaleMap(keySignature: string): Record<string, string>"
+    ]
+  },
+  "note": {
+    "GlyphProps": {
+      "extends": [],
+      "fields": [
+        "codeHead: string;",
+        "stemBeamExtension: number;",
+        "stem: boolean;",
+        "codeFlagUp?: string;",
+        "beamCount: number;"
+      ]
+    },
+    "KeyProps": {
+      "extends": [],
+      "fields": [
+        "key: string;",
+        "octave: number;",
+        "line: number;",
+        "intValue?: number;",
+        "code?: string;",
+        "displaced: boolean;"
+      ]
+    },
+    "NoteMetrics": {
+      "extends": [],
+      "fields": [
+        "width: number;",
+        "glyphWidth?: number;",
+        "notePx: number;",
+        "modLeftPx: number;",
+        "modRightPx: number;",
+        "leftDisplacedHeadPx: number;",
+        "glyphPx: number;",
+        "rightDisplacedHeadPx: number;"
+      ]
+    },
+    "NoteDuration": {
+      "extends": [],
+      "fields": ["duration: string;", "dots: number;", "type: string;"]
+    },
+    "ParsedNote": {
+      "extends": [],
+      "fields": ["duration: string;", "type: string;", "customTypes: string[];", "dots: number;", "ticks: number;"]
+    },
+    "NoteStruct": {
+      "extends": [],
+      "fields": [
+        "keys?: string[];",
+        "duration: string;",
+        "line?: number;",
+        "dots?: number;",
+        "type?: string;",
+        "alignCenter?: boolean;",
+        "durationOverride?: Fraction;"
+      ]
+    },
+    "Note": [
+      "CATEGORY(): string",
+      "getGlyphProps(duration: string, type: string = 'n'): GlyphProps",
+      "plotMetrics(ctx: RenderContext, note: Tickable, yPos: number): void",
+      "glyphProps: GlyphProps",
+      "keys: string[]",
+      "keyProps: KeyProps[]",
+      "renderOptions: { drawStemThroughStave?: boolean; draw?: boolean; drawDots?: boolean; drawStem?: boolean; yShift: number; extendLeft?: number; extendRight?: number; annotationSpacing: number; strokePx: number; }",
+      "constructor(noteStruct: NoteStruct)",
+      "getPlayNote(): Note | undefined",
+      "setPlayNote(note: Note): this",
+      "isRest(): boolean",
+      "addStroke(index: number, stroke: Stroke): this",
+      "getStave(): Stave | undefined",
+      "checkStave(): Stave",
+      "setStave(stave: Stave): this",
+      "getLeftDisplacedHeadPx(): number",
+      "getRightDisplacedHeadPx(): number",
+      "setLeftDisplacedHeadPx(x: number): this",
+      "setRightDisplacedHeadPx(x: number): this",
+      "shouldIgnoreTicks(): boolean",
+      "getLineNumber(isTopNote?: boolean): number",
+      "getLineForRest(): number",
+      "getGlyphProps(): GlyphProps",
+      "getGlyphWidth(): number",
+      "setYs(ys: number[]): this",
+      "getYs(): number[]",
+      "getYForTopText(textLine: number): number",
+      "getVoice(): Voice",
+      "setVoice(voice: Voice): this",
+      "getTickContext(): TickContext",
+      "setTickContext(tc: TickContext): this",
+      "getDuration(): string",
+      "isDotted(): boolean",
+      "hasStem(): boolean",
+      "getNoteType(): string",
+      "getBeam(): Beam | undefined",
+      "checkBeam(): Beam",
+      "hasBeam(): boolean",
+      "setBeam(beam: Beam): this",
+      "addModifier(modifier: Modifier, index: number = 0): this",
+      "getModifiersByType(type: string): Modifier[]",
+      "getModifierStartXY(position?: number, index?: number, options?: any): { x: number; y: number }",
+      "getRightParenthesisPx(index: number): number",
+      "getLeftParenthesisPx(index: number): number",
+      "getFirstDotPx(): number",
+      "getMetrics(): NoteMetrics",
+      "getAbsoluteX(): number",
+      "getStemDirection(): number",
+      "getStemExtents(): Record<string, number>",
+      "getTieRightX(): number",
+      "getTieLeftX(): number",
+      "getKeys(): string[]",
+      "getKeyProps(): KeyProps[]",
+      "getBoundingBox(): BoundingBox"
+    ]
+  },
+  "notehead": {
+    "NoteHeadStruct": {
+      "extends": ["extends NoteStruct"],
+      "fields": [
+        "line?: number;",
+        "slashed?: boolean;",
+        "style?: ElementStyle;",
+        "customGlyphCode?: string;",
+        "stemDirection?: number;",
+        "displaced?: boolean;",
+        "noteType?: string;",
+        "x?: number;",
+        "y?: number;",
+        "index?: number;"
+      ]
+    },
+    "NoteHead": [
+      "DEBUG: boolean",
+      "CATEGORY(): string",
+      "constructor(noteStruct: NoteHeadStruct)",
+      "getWidth(): number",
+      "isDisplaced(): boolean",
+      "getLine(): number",
+      "setLine(line: number): this",
+      "getAbsoluteX(): number",
+      "setStave(stave: Stave): this",
+      "preFormat(): this",
+      "draw(): void"
+    ]
+  },
+  "notesubgroup": {
+    "NoteSubGroup": [
+      "CATEGORY(): string",
+      "format(groups: NoteSubGroup[], state: ModifierContextState): boolean",
+      "constructor(subNotes: Note[])",
+      "preFormat(): void",
+      "setWidth(width: number): this",
+      "getWidth(): number",
+      "draw(): void"
+    ]
+  },
+  "ornament": {
+    "Ornament": [
+      "DEBUG: boolean",
+      "CATEGORY(): string",
+      "minPadding(): number",
+      "renderOptions: { accidentalUpperPadding: number; accidentalLowerPadding: number; }",
+      "format(ornaments: Ornament[], state: ModifierContextState): boolean",
+      "ornamentNoteTransition(): string[]",
+      "ornamentAttack(): string[]",
+      "ornamentAlignWithNoteHead(): string[]",
+      "ornamentRelease(): string[]",
+      "ornamentLeft(): string[]",
+      "ornamentRight(): string[]",
+      "ornamentYShift(): string[]",
+      "ornamentArticulation(): string[]",
+      "constructor(type: string)",
+      "setNote(note: Note): this",
+      "setDelayed(delayed: boolean): this",
+      "setUpperAccidental(accid: string): this",
+      "setLowerAccidental(accid: string): this",
+      "draw(): void"
+    ]
+  },
+  "parenthesis": {
+    "Parenthesis": [
+      "CATEGORY(): string",
+      "buildAndAttach(notes: Note[]): void",
+      "format(parentheses: Parenthesis[], state: ModifierContextState): boolean",
+      "constructor(position: ModifierPosition)",
+      "setNote(note: Note): this",
+      "draw(): void"
+    ]
+  },
+  "parser": {
+    "Match": "export type Match = string | Match[] | null;",
+    "RuleFunction": "export type RuleFunction = () => Rule;",
+    "TriggerFunction": "export type TriggerFunction = (state?: { matches: Match[]; start: number; end: number }) => void;",
+    "Rule": {
+      "extends": [],
+      "fields": [
+        "token?: string;",
+        "noSpace?: boolean;",
+        "expect?: RuleFunction[];",
+        "zeroOrMore?: boolean;",
+        "oneOrMore?: boolean;",
+        "maybe?: boolean;",
+        "or?: boolean;",
+        "run?: TriggerFunction;"
+      ]
+    },
+    "Result": {
+      "extends": [],
+      "fields": [
+        "success: boolean;",
+        "pos?: number;",
+        "incrementPos?: number;",
+        "matchedString?: string;",
+        "matches?: Match[];",
+        "numMatches?: number;",
+        "results?: GroupedResults;",
+        "furthestErrorPos?: number;",
+        "errorPos?: number;"
+      ]
+    },
+    "GroupedResults": "export type GroupedResults = (Result | Result[])[];",
+    "Grammar": {
+      "extends": [],
+      "fields": ["begin(): RuleFunction;"]
+    },
+    "Parser": [
+      "DEBUG: boolean",
+      "constructor(grammar: Grammar)",
+      "parse(line: string): Result",
+      "matchFail(returnPos: number): void",
+      "matchSuccess(): void",
+      "matchToken(token: string, noSpace: boolean = false): Result",
+      "expectOne(rule: Rule, maybe: boolean = false): Result",
+      "expectOneOrMore(rule: Rule, maybe: boolean = false): Result",
+      "expectZeroOrMore(rule: Rule): Result",
+      "expect(ruleFunc: RuleFunction): Result"
+    ]
+  },
+  "pedalmarking": {
+    "PedalMarking": [
+      "DEBUG: boolean",
+      "CATEGORY(): string",
+      "renderOptions: { color?: string; bracketHeight: number; textMarginRight: number; bracketLineWidth: number; }",
+      "GLYPHS: Record<string, string>",
+      "type",
+      "typeString: Record<string, number>",
+      "createSustain(notes: StaveNote[]): PedalMarking",
+      "createSostenuto(notes: StaveNote[]): PedalMarking",
+      "createUnaCorda(notes: StaveNote[]): PedalMarking",
+      "constructor(notes: StaveNote[])",
+      "setType(type: string | number): this",
+      "setCustomText(depress: string, release?: string): this",
+      "setLine(line: number): this",
+      "getYForStave(stave: Stave): number",
+      "drawBracketed(): void",
+      "drawText(): void",
+      "draw(): void"
+    ]
+  },
+  "registry": {
+    "RegistryUpdate": {
+      "extends": [],
+      "fields": ["id: string;", "name: string;", "value: string | undefined;", "oldValue: string | undefined;"]
+    },
+    "Registry": [
+      "getDefaultRegistry(): Registry | undefined",
+      "enableDefaultRegistry(registry: Registry): void",
+      "disableDefaultRegistry(): void",
+      "transaction(build: () => T): T",
+      "constructor()",
+      "clear(): this",
+      "setIndexValue(name: string, value: string, id: string, elem: Element): void",
+      "updateIndex({ id, name, value, oldValue }: RegistryUpdate): void",
+      "register(elem: Element, id?: string): this",
+      "getElementById(id: string): Element | undefined",
+      "getElementsByAttribute(attribute: string, value: string): Element[]",
+      "getElementsByType(type: string): Element[]",
+      "getElementsByClass(className: string): Element[]",
+      "onUpdate(info: RegistryUpdate): this"
+    ]
+  },
+  "rendercontext": {
+    "TextMeasure": {
+      "extends": [],
+      "fields": ["x: number;", "y: number;", "width: number;", "height: number;"]
+    },
+    "RenderContext": [
+      "setDefaultStyle(style: { fillStyle?: string; strokeStyle?: string }): this",
+      "getDefaultStyle(): { fillStyle?: string; strokeStyle?: string }",
+      "CATEGORY(): string",
+      "clear(): void",
+      "setFillStyle(style: string): this",
+      "setBackgroundFillStyle(style: string): this",
+      "setStrokeStyle(style: string): this",
+      "setShadowColor(color: string): this",
+      "setShadowBlur(blur: number): this",
+      "setLineWidth(width: number): this",
+      "setLineCap(capType: CanvasLineCap): this",
+      "setLineDash(dashPattern: number[]): this",
+      "scale(x: number, y: number): this",
+      "rect(x: number, y: number, width: number, height: number): this",
+      "resize(width: number, height: number): this",
+      "fillRect(x: number, y: number, width: number, height: number): this",
+      "clearRect(x: number, y: number, width: number, height: number): this",
+      "pointerRect(x: number, y: number, width: number, height: number): this",
+      "beginPath(): this",
+      "moveTo(x: number, y: number): this",
+      "lineTo(x: number, y: number): this",
+      "bezierCurveTo(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): this",
+      "quadraticCurveTo(cpx: number, cpy: number, x: number, y: number): this",
+      "arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterclockwise: boolean): this",
+      "fill(attributes?: any): this",
+      "stroke(): this",
+      "closePath(): this",
+      "fillText(text: string, x: number, y: number): this",
+      "save(): this",
+      "restore(): this",
+      "openGroup(cls?: string, id?: string): any",
+      "closeGroup(): void",
+      "openRotation(angleDegrees: number, x: number, y: number): void",
+      "closeRotation(): void",
+      "add(child: any): void",
+      "measureText(text: string): TextMeasure",
+      "fillStyle(style: string | CanvasGradient | CanvasPattern)",
+      "fillStyle(): string | CanvasGradient | CanvasPattern",
+      "strokeStyle(style: string | CanvasGradient | CanvasPattern)",
+      "strokeStyle(): string | CanvasGradient | CanvasPattern",
+      "setFont(f?: string | FontInfo, size?: string | number, weight?: string | number, style?: string): this",
+      "getFont(): string",
+      "font(f: string)",
+      "font(): string"
+    ],
+    "drawDot": "(ctx: RenderContext, x: number, y: number, color = '#F55'): void"
+  },
+  "renderer": {
+    "ContextBuilder": "export type ContextBuilder = typeof Renderer.getSVGContext | typeof Renderer.getCanvasContext;",
+    "RendererBackends": "export enum RendererBackends { CANVAS = 1, SVG = 2, }",
+    "RendererLineEndType": "export enum RendererLineEndType { NONE = 1, // No leg UP = 2, // Upward leg DOWN = 3, // Downward leg }",
+    "Renderer": [
+      "Backends",
+      "LineEndType",
+      "lastContext: RenderContext",
+      "buildContext(elementId: string | HTMLCanvasElement | HTMLDivElement, backend: number, width: number, height: number, background: string = '#FFF'): RenderContext",
+      "getCanvasContext(elementId: string, width: number, height: number, background?: string): RenderContext",
+      "getSVGContext(elementId: string, width: number, height: number, background?: string): RenderContext",
+      "drawDashedLine(context: RenderContext, fromX: number, fromY: number, toX: number, toY: number, dashPattern: number[]): void",
+      "constructor(context: RenderContext)",
+      "constructor(canvas: string | HTMLCanvasElement | HTMLDivElement, backend: number)",
+      "constructor(arg0: string | HTMLCanvasElement | HTMLDivElement | RenderContext, arg1?: number)",
+      "resize(width: number, height: number): this",
+      "getContext(): RenderContext"
+    ]
+  },
+  "repeatnote": {
+    "RepeatNote": [
+      "CATEGORY(): string",
+      "constructor(type: string, noteStruct?: NoteStruct, options?: GlyphNoteOptions)"
+    ]
+  },
+  "sheet": {
+    "SheetOptions": {
+      "extends": [],
+      "fields": [
+        "factory: Factory;",
+        "width?: number;",
+        "x?: number;",
+        "y?: number;",
+        "rowGap?: number;",
+        "measureGap?: number;",
+        "measurePadding?: number;",
+        "justify?: boolean;"
+      ]
+    },
+    "SheetRow": {
+      "extends": [],
+      "fields": [
+        "systems: System[];",
+        "x: number;",
+        "y: number;",
+        "width: number;",
+        "height: number;",
+        "overflow: number;"
+      ]
+    },
+    "Sheet": [
+      "constructor(options: SheetOptions)",
+      "addSystem(options: Omit<SystemOptions, 'factory' | 'width' | 'autoWidth' | 'noJustification'> = {}): System",
+      "setWidth(width: number): this",
+      "getSystems(): System[]",
+      "getRows(): SheetRow[]",
+      "getHeight(): number",
+      "format(): this"
+    ]
+  },
+  "stave": {
+    "StaveLineConfig": {
+      "extends": [],
+      "fields": ["visible?: boolean;"]
+    },
+    "StaveOptions": {
+      "extends": [],
+      "fields": [
+        "bottomTextPosition?: number;",
+        "lineConfig?: StaveLineConfig[];",
+        "spaceBelowStaffLn?: number;",
+        "spaceAboveStaffLn?: number;",
+        "verticalBarWidth?: number;",
+        "leftBar?: boolean;",
+        "rightBar?: boolean;",
+        "spacingBetweenLinesPx?: number;",
+        "topTextPosition?: number;",
+        "numLines?: number;"
+      ]
+    },
+    "Stave": [
+      "CATEGORY(): string",
+      "options: Required<StaveOptions>",
+      "defaultPadding(): number",
+      "rightPadding(): number",
+      "constructor(x: number, y: number, width: number, options?: StaveOptions)",
+      "setDefaultLedgerLineStyle(style: ElementStyle): void",
+      "getDefaultLedgerLineStyle(): ElementStyle",
+      "space(spacing: number): number",
+      "resetLines(): void",
+      "setNoteStartX(x: number): this",
+      "getNoteStartX(): number",
+      "getNoteEndX(): number",
+      "getTieStartX(): number",
+      "getTieEndX(): number",
+      "getNumLines(): number",
+      "setNumLines(n: number): this",
+      "getTopLineTopY(): number",
+      "getBottomLineBottomY(): number",
+      "setX(x: number): this",
+      "setWidth(width: number): this",
+      "setMeasure(measure: number): this",
+      "getMeasure(): number",
+      "getModifierXShift(index: number = 0): number",
+      "setRepetitionType(type: number, yShift: number = 0): this",
+      "setVoltaType(type: number, label: string, y: number): this",
+      "setSection(section: string, y: number, xOffset = 0, fontSize?: number, drawRect = true)",
+      "setTempo(tempo: StaveTempoOptions, y: number): this",
+      "setStaveText(text: string, position: number, options: { shiftX?: number; shiftY?: number; justification?: number; } = {}): this",
+      "getSpacingBetweenLines(): number",
+      "getBoundingBox(): BoundingBox",
+      "getBottomY(): number",
+      "getBottomLineY(): number",
+      "getYForLine(line: number): number",
+      "getLineForY(y: number): number",
+      "getYForTopText(line: number = 0): number",
+      "getYForBottomText(line: number = 0): number",
+      "getYForNote(line: number): number",
+      "getYForGlyphs(): number",
+      "addModifier(modifier: StaveModifier, position?: number): this",
+      "addEndModifier(modifier: StaveModifier): this",
+      "setBegBarType(type: number | BarlineType, repeatBracket: RepeatBracketType = RepeatBracketType.NONE): this",
+      "setEndBarType(type: number | BarlineType, repeatBracket: RepeatBracketType = RepeatBracketType.NONE): this",
+      "setClef(clefSpec: string, size?: string, annotation?: string, position?: number): this",
+      "getClef(): string",
+      "setEndClef(clefSpec: string, size?: string, annotation?: string): this",
+      "getEndClef(): string | undefined",
+      "setKeySignature(keySpec: string, cancelKeySpec?: string, position?: number): this",
+      "setEndKeySignature(keySpec: string, cancelKeySpec?: string): this",
+      "setTimeSignature(timeSpec: string, customPadding?: number, position?: number): this",
+      "setEndTimeSignature(timeSpec: string, customPadding?: number): this",
+      "addKeySignature(keySpec: string, cancelKeySpec?: string, position?: number): this",
+      "addClef(clef: string, size?: string, annotation?: string, position?: number): this",
+      "addEndClef(clef: string, size?: string, annotation?: string): this",
+      "addTimeSignature(timeSpec: string, customPadding?: number, position?: number): this",
+      "addEndTimeSignature(timeSpec: string, customPadding?: number): this",
+      "addTrebleGlyph(): this",
+      "getModifiers(position?: number, category?: string): StaveModifier[]",
+      "sortByCategory(items: StaveModifier[], order: Record<string, number>): void",
+      "format(): void",
+      "draw(): void",
+      "getVerticalBarWidth(): number",
+      "getConfigForLines(): StaveLineConfig[]",
+      "setConfigForLine(lineNumber: number, lineConfig: StaveLineConfig): this",
+      "setConfigForLines(linesConfiguration: StaveLineConfig[]): this",
+      "formatBegModifiers(staves: Stave[]): void"
+    ]
+  },
+  "stavebarline": {
+    "BarlineType": "export enum BarlineType { SINGLE = 1, DOUBLE = 2, END = 3, REPEAT_BEGIN = 4, REPEAT_END = 5, REPEAT_BOTH = 6, NONE = 7, }",
+    "RepeatBracketType": "export enum RepeatBracketType { NONE = 0, STRAIGHT = 1, CURVED = 2, }",
+    "Barline": [
+      "CATEGORY(): string",
+      "type(): typeof BarlineType",
+      "typeString(): Record<string, BarlineType>",
+      "constructor(type: BarlineType | string)",
+      "setRepeatBracket(val: RepeatBracketType)",
+      "getRepeatBrackets(): RepeatBracketType",
+      "getType(): number",
+      "setType(type: string | number): this",
+      "draw(): void",
+      "drawVerticalBar(stave: Stave, x: number, doubleBar?: boolean): void",
+      "drawVerticalEndBar(stave: Stave, x: number): void",
+      "drawStraightBrackets(stave: Stave, startX: number, startY: number, yDirection: number, xDirection: number)",
+      "drawCurvedBrackets(stave: Stave, startX: number, startY: number, yDirection: number, xDirection: number)",
+      "drawRepeatBar(stave: Stave, x: number, begin: boolean): void"
+    ]
+  },
+  "staveconnector": {
+    "StaveConnectorType": "export type StaveConnectorType = | 'singleRight' | 'singleLeft' | 'single' | 'double' | 'brace' | 'bracket' | 'boldDoubleLeft' | 'boldDoubleRight' | 'thinDouble' | 'none' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;",
+    "StaveConnector": [
+      "CATEGORY(): string",
+      "type: Record<string, Exclude<StaveConnectorType, string>>",
+      "typeString: Record<Exclude<StaveConnectorType, number>, Exclude<StaveConnectorType, string>>",
+      "topStave: Stave",
+      "bottomStave: Stave",
+      "thickness: number",
+      "constructor(topStave: Stave, bottomStave: Stave)",
+      "setType(type: StaveConnectorType): this",
+      "getType(): number",
+      "setText(text: string, options: { shiftX?: number; shiftY?: number } = {}): this",
+      "draw(): void"
+    ]
+  },
+  "stavehairpin": {
+    "StaveHairpinRenderOptions": {
+      "extends": [],
+      "fields": [
+        "rightShiftTicks?: number;",
+        "leftShiftTicks?: number;",
+        "leftShiftPx: number;",
+        "rightShiftPx: number;",
+        "height: number;",
+        "yShift: number;"
+      ]
+    },
+    "StaveHairpin": [
+      "CATEGORY(): string",
+      "renderOptions: StaveHairpinRenderOptions",
+      "type",
+      "FormatByTicksAndDraw(ctx: RenderContext, formatter: { pixelsPerTick: number }, notes: Record<string, Note>, type: number, position: number, options: StaveHairpinRenderOptions): void",
+      "constructor(notes: Record<string, Note>, type: number)",
+      "setPosition(position: number): this",
+      "setRenderOptions(options: StaveHairpinRenderOptions): this",
+      "setNotes(notes: Record<string, Note>): this",
+      "renderHairpin(params: { firstX: number; lastX: number; firstY: number; lastY: number; staffHeight: number }): void",
+      "draw(): void"
+    ]
+  },
+  "staveline": {
+    "StaveLineNotes": {
+      "extends": [],
+      "fields": ["firstNote: StaveNote;", "firstIndexes: number[];", "lastNote: StaveNote;", "lastIndexes: number[];"]
+    },
+    "StaveLine": [
+      "CATEGORY(): string",
+      "TextVerticalPosition",
+      "TextJustification",
+      "renderOptions: { paddingLeft: number; paddingRight: number; lineWidth: number; lineDash?: number[]; roundedEnd: boolean; color?: string; drawStartArrow: boolean; drawEndArrow: boolean; arrowheadLength: number; arrowheadAngle: number; textPositionVertical: number; textJustification: number; }",
+      "constructor(notes: StaveLineNotes)",
+      "setText(text: string): this",
+      "setNotes(notes: StaveLineNotes): this",
+      "applyLineStyle(): void",
+      "draw(): void"
+    ]
+  },
+  "stavemodifier": {
+    "LayoutMetrics": {
+      "extends": [],
+      "fields": ["xMin: number;", "xMax: number;", "paddingLeft: number;", "paddingRight: number;"]
+    },
+    "StaveModifierPosition": "export enum StaveModifierPosition { CENTER = 0, LEFT = 1, RIGHT = 2, ABOVE = 3, BELOW = 4, BEGIN = 5, END = 6, }",
+    "StaveModifier": [
+      "CATEGORY(): string",
+      "Position(): typeof StaveModifierPosition",
+      "constructor()",
+      "getPosition(): number",
+      "setPosition(position: number): this",
+      "getStave(): Stave | undefined",
+      "checkStave(): Stave",
+      "setStave(stave: Stave): this",
+      "getPadding(index: number): number",
+      "setPadding(padding: number): this",
+      "setLayoutMetrics(layoutMetrics: LayoutMetrics): this",
+      "getLayoutMetrics(): LayoutMetrics | undefined"
+    ]
+  },
+  "stavenote": {
+    "StaveNoteHeadBounds": {
+      "extends": [],
+      "fields": [
+        "yTop: number;",
+        "yBottom: number;",
+        "displacedX?: number;",
+        "nonDisplacedX?: number;",
+        "highestLine: number;",
+        "lowestLine: number;",
+        "highestDisplacedLine?: number;",
+        "lowestDisplacedLine?: number;",
+        "highestNonDisplacedLine: number;",
+        "lowestNonDisplacedLine: number;"
+      ]
+    },
+    "StaveNoteFormatSettings": {
+      "extends": [],
+      "fields": [
+        "line: number;",
+        "maxLine: number;",
+        "minLine: number;",
+        "isrest: boolean;",
+        "stemDirection?: number;",
+        "stemMax: number;",
+        "stemMin: number;",
+        "voiceShift: number;",
+        "isDisplaced: boolean;",
+        "note: StaveNote;"
+      ]
+    },
+    "StaveNoteStruct": {
+      "extends": ["extends NoteStruct"],
+      "fields": [
+        "stemDirection?: number;",
+        "autoStem?: boolean;",
+        "strokePx?: number;",
+        "octaveShift?: number;",
+        "clef?: string;"
+      ]
+    },
+    "StaveNote": [
+      "DEBUG: boolean",
+      "CATEGORY(): string",
+      "LEDGER_LINE_OFFSET(): number",
+      "minNoteheadPadding(): number",
+      "format(notes: StaveNote[], state: ModifierContextState): boolean",
+      "postFormat(notes: Note[]): boolean",
+      "minLine: number",
+      "maxLine: number",
+      "constructor(noteStruct: StaveNoteStruct)",
+      "reset(): this",
+      "setBeam(beam: Beam): this",
+      "buildStem(): this",
+      "buildNoteHeads(): NoteHead[]",
+      "autoStem(): void",
+      "calculateOptimalStemDirection(): number",
+      "calculateKeyProps(): void",
+      "getBoundingBox(): BoundingBox",
+      "getLineNumber(isTopNote?: boolean): number",
+      "isRest(): boolean",
+      "isChord(): boolean",
+      "hasStem(): boolean",
+      "hasFlag(): boolean",
+      "getStemX(): number",
+      "getYForTopText(textLine: number): number",
+      "getYForBottomText(textLine: number): number",
+      "setStave(stave: Stave): this",
+      "isDisplaced(): boolean",
+      "setNoteDisplaced(displaced: boolean): this",
+      "getTieRightX(): number",
+      "getTieLeftX(): number",
+      "getLineForRest(): number",
+      "getModifierStartXY(position: number, index: number, options: { forceFlagRight?: boolean } = {}): { x: number; y: number }",
+      "setStyle(style: ElementStyle): this",
+      "setStemStyle(style: ElementStyle): this",
+      "getStemStyle(): ElementStyle | undefined",
+      "setLedgerLineStyle(style: ElementStyle): void",
+      "getLedgerLineStyle(): ElementStyle",
+      "setFlagStyle(style: ElementStyle): void",
+      "getFlagStyle(): ElementStyle | undefined",
+      "getGlyphWidth(): number",
+      "setKeyStyle(index: number, style: ElementStyle): this",
+      "setKeyLine(index: number, line: number): this",
+      "getKeyLine(index: number): number",
+      "getVoiceShiftWidth(): number",
+      "calcNoteDisplacements(): void",
+      "preFormat(): void",
+      "getNoteHeadBounds(): StaveNoteHeadBounds",
+      "getNoteHeadBeginX(): number",
+      "getNoteHeadEndX(): number",
+      "noteHeads(): NoteHead[]",
+      "drawLedgerLines(): void",
+      "drawModifiers(noteheadParam: NoteHead): void",
+      "shouldDrawFlag(): boolean",
+      "drawFlag(): void",
+      "drawNoteHeads(): void",
+      "drawStem(stemOptions?: StemOptions): void",
+      "getStemExtension(): number",
+      "draw(): void"
+    ]
+  },
+  "staverepetition": {
+    "Repetition": [
+      "CATEGORY(): string",
+      "type",
+      "constructor(type: number, x: number, yShift: number)",
+      "setShiftX(x: number): this",
+      "setShiftY(y: number): this",
+      "draw(): void",
+      "drawCodaFixed(stave: Stave, x: number): this",
+      "drawSegnoFixed(stave: Stave, x: number): this",
+      "drawSymbolText(stave: Stave, x: number, text: string, drawCoda: boolean): this"
+    ]
+  },
+  "stavesection": {
+    "StaveSection": [
+      "CATEGORY(): string",
+      "constructor(section: string, x: number = 0, yShift: number = 0, drawRect = true)",
+      "setDrawRect(drawRect: boolean): this",
+      "draw(): void"
+    ]
+  },
+  "stavetempo": {
+    "StaveTempoOptions": {
+      "extends": [],
+      "fields": [
+        "name?: string;",
+        "parenthesis?: boolean;",
+        "duration?: string;",
+        "dots?: number;",
+        "bpm?: number | string;",
+        "duration2?: string;",
+        "dots2?: number;"
+      ]
+    },
+    "StaveTempo": [
+      "CATEGORY(): string",
+      "constructor(tempo: StaveTempoOptions, x: number, shiftY: number)",
+      "setTempo(tempo: StaveTempoOptions): this",
+      "draw(): void"
+    ]
+  },
+  "stavetext": {
+    "StaveText": [
+      "CATEGORY(): string",
+      "constructor(text: string, position: number, options: { shiftX?: number; shiftY?: number; justification?: number } = {})",
+      "draw(): void"
+    ]
+  },
+  "stavetie": {
+    "TieNotes": {
+      "extends": [],
+      "fields": [
+        "firstNote?: Note | null;",
+        "lastNote?: Note | null;",
+        "firstIndexes?: number[];",
+        "lastIndexes?: number[];"
+      ]
+    },
+    "StaveTie": [
+      "CATEGORY(): string",
+      "renderOptions: { cp1: number; // Curve control point 1 cp2: number; // Curve control point 2 shortTieCutoff: number; // below this we use short control points cp1Short: number; cp2Short: number; firstXShift: number; lastXShift: number; tieSpacing: number; textShiftX: number; yShift: number; }",
+      "constructor(notes: TieNotes, text = '')",
+      "getDirection(): number",
+      "setDirection(direction: number): this",
+      "setNotes(notes: TieNotes): this",
+      "isPartial(): boolean",
+      "renderTie(params: { direction: number; firstX: number; lastX: number; lastYs: number[]; firstYs: number[] }): void",
+      "renderTieText(firstX: number, lastX: number): void",
+      "getNotes(): TieNotes",
+      "getFirstX(): number",
+      "getLastX(): number",
+      "getFirstYs(): number[]",
+      "getLastYs(): number[]",
+      "synchronizeIndexes(): void",
+      "draw(): boolean"
+    ]
+  },
+  "stavevolta": {
+    "VoltaType": "export enum VoltaType { NONE = 1, BEGIN = 2, MID = 3, END = 4, BEGIN_END = 5, }",
+    "Volta": [
+      "CATEGORY(): string",
+      "type(): typeof VoltaType",
+      "constructor(type: number, label: string, x: number, yShift: number)",
+      "draw(): void"
+    ]
+  },
+  "stem": {
+    "StemOptions": {
+      "extends": [],
+      "fields": [
+        "stemDownYBaseOffset?: number;",
+        "stemUpYBaseOffset?: number;",
+        "stemDownYOffset?: number;",
+        "stemUpYOffset?: number;",
+        "stemletHeight?: number;",
+        "isStemlet?: boolean;",
+        "hide?: boolean;",
+        "stemDirection?: number;",
+        "stemExtension?: number;",
+        "yBottom?: number;",
+        "yTop?: number;",
+        "xEnd?: number;",
+        "xBegin?: number;"
+      ]
+    },
+    "Stem": [
+      "DEBUG: boolean",
+      "CATEGORY(): string",
+      "UP(): number",
+      "DOWN(): number",
+      "WIDTH(): number",
+      "HEIGHT(): number",
+      "constructor(options?: StemOptions)",
+      "setOptions(options?: StemOptions): void",
+      "setNoteHeadXBounds(xBegin: number, xEnd: number): this",
+      "setDirection(direction: number): void",
+      "setExtension(ext: number): void",
+      "getExtension(): number",
+      "setYBounds(yTop: number, yBottom: number): void",
+      "getHeight(): number",
+      "getBoundingBox(): BoundingBox",
+      "getExtents(): { topY: number; baseY: number }",
+      "setVisibility(isVisible: boolean): this",
+      "setStemlet(isStemlet: boolean, stemletHeight: number): this",
+      "adjustHeightForFlag(): void",
+      "adjustHeightForBeam(): void",
+      "draw(): void"
+    ]
+  },
+  "stemmablenote": {
+    "StemmableNote": [
+      "CATEGORY(): string",
+      "stemDirection: number",
+      "stem: Stem",
+      "constructor(noteStruct: NoteStruct)",
+      "getStem(): Stem | undefined",
+      "checkStem(): Stem",
+      "setStem(stem: Stem): this",
+      "buildStem(): this",
+      "buildFlag(): void",
+      "getBaseCustomNoteHeadGlyphProps(): GlyphProps",
+      "getStemLength(): number",
+      "getBeamCount(): number",
+      "getStemMinimumLength(): number",
+      "getStemDirection(): number",
+      "isAutoStem(): boolean",
+      "setStemDirection(direction?: number, autoStem = false): this",
+      "getStemX(): number",
+      "getCenterGlyphX(): number",
+      "getStemExtension(): number",
+      "setStemLength(height: number): this",
+      "getStemExtents(): { topY: number; baseY: number }",
+      "getYForTopText(textLine: number): number",
+      "getYForBottomText(textLine: number): number",
+      "hasFlag(): boolean",
+      "postFormat(): this",
+      "drawStem(stemOptions: StemOptions): void"
+    ]
+  },
+  "stringnumber": {
+    "StringNumber": [
+      "CATEGORY(): string",
+      "format(nums: StringNumber[], state: ModifierContextState): boolean",
+      "constructor(number: string)",
+      "setLineEndType(leg: number): this",
+      "setStringNumber(number: string): this",
+      "setOffsetX(x: number): this",
+      "setOffsetY(y: number): this",
+      "setLastNote(note: Note): this",
+      "setDashed(dashed: boolean): this",
+      "setDrawCircle(drawCircle: boolean): this",
+      "draw(): void"
+    ]
+  },
+  "strokes": {
+    "Stroke": [
+      "CATEGORY(): string",
+      "Type",
+      "format(strokes: Stroke[], state: ModifierContextState): boolean",
+      "renderOptions: { fontScale: number; }",
+      "constructor(type: number, options?: { allVoices: boolean })",
+      "getPosition(): number",
+      "addEndNote(note: Note): this",
+      "draw(): void",
+      "getBoundingBox(): BoundingBox"
+    ]
+  },
+  "svgcontext": {
+    "Attributes": "export type Attributes = { [name: string]: string | number | undefined; 'font-family'?: string; 'font-size'?: string | number; 'font-style'?: string; 'font-weight'?: string | number; scaleX?: number; scaleY?: number; };",
+    "State": {
+      "extends": [],
+      "fields": ["state: Attributes;", "attributes: Attributes;"]
+    },
+    "SVGContext": [
+      "toSVG(svg: SVGSVGElement, fonts?: SVGFont[]): string",
+      "toSVG(fonts?: SVGFont[]): string",
+      "element: HTMLElement",
+      "svg: SVGSVGElement",
+      "width: number",
+      "height: number",
+      "path: string",
+      "pen: { x: number; y: number }",
+      "attributes: Attributes",
+      "state: Attributes",
+      "stateStack: State[]",
+      "parent: SVGGElement",
+      "groups: SVGGElement[]",
+      "backgroundFillStyle: string",
+      "constructor(element: HTMLElement)",
+      "create(svgElementType: 'g'): SVGGElement",
+      "create(svgElementType: 'path'): SVGPathElement",
+      "create(svgElementType: 'rect'): SVGRectElement",
+      "create(svgElementType: 'svg'): SVGSVGElement",
+      "create(svgElementType: 'text'): SVGTextElement",
+      "create(svgElementType: string): SVGElement",
+      "create(svgElementType: string): SVGElement",
+      "openGroup(cls?: string, id?: string): SVGGElement",
+      "closeGroup(): void",
+      "openRotation(angleDegrees: number, x: number, y: number)",
+      "closeRotation()",
+      "add(elem: SVGElement): void",
+      "setFillStyle(style: string): this",
+      "setBackgroundFillStyle(style: string): this",
+      "setStrokeStyle(style: string): this",
+      "setShadowColor(color: string): this",
+      "setShadowBlur(blur: number): this",
+      "setLineWidth(width: number): this",
+      "setLineDash(lineDash: number[]): this",
+      "setLineCap(capType: CanvasLineCap): this",
+      "resize(width: number, height: number): this",
+      "scale(x: number, y: number): this",
+      "setViewBox(viewBoxOrMinX: string | number, minY?: number, width?: number, height?: number): void",
+      "applyAttributes(element: SVGElement, attributes: Attributes): SVGElement",
+      "clear(): void",
+      "rect(x: number, y: number, width: number, height: number, attributes?: Attributes): this",
+      "fillRect(x: number, y: number, width: number, height: number): this",
+      "pointerRect(x: number, y: number, width: number, height: number): this",
+      "clearRect(x: number, y: number, width: number, height: number): this",
+      "beginPath(): this",
+      "moveTo(x: number, y: number): this",
+      "lineTo(x: number, y: number): this",
+      "bezierCurveTo(x1: number, y1: number, x2: number, y2: number, x: number, y: number): this",
+      "quadraticCurveTo(x1: number, y1: number, x: number, y: number): this",
+      "arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterclockwise: boolean): this",
+      "closePath(): this",
+      "fill(attributes?: Attributes): this",
+      "stroke(): this",
+      "measureText(text: string): TextMeasure",
+      "fillText(text: string, x: number, y: number): this",
+      "save(): this",
+      "restore(): this",
+      "fillStyle(style: string | CanvasGradient | CanvasPattern)",
+      "fillStyle(): string | CanvasGradient | CanvasPattern",
+      "strokeStyle(style: string | CanvasGradient | CanvasPattern)",
+      "strokeStyle(): string | CanvasGradient | CanvasPattern",
+      "setFont(f?: string | FontInfo, size?: string | number, weight?: string | number, style?: string): this",
+      "getFont(): string"
+    ]
+  },
+  "svgexport": {
+    "SVGOutlineFont": {
+      "extends": [],
+      "fields": [
+        "charToGlyphIndex(character: string): number;",
+        "getAdvanceWidth(text: string, size: number): number;",
+        "getPath(text: string, x: number, y: number, size: number): { toPathData(decimalPlaces: number): string };"
+      ]
+    },
+    "SVGFont": {
+      "extends": [],
+      "fields": ["family: string;", "font: SVGOutlineFont;", "weight?: string | number;", "style?: string;"]
+    },
+    "svgWithFontPaths": "(svg: SVGSVGElement, fonts: SVGFont[]): SVGSVGElement"
+  },
+  "system": {
+    "SystemFormatterOptions": {
+      "extends": ["extends FormatterOptions"],
+      "fields": ["alpha?: number;"]
+    },
+    "SystemStave": {
+      "extends": [],
+      "fields": [
+        "voices: Voice[];",
+        "stave?: Stave;",
+        "noJustification?: boolean;",
+        "options?: StaveOptions;",
+        "spaceAbove?: number;",
+        "spaceBelow?: number;",
+        "debugNoteMetrics?: boolean;"
+      ]
+    },
+    "SystemOptions": {
+      "extends": [],
+      "fields": [
+        "factory?: Factory;",
+        "noPadding?: boolean;",
+        "debugFormatter?: boolean;",
+        "spaceBetweenStaves?: number;",
+        "formatIterations?: number;",
+        "autoWidth?: boolean;",
+        "x?: number;",
+        "width?: number;",
+        "y?: number;",
+        "details?: SystemFormatterOptions;",
+        "formatOptions?: FormatParams;",
+        "noJustification?: boolean;"
+      ]
+    },
+    "System": [
+      "CATEGORY(): string",
+      "constructor(params: SystemOptions = {})",
+      "setOptions(options: SystemOptions = {}): void",
+      "getX(): number",
+      "setX(x: number): this",
+      "getY(): number",
+      "setY(y: number): this",
+      "getStaves(): Stave[]",
+      "getVoices(): Voice[]",
+      "setWidth(width?: number): this",
+      "getWidth(): number",
+      "setContext(context: RenderContext): this",
+      "addConnector(type: StaveConnectorType = 'double'): StaveConnector",
+      "addStave(params: SystemStave): Stave",
+      "addVoices(voices: Voice[])",
+      "format(): void",
+      "getBoundingBox(): BoundingBox",
+      "draw(): void"
+    ]
+  },
+  "tabnote": {
+    "TabNotePosition": {
+      "extends": [],
+      "fields": ["str: number;", "fret: number | string;"]
+    },
+    "TabNoteStruct": {
+      "extends": ["extends StaveNoteStruct"],
+      "fields": ["positions: TabNotePosition[];"]
+    },
+    "TabNote": [
+      "CATEGORY(): string",
+      "constructor(noteStruct: TabNoteStruct, drawStem: boolean = false)",
+      "greatestString",
+      "leastString",
+      "reset(): this",
+      "setGhost(ghost: boolean): this",
+      "hasStem(): boolean",
+      "getStemExtension(): number",
+      "tabToElement(fret: string): Element",
+      "setFontSize(size?: string | number): this",
+      "updateWidth(): void",
+      "setStave(stave: Stave): this",
+      "getPositions(): TabNotePosition[]",
+      "getModifierStartXY(position: number, index: number): { x: number; y: number }",
+      "getLineForRest(): number",
+      "preFormat(): void",
+      "getStemX(): number",
+      "getStemY(): number",
+      "getStemExtents(): { topY: number; baseY: number }",
+      "drawFlag(): void",
+      "drawModifiers(): void",
+      "drawStemThrough(): void",
+      "drawPositions(): void",
+      "draw(): void"
+    ]
+  },
+  "tabslide": {
+    "TabSlide": [
+      "CATEGORY(): string",
+      "SLIDE_UP(): number",
+      "SLIDE_DOWN(): number",
+      "createSlideUp(notes: TieNotes): TabSlide",
+      "createSlideDown(notes: TieNotes): TabSlide",
+      "constructor(notes: TieNotes, direction?: number)",
+      "renderTie(params: { direction: number; firstX: number; lastX: number; lastYs: number[]; firstYs: number[]; }): void"
+    ]
+  },
+  "tabstave": {
+    "TabStave": [
+      "CATEGORY(): string",
+      "constructor(x: number, y: number, width: number, options?: StaveOptions)",
+      "getYForGlyphs(): number",
+      "addTabGlyph(): this"
+    ]
+  },
+  "tabtie": {
+    "TabTie": [
+      "CATEGORY(): string",
+      "createHammeron(notes: TieNotes): TabTie",
+      "createPulloff(notes: TieNotes): TabTie",
+      "constructor(notes: TieNotes, text?: string)"
+    ]
+  },
+  "textbracket": {
+    "TextBracketParams": {
+      "extends": [],
+      "fields": [
+        "start: Note;",
+        "stop: Note;",
+        "text?: string;",
+        "superscript?: string;",
+        "position?: number | string;"
+      ]
+    },
+    "TextBracketPosition": "export enum TextBracketPosition { TOP = 1, BOTTOM = -1, }",
+    "TextBracket": [
+      "DEBUG: boolean",
+      "CATEGORY(): string",
+      "renderOptions: { dashed: boolean; color?: string; lineWidth: number; underlineSuperscript: boolean; showBracket: boolean; dash: number[]; bracketHeight: number; }",
+      "position: TextBracketPosition",
+      "start: Note",
+      "stop: Note",
+      "Position(): typeof TextBracketPosition",
+      "PositionString(): Record<string, number>",
+      "constructor({ start, stop, text = '', superscript = '', position = TextBracketPosition.TOP }: TextBracketParams)",
+      "applyStyle(ctx: RenderContext): this",
+      "setDashed(dashed: boolean, dash?: number[]): this",
+      "setLine(line: number): this",
+      "draw(): void"
+    ]
+  },
+  "textdynamics": {
+    "TextDynamics": [
+      "DEBUG: boolean",
+      "CATEGORY(): string",
+      "GLYPHS(): Record<string, string>",
+      "constructor(noteStruct: TextNoteStruct)",
+      "setLine(line: number): this",
+      "preFormat(): this",
+      "getBoundingBox(): BoundingBox",
+      "draw(): void"
+    ]
+  },
+  "textnote": {
+    "TextJustification": "export enum TextJustification { LEFT = 1, CENTER = 2, RIGHT = 3, }",
+    "TextNoteStruct": {
+      "extends": ["extends NoteStruct"],
+      "fields": [
+        "text?: string;",
+        "glyph?: string;",
+        "ignoreTicks?: boolean;",
+        "smooth?: boolean;",
+        "font?: FontInfo;",
+        "subscript?: string;",
+        "superscript?: string;"
+      ]
+    },
+    "TextNote": [
+      "CATEGORY(): string",
+      "Justification",
+      "GLYPHS(): Record<string, string>",
+      "constructor(noteStruct: TextNoteStruct)",
+      "setJustification(just: TextJustification): this",
+      "setLine(line: number): this",
+      "getLine(): number",
+      "preFormat(): void",
+      "draw(): void"
+    ]
+  },
+  "tickable": {
+    "FormatterMetrics": {
+      "extends": [],
+      "fields": [
+        "duration: string;",
+        "freedom: { left: number; right: number; };",
+        "iterations: number;",
+        "space: { used: number; mean: number; deviation: number; };"
+      ]
+    },
+    "Tickable": [
+      "CATEGORY(): string",
+      "constructor()",
+      "reset(): this",
+      "getTicks(): Fraction",
+      "shouldIgnoreTicks(): boolean",
+      "setIgnoreTicks(flag: boolean): this",
+      "getWidth(): number",
+      "getX(): number",
+      "getFormatterMetrics(): FormatterMetrics",
+      "getCenterXShift(): number",
+      "setCenterXShift(centerXShift: number): this",
+      "isCenterAligned(): boolean",
+      "setCenterAlignment(alignCenter: boolean): this",
+      "getVoice(): Voice",
+      "setVoice(voice: Voice): void",
+      "getTuplet(): Tuplet | undefined",
+      "getTupletStack(): readonly Tuplet[]",
+      "removeTuplet(tuplet: Tuplet): this",
+      "clearTuplets(): this",
+      "resetTuplet(tuplet?: Tuplet): this",
+      "setTuplet(tuplet: Tuplet): this",
+      "addTuplet(tuplet: Tuplet): this",
+      "setTupletStack(tupletStack: Tuplet[]): this",
+      "addToModifierContext(mc: ModifierContext): this",
+      "addModifier(modifier: Modifier, index: number = 0): this",
+      "getModifiers(): Modifier[]",
+      "setTickContext(tc: TickContext): void",
+      "checkTickContext(message = 'Tickable has no tick context.'): TickContext",
+      "preFormat(): void",
+      "preFormatted(value: boolean)",
+      "preFormatted(): boolean",
+      "postFormat(): this",
+      "postFormatted(value: boolean)",
+      "postFormatted(): boolean",
+      "getIntrinsicTicks(): number",
+      "setIntrinsicTicks(intrinsicTicks: number): void",
+      "getTickMultiplier(): Fraction",
+      "applyTickMultiplier(numerator: number, denominator: number): void",
+      "setDuration(duration: Fraction): void",
+      "getAbsoluteX(): number",
+      "setModifierContext(mc?: ModifierContext): this",
+      "getModifierContext(): ModifierContext | undefined",
+      "checkModifierContext(): ModifierContext",
+      "getStave(): Stave | undefined",
+      "setStave(stave: Stave): this",
+      "getMetrics(): any"
+    ]
+  },
+  "tickcontext": {
+    "TickContextMetrics": {
+      "extends": ["extends NoteMetrics"],
+      "fields": ["totalLeftPx: number;", "totalRightPx: number;"]
+    },
+    "TickContextOptions": {
+      "extends": [],
+      "fields": ["tickID: number;"]
+    },
+    "TickContext": [
+      "tContexts: TickContext[]",
+      "getNextContext(tContext: TickContext): TickContext | undefined",
+      "constructor(options?: TickContextOptions)",
+      "getTickID(): number",
+      "getX(): number",
+      "setX(x: number): this",
+      "getXBase(): number",
+      "setXBase(xBase: number): void",
+      "getXOffset(): number",
+      "setXOffset(xOffset: number): void",
+      "getWidth(): number",
+      "setPadding(padding: number): this",
+      "getMaxTicks(): Fraction",
+      "getMinTicks(): Fraction | undefined",
+      "getMaxTickable(): Tickable | undefined",
+      "getMinTickable(): Tickable | undefined",
+      "getTickables(): Tickable[]",
+      "getTickableForVoice(voiceIndex: number): Tickable",
+      "getTickablesByVoice(): Record<string, Tickable>",
+      "getCenterAlignedTickables(): Tickable[]",
+      "getMetrics(): TickContextMetrics",
+      "getCurrentTick(): Fraction",
+      "setCurrentTick(tick: Fraction): void",
+      "addTickable(tickable: Tickable, voiceIndex?: number): this",
+      "preFormat(): this",
+      "postFormat(): this",
+      "getFormatterMetrics(): { freedom: { left: number; right: number } }",
+      "move(shift: number, prev?: TickContext, next?: TickContext): void",
+      "getDeviationCost(): number",
+      "getAverageDeviationCost(): number"
+    ]
+  },
+  "timesignature": {
+    "TimeSignatureInfo": {
+      "extends": [],
+      "fields": ["glyph: string;", "line: number;", "num: boolean;"]
+    },
+    "TimeSignature": [
+      "CATEGORY(): string",
+      "bottomLine: number",
+      "topLine: number",
+      "constructor(timeSpec: string = '4/4', customPadding = 15, validateArgs = true)",
+      "getTimeSigCode(key: string, smallSig = false): string",
+      "makeTimeSignatureGlyph(topDigits: string, botDigits: string): void",
+      "setTimeSig(timeSpec: string): this",
+      "getTimeSpec(): string",
+      "getLine(): number",
+      "setLine(line: number)",
+      "getIsNumeric(): boolean",
+      "setIsNumeric(isNumeric: boolean)",
+      "draw(): void",
+      "drawAt(ctx: RenderContext, stave: Stave, x: number): void",
+      "getBoundingBox(): BoundingBox"
+    ]
+  },
+  "timesignote": {
+    "TimeSigNote": [
+      "CATEGORY(): string",
+      "constructor(timeSpec: string, customPadding?: number)",
+      "addToModifierContext(mc: ModifierContext): this",
+      "preFormat(): this",
+      "draw(): void"
+    ]
+  },
+  "tremolo": {
+    "Tremolo": ["CATEGORY(): string", "constructor(num: number)", "draw(): void"]
+  },
+  "tuning": {
+    "Tuning": [
+      "names(): Record<string, string>",
+      "constructor(tuningString = 'E/5,B/4,G/4,D/4,A/3,E/3,B/2,E/2')",
+      "noteToInteger(noteString: string): number",
+      "setTuning(tuningString: string): void",
+      "getValueForString(stringNum: string | number): number",
+      "getValueForFret(fretNum: string | number, stringNum: string | number): number",
+      "getNoteForFret(fretNum: string | number, stringNum: string | number): string"
+    ]
+  },
+  "tuplet": {
+    "TupletOptions": {
+      "extends": [],
+      "fields": [
+        "bracketed?: boolean;",
+        "location?: number;",
+        "notesOccupied?: number;",
+        "numNotes?: number;",
+        "ratioed?: boolean;",
+        "yOffset?: number;",
+        "textYOffset?: number;",
+        "suffix?: string;"
+      ]
+    },
+    "TupletLocation": "export const enum TupletLocation { BOTTOM = -1, TOP = +1, }",
+    "Tuplet": [
+      "CATEGORY(): string",
+      "notes: Note[]",
+      "LOCATION_TOP(): number",
+      "LOCATION_BOTTOM(): number",
+      "NESTING_OFFSET(): number",
+      "constructor(notes: Note[], options: TupletOptions = {})",
+      "attach(): void",
+      "detach(): void",
+      "setBracketed(bracketed: boolean): this",
+      "setRatioed(ratioed: boolean): this",
+      "setTupletLocation(location: number): this",
+      "getNotes(): Note[]",
+      "getNoteCount(): number",
+      "getNotesOccupied(): number",
+      "setNotesOccupied(notes: number): void",
+      "resolveGlyphs(): void",
+      "getNestedTupletCount(): number",
+      "getYPosition(): number",
+      "draw(): void",
+      "getBoundingBox(): BoundingBox"
+    ]
+  },
+  "typeguard": {
+    "isCategory": "(obj: any, category: string, checkAncestors: boolean = true): obj is T",
+    "isAccidental": "inferred",
+    "isAnnotation": "inferred",
+    "isBarline": "inferred",
+    "isDot": "inferred",
+    "isGraceNote": "inferred",
+    "isGraceNoteGroup": "inferred",
+    "isNote": "inferred",
+    "isRenderContext": "inferred",
+    "isStaveNote": "inferred",
+    "isStemmableNote": "inferred",
+    "isTabNote": "inferred",
+    "Category": "export const enum Category { Accidental = 'Accidental', Annotation = 'Annotation', Articulation = 'Articulation', Barline = 'Barline', BarNote = 'BarNote', Beam = 'Beam', Bend = 'Bend', ChordSymbol = 'ChordSymbol', Clef = 'Clef', ClefNote = 'ClefNote', Crescendo = 'Crescendo', Curve = 'Curve', Dot = 'Dot', Element = 'Element', Flag = 'Flag', Fraction = 'Fraction', FretHandFinger = 'FretHandFinger', GhostNote = 'GhostNote', Glyph = 'Glyph', GlyphNote = 'GlyphNote', GraceNote = 'GraceNote', GraceNoteGroup = 'GraceNoteGroup', GraceTabNote = 'GraceTabNote', KeySignature = 'KeySignature', KeySigNote = 'KeySigNote', Modifier = 'Modifier', MultiMeasureRest = 'MultiMeasureRest', Note = 'Note', NoteHead = 'NoteHead', NoteSubGroup = 'NoteSubGroup', Ornament = 'Ornament', Parenthesis = 'Parenthesis', PedalMarking = 'PedalMarking', RenderContext = 'RenderContext', RepeatNote = 'RepeatNote', Repetition = 'Repetition', Stave = 'Stave', StaveConnector = 'StaveConnector', StaveHairpin = 'StaveHairpin', StaveLine = 'StaveLine', StaveModifier = 'StaveModifier', StaveNote = 'StaveNote', StaveSection = 'StaveSection', StaveTempo = 'StaveTempo', StaveText = 'StaveText', StaveTie = 'StaveTie', Stem = 'Stem', StemmableNote = 'StemmableNote', StringNumber = 'StringNumber', Stroke = 'Stroke', System = 'System', TabNote = 'TabNote', TabSlide = 'TabSlide', TabStave = 'TabStave', TabTie = 'TabTie', TextBracket = 'TextBracket', TextDynamics = 'TextDynamics', TextNote = 'TextNote', Tickable = 'Tickable', TimeSignature = 'TimeSignature', TimeSigNote = 'TimeSigNote', Tremolo = 'Tremolo', Tuplet = 'Tuplet', Vibrato = 'Vibrato', VibratoBracket = 'VibratoBracket', Voice = 'Voice', Volta = 'Volta', }"
+  },
+  "util": {
+    "RuntimeError": ["code: string", "constructor(code: string, message: string = '')"],
+    "globalObject": "(): typeof globalThis & any",
+    "defined": "(x?: T, code: string = 'undefined', message: string = ''): T",
+    "log": "(block: string, ...args: any[]): void",
+    "warn": "(...args: any[]): void",
+    "midLine": "(a: number, b: number): number",
+    "prefix": "(text: string): string",
+    "upperFirst": "(s: string = ''): string",
+    "normalizeAngle": "(a: number): number",
+    "sumArray": "(arr: number[]): number"
+  },
+  "vexflow": {
+    "VexFlow": [
+      "BUILD",
+      "Accidental",
+      "Annotation",
+      "Articulation",
+      "Barline",
+      "BarNote",
+      "Beam",
+      "Bend",
+      "BoundingBox",
+      "CanvasContext",
+      "ChordSymbol",
+      "Clef",
+      "ClefNote",
+      "Crescendo",
+      "Curve",
+      "Dot",
+      "EasyScore",
+      "EasyScoreError",
+      "Element",
+      "Factory",
+      "Font",
+      "Formatter",
+      "Fraction",
+      "FretHandFinger",
+      "GhostNote",
+      "GlyphNote",
+      "GraceNote",
+      "GraceNoteGroup",
+      "GraceTabNote",
+      "KeyManager",
+      "KeySignature",
+      "KeySigNote",
+      "Modifier",
+      "ModifierContext",
+      "MultiMeasureRest",
+      "Music",
+      "Note",
+      "NoteHead",
+      "NoteSubGroup",
+      "Ornament",
+      "Parenthesis",
+      "Parser",
+      "PedalMarking",
+      "Registry",
+      "RenderContext",
+      "Renderer",
+      "RepeatNote",
+      "Repetition",
+      "Stave",
+      "StaveConnector",
+      "StaveHairpin",
+      "StaveLine",
+      "StaveModifier",
+      "StaveNote",
+      "StaveTempo",
+      "StaveText",
+      "StaveTie",
+      "Stem",
+      "StringNumber",
+      "Stroke",
+      "SVGContext",
+      "System",
+      "Sheet",
+      "TabNote",
+      "TabSlide",
+      "TabStave",
+      "TabTie",
+      "TextBracket",
+      "TextDynamics",
+      "TextNote",
+      "TickContext",
+      "TimeSignature",
+      "TimeSigNote",
+      "Tremolo",
+      "Tuning",
+      "Tuplet",
+      "Vibrato",
+      "VibratoBracket",
+      "Voice",
+      "Volta",
+      "RuntimeError",
+      "Test",
+      "AnnotationHorizontalJustify",
+      "AnnotationVerticalJustify",
+      "ChordSymbolHorizontalJustify",
+      "ChordSymbolVerticalJustify",
+      "SymbolModifiers",
+      "CurvePosition",
+      "FontWeight",
+      "FontStyle",
+      "Glyphs",
+      "ModifierPosition",
+      "RendererBackends",
+      "RendererLineEndType",
+      "BarlineType",
+      "RepeatBracketType",
+      "StaveModifierPosition",
+      "VoltaType",
+      "TextBracketPosition",
+      "TextJustification",
+      "VoiceMode",
+      "loadFonts(...fontNames: string[]): Promise<void>",
+      "setFonts(...fontNames: string[]): void",
+      "setTextFonts(...fontNames: string[]): void",
+      "getTextFonts(): string[]",
+      "getFonts(): string[]",
+      "RENDER_PRECISION_PLACES(): number",
+      "RENDER_PRECISION_PLACES(precision: number)",
+      "SOFTMAX_FACTOR(): number",
+      "SOFTMAX_FACTOR(factor: number)",
+      "UNISON(): boolean",
+      "UNISON(unison: boolean)",
+      "NOTATION_FONT_SCALE(): number",
+      "NOTATION_FONT_SCALE(value: number)",
+      "TABLATURE_FONT_SCALE(): number",
+      "TABLATURE_FONT_SCALE(value: number)",
+      "RESOLUTION(): number",
+      "RESOLUTION(value: number)",
+      "SLASH_NOTEHEAD_WIDTH(): number",
+      "SLASH_NOTEHEAD_WIDTH(value: number)",
+      "STAVE_LINE_DISTANCE(): number",
+      "STAVE_LINE_DISTANCE(value: number)",
+      "STAVE_LINE_THICKNESS(): number",
+      "STAVE_LINE_THICKNESS(value: number)",
+      "STEM_HEIGHT(): number",
+      "STEM_HEIGHT(value: number)",
+      "STEM_WIDTH(): number",
+      "STEM_WIDTH(value: number)",
+      "TIME4_4(): VoiceTime",
+      "unicode(): Record<string, string>",
+      "keySignature(spec: string): { type: string; line: number }[]",
+      "hasKeySignature(spec: string): boolean",
+      "getKeySignatures(): Record<string, { acc?: string; num: number }>",
+      "clefProperties(clef: string): { lineShift: number }",
+      "keyProperties(key: string, clef?: string, params?: any): any",
+      "durationToTicks(duration: string): number"
+    ]
+  },
+  "vibrato": {
+    "VibratoRenderOptions": {
+      "extends": [],
+      "fields": ["code: number;", "width: number;"]
+    },
+    "Vibrato": [
+      "CATEGORY(): string",
+      "format(vibratos: Vibrato[], state: ModifierContextState, context: ModifierContext): boolean",
+      "constructor()",
+      "setVibratoWidth(width: number): this",
+      "setVibratoCode(code: number): this",
+      "draw(): void"
+    ]
+  },
+  "vibratobracket": {
+    "VibratoBracket": [
+      "DEBUG: boolean",
+      "CATEGORY(): string",
+      "constructor(bracketData: { stop?: Note | null; start?: Note | null })",
+      "setLine(line: number): this",
+      "setVibratoCode(code: number): this",
+      "draw(): void"
+    ]
+  },
+  "voice": {
+    "VoiceTime": {
+      "extends": [],
+      "fields": ["numBeats: number;", "beatValue: number;", "resolution?: number;"]
+    },
+    "VoiceMode": "export enum VoiceMode { STRICT = 1, SOFT = 2, FULL = 3, }",
+    "Voice": [
+      "CATEGORY(): string",
+      "Mode(): typeof VoiceMode",
+      "constructor(time?: VoiceTime | string)",
+      "getTotalTicks(): Fraction",
+      "getTicksUsed(): Fraction",
+      "getLargestTickWidth(): number",
+      "getSmallestTickCount(): Fraction",
+      "getTickables(): Tickable[]",
+      "getMode(): number",
+      "setMode(mode: number): this",
+      "getResolutionMultiplier(): number",
+      "getActualResolution(): number",
+      "setStave(stave: Stave): this",
+      "getStave(): Stave | undefined",
+      "getBoundingBox(): BoundingBox",
+      "setStrict(strict: boolean): this",
+      "isComplete(): boolean",
+      "setSoftmaxFactor(factor: number): this",
+      "softmax(tickValue: number): number",
+      "invalidateTicks(): void",
+      "addTickable(tickable: Tickable): this",
+      "addTickables(tickables: Tickable[]): this",
+      "preFormat(): this",
+      "checkStave(): Stave",
+      "draw(context: RenderContext = this.checkContext(), stave?: Stave): void"
+    ]
+  },
+  "web": {
+    "isHTMLCanvas": "(element: any): element is HTMLCanvasElement",
+    "isHTMLDiv": "(element: any): element is HTMLDivElement"
+  }
+}

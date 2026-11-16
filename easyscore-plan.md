@@ -24,7 +24,7 @@ Second slice:
 Validation for slice two: 105 Node checks, 1,891 QUnit tests, and 12 Explorer checks pass. Source types, emitted-declaration consumer checks, and lint pass. Native-extension rendering matches SVG/Canvas with Bravura and Petaluma, including retained redraw.
 
 Still pending: the remaining `make.*` families, automatic beaming, typed note sequences, and structured composition.
-This slice does not complete Milestones 0–2 in full: module classification is established, but exhaustive option-level coverage and the broader extension/reference APIs remain open.
+Milestone 0 is complete: [contracts](docs/easyscore-contracts.md) map every notation family to a typed path and lifecycle. A checked native API snapshot records exported types, constructors, options, and public members. Beginner, piano, tab, and percussion workflows are reviewed. Milestones 1–7 are being completed in order.
 Reviewed against `main` at `91e753e79e1fed1ef87a669b884dab50e7dca463` on November 16, 2026.
 
 ## Recommendation
