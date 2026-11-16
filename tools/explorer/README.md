@@ -1,6 +1,6 @@
 # VexFlow Explorer
 
-A static notation workbench with 54 editable examples, visual inspection, and a searchable glyph atlas.
+A static notation workbench with 55 editable examples, visual inspection, and a searchable glyph atlas.
 
 From the repository root, after `npm ci`:
 

@@ -31,6 +31,54 @@ notes[1].addModifier(factory.ChordSymbol().addText('G').addGlyphOrText('7').addG
     [text('root', 'Root', 'C')]
   ),
   e(
+    'chord-kerning',
+    'Chord kerning',
+    group,
+    'Compare default spacing with opt-in font-specific kerning and stacked scripts.',
+    'ChordSymbol',
+    `${setup}
+// The two rows use identical notes and chord content. Only the kerning mode changes.
+const ctx = factory.getContext();
+ctx.resize(width, 360);
+const chords = [];
+const sup = { symbolModifier: VF.ChordSymbol.symbolModifiers.SUPERSCRIPT };
+const sub = { symbolModifier: VF.ChordSymbol.symbolModifiers.SUBSCRIPT };
+['none', 'auto'].forEach((mode, row) => {
+  const notes = score.notes('C5/q, D5, E5, G5');
+  const make = () => factory.ChordSymbol({ fontSize: params.size, hJustify: 'left' }).setKerning(mode);
+  const symbols = [
+    make().addText(params.root).addGlyph('diminished', sup),
+    make().addGlyphOrText('C#7'),
+    make().addText('F7').addGlyphOrText('b9', sup).addGlyphOrText('#11', sub),
+    make().addText(params.root).addGlyph('majorSeventh', sup),
+  ];
+  notes.forEach((note, i) => note.addModifier(symbols[i], 0));
+  chords.push(...symbols);
+  const voice = factory.Voice().addTickables(notes);
+  factory.System({ x: 30, y: 70 + row * 150, width: width - 60 })
+    .addStave({ voices: [voice] }).addClef('treble');
+});
+factory.draw();
+ctx.setFont('sans-serif', 10);
+ctx.fillText('Default: none', 30, 22);
+ctx.fillText('Opt-in: auto', 30, 172);
+// Inspect the complete chord's ink bounds, including both script rows.
+if (params.bounds === 'yes') {
+  ctx.save().setStrokeStyle('#b74632').setLineWidth(0.5);
+  chords.forEach(chord => {
+    const box = chord.getBoundingBox();
+    ctx.beginPath().rect(box.x, box.y, box.w, box.h).stroke();
+  });
+  ctx.restore();
+}`,
+    [
+      text('root', 'Root', 'A'),
+      number('size', 'Font size (pt)', 18, 10, 28),
+      select('bounds', 'Chord bounds', 'no', ['no', 'yes']),
+    ],
+    'Auto supports regular Academico/Bravura and Petaluma Script/Petaluma. Other font combinations keep the default layout. Set the chord font before formatting.'
+  ),
+  e(
     'dynamics',
     'Dynamics',
     group,

@@ -104,6 +104,7 @@ A good way to learn the API is to look at our examples & unit tests:
 ## More Resources
 
 - [Text fonts and lyric layout](docs/text-and-lyrics.md), [jsdom rendering](docs/jsdom.md), and [score benchmarks](docs/benchmarks.md).
+- [Chord symbol kerning](docs/chord-symbols.md).
 - [Score layout](docs/score-layout.md) and [responsive sheets and themes](docs/sheets-and-themes.md).
 - [Rendering tests and visual comparisons](docs/testing.md).
 - [VexFlow Explorer](tools/explorer/README.md): run `npm run explorer` to browse and edit notation.

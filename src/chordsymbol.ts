@@ -10,6 +10,7 @@
 // See `tests/chordsymbol_tests.ts` for usage examples.
 
 import { BoundingBox } from './boundingbox';
+import { chordKerningProfile, ChordSymbolKerningProfile, ChordSymbolRun, layoutChordRuns } from './chordkerning';
 import { Element } from './element';
 import { Font } from './font';
 import { Glyphs } from './glyphs';
@@ -20,7 +21,9 @@ import { Note } from './note';
 import { StemmableNote } from './stemmablenote';
 import { Tables } from './tables';
 import { Category, isStemmableNote } from './typeguard';
-import { log } from './util';
+import { log, RuntimeError } from './util';
+
+export type { ChordSymbolKerningPair, ChordSymbolKerningProfile, ChordSymbolPosition } from './chordkerning';
 
 // To enable logging for this class. Set `VexFlow.ChordSymbol.DEBUG` to `true`.
 // eslint-disable-next-line
@@ -161,33 +164,39 @@ export class ChordSymbol extends Modifier {
       const note: Note = symbol.checkAttachedNote();
       let lineSpaces = 1;
 
-      for (let j = 0; j < symbol.symbolBlocks.length; ++j) {
-        const block = symbol.symbolBlocks[j];
-        const sup = block.isSuperscript();
-        const sub = block.isSubscript();
-        block.setXShift(width);
+      const kernedWidth = symbol.formatKerning();
+      if (kernedWidth !== undefined) {
+        width = kernedWidth;
+        if (symbol.symbolBlocks.some((block) => block.isSuperscript() || block.isSubscript())) lineSpaces = 2;
+      } else {
+        for (let j = 0; j < symbol.symbolBlocks.length; ++j) {
+          const block = symbol.symbolBlocks[j];
+          const sup = block.isSuperscript();
+          const sub = block.isSubscript();
+          block.setXShift(width);
 
-        // If there are super/subscripts, they extend beyond the line so
-        // assume they take up 2 lines
-        if (sup || sub) {
-          lineSpaces = 2;
-        }
-
-        // If a subscript immediately follows a superscript block, try to
-        // overlay them.
-        if (sub && j > 0) {
-          const prev = symbol.symbolBlocks[j - 1];
-          if (prev.isSuperscript()) {
-            // slide the symbol over so it lines up with superscript
-            block.setXShift(width - prev.getWidth() - ChordSymbol.minPadding);
-            block.vAlign = true;
-            width +=
-              -prev.getWidth() -
-              ChordSymbol.minPadding +
-              (prev.getWidth() > block.getWidth() ? prev.getWidth() - block.getWidth() : 0);
+          // If there are super/subscripts, they extend beyond the line so
+          // assume they take up 2 lines
+          if (sup || sub) {
+            lineSpaces = 2;
           }
+
+          // If a subscript immediately follows a superscript block, try to
+          // overlay them.
+          if (sub && j > 0) {
+            const prev = symbol.symbolBlocks[j - 1];
+            if (prev.isSuperscript()) {
+              // slide the symbol over so it lines up with superscript
+              block.setXShift(width - prev.getWidth() - ChordSymbol.minPadding);
+              block.vAlign = true;
+              width +=
+                -prev.getWidth() -
+                ChordSymbol.minPadding +
+                (prev.getWidth() > block.getWidth() ? prev.getWidth() - block.getWidth() : 0);
+            }
+          }
+          width += block.getWidth() + ChordSymbol.minPadding;
         }
-        width += block.getWidth() + ChordSymbol.minPadding;
       }
 
       if (symbol.getVertical() === ChordSymbolVerticalJustify.TOP) {
@@ -213,8 +222,9 @@ export class ChordSymbol extends Modifier {
             maxRightGlyphWidth = Math.max(glyphWidth / 2, maxRightGlyphWidth);
           }
         }
-        symbol.width = width;
       }
+      // Opt-in runs need their width for alignment even when they reserve no stave space.
+      if (symbol.getReportWidth() || symbol.kernedRuns) symbol.width = width;
       width = 0; // reset symbol width
     }
     const rightOverlap = Math.min(
@@ -232,6 +242,71 @@ export class ChordSymbol extends Modifier {
   protected horizontal: number = ChordSymbolHorizontalJustify.LEFT;
   protected vertical: number = ChordSymbolVerticalJustify.TOP;
   protected reportWidth: boolean = true;
+
+  /** Default rendering stays compatible; only a matching opt-in profile uses shaped runs. */
+  protected kerning: 'auto' | 'none' = 'none';
+  protected kerningProfile?: ChordSymbolKerningProfile;
+  protected kernedRuns?: ChordSymbolRun[];
+  protected kerningMeasurement?: Element;
+  protected kerningOrigin = { x: 0, y: 0 };
+
+  /** Select optical kerning. Format the score again after changing layout settings. */
+  setKerning(mode: 'auto' | 'none'): this {
+    if (mode !== 'auto' && mode !== 'none') throw new RuntimeError('BadArgument', 'Kerning must be auto or none.');
+    this.kerning = mode;
+    this.kernedRuns = undefined;
+    return this;
+  }
+
+  getKerning(): 'auto' | 'none' {
+    return this.kerning;
+  }
+
+  /** Replace the font-specific table for this chord only. Omit the profile to restore built-ins. */
+  setKerningProfile(profile?: ChordSymbolKerningProfile): this {
+    if (
+      profile &&
+      (!profile.textFont.trim() ||
+        !profile.musicFont.trim() ||
+        profile.pairs.some(
+          (pair) =>
+            Array.from(pair.left).length !== 1 ||
+            Array.from(pair.right).length !== 1 ||
+            !['baseline', 'superscript', 'subscript'].includes(pair.position) ||
+            !Number.isFinite(pair.adjustmentEm)
+        ))
+    )
+      throw new RuntimeError('BadArgument', 'Invalid chord kerning profile.');
+    this.kerningProfile = profile && { ...profile, pairs: profile.pairs.map((pair) => ({ ...pair })) };
+    this.kernedRuns = undefined;
+    return this;
+  }
+
+  /** Re-measure on every format pass; Element's shared cache handles font loading and reuse. */
+  protected formatKerning(): number | undefined {
+    this.kernedRuns = undefined;
+    if (this.kerning === 'none') return undefined;
+    const profile = chordKerningProfile(this.fontInfo, this.kerningProfile);
+    if (!profile) return undefined;
+    const measurement = this.kerningMeasurement ?? (this.kerningMeasurement = new Element());
+    const layout = layoutChordRuns(
+      this.symbolBlocks.map((block) => ({
+        text: block.getText(),
+        position: block.isSuperscript() ? 'superscript' : block.isSubscript() ? 'subscript' : 'baseline',
+      })),
+      this.fontInfo,
+      profile,
+      {
+        spacing: ChordSymbol.spacingBetweenBlocks,
+        ratio: ChordSymbol.superSubRatio,
+        superscript: ChordSymbol.superscriptOffset,
+        subscript: ChordSymbol.subscriptOffset,
+      },
+      (text, font) => measurement.setText(text).setFont(font).measureText()
+    );
+    this.kernedRuns = layout.runs;
+    return layout.width;
+  }
 
   constructor() {
     super();
@@ -440,7 +515,7 @@ export class ChordSymbol extends Modifier {
     if (this.horizontal === ChordSymbolHorizontalJustify.LEFT) {
       x = start.x;
     } else if (this.horizontal === ChordSymbolHorizontalJustify.RIGHT) {
-      x = start.x + this.getWidth();
+      x = this.kernedRuns ? start.x - this.getWidth() : start.x + this.getWidth();
     } else if (this.horizontal === ChordSymbolHorizontalJustify.CENTER) {
       x = start.x - this.getWidth() / 2;
     } else {
@@ -449,19 +524,44 @@ export class ChordSymbol extends Modifier {
     }
     L('Rendering ChordSymbol: ', x, y);
 
-    this.symbolBlocks.forEach((symbol) => {
-      L('Rendering Text: ', symbol.getText(), x + symbol.getXShift(), y + symbol.getYShift());
-      symbol.setX(x);
-      symbol.setY(y);
-      symbol.renderText(ctx, 0, 0);
-    });
+    if (this.kernedRuns) {
+      this.kerningOrigin = { x, y };
+      for (const run of this.kernedRuns) {
+        ctx.setFont(run.font);
+        ctx.fillText(run.text, x + run.x, y + run.y);
+      }
+    } else {
+      this.symbolBlocks.forEach((symbol) => {
+        L('Rendering Text: ', symbol.getText(), x + symbol.getXShift(), y + symbol.getYShift());
+        symbol.setX(x);
+        symbol.setY(y);
+        symbol.renderText(ctx, 0, 0);
+      });
+    }
     this.drawPointerRect();
     ctx.closeGroup();
   }
 
-  // Get the `BoundingBox` for the entire chord
+  /** Return fresh ink bounds, including script offsets and overhangs. Empty symbols have empty bounds. */
   override getBoundingBox(): BoundingBox {
-    const boundingBox = this.symbolBlocks[0].getBoundingBox();
+    if (this.kernedRuns) {
+      const { x, y } = this.kerningOrigin;
+      let box: BoundingBox | undefined;
+      for (const run of this.kernedRuns) {
+        const m = run.metrics;
+        const ink = new BoundingBox(
+          x + run.x - m.actualBoundingBoxLeft,
+          y + run.y - m.actualBoundingBoxAscent,
+          m.actualBoundingBoxLeft + m.actualBoundingBoxRight,
+          m.actualBoundingBoxAscent + m.actualBoundingBoxDescent
+        );
+        if (box) box.mergeWith(ink);
+        else box = ink;
+      }
+      return box ?? new BoundingBox(x, y, 0, 0);
+    }
+    if (!this.symbolBlocks.length) return new BoundingBox(0, 0, 0, 0);
+    const boundingBox = BoundingBox.copy(this.symbolBlocks[0].getBoundingBox());
     for (let i = 1; i < this.symbolBlocks.length; i++) {
       boundingBox.mergeWith(this.symbolBlocks[i].getBoundingBox());
     }
