@@ -22,6 +22,7 @@ import { GlyphNote, GlyphNoteOptions } from './glyphnote';
 import { GraceNote, GraceNoteStruct } from './gracenote';
 import { GraceNoteGroup } from './gracenotegroup';
 import { KeySigNote } from './keysignote';
+import { Modifier } from './modifier';
 import { ModifierContext } from './modifiercontext';
 import { MultiMeasureRest, MultimeasureRestRenderOptions } from './multimeasurerest';
 import { Note, NoteStruct } from './note';
@@ -37,6 +38,7 @@ import { Stave, StaveOptions } from './stave';
 import { BarlineType } from './stavebarline';
 import { StaveConnector, StaveConnectorType } from './staveconnector';
 import { StaveLine } from './staveline';
+import { StaveModifier } from './stavemodifier';
 import { StaveNote, StaveNoteStruct } from './stavenote';
 import { StaveTie } from './stavetie';
 import { StemmableNote } from './stemmablenote';
@@ -54,6 +56,9 @@ import { defined, log, RuntimeError } from './util';
 import { VibratoBracket } from './vibratobracket';
 import { Voice, VoiceTime } from './voice';
 import { isHTMLCanvas } from './web';
+
+/** Explicit drawing role for a native extension adopted into a Factory. */
+export type FactoryElementRole = 'note' | 'modifier' | 'drawable';
 
 export interface FactoryOptions {
   stave?: {
@@ -114,8 +119,33 @@ export class Factory {
 
   /** Record ownership independently of whether the element draws itself or attaches to a note. */
   private own<T extends Element>(element: T): T {
+    const owner = Factory.owners.get(element);
+    if (owner === this) return element;
+    if (owner) throw new RuntimeError('BadArguments', 'Element belongs to another Factory.');
     Factory.owners.set(element, this);
     this.constructionScopes.forEach((scope) => scope.push(element));
+    return element;
+  }
+
+  /**
+   * Adopt a native extension without guessing its drawing role. Attachment and layout remain explicit.
+   * Repeating adoption cannot enqueue an element twice. Ownership survives draw/reset.
+   */
+  adopt<T extends Element>(element: T, role: FactoryElementRole): T {
+    const valid =
+      (role === 'note' && element instanceof Note) ||
+      (role === 'modifier' && element instanceof Modifier) ||
+      (role === 'drawable' &&
+        element instanceof Element &&
+        !(element instanceof Note) &&
+        !(element instanceof Modifier) &&
+        !(element instanceof Voice) &&
+        !(element instanceof Stave) &&
+        !(element instanceof StaveModifier) &&
+        !(element instanceof System));
+    if (!valid) throw new RuntimeError('BadArguments', `Invalid adopted element role: ${role}`);
+    this.own(element);
+    if (role !== 'modifier' && !this.renderQ.includes(element)) this.renderQ.push(element);
     return element;
   }
 

@@ -1,7 +1,7 @@
 # EasyScore
 
 EasyScore combines compact notation strings with typed helpers that return native VexFlow objects.
-The first API slice covers notes, annotations, ties, voices, systems, and drawing.
+The current API covers notes, annotations, ties, voices, systems, drawing, local references, and native extensions.
 Use Factory and the native API for the remaining notation families.
 
 ## First score
@@ -114,7 +114,7 @@ Partial ties can omit one endpoint. There must be at least one endpoint, and ind
 
 Notes must come from the same Factory as the facade. This includes notes created directly through `score.factory`.
 A newly constructed custom Modifier can be attached. An annotation owned by another Factory is rejected.
-General adoption of external notes and drawables is not part of this slice.
+Use `adopt()` below to register external notes and standalone drawables.
 
 The returned objects retain their native setters:
 
@@ -124,6 +124,70 @@ annotation.setTextBaseline(40);
 ```
 
 Attached modifiers draw through their notes. Ties draw through the Factory queue. Do not call their `draw()` methods separately.
+
+## Local references and source
+
+`getElement()` returns a native Element, or `undefined` if the ID is missing.
+`getNote()` returns a native Note. It throws if the ID is missing or belongs to a non-note.
+
+```js
+const notes = score.notes('C4/h[id="start"], C4[id="end"]');
+score.make.tie({ from: score.getNote('start'), to: score.getNote('end') });
+const source = score.getSource(notes[0]);
+console.log(source.input.slice(source.start, source.end)); // C4/h[id="start"]
+```
+
+- IDs are local to each EasyScore. Separate scores can use the same names.
+- IDs must be nonempty and unique within one score. Duplicate construction throws.
+- Native `setAttribute('id', value)` updates lookup. A conflicting rename throws before changing the ID.
+- Notes, their parsed modifiers, and objects returned by EasyScore helpers are indexed.
+- Direct Factory objects enter the local index through `adopt()`. Layout children created through returned native objects are not indexed automatically.
+- Lookup does not enable, replace, or clear the ambient Registry. An explicitly installed global Registry still has its own global ID namespace.
+
+`getSource()` returns a copy of `{ input, start, end, measure? }`.
+The input is the original notation string. Offsets use UTF-16 indexes and exclude the end position.
+For `measures()`, offsets refer to the complete bar-separated input; `measure` is one-based.
+Parsed modifiers point to their containing notation piece. Native/adopted elements have no notation source.
+
+`VF.EasyScore.getSource(element)` provides the same provenance to debuggers without needing the score instance.
+The instance method returns source only for that score's members.
+Source and lookup survive drawing. `score.reset()` releases both, including ID-change subscriptions.
+Strict construction failures also remove the newly created references and provenance.
+
+In the Explorer, click a parsed note to select its notation in the code editor.
+Hover only inspects. The inspector also displays the notation source.
+Selection requires one matching, unescaped string literal in the current code.
+Repeated literals, escaped strings, and computed input remain inspectable without guessing an editor location.
+An edited but unrendered preview cannot select stale source.
+
+## Native extensions
+
+`adopt()` returns the original object and requires its drawing role:
+
+| Role       | Object                            | Lifecycle                                                 |
+| ---------- | --------------------------------- | --------------------------------------------------------- |
+| `note`     | Native Note subclass              | Add to a voice; System supplies staff/layout.             |
+| `modifier` | Native Modifier subclass          | Attach to a note with `attach()`. Never drawn separately. |
+| `drawable` | Standalone Element, such as Curve | Drawn by the Factory queue after voices.                  |
+
+```js
+const native = score.adopt(new VF.StaveNote({ keys: ['e/4'], duration: 'q' }), 'note');
+const customLabel = score.adopt(new VF.Annotation('dolce'), 'modifier');
+score.attach(native, customLabel);
+```
+
+Repeated adoption does not duplicate a queued object. Objects owned by another Factory are rejected.
+Wrong roles throw before changing ownership or queues. Voice, Stave, StaveModifier, and System need their normal layout APIs; they cannot be adopted as generic drawables.
+Custom relationships must validate their own endpoints and implement the native drawing contract.
+Adoption does not infer layout, attach modifiers, or inspect arbitrary custom-object references.
+
+`attach()` also adopts an unowned native modifier. It rejects an already attached modifier being moved to another note.
+Factory ownership survives drawing and reset. To reuse a reset score's native objects, explicitly adopt them again and rebuild their voices/layout.
+Reset does not transfer ownership to another Factory.
+
+The [extension example](../tools/easyscore-references-example.mjs) runs as **EasyScore: references & extensions** in the Explorer.
+It combines named notes, a tie, a custom Modifier subclass, an adopted native note, and an adopted Curve.
+Tests compare its SVG/Canvas output against native construction with Bravura and Petaluma, then check retained redraw.
 
 ## Diagnostics and failed edits
 
@@ -180,7 +244,7 @@ score.draw({ retain: true });
 ```
 
 Set the host background with CSS. Explicit element styles override the shared foreground.
-`reset()` clears queues and the builder's last result. Caller-held native objects still exist.
+`reset()` clears queues, local references, source metadata, and the builder's last result. Caller-held native objects still exist.
 Resizing a context alone does not reflow a score. See [sheets and themes](sheets-and-themes.md).
 
 ## Coverage and next steps
@@ -189,5 +253,5 @@ The [coverage manifest](easyscore-coverage.json) classifies every public source 
 Classification does not mean every feature is implemented. CI checks for newly unclassified modules and missing contract references.
 Native option and setter additions still need review.
 
-The [implementation plan](../easyscore-plan.md) tracks the remaining helpers, local references, source-to-element mapping, and structured composition.
+The [implementation plan](../easyscore-plan.md) tracks the remaining helpers and structured composition.
 The complete EasyScore feature rollout remains tracked by [#354](https://github.com/vexflow/vexflow/issues/354).

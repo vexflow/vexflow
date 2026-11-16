@@ -1,10 +1,13 @@
 // Compare the documented EasyScore example with independently constructed native notation.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
+
 import puppeteer from 'puppeteer';
+
 import { createEasyScoreExample } from '../../tools/easyscore-example.mjs';
+import { createEasyScoreReferencesExample } from '../../tools/easyscore-references-example.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const guide = readFileSync(`${root}docs/easyscore.md`, 'utf8').match(/```js\n([\s\S]*?)```/)[1];
@@ -110,6 +113,105 @@ test('first EasyScore example matches native rendering', async (t) => {
             await page.screenshot({ omitBackground: false }),
             frames[1],
             'theme round trip preserves output'
+          );
+        });
+      }
+    }
+  } finally {
+    await browser.close();
+  }
+});
+
+test('adopted native notation matches rendering and retained redraw lifecycle', async (t) => {
+  const browser = await puppeteer.launch({ headless: true, args: process.env.CI ? ['--no-sandbox'] : [] });
+  try {
+    const page = await browser.newPage();
+    await page.setViewport({ width: 500, height: 240, deviceScaleFactor: 1 });
+    await page.setContent('<style>body { margin: 0; background: white; }</style><div id="host"></div>');
+    await page.addScriptTag({ path: `${root}build/cjs/vexflow-debug.js` });
+    await page.evaluate(`window.createReferenceExample = ${createEasyScoreReferencesExample.toString()}`);
+    for (const font of ['Bravura', 'Petaluma']) {
+      for (const backend of ['svg', 'canvas']) {
+        await t.test(`${font} ${backend}`, async () => {
+          const frames = [];
+          for (const native of [true, false]) {
+            await page.evaluate(
+              async ({ font, backend, native }) => {
+                const VF = VexFlow;
+                VF.setFonts(font, font === 'Bravura' ? 'Academico' : 'Petaluma Script');
+                await document.fonts.ready;
+                const host = document.getElementById('host');
+                host.replaceChildren();
+                const target = host.appendChild(document.createElement(backend === 'canvas' ? 'canvas' : 'div'));
+                target.id = 'score';
+                const renderer = { elementId: 'score', width: 500, height: 240 };
+                if (!native) {
+                  window.example = window.createReferenceExample(VF, renderer);
+                  return;
+                }
+                const factory = new VF.Factory({ renderer });
+                factory.setStyle({ fillStyle: '#24312c', strokeStyle: '#24312c' });
+                const notes = [
+                  factory.StaveNote({ keys: ['c/4'], duration: 'h', autoStem: true }),
+                  factory.StaveNote({ keys: ['c/4'], duration: 'q', autoStem: true }),
+                  factory.StaveNote({ keys: ['e/4'], duration: 'q', autoStem: true }),
+                ];
+                notes[0].addModifier(factory.Annotation({ text: 'dolce', vJustify: 'top' }), 0);
+                factory.StaveTie({ from: notes[0], to: notes[1] });
+                factory.Curve({ from: notes[1], to: notes[2] });
+                const voice = factory.Voice({ time: '4/4' }).addTickables(notes);
+                factory
+                  .System({ x: 20, y: 70, width: 460 })
+                  .addStave({ voices: [voice] })
+                  .addClef('treble')
+                  .addTimeSignature('4/4');
+                factory.draw({ retain: true });
+              },
+              { font, backend, native }
+            );
+            frames.push(await page.screenshot({ omitBackground: false }));
+          }
+          assert.deepEqual(frames[1], frames[0], 'native extensions preserve rendered pixels');
+          const counts = await page.evaluate(() => {
+            const { score, notes, label, tie, curve } = window.example;
+            const calls = { label: 0, tie: 0, curve: 0, native: 0 };
+            for (const [key, element] of [
+              ['label', label],
+              ['tie', tie],
+              ['curve', curve],
+              ['native', notes[2]],
+            ]) {
+              const draw = element.draw.bind(element);
+              element.draw = () => {
+                calls[key]++;
+                return draw();
+              };
+            }
+            score.adopt(curve, 'drawable');
+            score.adopt(notes[2], 'note');
+            score.adopt(label, 'modifier');
+            score.attach(notes[0], label);
+            score.factory.getContext().clear();
+            score.draw({ retain: true });
+            if (score.getNote('start') !== notes[0] || !score.getSource(notes[0])) throw new Error('Lost references');
+            return calls;
+          });
+          assert.deepEqual(counts, { label: 1, tie: 1, curve: 1, native: 1 });
+          assert.deepEqual(await page.screenshot({ omitBackground: false }), frames[1], 'retained redraw is identical');
+          assert.deepEqual(
+            await page.evaluate(() => {
+              const { score, notes } = window.example;
+              score.factory.getContext().clear();
+              score.draw(); // Default drawing clears queues but preserves references for inspection.
+              const found = score.getNote('start') === notes[0];
+              score.reset();
+              return {
+                found,
+                missing: score.getElement('start') === undefined,
+                cleared: VexFlow.EasyScore.getSource(notes[0]) === undefined,
+              };
+            }),
+            { found: true, missing: true, cleared: true }
           );
         });
       }

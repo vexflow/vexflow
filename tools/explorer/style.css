@@ -569,9 +569,13 @@ summary {
   color: #455845;
   font-size: 11px;
 }
+/* Keep inspection beside the preview so selecting notation cannot push its source off screen. */
 .detail-panel {
   padding: 0 2px;
   min-width: 0;
+  min-height: 0;
+  contain: size;
+  overflow: auto;
 }
 .detail-tabs {
   display: flex;
@@ -875,6 +879,8 @@ h3 {
     grid-template-columns: 1fr;
   }
   .detail-panel {
+    contain: none;
+    max-height: 320px;
     border: 1px solid var(--rule);
     border-radius: 7px;
     padding: 0 18px 18px;

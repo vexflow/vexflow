@@ -1,5 +1,6 @@
 // Higher-level formatting, invisible timing, and unusual rhythmic glyphs.
 import { createEasyScoreExample } from '../../easyscore-example.mjs';
+import { createEasyScoreReferencesExample } from '../../easyscore-references-example.mjs';
 import { example as e, number, select, setup, staff, text } from './helpers.mjs';
 
 const group = 'Layout & composition';
@@ -14,6 +15,17 @@ export const layout = [
 (${createEasyScoreExample.toString()})(VF, { elementId: 'score', width, height }, ink);`,
     [],
     'EasyScore.create() validates before construction. Helpers return native VexFlow objects. This is the first API slice; other notation families remain available through Factory.'
+  ),
+  e(
+    'easyscore-references',
+    'EasyScore: references & extensions',
+    group,
+    'Resolve named notes, adopt native extensions, and click parsed notes to select their source.',
+    'EasyScore getElement getNote getSource adopt Annotation StaveTie Curve',
+    `// Click either C4 note to select its notation in this editor.
+(${createEasyScoreReferencesExample.toString()})(VF, { elementId: 'score', width, height }, ink);`,
+    [],
+    'IDs are local to each score. Adopted notes and drawables share the normal retained lifecycle. Native objects have no notation source. Inspector selection requires one unescaped matching literal; computed or ambiguous input is shown without guessing an editor location.'
   ),
   e(
     'proportional-spacing',

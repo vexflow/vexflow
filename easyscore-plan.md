@@ -2,9 +2,9 @@
 
 Plan for [#354](https://github.com/vexflow/vexflow/issues/354).
 
-Status: first implementation slice complete and validated locally. It is not pushed. All upstream pushes are deferred until the complete milestone rollout is finished.
+Status: the first two implementation slices are complete and validated on `easyscore-overhaul`. Work is committed and pushed to this branch. Main receives the overhaul only after all milestones are complete.
 
-The [user guide](docs/easyscore.md) documents the shipped surface. The [coverage manifest](docs/easyscore-coverage.json) classifies public modules and tracks first-slice contracts.
+The [user guide](docs/easyscore.md) documents the implemented surface. The [coverage manifest](docs/easyscore-coverage.json) classifies public modules and tracks implemented contracts.
 
 Implemented in this slice:
 
@@ -13,7 +13,17 @@ Implemented in this slice:
 - Native note options, voice modes/time/resolution, working softmax options, and validated articulation names/codes/glyphs.
 - A guide and Explorer example, native-rendering parity checks, and compatibility/ownership regressions.
 
-Still pending: the remaining `make.*` families, automatic beaming, typed note sequences, score-local lookup, source-to-element mapping, generic adoption, and structured composition.
+Second slice:
+
+- Score-local `getElement()` and typed `getNote()` lookup, synchronized native ID changes, and duplicate checks.
+- `getSource()` provenance for parsed notes/modifiers, including complete measure input ranges.
+- Explicit `adopt()` roles for native notes, custom modifiers, and standalone drawables.
+- Explorer click-to-source selection, with conservative handling of ambiguous or generated input.
+- Rollback/reset coverage and a native-rendering parity example for extensions.
+
+Validation for slice two: 105 Node checks, 1,891 QUnit tests, and 12 Explorer checks pass. Source types, emitted-declaration consumer checks, and lint pass. Native-extension rendering matches SVG/Canvas with Bravura and Petaluma, including retained redraw.
+
+Still pending: the remaining `make.*` families, automatic beaming, typed note sequences, and structured composition.
 This slice does not complete Milestones 0–2 in full: module classification is established, but exhaustive option-level coverage and the broader extension/reference APIs remain open.
 Reviewed against `main` at `91e753e79e1fed1ef87a669b884dab50e7dca463` on November 16, 2026.
 
@@ -281,7 +291,7 @@ Registration must be idempotent by object identity. It must not draw a modifier 
 
 Add an explicit adoption API for custom objects. Require the caller to identify its role.
 Do not guess from the existence of `draw()`, and do not expose the protected render queue as the public contract.
-Reject cross-factory attachments unless they have been explicitly adopted.
+Reject cross-factory adoption and attachments. Adoption registers unowned native objects; it does not transfer ownership from another Factory.
 
 Default `draw()` still clears the Factory's queues. `draw({ retain: true })` preserves them.
 Keep EasyScore references available for inspection after a normal draw, until `reset()`. Explain that references alone do not requeue objects for drawing. Clear owned references and source mappings on `reset()`.

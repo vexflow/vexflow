@@ -2,7 +2,9 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
+
 import { createCanvas, registerFont } from 'canvas';
+
 const VF = await import(new URL('../../build/esm/entry/vexflow-core.js', import.meta.url));
 
 for (const [family, file] of [
@@ -256,4 +258,144 @@ test('public modules and implemented contracts have coverage entries', () => {
     assert.ok(guide.includes(feature.api), feature.api);
     assert.ok(testSources.includes(feature.test), feature.api);
   }
+});
+
+test('score-local IDs follow renames and reject collisions before mutation', () => {
+  const score = create();
+  const other = create();
+  const [a, b] = score.notes('C4/h[id="a"], D4[id="b"]');
+  const [independent] = other.notes('E4/w[id="a"]');
+  assert.equal(score.getElement('a'), a);
+  assert.equal(other.getElement('a'), independent);
+  assert.equal(score.getElement('missing'), undefined);
+  assert.throws(() => score.getNote('missing'), /No note with ID/);
+  const label = score.make.annotation({ text: 'test' });
+  assert.equal(score.getElement(label.getAttribute('id')), label);
+  assert.throws(() => score.getNote(label.getAttribute('id')), /No note with ID/);
+  a.setAttribute('id', 'renamed');
+  assert.equal(score.getElement('a'), undefined);
+  assert.equal(score.getNote('renamed'), a);
+  assert.throws(() => a.setAttribute('id', 'b'), /Duplicate score element ID/);
+  assert.throws(() => a.setAttribute('id', undefined), /nonempty ID/);
+  assert.equal(a.getAttribute('id'), 'renamed');
+  assert.equal(score.getNote('b'), b);
+  score.reset();
+  assert.equal(score.getElement('renamed'), undefined);
+  a.setAttribute('id', 'b'); // Reset released the local collision subscription.
+  assert.equal(other.getNote('a'), independent);
+});
+
+test('source mapping preserves complete measure input and survives native ID changes', () => {
+  const score = create();
+  const input = '  C4/h[id="a"], D4 |\n E4[articulations="staccato"], F4  ';
+  const measures = score.measures(input);
+  const note = measures[1][0];
+  const source = score.getSource(note);
+  assert.equal(source.input, input);
+  assert.equal(source.measure, 2);
+  assert.equal(input.slice(source.start, source.end), 'E4[articulations="staccato"]');
+  assert.deepEqual(score.getSource(note.getModifiers()[0]), source);
+  assert.deepEqual(VF.EasyScore.getSource(note), source);
+  assert.equal(create().getSource(note), undefined);
+  note.setAttribute('id', 'changed');
+  assert.deepEqual(score.getSource(note), source);
+  source.start = 999; // Callers cannot corrupt stored provenance.
+  assert.notEqual(score.getSource(note).start, 999);
+  const native = score.adopt(new VF.StaveNote({ keys: ['g/4'], duration: 'q' }), 'note');
+  assert.equal(score.getSource(native), undefined);
+  score.reset();
+  assert.equal(score.getSource(note), undefined);
+  assert.equal(VF.EasyScore.getSource(note), undefined);
+});
+
+test('failed construction rolls back references, source metadata, and ID subscriptions', () => {
+  const score = create();
+  const [keep] = score.notes('C4/w[id="keep"]');
+  let escaped;
+  score.addCommitHook((options, note) => {
+    if (options.id === 'temporary') escaped = note;
+  });
+  const registry = new VF.Registry();
+  registry.register(keep);
+  VF.Registry.enableDefaultRegistry(registry);
+  try {
+    assert.throws(() => score.measures('D4/w[id="temporary"] | E4/w[id="keep"]'), /Duplicate score element ID/);
+    assert.equal(score.getElement('temporary'), undefined);
+    assert.equal(score.getNote('keep'), keep);
+    assert.equal(queued(score), 1);
+    assert.equal(VF.Factory.getOwner(escaped), undefined);
+    assert.equal(VF.EasyScore.getSource(escaped), undefined);
+    assert.deepEqual(registered(registry), [keep]);
+    escaped.setAttribute('id', 'keep'); // No leaked local ID validator after rollback.
+    keep.setAttribute('id', 'retained');
+    assert.equal(registry.getElementById('retained'), keep);
+    assert.equal(score.getNote('retained'), keep);
+  } finally {
+    VF.Registry.disableDefaultRegistry();
+  }
+  const legacy = new VF.Factory({ renderer }).EasyScore();
+  assert.equal(legacy.parse('C4/q[id="partial"], invalid').success, false);
+  assert.equal(legacy.getNote('partial'), legacy.builder.elements.notes[0]);
+  assert.equal(legacy.getSource(legacy.getNote('partial')).input, 'C4/q[id="partial"], invalid');
+});
+
+test('native adoption validates roles and ownership without duplicate drawing entries', () => {
+  const score = create();
+  const note = new VF.StaveNote({ keys: ['c/4'], duration: 'w' });
+  const label = new VF.Annotation('native');
+  const other = create();
+  assert.throws(() => score.adopt(note, 'modifier'), /Invalid adopted element role/);
+  assert.throws(() => score.adopt(label, 'drawable'), /Invalid adopted element role/);
+  assert.throws(() => score.adopt(new VF.Clef('treble'), 'drawable'), /Invalid adopted element role/);
+  assert.throws(() => score.adopt(null, 'drawable'), /Invalid adopted element role/);
+  assert.equal(score.getElement(note.getAttribute('id')), undefined);
+  assert.equal(VF.Factory.getOwner(note), undefined);
+  assert.equal(score.adopt(note, 'note'), note);
+  score.adopt(note, 'note');
+  assert.equal(queued(score), 1);
+  assert.equal(score.getNote(note.getAttribute('id')), note);
+  assert.throws(() => other.adopt(note, 'note'), /another Factory/);
+  assert.equal(other.getElement(note.getAttribute('id')), undefined);
+  score.adopt(label, 'modifier');
+  score.attach(note, label);
+  score.attach(note, label);
+  assert.equal(queued(score), 1);
+  assert.equal(note.getModifiers().length, 1);
+  assert.equal(VF.Factory.getOwner(label), score.factory);
+  const voice = score.voice([note]);
+  assert.throws(() => score.adopt(voice, 'drawable'), /Invalid adopted element role/);
+  assert.equal(score.getElement(voice.getAttribute('id')), voice);
+  const conflict = new VF.Annotation('conflict').setAttribute('id', note.getAttribute('id'));
+  assert.throws(() => score.adopt(conflict, 'modifier'), /Duplicate score element ID/);
+  assert.equal(VF.Factory.getOwner(conflict), undefined);
+  assert.throws(
+    () =>
+      score.factory.transaction(() => {
+        score.factory.adopt(note, 'note');
+        throw new Error('later failure');
+      }),
+    /later failure/
+  );
+  assert.equal(VF.Factory.getOwner(note), score.factory, 'rollback preserves prior ownership');
+  score.reset();
+  assert.equal(queued(score), 0);
+  score.adopt(note, 'note');
+  assert.equal(queued(score), 1, 'explicit readoption queues a note after reset');
+});
+
+test('failed native attachment releases newly adopted ownership and references', () => {
+  const score = create();
+  class RefusingNote extends VF.StaveNote {
+    addModifier() {
+      throw new Error('custom attachment failed');
+    }
+  }
+  const note = score.adopt(new RefusingNote({ keys: ['c/4'], duration: 'w' }), 'note');
+  const label = new VF.Annotation('custom');
+  assert.throws(() => score.attach(note, label), /custom attachment failed/);
+  assert.equal(VF.Factory.getOwner(label), undefined);
+  assert.equal(score.getElement(label.getAttribute('id')), undefined);
+  assert.equal(VF.Factory.getOwner(note), score.factory);
+  assert.equal(queued(score), 1);
+  label.setAttribute('id', note.getAttribute('id')); // The failed attachment left no ID subscription.
 });

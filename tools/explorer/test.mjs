@@ -6,10 +6,12 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 
+import Prism from 'prismjs';
 import puppeteer from 'puppeteer';
 
 import { defaults, examples } from './catalog.mjs';
 import { build, output, serve } from './cli.mjs';
+import { findNotationRange } from './source.mjs';
 import { upload, validate } from './upload.mjs';
 
 await build();
@@ -65,7 +67,84 @@ async function edit(code) {
   );
 }
 
+/** Puppeteer does not scale child boxes for our transformed iframe. Use displayed coordinates. */
+async function previewPoint(frame, selector) {
+  const point = await frame.$eval(selector, (element) => {
+    const rect = element.getBoundingClientRect();
+    return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2, width: innerWidth, height: innerHeight };
+  });
+  const frameElement = await frame.frameElement();
+  const rect = await frameElement.boundingBox();
+  return { x: rect.x + (point.x * rect.width) / point.width, y: rect.y + (point.y * rect.height) / point.height };
+}
+
 try {
+  await test('notation source matching excludes ambiguous, escaped, and non-literal input', () => {
+    const input = 'C4/q, D4';
+    const source = { input, start: 6, end: 8 };
+    for (const quote of ["'", '"', '`']) {
+      const code = `const melody = ${quote}${input}${quote};`;
+      const range = findNotationRange(code, source, Prism);
+      assert.equal(code.slice(range.start, range.end), 'D4');
+    }
+    for (const code of [
+      `// '${input}'`,
+      `/* "${input}" */`,
+      `const a = '${input}', b = '${input}';`,
+      "const a = 'C4/q, ' + 'D4';",
+      'const a = `C4/q, ${pitch}`;',
+      "const a = /'C4\\/q, D4'/;",
+    ])
+      assert.equal(findNotationRange(code, source, Prism), undefined, code);
+    assert.equal(
+      findNotationRange('const a = "C4/q,\\n D4";', { input: 'C4/q,\n D4', start: 7, end: 9 }, Prism),
+      undefined
+    );
+  });
+
+  await test('clicking EasyScore notation selects source without rerendering or selecting stale edits', async () => {
+    await visit(examples.find((example) => example.id === 'easyscore-references'));
+    const frame = page.frames().find((candidate) => candidate.parentFrame());
+    const status = await page.$eval('#render-status', (element) => element.textContent);
+    const editorTop = await page.$eval('.code-panel', (element) => element.getBoundingClientRect().top);
+    const { x, y } = await previewPoint(frame, '#vf-start');
+    await page.mouse.move(x, y);
+    await page.waitForFunction(() => !document.querySelector('#inspection').hidden);
+    assert.equal(await page.evaluate(() => String(window.getSelection())), '', 'hover never selects code');
+    await page.mouse.click(x, y);
+    await page.waitForFunction(() => String(window.getSelection()).includes('id="start"'));
+    assert.equal(await page.evaluate(() => String(window.getSelection())), 'C4/h[id="start"]');
+    assert.equal(await page.$eval('#render-status', (element) => element.textContent), status);
+    assert.equal(
+      await page.$eval('.code-panel', (element) => element.getBoundingClientRect().top),
+      editorTop,
+      'inspection keeps source visible'
+    );
+    assert.equal(
+      await page.$eval('#inspection .notation-source', (element) => element.textContent),
+      'C4/h[id="start"]'
+    );
+    await page.select('#elements', 'end');
+    await page.waitForFunction(() => String(window.getSelection()).includes('id="end"'));
+    assert.equal(await page.evaluate(() => String(window.getSelection())), 'C4/q[id="end"]');
+    await page.select('#elements', 'native');
+    await page.waitForFunction(() => !document.querySelector('#inspection .notation-source'));
+    assert.equal(await page.$('#inspection .notation-source'), null, 'adopted notes have no invented source');
+    await page.click('#auto-run');
+    await page.$eval('#editor', (element) => {
+      element.textContent = '// Unrendered change\n' + element.textContent;
+      element.dispatchEvent(new Event('input', { bubbles: true }));
+      window.getSelection().removeAllRanges();
+    });
+    await page.$eval('#frame-host', (element) => element.scrollIntoView({ block: 'center' }));
+    const stalePoint = await previewPoint(frame, '#vf-start');
+    await page.mouse.click(stalePoint.x, stalePoint.y);
+    await page.waitForFunction(() => !!document.querySelector('#inspection .notation-source'));
+    assert.equal(await page.evaluate(() => String(window.getSelection())), '', 'stale preview cannot move selection');
+    assert.equal(await page.$eval('#inspection button[disabled]', (button) => button.textContent), 'Select source');
+    assert.deepEqual(errors, []);
+  });
+
   await test('highlighted editor preserves literal code, indentation, and isolated undo history', async () => {
     await visit(examples[0]);
     await page.click('#auto-run');
@@ -344,18 +423,7 @@ throw new Error('Superseded error');`);
   await test('hover, click, bounds, related elements, and theme controls', async () => {
     await visit(examples[0]);
     const frame = page.frames().find((frame) => frame.url() === 'about:srcdoc');
-    const note = await frame.$('g.vf-stavenote');
-    assert.ok(note);
-    // Puppeteer adds iframe offsets but does not scale child boxes for a transformed frame.
-    // Convert the note's local center to page coordinates using the displayed frame size.
-    const point = await note.evaluate((element) => {
-      const rect = element.getBoundingClientRect();
-      return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2, width: innerWidth, height: innerHeight };
-    });
-    const frameElement = await frame.frameElement();
-    const rect = await frameElement.boundingBox();
-    const x = rect.x + (point.x * rect.width) / point.width;
-    const y = rect.y + (point.y * rect.height) / point.height;
+    const { x, y } = await previewPoint(frame, 'g.vf-stavenote');
     await page.mouse.move(x, y);
     await page.waitForFunction(() => !document.querySelector('#inspection').hidden);
     await page.mouse.click(x, y);

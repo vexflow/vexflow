@@ -1,5 +1,5 @@
 {
-  "description": "Initial public-module classification and tested first-slice contracts for #354. Classification is not a claim of full feature support. Review native option and setter additions separately.",
+  "description": "Public-module classification and tested EasyScore contracts. Classification is not a claim of full feature support. Review native option and setter additions separately.",
   "modules": {
     "composition": ["easyscore", "factory", "system", "sheet", "voice", "formatter", "registry"],
     "notes-and-rhythm": [
@@ -161,6 +161,30 @@
       "guide": "docs/easyscore.md",
       "example": null,
       "test": "annotation attachment and ties have validated ownership and no duplicate queue entries"
+    },
+    {
+      "api": "getElement()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-references",
+      "test": "score-local IDs follow renames and reject collisions before mutation"
+    },
+    {
+      "api": "getNote()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-references",
+      "test": "score-local IDs follow renames and reject collisions before mutation"
+    },
+    {
+      "api": "getSource()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-references",
+      "test": "source mapping preserves complete measure input and survives native ID changes"
+    },
+    {
+      "api": "adopt()",
+      "guide": "docs/easyscore.md",
+      "example": "easyscore-references",
+      "test": "adopted native notation matches rendering and retained redraw lifecycle"
     }
   ],
   "pending": [
@@ -168,7 +192,6 @@
     "Automatic beam groups and advanced rhythm helpers",
     "Other spans, dynamics, and string techniques",
     "Tablature and remaining stave structure",
-    "Score-local lookup and source-to-element mapping",
     "Structured composition and explicit musical policies",
     "Complete guide, paired examples, and option-level coverage"
   ]
