@@ -1,4 +1,4 @@
-# Unreleased
+# 5.2.0
 
 ## EasyScore
 
@@ -15,6 +15,23 @@
 - Add typed note sequences, percussion heads, native modifier helpers, and single-owner grace/subnote groups.
 - Add pure extension validation, Sheet access, and synchronous construction batches.
 - Preserve native dot and parenthesis fonts without requiring a browser document in Node.
+- Add rhythm and relationship helpers, tablature and staff constructors, and structured composition with explicit responsive layout policies.
+- Preserve clef state across composed key changes and resolve automatic stems for complete beam groups.
+
+## Notation
+
+- Add strict proportional spacing for shared rhythmic timelines.
+
+## Interactive guide
+
+- Add Quickstart, EasyScore, native API lessons, and an editable playground with bundled assets.
+- Reuse the loaded VexFlow runtime and fonts across lesson and playground navigation.
+- Add browser coverage for navigation, editing, exports, mobile layouts, and asset reuse.
+
+## Development
+
+- Add EasyScore consumer-package and declaration checks.
+- Consolidate build, testing, release, and upload instructions.
 
 # 5.1.2
 
