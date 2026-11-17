@@ -6,7 +6,8 @@ export function renderEasyScoreStructure(VF, renderer, kind = 'tab', ink = '#243
   let notes = [];
   const system = score.system({ x: 20, y: 75, width: renderer.width - 40 });
   const tab = ['tab', 'grace-tab'].includes(kind);
-  const stave = tab ? score.make.tabStave() : score.make.stave();
+  const bounds = { x: 20, width: renderer.width - 40 };
+  const stave = tab ? score.make.tabStave(bounds) : score.make.stave(bounds);
   const attach = (mark, position) => {
     score.attachToStave(stave, mark, position);
     marks.push(mark);
@@ -70,7 +71,7 @@ export function renderEasyScoreStructure(VF, renderer, kind = 'tab', ink = '#243
   system.addStave({ stave, voices: notes.length ? [score.voice(notes)] : [] });
   if (kind === 'connector') {
     const lowerNotes = score.notes('C3/w', { clef: 'bass' });
-    const lower = score.make.stave();
+    const lower = score.make.stave(bounds);
     score.attachToStave(lower, score.make.clef('bass'));
     system.addStave({ stave: lower, voices: [score.voice(lowerNotes)] });
     marks.push(score.make.connector({ topStave: stave, bottomStave: lower, type: 'brace' }));
