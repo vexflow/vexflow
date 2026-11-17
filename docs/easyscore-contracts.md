@@ -1,6 +1,6 @@
 # EasyScore API contracts
 
-This inventory defines the rollout's public paths. The [guide](easyscore.md) lists implemented APIs.
+This inventory maps the implemented public paths. The [API reference](easyscore.md) includes migration and native customization.
 The [coverage manifest](easyscore-coverage.json) records examples and tests.
 
 ## Native options and customization
@@ -13,6 +13,8 @@ No option dictionary is copied into a second schema or silently dropped.
 Run `node tools/easyscore-api-audit.mjs` to check the snapshot.
 After reviewing a native API change, update its coverage and run `node tools/easyscore-api-audit.mjs --update`.
 The snapshot detects drift; semantic and rendering tests establish support.
+The coverage test requires a row and an existing executable example for every public `make.*` method.
+`npm run test:easyscore-package` verifies the packed artifact and its declarations without publishing.
 
 ## Notation paths and ownership
 

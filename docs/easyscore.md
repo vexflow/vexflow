@@ -1,8 +1,10 @@
 # EasyScore
 
 EasyScore combines compact notation strings with typed helpers that return native VexFlow objects.
-The current API covers notes, annotations, ties, voices, systems, drawing, local references, and native extensions.
-Use Factory and the native API for the remaining notation families.
+Start with strings for pitches and rhythm. Use `make.*` for native notation, `system()` for direct layout, or `compose()` for aligned measures.
+The helpers cover every built-in notation family. Returned objects retain their native setters.
+
+This is the API reference. The interactive guide is developed separately in [#356](https://github.com/vexflow/vexflow/issues/356).
 
 ## First score
 
@@ -31,7 +33,7 @@ The [shared example](../tools/easyscore-example.mjs) runs in the Explorer as **E
 Tests compare it against independently constructed native notation on SVG and Canvas, with Bravura and Petaluma.
 
 `EasyScore.create()` owns a Factory. Existing `factory.EasyScore()` calls still work.
-For an existing render context, create with `renderer.elementId: null` and call `score.setContext(context)` before constructing notation.
+`setContext()` supplies an existing render context. Create with `renderer.elementId: null` and call `score.setContext(context)` before constructing notation.
 Use the [Node setup guide](jsdom.md) for server-side rendering.
 
 ## Notes and measures
@@ -48,7 +50,7 @@ Use the [Node setup guide](jsdom.md) for server-side rendering.
 | `C4/q[id="start",stem="up"]` | A note ID and explicit stem direction.                           |
 
 The initial duration is an eighth note. Defaults are treble clef, 4/4, and automatic stems.
-Use `score.set({ clef: 'bass', time: '3/4' })` to change the note/voice defaults.
+Use `set()` to change defaults, for example `score.set({ clef: 'bass', time: '3/4' })`.
 Staff clefs and displayed signatures are still added explicitly to the returned Stave.
 
 `measures()` splits bars and returns an array of note arrays:
@@ -67,7 +69,7 @@ Native note options now include `octaveShift`, `strokePx`, `line`, `alignCenter`
 const shifted = score.notes('C4/h, D4', { octaveShift: 1 });
 ```
 
-String notation supplies keys, duration, dots, and type. Typed custom heads, tablature, and the remaining constructors are planned separately.
+String notation supplies keys, duration, dots, and type. Use the typed helpers below for custom heads, tablature, and other native notation.
 
 ## Typed notes and modifiers
 
@@ -280,11 +282,12 @@ An edited but unrendered preview cannot select stale source.
 
 `adopt()` returns the original object and requires its drawing role:
 
-| Role       | Object                            | Lifecycle                                                 |
-| ---------- | --------------------------------- | --------------------------------------------------------- |
-| `note`     | Native Note subclass              | Add to a voice; System supplies staff/layout.             |
-| `modifier` | Native Modifier subclass          | Attach to a note with `attach()`. Never drawn separately. |
-| `drawable` | Standalone Element, such as Curve | Drawn by the Factory queue after voices.                  |
+| Role            | Object                            | Lifecycle                                                 |
+| --------------- | --------------------------------- | --------------------------------------------------------- |
+| `note`          | Native Note subclass              | Add to a voice; System supplies staff/layout.             |
+| `modifier`      | Native Modifier subclass          | Attach to a note with `attach()`. Never drawn separately. |
+| `drawable`      | Standalone Element, such as Curve | Drawn by the Factory queue after voices.                  |
+| `staveModifier` | Native StaveModifier subclass     | Attach with `attachToStave()`; the stave draws it.        |
 
 ```js
 const native = score.adopt(new VF.StaveNote({ keys: ['e/4'], duration: 'q' }), 'note');
@@ -406,15 +409,6 @@ Set the host background with CSS. Explicit element styles override the shared fo
 `reset()` clears queues, local references, source metadata, and the builder's last result. Caller-held native objects still exist.
 Resizing a context alone does not reflow a score. See [sheets and themes](sheets-and-themes.md).
 
-## Coverage and next steps
-
-The [coverage manifest](easyscore-coverage.json) classifies every public source module and records the tested contracts in this slice.
-Classification does not mean every feature is implemented. CI checks for newly unclassified modules and missing contract references.
-Native option and setter additions still need review.
-
-The [implementation plan](../easyscore-plan.md) tracks the remaining helpers and structured composition.
-The complete EasyScore feature rollout remains tracked by [#354](https://github.com/vexflow/vexflow/issues/354).
-
 ## Tablature and staff structure
 
 `make.tabNote()` accepts every native TabNote field. Its optional second argument enables stems.
@@ -440,11 +434,11 @@ Choose enough lines in `make.tabStave({ options: { numLines: 7 } })` for the ins
 Use `attachToStave()` for the following modifiers. Repeating the same attachment is harmless.
 An attached modifier cannot move to another stave. Create a new one instead.
 
-| Helpers | Native notation |
-| --- | --- |
-| `make.clef()`, `make.keySignature()`, `make.timeSignature()` | Clefs and signatures |
-| `make.barline()`, `make.repetition()`, `make.volta()` | Barlines, navigation, endings |
-| `make.section()`, `make.tempo()`, `make.staveText()` | Rehearsal labels, tempo, staff text |
+| Helpers                                                      | Native notation                     |
+| ------------------------------------------------------------ | ----------------------------------- |
+| `make.clef()`, `make.keySignature()`, `make.timeSignature()` | Clefs and signatures                |
+| `make.barline()`, `make.repetition()`, `make.volta()`        | Barlines, navigation, endings       |
+| `make.section()`, `make.tempo()`, `make.staveText()`         | Rehearsal labels, tempo, staff text |
 
 These constructors accept native constructor arguments and return native objects.
 `attachToStave(stave, mark, position)` optionally overrides the native position.
@@ -470,13 +464,18 @@ const result = score.compose({
   sheet: { width: 640, rowGap: 50 },
   signatures: 'every-measure',
   accidentals: 'key-aware',
-  staves: [{
-    id: 'melody', clef: 'treble', key: 'G', time: '4/4',
-    measures: [
-      { span: '1/4', voices: [{ notes: 'D5/q' }] }, // Pickup; still displays 4/4.
-      { time: '2/4', voices: [{ notes: 'F#5/q[id="a"], G5[id="b"]' }] },
-    ],
-  }],
+  staves: [
+    {
+      id: 'melody',
+      clef: 'treble',
+      key: 'G',
+      time: '4/4',
+      measures: [
+        { span: '1/4', voices: [{ notes: 'D5/q' }] }, // Pickup; still displays 4/4.
+        { time: '2/4', voices: [{ notes: 'F#5/q[id="a"], G5[id="b"]' }] },
+      ],
+    },
+  ],
   spans: [{ kind: 'curve', from: 'a', to: 'b' }],
 });
 result.sheet.format();
@@ -544,3 +543,77 @@ Cross-measure spans are rejected by default. `crossMeasureSpans: 'manual'` permi
 The caller must replace them with native partial segments if they cross a row after reflow. Sheet never splits them silently.
 
 The Explorer's **EasyScore: responsive composition** example covers a grand staff, pickup, multiple voices, tuplets, changing meter, inline state, and both spacing modes.
+
+## Native customization and infrastructure
+
+Helpers expose native objects directly. Keep using their setters, render options, styles, subclasses, and measurement methods.
+`NoteHead`, `Stem`, and `Flag` belong to their note. Set note keys/head codes, `setKeyStyle()`, `setKeyLine()`, and native stem/flag options.
+Native Fraction, Music, Tuning, KeyManager, Formatter, Registry, Metrics, and bounding boxes remain available from the same package.
+No parallel versions of these utilities are introduced.
+
+`attach()` accepts index 0 for non-pitched timed notes, such as GlyphNote. Pitched and tab notes validate their actual chord/position indexes.
+Native custom modifiers still determine which kinds of note they can render on.
+`StaveOptions.clef` carries clef state when a repeated glyph is omitted. Attached clefs also update that state.
+`make.keySigNote({ key, cancelKey, clef })` supports cancellation and an explicit inline clef.
+
+### Fonts, contexts, and export
+
+Select fonts before constructing notation. Font metrics and text measurement are global native settings.
+For browser ESM with local font files (serve these URLs from your app):
+
+```js
+import { EasyScore, Font, VexFlow } from 'vexflow/core';
+await Promise.all([Font.load('Bravura', '/fonts/bravura.otf'), Font.load('Academico', '/fonts/academico.otf')]);
+VexFlow.setFonts('Bravura', 'Academico');
+const score = EasyScore.create({ renderer: { elementId: 'score', width: 600, height: 260 } });
+```
+
+Use `renderer.backend: VF.Renderer.Backends.CANVAS` or `SVG` to choose a backend explicitly.
+For an existing context, use `renderer.elementId: null`, then `score.setContext(context)` before creating notes.
+Native CanvasContext and SVGContext, Node canvas measurement, and [server-side setup](jsdom.md) work unchanged.
+
+For SVG export, obtain the SVG element from the renderer's host after drawing.
+`svgWithFontPaths(svg, fonts)` converts supplied fonts to portable paths. See [SVG export](portable-svg.md) for font loading and licenses.
+Canvas export uses the native canvas `toDataURL()` / `toBlob()` methods.
+Neither export method changes score ownership or musical state.
+
+## Migration from Factory.EasyScore
+
+Existing Factory/EasyScore code continues to work. Migration can be gradual.
+
+| Existing code                               | First-class facade                                                                           |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `factory.EasyScore()`                       | `EasyScore.create(factoryOptions)` owns its Factory. Existing factories still work.          |
+| `factory.StaveNote(struct)`                 | `score.make.note(struct)` returns the same native class.                                     |
+| `note.addModifier(mark, index)`             | `score.attach(note, mark, index)` adds ownership and duplicate checks.                       |
+| `stave.addModifier(mark)`                   | `score.attachToStave(stave, mark)` gives the modifier one staff owner.                       |
+| `score.beam(notes)` / `score.tuplet(notes)` | Keep their array return. Use `make.beam()` / `make.tuplet()` when a native handle is needed. |
+| Manually managed measure Systems            | `compose()` optionally builds aligned measures and a responsive Sheet.                       |
+
+The new entry point is strict. Register custom bracket options with `extensions` and keep validators pure.
+`factory.EasyScore()` retains legacy unknown-option and partial-parse behavior unless strict options are enabled.
+Custom builders and commit hooks remain supported. Side effects in hooks are outside managed rollback.
+Drawing clears queues by default. Use `{ retain: true }` for redraw; `reset()` clears local references too.
+Ownership stays with the original Factory even after reset. Rebuild notation to move it to another score.
+
+## Coverage and validation
+
+The [contracts](easyscore-contracts.md) map notation families to helper names and drawing owners.
+The coverage gate checks every public module, every named `make.*` helper, example IDs, guide entries, and test names.
+A separate native API snapshot catches new constructor fields and public setters for review.
+It is a review gate, not a claim that every possible option combination is visually identical.
+
+Run from the checkout:
+
+```sh
+npm test
+npm run explorer:test
+npm run test:easyscore-package
+```
+
+The package check packs locally, checks all public ESM/CommonJS entries, and compiles an external TypeScript consumer.
+It does not publish. See [build and test commands](build.md) for the broader test tooling.
+
+Known limits stay explicit: no pagination, automatic span splitting, row-start-only signature repetition, or general collision solver.
+Native input objects must be prepared before composition policies can consume them.
+The facade does not add playback, MusicXML import, or a persistent editable score model.

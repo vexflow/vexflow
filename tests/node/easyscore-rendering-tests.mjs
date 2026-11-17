@@ -252,7 +252,15 @@ test('EasyScore notation families draw once and redraw identically on both backe
           'brackets',
           'pedal',
           'partial-spans',
-          'dynamics', 'tab', 'grace-tab', 'rest', 'inline', 'repeat', 'labels', 'endings',
+          'dynamics',
+          'tab',
+          'grace-tab',
+          'rest',
+          'inline',
+          'repeat',
+          'labels',
+          'endings',
+          'connector',
         ]) {
           await t.test(`${font} ${backend} ${kind}`, async () => {
             await page.evaluate(
@@ -266,7 +274,9 @@ test('EasyScore notation families draw once and redraw identically on both backe
                 target.id = 'score';
                 const render = ['modifiers', 'accidentals', 'text', 'grace', 'percussion', 'sequence'].includes(kind)
                   ? window.renderFamilies
-                  : ['tab', 'grace-tab', 'rest', 'inline', 'repeat', 'labels', 'endings'].includes(kind) ? window.renderStructure : window.renderRhythm;
+                  : ['tab', 'grace-tab', 'rest', 'inline', 'repeat', 'labels', 'endings', 'connector'].includes(kind)
+                    ? window.renderStructure
+                    : window.renderRhythm;
                 window.example = render(VF, { elementId: 'score', width: 640, height: 240 }, kind);
               },
               { font, backend, kind }
@@ -309,25 +319,38 @@ test('structured composition reflows wide narrow wide with stable native geometr
     await page.setContent('<style>body{margin:0;background:white}</style><div id="host"></div>');
     await page.addScriptTag({ path: `${root}build/cjs/vexflow-debug.js` });
     await page.evaluate(`window.renderComposition = ${renderEasyScoreComposition.toString()}`);
-    for (const font of ['Bravura', 'Petaluma']) for (const backend of ['svg', 'canvas']) for (const spacing of ['engraving', 'proportional']) {
-      await t.test(`${font} ${backend} ${spacing}`, async () => {
-        const initial = await page.evaluate(async ({font, backend, spacing}) => {
-          const VF = VexFlow;
-          VF.setFonts(font, font === 'Bravura' ? 'Academico' : 'Petaluma Script');
-          await document.fonts.ready;
-          const host = document.getElementById('host'); host.replaceChildren();
-          const target = host.appendChild(document.createElement(backend === 'canvas' ? 'canvas' : 'div')); target.id = 'score';
-          window.example = window.renderComposition(VF, { elementId: 'score', width: 1000, height: 600 }, spacing);
-          return window.example.redraw(1000);
-        }, {font, backend, spacing});
-        const original = await page.screenshot({ omitBackground: false });
-        const narrow = await page.evaluate(() => window.example.redraw(350));
-        assert.ok(narrow.length > initial.length, 'narrow width wraps more rows');
-        assert.ok(narrow.every((row) => Number.isFinite(row.width) && row.height > 0 && row.overflow >= 0));
-        const wide = await page.evaluate(() => window.example.redraw(1000));
-        assert.deepEqual(wide, initial, 'native row geometry returns exactly');
-        assert.deepEqual(await page.screenshot({ omitBackground: false }), original, 'wide redraw is identical');
-      });
-    }
-  } finally { await browser.close(); }
+    for (const font of ['Bravura', 'Petaluma'])
+      for (const backend of ['svg', 'canvas'])
+        for (const spacing of ['engraving', 'proportional']) {
+          await t.test(`${font} ${backend} ${spacing}`, async () => {
+            const initial = await page.evaluate(
+              async ({ font, backend, spacing }) => {
+                const VF = VexFlow;
+                VF.setFonts(font, font === 'Bravura' ? 'Academico' : 'Petaluma Script');
+                await document.fonts.ready;
+                const host = document.getElementById('host');
+                host.replaceChildren();
+                const target = host.appendChild(document.createElement(backend === 'canvas' ? 'canvas' : 'div'));
+                target.id = 'score';
+                window.example = window.renderComposition(
+                  VF,
+                  { elementId: 'score', width: 1000, height: 600 },
+                  spacing
+                );
+                return window.example.redraw(1000);
+              },
+              { font, backend, spacing }
+            );
+            const original = await page.screenshot({ omitBackground: false });
+            const narrow = await page.evaluate(() => window.example.redraw(350));
+            assert.ok(narrow.length > initial.length, 'narrow width wraps more rows');
+            assert.ok(narrow.every((row) => Number.isFinite(row.width) && row.height > 0 && row.overflow >= 0));
+            const wide = await page.evaluate(() => window.example.redraw(1000));
+            assert.deepEqual(wide, initial, 'native row geometry returns exactly');
+            assert.deepEqual(await page.screenshot({ omitBackground: false }), original, 'wide redraw is identical');
+          });
+        }
+  } finally {
+    await browser.close();
+  }
 });

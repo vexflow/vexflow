@@ -10,6 +10,12 @@ import { TabNote, TabNoteStruct } from '../tabnote';
 import type { TupletOptions } from '../tuplet';
 import { RuntimeError } from '../util';
 
+/** Tab relationships narrow native note endpoints while preserving partial spans and chord indexes. */
+export interface EasyScoreTabSpan extends Omit<Parameters<Factory['TabTie']>[0], 'firstNote' | 'lastNote'> {
+  firstNote?: TabNote | null;
+  lastNote?: TabNote | null;
+}
+
 /** Internal bridge avoids a runtime import cycle back to the facade. */
 export interface EasyScoreElementHost {
   factory: () => Factory;
@@ -163,13 +169,13 @@ export class EasyScoreElements {
   }
 
   /** Tab ties support native hammer-on/pull-off text and explicit partial endpoints. */
-  tabTie(...args: Parameters<Factory['TabTie']>) {
+  tabTie(...args: [notes: EasyScoreTabSpan, text?: string]) {
     this.tabEndpoints(args[0]);
     return this.host.manage(() => this.factory.TabTie(...args));
   }
 
   /** A partial slide needs an explicit direction; there are not two frets to compare. */
-  tabSlide(...args: Parameters<Factory['TabSlide']>) {
+  tabSlide(...args: [notes: EasyScoreTabSpan, direction?: number]) {
     this.tabEndpoints(args[0]);
     if (
       (args[1] !== undefined && args[1] !== 1 && args[1] !== -1) ||
@@ -216,7 +222,13 @@ export class EasyScoreElements {
 
   /** Construct a native GraceNote; its options and setters remain available. */
   graceNote(options: Parameters<Factory['GraceNote']>[0]) {
-    return this.host.manage(() => this.factory.GraceNote({ ...this.host.noteDefaults(), ...options }));
+    return this.host.manage(() =>
+      this.factory.GraceNote({
+        ...this.host.noteDefaults(),
+        ...(options.stemDirection !== undefined && options.autoStem === undefined ? { autoStem: false } : {}),
+        ...options,
+      })
+    );
   }
 
   /** Construct a native Accidental; its options and setters remain available. */

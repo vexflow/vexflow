@@ -2813,6 +2813,15 @@
     "isHTMLDiv": "(element: any): element is HTMLDivElement"
   },
   "easyscore/elements": {
+    "EasyScoreTabSpan": {
+      "extends": [
+        "extends Omit<Parameters<Factory['TabTie']>[0], 'firstNote' | 'lastNote'>"
+      ],
+      "fields": [
+        "firstNote?: TabNote | null;",
+        "lastNote?: TabNote | null;"
+      ]
+    },
     "EasyScoreElementHost": {
       "extends": [],
       "fields": [
@@ -2846,8 +2855,8 @@
       "tabNote(options: TabNoteStruct, drawStem = false)",
       "graceTabNote(options: TabNoteStruct)",
       "bend(...args: Parameters<Factory['Bend']>)",
-      "tabTie(...args: Parameters<Factory['TabTie']>)",
-      "tabSlide(...args: Parameters<Factory['TabSlide']>)",
+      "tabTie(...args: [notes: EasyScoreTabSpan, text?: string])",
+      "tabSlide(...args: [notes: EasyScoreTabSpan, direction?: number])",
       "connector(params: Parameters<Factory['StaveConnector']>[0])",
       "multiMeasureRest(params: Parameters<Factory['MultiMeasureRest']>[0])",
       "note(options: StaveNoteStruct)",

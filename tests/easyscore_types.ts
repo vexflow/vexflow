@@ -22,6 +22,8 @@ export function easyScoreTypes(): void {
   score.withDefaults({}, async () => 1);
   const tab = score.make.tabNote({ positions: [{ str: 2, fret: 'X' }], duration: 'q' }, true);
   score.make.tabTie({ firstNote: tab }, 'H');
+  // @ts-expect-error Tab spans require tablature endpoints.
+  score.make.tabTie({ firstNote: score.make.note({ keys: ['c/4'], duration: 'q' }) });
   score.attachToStave(score.make.tabStave(), score.make.clef('tab'));
   // @ts-expect-error Tablature positions require numeric string indexes.
   score.make.tabNote({ positions: [{ str: 'one', fret: 3 }], duration: 'q' });

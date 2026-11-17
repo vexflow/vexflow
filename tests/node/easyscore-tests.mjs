@@ -243,7 +243,7 @@ test('annotation attachment and ties have validated ownership and no duplicate q
   assert.deepEqual(score.builder.getElements().notes, []);
 });
 
-test('public modules and implemented contracts have coverage entries', () => {
+test('public modules and implemented contracts have coverage entries', async () => {
   const manifest = JSON.parse(readFileSync(new URL('../../docs/easyscore-coverage.json', import.meta.url), 'utf8'));
   const source = readFileSync(new URL('../../src/index.ts', import.meta.url), 'utf8');
   const modules = [...source.matchAll(/^export \* from '\.\/([^']+)';/gm)].map((m) => m[1]);
@@ -254,7 +254,27 @@ test('public modules and implemented contracts have coverage entries', () => {
   const testSources = ['easyscore-tests.mjs', 'easyscore-rendering-tests.mjs']
     .map((file) => readFileSync(new URL(file, import.meta.url), 'utf8'))
     .join('\n');
+  const { examples } = await import('../../tools/explorer/catalog.mjs');
+  const { nativeSurface } = await import('../../tools/easyscore-api-audit.mjs');
+  const helpers = nativeSurface()
+    ['easyscore/elements'].EasyScoreElements.filter((signature) => !signature.startsWith('constructor('))
+    .map((signature) => `make.${signature.split('(')[0]}()`);
+  assert.deepEqual(
+    manifest.implemented
+      .filter((feature) => feature.api.startsWith('make.'))
+      .map((feature) => feature.api)
+      .sort(),
+    helpers.sort(),
+    'every named helper needs a coverage row'
+  );
+  assert.equal(new Set(manifest.implemented.map((feature) => feature.api)).size, manifest.implemented.length);
   for (const feature of manifest.implemented) {
+    if (feature.api.startsWith('make.')) assert.ok(feature.example, `${feature.api} needs an executable example`);
+    if (feature.example)
+      assert.ok(
+        examples.some((example) => example.id === feature.example),
+        feature.example
+      );
     assert.ok(guide.includes(feature.api), feature.api);
     assert.ok(testSources.includes(feature.test), feature.api);
   }
@@ -673,9 +693,22 @@ test('relationship helpers reject foreign or invalid endpoints and preserve nati
 
 test('tab helpers preserve native options and validate span heads and grace ownership', () => {
   const score = create();
-  const options = { positions: [{ str: 7, fret: 'X' }, { str: 2, fret: 12 }], duration: 'q', stemDirection: -1 };
+  const options = {
+    positions: [
+      { str: 7, fret: 'X' },
+      { str: 2, fret: 12 },
+    ],
+    duration: 'q',
+    stemDirection: -1,
+  };
   const from = score.make.tabNote(options, true);
-  const to = score.make.tabNote({ ...options, positions: [{ str: 7, fret: 5 }, { str: 2, fret: 14 }] });
+  const to = score.make.tabNote({
+    ...options,
+    positions: [
+      { str: 7, fret: 5 },
+      { str: 2, fret: 14 },
+    ],
+  });
   assert.deepEqual(from.getPositions(), options.positions);
   assert.equal(from.renderOptions.drawStem, true);
   assert.equal(from.getStemDirection(), -1);
@@ -704,11 +737,17 @@ test('staff helpers attach once and preserve native options without standalone d
   const score = create();
   const stave = score.make.stave({ x: 10, y: 20, width: 400 });
   const count = queued(score);
-  const modifiers = [score.make.clef('bass', 'small', '8vb'), score.make.keySignature('D', 'C'),
-    score.make.timeSignature('7/8', 0), score.make.barline(VF.Barline.type.DOUBLE),
-    score.make.repetition(VF.Repetition.type.DC, 0, 0), score.make.volta(VF.Volta.type.BEGIN, '1.', 0, 0),
-    score.make.section('A', 0, 0, false), score.make.tempo({ bpm: 100, duration: 'q', dots: 1 }, 0, 0),
-    score.make.staveText('text', VF.StaveModifier.Position.ABOVE, { shiftX: 0, shiftY: 0 })];
+  const modifiers = [
+    score.make.clef('bass', 'small', '8vb'),
+    score.make.keySignature('D', 'C'),
+    score.make.timeSignature('7/8', 0),
+    score.make.barline(VF.Barline.type.DOUBLE),
+    score.make.repetition(VF.Repetition.type.DC, 0, 0),
+    score.make.volta(VF.Volta.type.BEGIN, '1.', 0, 0),
+    score.make.section('A', 0, 0, false),
+    score.make.tempo({ bpm: 100, duration: 'q', dots: 1 }, 0, 0),
+    score.make.staveText('text', VF.StaveModifier.Position.ABOVE, { shiftX: 0, shiftY: 0 }),
+  ];
   for (const mark of modifiers) {
     score.attachToStave(stave, mark);
     score.attachToStave(stave, mark);
@@ -725,9 +764,20 @@ test('staff helpers attach once and preserve native options without standalone d
   assert.ok(score.make.connector({ topStave: stave, bottomStave: other, type: 'single' }) instanceof VF.StaveConnector);
   assert.throws(() => score.make.multiMeasureRest({ numberOfMeasures: 0 }), /positive/i);
   assert.ok(score.make.multiMeasureRest({ numberOfMeasures: 3 }).setStave(stave) instanceof VF.MultiMeasureRest);
-  const inline = [score.make.barNote(), score.make.clefNote({ options: undefined }), score.make.keySigNote({ key: 'G' }), score.make.timeSigNote({ time: '3/4' })];
+  const inline = [
+    score.make.barNote(),
+    score.make.clefNote({ options: undefined }),
+    score.make.keySigNote({ key: 'G' }),
+    score.make.timeSigNote({ time: '3/4' }),
+  ];
   assert.ok(inline.every((note) => note.shouldIgnoreTicks()));
-  assert.equal(score.voice([...inline, ...score.notes('C4/w')]).getTicksUsed().value(), VF.VexFlow.RESOLUTION);
+  assert.equal(
+    score
+      .voice([...inline, ...score.notes('C4/w')])
+      .getTicksUsed()
+      .value(),
+    VF.VexFlow.RESOLUTION
+  );
   assert.ok(score.make.glyphNote('\uE047', { duration: 'q' }) instanceof VF.GlyphNote);
   assert.ok(score.make.repeatNote('2', { duration: 'w' }) instanceof VF.RepeatNote);
 });
@@ -738,21 +788,48 @@ test('composition scopes defaults, validates pickups and rational voices, and re
   const note = score.withDefaults({ clef: 'bass', stem: 'down' }, (builder) => builder.notes('C3/q')[0]);
   assert.equal(note.getStemDirection(), -1);
   assert.equal(score.defaults, defaults);
-  assert.throws(() => score.withDefaults({ clef: 'bass' }, () => { throw Error('stop'); }), /stop/);
+  assert.throws(
+    () =>
+      score.withDefaults({ clef: 'bass' }, () => {
+        throw Error('stop');
+      }),
+    /stop/
+  );
   assert.equal(score.defaults, defaults);
-  const result = score.compose({ staves: [
-    { id: 'right', measures: [
-      { span: '1/4', voices: [{ notes: 'C5/q[id="pickup"]' }] },
-      { time: '2/4', voices: [
-        { notes: 'C5/8[id="start"], D5, E5, F5, G5, A5[id="end"]', tuplets: [{ start: 0, count: 3 }, { start: 3, count: 3 }], autoBeam: true, stem: 'up' },
-        { notes: 'G4/h', stem: 'down' },
-      ] },
-    ] },
-    { id: 'left', clef: 'bass', measures: [
-      { span: '1/4', voices: [{ notes: 'C3/q' }] },
-      { time: '2/4', voices: [{ notes: 'C3/h' }] },
-    ] },
-  ], spans: [{ kind: 'curve', from: 'start', to: 'end' }] });
+  const result = score.compose({
+    staves: [
+      {
+        id: 'right',
+        measures: [
+          { span: '1/4', voices: [{ notes: 'C5/q[id="pickup"]' }] },
+          {
+            time: '2/4',
+            voices: [
+              {
+                notes: 'C5/8[id="start"], D5, E5, F5, G5, A5[id="end"]',
+                tuplets: [
+                  { start: 0, count: 3 },
+                  { start: 3, count: 3 },
+                ],
+                autoBeam: true,
+                stem: 'up',
+              },
+              { notes: 'G4/h', stem: 'down' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'left',
+        clef: 'bass',
+        measures: [
+          { span: '1/4', voices: [{ notes: 'C3/q' }] },
+          { time: '2/4', voices: [{ notes: 'C3/h' }] },
+        ],
+      },
+    ],
+    spans: [{ kind: 'curve', from: 'start', to: 'end' }],
+  });
   assert.equal(result.systems.length, 2);
   assert.equal(result.voices[1][0].length, 2);
   assert.ok(result.voices.flat(2).every((voice) => voice.isComplete()));
@@ -768,11 +845,35 @@ test('composition failures roll back IDs and queues and enforce shared staff sta
   const count = queued(score);
   const specs = [
     { staves: [{ id: 'a', measures: [{ voices: [{ notes: 'C4/q[id="new"]' }] }] }] },
-    { staves: [{ id: 'a', measures: [{ voices: [{ notes: 'C4/w[id="new"]' }] }] }], spans: [{ kind: 'tie', from: 'new', to: 'missing' }] },
-    { staves: [{ id: 'a', measures: [{ voices: [{ notes: 'C4/w' }] }] }, { id: 'b', measures: [] }] },
-    { staves: [{ id: 'a', measures: [{ voices: [{ notes: 'C4/w' }] }] }, { id: 'b', measures: [{ time: '3/4', voices: [{ notes: 'C3/h.' }] }] }] },
-    { staves: [{ id: 'a', measures: [{ voices: [{ notes: ['C4/h', { change: { key: 'G' } }, 'C4/h'] }, { notes: 'C4/w' }] }] }] },
-    { staves: [{ id: 'a', measures: [{ voices: [{ notes: [{ note: { keys: ['c/4'], duration: 'w' }, stave: 'missing' }] }] }] }] },
+    {
+      staves: [{ id: 'a', measures: [{ voices: [{ notes: 'C4/w[id="new"]' }] }] }],
+      spans: [{ kind: 'tie', from: 'new', to: 'missing' }],
+    },
+    {
+      staves: [
+        { id: 'a', measures: [{ voices: [{ notes: 'C4/w' }] }] },
+        { id: 'b', measures: [] },
+      ],
+    },
+    {
+      staves: [
+        { id: 'a', measures: [{ voices: [{ notes: 'C4/w' }] }] },
+        { id: 'b', measures: [{ time: '3/4', voices: [{ notes: 'C3/h.' }] }] },
+      ],
+    },
+    {
+      staves: [
+        { id: 'a', measures: [{ voices: [{ notes: ['C4/h', { change: { key: 'G' } }, 'C4/h'] }, { notes: 'C4/w' }] }] },
+      ],
+    },
+    {
+      staves: [
+        {
+          id: 'a',
+          measures: [{ voices: [{ notes: [{ note: { keys: ['c/4'], duration: 'w' }, stave: 'missing' }] }] }],
+        },
+      ],
+    },
   ];
   for (const spec of specs) {
     assert.throws(() => score.compose(spec));
@@ -782,7 +883,12 @@ test('composition failures roll back IDs and queues and enforce shared staff sta
     assert.equal(score.factory.sheets.length, 0);
   }
   const native = score.make.note({ keys: ['c/4'], duration: 'w' });
-  assert.throws(() => score.compose({ staves: [{ id: 'a', measures: [{ voices: [{ notes: [native] }] }] }], spans: [{ kind: 'tie', from: 'missing' }] }));
+  assert.throws(() =>
+    score.compose({
+      staves: [{ id: 'a', measures: [{ voices: [{ notes: [native] }] }] }],
+      spans: [{ kind: 'tie', from: 'missing' }],
+    })
+  );
   assert.throws(() => native.getVoice(), /No voice/i);
   assert.equal(native.getStave(), undefined);
   const result = score.compose({ staves: [{ id: 'a', measures: [{ voices: [{ notes: [native] }] }] }] });
@@ -790,34 +896,79 @@ test('composition failures roll back IDs and queues and enforce shared staff sta
 });
 
 test('key-aware composition preserves literal pitches and explicit marks across rational onsets and key changes', () => {
-  const marks = (note) => note.getModifiers().filter((mark) => mark instanceof VF.Accidental).map((mark) => mark.type);
+  const marks = (note) =>
+    note
+      .getModifiers()
+      .filter((mark) => mark instanceof VF.Accidental)
+      .map((mark) => mark.type);
   const score = create();
-  const result = score.compose({ accidentals: 'key-aware', staves: [{ id: 'a', key: 'G', measures: [
-    { voices: [{ notes: 'F#4/q, F#4, F4, F4' }] },
-    { voices: [{ notes: 'F#4/q, F4, F#4, F4' }, { notes: 'F4/q, F#4, F4, F#4' }] },
-    { voices: [{ notes: ['F#4/h', { change: { key: 'C' } }, 'F#4/q, F#4'] }] },
-  ] }] });
+  const result = score.compose({
+    accidentals: 'key-aware',
+    staves: [
+      {
+        id: 'a',
+        key: 'G',
+        measures: [
+          { voices: [{ notes: 'F#4/q, F#4, F4, F4' }] },
+          { voices: [{ notes: 'F#4/q, F4, F#4, F4' }, { notes: 'F4/q, F#4, F4, F#4' }] },
+          { voices: [{ notes: ['F#4/h', { change: { key: 'C' } }, 'F#4/q, F#4'] }] },
+        ],
+      },
+    ],
+  });
   assert.deepEqual(result.notes[0][0][0].map(marks), [[], [], ['n'], []]);
   assert.equal(result.notes[0][0][0][0].getKeys()[0], 'F#/4');
   assert.deepEqual(result.notes[1][0][0].map(marks), [['#'], ['n'], ['#'], ['n']]);
   assert.deepEqual(result.notes[1][0][1].map(marks), [['n'], ['#'], ['n'], ['#']]);
   assert.deepEqual(result.notes[2][0][0].filter((n) => !n.shouldIgnoreTicks()).map(marks), [[], ['#'], []]);
-  const caution = create({ commitHooks: [(options, note) => { if (options.id === 'caution') note.getModifiers()[0].setAsCautionary(); note.setAttribute('id', options.id ?? note.getAttribute('id')); }] });
-  const preserved = caution.compose({ accidentals: 'key-aware', staves: [{ id: 'a', key: 'G', measures: [{ voices: [{ notes: 'F#4/q[id="caution"], F++4, F4, F4' }] }] }] });
+  const caution = create({
+    commitHooks: [
+      (options, note) => {
+        if (options.id === 'caution') note.getModifiers()[0].setAsCautionary();
+        note.setAttribute('id', options.id ?? note.getAttribute('id'));
+      },
+    ],
+  });
+  const preserved = caution.compose({
+    accidentals: 'key-aware',
+    staves: [{ id: 'a', key: 'G', measures: [{ voices: [{ notes: 'F#4/q[id="caution"], F++4, F4, F4' }] }] }],
+  });
   const notes = preserved.notes[0][0][0];
   assert.equal(notes[0].getModifiers()[0].isCautionary(), true);
   assert.deepEqual(notes.map(marks), [['#'], ['++'], ['n'], []]);
-  const rational = create().compose({ accidentals: 'key-aware', staves: [{ id: 'a', measures: [{ time: '2/4', voices: [
-    { notes: 'F#4/8, F4, F#4, F4, F#4, F4', tuplets: [{ start: 0, count: 3 }, { start: 3, count: 3 }] },
-    { notes: 'C4/q, F4' },
-  ] }] }] });
+  const rational = create().compose({
+    accidentals: 'key-aware',
+    staves: [
+      {
+        id: 'a',
+        measures: [
+          {
+            time: '2/4',
+            voices: [
+              {
+                notes: 'F#4/8, F4, F#4, F4, F#4, F4',
+                tuplets: [
+                  { start: 0, count: 3 },
+                  { start: 3, count: 3 },
+                ],
+              },
+              { notes: 'C4/q, F4' },
+            ],
+          },
+        ],
+      },
+    ],
+  });
   assert.deepEqual(marks(rational.notes[0][0][1][1]), ['n']);
 });
 
 test('composition spans and signature repetition require explicit layout policies', () => {
-  const spec = { staves: [{ id: 'a', measures: [
-    { voices: [{ notes: 'C4/w[id="first"]' }] }, { voices: [{ notes: 'C4/w[id="last"]' }] },
-  ] }], spans: [{ kind: 'tie', from: 'first', to: 'last' }] };
+  const spec = {
+    staves: [
+      { id: 'a', measures: [{ voices: [{ notes: 'C4/w[id="first"]' }] }, { voices: [{ notes: 'C4/w[id="last"]' }] }] },
+    ],
+    spans: [{ kind: 'tie', from: 'first', to: 'last' }],
+  };
   assert.throws(() => create().compose(spec), /manual segmentation/i);
   const manual = create().compose({ ...spec, crossMeasureSpans: 'manual', signatures: 'every-measure' });
   assert.equal(manual.diagnostics.length, 1);
@@ -827,13 +978,31 @@ test('composition spans and signature repetition require explicit layout policie
 
 test('composition keeps cross-staff placement and applies accidentals on the target stave', () => {
   const score = create();
-  const result = score.compose({ accidentals: 'key-aware', staves: [
-    { id: 'upper', measures: [{ voices: [{ notes: [{ note: { keys: ['f/3'], duration: 'w', clef: 'bass' }, id: 'cross', stave: 'lower' }] }] }] },
-    { id: 'lower', key: 'G', clef: 'bass', measures: [{ voices: [{ notes: 'G2/w' }] }] },
-  ] });
+  const result = score.compose({
+    accidentals: 'key-aware',
+    staves: [
+      {
+        id: 'upper',
+        measures: [
+          {
+            voices: [
+              { notes: [{ note: { keys: ['f/3'], duration: 'w', clef: 'bass' }, id: 'cross', stave: 'lower' }] },
+            ],
+          },
+        ],
+      },
+      { id: 'lower', key: 'G', clef: 'bass', measures: [{ voices: [{ notes: 'G2/w' }] }] },
+    ],
+  });
   const note = result.getNote('cross');
   assert.equal(note.getStave(), result.staves[0][1]);
-  assert.deepEqual(note.getModifiers().filter((mark) => mark instanceof VF.Accidental).map((mark) => mark.type), ['n']);
+  assert.deepEqual(
+    note
+      .getModifiers()
+      .filter((mark) => mark instanceof VF.Accidental)
+      .map((mark) => mark.type),
+    ['n']
+  );
   result.sheet.format();
   result.sheet.setWidth(220).format();
   assert.equal(note.getStave(), result.staves[0][1]);
@@ -842,10 +1011,19 @@ test('composition keeps cross-staff placement and applies accidentals on the tar
 
 test('composition carries clef state and cancels inline key signatures on the correct staff lines', () => {
   const score = create();
-  const result = score.compose({ staves: [{ id: 'bass', clef: 'bass', key: 'G', measures: [
-    { voices: [{ notes: 'G3/w' }] },
-    { key: 'D', voices: [{ notes: ['D3/h', { change: { clef: 'treble', key: 'C' } }, 'C5/h'] }] },
-  ] }] });
+  const result = score.compose({
+    staves: [
+      {
+        id: 'bass',
+        clef: 'bass',
+        key: 'G',
+        measures: [
+          { voices: [{ notes: 'G3/w' }] },
+          { key: 'D', voices: [{ notes: ['D3/h', { change: { clef: 'treble', key: 'C' } }, 'C5/h'] }] },
+        ],
+      },
+    ],
+  });
   assert.equal(result.staves[0][0].getClef(), 'bass');
   assert.equal(result.staves[1][0].getClef(), 'bass');
   const inline = result.notes[1][0][0].find((note) => note instanceof VF.KeySigNote);
@@ -857,4 +1035,20 @@ test('composition carries clef state and cancels inline key signatures on the co
   const attached = score.make.stave();
   score.attachToStave(attached, score.make.clef('alto'));
   assert.equal(attached.getClef(), 'alto');
+});
+
+test('non-pitched timed notes accept native modifiers at their single attachment index', () => {
+  const score = create();
+  const note = score.make.glyphNote('\uE047', { duration: 'w' });
+  const label = score.make.annotation({ text: 'sim.' });
+  score.attach(note, label);
+  assert.equal(label.getNote(), note);
+  assert.equal(label.getIndex(), 0);
+  assert.throws(() => score.attach(note, score.make.annotation({ text: 'bad' }), 1), /index/i);
+});
+
+test('typed grace notes retain explicit stem direction over automatic defaults', () => {
+  const grace = create().make.graceNote({ keys: ['c/4'], duration: '16', stemDirection: -1 });
+  assert.equal(grace.getStemDirection(), -1);
+  assert.equal(grace.isAutoStem(), false);
 });

@@ -1,15 +1,7 @@
 {
-  "description": "Public-module classification and tested EasyScore contracts. Classification is not a claim of full feature support. Review native option and setter additions separately.",
+  "description": "Every public module is classified. Every named EasyScore constructor has a native return path, guide entry, executable example, and regression contract. The API snapshot detects native option drift; rendering tests cover representative combinations, not every possible combination.",
   "modules": {
-    "composition": [
-      "easyscore",
-      "factory",
-      "system",
-      "sheet",
-      "voice",
-      "formatter",
-      "registry"
-    ],
+    "composition": ["easyscore", "factory", "system", "sheet", "voice", "formatter", "registry"],
     "notes-and-rhythm": [
       "stavenote",
       "ghostnote",
@@ -68,14 +60,7 @@
       "timesignature",
       "timesignote"
     ],
-    "tablature": [
-      "gracetabnote",
-      "tabnote",
-      "tabslide",
-      "tabstave",
-      "tabtie",
-      "tuning"
-    ],
+    "tablature": ["gracetabnote", "tabnote", "tabslide", "tabstave", "tabtie", "tuning"],
     "infrastructure": [
       "boundingbox",
       "canvascontext",
@@ -548,9 +533,26 @@
       "guide": "docs/easyscore.md",
       "example": "easyscore-composition",
       "test": "composition scopes defaults, validates pickups and rational voices, and resolves forward spans"
+    },
+    {
+      "api": "setContext()",
+      "guide": "docs/easyscore.md",
+      "example": null,
+      "test": "annotation attachment and ties have validated ownership and no duplicate queue entries"
+    },
+    {
+      "api": "set()",
+      "guide": "docs/easyscore.md",
+      "example": null,
+      "test": "composition scopes defaults, validates pickups and rational voices, and resolves forward spans"
     }
   ],
-  "pending": [
-    "Complete guide, paired examples, and option-level coverage"
+  "pending": [],
+  "limits": [
+    "Sheet does not paginate, split spans, or repeat signatures only at row starts.",
+    "Hairpins need two endpoints; other partial spans use native support.",
+    "Key-aware composition keeps grace accidentals explicit.",
+    "Prepare native inputs before composition rhythm or accidental policies.",
+    "Arbitrary existing-object setters and application hook side effects are outside managed rollback."
   ]
 }

@@ -18,7 +18,7 @@ export const layout = [
     `// The function body is shared with the tested user-guide example.
 (${createEasyScoreExample.toString()})(VF, { elementId: 'score', width, height }, ink);`,
     [],
-    'EasyScore.create() validates before construction. Helpers return native VexFlow objects. This is the first API slice; other notation families remain available through Factory.'
+    'EasyScore.create() validates before construction. Helpers return native VexFlow objects. Typed helpers cover all notation families; native setters remain available.'
   ),
   e(
     'easyscore-references',
@@ -65,19 +65,37 @@ export const layout = [
     'Beam groups use exact Fractions and preserve explicit stems by default. Create tuplets before voices. Spans draw through the score; row-break segments remain explicit.'
   ),
   e(
-    'easyscore-structure', 'EasyScore: tablature & staff structure', group,
+    'easyscore-structure',
+    'EasyScore: tablature & staff structure',
+    group,
     'Tablature, bends, grace groups, inline changes, rests, repeats, and staff markings.',
     'EasyScore TabNote GraceTabNote TabSlide TabTie Bend Stave Clef KeySignature TimeSignature MultiMeasureRest RepeatNote GlyphNote',
     `(${renderEasyScoreStructure.toString()})(VF, { elementId: 'score', width, height }, params.family, ink);`,
-    [select('family', 'Family', 'tab', ['tab', 'grace-tab', 'rest', 'inline', 'repeat', 'labels', 'endings'])],
+    [
+      select('family', 'Family', 'tab', [
+        'tab',
+        'grace-tab',
+        'rest',
+        'inline',
+        'repeat',
+        'labels',
+        'endings',
+        'connector',
+      ]),
+    ],
     'Staff modifiers draw through their stave. Inline clefs and signatures change appearance; update note options explicitly. Tab tuning stays a separate native utility.'
   ),
   e(
-    'easyscore-composition', 'EasyScore: responsive composition', group,
+    'easyscore-composition',
+    'EasyScore: responsive composition',
+    group,
     'A grand staff with pickup, opposing voices, triplets, changing meter, key-aware accidentals, and inline state.',
     'EasyScore compose Sheet System Voice Fraction Accidental',
     `(${renderEasyScoreComposition.toString()})(VF, { elementId: 'score', width: params.sheetWidth, height }, params.spacing, ink);`,
-    [number('sheetWidth', 'Width', 640, 320, 1000, 20), select('spacing', 'Spacing', 'engraving', ['engraving', 'proportional'])],
+    [
+      number('sheetWidth', 'Width', 640, 320, 1000, 20),
+      select('spacing', 'Spacing', 'engraving', ['engraving', 'proportional']),
+    ],
     'Each measure is a native System. Tuplets precede voices; all voices share the actual span. Signatures repeat at every measure here, so any measure can begin a row. Use Sheet.getRows() to inspect overflow.'
   ),
   e(

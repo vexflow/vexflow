@@ -2,30 +2,28 @@
 
 Plan for [#354](https://github.com/vexflow/vexflow/issues/354).
 
-Status: the first two implementation slices are complete and validated on `easyscore-overhaul`. Work is committed and pushed to this branch. Main receives the overhaul only after all milestones are complete.
+Status: all milestones are implemented and validated on `easyscore-overhaul`. Main has not been merged. The interactive guide in #356 remains separate.
 
-The [user guide](docs/easyscore.md) documents the implemented surface. The [coverage manifest](docs/easyscore-coverage.json) classifies public modules and tracks implemented contracts.
+The [API reference](docs/easyscore.md), [contracts](docs/easyscore-contracts.md), and [coverage manifest](docs/easyscore-coverage.json) describe the implementation.
 
-Implemented in this slice:
+| Milestone                  | Status   | Result                                                                                                |
+| -------------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| 0. Inventory               | Complete | Public modules, native option snapshot, explicit helper/lifecycle contracts.                          |
+| 1. Reliability             | Complete | Pure parsing, source diagnostics, strict validation, and construction rollback.                       |
+| 2. Entry point             | Complete | Facade, local IDs/provenance, adoption, Sheet, batch construction, and Inspector source selection.    |
+| 3. Notes and modifiers     | Complete | Typed sequences, percussion, all note modifiers, and grace/subnote ownership.                         |
+| 4. Rhythm and spans        | Complete | Automatic beams, rational tuplets, dynamics, and validated native relationships.                      |
+| 5. Tab and staff structure | Complete | Tablature, bends/slides/ties, staff markings, inline changes, repeats, and rests.                     |
+| 6. Composition             | Complete | Aligned measures, pickups, multiple voices, scoped state, accidental policies, and stable reflow.     |
+| 7. Coverage and packaging  | Complete | Complete reference/migration docs, every-helper coverage gate, and packed ESM/CJS/declaration checks. |
 
-- Strict `EasyScore.create()`, `make.annotation()`, `make.tie()`, `attach()`, `system()`, style, draw, and reset helpers.
-- Pure `parseNotation()` results with source diagnostics. Strict construction and measure requests clean up failed managed work.
-- Native note options, voice modes/time/resolution, working softmax options, and validated articulation names/codes/glyphs.
-- A guide and Explorer example, native-rendering parity checks, and compatibility/ownership regressions.
+Final validation: 229 Node checks, 1,891 QUnit tests, 12 Explorer checks, and 2 bundled-gallery checks pass. Lint, source/declaration builds, all public ESM/CommonJS package entries, and an external TypeScript consumer pass.
 
-Second slice:
+Native limits remain explicit: no automatic span splitting, row-start-only signature repetition, pagination, or general collision solver.
+Hairpins require two endpoints. Grace accidentals remain explicit. Adopted inputs must be prepared before composition rhythm/accidental policies.
 
-- Score-local `getElement()` and typed `getNote()` lookup, synchronized native ID changes, and duplicate checks.
-- `getSource()` provenance for parsed notes/modifiers, including complete measure input ranges.
-- Explicit `adopt()` roles for native notes, custom modifiers, and standalone drawables.
-- Explorer click-to-source selection, with conservative handling of ambiguous or generated input.
-- Rollback/reset coverage and a native-rendering parity example for extensions.
-
-Validation for slice two: 105 Node checks, 1,891 QUnit tests, and 12 Explorer checks pass. Source types, emitted-declaration consumer checks, and lint pass. Native-extension rendering matches SVG/Canvas with Bravura and Petaluma, including retained redraw.
-
-Still pending: the final coverage/guide audit.
-Milestone 0 is complete: [contracts](docs/easyscore-contracts.md) map every notation family to a typed path and lifecycle. A checked native API snapshot records exported types, constructors, options, and public members. Beginner, piano, tab, and percussion workflows are reviewed. Milestone 1 is complete: typed pure validators complement source diagnostics and transactional construction. Native zero-valued bracket options are honored, and Factory setup leaves caller options untouched. Milestone 2 is complete: the facade includes native Sheet access and nested batch construction, alongside lookup, provenance, adoption, style, reset, and retained drawing. Milestone 3 is complete: typed sequences, percussion heads, all note-modifier constructors, and grace/subnote ownership have executable examples and semantic/rendering checks. Milestone 4 is complete: automatic beaming preserves explicit stem policies, native tuplet/span handles validate timing and endpoints, and dynamics/partial-span examples cover both renderers. Hairpins require both endpoints because the native renderer cannot draw partial hairpins. Milestone 5 is complete: tablature, bends/slides/ties, grace-tab groups, all staff modifiers, inline changes, repeat/glyph notes, and multi-measure rests have typed helpers and rendering checks. Milestone 6 is complete: structured composition validates aligned rational measures, resolves IDs, scopes staff state, preserves cross-staff assignments, and offers explicit accidental/signature/span policies. Responsive examples caught and fixed stale Sheet bounds after redraw. Milestone 7 remains.
-Reviewed against `main` at `91e753e79e1fed1ef87a669b884dab50e7dca463` on November 16, 2026.
+The original review below was made against `main` at `91e753e79e1fed1ef87a669b884dab50e7dca463` on November 16, 2026.
+It records the strategy and exit criteria for the completed implementation.
 
 ## Recommendation
 

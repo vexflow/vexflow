@@ -46,6 +46,7 @@ export type {
   EasyScoreVoiceSpec,
 } from './easyscore/composition';
 export type { EasyScoreSource } from './easyscore/elementindex';
+export type { EasyScoreTabSpan } from './easyscore/elements';
 export type { EasyScoreAutoBeamOptions } from './easyscore/rhythm';
 
 // To enable logging for this class. Set `VexFlow.EasyScore.DEBUG` to `true`.
@@ -745,7 +746,7 @@ export class EasyScore {
     if (
       !Number.isInteger(index) ||
       index < 0 ||
-      index >= (note instanceof TabNote ? note.getPositions().length : note.getKeys().length)
+      index >= (note instanceof TabNote ? note.getPositions().length : Math.max(1, note.getKeys().length))
     ) {
       throw new RuntimeError('BadArguments', `Invalid chord index: ${index}`);
     }

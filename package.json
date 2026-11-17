@@ -135,7 +135,8 @@
     "explorer:upload": "node tools/explorer/upload.mjs",
     "tests:build": "node tools/tests-site.mjs build",
     "tests:upload": "node tools/tests-site.mjs upload",
-    "tests:test": "node tools/tests-site.test.mjs"
+    "tests:test": "node tools/tests-site.test.mjs",
+    "test:easyscore-package": "grunt build:esm build:types build:cjs && node tools/easyscore-package-check.mjs"
   },
   "homepage": "https://vexflow.com/",
   "keywords": [
