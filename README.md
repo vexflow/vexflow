@@ -35,7 +35,7 @@ If your project uses a bundler, you can install VexFlow from npm:
 npm install vexflow
 ```
 
-[See our tutorial](https://vexflow.github.io/vexflow-examples/guides/tutorial/).
+[Read the interactive user guide](https://vexflow.com/guide/) for Quickstart, EasyScore, the native API, and an editable playground. [Run or build the guide locally](guide/README.md).
 
 ## Factory and EasyScore
 
@@ -109,6 +109,7 @@ A good way to learn the API is to look at our examples & unit tests:
 - [Chord symbol kerning](docs/chord-symbols.md).
 - [Score layout](docs/score-layout.md), [proportional spacing](docs/proportional-spacing.md), and [responsive sheets and themes](docs/sheets-and-themes.md).
 - [Rendering tests and visual comparisons](docs/testing.md).
+- [Interactive user guide](guide/README.md): learn with editable examples.
 - [VexFlow Explorer](tools/explorer/README.md): browse and edit notation.
 
 - If you need help, start a [GitHub discussion](https://github.com/vexflow/vexflow/discussions).

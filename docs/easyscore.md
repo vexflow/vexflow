@@ -4,7 +4,8 @@ EasyScore combines compact notation strings with typed helpers that return nativ
 Start with strings for pitches and rhythm. Use `make.*` for native notation, `system()` for direct layout, or `compose()` for aligned measures.
 The helpers cover every built-in notation family. Returned objects retain their native setters.
 
-This is the API reference. The interactive guide is developed separately in [#356](https://github.com/vexflow/vexflow/issues/356).
+This is the API reference. For editable lessons, use the [interactive user guide](https://vexflow.com/guide/).
+See [guide development](guide.md) to run it locally.
 
 ## First score
 
