@@ -128,6 +128,8 @@ export class Element {
   /** Distinguishes caller overrides from built-in metric colors. */
   protected styleExplicit = false;
   protected registry?: Registry;
+  /** Independent ID indexes can validate changes without replacing the default Registry. */
+  private idListeners?: Set<{ validate: (id: string | undefined) => void; changed: () => void }>;
 
   protected _fontInfo: Required<FontInfo>;
   protected fontScale: number;
@@ -355,13 +357,23 @@ export class Element {
     if (element) return element as unknown as SVGElement;
   }
 
+  /** @internal Subscribe a local ID index. All validators run before an ID is changed. */
+  onIdChange(validate: (id: string | undefined) => void, changed: () => void): () => void {
+    const listener = { validate, changed };
+    const listeners = (this.idListeners ??= new Set());
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+  }
+
   /** Set an attribute such as 'id', 'class', or 'type'. */
   setAttribute(name: string, value: string | undefined): this {
     const oldID = this.attrs.id;
     const oldValue = this.attrs[name];
+    if (name === 'id') this.idListeners?.forEach((listener) => listener.validate(value));
     this.attrs[name] = value;
     // Register with old id to support id changes.
     this.registry?.onUpdate({ id: oldID, name, value, oldValue });
+    if (name === 'id') this.idListeners?.forEach((listener) => listener.changed());
     return this;
   }
 

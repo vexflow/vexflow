@@ -4,6 +4,7 @@ import { createEditor, highlightCode } from './editor.mjs';
 import { createGlyphAtlas } from './glyphs.mjs';
 import { Preview } from './preview.mjs';
 import { analyzeLayout } from './render-metrics.mjs';
+import { findNotationRange } from './source.mjs';
 
 const $ = (id) => document.getElementById(id);
 const node = (tag, text, className) => {
@@ -16,6 +17,7 @@ let current,
   params = {},
   elements = [],
   lastSVG = '',
+  renderedCode = '',
   lastWidth = 0,
   debounce,
   pending = false;
@@ -210,8 +212,9 @@ function run() {
   $('elements').disabled = true;
   $('inspection').hidden = true;
   document.querySelector('.inspector-hint').hidden = false;
+  renderedCode = editor.getCode();
   preview.run({
-    code: editor.getCode(),
+    code: renderedCode,
     params,
     width,
     height: 245,
@@ -242,6 +245,7 @@ function receive(message) {
       document.querySelector('.inspector-hint').hidden = false;
     }
     showInspection(message.element, message.pinned);
+    if (message.pinned) selectSource(message.element);
     if (message.point)
       $('pointer-position').textContent =
         `x ${message.point.x} · y ${message.point.y}${message.pinned ? ' · pinned' : ''}`;
@@ -271,6 +275,18 @@ function receive(message) {
   }
 }
 
+/** Old previews and ambiguous literals must never select unrelated editor text. */
+function sourceRange(element) {
+  if (pending || editor.getCode() !== renderedCode) return undefined;
+  return findNotationRange(renderedCode, element?.source, Prism);
+}
+
+/** Hover only inspects. A click or explicit inspector action may move the editor selection. */
+function selectSource(element) {
+  const range = sourceRange(element);
+  if (range) editor.selectRange(range.start, range.end);
+}
+
 /** Display measured bounds and safe, public element properties. */
 function showInspection(element, pinned = false) {
   if (!element) return;
@@ -290,6 +306,18 @@ function showInspection(element, pinned = false) {
     heading.append(release);
   }
   pane.append(heading, node('div', element.id, 'inspection-id'));
+  if (element.source) {
+    const { input, start, end, measure } = element.source;
+    pane.append(node('div', `Notation source${measure ? ` · measure ${measure}` : ''}`, 'subtle'));
+    pane.append(node('pre', input.slice(start, end), 'notation-source'));
+    const select = node('button', 'Select source', 'text-button');
+    select.disabled = !sourceRange(element);
+    select.onclick = () => selectSource(element);
+    select.title = select.disabled
+      ? 'No unique literal in the current editor. Run edits before selecting source.'
+      : 'Select notation in the editor';
+    pane.append(select);
+  }
   for (const [name, box] of [
     ['Rendered bounds', element.rendered],
     ['Layout bounds', element.layout],

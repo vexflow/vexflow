@@ -51,6 +51,12 @@ export class ClefNote extends Note {
   }
 
   override getBoundingBox(): BoundingBox {
-    return this.clef.getBoundingBox();
+    const box = this.clef.getBoundingBox();
+    const stave = this.getStave();
+    if (stave)
+      box.setY(
+        stave.getYForLine(this.clef.line) + this.clef.getYShift() - this.clef.getTextMetrics().actualBoundingBoxAscent
+      );
+    return box;
   }
 }

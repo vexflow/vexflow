@@ -9,9 +9,13 @@ import { Annotation, AnnotationHorizontalJustify, AnnotationVerticalJustify } fr
 import { Articulation } from './articulation';
 import { BarNote } from './barnote';
 import { Beam, PartialBeamDirection } from './beam';
+import { Bend } from './bend';
 import { ChordSymbol } from './chordsymbol';
+import { Clef } from './clef';
 import { ClefNote } from './clefnote';
+import { Crescendo } from './crescendo';
 import { Curve, CurveOptions } from './curve';
+import { Dot } from './dot';
 import { EasyScore, EasyScoreOptions } from './easyscore';
 import { Element } from './element';
 import { FontInfo } from './font';
@@ -21,12 +25,16 @@ import { GhostNote } from './ghostnote';
 import { GlyphNote, GlyphNoteOptions } from './glyphnote';
 import { GraceNote, GraceNoteStruct } from './gracenote';
 import { GraceNoteGroup } from './gracenotegroup';
+import { GraceTabNote } from './gracetabnote';
+import { KeySignature } from './keysignature';
 import { KeySigNote } from './keysignote';
+import { Modifier } from './modifier';
 import { ModifierContext } from './modifiercontext';
 import { MultiMeasureRest, MultimeasureRestRenderOptions } from './multimeasurerest';
 import { Note, NoteStruct } from './note';
 import { NoteSubGroup } from './notesubgroup';
 import { Ornament } from './ornament';
+import { Parenthesis } from './parenthesis';
 import { PedalMarking } from './pedalmarking';
 import { Registry } from './registry';
 import { RenderContext } from './rendercontext';
@@ -34,26 +42,42 @@ import { Renderer } from './renderer';
 import { RepeatNote } from './repeatnote';
 import { Sheet, SheetOptions } from './sheet';
 import { Stave, StaveOptions } from './stave';
-import { BarlineType } from './stavebarline';
+import { Barline, BarlineType } from './stavebarline';
 import { StaveConnector, StaveConnectorType } from './staveconnector';
+import { StaveHairpin, StaveHairpinRenderOptions } from './stavehairpin';
 import { StaveLine } from './staveline';
+import { StaveModifier } from './stavemodifier';
 import { StaveNote, StaveNoteStruct } from './stavenote';
+import { Repetition } from './staverepetition';
+import { StaveSection } from './stavesection';
+import { StaveTempo } from './stavetempo';
+import { StaveText } from './stavetext';
 import { StaveTie } from './stavetie';
+import { Volta } from './stavevolta';
 import { StemmableNote } from './stemmablenote';
 import { StringNumber } from './stringnumber';
+import { Stroke } from './strokes';
 import { System, SystemOptions } from './system';
 import { TabNote, TabNoteStruct } from './tabnote';
+import { TabSlide } from './tabslide';
 import { TabStave } from './tabstave';
+import { TabTie } from './tabtie';
 import { TextBracket } from './textbracket';
 import { TextDynamics } from './textdynamics';
 import { TextNote, TextNoteStruct } from './textnote';
 import { TickContext } from './tickcontext';
+import { TimeSignature } from './timesignature';
 import { TimeSigNote } from './timesignote';
+import { Tremolo } from './tremolo';
 import { Tuplet, TupletOptions } from './tuplet';
 import { defined, log, RuntimeError } from './util';
+import { Vibrato } from './vibrato';
 import { VibratoBracket } from './vibratobracket';
 import { Voice, VoiceTime } from './voice';
 import { isHTMLCanvas } from './web';
+
+/** Explicit drawing role for a native extension adopted into a Factory. */
+export type FactoryElementRole = 'note' | 'modifier' | 'staveModifier' | 'drawable';
 
 export interface FactoryOptions {
   stave?: {
@@ -106,6 +130,13 @@ export class Factory {
   /** Ownership survives drawing; weak keys do not retain discarded notation. */
   private static owners = new WeakMap<Element, Factory>();
   private constructionScopes: Element[][] = [];
+  private groupScopes: (() => void)[][] = [];
+  private static groups = new WeakMap<Note, Modifier>();
+
+  /** A grouped note draws only through its modifier, never through a main voice or queue. */
+  static getGroup(note: Note): Modifier | undefined {
+    return Factory.groups.get(note);
+  }
 
   /** Identify the Factory that created an element, without changing its draw role. */
   static getOwner(element: Element): Factory | undefined {
@@ -114,8 +145,37 @@ export class Factory {
 
   /** Record ownership independently of whether the element draws itself or attaches to a note. */
   private own<T extends Element>(element: T): T {
+    const owner = Factory.owners.get(element);
+    if (owner === this) return element;
+    if (owner) throw new RuntimeError('BadArguments', 'Element belongs to another Factory.');
     Factory.owners.set(element, this);
     this.constructionScopes.forEach((scope) => scope.push(element));
+    return element;
+  }
+
+  /**
+   * Adopt a native extension without guessing its drawing role. Attachment and layout remain explicit.
+   * Repeating adoption cannot enqueue an element twice. Ownership survives draw/reset.
+   */
+  adopt<T extends Element>(element: T, role: FactoryElementRole): T {
+    const valid =
+      (role === 'note' && element instanceof Note) ||
+      (role === 'modifier' && element instanceof Modifier) ||
+      (role === 'staveModifier' && element instanceof StaveModifier) ||
+      (role === 'drawable' &&
+        element instanceof Element &&
+        !(element instanceof Note) &&
+        !(element instanceof Modifier) &&
+        !(element instanceof Voice) &&
+        !(element instanceof Stave) &&
+        !(element instanceof StaveModifier) &&
+        !(element instanceof System));
+    if (!valid) throw new RuntimeError('BadArguments', `Invalid adopted element role: ${role}`);
+    if (element instanceof Note && Factory.groups.has(element)) {
+      throw new RuntimeError('BadArguments', 'A grouped note cannot be queued independently.');
+    }
+    this.own(element);
+    if ((role === 'note' || role === 'drawable') && !this.renderQ.includes(element)) this.renderQ.push(element);
     return element;
   }
 
@@ -131,16 +191,23 @@ export class Factory {
       retained: this.retained,
     };
     const created: Element[] = [];
+    const grouped: (() => void)[] = [];
     this.constructionScopes.push(created);
+    this.groupScopes.push(grouped);
     const run = () => {
       try {
         return build();
       } catch (error) {
         Object.assign(this, snapshot);
         created.forEach((element) => Factory.owners.delete(element));
+        grouped
+          .slice()
+          .reverse()
+          .forEach((restore) => restore());
         throw error;
       } finally {
         this.constructionScopes.pop();
+        this.groupScopes.pop();
       }
     };
     const registry = Registry.getDefaultRegistry();
@@ -283,6 +350,71 @@ export class Factory {
     return this.own(stave);
   }
 
+  /** Construct a native Bend with an explicit drawing role. */
+  Bend(...args: ConstructorParameters<typeof Bend>): Bend {
+    return this.adopt(new Bend(...args).setContext(this.context), 'modifier');
+  }
+
+  /** Construct a native Clef with an explicit drawing role. */
+  Clef(...args: ConstructorParameters<typeof Clef>): Clef {
+    return this.adopt(new Clef(...args).setContext(this.context), 'staveModifier');
+  }
+
+  /** Construct a native KeySignature with an explicit drawing role. */
+  KeySignature(...args: ConstructorParameters<typeof KeySignature>): KeySignature {
+    return this.adopt(new KeySignature(...args).setContext(this.context), 'staveModifier');
+  }
+
+  /** Construct a native TimeSignature with an explicit drawing role. */
+  TimeSignature(...args: ConstructorParameters<typeof TimeSignature>): TimeSignature {
+    return this.adopt(new TimeSignature(...args).setContext(this.context), 'staveModifier');
+  }
+
+  /** Construct a native Barline with an explicit drawing role. */
+  Barline(...args: ConstructorParameters<typeof Barline>): Barline {
+    return this.adopt(new Barline(...args).setContext(this.context), 'staveModifier');
+  }
+
+  /** Construct a native Repetition with an explicit drawing role. */
+  Repetition(...args: ConstructorParameters<typeof Repetition>): Repetition {
+    return this.adopt(new Repetition(...args).setContext(this.context), 'staveModifier');
+  }
+
+  /** Construct a native Volta with an explicit drawing role. */
+  Volta(...args: ConstructorParameters<typeof Volta>): Volta {
+    return this.adopt(new Volta(...args).setContext(this.context), 'staveModifier');
+  }
+
+  /** Construct a native StaveSection with an explicit drawing role. */
+  StaveSection(...args: ConstructorParameters<typeof StaveSection>): StaveSection {
+    return this.adopt(new StaveSection(...args).setContext(this.context), 'staveModifier');
+  }
+
+  /** Construct a native StaveTempo with an explicit drawing role. */
+  StaveTempo(...args: ConstructorParameters<typeof StaveTempo>): StaveTempo {
+    return this.adopt(new StaveTempo(...args).setContext(this.context), 'staveModifier');
+  }
+
+  /** Construct a native StaveText with an explicit drawing role. */
+  StaveText(...args: ConstructorParameters<typeof StaveText>): StaveText {
+    return this.adopt(new StaveText(...args).setContext(this.context), 'staveModifier');
+  }
+
+  /** Construct a native TabTie with an explicit drawing role. */
+  TabTie(...args: ConstructorParameters<typeof TabTie>): TabTie {
+    return this.adopt(new TabTie(...args).setContext(this.context), 'drawable');
+  }
+
+  /** Construct a native TabSlide with an explicit drawing role. */
+  TabSlide(...args: ConstructorParameters<typeof TabSlide>): TabSlide {
+    return this.adopt(new TabSlide(...args).setContext(this.context), 'drawable');
+  }
+
+  /** Grace tab children draw through a GraceNoteGroup, never as standalone tickables. */
+  GraceTabNote(options: TabNoteStruct): GraceTabNote {
+    return this.own(new GraceTabNote(options).setContext(this.context));
+  }
+
   StaveNote(noteStruct: StaveNoteStruct): StaveNote {
     const note = new StaveNote(noteStruct);
     if (this.stave) note.setStave(this.stave);
@@ -332,16 +464,7 @@ export class Factory {
   }
 
   ClefNote(params?: { type?: string; options?: { size?: string; annotation?: string } }): ClefNote {
-    const p = {
-      type: 'treble',
-      options: {
-        size: 'default',
-        annotation: undefined,
-      },
-      ...params,
-    };
-
-    const clefNote = new ClefNote(p.type, p.options.size, p.options.annotation);
+    const clefNote = new ClefNote(params?.type ?? 'treble', params?.options?.size, params?.options?.annotation);
     if (this.stave) clefNote.setStave(this.stave);
     clefNote.setContext(this.context);
     this.renderQ.push(clefNote);
@@ -361,16 +484,16 @@ export class Factory {
     return this.own(timeSigNote);
   }
 
-  KeySigNote(params: { key: string; cancelKey?: string; alterKey?: string[] }): KeySigNote {
-    const keySigNote = new KeySigNote(params.key, params.cancelKey, params.alterKey);
+  KeySigNote(params: { key: string; cancelKey?: string; alterKey?: string[]; clef?: string }): KeySigNote {
+    const keySigNote = new KeySigNote(params.key, params.cancelKey, params.alterKey, params.clef);
     if (this.stave) keySigNote.setStave(this.stave);
     keySigNote.setContext(this.context);
     this.renderQ.push(keySigNote);
     return this.own(keySigNote);
   }
 
-  TabNote(noteStruct: TabNoteStruct): TabNote {
-    const note = new TabNote(noteStruct);
+  TabNote(noteStruct: TabNoteStruct, drawStem = false): TabNote {
+    const note = new TabNote(noteStruct, drawStem);
     if (this.stave) note.setStave(this.stave);
     note.setContext(this.context);
     this.renderQ.push(note);
@@ -385,9 +508,7 @@ export class Factory {
   }
 
   GraceNoteGroup(params: { notes: StemmableNote[]; slur?: boolean }): GraceNoteGroup {
-    const group = new GraceNoteGroup(params.notes, params.slur);
-    group.setContext(this.context);
-    return this.own(group);
+    return this.own(new GraceNoteGroup(params.notes, params.slur).setContext(this.context));
   }
 
   Accidental(params: { type: string }): Accidental {
@@ -480,21 +601,8 @@ export class Factory {
     return this.own(ornament);
   }
 
-  TextDynamics(params?: { text?: string; duration?: string; dots?: number; line?: number }): TextDynamics {
-    const p = {
-      text: 'p',
-      duration: 'q',
-      dots: 0,
-      line: 0,
-      ...params,
-    };
-
-    const text = new TextDynamics({
-      text: p.text,
-      line: p.line,
-      duration: p.duration,
-      dots: p.dots,
-    });
+  TextDynamics(params?: Partial<TextNoteStruct>): TextDynamics {
+    const text = new TextDynamics({ text: 'p', duration: 'q', dots: 0, line: 0, ...params });
 
     if (this.stave) text.setStave(this.stave);
     text.setContext(this.context);
@@ -658,8 +766,8 @@ export class Factory {
       stop: params.to,
     });
 
-    if (params.options.line) vibratoBracket.setLine(params.options.line);
-    if (params.options.code) vibratoBracket.setVibratoCode(params.options.code);
+    if (params.options.line !== undefined) vibratoBracket.setLine(params.options.line);
+    if (params.options.code !== undefined) vibratoBracket.setVibratoCode(params.options.code);
 
     vibratoBracket.setContext(this.context);
     this.renderQ.push(vibratoBracket);
@@ -686,7 +794,7 @@ export class Factory {
       position: params.options.position,
     });
 
-    if (params.options.line) textBracket.setLine(params.options.line);
+    if (params.options.line !== undefined) textBracket.setLine(params.options.line);
     if (params.options.font) textBracket.setFont(params.options.font);
 
     textBracket.setContext(this.context);
@@ -695,8 +803,7 @@ export class Factory {
   }
 
   System(params: SystemOptions = {}): System {
-    params.factory = this;
-    const system = new System(params).setContext(this.context);
+    const system = new System({ ...params, factory: this }).setContext(this.context);
     this.systems.push(system);
     return this.own(system);
   }
@@ -713,8 +820,7 @@ export class Factory {
    * @param options.throwOnError throw error in case of parsing error
    */
   EasyScore(options: EasyScoreOptions = {}): EasyScore {
-    options.factory = this;
-    return new EasyScore(options);
+    return new EasyScore({ ...options, factory: this });
   }
 
   PedalMarking(params?: { notes?: StaveNote[]; options?: { style: string } }): PedalMarking {
@@ -739,9 +845,91 @@ export class Factory {
       ...params,
     };
 
-    const group = new NoteSubGroup(p.notes);
-    group.setContext(this.context);
-    return this.own(group);
+    return this.own(new NoteSubGroup(p.notes).setContext(this.context));
+  }
+
+  /** Transfer unvoiced notes to one modifier. Validation happens before native voice assignment. */
+  groupNotes<T extends Modifier>(notes: Note[], construct: () => T): T {
+    if (!notes.length || new Set(notes).size !== notes.length) {
+      throw new RuntimeError('BadArguments', 'A note group needs distinct notes.');
+    }
+    notes.forEach((note) => {
+      const owner = Factory.getOwner(note);
+      if (owner && owner !== this) throw new RuntimeError('BadArguments', 'Group note belongs to another Factory.');
+      if (Factory.groups.has(note)) throw new RuntimeError('BadArguments', 'Note already belongs to a group.');
+      let voice: Voice | undefined;
+      try {
+        voice = note.getVoice();
+      } catch (error) {
+        if (!(error instanceof RuntimeError) || error.code !== 'NoVoice') throw error;
+      }
+      if (voice) throw new RuntimeError('BadArguments', 'A voiced note cannot be moved into a group.');
+    });
+    const ignored = notes.map((note) => note.shouldIgnoreTicks());
+    const restore = () =>
+      notes.forEach((note, index) => {
+        Factory.groups.delete(note);
+        note.clearVoice().setIgnoreTicks(ignored[index]);
+      });
+    let group: T;
+    try {
+      group = this.own(construct().setContext(this.context));
+    } catch (error) {
+      restore();
+      throw error;
+    }
+    this.groupScopes.forEach((scope) => scope.push(restore));
+    notes.forEach((note) => {
+      this.own(note);
+      Factory.groups.set(note, group);
+    });
+    this.renderQ = this.renderQ.filter((element) => !notes.includes(element as Note));
+    return group;
+  }
+
+  /** Construct a native Dot for attachment; preserve its full constructor options. */
+  Dot(...args: ConstructorParameters<typeof Dot>): Dot {
+    return this.adopt(new Dot(...args).setContext(this.context), 'modifier');
+  }
+
+  /** Construct a native Parenthesis for attachment; preserve its full constructor options. */
+  Parenthesis(...args: ConstructorParameters<typeof Parenthesis>): Parenthesis {
+    return this.adopt(new Parenthesis(...args).setContext(this.context), 'modifier');
+  }
+
+  /** Construct a native Stroke for attachment; preserve its full constructor options. */
+  Stroke(...args: ConstructorParameters<typeof Stroke>): Stroke {
+    return this.adopt(new Stroke(...args).setContext(this.context), 'modifier');
+  }
+
+  /** Construct a native Tremolo for attachment; preserve its full constructor options. */
+  Tremolo(...args: ConstructorParameters<typeof Tremolo>): Tremolo {
+    return this.adopt(new Tremolo(...args).setContext(this.context), 'modifier');
+  }
+
+  /** Construct a native Vibrato for attachment; preserve its full constructor options. */
+  Vibrato(...args: ConstructorParameters<typeof Vibrato>): Vibrato {
+    return this.adopt(new Vibrato(...args).setContext(this.context), 'modifier');
+  }
+
+  /** Timed crescendo note; span hairpins have a separate constructor. */
+  Crescendo(...args: ConstructorParameters<typeof Crescendo>): Crescendo {
+    const note = new Crescendo(...args).setContext(this.context);
+    if (this.stave) note.setStave(this.stave);
+    return this.adopt(note, 'note');
+  }
+
+  /** Stave-bound hairpin. The native renderer requires both endpoints. */
+  StaveHairpin(params: {
+    from: Note;
+    to: Note;
+    type: number;
+    options?: Partial<StaveHairpinRenderOptions>;
+  }): StaveHairpin {
+    const notes = { ...(params.from && { firstNote: params.from }), ...(params.to && { lastNote: params.to }) };
+    const hairpin = new StaveHairpin(notes, params.type).setContext(this.context);
+    if (params.options) hairpin.setRenderOptions({ ...hairpin.renderOptions, ...params.options });
+    return this.adopt(hairpin, 'drawable');
   }
 
   /** Render the score. */

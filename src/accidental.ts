@@ -560,6 +560,11 @@ export class Accidental extends Modifier {
     return this;
   }
 
+  /** Identify explicit cautionary signs without inspecting protected engraving state. */
+  isCautionary(): boolean {
+    return this.cautionary;
+  }
+
   /** Render accidental onto canvas. */
   override draw(): void {
     const { type, position, index } = this;

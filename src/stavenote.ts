@@ -600,7 +600,7 @@ export class StaveNote extends StemmableNote {
   }
 
   // Measure noteheads and flags from layout coordinates, including before draw().
-  override getBoundingBox(): BoundingBox {
+  override getBoundingBox(includeModifiers = true): BoundingBox {
     const boundingBox = new BoundingBox(this.getAbsoluteX(), this.ys[0], 0, 0);
     this._noteHeads.forEach((notehead) => {
       const displacement = notehead.isDisplaced()
@@ -627,9 +627,7 @@ export class StaveNote extends StemmableNote {
       bbFlag.setY(y + this.flag.getYShift() - this.flag.getTextMetrics().actualBoundingBoxAscent);
       boundingBox.mergeWith(bbFlag);
     }
-    for (let i = 0; i < this.modifiers.length; i++) {
-      boundingBox.mergeWith(this.modifiers[i].getBoundingBox());
-    }
+    if (includeModifiers) for (const modifier of this.modifiers) boundingBox.mergeWith(modifier.getBoundingBox());
     return boundingBox;
   }
 

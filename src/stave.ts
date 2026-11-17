@@ -24,6 +24,8 @@ export interface StaveLineConfig {
 }
 
 export interface StaveOptions {
+  /** Musical state when a repeated clef glyph is intentionally omitted. */
+  clef?: string;
   bottomTextPosition?: number;
   lineConfig?: StaveLineConfig[];
   spaceBelowStaffLn?: number;
@@ -94,10 +96,11 @@ export class Stave extends Element {
     this.endX = x + width;
     this.modifiers = []; // stave modifiers (clef, key, time, barlines, coda, segno, etc.)
     this.measure = 0;
-    this.clef = 'treble';
+    this.clef = options?.clef ?? 'treble';
     this.endClef = undefined;
 
     this.options = {
+      clef: 'treble',
       verticalBarWidth: 10, // Width around vertical bar end-marker
       numLines: 5,
       leftBar: true, // draw vertical bar on left
@@ -369,6 +372,10 @@ export class Stave extends Element {
       modifier.setPosition(position);
     }
 
+    if (modifier instanceof Clef) {
+      if (modifier.getPosition() === StaveModifierPosition.BEGIN) this.clef = modifier.getType();
+      else if (modifier.getPosition() === StaveModifierPosition.END) this.endClef = modifier.getType();
+    }
     modifier.setStave(this);
     this.formatted = false;
     this.modifiers.push(modifier);

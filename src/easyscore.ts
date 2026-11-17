@@ -3,13 +3,16 @@
 // MIT License
 
 import { Accidental } from './accidental';
-import { Annotation } from './annotation';
 import { Articulation } from './articulation';
 import { PartialBeamDirection } from './beam';
 import { Clef } from './clef';
 import { Dot } from './dot';
-import { ElementStyle } from './element';
-import { Factory, FactoryOptions } from './factory';
+import { compose, EasyScoreComposition, EasyScoreCompositionSpec } from './easyscore/composition';
+import { EasyScoreReferences, EasyScoreSource } from './easyscore/elementindex';
+import { EasyScoreElements } from './easyscore/elements';
+import { autoBeam, EasyScoreAutoBeamOptions } from './easyscore/rhythm';
+import { Element, ElementStyle } from './element';
+import { Factory, FactoryElementRole, FactoryOptions } from './factory';
 import { Fraction } from './fraction';
 import { FretHandFinger } from './frethandfinger';
 import { Modifier } from './modifier';
@@ -17,16 +20,34 @@ import { Music } from './music';
 import { Note } from './note';
 import { Grammar, Match, Parser, Result, Rule, RuleFunction } from './parser';
 import { RenderContext } from './rendercontext';
+import { Sheet, SheetOptions } from './sheet';
+import { Stave } from './stave';
+import { StaveModifier } from './stavemodifier';
 import { StaveNoteStruct } from './stavenote';
-import { StaveTie } from './stavetie';
 import { Stem } from './stem';
 import { StemmableNote } from './stemmablenote';
 import { System, SystemOptions } from './system';
 import { Tables } from './tables';
+import { TabNote } from './tabnote';
 import { Tickable } from './tickable';
 import { TupletOptions } from './tuplet';
 import { defined, log, RuntimeError } from './util';
 import { Voice, VoiceMode, VoiceTime } from './voice';
+
+export type {
+  EasyScoreComposition,
+  EasyScoreCompositionDiagnostic,
+  EasyScoreCompositionSpec,
+  EasyScoreContent,
+  EasyScoreMeasureSpec,
+  EasyScoreSpanSpec,
+  EasyScoreStaffState,
+  EasyScoreStaveSpec,
+  EasyScoreVoiceSpec,
+} from './easyscore/composition';
+export type { EasyScoreSource } from './easyscore/elementindex';
+export type { EasyScoreTabSpan } from './easyscore/elements';
+export type { EasyScoreAutoBeamOptions } from './easyscore/rhythm';
 
 // To enable logging for this class. Set `VexFlow.EasyScore.DEBUG` to `true`.
 // eslint-disable-next-line
@@ -273,6 +294,8 @@ export class Builder {
   // Initialized by the constructor via this.resetPiece().
   piece!: Piece;
   commitHooks: CommitHook[] = [];
+  /** @internal EasyScore observes completed pieces after application hooks have run. */
+  onNote?: (note: StemmableNote, source?: EasyScoreSourceSpan) => void;
   rollingDuration!: string;
 
   constructor(factory?: Factory) {
@@ -418,6 +441,7 @@ export class Builder {
 
     this.commitHooks.forEach((commitHook) => commitHook(options, note, this));
 
+    this.onNote?.(note, source);
     this.elements.notes.push(note);
     this.elements.accidentals.push(accidentals);
     this.resetPiece();
@@ -482,6 +506,12 @@ function diagnostic(line: string, code: string, message: string, source: EasySco
   return { ...source, code, message, line: prefix.split('\n').length, column: source.start - prefix.lastIndexOf('\n') };
 }
 
+/** Pure extension validation runs before any Factory construction or commit hook. */
+export interface EasyScoreValidationContext {
+  piece: Readonly<EasyScoreParsedPiece>;
+  options: Readonly<BuilderOptions>;
+}
+
 export interface EasyScoreOptions {
   factory?: Factory;
   builder?: Builder;
@@ -491,6 +521,8 @@ export interface EasyScoreOptions {
   strictOptions?: boolean;
   /** Extra option names consumed by application commit hooks in strict mode. */
   extensions?: readonly string[];
+  /** Throw to return a source diagnostic. Must not mutate input or application state. */
+  validate?: (context: EasyScoreValidationContext) => void;
 }
 
 // Extending Record<string, any> allows arbitrary properties via set(defaults).
@@ -525,35 +557,60 @@ function setClass(options: { class?: string }, note: StemmableNote) {
  */
 export class EasyScore {
   static DEBUG: boolean = false;
+  private references = new EasyScoreReferences();
+  /** The complete measure input, when parse() is constructing a trimmed measure. */
+  private sourceContext?: { input: string; offset: number; measure: number };
+
+  /** Inspect notation provenance without installing a global Registry. Useful for visual tooling. */
+  static getSource(element: Element): EasyScoreSource | undefined {
+    return EasyScoreReferences.sourceOf(element);
+  }
+
+  /** Look up a native object in this score. Missing IDs return undefined. */
+  getElement(id: string): Element | undefined {
+    return this.references.get(id);
+  }
+
+  /** Resolve a named note for typed relationship APIs. Missing IDs and non-notes throw. */
+  getNote(id: string): Note {
+    const element = this.getElement(id);
+    if (!(element instanceof Note)) throw new RuntimeError('BadArguments', `No note with ID: ${id}`);
+    return element;
+  }
+
+  /** Return a defensive copy of a generated element's source, or undefined for native objects. */
+  getSource(element: Element): EasyScoreSource | undefined {
+    return this.references.getSource(element);
+  }
+
+  /** Explicitly join a native extension to this score's ownership and drawing lifecycle. */
+  adopt<T extends Element>(element: T, role: FactoryElementRole): T {
+    return this.transaction(() => this.references.add(this.factory.adopt(element, role)));
+  }
+
+  /** Stage local references together with Factory queues and ambient registry entries. */
+  private transaction<T>(build: () => T): T {
+    return this.references.transaction(() => (this.factory ? this.factory.transaction(build) : build()));
+  }
 
   /** Create a strict EasyScore facade with its own Factory. Load fonts before constructing notation. */
   static create(options: FactoryOptions, scoreOptions: Omit<EasyScoreOptions, 'factory' | 'builder'> = {}): EasyScore {
     return new Factory(options).EasyScore({ throwOnError: true, strictOptions: true, ...scoreOptions });
   }
 
-  /** Native constructors for this first slice. More feature families will be added incrementally. */
-  readonly make = {
-    annotation: (options?: Parameters<Factory['Annotation']>[0]): Annotation =>
-      this.factory.transaction(() => this.factory.Annotation(options)),
-    tie: (options: Parameters<Factory['StaveTie']>[0]): StaveTie => {
-      const { from, to } = options;
-      if (!from && !to) throw new RuntimeError('BadArguments', 'A tie needs at least one endpoint.');
-      const first = options.firstIndexes ?? [0];
-      const last = options.lastIndexes ?? [0];
-      if (!first.length || first.length !== last.length) {
-        throw new RuntimeError('BadArguments', 'Tie index lists must be nonempty and have the same length.');
-      }
-      for (const [note, indices] of [
-        [from, first],
-        [to, last],
-      ] as const) {
-        if (!note) continue;
-        this.requireOwned(note);
-        indices.forEach((index) => this.checkIndex(note, index));
-      }
-      return this.factory.transaction(() => this.factory.StaveTie(options));
-    },
-  };
+  /** Typed constructors return native objects and share the facade's transaction boundary. */
+  readonly make = new EasyScoreElements({
+    factory: () => this.factory,
+    manage: (construct) => this.transaction(() => this.references.add(construct())),
+    owned: (element) => this.requireOwned(element),
+    checkIndex: (note, index) => this.checkIndex(note, index),
+    beamStems: (notes) => this.resolveBeamStems(notes),
+    noteDefaults: () => ({
+      clef: this.defaults.clef,
+      autoStem: this.defaults.stem === 'auto',
+      stemDirection: this.defaults.stem === 'down' ? Stem.DOWN : Stem.UP,
+    }),
+  });
 
   /** Attach a modifier once. Native custom modifiers are welcome; foreign Factory objects are rejected. */
   attach<T extends Note>(note: T, modifier: Modifier, index = 0): T {
@@ -572,12 +629,87 @@ export class EasyScore {
       if (attached === note && modifier.getIndex() === index && note.getModifiers().includes(modifier)) return note;
       throw new RuntimeError('BadArguments', 'Modifier is already attached. Create a separate modifier.');
     }
-    return note.addModifier(modifier, index);
+    return this.transaction(() => {
+      this.adopt(modifier, 'modifier');
+      return note.addModifier(modifier, index);
+    });
+  }
+
+  /** Attach staff notation once; the stave owns its drawing lifecycle. */
+  attachToStave<T extends Stave>(stave: T, modifier: StaveModifier, position?: number): T {
+    this.requireOwned(stave);
+    const owner = Factory.getOwner(modifier);
+    if (owner && owner !== this.factory) throw new RuntimeError('BadArguments', 'Modifier belongs to another Factory.');
+    if (position !== undefined && (!Number.isInteger(position) || position < 0 || position > 6))
+      throw new RuntimeError('BadArguments', 'Invalid stave modifier position.');
+    if (modifier.getStave()) {
+      if (
+        modifier.getStave() === stave &&
+        stave.getModifiers().includes(modifier) &&
+        (position === undefined || position === modifier.getPosition())
+      )
+        return stave;
+      throw new RuntimeError('BadArguments', 'Stave modifier is already attached.');
+    }
+    return this.transaction(() => {
+      this.adopt(modifier, 'staveModifier');
+      stave.addModifier(modifier, position);
+      return stave;
+    });
+  }
+
+  /** Apply temporary defaults to synchronous managed construction; restore them on success or failure. */
+  withDefaults<T>(
+    defaults: EasyScoreDefaults,
+    construct: (score: EasyScore) => T & (T extends PromiseLike<unknown> ? never : unknown)
+  ): T {
+    const previous = this.defaults;
+    try {
+      this.set(defaults);
+      return this.build(construct);
+    } finally {
+      this.defaults = previous;
+    }
+  }
+
+  /** Construct aligned measures and resolve forward references before layout or drawing. */
+  compose(spec: EasyScoreCompositionSpec): EasyScoreComposition {
+    return compose(this, spec);
   }
 
   /** Build a normal System; its staff API and formatter options stay available. */
   system(options: SystemOptions = {}): System {
-    return this.factory.transaction(() => this.factory.System(options));
+    return this.transaction(() => this.references.add(this.factory.System(options)));
+  }
+
+  /** Create a native responsive Sheet. Its systems remain managed by this Factory. */
+  sheet(options: Omit<SheetOptions, 'factory'> = {}): Sheet {
+    return this.transaction(() => this.factory.Sheet(options));
+  }
+
+  /**
+   * Stage a group of synchronous construction calls. Failed groups release their new objects and IDs.
+   * Existing-object setters and application side effects remain the caller's responsibility.
+   */
+  build<T>(construct: (score: EasyScore) => T & (T extends PromiseLike<unknown> ? never : unknown)): T {
+    const snapshot = {
+      elements: this.builder.elements,
+      options: this.builder.options,
+      piece: this.builder.piece,
+      rollingDuration: this.builder.rollingDuration,
+    };
+    try {
+      return this.transaction(() => {
+        const result = construct(this);
+        if (result && typeof result === 'object' && 'then' in result) {
+          throw new RuntimeError('BadArguments', 'EasyScore.build() requires a synchronous callback.');
+        }
+        return result;
+      });
+    } catch (error) {
+      Object.assign(this.builder, snapshot);
+      throw error;
+    }
   }
 
   /** Apply the Factory foreground defaults without changing global metrics or fonts. */
@@ -595,11 +727,12 @@ export class EasyScore {
   reset(): this {
     this.factory.reset();
     this.builder.reset();
+    this.references.clear();
     return this;
   }
 
   /** Endpoints and voice notes must share this facade's Factory. */
-  private requireOwned(note: Tickable): void {
+  private requireOwned(note: Element): void {
     if (Factory.getOwner(note) !== this.factory) {
       throw new RuntimeError(
         'BadArguments',
@@ -610,7 +743,11 @@ export class EasyScore {
 
   /** Reject invalid chord-head references before attaching or queuing notation. */
   private checkIndex(note: Note, index: number): void {
-    if (!Number.isInteger(index) || index < 0 || index >= note.getKeys().length) {
+    if (
+      !Number.isInteger(index) ||
+      index < 0 ||
+      index >= (note instanceof TabNote ? note.getPositions().length : Math.max(1, note.getKeys().length))
+    ) {
       throw new RuntimeError('BadArguments', `Invalid chord index: ${index}`);
     }
   }
@@ -696,7 +833,18 @@ export class EasyScore {
     const diagnostics: EasyScoreDiagnostic[] = [];
     for (const piece of builder.pieces) {
       try {
-        this.validatePiece(piece, { ...builder.options, ...piece.options });
+        const options = { ...builder.options, ...piece.options };
+        this.validatePiece(piece, options);
+        // Validation sees copies, so extensions cannot rewrite the parser's output accidentally.
+        this.options.validate?.({
+          piece: {
+            ...piece,
+            chord: piece.chord.map((note) => ({ ...note })),
+            options: { ...piece.options },
+            source: { ...piece.source },
+          },
+          options: { ...options },
+        });
       } catch (error) {
         diagnostics.push(
           diagnostic(line, 'InvalidNotation', error instanceof Error ? error.message : String(error), piece.source)
@@ -756,7 +904,30 @@ export class EasyScore {
     }
   }
 
+  /** Observe source ranges only during this parse, including legacy partial results. */
   parse(line: string, options: BuilderOptions = {}): Result {
+    const previous = this.builder.onNote;
+    const context = this.sourceContext;
+    this.builder.onNote = (note, span) => {
+      previous?.(note, span);
+      const source = span && {
+        input: context?.input ?? line,
+        start: span.start + (context?.offset ?? 0),
+        end: span.end + (context?.offset ?? 0),
+        ...(context && { measure: context.measure }),
+      };
+      this.references.add(note, source);
+      note.getModifiers().forEach((modifier) => this.references.add(modifier, source));
+    };
+    try {
+      return this.parseInput(line, options);
+    } finally {
+      this.builder.onNote = previous;
+    }
+  }
+
+  /** Strict construction is transactional; the legacy non-throwing parser retains partial output. */
+  private parseInput(line: string, options: BuilderOptions): Result {
     if (!this.options.throwOnError) {
       this.builder.reset(options);
       return this.parser.parse(line);
@@ -777,7 +948,7 @@ export class EasyScore {
       return result;
     };
     try {
-      return this.factory ? this.factory.transaction(build) : build();
+      return this.transaction(build);
     } catch (error) {
       const source = parsed.pieces[this.builder.elements.notes.length]?.source ?? { start: 0, end: line.length };
       Object.assign(this.builder, snapshot);
@@ -801,9 +972,17 @@ export class EasyScore {
       };
     }
   ): StemmableNote[] {
-    const autoStem = options?.autoStem ?? this.resolveBeamStems(notes);
-    this.factory.Beam({ notes, options: { ...options, autoStem } });
+    if (this.options.strictOptions) this.make.beam({ notes, options });
+    else {
+      const autoStem = options?.autoStem ?? this.resolveBeamStems(notes);
+      this.transaction(() => this.references.add(this.factory.Beam({ notes, options: { ...options, autoStem } })));
+    }
     return notes;
+  }
+
+  /** Generate and own native beam groups without changing rhythmic duration. */
+  autoBeam(notes: StemmableNote[], options: EasyScoreAutoBeamOptions = {}) {
+    return autoBeam(this, notes, options);
   }
 
   /** Explicit pitched stems constrain the group; conflicting explicit stems remain mixed. */
@@ -821,7 +1000,8 @@ export class EasyScore {
   }
 
   tuplet(notes: StemmableNote[], options?: TupletOptions): StemmableNote[] {
-    this.factory.Tuplet({ notes, options });
+    if (this.options.strictOptions) this.make.tuplet({ notes, options });
+    else this.transaction(() => this.references.add(this.factory.Tuplet({ notes, options })));
     return notes;
   }
 
@@ -829,6 +1009,22 @@ export class EasyScore {
     options = { clef: this.defaults.clef, stem: this.defaults.stem, ...options };
     this.parse(line, options);
     return this.builder.getElements().notes;
+  }
+
+  /** Mix notation fragments, full native note structs, and already-owned native tickables. */
+  sequence(items: readonly (string | StaveNoteStruct | Tickable)[], options: BuilderOptions = {}): Tickable[] {
+    return this.build(() =>
+      items.flatMap((item): Tickable[] => {
+        if (typeof item === 'string') return this.notes(item, options);
+        if (item instanceof Tickable) {
+          this.requireOwned(item);
+          if (item instanceof Note && Factory.getGroup(item))
+            throw new RuntimeError('BadArguments', 'Grouped notes cannot be sequence entries.');
+          return [item];
+        }
+        return [this.make.note(item)];
+      })
+    );
   }
 
   /**
@@ -854,6 +1050,8 @@ export class EasyScore {
     const build = () => {
       duration = options.duration;
       return measures.map(({ text, offset }, index) => {
+        const previous = this.sourceContext;
+        this.sourceContext = { input: line, offset, measure: index + 1 };
         try {
           const result = this.parse(text, { clef: this.defaults.clef, stem: this.defaults.stem, ...options, duration });
           if (!result.success) throw new RuntimeError('BadArguments', `Invalid EasyScore measure: ${text}`);
@@ -875,6 +1073,8 @@ export class EasyScore {
               measure: index + 1,
             }))
           );
+        } finally {
+          this.sourceContext = previous;
         }
       });
     };
@@ -885,7 +1085,7 @@ export class EasyScore {
       rollingDuration: this.builder.rollingDuration,
     };
     try {
-      return this.factory ? this.factory.transaction(build) : build();
+      return this.transaction(build);
     } catch (error) {
       Object.assign(this.builder, snapshot);
       throw error;
@@ -943,7 +1143,10 @@ export class EasyScore {
       throw new RuntimeError('BadArguments', 'softmaxFactor must be positive and finite.');
     }
     if (this.options.strictOptions) notes.forEach((note) => this.requireOwned(note));
-    return this.factory.transaction(() => {
+    if (notes.some((note) => note instanceof Note && Factory.getGroup(note))) {
+      throw new RuntimeError('BadArguments', 'Grouped notes cannot be inserted into a main voice.');
+    }
+    return this.transaction(() => {
       const voice = this.factory.Voice({ time: options.time ?? this.defaults.time });
       voice.setMode(mode);
       if (factor !== undefined) voice.setSoftmaxFactor(factor);
@@ -955,7 +1158,7 @@ export class EasyScore {
       if (mode !== VoiceMode.SOFT && ticks.greaterThan(voice.getTotalTicks())) {
         throw new RuntimeError('BadArguments', 'Too many ticks for this voice.');
       }
-      return voice.addTickables(notes);
+      return this.references.add(voice.addTickables(notes));
     });
   }
 

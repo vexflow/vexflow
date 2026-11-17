@@ -1,5 +1,9 @@
 // Optional continuous-sheet layout for existing Systems. No music data model or pagination.
+import { ClefNote } from './clefnote';
 import { Factory } from './factory';
+import { Note } from './note';
+import { StaveNote } from './stavenote';
+import { StemmableNote } from './stemmablenote';
 import { System, SystemOptions } from './system';
 import { RuntimeError } from './util';
 
@@ -130,9 +134,24 @@ export class Sheet {
     // Spanning marks and arbitrary annotations still need caller-supplied rowGap.
     for (const voice of system.getVoices()) {
       for (const note of voice.getTickables()) {
-        const box = note.getBoundingBox();
-        top = Math.min(top, box.getY());
-        bottom = Math.max(bottom, box.getY() + box.getH());
+        // Modifier and generic text bounds may still contain coordinates from the last draw.
+        // Measure pitched heads/stems and inline clefs from current layout only. Other notes use
+        // their stave-relative Y positions; arbitrary labels and spans still need explicit rowGap.
+        if (note instanceof StaveNote || note instanceof ClefNote) {
+          const box = note instanceof StaveNote ? note.getBoundingBox(false) : note.getBoundingBox();
+          top = Math.min(top, box.getY());
+          bottom = Math.max(bottom, box.getY() + box.getH());
+        } else if (note instanceof Note) {
+          const padding = note.checkStave().getSpacingBetweenLines();
+          const ys = note.getYs();
+          top = Math.min(top, ...ys.map((y) => y - padding));
+          bottom = Math.max(bottom, ...ys.map((y) => y + padding));
+          if (note instanceof StemmableNote && note.hasStem()) {
+            const { topY, baseY } = note.getStemExtents();
+            top = Math.min(top, topY, baseY);
+            bottom = Math.max(bottom, topY, baseY);
+          }
+        }
       }
     }
     return { top, bottom };

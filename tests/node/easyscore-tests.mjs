@@ -2,7 +2,9 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
+
 import { createCanvas, registerFont } from 'canvas';
+
 const VF = await import(new URL('../../build/esm/entry/vexflow-core.js', import.meta.url));
 
 for (const [family, file] of [
@@ -241,7 +243,7 @@ test('annotation attachment and ties have validated ownership and no duplicate q
   assert.deepEqual(score.builder.getElements().notes, []);
 });
 
-test('public modules and implemented contracts have coverage entries', () => {
+test('public modules and implemented contracts have coverage entries', async () => {
   const manifest = JSON.parse(readFileSync(new URL('../../docs/easyscore-coverage.json', import.meta.url), 'utf8'));
   const source = readFileSync(new URL('../../src/index.ts', import.meta.url), 'utf8');
   const modules = [...source.matchAll(/^export \* from '\.\/([^']+)';/gm)].map((m) => m[1]);
@@ -252,8 +254,801 @@ test('public modules and implemented contracts have coverage entries', () => {
   const testSources = ['easyscore-tests.mjs', 'easyscore-rendering-tests.mjs']
     .map((file) => readFileSync(new URL(file, import.meta.url), 'utf8'))
     .join('\n');
+  const { examples } = await import('../../tools/explorer/catalog.mjs');
+  const { nativeSurface } = await import('../../tools/easyscore-api-audit.mjs');
+  const helpers = nativeSurface()
+    ['easyscore/elements'].EasyScoreElements.filter((signature) => !signature.startsWith('constructor('))
+    .map((signature) => `make.${signature.split('(')[0]}()`);
+  assert.deepEqual(
+    manifest.implemented
+      .filter((feature) => feature.api.startsWith('make.'))
+      .map((feature) => feature.api)
+      .sort(),
+    helpers.sort(),
+    'every named helper needs a coverage row'
+  );
+  assert.equal(new Set(manifest.implemented.map((feature) => feature.api)).size, manifest.implemented.length);
   for (const feature of manifest.implemented) {
+    if (feature.api.startsWith('make.')) assert.ok(feature.example, `${feature.api} needs an executable example`);
+    if (feature.example)
+      assert.ok(
+        examples.some((example) => example.id === feature.example),
+        feature.example
+      );
     assert.ok(guide.includes(feature.api), feature.api);
     assert.ok(testSources.includes(feature.test), feature.api);
   }
+});
+
+test('score-local IDs follow renames and reject collisions before mutation', () => {
+  const score = create();
+  const other = create();
+  const [a, b] = score.notes('C4/h[id="a"], D4[id="b"]');
+  const [independent] = other.notes('E4/w[id="a"]');
+  assert.equal(score.getElement('a'), a);
+  assert.equal(other.getElement('a'), independent);
+  assert.equal(score.getElement('missing'), undefined);
+  assert.throws(() => score.getNote('missing'), /No note with ID/);
+  const label = score.make.annotation({ text: 'test' });
+  assert.equal(score.getElement(label.getAttribute('id')), label);
+  assert.throws(() => score.getNote(label.getAttribute('id')), /No note with ID/);
+  a.setAttribute('id', 'renamed');
+  assert.equal(score.getElement('a'), undefined);
+  assert.equal(score.getNote('renamed'), a);
+  assert.throws(() => a.setAttribute('id', 'b'), /Duplicate score element ID/);
+  assert.throws(() => a.setAttribute('id', undefined), /nonempty ID/);
+  assert.equal(a.getAttribute('id'), 'renamed');
+  assert.equal(score.getNote('b'), b);
+  score.reset();
+  assert.equal(score.getElement('renamed'), undefined);
+  a.setAttribute('id', 'b'); // Reset released the local collision subscription.
+  assert.equal(other.getNote('a'), independent);
+});
+
+test('source mapping preserves complete measure input and survives native ID changes', () => {
+  const score = create();
+  const input = '  C4/h[id="a"], D4 |\n E4[articulations="staccato"], F4  ';
+  const measures = score.measures(input);
+  const note = measures[1][0];
+  const source = score.getSource(note);
+  assert.equal(source.input, input);
+  assert.equal(source.measure, 2);
+  assert.equal(input.slice(source.start, source.end), 'E4[articulations="staccato"]');
+  assert.deepEqual(score.getSource(note.getModifiers()[0]), source);
+  assert.deepEqual(VF.EasyScore.getSource(note), source);
+  assert.equal(create().getSource(note), undefined);
+  note.setAttribute('id', 'changed');
+  assert.deepEqual(score.getSource(note), source);
+  source.start = 999; // Callers cannot corrupt stored provenance.
+  assert.notEqual(score.getSource(note).start, 999);
+  const native = score.adopt(new VF.StaveNote({ keys: ['g/4'], duration: 'q' }), 'note');
+  assert.equal(score.getSource(native), undefined);
+  score.reset();
+  assert.equal(score.getSource(note), undefined);
+  assert.equal(VF.EasyScore.getSource(note), undefined);
+});
+
+test('failed construction rolls back references, source metadata, and ID subscriptions', () => {
+  const score = create();
+  const [keep] = score.notes('C4/w[id="keep"]');
+  let escaped;
+  score.addCommitHook((options, note) => {
+    if (options.id === 'temporary') escaped = note;
+  });
+  const registry = new VF.Registry();
+  registry.register(keep);
+  VF.Registry.enableDefaultRegistry(registry);
+  try {
+    assert.throws(() => score.measures('D4/w[id="temporary"] | E4/w[id="keep"]'), /Duplicate score element ID/);
+    assert.equal(score.getElement('temporary'), undefined);
+    assert.equal(score.getNote('keep'), keep);
+    assert.equal(queued(score), 1);
+    assert.equal(VF.Factory.getOwner(escaped), undefined);
+    assert.equal(VF.EasyScore.getSource(escaped), undefined);
+    assert.deepEqual(registered(registry), [keep]);
+    escaped.setAttribute('id', 'keep'); // No leaked local ID validator after rollback.
+    keep.setAttribute('id', 'retained');
+    assert.equal(registry.getElementById('retained'), keep);
+    assert.equal(score.getNote('retained'), keep);
+  } finally {
+    VF.Registry.disableDefaultRegistry();
+  }
+  const legacy = new VF.Factory({ renderer }).EasyScore();
+  assert.equal(legacy.parse('C4/q[id="partial"], invalid').success, false);
+  assert.equal(legacy.getNote('partial'), legacy.builder.elements.notes[0]);
+  assert.equal(legacy.getSource(legacy.getNote('partial')).input, 'C4/q[id="partial"], invalid');
+});
+
+test('native adoption validates roles and ownership without duplicate drawing entries', () => {
+  const score = create();
+  const note = new VF.StaveNote({ keys: ['c/4'], duration: 'w' });
+  const label = new VF.Annotation('native');
+  const other = create();
+  assert.throws(() => score.adopt(note, 'modifier'), /Invalid adopted element role/);
+  assert.throws(() => score.adopt(label, 'drawable'), /Invalid adopted element role/);
+  assert.throws(() => score.adopt(new VF.Clef('treble'), 'drawable'), /Invalid adopted element role/);
+  assert.throws(() => score.adopt(null, 'drawable'), /Invalid adopted element role/);
+  assert.equal(score.getElement(note.getAttribute('id')), undefined);
+  assert.equal(VF.Factory.getOwner(note), undefined);
+  assert.equal(score.adopt(note, 'note'), note);
+  score.adopt(note, 'note');
+  assert.equal(queued(score), 1);
+  assert.equal(score.getNote(note.getAttribute('id')), note);
+  assert.throws(() => other.adopt(note, 'note'), /another Factory/);
+  assert.equal(other.getElement(note.getAttribute('id')), undefined);
+  score.adopt(label, 'modifier');
+  score.attach(note, label);
+  score.attach(note, label);
+  assert.equal(queued(score), 1);
+  assert.equal(note.getModifiers().length, 1);
+  assert.equal(VF.Factory.getOwner(label), score.factory);
+  const voice = score.voice([note]);
+  assert.throws(() => score.adopt(voice, 'drawable'), /Invalid adopted element role/);
+  assert.equal(score.getElement(voice.getAttribute('id')), voice);
+  const conflict = new VF.Annotation('conflict').setAttribute('id', note.getAttribute('id'));
+  assert.throws(() => score.adopt(conflict, 'modifier'), /Duplicate score element ID/);
+  assert.equal(VF.Factory.getOwner(conflict), undefined);
+  assert.throws(
+    () =>
+      score.factory.transaction(() => {
+        score.factory.adopt(note, 'note');
+        throw new Error('later failure');
+      }),
+    /later failure/
+  );
+  assert.equal(VF.Factory.getOwner(note), score.factory, 'rollback preserves prior ownership');
+  score.reset();
+  assert.equal(queued(score), 0);
+  score.adopt(note, 'note');
+  assert.equal(queued(score), 1, 'explicit readoption queues a note after reset');
+});
+
+test('failed native attachment releases newly adopted ownership and references', () => {
+  const score = create();
+  class RefusingNote extends VF.StaveNote {
+    addModifier() {
+      throw new Error('custom attachment failed');
+    }
+  }
+  const note = score.adopt(new RefusingNote({ keys: ['c/4'], duration: 'w' }), 'note');
+  const label = new VF.Annotation('custom');
+  assert.throws(() => score.attach(note, label), /custom attachment failed/);
+  assert.equal(VF.Factory.getOwner(label), undefined);
+  assert.equal(score.getElement(label.getAttribute('id')), undefined);
+  assert.equal(VF.Factory.getOwner(note), score.factory);
+  assert.equal(queued(score), 1);
+  label.setAttribute('id', note.getAttribute('id')); // The failed attachment left no ID subscription.
+});
+
+test('native public option families match the reviewed coverage snapshot', async () => {
+  const { checkNativeSurface } = await import('../../tools/easyscore-api-audit.mjs');
+  checkNativeSurface();
+});
+
+test('pure typed validators reject custom options before construction and preserve caller settings', () => {
+  let commits = 0;
+  const score = create({
+    extensions: ['label'],
+    validate: ({ piece, options }) => {
+      assert.equal(typeof piece.source.start, 'number');
+      if (options.label && options.label !== 'melody') throw new Error('Unknown label');
+      piece.chord[0].key = 'Z'; // The validator receives a copy, not mutable parser state.
+    },
+  });
+  score.addCommitHook(() => commits++);
+  const parsed = score.parseNotation('C4/q[label="melody"]');
+  assert.equal(parsed.pieces[0].chord[0].key, 'C');
+  assert.equal(score.parseNotation('D4/q[label="bad"]').diagnostics[0].message, 'Unknown label');
+  assert.throws(() => score.notes('C4/q[label="bad"]'), /Unknown label/);
+  assert.equal(commits, 0);
+  assert.equal(queued(score), 0);
+  score.notes('C4/w[label="melody"]');
+  assert.equal(commits, 1);
+  const factory = score.factory;
+  const options = Object.freeze({ throwOnError: true });
+  assert.doesNotThrow(() => factory.EasyScore(options));
+  assert.doesNotThrow(() => factory.System(Object.freeze({ x: 20, y: 20, width: 400 })));
+  const note = score.builder.elements.notes[0];
+  assert.equal(
+    factory.TextBracket({ from: note, to: note, text: '8', options: { superscript: 'va', position: 'top', line: 0 } })
+      .line,
+    0
+  );
+  assert.equal(factory.VibratoBracket({ from: note, to: note, options: { line: 0 } }).line, 0);
+});
+
+test('facade sheets and nested build groups share ownership and rollback', () => {
+  const score = create();
+  score.setContext(new VF.CanvasContext(createCanvas(500, 240).getContext('2d')));
+  const [keep] = score.notes('C4/w[id="keep"]');
+  const original = score.builder.elements;
+  let discarded;
+  assert.throws(
+    () =>
+      score.build(() => {
+        score.notes('D4/w[id="temporary"]');
+        score.build(() => {
+          discarded = score.make.annotation({ text: 'temporary' });
+        });
+        score.sheet({ width: 500 }).addSystem();
+        throw new Error('cancel group');
+      }),
+    /cancel group/
+  );
+  assert.equal(score.getElement('temporary'), undefined);
+  assert.equal(score.getElement(discarded.getAttribute('id')), undefined);
+  assert.equal(VF.Factory.getOwner(discarded), undefined);
+  assert.equal(score.factory.sheets.length, 0);
+  assert.equal(score.factory.systems.length, 0);
+  assert.equal(score.builder.elements, original);
+  assert.equal(score.getNote('keep'), keep);
+  const sheet = score.build((builder) => builder.sheet({ width: 500 }));
+  const system = sheet.addSystem();
+  const voice = score.voice([keep]);
+  system.addStave({ voices: [voice] }).addClef('treble');
+  assert.equal(VF.Factory.getOwner(system), score.factory);
+  assert.deepEqual(sheet.getSystems(), [system]);
+  assert.equal(score.factory.sheets.length, 1);
+  score.draw({ retain: true });
+  assert.equal(sheet.getRows().length, 1);
+  assert.throws(() => score.build(() => Promise.resolve()), /synchronous callback/);
+  score.reset();
+  assert.equal(score.factory.sheets.length, 0);
+});
+
+test('typed sequences and modifier constructors preserve native fields and ownership', () => {
+  const score = create().set({ clef: 'bass', stem: 'down' });
+  const note = score.make.note({
+    keys: ['c/3/x'],
+    duration: 'q',
+    octaveShift: 1,
+    strokePx: 4,
+    stemDirection: VF.Stem.UP,
+  });
+  assert.equal(note.getStemDirection(), VF.Stem.UP);
+  assert.equal(note.isAutoStem(), false);
+  assert.equal(
+    note.getKeyProps()[0].code,
+    new VF.StaveNote({ keys: ['c/3/x'], duration: 'q', clef: 'bass', octaveShift: 1 }).getKeyProps()[0].code
+  );
+  const constructors = [
+    ['accidental', [{ type: '++' }], VF.Accidental],
+    ['articulation', [{ type: 'fermata.below' }], VF.Articulation],
+    ['ornament', ['tr', { delayed: true, upperAccidental: '#' }], VF.Ornament],
+    ['dot', [], VF.Dot],
+    ['parenthesis', [VF.Modifier.Position.LEFT], VF.Parenthesis],
+    ['stroke', [VF.Stroke.Type.ROLL_UP, { allVoices: false }], VF.Stroke],
+    ['tremolo', [3], VF.Tremolo],
+    ['vibrato', [], VF.Vibrato],
+    ['chordSymbol', [{ fontSize: 14 }], VF.ChordSymbol],
+    ['fingering', [{ number: '2', position: 'left' }], VF.FretHandFinger],
+    ['stringNumber', [{ number: '4', position: 'above' }, false], VF.StringNumber],
+  ];
+  for (const [name, args, Native] of constructors) {
+    const modifier = score.make[name](...args);
+    assert.ok(modifier instanceof Native, name);
+    assert.equal(VF.Factory.getOwner(modifier), score.factory, name);
+    score.attach(note, modifier);
+    assert.equal(modifier.getNote(), note, name);
+  }
+  assert.throws(() => score.make.articulation({ type: 'no-such-mark' }), /Unknown EasyScore articulation/);
+  const ghost = score.make.ghostNote('q');
+  const text = score.make.textNote({ text: 'rit.', duration: 'q', line: 2, smooth: true });
+  const sequence = score.sequence([note, ghost, text, { keys: ['d/3'], duration: 'q' }]);
+  assert.equal(score.voice(sequence).getTicksUsed().value(), VF.VexFlow.RESOLUTION);
+  const count = queued(score);
+  assert.throws(() => score.sequence(['C4/q[id="rolled-back"]', create().notes('D4/q')[0]]), /another Factory/);
+  assert.equal(score.getElement('rolled-back'), undefined);
+  assert.equal(queued(score), count);
+});
+
+test('grace and subnote groups own children exactly once and restore them after failed batches', () => {
+  const score = create();
+  const [parent, child] = score.notes('C4/h, D4');
+  const grace = score.make.graceNote({ keys: ['e/4'], duration: '16', slash: true });
+  assert.throws(
+    () =>
+      score.build(() => {
+        score.make.noteSubGroup({ notes: [child] });
+        throw new Error('cancel group');
+      }),
+    /cancel group/
+  );
+  assert.equal(VF.Factory.getGroup(child), undefined);
+  assert.throws(() => child.getVoice(), /NoVoice/);
+  assert.equal(queued(score), 2, 'batch rollback restores standalone drawing');
+  const group = score.make.graceNoteGroup({ notes: [grace], slur: true });
+  score.attach(parent, group);
+  assert.equal(VF.Factory.getGroup(grace), group);
+  assert.throws(() => score.make.graceNoteGroup({ notes: [grace] }), /already belongs to a group/);
+  assert.throws(() => score.voice([grace]), /Grouped notes/);
+  assert.throws(() => score.adopt(grace, 'note'), /grouped note/);
+  const sub = score.make.noteSubGroup({ notes: [child] });
+  score.attach(parent, sub);
+  assert.equal(queued(score), 1, 'subnotes are removed from the standalone queue');
+  const foreign = create().make.graceNote({ keys: ['c/4'], duration: '16' });
+  assert.throws(() => score.make.graceNoteGroup({ notes: [foreign] }), /another Factory/);
+  const voiced = score.notes('F4/w')[0];
+  score.voice([voiced]);
+  assert.throws(() => score.make.noteSubGroup({ notes: [voiced] }), /voiced note/);
+});
+
+test('automatic beams preserve explicit stems, rational ticks, and native grouping options', () => {
+  const score = create().set({ time: '7/8' });
+  const notes = score.notes('C4/8[stem="down"], D4, E4, F4, G4, A4, B4');
+  const ticks = notes.map((note) => note.getTicks().toString());
+  const groups = [new VF.Fraction(2, 8), new VF.Fraction(2, 8), new VF.Fraction(3, 8)];
+  const beams = score.autoBeam(notes, { groups, flatBeams: true, flatBeamOffset: 20 });
+  assert.deepEqual(
+    beams.map((beam) => beam.getNotes().length),
+    [2, 2, 3]
+  );
+  assert.deepEqual(
+    notes.map((note) => note.getTicks().toString()),
+    ticks
+  );
+  assert.deepEqual(
+    groups.map((group) => group.toString()),
+    ['2/8', '2/8', '3/8']
+  );
+  assert.equal(notes[1].getStemDirection(), VF.Stem.DOWN);
+  assert.equal(beams[0].renderOptions.flatBeamOffset, 20);
+  assert.ok(beams.every((beam) => VF.Factory.getOwner(beam) === score.factory));
+  score.voice(notes, { time: '7/8' });
+  assert.throws(() => score.autoBeam(notes), /already belongs/);
+  const mixed = score.notes('C4/8[stem="down"], D4[stem="up"]');
+  score.autoBeam(mixed);
+  assert.deepEqual(
+    mixed.map((note) => note.getStemDirection()),
+    [VF.Stem.DOWN, VF.Stem.UP]
+  );
+  const preserve = score.notes('C4/8, C6');
+  const before = preserve.map((note) => note.getStemDirection());
+  score.autoBeam(preserve, { autoStem: false });
+  assert.deepEqual(
+    preserve.map((note) => note.getStemDirection()),
+    before
+  );
+  const override = score.notes('C4/8[stem="down"], D4[stem="down"]');
+  score.autoBeam(override, { autoStem: true });
+  assert.deepEqual(
+    override.map((note) => note.getStemDirection()),
+    [VF.Stem.UP, VF.Stem.UP]
+  );
+  const rests = score.notes('C4/8, B4/8/r, D4/8, E4/8');
+  assert.equal(
+    score.autoBeam(rests, {
+      groups: [new VF.Fraction(4, 8)],
+      beamRests: true,
+      beamMiddleOnly: true,
+      showStemlets: true,
+    }).length,
+    1
+  );
+  const untouched = score.notes('C4/8, D4');
+  assert.throws(() => score.autoBeam(untouched, { groups: [new VF.Fraction(0, 1)] }), /positive finite/);
+  assert.ok(untouched.every((note) => !note.hasBeam()));
+  assert.throws(() => score.autoBeam([create().notes('C4/8')[0]]), /this Factory/);
+});
+
+test('tuplet handles preserve nested ratios and reject invalid late timing changes', () => {
+  const score = create();
+  const notes = score.notes('C4/8, D4, E4, F4, G4, A4');
+  const inner = score.make.tuplet({
+    notes: notes.slice(0, 3),
+    options: { numNotes: 3, notesOccupied: 2, yOffset: 0, textYOffset: 0 },
+  });
+  const outer = score.make.tuplet({ notes, options: { numNotes: 5, notesOccupied: 4, ratioed: true } });
+  assert.ok(inner instanceof VF.Tuplet && outer instanceof VF.Tuplet);
+  assert.equal(inner.options.yOffset, 0);
+  const eighth = new VF.Fraction(VF.VexFlow.RESOLUTION, 8);
+  assert.ok(notes[0].getTicks().equals(eighth.clone().multiply(2, 3).multiply(4, 5)));
+  score.autoBeam(notes, { groups: [new VF.Fraction(1, 4)] });
+  score.voice(notes, { mode: 'soft' });
+  assert.throws(() => score.make.tuplet({ notes }), /before inserting/);
+  const fresh = score.notes('C4/8, D4, E4');
+  const ticks = fresh.map((note) => note.getTicks().toString());
+  assert.throws(() => score.make.tuplet({ notes: fresh, options: { notesOccupied: 0 } }), /positive integers/);
+  assert.deepEqual(
+    fresh.map((note) => note.getTicks().toString()),
+    ticks
+  );
+});
+
+test('relationship helpers reject foreign or invalid endpoints and preserve native customization', () => {
+  const score = create();
+  const [from, to] = score.notes('(C4 E4)/h, (C5 E5)');
+  const spans = [
+    score.make.curve({ from, to, options: { thickness: 3 } }),
+    score.make.hairpin({ from, to, type: 1, options: { height: 14, yShift: 0 } }),
+    score.make.line({ from, to, firstIndexes: [1], lastIndexes: [0], options: { text: 'gliss.' } }),
+    score.make.textBracket({ from, to, text: '8', options: { superscript: 'va', position: 'top', line: 0 } }),
+    score.make.vibratoBracket({ from, to, options: { line: 0 } }),
+    score.make.pedalMarking({ notes: [from, to], options: { style: 'mixed' } }),
+  ];
+  assert.ok(spans.every((span) => VF.Factory.getOwner(span) === score.factory));
+  assert.equal(spans[0].renderOptions.thickness, 3);
+  assert.equal(spans[1].renderOptions.height, 14);
+  const count = queued(score);
+  const foreign = create().notes('C4/w')[0];
+  for (const build of [
+    () => score.make.curve({ from, to: foreign }),
+    () => score.make.hairpin({ type: 1 }),
+    () => score.make.line({ from, to, firstIndexes: [2], lastIndexes: [0] }),
+    () => score.make.textBracket({ from, text: '8', options: { superscript: 'va', position: 'top' } }),
+    () => score.make.pedalMarking({ notes: [foreign] }),
+    () => score.make.tie({ from: score.make.annotation({ text: 'not a note' }) }),
+  ])
+    assert.throws(build);
+  assert.equal(queued(score), count);
+  assert.ok(score.make.curve({ from }) instanceof VF.Curve);
+  assert.throws(() => score.make.hairpin({ to, type: 2 }), /endpoint/);
+  assert.ok(score.make.vibratoBracket({ from: null, to, options: { line: 1 } }) instanceof VF.VibratoBracket);
+  const duration = new VF.Fraction(1, 8);
+  const dynamics = score.make.textDynamics({ text: 'sfz', duration: 'q', durationOverride: duration, line: 2 });
+  assert.ok(dynamics.getTicks().equals(duration.clone().multiply(VF.VexFlow.RESOLUTION, 1)));
+  assert.ok(score.make.crescendo({ duration: 'q' }).setDecrescendo(true) instanceof VF.Crescendo);
+  assert.throws(() => score.make.textDynamics({ text: 'bad' }), /dynamics glyph/);
+});
+
+test('tab helpers preserve native options and validate span heads and grace ownership', () => {
+  const score = create();
+  const options = {
+    positions: [
+      { str: 7, fret: 'X' },
+      { str: 2, fret: 12 },
+    ],
+    duration: 'q',
+    stemDirection: -1,
+  };
+  const from = score.make.tabNote(options, true);
+  const to = score.make.tabNote({
+    ...options,
+    positions: [
+      { str: 7, fret: 5 },
+      { str: 2, fret: 14 },
+    ],
+  });
+  assert.deepEqual(from.getPositions(), options.positions);
+  assert.equal(from.renderOptions.drawStem, true);
+  assert.equal(from.getStemDirection(), -1);
+  const bend = score.make.bend([{ type: VF.Bend.UP, text: '1/2', width: 25 }]);
+  score.attach(from, bend, 1);
+  assert.equal(bend.getIndex(), 1);
+  const tie = score.make.tabTie({ firstNote: from, lastNote: to, firstIndexes: [1], lastIndexes: [1] }, 'P');
+  assert.ok(tie instanceof VF.TabTie);
+  assert.ok(score.make.tabSlide({ firstNote: from, lastNote: to }, -1) instanceof VF.TabSlide);
+  assert.ok(score.make.tabSlide({ firstNote: from }, 1) instanceof VF.TabSlide);
+  const grace = score.make.graceTabNote({ positions: [{ str: 1, fret: 2 }], duration: '16' });
+  const group = score.make.graceNoteGroup({ notes: [grace], slur: true });
+  score.attach(to, group);
+  assert.equal(VF.Factory.getGroup(grace), group);
+  assert.throws(() => score.voice([grace], { mode: 'soft' }), /group/i);
+  const count = queued(score);
+  assert.throws(() => score.make.tabNote({ positions: [{ str: 0, fret: 2 }], duration: 'q' }), /position/i);
+  assert.throws(() => score.make.tabSlide({ firstNote: from }), /direction/i);
+  assert.throws(() => score.make.tabTie({ firstNote: from, firstIndexes: [2] }), /index/i);
+  assert.throws(() => score.make.tabTie({ firstNote: create().make.tabNote(options) }), /Factory/i);
+  assert.throws(() => score.make.bend([{ type: 5, text: 'x' }]), /direction/i);
+  assert.equal(queued(score), count);
+});
+
+test('staff helpers attach once and preserve native options without standalone drawing', () => {
+  const score = create();
+  const stave = score.make.stave({ x: 10, y: 20, width: 400 });
+  const count = queued(score);
+  const modifiers = [
+    score.make.clef('bass', 'small', '8vb'),
+    score.make.keySignature('D', 'C'),
+    score.make.timeSignature('7/8', 0),
+    score.make.barline(VF.Barline.type.DOUBLE),
+    score.make.repetition(VF.Repetition.type.DC, 0, 0),
+    score.make.volta(VF.Volta.type.BEGIN, '1.', 0, 0),
+    score.make.section('A', 0, 0, false),
+    score.make.tempo({ bpm: 100, duration: 'q', dots: 1 }, 0, 0),
+    score.make.staveText('text', VF.StaveModifier.Position.ABOVE, { shiftX: 0, shiftY: 0 }),
+  ];
+  for (const mark of modifiers) {
+    score.attachToStave(stave, mark);
+    score.attachToStave(stave, mark);
+    assert.equal(mark.getStave(), stave);
+    assert.equal(stave.getModifiers().filter((m) => m === mark).length, 1);
+    assert.equal(VF.Factory.getOwner(mark), score.factory);
+    assert.equal(score.getElement(mark.getAttribute('id')), mark);
+  }
+  assert.equal(queued(score), count);
+  const other = score.make.tabStave();
+  assert.throws(() => score.attachToStave(other, modifiers[0]), /already attached/i);
+  assert.throws(() => score.attachToStave(stave, create().make.clef('treble')), /Factory/i);
+  assert.throws(() => score.attachToStave(stave, score.make.clef('treble'), 99), /position/i);
+  assert.ok(score.make.connector({ topStave: stave, bottomStave: other, type: 'single' }) instanceof VF.StaveConnector);
+  assert.throws(() => score.make.multiMeasureRest({ numberOfMeasures: 0 }), /positive/i);
+  assert.ok(score.make.multiMeasureRest({ numberOfMeasures: 3 }).setStave(stave) instanceof VF.MultiMeasureRest);
+  const inline = [
+    score.make.barNote(),
+    score.make.clefNote({ options: undefined }),
+    score.make.keySigNote({ key: 'G' }),
+    score.make.timeSigNote({ time: '3/4' }),
+  ];
+  assert.ok(inline.every((note) => note.shouldIgnoreTicks()));
+  assert.equal(
+    score
+      .voice([...inline, ...score.notes('C4/w')])
+      .getTicksUsed()
+      .value(),
+    VF.VexFlow.RESOLUTION
+  );
+  assert.ok(score.make.glyphNote('\uE047', { duration: 'q' }) instanceof VF.GlyphNote);
+  assert.ok(score.make.repeatNote('2', { duration: 'w' }) instanceof VF.RepeatNote);
+});
+
+test('composition scopes defaults, validates pickups and rational voices, and resolves forward spans', () => {
+  const score = create();
+  const defaults = score.defaults;
+  const note = score.withDefaults({ clef: 'bass', stem: 'down' }, (builder) => builder.notes('C3/q')[0]);
+  assert.equal(note.getStemDirection(), -1);
+  assert.equal(score.defaults, defaults);
+  assert.throws(
+    () =>
+      score.withDefaults({ clef: 'bass' }, () => {
+        throw Error('stop');
+      }),
+    /stop/
+  );
+  assert.equal(score.defaults, defaults);
+  const result = score.compose({
+    staves: [
+      {
+        id: 'right',
+        measures: [
+          { span: '1/4', voices: [{ notes: 'C5/q[id="pickup"]' }] },
+          {
+            time: '2/4',
+            voices: [
+              {
+                notes: 'C5/8[id="start"], D5, E5, F5, G5, A5[id="end"]',
+                tuplets: [
+                  { start: 0, count: 3 },
+                  { start: 3, count: 3 },
+                ],
+                autoBeam: true,
+                stem: 'up',
+              },
+              { notes: 'G4/h', stem: 'down' },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'left',
+        clef: 'bass',
+        measures: [
+          { span: '1/4', voices: [{ notes: 'C3/q' }] },
+          { time: '2/4', voices: [{ notes: 'C3/h' }] },
+        ],
+      },
+    ],
+    spans: [{ kind: 'curve', from: 'start', to: 'end' }],
+  });
+  assert.equal(result.systems.length, 2);
+  assert.equal(result.voices[1][0].length, 2);
+  assert.ok(result.voices.flat(2).every((voice) => voice.isComplete()));
+  assert.ok(result.voices[1][0][0].getTicksUsed().equals(new VF.Fraction(VF.VexFlow.RESOLUTION, 2)));
+  assert.equal(result.getNote('start'), result.notes[1][0][0][0]);
+  assert.ok(result.spans[0] instanceof VF.Curve);
+  assert.equal(score.defaults, defaults);
+});
+
+test('composition failures roll back IDs and queues and enforce shared staff state', () => {
+  const score = create();
+  const original = score.notes('A4/q[id="keep"]')[0];
+  const count = queued(score);
+  const specs = [
+    { staves: [{ id: 'a', measures: [{ voices: [{ notes: 'C4/q[id="new"]' }] }] }] },
+    {
+      staves: [{ id: 'a', measures: [{ voices: [{ notes: 'C4/w[id="new"]' }] }] }],
+      spans: [{ kind: 'tie', from: 'new', to: 'missing' }],
+    },
+    {
+      staves: [
+        { id: 'a', measures: [{ voices: [{ notes: 'C4/w' }] }] },
+        { id: 'b', measures: [] },
+      ],
+    },
+    {
+      staves: [
+        { id: 'a', measures: [{ voices: [{ notes: 'C4/w' }] }] },
+        { id: 'b', measures: [{ time: '3/4', voices: [{ notes: 'C3/h.' }] }] },
+      ],
+    },
+    {
+      staves: [
+        { id: 'a', measures: [{ voices: [{ notes: ['C4/h', { change: { key: 'G' } }, 'C4/h'] }, { notes: 'C4/w' }] }] },
+      ],
+    },
+    {
+      staves: [
+        {
+          id: 'a',
+          measures: [{ voices: [{ notes: [{ note: { keys: ['c/4'], duration: 'w' }, stave: 'missing' }] }] }],
+        },
+      ],
+    },
+  ];
+  for (const spec of specs) {
+    assert.throws(() => score.compose(spec));
+    assert.equal(queued(score), count);
+    assert.equal(score.getElement('new'), undefined);
+    assert.equal(score.getNote('keep'), original);
+    assert.equal(score.factory.sheets.length, 0);
+  }
+  const native = score.make.note({ keys: ['c/4'], duration: 'w' });
+  assert.throws(() =>
+    score.compose({
+      staves: [{ id: 'a', measures: [{ voices: [{ notes: [native] }] }] }],
+      spans: [{ kind: 'tie', from: 'missing' }],
+    })
+  );
+  assert.throws(() => native.getVoice(), /No voice/i);
+  assert.equal(native.getStave(), undefined);
+  const result = score.compose({ staves: [{ id: 'a', measures: [{ voices: [{ notes: [native] }] }] }] });
+  assert.equal(result.notes[0][0][0][0], native);
+});
+
+test('key-aware composition preserves literal pitches and explicit marks across rational onsets and key changes', () => {
+  const marks = (note) =>
+    note
+      .getModifiers()
+      .filter((mark) => mark instanceof VF.Accidental)
+      .map((mark) => mark.type);
+  const score = create();
+  const result = score.compose({
+    accidentals: 'key-aware',
+    staves: [
+      {
+        id: 'a',
+        key: 'G',
+        measures: [
+          { voices: [{ notes: 'F#4/q, F#4, F4, F4' }] },
+          { voices: [{ notes: 'F#4/q, F4, F#4, F4' }, { notes: 'F4/q, F#4, F4, F#4' }] },
+          { voices: [{ notes: ['F#4/h', { change: { key: 'C' } }, 'F#4/q, F#4'] }] },
+        ],
+      },
+    ],
+  });
+  assert.deepEqual(result.notes[0][0][0].map(marks), [[], [], ['n'], []]);
+  assert.equal(result.notes[0][0][0][0].getKeys()[0], 'F#/4');
+  assert.deepEqual(result.notes[1][0][0].map(marks), [['#'], ['n'], ['#'], ['n']]);
+  assert.deepEqual(result.notes[1][0][1].map(marks), [['n'], ['#'], ['n'], ['#']]);
+  assert.deepEqual(result.notes[2][0][0].filter((n) => !n.shouldIgnoreTicks()).map(marks), [[], ['#'], []]);
+  const caution = create({
+    commitHooks: [
+      (options, note) => {
+        if (options.id === 'caution') note.getModifiers()[0].setAsCautionary();
+        note.setAttribute('id', options.id ?? note.getAttribute('id'));
+      },
+    ],
+  });
+  const preserved = caution.compose({
+    accidentals: 'key-aware',
+    staves: [{ id: 'a', key: 'G', measures: [{ voices: [{ notes: 'F#4/q[id="caution"], F++4, F4, F4' }] }] }],
+  });
+  const notes = preserved.notes[0][0][0];
+  assert.equal(notes[0].getModifiers()[0].isCautionary(), true);
+  assert.deepEqual(notes.map(marks), [['#'], ['++'], ['n'], []]);
+  const rational = create().compose({
+    accidentals: 'key-aware',
+    staves: [
+      {
+        id: 'a',
+        measures: [
+          {
+            time: '2/4',
+            voices: [
+              {
+                notes: 'F#4/8, F4, F#4, F4, F#4, F4',
+                tuplets: [
+                  { start: 0, count: 3 },
+                  { start: 3, count: 3 },
+                ],
+              },
+              { notes: 'C4/q, F4' },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+  assert.deepEqual(marks(rational.notes[0][0][1][1]), ['n']);
+});
+
+test('composition spans and signature repetition require explicit layout policies', () => {
+  const spec = {
+    staves: [
+      { id: 'a', measures: [{ voices: [{ notes: 'C4/w[id="first"]' }] }, { voices: [{ notes: 'C4/w[id="last"]' }] }] },
+    ],
+    spans: [{ kind: 'tie', from: 'first', to: 'last' }],
+  };
+  assert.throws(() => create().compose(spec), /manual segmentation/i);
+  const manual = create().compose({ ...spec, crossMeasureSpans: 'manual', signatures: 'every-measure' });
+  assert.equal(manual.diagnostics.length, 1);
+  assert.equal(manual.diagnostics[0].code, 'ManualSpan');
+  assert.ok(manual.staves.every(([stave]) => stave.getModifiers().some((mark) => mark instanceof VF.Clef)));
+});
+
+test('composition keeps cross-staff placement and applies accidentals on the target stave', () => {
+  const score = create();
+  const result = score.compose({
+    accidentals: 'key-aware',
+    staves: [
+      {
+        id: 'upper',
+        measures: [
+          {
+            voices: [
+              { notes: [{ note: { keys: ['f/3'], duration: 'w', clef: 'bass' }, id: 'cross', stave: 'lower' }] },
+            ],
+          },
+        ],
+      },
+      { id: 'lower', key: 'G', clef: 'bass', measures: [{ voices: [{ notes: 'G2/w' }] }] },
+    ],
+  });
+  const note = result.getNote('cross');
+  assert.equal(note.getStave(), result.staves[0][1]);
+  assert.deepEqual(
+    note
+      .getModifiers()
+      .filter((mark) => mark instanceof VF.Accidental)
+      .map((mark) => mark.type),
+    ['n']
+  );
+  result.sheet.format();
+  result.sheet.setWidth(220).format();
+  assert.equal(note.getStave(), result.staves[0][1]);
+  assert.ok(Number.isFinite(note.getYs()[0]));
+});
+
+test('composition carries clef state and cancels inline key signatures on the correct staff lines', () => {
+  const score = create();
+  const result = score.compose({
+    staves: [
+      {
+        id: 'bass',
+        clef: 'bass',
+        key: 'G',
+        measures: [
+          { voices: [{ notes: 'G3/w' }] },
+          { key: 'D', voices: [{ notes: ['D3/h', { change: { clef: 'treble', key: 'C' } }, 'C5/h'] }] },
+        ],
+      },
+    ],
+  });
+  assert.equal(result.staves[0][0].getClef(), 'bass');
+  assert.equal(result.staves[1][0].getClef(), 'bass');
+  const inline = result.notes[1][0][0].find((note) => note instanceof VF.KeySigNote);
+  inline.preFormat();
+  assert.equal(inline.keySignature.accList.length, 2, 'D major is cancelled with two naturals');
+  const native = new VF.KeySignature('C', 'D').setStave(new VF.Stave(0, 0, 200).addClef('treble'));
+  native.format();
+  assert.deepEqual(inline.keySignature.accList, native.accList, 'inline cancellation follows the new clef');
+  const attached = score.make.stave();
+  score.attachToStave(attached, score.make.clef('alto'));
+  assert.equal(attached.getClef(), 'alto');
+});
+
+test('non-pitched timed notes accept native modifiers at their single attachment index', () => {
+  const score = create();
+  const note = score.make.glyphNote('\uE047', { duration: 'w' });
+  const label = score.make.annotation({ text: 'sim.' });
+  score.attach(note, label);
+  assert.equal(label.getNote(), note);
+  assert.equal(label.getIndex(), 0);
+  assert.throws(() => score.attach(note, score.make.annotation({ text: 'bad' }), 1), /index/i);
+});
+
+test('typed grace notes retain explicit stem direction over automatic defaults', () => {
+  const grace = create().make.graceNote({ keys: ['c/4'], duration: '16', stemDirection: -1 });
+  assert.equal(grace.getStemDirection(), -1);
+  assert.equal(grace.isAutoStem(), false);
 });

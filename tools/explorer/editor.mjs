@@ -47,6 +47,19 @@ export function createEditor(element, onChange) {
 
   return {
     getCode: () => jar.toString(),
+    /** Select source without changing text, history, or scheduling a new render. */
+    selectRange(start, end) {
+      if (start < 0 || end < start || end > jar.toString().length) return;
+      element.focus({ preventScroll: true });
+      jar.restore({ start, end });
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+      const rect = selection.getRangeAt(0).getBoundingClientRect();
+      const editorRect = element.getBoundingClientRect();
+      if (rect.top < editorRect.top || rect.bottom > editorRect.bottom) {
+        element.scrollTop += rect.top - editorRect.top - element.clientHeight / 2;
+      }
+    },
     setCode(code) {
       clearTimeout(inputTimer);
       // A new example or reset starts a separate undo history.

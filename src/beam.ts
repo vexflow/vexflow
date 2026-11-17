@@ -191,6 +191,8 @@ export class Beam extends Element {
       secondaryBreaks?: string;
       showStemlets?: boolean;
       maintainStemDirections?: boolean;
+      /** Optional facade policy. Omitted preserves the native generator's historical behavior. */
+      stemPolicy?: 'auto' | 'explicit' | 'preserve';
       beamMiddleOnly?: boolean;
       beamRests?: boolean;
       groups?: Fraction[];
@@ -345,6 +347,17 @@ export class Beam extends Element {
 
     function formatStems() {
       noteGroups.forEach((group) => {
+        if (config.stemPolicy === 'preserve') return;
+        if (config.stemPolicy === 'explicit') {
+          const explicit = new Set(
+            group.filter((note) => !note.isRest() && !note.isAutoStem()).map((note) => note.getStemDirection())
+          );
+          // Cross-staff groups retain mixed explicit directions. Automatic notes follow a sole explicit direction.
+          if (explicit.size > 1) return;
+          const direction = explicit.size ? [...explicit][0] : calculateStemDirection(group);
+          group.filter((note) => note.isAutoStem()).forEach((note) => note.setStemDirection(direction, true));
+          return;
+        }
         let stemDirection;
         if (config.maintainStemDirections) {
           const note = findFirstNote(group);

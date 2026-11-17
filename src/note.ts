@@ -378,6 +378,13 @@ export abstract class Note extends Tickable {
     return this.stave;
   }
 
+  /** Release a staged stave assignment when managed composition fails. */
+  clearStave(): this {
+    this.stave = undefined;
+    this.preFormatted = false;
+    return this;
+  }
+
   /** Check and get the target stave. */
   checkStave(): Stave {
     return defined(this.stave, 'NoStave', 'No stave attached to instance.');

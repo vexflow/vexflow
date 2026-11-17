@@ -7,7 +7,14 @@
 - Apply native note options and voice modes, meter objects, resolution, and softmax settings.
 - Support validated articulation aliases, codes, and glyphs. Unknown names no longer silently become staccato.
 - Preserve legacy non-throwing parsing, custom builders, and commit hooks.
-- Add a user guide, Explorer example, feature coverage checklist, and native-rendering parity tests.
+- Add a user guide, Explorer examples, feature coverage checklist, and native-rendering parity tests.
+- Add score-local ID lookup and source provenance, with duplicate checks, rename tracking, and reset/rollback cleanup.
+- Adopt native notes, modifiers, and standalone drawables with explicit roles and ownership checks.
+- Select parsed notation from Explorer clicks without guessing ambiguous or stale editor locations.
+
+- Add typed note sequences, percussion heads, native modifier helpers, and single-owner grace/subnote groups.
+- Add pure extension validation, Sheet access, and synchronous construction batches.
+- Preserve native dot and parenthesis fonts without requiring a browser document in Node.
 
 # 5.1.2
 

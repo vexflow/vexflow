@@ -73,7 +73,8 @@ export class Parenthesis extends Modifier {
   /** Set the associated note. */
   override setNote(note: Note): this {
     this.note = note;
-    this.setFont(note.getFont());
+    // Copy structured font data so attachment also works without a browser document.
+    this.setFont(note.fontInfo);
     return this;
   }
 

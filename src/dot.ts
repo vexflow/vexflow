@@ -139,7 +139,8 @@ export class Dot extends Modifier {
 
   override setNote(note: Note): this {
     this.note = note;
-    this.font = note.font;
+    // Keep native font data; parsing CSS here would require a browser document in Node.
+    this.setFont(note.fontInfo);
     return this;
   }
 

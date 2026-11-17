@@ -162,6 +162,7 @@ export function runPreview() {
       layout,
       rendered,
       properties,
+      source: window.VexFlow.EasyScore.getSource(element),
       related: [...related],
       voice: voice?.getAttribute('id'),
     };

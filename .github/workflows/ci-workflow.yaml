@@ -26,3 +26,4 @@ jobs:
       - run: npm test
       - run: npm run explorer:test
       - run: npm run tests:test
+      - run: npm run test:easyscore-package

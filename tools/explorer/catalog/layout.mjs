@@ -1,5 +1,10 @@
 // Higher-level formatting, invisible timing, and unusual rhythmic glyphs.
+import { renderEasyScoreComposition } from '../../easyscore-composition.mjs';
 import { createEasyScoreExample } from '../../easyscore-example.mjs';
+import { renderEasyScoreFamilies } from '../../easyscore-families.mjs';
+import { createEasyScoreReferencesExample } from '../../easyscore-references-example.mjs';
+import { renderEasyScoreStructure } from '../../easyscore-structure.mjs';
+import { renderEasyScoreRhythm } from '../../easyscore-rhythm.mjs';
 import { example as e, number, select, setup, staff, text } from './helpers.mjs';
 
 const group = 'Layout & composition';
@@ -13,7 +18,85 @@ export const layout = [
     `// The function body is shared with the tested user-guide example.
 (${createEasyScoreExample.toString()})(VF, { elementId: 'score', width, height }, ink);`,
     [],
-    'EasyScore.create() validates before construction. Helpers return native VexFlow objects. This is the first API slice; other notation families remain available through Factory.'
+    'EasyScore.create() validates before construction. Helpers return native VexFlow objects. Typed helpers cover all notation families; native setters remain available.'
+  ),
+  e(
+    'easyscore-references',
+    'EasyScore: references & extensions',
+    group,
+    'Resolve named notes, adopt native extensions, and click parsed notes to select their source.',
+    'EasyScore getElement getNote getSource adopt Annotation StaveTie Curve',
+    `// Click either C4 note to select its notation in this editor.
+(${createEasyScoreReferencesExample.toString()})(VF, { elementId: 'score', width, height }, ink);`,
+    [],
+    'IDs are local to each score. Adopted notes and drawables share the normal retained lifecycle. Native objects have no notation source. Inspector selection requires one unescaped matching literal; computed or ambiguous input is shown without guessing an editor location.'
+  ),
+  e(
+    'easyscore-families',
+    'EasyScore: notes & modifiers',
+    group,
+    'Typed notes, percussion heads, native modifiers, and grace groups through one score.',
+    'EasyScore StaveNote Accidental Articulation Ornament Tremolo Vibrato Parenthesis Dot ChordSymbol GraceNoteGroup NoteSubGroup Stroke TextNote',
+    `(${renderEasyScoreFamilies.toString()})(VF, { elementId: 'score', width, height }, params.family, ink);`,
+    [select('family', 'Family', 'modifiers', ['modifiers', 'accidentals', 'text', 'grace', 'percussion', 'sequence'])],
+    'Typed notes preserve native fields and head codes. Grace/subnote groups own their children. Set note duration dots explicitly; a Dot modifier alone changes only the appearance.'
+  ),
+  e(
+    'easyscore-rhythm',
+    'EasyScore: rhythm & relationships',
+    group,
+    'Odd-meter voices, nested tuplets, owned spans, partial endpoints, and timed dynamics.',
+    'EasyScore Beam Tuplet StaveTie Curve StaveHairpin StaveLine TextBracket VibratoBracket PedalMarking TextDynamics Crescendo',
+    `(${renderEasyScoreRhythm.toString()})(VF, { elementId: 'score', width, height }, params.family, ink);`,
+    [
+      select('family', 'Family', 'odd-meter', [
+        'odd-meter',
+        'tuplets',
+        'ties',
+        'curves',
+        'hairpins',
+        'lines',
+        'brackets',
+        'pedal',
+        'partial-spans',
+        'dynamics',
+      ]),
+    ],
+    'Beam groups use exact Fractions and preserve explicit stems by default. Create tuplets before voices. Spans draw through the score; row-break segments remain explicit.'
+  ),
+  e(
+    'easyscore-structure',
+    'EasyScore: tablature & staff structure',
+    group,
+    'Tablature, bends, grace groups, inline changes, rests, repeats, and staff markings.',
+    'EasyScore TabNote GraceTabNote TabSlide TabTie Bend Stave Clef KeySignature TimeSignature MultiMeasureRest RepeatNote GlyphNote',
+    `(${renderEasyScoreStructure.toString()})(VF, { elementId: 'score', width, height }, params.family, ink);`,
+    [
+      select('family', 'Family', 'tab', [
+        'tab',
+        'grace-tab',
+        'rest',
+        'inline',
+        'repeat',
+        'labels',
+        'endings',
+        'connector',
+      ]),
+    ],
+    'Staff modifiers draw through their stave. Inline clefs and signatures change appearance; update note options explicitly. Tab tuning stays a separate native utility.'
+  ),
+  e(
+    'easyscore-composition',
+    'EasyScore: responsive composition',
+    group,
+    'A grand staff with pickup, opposing voices, triplets, changing meter, key-aware accidentals, and inline state.',
+    'EasyScore compose Sheet System Voice Fraction Accidental',
+    `(${renderEasyScoreComposition.toString()})(VF, { elementId: 'score', width: params.sheetWidth, height }, params.spacing, ink);`,
+    [
+      number('sheetWidth', 'Width', 640, 320, 1000, 20),
+      select('spacing', 'Spacing', 'engraving', ['engraving', 'proportional']),
+    ],
+    'Each measure is a native System. Tuplets precede voices; all voices share the actual span. Signatures repeat at every measure here, so any measure can begin a row. Use Sheet.getRows() to inspect overflow.'
   ),
   e(
     'proportional-spacing',

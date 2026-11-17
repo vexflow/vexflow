@@ -2,20 +2,28 @@
 
 Plan for [#354](https://github.com/vexflow/vexflow/issues/354).
 
-Status: first implementation slice complete and validated locally. It is not pushed. All upstream pushes are deferred until the complete milestone rollout is finished.
+Status: all milestones are implemented and validated. The `easyscore-overhaul` branch is merged into `main`. The interactive guide in #356 remains separate.
 
-The [user guide](docs/easyscore.md) documents the shipped surface. The [coverage manifest](docs/easyscore-coverage.json) classifies public modules and tracks first-slice contracts.
+The [API reference](docs/easyscore.md), [contracts](docs/easyscore-contracts.md), and [coverage manifest](docs/easyscore-coverage.json) describe the implementation.
 
-Implemented in this slice:
+| Milestone                  | Status   | Result                                                                                                |
+| -------------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| 0. Inventory               | Complete | Public modules, native option snapshot, explicit helper/lifecycle contracts.                          |
+| 1. Reliability             | Complete | Pure parsing, source diagnostics, strict validation, and construction rollback.                       |
+| 2. Entry point             | Complete | Facade, local IDs/provenance, adoption, Sheet, batch construction, and Inspector source selection.    |
+| 3. Notes and modifiers     | Complete | Typed sequences, percussion, all note modifiers, and grace/subnote ownership.                         |
+| 4. Rhythm and spans        | Complete | Automatic beams, rational tuplets, dynamics, and validated native relationships.                      |
+| 5. Tab and staff structure | Complete | Tablature, bends/slides/ties, staff markings, inline changes, repeats, and rests.                     |
+| 6. Composition             | Complete | Aligned measures, pickups, multiple voices, scoped state, accidental policies, and stable reflow.     |
+| 7. Coverage and packaging  | Complete | Complete reference/migration docs, every-helper coverage gate, and packed ESM/CJS/declaration checks. |
 
-- Strict `EasyScore.create()`, `make.annotation()`, `make.tie()`, `attach()`, `system()`, style, draw, and reset helpers.
-- Pure `parseNotation()` results with source diagnostics. Strict construction and measure requests clean up failed managed work.
-- Native note options, voice modes/time/resolution, working softmax options, and validated articulation names/codes/glyphs.
-- A guide and Explorer example, native-rendering parity checks, and compatibility/ownership regressions.
+Final validation: 229 Node checks, 1,891 QUnit tests, 12 Explorer checks, and 2 bundled-gallery checks pass. Lint, source/declaration builds, all public ESM/CommonJS package entries, and an external TypeScript consumer pass.
 
-Still pending: the remaining `make.*` families, automatic beaming, typed note sequences, score-local lookup, source-to-element mapping, generic adoption, and structured composition.
-This slice does not complete Milestones 0–2 in full: module classification is established, but exhaustive option-level coverage and the broader extension/reference APIs remain open.
-Reviewed against `main` at `91e753e79e1fed1ef87a669b884dab50e7dca463` on November 16, 2026.
+Native limits remain explicit: no automatic span splitting, row-start-only signature repetition, pagination, or general collision solver.
+Hairpins require two endpoints. Grace accidentals remain explicit. Adopted inputs must be prepared before composition rhythm/accidental policies.
+
+The original review below was made against `main` at `91e753e79e1fed1ef87a669b884dab50e7dca463` on November 16, 2026.
+It records the strategy and exit criteria for the completed implementation.
 
 ## Recommendation
 
@@ -100,7 +108,7 @@ These findings come from source inspection and small probes against a freshly re
 
 The softmax probe used a half note and two quarter notes. The accepted option produced weights of about `0.471, 0.265, 0.265`. Calling the native setter produced the expected equal thirds.
 
-The first slice now fixes the listed option forwarding, articulation fallback, and strict/measure failure cleanup. Broader coverage and score-local registry work remain pending. The table records the pre-implementation behavior.
+The first slice now fixes the listed option forwarding, articulation fallback, and strict/measure failure cleanup. Broader coverage remains in progress; score-local lookup is implemented. The table records the pre-implementation behavior.
 
 ## Feature coverage and gaps
 
@@ -281,7 +289,7 @@ Registration must be idempotent by object identity. It must not draw a modifier 
 
 Add an explicit adoption API for custom objects. Require the caller to identify its role.
 Do not guess from the existence of `draw()`, and do not expose the protected render queue as the public contract.
-Reject cross-factory attachments unless they have been explicitly adopted.
+Reject cross-factory adoption and attachments. Adoption registers unowned native objects; it does not transfer ownership from another Factory.
 
 Default `draw()` still clears the Factory's queues. `draw({ retain: true })` preserves them.
 Keep EasyScore references available for inspection after a normal draw, until `reset()`. Explain that references alone do not requeue objects for drawing. Clear owned references and source mappings on `reset()`.
