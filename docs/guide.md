@@ -73,6 +73,9 @@ its tests render every example in three fonts and exercise the EasyScore family 
 
 - Drafts are stored by example ID in browser local storage. Storage failure leaves editing usable.
 - Reset restores the original code and parameter values and recreates the sandbox.
+- Lesson and playground navigation reuse the sandbox, loaded library, and fonts without new asset requests.
+  Each run clears the previous score, inspection state, and tracked timers and listeners.
+  Use Reset to clear arbitrary global changes made by edited code.
 - Run as you type is opt-in. Ctrl/Command+Enter runs immediately. Escape, then Tab leaves the editor.
 - Clicking a parsed note selects its notation when one exact, unescaped source literal matches the unchanged editor.
   Ambiguous, computed, or stale source is inspected without selecting guessed text.
@@ -89,6 +92,7 @@ its tests render every example in three fonts and exercise the EasyScore family 
 `npm run guide:test` covers:
 
 - All lesson routes, related links, and repository source paths.
+- Warm lesson and playground navigation with no asset requests and unchanged library/font objects.
 - Every teaching and Explorer example with Bravura, Petaluma, and Gonville.
 - Editing, literal source text, keyboard access, drafts, reset, and errors.
 - Mobile layout, navigation, disabled storage, and sandbox attributes.

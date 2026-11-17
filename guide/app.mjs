@@ -199,10 +199,9 @@ function environment() {
   $('params-code').textContent = `const params = ${JSON.stringify(params, null, 2)};`;
 }
 
-/** A changed example gets a fresh sandbox; ordinary edits reuse the warm runtime. */
+/** Reuse the loaded library and fonts; the shared runtime cleans each example's effects. */
 function showExample(example) {
   clearTimeout(timer);
-  preview.reset();
   currentExample = example;
   const saved = Object.hasOwn(drafts, example.id) ? drafts[example.id] : undefined;
   params = { ...defaults(example), ...(saved?.params && typeof saved.params === 'object' ? saved.params : {}) };

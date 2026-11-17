@@ -76,6 +76,68 @@ async function edit(code) {
 }
 
 try {
+  await test('lesson and playground navigation reuse the runtime without asset requests', async () => {
+    // Disable HTTP caching so this also protects remotely served guides with a cold cache.
+    await page.setCacheEnabled(false);
+    await visit('lesson/welcome');
+    const frame = page.frames().find((frame) => frame.url() === 'about:srcdoc');
+    await frame.evaluate(() => {
+      window.originalLibrary = VexFlow;
+      window.originalFonts = [...document.fonts];
+    });
+    const requests = [];
+    const record = (request) => {
+      // Chromium may refresh the tab icon during fragment navigation.
+      if (request.url() !== `${origin}/favicon.ico`) requests.push(request.url());
+    };
+    page.on('request', record);
+    try {
+      for (const hash of [
+        ...lessons.filter((lesson) => lesson.id !== 'welcome').map((lesson) => `lesson/${lesson.id}`),
+        ...examples.map((example) => `playground/${example.id}`),
+        'lesson/welcome',
+      ]) {
+        // Clear the previous result before navigating so the wait cannot accept a stale render.
+        await page.evaluate((hash) => {
+          document.getElementById('render-status').textContent = 'Navigating…';
+          location.hash = hash;
+        }, hash);
+        await rendered(hash);
+        assert.equal(
+          page.frames().find((frame) => frame.url() === 'about:srcdoc'),
+          frame,
+          hash
+        );
+        assert.equal(await frame.$$eval('#score > svg', (nodes) => nodes.length), 1, hash);
+      }
+      for (const font of ['Petaluma', 'Gonville', 'Bravura']) {
+        await page.select('#font', font);
+        await rendered(font);
+      }
+      assert.ok(
+        await frame.evaluate(
+          () =>
+            VexFlow === window.originalLibrary &&
+            document.fonts.size === window.originalFonts.length &&
+            [...document.fonts].every((font, i) => font === window.originalFonts[i])
+        ),
+        'library and font objects survive navigation'
+      );
+      assert.deepEqual(requests, [], 'navigation and font switches make no application requests');
+      assert.deepEqual(errors, []);
+      assert.deepEqual(failures, []);
+    } finally {
+      page.off('request', record);
+    }
+    // Explicit Reset must still discard global mutations and recreate the sandbox.
+    await page.click('#reset');
+    await rendered('explicit reset');
+    assert.notEqual(
+      page.frames().find((frame) => frame.url() === 'about:srcdoc'),
+      frame
+    );
+  });
+
   await test('all lesson routes render and all local source references exist', async () => {
     const ids = new Set(lessons.map((lesson) => lesson.id));
     assert.equal(ids.size, lessons.length);
