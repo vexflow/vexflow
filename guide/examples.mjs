@@ -1,20 +1,19 @@
 // Complete teaching examples. Each runs in the shared Explorer preview environment.
-const setup = `const factory = new VF.Factory({
+const setup = `const score = VF.EasyScore.create({
   renderer: { elementId: 'score', width, height },
-});
-const score = factory.EasyScore({ throwOnError: true });`;
+});`;
 
 /** Keep beginner examples strict so rhythm errors are visible while learning. */
 function stave(body, meter = '4/4') {
   return `${setup}\n${body}\nconst voice = score.voice(notes, { time: '${meter}' });
-factory.System({ x: 20, y: 50, width: width - 40 })
+score.system({ x: 20, y: 50, width: width - 40 })
   .addStave({ voices: [voice] })
   .addClef('treble').addTimeSignature('${meter}');
-factory.draw();`;
+score.draw();`;
 }
 
 /** Use the same example shape as Explorer; controls are optional. */
-function example(id, title, code, api = 'Factory EasyScore System') {
+function example(id, title, code, api = 'EasyScore System') {
   return { id, title, code, api: api.split(' '), controls: [], group: 'Guide examples', description: title, tips: '' };
 }
 
@@ -41,8 +40,10 @@ for (let i = 0; i < notes.length; i += 2) {
     'Triplets inside a complete bar',
     stave(`const triplet = score.notes('C5/8, D5, E5');
 // Adjust ticks before creating the voice.
-score.tuplet(triplet, { numNotes: 3, notesOccupied: 2 });
-score.beam(triplet);
+const tuplet = score.make.tuplet({ notes: triplet, options: { numNotes: 3, notesOccupied: 2 } });
+score.autoBeam(triplet);
+// Apply display overrides after automatic beaming.
+tuplet.setBracketed(true);
 const notes = [...triplet, ...score.notes('G5/q, E5, C5')];`),
     'EasyScore Tuplet Beam Voice'
   ),
@@ -50,14 +51,14 @@ const notes = [...triplet, ...score.notes('G5/q, E5, C5')];`),
     'grand-staff',
     'Treble and bass together',
     `${setup}
-const system = factory.System({ x: 20, y: 25, width: width - 40, spaceBetweenStaves: 10 });
+const system = score.system({ x: 20, y: 25, width: width - 40, spaceBetweenStaves: 10 });
 system.addStave({ voices: [score.voice(score.notes('C5/h, E5'))] })
   .addClef('treble').addTimeSignature('4/4');
 system.addStave({ voices: [score.voice(score.notes('C3/h, G2', { clef: 'bass' }))] })
   .addClef('bass').addTimeSignature('4/4');
 system.addConnector('brace');
-factory.getContext().resize(width, 300);
-factory.draw();`,
+score.factory.getContext().resize(width, 300);
+score.draw();`,
     'EasyScore System StaveConnector'
   ),
   example(
@@ -81,9 +82,9 @@ score.draw();`,
 const result = score.parseNotation('C4/q, invalid');
 console.log(JSON.stringify(result.diagnostics, null, 2));
 // The invalid request creates no notation. Draw a valid bar afterward.
-factory.System({ x: 20, y: 50, width: width - 40 })
+score.system({ x: 20, y: 50, width: width - 40 })
   .addStave({ voices: [score.voice(score.notes('C4/w'))] }).addClef('treble');
-factory.draw();`,
+score.draw();`,
     'EasyScore'
   ),
   example(
@@ -155,13 +156,140 @@ for (const beam of beams) beam.setContext(factory.getContext()).draw();`,
     `${setup}
 const notes = score.notes('C5/q, E5, G5, C6');
 notes[1].setStyle({ fillStyle: '#b74632', strokeStyle: '#b74632' });
-factory.System({ x: 20, y: 50, width: width - 40 })
+score.system({ x: 20, y: 50, width: width - 40 })
   .addStave({ voices: [score.voice(notes)] }).addClef('treble');
-factory.draw({ retain: true });
+score.draw({ retain: true });
 // A retained draw keeps objects available for the next pass.
-factory.getContext().clear();
-factory.setStyle({ fillStyle: '#38614e', strokeStyle: '#38614e' });
-factory.draw({ retain: true });`,
+score.factory.getContext().clear();
+score.setStyle({ fillStyle: '#38614e', strokeStyle: '#38614e' });
+score.draw({ retain: true });`,
     'Factory Element'
+  ),
+  example(
+    'typed-sequence',
+    'Mix strings, typed notes, and native objects',
+    stave(`const notes = score.sequence([
+  'C5/q',
+  { keys: ['d/5/x'], duration: 'q' },
+  score.make.note({ keys: ['e/5'], duration: 'q', dots: 1 }),
+  'G5/8',
+]);
+score.attach(notes[0], score.make.articulation({ type: 'fermata' }));
+// The typed note has dotted time; this modifier draws its dot.
+score.attach(notes[2], score.make.dot());
+score.attach(notes[3], score.make.annotation({ text: 'dolce', vJustify: 'top' }));`),
+    'EasyScore StaveNote Dot Articulation'
+  ),
+  example(
+    'automatic-beams',
+    'Group seven eighth notes as 2 + 2 + 3',
+    stave(
+      `score.set({ time: '7/8' });
+const notes = score.notes('C5/8, D5, E5, F5, G5, A5, B5');
+const beams = score.autoBeam(notes, {
+  groups: [new VF.Fraction(2, 8), new VF.Fraction(2, 8), new VF.Fraction(3, 8)],
+});
+// Returned native beams are owned and drawn by the score.
+beams[2].setStyle({ fillStyle: '#b74632', strokeStyle: '#b74632' });`,
+      '7/8'
+    ),
+    'EasyScore Beam Fraction'
+  ),
+  example(
+    'named-notes',
+    'Look up notes and inspect their notation source',
+    stave(`const notes = score.notes('C5/h[id="start"], C5/h[id="end"]');
+const from = score.getNote('start');
+score.make.tie({ from, to: score.getNote('end') });
+score.attach(from, score.make.annotation({ text: 'hold', vJustify: 'top' }));
+const source = score.getSource(from);
+console.log(source.input.slice(source.start, source.end));`),
+    'EasyScore getNote getSource StaveTie'
+  ),
+  example(
+    'managed-batch',
+    'Recover a failed batch and scope bass defaults',
+    `${setup}
+try {
+  score.build(s => {
+    s.notes('C5/w[id="discarded"]');
+    throw new Error('Cancel this batch');
+  });
+} catch (error) { console.log(error.message); }
+console.log('Rolled back:', score.getElement('discarded') === undefined);
+const bass = score.withDefaults({ clef: 'bass', stem: 'down' }, s => s.notes('C3/h, G2'));
+const melody = score.notes('C5/h, E5'); // Treble defaults were restored.
+const system = score.system({ x: 20, y: 25, width: width - 40, spaceBetweenStaves: 10 });
+system.addStave({ voices: [score.voice(melody)] }).addClef('treble');
+system.addStave({ voices: [score.voice(bass)] }).addClef('bass');
+system.addConnector('brace');
+score.factory.getContext().resize(width, 300);
+score.draw();`,
+    'EasyScore build withDefaults System'
+  ),
+  example(
+    'owned-spans',
+    'Draw a slur and hairpin through EasyScore',
+    stave(`const notes = score.notes('C5/q, D5, E5, G5');
+score.make.curve({ from: notes[0], to: notes[3] });
+score.make.hairpin({ from: notes[0], to: notes[3], type: VF.StaveHairpin.type.CRESC });
+score.attach(notes[0], score.make.annotation({ text: 'dolce', vJustify: 'top' }));`),
+    'EasyScore Curve StaveHairpin Annotation'
+  ),
+  example(
+    'easy-tab',
+    'Create tablature and attach staff markings',
+    `${setup}
+const notes = [3, 5, 7, 7].map(fret => score.make.tabNote({
+  positions: [{ str: 2, fret }], duration: 'q',
+}));
+score.attach(notes[0], score.make.bend([{ type: VF.Bend.UP, text: 'Full' }]));
+score.make.tabSlide({ firstNote: notes[1], lastNote: notes[2] });
+score.make.tabTie({ firstNote: notes[2], lastNote: notes[3] }, 'H');
+const stave = score.make.tabStave({ x: 20, width: width - 40 });
+score.attachToStave(stave, score.make.clef('tab'));
+score.system({ x: 20, y: 60, width: width - 40 })
+  .addStave({ stave, voices: [score.voice(notes)] });
+score.draw();`,
+    'EasyScore TabNote TabSlide TabTie Bend'
+  ),
+  example(
+    'compose-measures',
+    'Compose a pickup and changing meter',
+    `${setup}
+const result = score.compose({
+  sheet: { width: width - 40, x: 20, y: 25, rowGap: 50 },
+  signatures: 'every-measure',
+  accidentals: 'key-aware',
+  staves: [{ id: 'melody', clef: 'treble', key: 'G', time: '4/4', measures: [
+    { span: '1/4', voices: [{ notes: 'D5/q' }] },
+    { time: '2/4', voices: [{ notes: 'F#5/q[id="a"], G5[id="b"]' }] },
+    { voices: [{ notes: 'F#5/q, F5' }] },
+  ] }],
+  spans: [{ kind: 'curve', from: 'a', to: 'b' }],
+});
+result.sheet.format();
+score.factory.getContext().resize(width, result.sheet.getHeight() + 35);
+score.draw({ retain: true });
+console.log('Rows:', result.sheet.getRows().length);`,
+    'EasyScore compose Sheet'
+  ),
+  example(
+    'accidental-policy',
+    'Compare literal and key-aware accidentals',
+    `${setup}
+const result = score.compose({
+  sheet: { width: width - 40, x: 20, y: 25, rowGap: 45 },
+  signatures: 'every-measure',
+  accidentals: 'key-aware', // Try 'literal'. Written pitches remain the same.
+  staves: [{ id: 'melody', key: 'G', time: '4/4', measures: [
+    { voices: [{ notes: 'F#5/q, F#5, F5, F5' }] },
+    { voices: [{ notes: ['F#5/h', { change: { key: 'C', clef: 'bass' } }, 'G3/q, C4'] }] },
+  ] }],
+});
+result.sheet.format();
+score.factory.getContext().resize(width, result.sheet.getHeight() + 35);
+score.draw({ retain: true });`,
+    'EasyScore compose Accidental KeySignature'
   ),
 ];

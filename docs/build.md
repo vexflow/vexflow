@@ -102,12 +102,14 @@ npm run lint
 npm test
 npm run explorer:test
 npm run tests:test
+npm run test:easyscore-package
 npm run guide:test
 ```
 
 - `npm test` builds debug and ESM outputs, runs Node integration checks, and runs QUnit in headless Chrome.
 - `explorer:test` checks examples, controls, editing, inspection, and upload behavior.
 - `tests:test` builds and checks the standalone test gallery and its upload behavior.
+- `test:easyscore-package` builds ESM, declarations, and CJS, then checks EasyScore package exports and types.
 - `guide:test` checks lesson routes, all editable examples, mobile layout, exports, and upload behavior.
 - Upload tests use a fake cloud command. They do not publish anything.
 

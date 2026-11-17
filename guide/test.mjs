@@ -103,6 +103,104 @@ try {
     assert.deepEqual(failures, []);
   });
 
+  await test('EasyScore family controls render every notation choice in all fonts', async () => {
+    for (const id of ['easyscore-families', 'easyscore-rhythm', 'easyscore-structure']) {
+      const example = examples.find((item) => item.id === id);
+      await visit(`playground/${id}`);
+      for (const font of ['Bravura', 'Petaluma', 'Gonville']) {
+        await page.select('#font', font);
+        await rendered(`${id}: ${font}`);
+        for (const choice of example.controls.find((control) => control.key === 'family').choices) {
+          await page.select('#control-family', choice);
+          await rendered(`${id}: ${font}: ${choice}`);
+        }
+      }
+    }
+    assert.deepEqual(errors, []);
+    assert.deepEqual(failures, []);
+  });
+
+  await test('composition lessons reflow and preserve explicit pitch spelling', async () => {
+    await visit('lesson/structured-composition');
+    const original = await page.$eval('#editor', (element) => element.textContent);
+    await edit(
+      original +
+        "\nconsole.log('before:', result.sheet.getRows().length);\nresult.sheet.setWidth(320).format();\nscore.factory.getContext().resize(width, result.sheet.getHeight() + 35);\nscore.factory.getContext().clear();\nscore.draw({ retain: true });\nconsole.log('after:', result.sheet.getRows().length);"
+    );
+    await rendered('retained composition reflow');
+    const log = await page.$eval('#logs', (element) => element.textContent);
+    const before = Number(log.match(/before: (\d+)/)[1]);
+    const after = Number(log.match(/after: (\d+)/)[1]);
+    assert.ok(after > before, log);
+    await edit(original.replace("span: '1/4'", "span: '2/4'"));
+    await page.waitForFunction(() => !document.querySelector('#render-error').hidden);
+    await page.click('#reset');
+    await rendered('pickup restored');
+    await visit('lesson/composition-policies');
+    const policyCode = await page.$eval('#editor', (element) => element.textContent);
+    const inspect =
+      "\nconsole.log('policy:', JSON.stringify(result.notes.flat(3).filter(note => note instanceof VF.StaveNote).map(note => ({ keys: note.getKeys(), accidentals: note.getModifiers().filter(modifier => modifier instanceof VF.Accidental).map(modifier => modifier.type) }))));";
+    const readPolicy = async () =>
+      JSON.parse((await page.$eval('#logs', (element) => element.textContent)).split('policy: ')[1]);
+    await edit(policyCode + inspect);
+    await rendered('key-aware accidentals');
+    const keyAware = await readPolicy();
+    assert.deepEqual(
+      keyAware.slice(0, 4).map((note) => note.accidentals),
+      [[], [], ['n'], []]
+    );
+    await edit(policyCode.replace("accidentals: 'key-aware'", "accidentals: 'literal'") + inspect);
+    await rendered('literal accidentals');
+    const literal = await readPolicy();
+    assert.deepEqual(
+      literal.slice(0, 4).map((note) => note.accidentals),
+      [['#'], ['#'], [], []]
+    );
+    assert.deepEqual(
+      literal.map((note) => note.keys),
+      keyAware.map((note) => note.keys)
+    );
+    assert.deepEqual(errors, []);
+  });
+
+  await test('clicking parsed notes selects source while hover and stale edits leave selection alone', async () => {
+    await visit('lesson/references');
+    const frame = page.frames().find((frame) => frame.url() === 'about:srcdoc');
+    // The preview iframe is scaled; convert child coordinates to displayed page coordinates.
+    const point = async () => {
+      await page.$eval('#frame-host', (element) => element.scrollIntoView({ block: 'center' }));
+      const local = await frame.$eval('#vf-start', (element) => {
+        const rect = element.getBoundingClientRect();
+        return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2, width: innerWidth, height: innerHeight };
+      });
+      const box = await (await frame.frameElement()).boundingBox();
+      return { x: box.x + (local.x * box.width) / local.width, y: box.y + (local.y * box.height) / local.height };
+    };
+    const status = await page.$eval('#render-status', (element) => element.textContent);
+    let location = await point();
+    await page.mouse.move(location.x, location.y);
+    await page.waitForFunction(() => document.querySelector('#inspection').textContent.includes('"source"'));
+    assert.equal(await page.evaluate(() => String(window.getSelection())), '');
+    await page.mouse.click(location.x, location.y);
+    await page.waitForFunction(() => String(window.getSelection()).includes('id="start"'));
+    assert.equal(await page.evaluate(() => String(window.getSelection())), 'C5/h[id="start"]');
+    assert.equal(await page.$eval('#render-status', (element) => element.textContent), status);
+    await page.$eval('#editor', (element) => {
+      element.textContent = '// Unrendered edit\n' + element.textContent;
+      element.dispatchEvent(new Event('input', { bubbles: true }));
+      window.getSelection().removeAllRanges();
+      document.getElementById('inspection').textContent = '';
+    });
+    location = await point();
+    // Unpin, then pin the same note again after an unrendered edit.
+    await page.mouse.click(location.x, location.y);
+    await page.mouse.click(location.x, location.y);
+    await page.waitForFunction(() => document.querySelector('#inspection').textContent.includes('"source"'));
+    assert.equal(await page.evaluate(() => String(window.getSelection())), '');
+    assert.equal(await page.$eval('#render-status', (element) => element.textContent), status);
+    assert.deepEqual(errors, []);
+  });
+
   await test('navigation, search, deep links, and unknown fragments recover predictably', async () => {
     await visit('lesson/welcome');
     await page.type('#search', 'tablature');
@@ -187,7 +285,19 @@ try {
 
   await test('mobile layout stays within the viewport and the contents menu works', async () => {
     await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
-    for (const id of ['welcome', 'setup', 'polyphony', 'measures', 'composition', 'spacing', 'troubleshooting']) {
+    for (const id of [
+      'welcome',
+      'setup',
+      'polyphony',
+      'measures',
+      'composition',
+      'typed-notes',
+      'structured-composition',
+      'composition-policies',
+      'easy-families',
+      'spacing',
+      'troubleshooting',
+    ]) {
       await visit(`lesson/${id}`);
       assert.ok(
         await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
@@ -302,8 +412,15 @@ try {
       for (const [id, name] of [
         ['welcome', 'guide-quickstart'],
         ['composition', 'guide-easyscore'],
+        ['structured-composition', 'guide-composition'],
+        ['typed-notes', 'guide-typed-notes'],
       ]) {
         await visit(`lesson/${id}`);
+        await page.$eval('#frame-host', (element) => element.scrollIntoView({ block: 'center' }));
+        const frame = page.frames().find((frame) => frame.url() === 'about:srcdoc');
+        await frame.evaluate(
+          () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        );
         await page.screenshot({ path: join(artifacts, `${name}.png`), fullPage: true });
       }
       await visit('playground/tablature');

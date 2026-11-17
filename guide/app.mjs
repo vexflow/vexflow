@@ -2,6 +2,7 @@
 import { examples, lessons, sections } from './content.mjs';
 import { createEditor } from './explorer/editor.mjs';
 import { Preview } from './explorer/preview.mjs';
+import { findNotationRange } from './explorer/source.mjs';
 
 const $ = (id) => document.getElementById(id);
 const draftsKey = 'vexflow-guide-drafts-v1';
@@ -12,6 +13,8 @@ let currentLesson,
   currentExample,
   params = {},
   lastSVG = '',
+  renderedCode = '',
+  pending = false,
   timer,
   toastTimer,
   observedWidth;
@@ -249,6 +252,8 @@ function run() {
   if (!currentExample) return;
   clearTimeout(timer);
   lastSVG = '';
+  pending = true;
+  renderedCode = editor.getCode();
   $('save-svg').disabled = true;
   $('render-error').hidden = true;
   $('render-error').textContent = '';
@@ -258,7 +263,7 @@ function run() {
   $('frame-host').style.width = '';
   const width = Math.max(320, Math.round($('frame-host').clientWidth / 0.8));
   preview.run({
-    code: editor.getCode(),
+    code: renderedCode,
     params,
     width,
     height: 245,
@@ -278,6 +283,8 @@ function schedule() {
 /** Accept only messages validated by the shared Preview instance. */
 function receive(message) {
   if (message.type === 'error') {
+    pending = false;
+    renderedCode = '';
     $('render-status').textContent = 'Render failed';
     $('render-error').textContent =
       `${message.name ?? 'Error'}${message.line ? ` · line ${message.line}` : ''}\n${message.message}`;
@@ -285,6 +292,7 @@ function receive(message) {
     lastSVG = '';
     $('save-svg').disabled = true;
   } else if (message.type === 'rendered') {
+    pending = false;
     lastSVG = message.svg;
     $('save-svg').disabled = false;
     $('render-status').textContent = `Rendered · ${message.elements.length} elements · ${message.duration} ms`;
@@ -292,6 +300,11 @@ function receive(message) {
     $('frame-host').style.width = `${message.width * 0.8}px`;
   } else if (message.type === 'inspect') {
     $('inspection').textContent = message.element ? JSON.stringify(message.element, null, 2) : 'No element selected.';
+    // A pinned click may select exact source; hover and stale previews never move the cursor.
+    if (message.pinned && !pending && editor.getCode() === renderedCode) {
+      const range = findNotationRange(renderedCode, message.element?.source, Prism);
+      if (range) editor.selectRange(range.start, range.end);
+    }
   }
 }
 

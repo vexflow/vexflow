@@ -60,24 +60,22 @@ The build first invokes the existing Explorer builder. It copies the same CodeJa
 Preview class, sandbox runtime, font data, and current-source VexFlow bundle into the guide's asset graph.
 It does not use an npm VexFlow release or a runtime CDN. No new runtime dependency is required.
 
-The guide does not modify EasyScore or Explorer implementation files. This keeps it separate from
-[#354](https://github.com/vexflow/vexflow/issues/354). The current guide branch starts from the first
-EasyScore composition slice. New helpers should be documented only after their implementation is available.
-After integrating further EasyScore work:
+The guide teaches the EasyScore API merged in [#354](https://github.com/vexflow/vexflow/issues/354).
+Quickstart uses `EasyScore.create()`. Lessons cover typed helpers, automatic beams, references,
+ownership, batch construction, tablature, and structured composition with explicit layout policies.
+The native API section explains direct construction and formatting.
 
-1. Review `docs/easyscore.md` and `docs/easyscore-coverage.json`.
-2. Update the relevant lessons and add complete teaching examples.
-3. Run `npm run guide:test` against the combined source.
-4. Check the version link and new examples before uploading.
-
-Tests render every lesson and every playground example in the guide, including the shared Explorer examples.
-This catches runtime and catalog drift when the two branches are integrated.
+When EasyScore changes, update the [API reference](easyscore.md), teaching examples, and lesson prose together.
+Run `npm run guide:test` against the combined source. The guide imports the current Explorer catalog;
+its tests render every example in three fonts and exercise the EasyScore family controls.
 
 ## Editing and export behavior
 
 - Drafts are stored by example ID in browser local storage. Storage failure leaves editing usable.
 - Reset restores the original code and parameter values and recreates the sandbox.
 - Run as you type is opt-in. Ctrl/Command+Enter runs immediately. Escape, then Tab leaves the editor.
+- Clicking a parsed note selects its notation when one exact, unescaped source literal matches the unchanged editor.
+  Ambiguous, computed, or stale source is inspected without selecting guessed text.
 - Copy link points to the original example. It does not upload or share a draft.
 - Save JS includes parameter values and the environment variables the app must provide.
 - Save HTML includes the current library, selected fonts, code, and controls in a standalone page.

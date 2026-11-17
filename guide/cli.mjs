@@ -25,7 +25,7 @@ export async function build() {
   for (const file of Object.keys(shared.files)) {
     const name = file.slice(shared.assetPath.length + 1);
     if (
-      /^(editor.mjs|preview.mjs|runner.mjs|vexflow.js|font-data.json|catalog.mjs|catalog\/entries.mjs|vendor\/.*)$/.test(
+      /^(editor.mjs|preview.mjs|source.mjs|runner.mjs|vexflow.js|font-data.json|catalog.mjs|catalog\/entries.mjs|vendor\/.*)$/.test(
         name
       )
     )
