@@ -148,7 +148,7 @@ function checkTextControls(lyrics) {
 function reviewPage(records) {
   const escape = (s) =>
     s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
-  const flagged = Object.keys(manifest.outcomes)
+  const flagged = [...new Set([...Object.keys(manifest.reviews), ...Object.keys(manifest.outcomes)])]
     .map((id) => `<a href="#${id}">${id}</a>`)
     .join(' · ');
   const cards = cases.map(

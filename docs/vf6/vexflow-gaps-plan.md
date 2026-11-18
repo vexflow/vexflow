@@ -6,7 +6,7 @@ Last reviewed: **2026-11-18**
 
 Reviewed against [main at 31405bc5](https://github.com/vexflow/vexflow/commit/31405bc51df59aa719161c26f7160e9ea26e32df), package version **5.2.0**.
 
-Status: **M0 baseline recorded. Maintainer engraving review pending. M1–M8 remain proposed or deferred.**
+Status: **M0 baseline recorded. Maintainer feedback recorded for seven of 64 examples. M1–M8 remain proposed or deferred.**
 
 Source of scope: [Notation gap register](vexflow-gaps.md)
 
@@ -508,4 +508,4 @@ Review progress by **supported use case and unresolved severity**. Report confir
 | 2026-11-16 | Defer specialist profiles, full condensing and generalized polymeter commitments.                     | Revisit after core evidence and a scoped sponsor request.                                                                                                                          |
 | 2026-11-17 | Use the merged 5.2.0 API and guide as the baseline. Add the score/excerpt persistence decision to M1. | VF-044/049 verified. VF-013 design remains open.                                                                                                                                   |
 | 2026-11-17 | Split compatible V5 delivery from parallel V6 requirements and design.                                | Proposed by the maintainer. The planned prototype repository will carry V6 requirements. [Issue discussion](https://github.com/vexflow/vexflow/issues/358#issuecomment-6960644745) |
-| 2026-11-18 | Record M0 and start a branch-local VF6 requirements directory.                                        | [Evidence, priority and revised effort](m0.md). Maintainer will review the examples.                                                                                               |
+| 2026-11-18 | Record M0 and start a branch-local VF6 requirements directory.                                        | [Evidence, priority and revised effort](m0.md). Seven cases have [engraving feedback](m0.md#maintainer-engraving-review).                                                          |

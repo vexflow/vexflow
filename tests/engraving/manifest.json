@@ -11,7 +11,15 @@
     "threevoice-1": "Expected defect: the ascending inner beam crosses a lower voice head.",
     "beam-width": "Review slope reversal on the second group at 500 px."
   },
-  "reviews": {},
+  "reviews": {
+    "formatter-3": "2026-11-18 · @0xfe · Adjust triplet clearance. In bar 2 the upper bracket sits too far above the text stack. Use the lower bracket in bar 1 as the spacing reference and give that lower bracket a little more room.",
+    "threevoice-1": "2026-11-18 · @0xfe · Collision at the second note of the bottom voice. Prefer raising the middle voice’s double beam just enough to clear that head.",
+    "unison-2": "2026-11-18 · @0xfe · Shared heads are hard to identify and the stems appear to point up. Sharing is disabled in this fixture. Label it as the separated-head control and compare it with the same music with sharing enabled.",
+    "unison-3": "2026-11-18 · @0xfe · Shared heads are hard to identify here too. Sharing is enabled. Point out the final E half notes with one head and opposing stems, alongside the opening notes with unequal dot counts.",
+    "curve-1": "2026-11-18 · @0xfe · The second curve looks reversed and runs through the down-stem group. Keep the requested up opening and place the arc and endpoints clear of the intervening notes.",
+    "curve-2": "2026-11-18 · @0xfe · The first curve looks reversed and runs through the up-stem group. Keep the requested down opening and place the arc and endpoints clear of the intervening notes.",
+    "bend-2": "2026-11-18 · @0xfe · On the first chord, nest the half-bend behind the full bend. On the next chord, keep the two quarter-bend paths from crossing so each string can be traced to its arrow."
+  },
   "groups": [
     {
       "module": "Formatter",
@@ -21,9 +29,17 @@
       "cases": {
         "formatter-1": "Penultimate Note Padding",
         "formatter-2": "Justification and alignment with accidentals",
-        "formatter-3": "Vertical alignment - many mixed elements",
         "formatter-4": "Strict proportional spacing",
         "formatter-5": "Tight"
+      }
+    },
+    {
+      "module": "Formatter",
+      "source": "tests/formatter_tests.ts",
+      "gaps": ["VF-004", "VF-009", "VF-011"],
+      "review": "Compare the clearance from each triplet bracket to the outermost annotation in its bar.",
+      "cases": {
+        "formatter-3": "Vertical alignment - many mixed elements"
       }
     },
     {
