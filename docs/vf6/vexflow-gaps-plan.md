@@ -180,7 +180,7 @@ M0–M7 total **44–75 engineer-weeks before contingency**. Reserve roughly 25%
 | M3        | Collision-aware phrases and lyrics    | M1; relevant M2 placement                     | 7–12 weeks           | Complete on main |
 | M4        | Complete continuous scores            | M2/M3, minimal context from M1                | 7–12 weeks           | Complete on main |
 | M5        | Pages and basic part layouts          | M4, stable vertical envelopes                 | 4–7 weeks            | Complete on main |
-| M6        | Mainstream instrument profiles        | M2–M4; parts use M5                           | 8–14 weeks           | Proposed |
+| M6        | Mainstream instrument profiles        | M2–M4; parts use M5                           | 8–14 weeks           | Implemented on branch; engraving review pending. [M6 evidence](m6.md) |
 | M7        | Web/integration quality release       | M0–M5 and P1 scope of M6                      | 5–9 weeks            | Proposed |
 | M8        | Specialist expansion                  | Explicit profile charter; required core gates | Estimate per profile | Deferred |
 
