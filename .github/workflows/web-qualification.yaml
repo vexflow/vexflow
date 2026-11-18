@@ -8,6 +8,8 @@ permissions:
 jobs:
   qualify:
     runs-on: ubuntu-24.04
+    # Official Playwright 1.58.2 Noble image includes all three browser revisions and their native libraries.
+    container: mcr.microsoft.com/playwright@sha256:6446946a1d9fd62d9ae501312a2d76a43ee688542b21622056a372959b65d63d
     timeout-minutes: 20
     env:
       VF_ENGRAVING_REFERENCE: aa606df0d6aa098c0860eab7eb03dc6baf2e4958
@@ -31,8 +33,6 @@ jobs:
         env:
           PUPPETEER_SKIP_DOWNLOAD: 'true'
       - run: npm ci --ignore-scripts
-        working-directory: tests/web
-      - run: npx playwright install --with-deps chromium firefox webkit
         working-directory: tests/web
       - run: node tests/web/qualify.mjs
       - name: Check the complete engraving gallery and historical release
