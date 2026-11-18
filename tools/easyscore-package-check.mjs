@@ -24,6 +24,10 @@ function run(command, args, cwd = root) {
 
 try {
   const metadata = JSON.parse(run('npm', ['pack', '--ignore-scripts', '--json', '--pack-destination', directory]))[0];
+  assert.ok(
+    metadata.files.every((file) => !file.path.startsWith('build/esm/tests/web/')),
+    'Keep browser qualification tools outside the published package'
+  );
   run('tar', ['-xzf', join(directory, metadata.filename), '-C', directory]);
   mkdirSync(join(directory, 'node_modules'));
   renameSync(join(directory, 'package'), join(directory, 'node_modules/vexflow'));

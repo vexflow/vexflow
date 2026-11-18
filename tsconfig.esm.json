@@ -9,5 +9,7 @@
     // "incremental": true,
     // "tsBuildInfoFile": "./node_modules/.cache/typescript/tsbuildinfo.json"
   },
-  "include": ["./src", "./entry", "./tests"]
+  "include": ["./src", "./entry", "./tests"],
+  // The release qualification harness runs in Node with its own locked test dependencies.
+  "exclude": ["./tests/web", "**/node_modules"]
 }
