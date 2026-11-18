@@ -129,6 +129,7 @@
     "generate:reference": "grunt generate:reference",
     "diff:reference": "grunt diff:reference",
     "lint": "grunt eslint",
+    "audit:ci": "node tools/audit-dependencies.mjs",
     "explorer": "node tools/explorer/cli.mjs serve",
     "explorer:build": "node tools/explorer/cli.mjs build",
     "explorer:test": "node tools/explorer/test.mjs",

@@ -97,7 +97,7 @@ Use `npx grunt clean` to also remove `reference/` and tool caches. Save any visu
 Run the same checks as CI, in order:
 
 ```sh
-npm audit --audit-level=low
+npm run audit:ci
 npm run lint
 npm test
 npm run explorer:test

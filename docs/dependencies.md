@@ -4,13 +4,13 @@ Use the Node version in `.nvmrc`. CI uses the same version and installs `package
 
 ```sh
 npm ci
-npm audit
+npm run audit:ci
 npm run lint
 npm test
 npm run explorer:test
 ```
 
-CI checks all dependency severities, including development dependencies.
+CI checks all dependency severities, including development dependencies. See [SECURITY.md](../SECURITY.md) for temporary exceptions. Run `npm audit` for the unfiltered result.
 
 ## Security overrides
 
