@@ -11,7 +11,8 @@ export const expression = [
     'Annotation',
     staff(
       "score.notes('C5/q, E5, G5, C6')",
-      `params.words.split(' ').slice(0, notes.length).forEach((word, i) => {
+      `// Pair each word with the note at the same position in the melody.
+params.words.split(' ').slice(0, notes.length).forEach((word, i) => {
   notes[i].addModifier(factory.Annotation({ text: word, vJustify: params.position }), 0);
 });`
     ),
@@ -25,7 +26,8 @@ export const expression = [
     'ChordSymbol',
     staff(
       "score.notes('C5/h, G4')",
-      `notes[0].addModifier(factory.ChordSymbol().addText(params.root).addGlyphOrText('maj7'), 0);
+      `// Build the label in reading order. Raise the flat ninth on the second symbol.
+notes[0].addModifier(factory.ChordSymbol().addText(params.root).addGlyphOrText('maj7'), 0);
 notes[1].addModifier(factory.ChordSymbol().addText('G').addGlyphOrText('7').addGlyphOrText('b9', { symbolModifier: VF.ChordSymbol.symbolModifiers.SUPERSCRIPT }), 0);`
     ),
     [text('root', 'Root', 'C')]
@@ -85,6 +87,7 @@ if (params.bounds === 'yes') {
     'From pianissimo to fortissimo, draw music-font dynamic marks.',
     'TextDynamics',
     `${setup}
+// Give each dynamic a beat so the voice can space the markings from softest to loudest.
 const dynamics = ['pp', 'p', 'mp', 'mf', 'f', 'ff'].map(text => factory.TextDynamics({ text, duration: 'q' }));
 const voice = factory.Voice().setMode(VF.Voice.Mode.SOFT).addTickables(dynamics);
 factory.System({ x: 30, y: 55, width: width - 60 }).addStave({ voices: [voice] });
@@ -97,6 +100,7 @@ factory.draw();`
     'Place rhythmically aligned text alongside music.',
     'TextNote',
     `${setup}
+// Each word takes a quarter note of time, even though it has no notehead.
 const notes = ['dolce', 'poco', 'a', 'poco'].map(text => factory.TextNote({ text, duration: 'q', line: params.line }));
 const voice = factory.Voice().addTickables(notes);
 factory.System({ x: 30, y: 65, width: width - 60 }).addStave({ voices: [voice] });
@@ -111,7 +115,7 @@ factory.draw();`,
     'StaveTie',
     staff(
       "score.notes('(C5 E5)/h, (C5 E5)')",
-      'factory.StaveTie({ from: notes[0], to: notes[1], firstIndexes: [0, 1], lastIndexes: [0, 1] });'
+      '// Connect both matching pitches. Leave only index zero on each side to sustain just C.\nfactory.StaveTie({ from: notes[0], to: notes[1], firstIndexes: [0, 1], lastIndexes: [0, 1] });'
     )
   ),
   e(
@@ -122,7 +126,7 @@ factory.draw();`,
     'Curve',
     staff(
       "score.notes('C5/q, D5, E5, G5')",
-      'factory.Curve({ from: notes[0], to: notes[3], options: { thickness: params.thickness } });'
+      '// The middle two notes belong to the phrase even though only its endpoints are named.\nfactory.Curve({ from: notes[0], to: notes[3], options: { thickness: params.thickness } });'
     ),
     [number('thickness', 'Thickness', 2, 1, 6, 0.5)]
   ),
@@ -135,7 +139,8 @@ factory.draw();`,
     staff(
       "score.notes('C5/q, D5, E5, G5')",
       '',
-      `new VF.StaveHairpin({ firstNote: notes[0], lastNote: notes[3] }, params.direction === 'crescendo' ? 1 : 2)
+      `// The opening or closing wedge occupies the space between the first and last attacks.
+new VF.StaveHairpin({ firstNote: notes[0], lastNote: notes[3] }, params.direction === 'crescendo' ? 1 : 2)
   .setPosition(VF.Modifier.Position.BELOW)
   .setStyle({ fillStyle: ink, strokeStyle: ink })
   .setContext(factory.getContext()).drawWithStyle();`
@@ -150,7 +155,7 @@ factory.draw();`,
     'PedalMarking',
     staff(
       "score.notes('C5/q, E5, G5, C6')",
-      'factory.PedalMarking({ notes: [notes[0], notes[3]], options: { style: params.style } });'
+      '// The first note tells the pianist to depress the pedal and the last to release it.\nfactory.PedalMarking({ notes: [notes[0], notes[3]], options: { style: params.style } });'
     ),
     [select('style', 'Style', 'mixed', ['mixed', 'bracket', 'text'])]
   ),
@@ -162,7 +167,7 @@ factory.draw();`,
     'TextBracket',
     staff(
       "score.notes('C5/q, E5, G5, C6')",
-      "factory.TextBracket({ from: notes[0], to: notes[3], text: params.text, options: { superscript: 'va', position: 'top', line: 2 } });"
+      "// The bracket tells the player to transpose every note under it.\nfactory.TextBracket({ from: notes[0], to: notes[3], text: params.text, options: { superscript: 'va', position: 'top', line: 2 } });"
     ),
     [select('text', 'Interval', '8', ['8', '15'])]
   ),
@@ -174,7 +179,7 @@ factory.draw();`,
     'StaveLine',
     staff(
       "score.notes('C4/h, C6')",
-      "factory.StaveLine({ from: notes[0], to: notes[1], firstIndexes: [0], lastIndexes: [0], options: { text: 'gliss.' } });"
+      "// Each index picks the head where the sliding line starts or ends.\nfactory.StaveLine({ from: notes[0], to: notes[1], firstIndexes: [0], lastIndexes: [0], options: { text: 'gliss.' } });"
     )
   ),
   e(
@@ -185,7 +190,7 @@ factory.draw();`,
     'VibratoBracket',
     staff(
       "score.notes('C5/q, D5, E5, G5')",
-      'factory.VibratoBracket({ from: notes[0], to: notes[3], options: { line: 2 } });'
+      '// The wavy line lasts across the phrase. Its line setting controls its height.\nfactory.VibratoBracket({ from: notes[0], to: notes[3], options: { line: 2 } });'
     )
   ),
 ];

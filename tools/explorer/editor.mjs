@@ -3,7 +3,9 @@ import { CodeJar } from './vendor/codejar.js';
 
 /** Prism escapes source text before adding token markup. Never insert raw code as HTML. */
 export function highlightCode(element) {
-  element.innerHTML = Prism.highlight(element.textContent, Prism.languages.javascript, 'javascript');
+  const requested = Prism.util.getLanguage(element);
+  const language = Prism.languages[requested] ? requested : 'javascript';
+  element.innerHTML = Prism.highlight(element.textContent, Prism.languages[language], language);
 }
 
 /** Keep edits, indentation, history, and mobile input behind one small interface. */

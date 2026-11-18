@@ -56,6 +56,14 @@ async function buildLibrary() {
   return library;
 }
 
+/** Read the pinned Prism grammars locally, in dependency order, for an offline build. */
+export async function bundlePrism(languages) {
+  const prism = await Promise.all(
+    languages.map((name) => readFile(join(root, `node_modules/prismjs/components/prism-${name}.min.js`), 'utf8'))
+  );
+  return Buffer.from('window.Prism = { manual: true };\n' + prism.join('\n'));
+}
+
 /** Fingerprint the whole module graph, so every relative import shares one immutable release. */
 export async function build() {
   const library = await buildLibrary();
@@ -76,12 +84,7 @@ export async function build() {
   })) {
     assets.set(`vendor/${name}`, await readFile(join(root, 'node_modules', packagePath)));
   }
-  const prism = await Promise.all(
-    ['core', 'clike', 'javascript'].map((name) =>
-      readFile(join(root, `node_modules/prismjs/components/prism-${name}.min.js`), 'utf8')
-    )
-  );
-  assets.set('vendor/prism.js', Buffer.from('window.Prism = { manual: true };\n' + prism.join('\n')));
+  assets.set('vendor/prism.js', await bundlePrism(['core', 'clike', 'javascript']));
   // Format the assembled snippets at build time; Prettier never reaches the browser.
   const formatted = await Promise.all(
     examples.map(async (example) => ({

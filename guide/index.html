@@ -15,7 +15,15 @@
   <body>
     <a class="skip" href="#main">Skip to lesson</a>
     <header class="site-header">
-      <a class="brand" href="https://vexflow.com/">VexFlow<span>Music notation for the web</span></a>
+      <div class="masthead">
+        <a class="brand" href="https://vexflow.com/">VexFlow</a>
+        <a
+          id="version"
+          href="https://github.com/vexflow/vexflow/commit/__GUIDE_COMMIT__"
+          title="View the VexFlow source used by this guide"
+          >v__GUIDE_VERSION__</a
+        >
+      </div>
       <nav aria-label="VexFlow">
         <a href="#lesson/welcome" aria-current="page">Guide</a><a href="https://vexflow.com/explorer/">Explorer ↗</a
         ><a href="https://github.com/vexflow/vexflow">GitHub ↗</a>
@@ -31,9 +39,6 @@
           <label for="search">Find a lesson</label>
           <input id="search" type="search" placeholder="Try “beams” or “lyrics”" />
           <nav id="navigation" aria-label="Lessons"></nav>
-          <p class="version">
-            Repository build<br /><a id="version" href="https://github.com/vexflow/vexflow">Loading version…</a>
-          </p>
         </div>
       </aside>
       <main id="main" tabindex="-1">
@@ -50,10 +55,11 @@
           </p></noscript
         >
         <section class="workbench" aria-label="Interactive example">
+          <nav id="lesson-examples" aria-label="Examples in this lesson" hidden></nav>
           <div class="workbench-heading">
             <div>
               <p class="eyebrow">Try it yourself</p>
-              <h2 id="example-title">Your first four notes</h2>
+              <h2 id="example-title" tabindex="-1">Your first four notes</h2>
             </div>
             <a id="open-playground" href="#playground/first-notes">Open in playground →</a>
           </div>
@@ -112,7 +118,7 @@
               <code>VF</code> is VexFlow; <code>width</code>, <code>height</code>, <code>ink</code>, and the
               <code>score</code> container are supplied by the preview. Fonts are loaded before execution.
             </p>
-            <pre id="params-code"></pre>
+            <pre><code id="params-code" class="language-javascript"></code></pre>
             <pre id="logs" aria-label="Console output"></pre>
           </details>
           <p class="example-links">

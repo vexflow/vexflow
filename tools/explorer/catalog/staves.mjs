@@ -11,6 +11,7 @@ export const staves = [
     'Stave Clef',
     `${setup}
 const stave = factory.Stave({ x: 35, y: 65, width: width - 70 });
+// The clef is attached to the stave and reserves space before the first note.
 stave.addClef(params.clef);
 factory.draw();`,
     [
@@ -35,6 +36,7 @@ factory.draw();`,
     'Change the number and spacing of lines, from a percussion staff to a conventional stave.',
     'Stave',
     `${setup}
+// Change the line count for percussion, or the gap to give each line more room.
 factory.Stave({ x: 35, y: 65, width: width - 70,
   options: { numLines: params.lines, spacingBetweenLinesPx: params.spacing }
 });
@@ -47,7 +49,12 @@ factory.draw();`,
     group,
     'Render sharp and flat key signatures.',
     'KeySignature Stave',
-    staff("score.notes('C5/q, D5, E5, G5')", '', '', ".addClef('treble').addKeySignature(params.key)"),
+    staff(
+      "score.notes('C5/q, D5, E5, G5')",
+      '// Changing the signature changes which sharps or flats the player sees at the start.',
+      '',
+      ".addClef('treble').addKeySignature(params.key)"
+    ),
     [select('key', 'Key', 'D', ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb'])]
   ),
   e(
@@ -56,7 +63,12 @@ factory.draw();`,
     group,
     'Show simple, compound, common, and cut time.',
     'TimeSignature',
-    staff("score.notes('C5/q, E5, G5, C6')", '', '', ".addClef('treble').addTimeSignature(params.time)"),
+    staff(
+      "score.notes('C5/q, E5, G5, C6')",
+      '// The control changes the printed signature. The sample phrase stays the same.',
+      '',
+      ".addClef('treble').addTimeSignature(params.time)"
+    ),
     [select('time', 'Meter', '4/4', ['2/4', '3/4', '4/4', '6/8', '9/8', '12/8', 'C', 'C|'])]
   ),
   e(
@@ -67,6 +79,7 @@ factory.draw();`,
     'Barline Stave',
     `${setup}
 const stave = factory.Stave({ x: 35, y: 65, width: width - 70 }).addClef('treble');
+// The beginning repeat stays fixed while the control changes the other end.
 stave.setBegBarType(VF.Barline.type.REPEAT_BEGIN);
 stave.setEndBarType(VF.Barline.type[params.ending]);
 factory.draw();`,
@@ -92,6 +105,7 @@ factory.draw();`,
 const system = factory.System({ x: 45, y: 30, width: width - 80, spaceBetweenStaves: 9 });
 system.addStave({ voices: [score.voice(score.notes('C5/w'))] }).addClef('treble');
 system.addStave({ voices: [score.voice(score.notes('C3/w', { clef: 'bass' }))] }).addClef('bass');
+// Add the brace after both staves exist so it can span from one to the other.
 system.addConnector(params.connector);
 factory.draw();`,
     [
@@ -113,7 +127,7 @@ factory.draw();`,
     'StaveTempo',
     staff(
       "score.notes('C5/q, E5, G5, C6')",
-      '',
+      '// The q makes the quarter note the unit counted by the metronome.',
       '',
       ".addClef('treble').setTempo({ name: params.name, duration: 'q', bpm: params.bpm }, 0)"
     ),
@@ -127,7 +141,7 @@ factory.draw();`,
     'StaveSection StaveText',
     staff(
       "score.notes('C5/q, E5, G5, C6')",
-      '',
+      '// The section letter belongs to the whole stave, so it stays in place when pitches change.',
       '',
       ".addClef('treble').setSection(params.section, 0).setText(params.instruction, VF.Modifier.Position.BELOW)"
     ),
@@ -141,7 +155,7 @@ factory.draw();`,
     'Volta',
     staff(
       "score.notes('C5/q, E5, G5, C6')",
-      '',
+      '// The label tells the player which pass uses this ending.',
       '',
       ".addClef('treble').setVoltaType(VF.Volta.type.BEGIN_END, params.label, 0)"
     ),
@@ -155,7 +169,7 @@ factory.draw();`,
     'Repetition',
     staff(
       "score.notes('C5/q, E5, G5, C6')",
-      '',
+      '// A repeat instruction is printed on the stave at its designated side.',
       '',
       ".addClef('treble').setRepetitionType(VF.Repetition.type[params.mark], 0)"
     ),
@@ -177,6 +191,7 @@ factory.draw();`,
     'Insert a clef, key, or meter change into a sequence of tickables.',
     'ClefNote KeySigNote TimeSigNote BarNote',
     `${setup}
+// Put the clef before the lower F and construct that note with its new bass clef.
 const notes = [
   ...score.notes('C5/h'), factory.BarNote(),
   factory.ClefNote({ type: 'bass', options: { size: 'small' } }),
@@ -195,6 +210,7 @@ factory.draw();`
     'MultiMeasureRest',
     `${setup}
 const stave = factory.Stave({ x: 35, y: 65, width: width - 70 }).addClef('treble');
+// The count above the resting bar tells the player how many measures to wait.
 factory.MultiMeasureRest({ numberOfMeasures: params.measures, useSymbols: params.style === 'symbols' }).setStave(stave);
 factory.draw();`,
     [number('measures', 'Measures', 8, 1, 32), select('style', 'Style', 'bar', ['bar', 'symbols'])]

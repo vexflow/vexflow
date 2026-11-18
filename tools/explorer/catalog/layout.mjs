@@ -15,7 +15,7 @@ export const layout = [
     group,
     'Create notes, an annotation, a tie, a voice, and a system through EasyScore.',
     'EasyScore Annotation StaveTie Voice System',
-    `// The function body is shared with the tested user-guide example.
+    `// Follow the lowest C from chord to chord. Head index zero on both ends ties only that pitch.
 (${createEasyScoreExample.toString()})(VF, { elementId: 'score', width, height }, ink);`,
     [],
     'EasyScore.create() validates before construction. Helpers return native VexFlow objects. Typed helpers cover all notation families; native setters remain available.'
@@ -153,6 +153,7 @@ ctx.restore();`,
     'Independent voices share a staff and align at common musical times.',
     'Voice Formatter ModifierContext TickContext',
     `${setup}
+// Opposite stems make it possible to read the two independent rhythms on one stave.
 const upper = score.voice(score.notes('C5/h, D5', { stem: 'up' }));
 const lower = score.voice(score.notes('G4/q, A4, B4, A4', { stem: 'down' }));
 factory.System({ x: 30, y: 65, width: width - 60 })
@@ -184,7 +185,7 @@ factory.draw();`,
     'Element Factory',
     staff(
       "score.notes('C5/q, E5, G5, C6')",
-      'notes[params.index].setStyle({ fillStyle: params.color, strokeStyle: params.color });'
+      '// Only the selected note overrides the shared ink. The index starts at zero.\nnotes[params.index].setStyle({ fillStyle: params.color, strokeStyle: params.color });'
     ),
     [number('index', 'Note index', 1, 0, 3), text('color', 'Highlight color', '#b74632')]
   ),
@@ -194,7 +195,10 @@ factory.draw();`,
     group,
     'An invisible tickable reserves rhythmic space without drawing a note.',
     'GhostNote',
-    staff("[...score.notes('C5/q'), factory.GhostNote({ duration: 'q' }), ...score.notes('E5/q, G5')]"),
+    staff(
+      "[...score.notes('C5/q'), factory.GhostNote({ duration: 'q' }), ...score.notes('E5/q, G5')]",
+      '// Look for the empty second beat between C and E. It still counts toward the bar.'
+    ),
     [],
     'The empty second beat is intentional. GhostNote contributes time and spacing without a visible notehead.'
   ),
@@ -204,7 +208,10 @@ factory.draw();`,
     group,
     'A repeat glyph can stand in for a repeated measure.',
     'RepeatNote',
-    staff("[factory.RepeatNote(params.type, { duration: 'w' })]"),
+    staff(
+      "[factory.RepeatNote(params.type, { duration: 'w' })]",
+      '// The whole-note duration reserves the bar for its repeat symbol.'
+    ),
     [select('type', 'Repeat', '1', ['1', '2', '4', 'slash'])]
   ),
   e(
@@ -214,7 +221,8 @@ factory.draw();`,
     'Use a music glyph as a rhythmically positioned note.',
     'GlyphNote',
     staff(
-      "[factory.GlyphNote(VF.Glyphs.segno, { duration: 'h' }), factory.GlyphNote(VF.Glyphs.coda, { duration: 'h' })]"
+      "[factory.GlyphNote(VF.Glyphs.segno, { duration: 'h' }), factory.GlyphNote(VF.Glyphs.coda, { duration: 'h' })]",
+      '// The segno and coda each take two beats, so their horizontal positions come from the voice.'
     )
   ),
   e(
@@ -225,7 +233,7 @@ factory.draw();`,
     'NoteSubGroup ClefNote',
     staff(
       "score.notes('C5/q, E5, G5, C6')",
-      "notes[1].addModifier(factory.NoteSubGroup({ notes: [new VF.ClefNote('bass', 'small')] }), 0);"
+      "// Give the small clef to the second note so the formatter leaves space just before it.\nnotes[1].addModifier(factory.NoteSubGroup({ notes: [new VF.ClefNote('bass', 'small')] }), 0);"
     )
   ),
   e(
@@ -235,6 +243,7 @@ factory.draw();`,
     'A crescendo can occupy musical time inside a voice.',
     'Crescendo',
     `${setup}
+// This wedge has its own whole-note duration in the voice.
 const crescendo = new VF.Crescendo({ duration: 'w' }).setLine(params.line);
 const voice = factory.Voice().addTickables([crescendo]);
 factory.System({ x: 30, y: 60, width: width - 60 }).addStave({ voices: [voice] });

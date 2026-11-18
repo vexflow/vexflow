@@ -1,7 +1,7 @@
 // Browser regressions for lessons, shared previews, local editing, exports, and static uploads.
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
-import { chmod, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import { chmod, copyFile, mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import test from 'node:test';
@@ -94,6 +94,7 @@ try {
     try {
       for (const hash of [
         ...lessons.filter((lesson) => lesson.id !== 'welcome').map((lesson) => `lesson/${lesson.id}`),
+        ...lessons.flatMap((lesson) => lesson.examples.slice(1).map((id) => `lesson/${lesson.id}/${id}`)),
         ...examples.map((example) => `playground/${example.id}`),
         'lesson/welcome',
       ]) {
@@ -138,6 +139,64 @@ try {
     );
   });
 
+  await test('setup highlights copyable source and its standalone HTML draws the first note', async () => {
+    await visit('lesson/setup');
+    const frame = page.frames().find((frame) => frame.url() === 'about:srcdoc');
+    const build = await frame.evaluate(() => ({ version: VexFlow.BUILD.VERSION, revision: VexFlow.BUILD.ID }));
+    assert.equal(await page.$eval('header #version', (link) => link.textContent), `v${build.version}`);
+    assert.ok((await page.$eval('#version', (link) => link.href)).endsWith(`/commit/${build.revision}`));
+    for (const selector of [
+      'pre .language-markup .token.tag',
+      'pre .language-markup .token.keyword',
+      'pre .language-bash .token.comment',
+      'pre .language-typescript .token.keyword',
+      'p .language-markup .token.tag',
+      '#params-code .token.keyword',
+      '#editor .token.comment',
+    ])
+      assert.ok(await page.$(selector), selector);
+    const html = await page.$eval('#lesson pre .language-markup', (element) => element.textContent);
+    // Use the published package layout, with the equivalent full-font debug bundle built by this suite.
+    const manifest = await validate(output);
+    const packageDir = join(artifacts, 'node_modules/vexflow/build/cjs');
+    await mkdir(packageDir, { recursive: true });
+    await copyFile(join(output, manifest.assetPath, 'explorer/vexflow.js'), join(packageDir, 'vexflow.js'));
+    const standalone = join(artifacts, 'setup.html');
+    await writeFile(standalone, html);
+    await page.goto(pathToFileURL(standalone).href);
+    await page.waitForSelector('#score svg .vf-stavenote');
+    assert.equal(await page.$$eval('.vf-stavenote', (items) => items.length), 1);
+    assert.deepEqual(errors, []);
+    assert.deepEqual(failures, []);
+  });
+
+  await test('worked examples open the matching score and preserve lesson steps in browser history', async () => {
+    await visit('lesson/notation');
+    const frame = page.frames().find((frame) => frame.url() === 'about:srcdoc');
+    const current = '#lesson-examples [aria-current="step"]';
+    assert.equal(await page.$eval(current, (step) => step.textContent), 'Hold one note');
+    assert.equal(await page.$$eval('#lesson pre code .token.comment', (comments) => comments.length), 4);
+    await page.click('#lesson [href="#lesson/notation/chord-and-answer"]');
+    await page.waitForFunction(() => document.querySelector('#example-title').textContent === 'Stack three pitches');
+    await rendered('chord example');
+    assert.equal(await frame.$$eval('.vf-notehead', (items) => items.length), 4);
+    await page.focus(current);
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Enter');
+    await page.waitForFunction(
+      () => document.querySelector('#example-title').textContent === 'Chords, rests, and dotted rhythm'
+    );
+    await rendered('rhythm example');
+    assert.equal(await frame.$$eval('.vf-stavenote', (items) => items.length), 4);
+    await page.goBack();
+    await page.waitForFunction(() => document.querySelector('#example-title').textContent === 'Stack three pitches');
+    assert.equal(await page.$eval(current, (step) => step.hash), '#lesson/notation/chord-and-answer');
+    await visit('lesson/notation/unknown-example');
+    await page.waitForFunction(() => document.querySelector('#example-title').textContent === 'Hold one note');
+    assert.equal(await page.$eval(current, (step) => step.textContent), 'Hold one note');
+    assert.deepEqual(errors, []);
+  });
+
   await test('all lesson routes render and all local source references exist', async () => {
     const ids = new Set(lessons.map((lesson) => lesson.id));
     assert.equal(ids.size, lessons.length);
@@ -156,7 +215,7 @@ try {
   await test('every teaching and Explorer example renders with all three bundled music fonts', async () => {
     for (const example of examples) {
       await visit(`playground/${example.id}`);
-      for (const font of ['Petaluma', 'Gonville']) {
+      for (const font of ['Bravura', 'Petaluma', 'Gonville']) {
         await page.select('#font', font);
         await rendered(`${example.id}: ${font}`);
       }
@@ -366,6 +425,13 @@ try {
         `${id}: no page overflow`
       );
     }
+    assert.ok(
+      await page.$eval('header #version', (element) => {
+        const { x, y, width, height } = element.getBoundingClientRect();
+        return x >= 0 && y >= 0 && width > 0 && height > 0 && x + width <= innerWidth;
+      }),
+      'version visible in the mobile header'
+    );
     await page.click('#menu');
     assert.equal(await page.$eval('#menu', (element) => element.getAttribute('aria-expanded')), 'true');
     await page.click('#navigation a[href="#lesson/welcome"]');
@@ -473,6 +539,8 @@ try {
     await test('capture representative guide pages on white backgrounds', async () => {
       for (const [id, name] of [
         ['welcome', 'guide-quickstart'],
+        ['notation', 'guide-notation'],
+        ['setup', 'guide-setup'],
         ['composition', 'guide-easyscore'],
         ['structured-composition', 'guide-composition'],
         ['typed-notes', 'guide-typed-notes'],

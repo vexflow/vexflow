@@ -2,6 +2,7 @@
 export function renderEasyScoreFamilies(VF, renderer, kind = 'modifiers', ink = '#24312c') {
   const score = VF.EasyScore.create({ renderer });
   score.setStyle({ fillStyle: ink, strokeStyle: ink });
+  // The first four families decorate a common melody. Percussion and mixed sequences build their own notes.
   const notes = (['percussion', 'sequence'].includes(kind) ? [] : ['c/5', 'd/5', 'e/5', 'f/5']).map((key) =>
     score.make.note({ keys: [key], duration: 'q' })
   );

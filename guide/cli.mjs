@@ -1,5 +1,5 @@
 // Build, preview, and upload the guide with the Explorer's exact editor and runtime.
-import { execFileSync } from 'node:child_process';
+import { createRequire } from 'node:module';
 import { createHash } from 'node:crypto';
 import { mkdir, mkdtemp, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
@@ -8,7 +8,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import prettier from 'prettier';
 
-import { build as buildExplorer } from '../tools/explorer/cli.mjs';
+import { build as buildExplorer, bundlePrism } from '../tools/explorer/cli.mjs';
 import { upload as uploadSite, validate } from '../tools/static-site-upload.mjs';
 import { examples, lessons, sections } from './content.mjs';
 
@@ -31,6 +31,11 @@ export async function build() {
     )
       assets.set(`explorer/${name}`, await readFile(join(explorer, file)));
   }
+  // Markup precedes JavaScript so HTML samples also highlight embedded scripts.
+  assets.set(
+    'explorer/vendor/prism.js',
+    await bundlePrism(['core', 'markup', 'clike', 'javascript', 'bash', 'typescript'])
+  );
   // Retain font licenses alongside the embedded OTF data.
   for (const family of ['bravura', 'petaluma', 'gonville', 'academico', 'petalumascript']) {
     const directory = join(root, 'node_modules/@vexflow-fonts', family);
@@ -70,7 +75,9 @@ export async function build() {
     ids.add(example.id);
   }
   for (const lesson of lessons) {
-    if (!ids.has(lesson.example)) throw new Error(`Missing lesson example: ${lesson.id}`);
+    for (const id of lesson.examples) {
+      if (!ids.has(id)) throw new Error(`Missing example ${id} for lesson ${lesson.id}`);
+    }
   }
   assets.set(
     'content.mjs',
@@ -78,8 +85,10 @@ export async function build() {
       `// Generated from guide/content.mjs.\nexport const sections = ${JSON.stringify(sections)};\nexport const lessons = ${JSON.stringify(lessons)};\nexport const examples = ${JSON.stringify(formatted)};\n`
     )
   );
-  const version = JSON.parse(await readFile(join(root, 'package.json'), 'utf8')).version;
-  const commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
+  // The cached Explorer bundle can predate a documentation-only commit.
+  const { VERSION: version, ID: commit } = createRequire(import.meta.url)(
+    join(explorer, shared.assetPath, 'vexflow.js')
+  ).BUILD;
   assets.set('version.json', Buffer.from(JSON.stringify({ version, commit })));
   const assetPath = `assets/${hash(Buffer.concat([...assets].sort().flatMap(([name, bytes]) => [Buffer.from(name), bytes]))).slice(0, 16)}`;
   const staging = await mkdtemp(join(root, 'build/guide-staging-'));
@@ -91,7 +100,10 @@ export async function build() {
       await writeFile(join(staging, file), bytes);
       manifest.files[file] = hash(bytes);
     }
-    const html = (await readFile(join(source, 'index.html'), 'utf8')).replaceAll('./assets/', `./${assetPath}/`);
+    const html = (await readFile(join(source, 'index.html'), 'utf8'))
+      .replaceAll('./assets/', `./${assetPath}/`)
+      .replaceAll('__GUIDE_VERSION__', version)
+      .replaceAll('__GUIDE_COMMIT__', commit);
     await writeFile(join(staging, 'index.html'), html);
     manifest.files['index.html'] = hash(html);
     await writeFile(join(staging, 'manifest.json'), JSON.stringify(manifest, null, 2));

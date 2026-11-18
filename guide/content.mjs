@@ -14,8 +14,15 @@ export const sections = [
 ];
 
 /** Trusted, repository-authored HTML keeps prose easy to review without a Markdown dependency. */
-function lesson(id, section, title, summary, example, body, exercise, related = [], sources = []) {
-  return { id, section, title, summary, example, body, exercise, related, sources };
+function lesson(id, section, title, summary, selection, body, exercise, related = [], sources = []) {
+  const examples = Array.isArray(selection) ? selection : [selection];
+  return { id, section, title, summary, examples, body, exercise, related, sources };
+}
+
+/** Escape literal source before embedding a language-tagged sample in the authored HTML. */
+function sample(language, source) {
+  const escaped = source.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+  return `<pre><code class="language-${language}">${escaped}</code></pre>`;
 }
 
 export const lessons = [
@@ -24,12 +31,14 @@ export const lessons = [
     'quickstart',
     'Make your first score',
     'Turn a few lines of JavaScript into music notation.',
-    'first-notes',
-    `<p>VexFlow draws sheet music and guitar tablature in a browser or a Node application. It produces SVG or Canvas graphics. It does not play sound or turn audio into notes.</p>
-    <p>You need basic JavaScript and a little music vocabulary. A <strong>stave</strong> is the set of staff lines. A <strong>voice</strong> is one sequence of musical events. A <strong>system</strong> aligns voices across one or more staves.</p>
-    <h2>Read the example</h2><ol><li><code>EasyScore.create()</code> creates a drawing surface and owns the Factory that will draw the score.</li><li><code>EasyScore</code> turns pitch and duration strings into notes.</li><li><code>voice()</code> gives the notes a meter. <code>System</code> places them on a stave.</li><li><code>score.draw()</code> formats and renders the result.</li></ol>
-    <p>Every lesson has a real editor. Change the code, then choose <strong>Run</strong>. Enable <strong>Run as you type</strong> for live feedback. Press Escape, then Tab to leave the editor with a keyboard.</p>`,
-    'Change G5 to C6. Then replace all four quarter notes with C5/w. Both versions fill one bar of 4/4.',
+    ['first-notes', 'held-note'],
+    `<p>Let’s put four notes on a page. In the preview, find the lowest note and follow the melody as it climbs. The five horizontal lines form a <strong>stave</strong>. A note’s height on those lines tells a musician which pitch to play.</p>
+<h2>Make the melody yours</h2>
+<p>In the editor, find <code>'C5/q, D5, E5, G5'</code>. The letters name pitches. Change the last <code>G5</code> to <code>C6</code> and choose <strong>Run</strong>. The new note should sit higher, while the other three stay put. You can do the whole guide here before installing anything.</p>
+<h2>Follow the music from text to page</h2>
+<p><code>score.notes()</code> reads the melody. <code>score.voice()</code> counts how much time it takes. A <strong>system</strong> arranges one or more staves together. Here it holds just one treble stave. Finally, <code>score.draw()</code> lays out the notes and draws them.</p>
+<p>Try the second example to see a single note occupy the same four beats. A whole note has an open head and no stem.</p>`,
+    'In “Your first four notes”, make the line descend instead. Leave /q on the first pitch so the rhythm stays the same.',
     ['setup', 'notation'],
     ['https://vexflow.github.io/vexflow-examples/guides/tutorial/']
   ),
@@ -37,33 +46,69 @@ export const lessons = [
     'setup',
     'quickstart',
     'Use VexFlow in your app',
-    'Load the library, wait for fonts, and choose an entry point.',
-    'first-notes',
-    `<h2>A browser page</h2><p>Use UTF-8 so music glyphs display correctly. For the examples in this guide, build the repository with <code>npm ci</code> and <code>npm start</code>, then serve <code>build/cjs/vexflow.js</code> beside your page.</p>
-    <pre><code>&lt;!doctype html&gt;
-&lt;html lang="en"&gt;
-&lt;meta charset="utf-8"&gt;
-&lt;title&gt;My score&lt;/title&gt;
-&lt;div id="score"&gt;&lt;/div&gt;
-&lt;script src="./vexflow.js"&gt;&lt;/script&gt;
-&lt;script&gt;
-(async () =&gt; {
-  const VF = VexFlow;
-  await VF.loadFonts('Bravura', 'Academico');
-  VF.setFonts('Bravura', 'Academico');
-  const width = 640, height = 245;
-  const ink = '#24312c', params = {};
-  // Paste a guide example here.
-})();
-&lt;/script&gt;
-&lt;/html&gt;</code></pre>
-    <p>The full bundle includes its default fonts. A core bundle needs font loading before layout. For offline use, provide local font files with <code>VF.Font.load(family, url)</code>. Set the active fonts after they load.</p>
-    <h2>npm and TypeScript</h2><pre><code>npm install --save-exact vexflow</code></pre><pre><code>import { VexFlow as VF } from 'vexflow';
-await VF.loadFonts('Bravura', 'Academico');
-VF.setFonts('Bravura', 'Academico');</code></pre>
-    <p>VexFlow ships type declarations. Keep the installed version pinned. This guide runs the <strong>repository build</strong> shown in the sidebar; new APIs such as <code>EasyScore.create()</code> may not be in your npm release yet. Use a matching repository build for these examples, or check your installed release against the linked API reference.</p>
-    <h2>What the editor supplies</h2><table><tr><th>Name</th><th>Value</th></tr><tr><td><code>VF</code></td><td>The loaded VexFlow namespace</td></tr><tr><td><code>width</code>, <code>height</code></td><td>The available score dimensions</td></tr><tr><td><code>ink</code></td><td>The score foreground color</td></tr><tr><td><code>params</code></td><td>The values of the example controls, shown below the editor</td></tr></table><p>The preview also supplies a <code>div#score</code> and loaded fonts. In your own app, provide these explicitly. Export HTML from the playground for a complete page with the current code and controls.</p>`,
-    'Copy the first example into your page after the font setup. Use a fixed width first, then connect it to your container size.',
+    'Draw a bar of music in an HTML page or a TypeScript app.',
+    ['held-note', 'two-pitches'],
+    `<p>Draw one bar of music outside the guide. You can start with an HTML file or add VexFlow to an existing TypeScript app. Both examples put a middle C into an element named <code>score</code>.</p>
+<h2>Start with an HTML file</h2>
+<p>Open a terminal in a new folder and install the package.</p>
+${sample(
+  'bash',
+  `# Pin the installed release so the next install uses the same VexFlow API.
+npm install --save-exact vexflow`
+)}
+<p>Save this HTML as <code>index.html</code> in the same folder. The script loads VexFlow from the package you just installed.</p>
+${sample(
+  'markup',
+  `<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>My first score</title></head>
+<body>
+  <!-- VexFlow inserts the finished SVG inside this container. -->
+  <div id="score"></div>
+  <script src="./node_modules/vexflow/build/cjs/vexflow.js"></script>
+  <script type="module">
+    // The full bundle registers its fonts. Wait for them before measuring notes.
+    await document.fonts.ready;
+    const score = VexFlow.EasyScore.create({
+      renderer: { elementId: 'score', width: 360, height: 160 }
+    });
+    const melody = score.voice(score.notes('C4/w'));
+    score.system({ width: 320 }).addStave({ voices: [melody] })
+      .addClef('treble').addTimeSignature('4/4');
+    score.draw();
+  </script>
+</body>
+</html>`
+)}
+<p>Start a local web server in that folder. If you have Python 3, run this command in your terminal.</p>
+${sample(
+  'bash',
+  `# Serve the folder containing index.html, then open http://localhost:8000.
+python3 -m http.server 8000`
+)}
+<p>You should see one open notehead on a short line below the treble stave. Change <code>C4/w</code> to <code>C5/w</code> and reload. The note moves up an octave.</p>
+<h2>Use a TypeScript app</h2>
+<p>Install the same package in your app and put <code class="language-markup">&lt;div id="score"&gt;&lt;/div&gt;</code> in its page. In your browser entry module, import VexFlow by name. Run this after the container exists.</p>
+${sample(
+  'typescript',
+  `import { VexFlow as VF } from 'vexflow';
+
+// A reusable function lets another part of the app supply a different melody.
+async function drawBar(phrase: string) {
+  await document.fonts.ready;
+  const score = VF.EasyScore.create({
+    renderer: { elementId: 'score', width: 360, height: 160 },
+  });
+  const voice = score.voice(score.notes(phrase));
+  score.system({ width: 320 }).addStave({ voices: [voice] })
+    .addClef('treble').addTimeSignature('4/4');
+  score.draw();
+}
+
+drawBar('C4/w');`
+)}
+<p>The guide editor already supplies the <code>VF</code> import, loaded fonts, container, <code>width</code>, and <code>height</code>. Examples with controls read their values from <code>params</code>. Choose <strong>Save HTML</strong> below the editor for a standalone copy of the current example. The version in the header links to the library source used here.</p>`,
+    'Draw C4/w in your own page. Replace it with C4/h, G4/h and reload to see two notes fill the same bar.',
     ['native-lifecycle', 'fonts-export'],
     ['repo:docs/build.md', 'repo:entry/vexflow.ts']
   ),
@@ -72,23 +117,56 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'quickstart',
     'Choose your level of control',
     'EasyScore, Factory, and the native API work together.',
-    'native-notes',
-    `<p>Start with EasyScore for pitches and rhythm. It returns ordinary VexFlow notes, so you can add native modifiers and use their setters. Factory creates objects with a shared context and a drawing queue. The native API lets you own every step.</p>
-    <table><tr><th>Task</th><th>Start with</th></tr><tr><td>Enter a melody quickly</td><td><code>score.notes('C5/q, D5, E5, G5')</code></td></tr><tr><td>Create specialized notation</td><td><code>score.make.*</code> typed helpers</td></tr><tr><td>Align several staves</td><td><code>System</code></td></tr><tr><td>Wrap measures into rows</td><td><code>score.compose()</code> and <code>Sheet</code></td></tr><tr><td>Control formatting and drawing directly</td><td><code>Renderer</code>, <code>Voice</code>, <code>Formatter</code></td></tr></table>
-    <p>The example below draws the same kinds of notes without EasyScore. Compare its explicit construction and drawing steps with the first lesson. Neither path requires a separate data model.</p><h2>One drawing owner</h2><p>Factory-owned objects draw through <code>factory.draw()</code>. Objects you construct directly may need a context and an explicit draw call. Modifiers attached to notes draw with those notes. Avoid drawing the same object twice.</p>`,
-    'Change the last chord to a single note by leaving only c/4 in its keys array.',
+    ['first-notes', 'facade', 'native-notes'],
+    `<p>You can describe a melody in musical shorthand or construct each printed note yourself. Try the same four beats both ways. The first example uses EasyScore to read the pitches and count time in a voice.</p>
+<h2>Try adding a mark</h2>
+<p>EasyScore returns ordinary VexFlow notes. Once you have a note, attach a label, fingering, or articulation to it. The second example attaches a word to a chord and ties its lowest pitch into the next chord. You can keep writing pitches as strings while working with those objects.</p>
+<h2>Take over the drawing</h2>
+<p>In the native example, look for the moment the formatter assigns positions to the notes and the voice draws them. A <code>Factory</code> can keep track of objects and draw them together. With direct constructors, your code supplies the context and calls draw. Choose EasyScore for the next lessons, or follow the native API section for this lower-level approach.</p>`,
+    'In the native example, remove two keys from the last chord. Compare its remaining head with the original chord.',
     ['notation', 'native-lifecycle']
   ),
   lesson(
     'notation',
     'easyscore',
     'Pitches, durations, and chords',
-    'Learn the small string language at the center of EasyScore.',
-    'rhythm-basics',
-    `<p>Separate events with commas. A pitch has a letter, an optional accidental, and an octave: <code>C4</code>, <code>F#4</code>, <code>Bb3</code>, <code>Gn4</code>. C4 is middle C. Write simultaneous pitches in parentheses, separated by spaces.</p>
-    <table><tr><th>Input</th><th>Meaning</th></tr><tr><td><code>C5/w</code></td><td>Whole note</td></tr><tr><td><code>C5/h</code></td><td>Half note</td></tr><tr><td><code>C5/q</code></td><td>Quarter note</td></tr><tr><td><code>C5/8</code>, <code>C5/16</code></td><td>Eighth and sixteenth notes</td></tr><tr><td><code>(C4 E4 G4)/h</code></td><td>Half-note chord</td></tr><tr><td><code>C5/q.</code></td><td>Dotted quarter: one and a half beats in 4/4</td></tr><tr><td><code>B4/q/r</code></td><td>Quarter rest at the B4 staff position</td></tr></table>
-    <p>An omitted duration repeats the previous duration within that call. The initial duration is an eighth note, so write the first duration explicitly. A second dot adds half as much time as the first dot.</p><p>EasyScore creates visible accidentals from the spelling. Adding a key signature to the stave does not rewrite the notes you entered. Spell pitches and accidentals deliberately.</p>`,
-    'Replace the rest with a quarter-note chord. Keep the total at four quarter-note beats.',
+    'Turn one held note into a four-beat phrase with a chord and a rest.',
+    ['held-note', 'two-pitches', 'chord-and-answer', 'rhythm-basics'],
+    `<p>Imagine writing down a tune for another musician. For each sound they need to know <em>which pitch</em> to play and <em>how long</em> to hold it. EasyScore lets you put both into a short string. In the examples below, each bar lasts four quarter-note beats.</p>
+<h2>Hold one note for four beats</h2>
+<p>Start with middle C. The letter names the pitch, the number selects its octave, and <code>/w</code> makes it a whole note. Try changing only the octave in the first example.</p>
+${sample(
+  'javascript',
+  `// One attack on beat one, held until the end of the bar.
+const notes = score.notes('C4/w');`
+)}
+<a data-show-example href="#lesson/notation/held-note">Try the held note →</a>
+<h2>Divide the same time between two pitches</h2>
+<p>Give C the first two beats and G the next two. A comma means the next note comes <em>after</em> the previous one. Each <code>/h</code> is a half note. A quarter note (<code>/q</code>) takes one beat and an eighth note (<code>/8</code>) takes half a beat in this meter.</p>
+${sample(
+  'javascript',
+  `// Count “one, two” on C and “three, four” on G.
+const notes = score.notes('C4/h, G4/h');`
+)}
+<a data-show-example href="#lesson/notation/two-pitches">Try the two half notes →</a>
+<h2>Sound several pitches together</h2>
+<p>Keep the rhythm and thicken the first sound. Put C, E, and G inside parentheses, separated by spaces. The pitches form one chord, so a single duration applies to all three. Look for the three noteheads above one another in the third example.</p>
+${sample(
+  'javascript',
+  `// The chord occupies two beats. The last G occupies the other two.
+const notes = score.notes('(C4 E4 G4)/h, G4/h');`
+)}
+<a data-show-example href="#lesson/notation/chord-and-answer">Try the chord →</a>
+<h2>Leave room for silence</h2>
+<p>In the last example a dot lengthens the quarter-note chord by half a beat. An eighth note finishes beat two. <code>B4/q/r</code> places a quarter rest at the B4 staff position, leaving beat three silent. The last C lands on beat four.</p>
+${sample(
+  'javascript',
+  `// Count a dotted quarter, an eighth, a quarter rest, and a final quarter.
+const notes = score.notes('(C4 E4 G4)/q., D4/8, B4/q/r, C5/q');`
+)}
+<a data-show-example href="#lesson/notation/rhythm-basics">Try the complete rhythm →</a>
+<p>Once you can count the bar, shorten the spelling. Within one call a note can inherit the previous duration, as in <code>'C4/q, D4, E4, F4'</code>. Write an accidental next to the letter for pitches such as <code>F#4</code> and <code>Bb4</code>.</p>`,
+    'In “Chords, rests, and dotted rhythm”, replace B4/q/r with (D4 F4 A4)/q. Beat three now has a chord and the bar still has four beats.',
     ['meter', 'beaming'],
     ['repo:docs/easyscore.md', 'https://github.com/0xfe/vexflow/wiki/Using-EasyScore']
   ),
@@ -97,12 +175,16 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'easyscore',
     'Voices and meter',
     'Keep musical time separate from the printed time signature.',
-    'three-four',
-    `<p>A voice tracks the duration of its events. In 3/4, three quarter notes fill the voice. Set <code>time: '3/4'</code> when creating it, and add <code>addTimeSignature('3/4')</code> to print the signature. Changing one does not change the other.</p>
-    <p><code>score.set({ time: '3/4', clef: 'bass' })</code> changes defaults for later calls. A native time object can specify <code>numBeats</code>, <code>beatValue</code>, and <code>resolution</code>.</p>
-    <table><tr><th>Mode</th><th>Use</th></tr><tr><td><code>strict</code></td><td>Default. Rejects overflow and requires a complete voice for formatting.</td></tr><tr><td><code>full</code></td><td>Allows an incomplete voice, but rejects overflow.</td></tr><tr><td><code>soft</code></td><td>Allows incomplete and overfull voices for sketches and demonstrations.</td></tr></table>
-    <p>Pass a mode in <code>score.voice(notes, { time: '3/4', mode: 'strict' })</code>. Native voices use <code>setMode(VF.Voice.Mode.SOFT)</code> before <code>addTickables()</code>. Many Explorer examples deliberately use soft mode to let you experiment.</p>`,
-    'Add a fourth quarter note and run. Read the timing error, then change both the voice meter and printed signature to 4/4.',
+    ['three-four', 'first-notes'],
+    `<p>Tap three steady beats and start again. That repeating group is a bar of 3/4. The printed 3/4 tells a player how to count. Inside your program, a voice keeps the same count so VexFlow can place each note.</p>
+<p>In the first example, the voice contains three quarter notes. Listen to the count in your head as you change the first two notes into a half note. Two heads become one, but the third beat stays in place.</p>
+${sample(
+  'javascript',
+  `// A half note plus a quarter note fills one bar of 3/4.
+const voice = score.voice(score.notes('C5/h, G5/q'), { time: '3/4' });`
+)}
+<p>Pass the meter to <code>voice()</code> and print it with <code>addTimeSignature()</code>. A strict voice checks the total when you add and format notes. Use the second example to compare a complete bar of 4/4. For a sketch that deliberately has spare beats, <code>mode: 'full'</code> permits an incomplete bar. <code>'soft'</code> also permits overflow.</p>`,
+    'In “A complete bar in 3/4”, add a fourth quarter note. Read the timing error, then change both the voice meter and the printed signature to 4/4.',
     ['polyphony', 'tuplets-lesson'],
     ['repo:src/voice.ts', 'repo:docs/easyscore.md']
   ),
@@ -111,8 +193,12 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'easyscore',
     'Compose with typed helpers',
     'Create annotations and ties while keeping native object access.',
-    'facade',
-    `<p>EasyScore combines compact strings with typed helpers for every built-in notation family. The examples use the merged API in the repository build identified in the sidebar.</p><p><code>EasyScore.create()</code> owns a Factory and enables strict parsing and option checks. <code>score.system()</code> creates a native System. <code>score.draw()</code> draws through that Factory.</p><p><code>score.make.annotation()</code> returns a native Annotation. <code>score.attach(note, modifier, index)</code> validates the target chord-head index. <code>score.make.tie()</code> creates a queued tie with validated endpoints and index lists.</p><p>Both notes and modifiers keep their native setters. Create a fresh modifier for each note. For this path, keep notes in the same Factory. Use <code>score.factory</code> when you need direct Factory access. Use <code>score.adopt()</code> to bring a separately constructed native object into the same drawing owner.</p>`,
+    ['facade', 'owned-spans'],
+    `<p>Play a C-major chord, then move the upper two pitches up a step. The bottom C can keep ringing. Look for the little arc between the two C heads in the first example. That <strong>tie</strong> tells the player to hold C through the change.</p>
+<h2>Give the tie its endpoints</h2>
+<p><code>score.notes()</code> returns the two chords in playing order. Pass them to <code>score.make.tie()</code> as <code>from</code> and <code>to</code>. Within each chord, head number zero is the first key you supplied. Both index arrays contain zero because C comes first in both chords.</p>
+<h2>Add a direction for the player</h2>
+<p>The word <em>dolce</em> asks for a sweet sound. Create the text with <code>score.make.annotation()</code> and attach it to the first chord. In the second example, follow the same melody under a slur and a crescendo. Each needs a start and end, while the word belongs to just one note.</p>`,
     'Change the annotation text. Tie another shared chord tone by editing both chords and the zero-based firstIndexes/lastIndexes arrays.',
     ['typed-notes', 'references', 'diagnostics'],
     ['repo:docs/easyscore.md', 'repo:docs/easyscore-coverage.json']
@@ -122,8 +208,12 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'easyscore',
     'Typed notes and mixed sequences',
     'Mix compact strings with explicit note structures.',
-    'typed-sequence',
-    `<p><code>score.make.note({ keys: ['c/5'], duration: 'q' })</code> returns a native StaveNote. Typed structures expose custom noteheads, explicit stems, dots, and other native options. <code>score.sequence()</code> accepts strings, typed structures, and tickables already owned by this score in one array.</p><p>Each string in a sequence starts its own duration inheritance. Write its first duration explicitly. An explicit <code>stemDirection</code> takes precedence over automatic stems unless you also request <code>autoStem</code>.</p><h2>Time and appearance</h2><p>A typed note's <code>dots</code> or <code>durationOverride</code> changes its time. <code>make.dot()</code> adds the visible mark only. The example sets dotted time and attaches a dot. Keep these two steps consistent.</p><p>Use <code>make.accidental()</code>, <code>articulation()</code>, <code>ornament()</code>, <code>fingering()</code>, and other helpers with <code>attach()</code>. These return native modifiers; use their setters for precise placement. The EasyScore notation-families playground example includes text, grace notes, percussion, and accidentals.</p>`,
+    ['typed-sequence', 'noteheads'],
+    `<p>What if the second beat of your melody needs a cross-shaped head? Keep the ordinary pitches as strings and describe that one note with an object. <code>score.sequence()</code> plays the entries in the order you supply them.</p>
+<p>In the first example, find <code>'d/5/x'</code>. The first two parts place D on the stave and the last part selects a cross. Remove <code>/x</code> and run it. The head changes shape and the note stays on the same line.</p>
+<h2>Make a dotted beat</h2>
+<p>The third entry has <code>dots: 1</code> to give it dotted time. The <code>make.dot()</code> attachment draws the dot beside its head. The eighth note that follows fills the rest of the bar. When you start a new string in a mixed sequence, write its first duration explicitly.</p>
+<p>Open the notehead study to compare more shapes without changing the rhythm.</p>`,
     'Change the cross notehead to a normal d/5 key. Then change the annotation text.',
     ['composition', 'easy-families'],
     ['repo:docs/easyscore.md', 'repo:docs/easyscore-coverage.json']
@@ -133,9 +223,12 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'easyscore',
     'Beams and stem direction',
     'Group short notes by musical beat.',
-    'beam-groups',
-    `<p><code>score.beam(notes)</code> creates a beam and returns the same note array. Choose the groups yourself with <code>slice()</code>. In this 4/4 example, each pair of eighth notes fills a beat.</p><p>EasyScore resolves automatic stems for the complete beam group. Explicit <code>stem: 'up'</code> or <code>stem: 'down'</code> choices are preserved. Set stems explicitly for independent voices sharing a stave.</p><p>Keep each group within its measure. A beam does not add or remove time. Use <code>score.autoBeam(notes, options)</code> for automatic grouping and owned Beam handles. The next lesson shows an explicit 2 + 2 + 3 pattern.</p>`,
-    'Group the first four eighth notes together. Then move some pitches above and below the middle staff line to see how the beam changes.',
+    ['beam-groups', 'automatic-beams'],
+    `<p>A row of eight separate flags makes a short melody surprisingly hard to count. A <strong>beam</strong> joins stems so the player can see which notes belong to a beat. Count “one and, two and, three and, four and” across the first example.</p>
+<p>Find <code>notes.slice(i, i + 2)</code>. Each slice gives <code>score.beam()</code> two eighth notes, exactly one beat in 4/4. The notes still sound for the same amount of time. The group shares a stem direction so the beam can join its ends.</p>
+<h2>Listen for a different grouping</h2>
+<p>In the second example, tap seven eighth notes and accent the first note of each beam. The groups now have lengths two, two, and three. For repeated patterns like this, you can describe the grouping once and let <code>score.autoBeam()</code> apply it.</p>`,
+    'In the first example, change both the loop increment and the slice length from 2 to 4. You should see two longer beams across the same eight notes.',
     ['automatic-beaming', 'tuplets-lesson', 'native-beaming'],
     ['repo:docs/score-layout.md']
   ),
@@ -144,8 +237,10 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'easyscore',
     'Automatic beaming',
     'Choose rhythmic groups and keep native Beam handles.',
-    'automatic-beams',
-    `<p><code>score.autoBeam(notes, options)</code> returns an array of owned native Beam objects. It uses the current meter unless you supply groups. Groups are fractions of a whole note: <code>new VF.Fraction(3, 8)</code> means three eighth notes.</p><p>The example groups 7/8 as 2 + 2 + 3. Change the group order to change its musical emphasis. Create tuplets before beaming and before constructing the voice. Apply final tuplet display setters after beaming.</p><p>By default, one explicit stem direction constrains its group. <code>autoStem: true</code> permits automatic direction to override explicit stems. <code>autoStem: false</code> preserves them; <code>maintainStemDirections</code> splits groups at direction changes. A note cannot belong to two beams.</p><p>Use <code>make.beam({ notes, options })</code> for a chosen group and a native Beam handle. The older <code>beam(notes)</code> returns the note array.</p>`,
+    ['automatic-beams', 'native-beams'],
+    `<p>Try tapping “ONE two, ONE two, ONE two three”. The first example writes that pulse in 7/8. Seven equal notes fill the bar, and the three beams tell the reader where to put the accents.</p>
+<p>Inside <code>groups</code>, each <code>VF.Fraction</code> measures part of a whole note. The two <code>2/8</code> groups take the first four notes and the <code>3/8</code> group takes the last three. <code>score.autoBeam()</code> returns the beams in order, so <code>beams[2]</code> colors just the final group.</p>
+<p>In the second example all the groups are equal. Follow the same fraction into <code>VF.Beam.generateBeams()</code> to see how to draw those groups directly with the native API.</p>`,
     'Reorder the groups to 3 + 2 + 2. Style the first returned beam instead of the third.',
     ['beaming', 'tuplets-lesson'],
     ['repo:docs/easyscore.md', 'repo:docs/easyscore-coverage.json']
@@ -155,8 +250,11 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'easyscore',
     'Tuplets',
     'Fit three notes into the time normally occupied by two.',
-    'triplet-bar',
-    `<p>A triplet of eighth notes lasts one quarter-note beat. <code>numNotes: 3</code> and <code>notesOccupied: 2</code> express that ratio. Tuplets change timing; beams only change the visual grouping.</p><p>Create tuplets <strong>before</strong> adding notes to a voice, so the voice counts the adjusted ticks. <code>score.make.tuplet({ notes, options })</code> returns the native Tuplet for styling. The older <code>score.tuplet()</code> returns the original notes. Concatenate those notes with ordinary notes before creating the voice.</p><p>Native options such as <code>bracketed</code> and <code>ratioed</code> control how the tuplet is printed. The playground includes 7:4 groups and proportional spacing for closer inspection.</p>`,
+    ['triplet-bar', 'beamed-tuplets'],
+    `<p>Say “tri-po-let” evenly during a single tap, then tap three plain beats. That is the rhythm in the first bar. The three eighth notes at the start are squeezed into the time normally occupied by two eighth notes.</p>
+<h2>Count first, then draw</h2>
+<p>Give the first three notes to <code>score.make.tuplet()</code>. Its <code>numNotes: 3</code> and <code>notesOccupied: 2</code> set their timing. Do this before collecting the bar into a voice so that VexFlow counts one beat there. The following G, E, and C each take one ordinary quarter beat.</p>
+<p>Beaming the triplet joins its stems. The numeral and bracket explain the unusual division to the reader. The example calls <code>setBracketed(true)</code> after automatic beaming so that the bracket stays visible. Open the next study to compare the beam and the tuplet mark.</p>`,
     'Set ratioed: true in the tuplet options. Keep setBracketed(true) after autoBeam(), which can update bracket defaults. Keep the three remaining quarter notes unchanged.',
     ['measures', 'spacing'],
     ['repo:docs/score-layout.md']
@@ -166,9 +264,12 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'easyscore',
     'Multiple voices and staves',
     'Align independent musical lines in one system.',
-    'grand-staff',
-    `<p>Pass multiple voices to one <code>addStave()</code> call for polyphony. Use up-stems for the upper voice and down-stems for the lower voice. Each voice must satisfy its own meter.</p><p>For a grand staff, call <code>addStave()</code> twice on the same system. The shared formatter aligns simultaneous events across both staves. Add a brace with <code>system.addConnector('brace')</code>.</p><p>The clef affects pitch placement. Supply <code>{ clef: 'bass' }</code> when creating bass notes and also print the bass clef on the stave. A printed clef alone does not change how an existing note was constructed.</p>`,
-    'Replace the bass half notes with C3/q, G2, C3, G2. Notice how the quarter-note beats align with the treble half notes.',
+    ['voices', 'grand-staff'],
+    `<p>Imagine holding a long note while someone else plays four short ones. Write each independent line in its own <strong>voice</strong>. In the first example, read the upper line by following the upward stems, then follow the downward stems on a second pass.</p>
+<p>Each voice fills the same bar. Hand both voices to one stave and VexFlow can put notes that sound together at the same horizontal position, even when their durations differ.</p>
+<h2>Give each hand a stave</h2>
+<p>Open “Treble and bass together”. One system holds both staves, and a brace joins them on the left. The lower notes use <code>clef: 'bass'</code> when they are constructed. Adding the bass clef symbol to the stave then tells the player how to read those positions.</p>`,
+    'In “Treble and bass together”, replace the bass half notes with C3/q, G2, C3, G2. Find the two bass notes that begin together with the treble notes.',
     ['measures', 'formatting'],
     ['https://github.com/0xfe/vexflow/wiki/Using-EasyScore']
   ),
@@ -177,9 +278,12 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'easyscore',
     'Modifiers, grace notes, and percussion',
     'Use typed helpers across notation families.',
-    'easyscore-families',
-    `<p>Select a family below to try modifiers, accidentals, text, grace notes, percussion, or mixed sequences. All helpers return native objects with their normal setters. Consult the API reference for constructor arguments.</p><table><tr><th>Task</th><th>Helpers</th></tr><tr><td>Decorate a note</td><td><code>articulation</code>, <code>ornament</code>, <code>tremolo</code>, <code>stroke</code>, <code>vibrato</code>, <code>parenthesis</code></td></tr><tr><td>Label music</td><td><code>annotation</code>, <code>chordSymbol</code>, <code>textNote</code></td></tr><tr><td>Show fingering</td><td><code>fingering</code>, <code>stringNumber</code></td></tr><tr><td>Add grace figures</td><td><code>graceNote</code>, <code>graceNoteGroup</code>, <code>noteSubGroup</code></td></tr></table><p>Create grace and subgroup children before adding the main notes to a voice. A group owns its children; do not share them between groups or also put them in a main voice. <code>graceNoteGroup(...).beamNotes()</code> beams the grace group.</p><p>Percussion can use explicit custom noteheads and a percussion clef. A <code>ghostNote</code> reserves invisible time; it does not draw a rest. A modifier generally changes appearance without changing rhythm.</p>`,
-    'Select grace, edit a grace pitch, and run. Then compare the percussion and sequence choices.',
+    ['articulations', 'grace', 'easyscore-families'],
+    `<p>Start with one note and ask the player to give it an accent. In the first example, change the articulation and watch the mark above or below the note. Moving the mark leaves the note’s pitch and duration intact.</p>
+<p>Next, open the grace-note example. These little notes lead into the main attack. Attach the whole grace group to the main note so the formatter gives the lead-in enough room.</p>
+<h2>Use the same ideas in EasyScore</h2>
+<p>In the last example, choose a family from the controls and find its branch in the editor. The grace branch builds the small notes together. The percussion branch combines a clef and chosen noteheads to show where and how to strike. Use this example when you want the EasyScore spelling for a mark you recognize.</p>`,
+    'In the last example choose grace, edit a grace pitch, and run it. Follow that little note into its unchanged main note.',
     ['typed-notes', 'easy-structure'],
     ['repo:docs/easyscore.md', 'repo:docs/easyscore-coverage.json']
   ),
@@ -188,8 +292,10 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'easyscore',
     'Ties, slurs, and expression spans',
     'Create owned relationships between notes.',
-    'owned-spans',
-    `<p><code>make.tie()</code>, <code>curve()</code>, and <code>hairpin()</code> validate endpoints and queue their native drawable. A tie connects matching chord tones through <code>firstIndexes</code> and <code>lastIndexes</code>. A curve can describe a phrase without matching pitches.</p><p>Other helpers include <code>line()</code>, <code>textBracket()</code>, <code>vibratoBracket()</code>, and <code>pedalMarking()</code>. Use their returned objects to change position and appearance. <code>textDynamics()</code> and <code>crescendo()</code> are timed objects for voices.</p><p>Ties, curves, and vibrato brackets support a missing endpoint for a partial segment. Other spans require complete endpoints. Responsive layout does not split a span across rows automatically. Build suitable segments after layout when a relationship crosses a row break.</p>`,
+    ['owned-spans', 'named-notes'],
+    `<p>Follow the four notes from C to G in the first example. A curved line gathers them into a phrase. The wedge opens underneath as the player gets louder. Both marks take their positions from the same first and last notes.</p>
+<p>Find <code>score.make.curve()</code> and <code>score.make.hairpin()</code>. Move just the curve’s start from <code>notes[0]</code> to <code>notes[1]</code>. The phrase begins a beat later while the crescendo still runs the length of the bar.</p>
+<p>The next example holds one pitch across two notes with a tie. It names its endpoints in the notation string. Naming them is handy when you want to insert another note earlier without renumbering the endpoints.</p>`,
     'Move the curve start to notes[1]. Keep the hairpin across all four notes.',
     ['structured-composition', 'spans'],
     ['repo:docs/easyscore.md', 'repo:docs/easyscore-coverage.json']
@@ -199,9 +305,12 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'easyscore',
     'Tablature with EasyScore',
     'Create frets, bends, slides, and tablature staves.',
-    'easy-tab',
-    `<p><code>make.tabNote()</code> accepts positions containing <code>str</code> and <code>fret</code>, plus a duration. String numbers start at 1. Use <code>make.tabStave()</code> for the staff and <code>attachToStave(stave, make.clef('tab'))</code> for its clef.</p><p>Attach a <code>make.bend()</code> modifier to a note. <code>make.tabSlide()</code> and <code>make.tabTie()</code> create queued spans between fret notes; their endpoint fields use native names such as <code>firstNote</code> and <code>lastNote</code>. A partial slide needs an explicit direction of 1 or -1.</p><p><code>make.graceTabNote()</code> supports grace tablature. Set <code>options.numLines</code> on the tablature stave for instruments with another string count. Tuning is an independent native helper; fret positions do not automatically transcribe pitches.</p>`,
-    'Change the first fret and bend text. Keep the final two frets equal for the tie.',
+    ['tablature', 'easy-tab', 'grace-tab'],
+    `<p>On a tab stave each line represents a string, and the number on the line tells you which fret to play. Start in the first example. Find a <code>positions</code> entry and change its fret. Then change <code>str</code> and watch the number move to another line. String numbers begin at one.</p>
+<h2>Connect two frets</h2>
+<p>Open “Create tablature and attach staff markings”. On string two, the line from fret 5 to 7 is a slide. The H from fret 7 to 8 asks for a hammer-on. Each connection needs both tab notes. The bend on the first note attaches to that note alone.</p>
+<p>In the grace-tab example a small fret number leads into the main one. The lead-in belongs to the following tab note, so you can add it without extending the bar.</p>`,
+    'In the second example change the last fret from 8 to 10. The hammer-on should still begin at fret 7. Then change the first bend’s label.',
     ['easy-structure', 'tab'],
     ['repo:docs/easyscore.md', 'repo:docs/easyscore-coverage.json']
   ),
@@ -210,9 +319,12 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'easyscore',
     'Staff markings and special measures',
     'Add signatures, labels, repeats, and rests.',
-    'easyscore-structure',
-    `<p>Select a structure example below. <code>make.stave()</code> and <code>make.tabStave()</code> create owned staves. Attach staff modifiers with <code>attachToStave()</code>: clefs, key and time signatures, barlines, repetitions, voltas, sections, tempo, and stave text.</p><p><code>make.connector({ topStave, bottomStave, type: 'brace' })</code> connects two staves. <code>make.multiMeasureRest()</code> draws a rest across multiple measures after you assign its stave. <code>make.repeatNote()</code> and <code>make.glyphNote()</code> cover repeated measures and glyph events.</p><p>In imperative code, <code>make.clefNote()</code>, <code>keySigNote()</code>, <code>timeSigNote()</code>, and <code>barNote()</code> create inline display events. They do not change the defaults for subsequent notes or voice timing. Use explicit options, or structured composition's change records when state should carry forward.</p>`,
-    'Select labels and edit the tempo. Select connector to compare the two staves.',
+    ['keys', 'barlines', 'easyscore-structure'],
+    `<p>Before playing the first note, a musician reads the clef and the key signature at the left of the stave. Choose a different key in the first example and count the sharps or flats. These markings belong to the stave, so they reserve space before the first beat.</p>
+<p>In the barline example change the ending. A double line or a repeat sign says something about the boundary of the measure. You can change that boundary without editing any pitches.</p>
+<h2>Add directions above the stave</h2>
+<p>In the last example choose <strong>labels</strong>. Look for the tempo marking and follow its construction back to the stave. Then choose <strong>connector</strong> to see a mark that needs two staves as its endpoints.</p>`,
+    'In the last example choose labels and edit the tempo. Switch to connector and look for the two staves it joins.',
     ['structured-composition', 'easy-tablature'],
     ['repo:docs/easyscore.md', 'repo:docs/easyscore-coverage.json']
   ),
@@ -221,8 +333,11 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'easyscore',
     'Named notes and source inspection',
     'Connect notation, native objects, and your editor.',
-    'named-notes',
-    `<p>Give notes IDs with bracket options such as <code>C5/h[id="start"]</code>. <code>score.getElement(id)</code> returns an owned element or undefined. <code>score.getNote(id)</code> throws for a missing ID or a non-note. IDs must be unique within one score.</p><p><code>getSource(note)</code> returns a copy of its parsed notation provenance: <code>input</code>, <code>start</code>, <code>end</code>, and an optional measure index. Offsets are zero-based UTF-16 positions and the end is exclusive. Typed and adopted native notes have no parser source.</p><p>Click a note in this preview to inspect it and select its notation in the editor. Selection works when the rendered notation has one exact, unescaped string literal in the unchanged editor. Repeated, computed, or edited source remains inspectable without guessing a selection.</p><p>Changing a native ID with <code>setAttribute('id', value)</code> updates lookup and rejects conflicts. <code>reset()</code> clears lookup and provenance; it does not transfer ownership to another score.</p>`,
+    ['named-notes', 'owned-spans'],
+    `<p>Click the first note of “Look up notes and inspect their notation source”. The editor selects the characters that produced the note. Look inside the brackets and find <code>id="start"</code>. That name lets later code find the note again.</p>
+<p>Read <code>score.getNote('start')</code> and follow the returned note into both the tie and the word <em>hold</em>. Try renaming the ID and its lookup together. The music should look identical.</p>
+<h2>Find where a note came from</h2>
+<p><code>score.getSource()</code> returns the original notation and the range that describes the parsed note. The guide can select matching text when there is one unambiguous literal in the current editor. In the second example, compare looking notes up by name with choosing endpoints by their array positions.</p>`,
     'Click the first note, then rename start in both the notation string and getNote() call.',
     ['managed-construction', 'spans-helpers'],
     ['repo:docs/easyscore.md', 'repo:docs/easyscore-coverage.json']
@@ -232,8 +347,11 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'easyscore',
     'Ownership and managed construction',
     'Adopt native objects and recover from failed batches.',
-    'managed-batch',
-    `<p>Each EasyScore instance has one Factory owner. <code>score.adopt(object, kind)</code> accepts native objects with kind <code>'note'</code>, <code>'modifier'</code>, <code>'drawable'</code>, or <code>'staveModifier'</code>. It validates ownership and avoids drawing an object twice. Foreign-owned objects are rejected.</p><p><code>attach()</code> can adopt an unowned modifier. Use a fresh modifier for each note. Use <code>attachToStave()</code> for clefs, signatures, and other staff markings. Native relationships still need valid endpoints from the same owner.</p><h2>Build a batch</h2><p><code>score.build(callback)</code> restores queues, references, and builder state when a synchronous callback throws. Even a successful nested batch is rolled back if its outer batch fails. The example deliberately fails, checks that its ID disappeared, and then draws valid notes.</p><p><code>withDefaults({ clef, time, stem }, callback)</code> restores defaults after success or failure. Both callbacks must be synchronous. Do not call draw or reset inside a batch. Changes to existing native objects and external hook side effects are not undone.</p>`,
+    ['managed-batch'],
+    `<p>Suppose your app starts adding a phrase and discovers an error halfway through. An abandoned note left in the drawing queue could turn up in a later score. The example deliberately cancels a small batch before it draws a valid piano line.</p>
+<p>Look in the log for <strong>Rolled back: true</strong>. The note named <code>discarded</code> was created inside <code>score.build()</code>. When the callback threw, EasyScore removed the batch’s queued objects and names. Keep the callback synchronous and draw after it finishes.</p>
+<h2>Change defaults for one hand</h2>
+<p><code>withDefaults()</code> limits the bass clef and downward stems to the lower phrase. The melody immediately afterward uses the original treble defaults. Keep each note and its attachments with the same score. To bring an unowned native object into that score, use <code>adopt()</code>.</p>`,
     'Change the bass phrase while keeping two half notes. Confirm the melody still uses treble defaults.',
     ['diagnostics', 'references'],
     ['repo:docs/easyscore.md', 'repo:docs/easyscore-coverage.json']
@@ -243,8 +361,11 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'easyscore',
     'Options, diagnostics, and failed edits',
     'Validate notation before creating drawing objects.',
-    'parse-diagnostics',
-    `<p><code>parseNotation()</code> returns <code>success</code>, parsed pieces, and diagnostics without constructing notes or running commit hooks. Diagnostics include source ranges. Offsets are zero-based UTF-16 indexes with an exclusive end; line and column are one-based.</p><p><code>EasyScore.create()</code> defaults to <code>throwOnError: true</code> and <code>strictOptions: true</code>. Strict construction throws an <code>EasyScoreError</code> with a <code>diagnostics</code> property. Failed construction restores the Factory queues and registry entries created by that request.</p><p>Legacy <code>factory.EasyScore()</code> defaults to non-throwing parsing and can return a valid prefix. Pass <code>{ throwOnError: true }</code> for editor input. Cleanup does not undo side effects from your own hooks.</p><h2>Note options</h2><p>Use bracket options such as <code>C5/q[id="melody",stem="up"]</code>. Articulation aliases include <code>staccato</code>, <code>tenuto</code>, <code>accent</code>, and <code>fermata</code>; add <code>.above</code> or <code>.below</code> for placement. Unknown articulation names throw.</p><p>JavaScript options can pass native note settings such as <code>octaveShift</code>. In strict mode, declare application-specific keys with <code>extensions: ['label']</code> before using a custom commit hook. Keep complex relationships in JavaScript rather than inventing a larger notation string.</p>`,
+    ['parse-diagnostics', 'named-notes'],
+    `<p>A reader typing a melody might pause halfway through a pitch. You can check the text before changing the drawing. The first example sends <code>'C4/q, invalid'</code> to <code>parseNotation()</code> and prints the diagnostics in the log.</p>
+<p>Replace <code>invalid</code> with <code>D4/q</code> and run it again. The error disappears. The whole note on the stave comes from a separate, valid phrase, so you can keep it visible while someone edits.</p>
+<h2>Point to the problem</h2>
+<p>A diagnostic’s start and end offsets identify the affected text. Use them with <code>slice(start, end)</code>, which excludes the end position. The next example uses source ranges in the other direction, to find the input for a note that parsed successfully. For strict construction, <code>EasyScore.create()</code> reports an invalid request with an error carrying its diagnostics.</p>`,
     'Change invalid to D4/q in the parseNotation call. The diagnostics log should become empty; the displayed whole note is separate from the parsing check.',
     ['composition', 'troubleshooting'],
     ['repo:docs/easyscore.md']
@@ -254,8 +375,11 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'easyscore',
     'Measures and responsive sheets',
     'Turn bar-separated notation into a score that wraps.',
-    'sheet',
-    `<p><code>score.measures('C5/h, E5 | G5/w')</code> returns one note array per measure. Durations carry across bar separators. Quoted option text can contain a literal bar. Empty measures are errors; use explicit rests.</p><p>Create a voice from each array and a system for each measure. A <code>Sheet</code> places these systems in rows. Format the sheet before reading its height, then resize the drawing surface to fit.</p><p>After changing width, call <code>sheet.setWidth(newWidth).format()</code>, resize and clear the context, and redraw a retained Factory. Merely resizing an SVG does not reflow music.</p><h2>Layout boundaries</h2><p>Sheet does not split measures, paginate, insert clefs, or split ties and beams at row breaks. Keep connected marks within a measure or manage the break yourself. An oversized measure keeps its minimum width and reports overflow; give it room or let the host scroll.</p>`,
+    ['sheet', 'compose-measures'],
+    `<p>A barline gives the reader a place to count from again. To put a longer tune on a page, first divide it into complete measures. <code>score.measures('C5/h, E5 | G5/w')</code> gives you two arrays. The first bar contains two half notes and the second contains one whole note.</p>
+<p>The first example lays a series of measures into a <strong>Sheet</strong>. Narrow the row with its control and watch which measure moves to the next line. The sheet keeps each measure together. An especially wide measure may need horizontal scrolling.</p>
+<h2>Fit the drawing to the rows</h2>
+<p>Format the sheet before reading its height. After a width change, format again, resize the drawing surface, clear it, and redraw. In the second example <code>compose()</code> builds the measures for you and returns a sheet you can lay out the same way.</p>`,
     'Reduce the row-width control, then add another complete measure to the notation string.',
     ['structured-composition', 'composition', 'spacing'],
     ['repo:docs/sheets-and-themes.md']
@@ -265,8 +389,11 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'easyscore',
     'Compose aligned measures',
     'Describe staves, voices, pickups, and changing meters.',
-    'compose-measures',
-    `<p><code>score.compose(spec)</code> builds a Sheet and native systems, staves, voices, notes, and spans. Give each staff an ID and the same number of measures. Each voice must exactly fill its measure; composition does not pad missing time.</p><p>A measure's <code>time</code> sets its printed meter and subsequent default timing. <code>span</code> sets actual duration independently. The example starts with a one-quarter pickup in printed 4/4, then changes to 2/4. All staves must agree on actual measure spans; use native layout for polymeter.</p><p>Voice <code>notes</code> can be a string or a mixed array of strings, typed structures, owned tickables, and explicit note wrappers with IDs. Set <code>tuplets: [{ start, count, options }]</code> and <code>autoBeam</code> on a voice to apply rhythm before voice construction. Tuplet indexes count timed notes.</p><p>The result exposes <code>sheet</code>, <code>systems</code>, <code>staves</code>, <code>voices</code>, <code>notes</code>, <code>spans</code>, lookup methods, and <code>diagnostics</code>. The arrays follow measure, staff, voice, then note order. These are native handles, not a persistent score model.</p><h2>Format and reflow</h2><p>Format the sheet before reading its height. Resize the context and draw with <code>{ retain: true }</code>. To reflow the existing objects, call <code>sheet.setWidth(newWidth).format()</code>, resize and clear the context, then draw again. The playground's EasyScore composition example exposes width and spacing controls.</p>`,
+    ['compose-measures', 'easyscore-composition'],
+    `<p>Some tunes begin a beat before the first full bar. Find the single D at the start of this example. The player sees 4/4, but that opening measure lasts one quarter note. <code>span: '1/4'</code> describes the pickup. The next measure has <code>time: '2/4'</code> and contains two full beats.</p>
+<h2>Read the score one layer at a time</h2>
+<p>Inside <code>staves</code>, find the melody staff, its <code>measures</code>, then a measure’s <code>voices</code>. A voice provides the actual notes. When adding another staff, give it the same number of measures and the same duration at each position. Include written rests where a part is silent.</p>
+<p>Two notes in the second measure have IDs. The curve refers to those names, so you can trace its endpoints from the data to the drawing. Try the second study’s width control to see the resulting native systems move between rows.</p>`,
     'Add another complete 2/4 measure. Narrow the browser to see the sheet wrap.',
     ['composition-policies', 'measures'],
     ['repo:docs/easyscore.md', 'repo:docs/easyscore-coverage.json']
@@ -276,8 +403,11 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'easyscore',
     'Keys, state changes, and row breaks',
     'Choose explicit policies for readable composed scores.',
-    'accidental-policy',
-    `<p>Pitch spelling stays literal. <code>F5</code> means F-natural even in G major; write <code>F#5</code> for F-sharp. The default <code>accidentals: 'literal'</code> preserves parser accidentals. <code>'key-aware'</code> suppresses redundant ordinary accidentals and adds required signs using the key and earlier pitches in that measure.</p><p>Key-aware state resets at barlines and key changes. Explicit, cautionary, and microtonal signs are preserved. Simultaneous conflicting spellings display both signs and require the next event to be explicit. Grace notes are not rewritten.</p><p>A mixed sequence can include <code>{ change: { clef: 'bass', key: 'C' } }</code>. State carries to subsequent notes and measures. All voices on a staff must declare the same change at the same musical instant; only the first voice draws it. An inline time change sets the next measure's meter without altering the current span.</p><h2>Responsive policies</h2><p><code>signatures: 'changes'</code> prints changed signatures and reports that wrapped rows do not repeat them. <code>'every-measure'</code> repeats signatures on every measure, so any new row starts with them. There is no row-start-only policy.</p><p>Structured <code>spans</code> support ties, curves, and hairpins referenced by note IDs. Cross-measure spans are rejected by default. <code>crossMeasureSpans: 'manual'</code> permits them with a diagnostic; you must create row-break segments after reflow.</p><p>For cross-staff notation, use a note wrapper with <code>stave</code> naming its target staff and supply the correct native clef. Key-aware processing follows the target staff. Already-owned native notes keep caller-controlled rhythm and accidentals; configure those before passing them to composition.</p>`,
+    ['accidental-policy', 'compose-measures'],
+    `<p>In G major the key signature already tells the player to sharpen every F. In the first example, find the two F-sharps at the start. Neither needs another sharp sign. The F-natural that follows does need a natural sign, and the next F-natural can inherit it for the rest of the bar.</p>
+<p>Switch <code>accidentals</code> from <code>'key-aware'</code> to <code>'literal'</code> and compare the printed signs. In both versions write <code>F#5</code> when you mean F-sharp. The policy chooses which signs to print for the pitches you supplied.</p>
+<h2>Carry changes forward</h2>
+<p>In the second measure, the inline change to bass clef and C major applies to the following G and C. Every voice on that stave must agree on the timing of a change. Open the pickup example to see a meter change at a barline. Its <code>signatures: 'every-measure'</code> keeps signatures visible when measures wrap onto another row.</p>`,
     'Change key-aware to literal and compare accidentals. Then change the inline bass clef and following pitches together.',
     ['structured-composition', 'diagnostics'],
     ['repo:docs/easyscore.md', 'repo:docs/easyscore-coverage.json']
@@ -287,8 +417,11 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'api',
     'Renderer and drawing lifecycle',
     'Create a surface, construct notation, format it, then draw.',
-    'native-stave',
-    `<p>A <code>Renderer</code> connects VexFlow to a DOM element. Choose <code>Renderer.Backends.SVG</code> for vector graphics or <code>CANVAS</code> for a bitmap surface. Resize it, then obtain its drawing context.</p><p>A <code>Stave(x, y, width)</code> supplies staff lines and space for signatures. Set its context before drawing. Notes need both a stave and a formatted position before they can draw.</p><ol><li>Load fonts and select them.</li><li>Construct notes, modifiers, voices, and staves.</li><li>Join and format the voices.</li><li>Draw the stave, notes, and any separately owned relationships.</li></ol><p>Factory and System automate these steps. With direct constructors, you control the order. The guide preview uses SVG so you can inspect and export it; use the Canvas backend in your own page when needed.</p>`,
+    ['native-stave', 'native-notes'],
+    `<p>Start with a blank piece of staff paper. The first example draws just five lines, a treble clef, and a time signature. That is enough to see how a VexFlow drawing reaches the page.</p>
+<p>Follow the first three lines of code. The <code>Renderer</code> connects to the page’s score container, <code>resize()</code> gives it room, and <code>getContext()</code> supplies the drawing surface. The <code>Stave</code> takes a left position, a top position, and a width in pixels. Change the top position and watch the whole stave move.</p>
+<h2>Put notes on the lines</h2>
+<p>Open the second example. The stave can draw as soon as it has a context. The notes also need horizontal positions. A voice counts their time, a formatter assigns positions, and <code>voice.draw()</code> puts them onto the stave. You can follow these same steps with a Canvas renderer.</p>`,
     'Add a bass clef instead of treble. Change the stave y coordinate and observe its position.',
     ['native-notes-lesson', 'fonts-export'],
     ['repo:src/renderer.ts', 'repo:src/stave.ts']
@@ -298,8 +431,10 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'api',
     'Notes, rests, and voices',
     'Construct musical events without a notation parser.',
-    'native-notes',
-    `<p>A <code>StaveNote</code> can hold one pitch or an entire chord. Native keys use slashes: <code>'c/4'</code>. The <code>duration</code> describes time, such as <code>'q'</code> or <code>'8'</code>. Append <code>r</code> for a rest, such as <code>'qr'</code>. Rest keys control vertical position.</p><p>A <code>Voice</code> collects these events. <code>addTickables()</code> adds them in musical order. A <code>GhostNote</code> reserves invisible time; it is useful for alignment but does not print a rest.</p><p>Use <code>stemDirection: VF.Stem.UP</code> or <code>VF.Stem.DOWN</code> to control stems. Native custom notehead codes can be added to keys; the playground includes cross, diamond, triangle, and slash heads.</p>`,
+    ['native-notes', 'ghosts'],
+    `<p>Read the first bar aloud as “C, D, rest, chord”. Each of those four beats corresponds to one <code>StaveNote</code> in the array. A single key such as <code>'c/5'</code> produces one head. Several keys in the same note stack into a chord and share one duration.</p>
+<p>The third note has duration <code>'qr'</code>. The <code>q</code> makes it a quarter note and the <code>r</code> prints a rest. Its key places the rest vertically. Remove the <code>r</code> and listen in your head to the pitch that now fills the silent beat.</p>
+<p>In the second example, a <code>GhostNote</code> leaves time for other notes to line up without printing a rest symbol. Choose a written rest when the player should see and count the silence.</p>`,
     'Replace the quarter rest with a pitched note. Then make the final chord a half note and remove one earlier quarter note to preserve four beats.',
     ['modifiers', 'formatting'],
     ['repo:src/stavenote.ts', 'repo:src/voice.ts']
@@ -309,8 +444,11 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'api',
     'Accidentals, dots, and attachments',
     'Attach notation to the correct notehead.',
-    'native-modifiers',
-    `<p><code>note.addModifier(modifier, index)</code> attaches a modifier to a zero-based chord-head index. Modifiers draw through their notes and take part in spacing. Attach them before formatting.</p><p>In native construction, a key such as <code>f#/4</code> describes the pitch. Add an <code>Accidental('#')</code> to display the sharp. Use a separate accidental object for each note. For context-aware spelling across voices, see <code>Accidental.applyAccidentals()</code>.</p><p>Dotted rhythm and printed dots are separate at this level. A duration such as <code>'qd'</code> supplies the time; <code>Dot.buildAndAttach()</code> supplies the visible dots. EasyScore handles both when parsing <code>C5/q.</code>.</p><p>Other modifiers include articulations, ornaments, fingerings, string numbers, and grace-note groups. They use the same attachment pattern, with class-specific options.</p>`,
+    ['native-modifiers', 'accidentals', 'dots'],
+    `<p>Find the sharp to the left of the first head and the dot just to its right. Both are <strong>modifiers</strong>, marks that belong to a note. Attach them before formatting so the formatter can leave them enough room.</p>
+<p>The native key <code>'f#/4'</code> gives the pitch. <code>new VF.Accidental('#')</code> supplies the printed sign. The second argument to <code>addModifier()</code> picks a head within the chord, counting from zero. In the last chord, index one belongs to C.</p>
+<h2>Give the dot its time</h2>
+<p>The first note’s <code>'qd'</code> duration contributes one and a half beats. <code>Dot.buildAndAttach()</code> draws the dot that tells the player to count it that way. Compare the separate accidental and dot studies to see how marks fit around neighboring heads.</p>`,
     'Add a flat accidental to the second head of the final chord, and update that key spelling to cb/5.',
     ['marks', 'grace-lesson'],
     ['repo:src/accidental.ts', 'repo:src/dot.ts']
@@ -320,8 +458,11 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'api',
     'Format multiple voices',
     'Align events at common musical times.',
-    'voices',
-    `<p>The formatter assigns horizontal positions from rhythmic ticks and minimum glyph widths. <code>joinVoices()</code> lets voices on the same stave share modifier spacing. <code>formatToStave()</code> uses the stave’s available note area.</p><p>Use System when several staves must align. It coordinates their shared time positions and gives clefs, signatures, and modifiers room. Give each voice the same meter and enough events to fill it.</p><p>Adding a modifier, changing a font, or changing a note’s duration can change minimum widths. Reformat afterward. Increasing SVG width alone only changes the drawing surface.</p><p>A dense score may need more width. Avoid solving every collision by shrinking glyphs; first check voice grouping, stave note boundaries, and whether modifiers were attached before formatting.</p>`,
+    ['voices', 'grand-staff'],
+    `<p>In the first example, find the upper half note that starts with the third lower quarter note. They share a horizontal position because they begin at the same time. Two voices can share a stave even if they have different numbers of notes.</p>
+<p>The upper voice has its stems up and the lower voice has its stems down. Give the system both voices together. Working with a formatter directly, call <code>joinVoices()</code> for voices sharing a stave and <code>formatToStave()</code> to use the available width.</p>
+<h2>Align both hands</h2>
+<p>In “Treble and bass together”, each hand has its own stave. Both staves belong to one system so beats line up across the gap. If you add a wide clef, accidental, or lyric, attach it before formatting so its width counts.</p>`,
     'Change the upper voice from two half notes to one whole note. Inspect the alignment with the four lower notes.',
     ['spacing', 'measures'],
     ['repo:docs/score-layout.md']
@@ -331,8 +472,10 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'api',
     'Generate beams automatically',
     'Choose grouping rules and manage the returned beams.',
-    'native-beams',
-    `<p><code>Beam.generateBeams(notes, options)</code> creates a list of native Beam objects. Its <code>groups</code> option accepts Fractions of a whole note: <code>new Fraction(2, 8)</code> groups two eighth notes. In compound meter, try groups of <code>3/8</code>.</p><p>Create beams before formatting. Draw them after the notes have positions. Beams returned by this static method are not automatically in your Factory queue; the example draws them explicitly once.</p><p>Use <code>new Tuplet(notes, options)</code> for native tuplets before voice construction. Set stem directions before constructing a manual beam when you want explicit control.</p>`,
+    ['native-beams', 'beamed-tuplets'],
+    `<p>In the first bar, count the four pairs of eighth notes. Change the group size from two eighths to four. The melody will still have eight notes, but now the beams divide it into two halves.</p>
+<p>Find <code>VF.Beam.generateBeams()</code>. Each fraction in <code>groups</code> describes how much time a beam should cover. Create the beams before formatting so the stems are ready. After <code>factory.draw()</code>, the example gives these directly created beams a context and draws them over the positioned notes.</p>
+<p>Open the tuplet study and find the numeral over the beam. When a group takes an unusual amount of time, build the tuplet before the voice counts its notes.</p>`,
     'Change the grouping to 4/8. The eight notes should form two groups.',
     ['beaming', 'tuplets-lesson'],
     ['repo:src/beam.ts', 'repo:src/tuplet.ts']
@@ -342,9 +485,12 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'api',
     'Clefs, keys, and barlines',
     'Describe the stave and its musical boundaries.',
-    'keys',
-    `<p>Chain <code>addClef()</code>, <code>addKeySignature()</code>, and <code>addTimeSignature()</code> on a stave before formatting. These marks reserve horizontal space. The signature text and the voice’s time are separate settings.</p><p>Use <code>setBegBarType()</code> and <code>setEndBarType()</code> with <code>Barline.type</code> for repeats and endings. A connector joins adjacent staves visually. It does not create voices or align unrelated systems.</p><p>Inline changes use rhythmic or zero-duration objects such as ClefNote, KeySigNote, TimeSigNote, and BarNote. When a clef changes, construct subsequent pitched notes with the appropriate clef as well.</p><p>Explore tempo, rehearsal marks, voltas, repeat instructions, and multi-measure rests in the playground. Each has different placement options; use its source link for the constructor contract.</p>`,
-    'Select a flat key, then open the barlines example in the playground and try repeat-begin and repeat-end styles.',
+    ['clefs', 'keys', 'changes'],
+    `<p>Take a moment to read the left edge of a stave as a musician would. The clef tells you how to name the lines and spaces. The key signature tells you which pitches normally carry sharps or flats. The time signature tells you how to count the bar.</p>
+<p>Start with the clef study, then choose a key in the second example. Look at the extra horizontal room a large key signature needs. Add these marks to the stave before formatting the notes. Give the voice its meter separately so it knows how much time to count.</p>
+<h2>Change clef halfway through</h2>
+<p>Open “Changes within a measure”. Find the small clef among the notes and follow the phrase past it. When you change clef in native code, construct the following notes with the new clef too, so their vertical positions match the sign.</p>`,
+    'In the key-signature example choose a flat key and count its signs. Then open the inline changes and find the first note governed by the new clef.',
     ['structure', 'polyphony'],
     ['repo:src/stave.ts', 'repo:src/keysignature.ts']
   ),
@@ -353,8 +499,10 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'api',
     'Articulations, ornaments, and dynamics',
     'Add expression while allowing the formatter to place marks.',
-    'articulations',
-    `<p>An articulation attaches to a notehead and can sit above or below the stave. Native articulations use supported codes or glyphs. EasyScore’s string hook also offers readable aliases.</p><p>Ornaments use their own class and can include upper or lower accidentals. Tremolo adds repeated strokes to a stem. These marks decorate notes without changing their duration.</p><p>Dynamic text and hairpins express volume. A TextDynamics object can occupy a rhythmic position in a voice. A StaveHairpin spans positioned notes. Keep the object’s timing and drawing owner explicit when combining these with Factory.</p><p>The playground offers separate editable examples for articulations, ornaments, tremolo, dynamics, and hairpins. Select a mark and inspect its bounds to understand the space it needs.</p>`,
+    ['articulations', 'ornaments', 'dynamics'],
+    `<p>A melody gives the player pitches and rhythm. An accent asks for a stronger attack, a staccato dot for a shorter one. In the first example use the controls to choose a mark and move it above or below the note. Notice which head it belongs to.</p>
+<p>An ornament is a different instruction for shaping the pitch. In the second example, follow the mark into its <code>Ornament</code> constructor. It attaches to a note in the same way that an articulation does.</p>
+<p>Finish with the dynamics example. Find the letters that tell the player how loudly to play. A <code>TextDynamics</code> can sit at a rhythmic position in a separate voice, letting a volume change line up with the sounding notes.</p>`,
     'Change the articulation and its position with the controls. Try another font and compare the glyph shape.',
     ['text', 'spans'],
     ['repo:src/articulation.ts', 'repo:src/ornament.ts', 'repo:src/textdynamics.ts']
@@ -364,9 +512,11 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'api',
     'Lyrics, annotations, and chord symbols',
     'Choose text objects by how they align with the music.',
-    'annotations',
-    `<p>An <code>Annotation</code> attaches to a note and supports horizontal and vertical justification. Use it for lyrics or short instructions. A <code>TextNote</code> is a tickable that can live in its own voice. Stave text belongs to a fixed staff location.</p><p>For stacked chord labels, use <code>ChordSymbol</code>. Its blocks support ordinary text, superscripts, subscripts, and music glyphs. The chord-symbol and kerning examples show these options together.</p><p>Load the text font before formatting. Text width affects collisions and spacing just like music glyphs. Use consistent lyric lines across a phrase and reserve enough vertical room beneath the staves.</p><p>Lyrics in this API are positioned text; your application still owns syllable splitting, melismas, and any higher-level text model.</p>`,
-    'Replace the lyric text with longer syllables and compare the spacing. Open chord-symbols in the playground for chord labels.',
+    ['annotations', 'chord-symbols', 'text-notes'],
+    `<p>Sing the four words under the first bar, one word on each note. Edit the words in the control and see how each label follows its note. An <code>Annotation</code> works well for a syllable or a short direction. Supply the syllables yourself when a word spans multiple notes.</p>
+<p>Open the chord-symbol study. A chord name sits above the harmony and may mix letters, raised numbers, and music glyphs. <code>ChordSymbol</code> assembles these pieces into a single label. Try a different root and watch what stays in place.</p>
+<p>In the last example, find the <code>TextNote</code>. It has a rhythmic position of its own, so you can place text between attacks by giving it a separate voice. Load the text font before formatting and allow vertical room for longer lyrics.</p>`,
+    'In “Lyrics & annotations”, replace the four words with four syllables of your own. Change their position and see how they remain aligned with the melody.',
     ['fonts-export', 'spans'],
     ['repo:docs/text-and-lyrics.md', 'repo:docs/chord-symbols.md']
   ),
@@ -375,8 +525,10 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'api',
     'Ties, slurs, and spanning marks',
     'Connect notes after deciding which objects own the endpoints.',
-    'ties',
-    `<p>A tie joins matching pitches; a slur describes a phrase. <code>StaveTie</code> uses first and last notes plus chord-head index arrays. <code>Curve</code> uses endpoints and curve controls for slurs.</p><p>Factory tie helpers accept <code>from</code>, <code>to</code>, <code>firstIndexes</code>, and <code>lastIndexes</code>. The direct StaveTie constructor uses <code>firstNote</code>, <code>lastNote</code>, and the same index names. Check the constructor used by your example.</p><p>Position notes before drawing spans. Factory-owned ties are queued for you. Directly created spans need their own draw call. Partial ties can omit one endpoint to represent a continuation.</p><p>Hairpins, octave brackets, glissando lines, vibrato brackets, and pedal markings follow similar endpoint-based patterns. Automatic splitting at Sheet row breaks is not provided; create the appropriate pieces when your layout crosses a row.</p>`,
+    ['ties', 'slurs', 'hairpins'],
+    `<p>Follow the curved lines between the two chords in the first example. Each <strong>tie</strong> continues one pitch into its next written note. The index arrays tell VexFlow which heads to connect. Leave just index zero in both arrays to hold only the first pitch.</p>
+<p>In the second example, trace the <strong>slur</strong> from the first note of the phrase to its last. Its endpoints can have different pitches. A native <code>Curve</code> gives you control over how high the arc sits above or below the phrase.</p>
+<p>Open the hairpin study to see another kind of span. The wedge follows two positioned notes as the music grows or fades. If either end moves to another row, supply the appropriate continuation for each row.</p>`,
     'Change the chord-head index in the tie example. Then compare the slurs example, whose curve is not tied to a matching pitch.',
     ['measures', 'tab'],
     ['repo:src/stavetie.ts', 'repo:src/curve.ts']
@@ -386,8 +538,11 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'api',
     'Grace notes and unusual heads',
     'Add small lead-in notes without consuming the main voice’s beat.',
-    'grace',
-    `<p>Create GraceNote objects, then attach a GraceNoteGroup to the main note. The group can draw a slur and beam its notes. A grace group is a modifier; it is not a separate run of ordinary-duration notes in the main voice.</p><p>For percussion and alternate notation, configure the clef, staff lines, and notehead shape independently. A percussion clef alone does not turn pitched input into a drum mapping. Your application chooses the line and head for each instrument.</p><p>The noteheads, staff-lines, grace, and grace-tab examples cover these building blocks. Use TabNote or GraceTabNote for string/fret positions instead of passing tab data to StaveNote.</p>`,
+    ['grace', 'noteheads', 'grace-tab'],
+    `<p>A grace note is a small lead-in to a main note. In the first example, find the small heads, then follow the slur to their destination. Toggle the slash and compare the mark on the grace stem.</p>
+<p>Find <code>GraceNoteGroup</code> in the code. The group is attached to the principal note, so the short lead-in gets space before that note without adding ordinary beats to the bar.</p>
+<h2>Change what the reader sees</h2>
+<p>The notehead study lets you change the shape of a head while keeping its place in time. On a percussion stave your application can use different shapes and lines for different instruments. Finally, open the grace-tab example to see the same lead-in idea written with fret numbers.</p>`,
     'Toggle the slash, then change the two grace pitches in the code.',
     ['tab', 'modifiers'],
     ['repo:src/gracenote.ts', 'repo:src/gracenotegroup.ts']
@@ -397,8 +552,11 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'api',
     'Tablature and string techniques',
     'Represent frets and strings directly.',
-    'tablature',
-    `<p>A <code>TabNote</code> uses a <code>positions</code> array of <code>{ str, fret }</code> objects and a duration. String numbers start at 1. A <code>TabStave</code> supplies the lines; its line count can match the instrument.</p><p>Several positions in one TabNote form a chord. TabVoice timing uses the same Voice and Formatter model as standard notation. Use a shared System to align tablature with a pitched stave.</p><p>Bend and Vibrato are note modifiers. TabSlide and TabTie connect tab notes; the tie text can indicate a hammer-on or pull-off. GraceTabNote adds a lead-in fret. StringNumber and Stroke decorate pitched notes when showing fingerings or strums.</p><p>VexFlow draws the positions you supply. It does not infer guitar fingering from pitches or validate whether a chord is physically playable.</p>`,
+    ['tablature', 'tab-slides', 'tab-ties', 'bends'],
+    `<p>Each line of the first example stands for a string. Read the fret numbers from left to right. Inside a <code>TabNote</code>, one <code>{ str, fret }</code> pair gives a single position. Put two pairs in the same <code>positions</code> array to play two strings together.</p>
+<h2>Show how to get to the next fret</h2>
+<p>In “Tab slides”, follow the diagonal line between two positions. A <code>TabSlide</code> needs those two notes as endpoints. Next try the hammer-on and pull-off study, where a letter over the curve tells the guitarist how to make the second sound.</p>
+<p>In “Bends”, look for the arrow rising from one fret. A <code>Bend</code> attaches to the fretted note and labels the change of pitch. The tab still displays the fret the finger starts from.</p>`,
     'Change a fret number, then add another position to one note to create a tab chord.',
     ['structure', 'spans'],
     ['repo:src/tabnote.ts', 'repo:src/tabstave.ts']
@@ -408,9 +566,12 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'api',
     'Repeats and score structure',
     'Compose measures, connectors, and navigation marks.',
-    'barlines',
-    `<p>A barline is a visual boundary. Repeats, voltas, segno, coda, and rehearsal marks describe navigation for the reader; they do not expand your data into a playback sequence.</p><p>Use a System for voices that share time and a Sheet for a series of measures. Add connectors to each system as needed. Keep your musical measure data separate enough that you can rebuild notation after structural edits.</p><p>MultiMeasureRest draws a counted span of silent measures. RepeatNote supplies a rhythmic repeat glyph. Neither replaces your application’s measure model. The playground includes both, along with tempo and rehearsal examples.</p><p>When laying out a large score, format after attaching marks, inspect row overflow, and reserve extra vertical space for lyrics or large spans. Avoid reusing the same note instance in several voices or measures.</p>`,
-    'Try each ending barline. Then use the responsive-sheet example to see how measures wrap.',
+    ['barlines', 'volta', 'repetition'],
+    `<p>Imagine a tune whose first phrase is played twice. In the first example choose a repeat-ending barline. The dots face the music the player should repeat. Changing the barline alters the printed direction while the notes in the bar remain the same.</p>
+<h2>Give the repeat two endings</h2>
+<p>Open “Volta endings”. A bracket above the stave tells the player which ending to take on each pass. Change its label and look at where the bracket begins relative to the barline.</p>
+<p>The repeat-instruction example adds signs such as a coda. These are directions for someone following the score. If you also play the music in your app, use your measure data to decide when to jump or repeat.</p>`,
+    'Choose a repeat-ending barline in the first example. In “Volta endings”, label the bracket for the second pass.',
     ['measures', 'spacing'],
     ['repo:docs/sheets-and-themes.md']
   ),
@@ -419,8 +580,11 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'api',
     'Engraving and proportional spacing',
     'Choose whether visual spacing or exact musical time drives horizontal distance.',
-    'proportional-spacing',
-    `<p>Default engraving spacing balances readable notation with the available width. Proportional spacing places events on an exact time grid: equal durations occupy equal horizontal distances.</p><p>Pass <code>{ mode: 'proportional', pixelsPerQuarter: 140 }</code> as a spacing option to the Formatter or <code>System.details</code>. Omit the scale to fit a supplied width. Leave room for signatures and note modifiers outside the timed span.</p><p>Dense notation can require a larger scale. A strict proportional layout reports the required minimum instead of shifting events off the grid. Tuplets use rational ticks, so their onsets remain evenly distributed.</p><p>The example compares both layouts. Reduce the scale to observe where collisions become a constraint. On a narrow screen, scroll the score horizontally when its natural width is larger than the preview.</p>`,
+    ['proportional-spacing'],
+    `<p>Find the beat guides in the proportional row. Notes that begin a quarter note apart are the same distance apart all along that row. This makes a useful visual clock for an exercise or a transcription. Compare the engraving row, where the formatter balances musical time with the space each symbol needs.</p>
+<h2>Change the scale</h2>
+<p>Move the pixels-per-quarter control. Increasing it moves attacks farther apart. Switch between one and two voices and look for notes that share a guide even though their rhythms differ. On a narrow screen you can scroll a wide score sideways.</p>
+<p>In your own formatter or system, choose <code>mode: 'proportional'</code> and pass <code>pixelsPerQuarter</code> for a fixed scale. Crowded notes can require more width. The formatter reports the space it needs to keep the grid accurate.</p>`,
     'Switch between one and two voices. Compare the quarter-note guide lines in the proportional row.',
     ['formatting', 'styles-lesson'],
     ['repo:docs/proportional-spacing.md']
@@ -430,9 +594,12 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'api',
     'Style, retain, and redraw',
     'Update a score without losing object-level highlights.',
-    'redraw',
-    `<p><code>score.setStyle()</code> (or <code>factory.setStyle()</code>) supplies a shared foreground. An element’s explicit style overrides that default. Set the host background separately with CSS.</p><p>Ordinary <code>score.draw()</code> and <code>factory.draw()</code> clear their drawing queues. Use <code>draw({ retain: true })</code> on every pass when you plan to redraw the same objects. Clear the context first to avoid duplicate SVG content. Call <code>reset()</code> when finished with the retained score.</p><p>For direct drawing, <code>drawWithStyle()</code> applies and restores the element’s style. A low-level <code>draw()</code> call is the primitive operation and may not apply the style itself.</p><p>Recoloring does not require a new musical model. Changing text, fonts, durations, or layout widths may require reformatting. For responsive measures, reformat the Sheet before redrawing.</p>`,
-    'Change the shared green foreground to blue. The explicitly colored second note should remain red.',
+    ['styles', 'redraw'],
+    `<p>In “Color & highlighting”, select a different note. Its individual style travels with it. This is a simple way to mark the note a learner should play next.</p>
+<p>Now open “Retain, recolor, and redraw”. Find the marked note and the green notes around it. The score has a shared foreground color and the marked note has its own explicit style. Change the shared color and compare the result.</p>
+<h2>Draw the same notes again</h2>
+<p>Use <code>draw({ retain: true })</code> on the first pass to keep the objects in the drawing queue. Clear the context before the next draw to remove the old SVG elements. If you change the music’s widths as well as its color, format again before drawing.</p>`,
+    'In “Retain, recolor, and redraw”, change the shared green to blue. Check that the second note keeps its own color.',
     ['fonts-export', 'measures'],
     ['repo:docs/sheets-and-themes.md']
   ),
@@ -441,8 +608,11 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'api',
     'Fonts, SVG export, and Node',
     'Keep layout and saved graphics consistent across machines.',
-    'first-notes',
-    `<p>VexFlow uses music fonts for notation and text fonts for labels. Await font loading before measuring or drawing. The guide bundles Bravura, Petaluma, Gonville, Academico, and Petaluma Script, with their licenses.</p><p>The guide’s <strong>Save SVG</strong> button embeds the selected music and text fonts in the SVG. This makes the downloaded score usable without the guide page. It is still text-based SVG, and the font licenses still apply.</p><p>For path-only export, use <code>SVGContext.toSVG(fonts)</code> with parsed font faces from opentype.js. Supply every music and text face used by the score. The exporter turns text into paths; it does not modify the live drawing. The portable SVG document includes a complete integration example.</p><h2>Server-side rendering</h2><p>Node can render SVG with a DOM implementation such as jsdom, or Canvas with an appropriate Canvas backend. Set up the environment and register the same font files before creating notes. Browser DOM globals are not available automatically in Node.</p><p>Use the repository’s tested Node setup and export examples linked below. An ordinary serialized SVG can lose its fonts when opened elsewhere; test the actual downloaded artifact, not only the browser view.</p>`,
+    ['first-notes', 'annotations'],
+    `<p>Open the music font menu and switch the four-note phrase from Bravura to Petaluma. Look at the treble clef and the shape of a notehead. Now open the lyrics example and notice that a score also needs a text face. Load both before measuring or drawing.</p>
+<h2>Take the score out of the guide</h2>
+<p>Choose <strong>Save SVG</strong> and open the file in a fresh browser tab. The guide embeds the selected fonts so the drawing can travel with its lettering. For an editable example with its code, choose <strong>Save HTML</strong> below the editor.</p>
+<p>For a path-only SVG, the portable SVG reference shows how to pass parsed music and text faces to <code>SVGContext.toSVG()</code>. To draw on a server, set up a DOM for SVG or a Canvas backend first and register the same fonts. The Node example below walks through that setup.</p>`,
     'Select Petaluma and save the SVG. Open the downloaded file independently and compare it with the preview.',
     ['troubleshooting', 'playground'],
     ['repo:docs/portable-svg.md', 'repo:docs/jsdom.md', 'repo:tests/node/svg-export-tests.mjs']
@@ -453,7 +623,8 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'Troubleshooting and further reading',
     'Use the error, the rendered result, and the source together.',
     'parse-diagnostics',
-    `<table><tr><th>Symptom</th><th>Check</th></tr><tr><td>Too many ticks or incomplete voice</td><td>Count durations, apply tuplets before adding notes, and match the voice meter. Use soft mode only when incomplete music is intentional.</td></tr><tr><td>Missing glyphs or changed spacing</td><td>Wait for fonts, select the intended family, and serve files with UTF-8.</td></tr><tr><td>Wrong bass-note positions</td><td>Set the clef on note construction as well as on the stave.</td></tr><tr><td>Clipped or crowded score</td><td>Format after adding modifiers, allow sufficient width, and resize the renderer after measuring a Sheet.</td></tr><tr><td>Duplicate notes after redraw</td><td>Clear the context and give each object one drawing owner.</td></tr><tr><td>An API is undefined</td><td>Compare your installed release with the guide’s source revision. Check the coverage document for new EasyScore helpers.</td></tr></table>
+    `<p>Start with one bar. In the example below, inspect the log to find the invalid word, fix it, and run again. Once a small example works, add back one note or mark at a time. Use the table to choose what to check first.</p>
+<table><tr><th>Symptom</th><th>Check</th></tr><tr><td>Too many ticks or incomplete voice</td><td>Count durations, apply tuplets before adding notes, and match the voice meter. Use soft mode only when incomplete music is intentional.</td></tr><tr><td>Missing glyphs or changed spacing</td><td>Wait for fonts, select the intended family, and serve files with UTF-8.</td></tr><tr><td>Wrong bass-note positions</td><td>Set the clef on note construction as well as on the stave.</td></tr><tr><td>Clipped or crowded score</td><td>Format after adding modifiers, allow sufficient width, and resize the renderer after measuring a Sheet.</td></tr><tr><td>Duplicate notes after redraw</td><td>Clear the context and give each object one drawing owner.</td></tr><tr><td>An API is undefined</td><td>Compare your installed release with the guide’s source revision. Check the coverage document for new EasyScore helpers.</td></tr></table>
     <h2>Explore and verify</h2><p>The <a href="https://vexflow.com/explorer/">Explorer</a> adds geometry diagnostics, glyph inspection, and more controls. The <a href="https://vexflow.com/tests/">visual test gallery</a> contains many edge cases. Tests illustrate contracts, but some intentionally show unusual or invalid notation.</p><h2>Sources and migration</h2><p>This guide brings together the original tutorial’s construction sequence, the EasyScore wiki’s compact notation, current repository documentation, and the live Explorer catalog. Older examples may use <code>Vex.Flow</code>; current browser examples use <code>VexFlow</code> (aliased as <code>VF</code> here). Prefer the constructor and option names in the linked source revision.</p><p>For help, include a small reproducible example, your VexFlow version, font, browser or Node version, and expected result in a <a href="https://github.com/vexflow/vexflow/discussions">GitHub discussion</a>.</p>`,
     'Introduce a syntax error into the parsing example and use its diagnostic range to locate the bad input.',
     ['setup', 'playground'],
@@ -469,7 +640,9 @@ VF.setFonts('Bravura', 'Academico');</code></pre>
     'A place to experiment',
     'Start with a lesson or any Explorer example. Make it your own.',
     'first-notes',
-    `<p>Select an example, edit its JavaScript, and run it. The collection includes every current Explorer example plus the guide’s teaching examples. Controls update <code>params</code>; their current values appear below the editor.</p><p>Drafts are saved per example in this browser when storage is available. <strong>Reset</strong> restores the original code and controls. <strong>Copy link</strong> links to the original example; it does not publish your draft. Save JavaScript or HTML to keep your edits in a file.</p><p>Code runs in a sandboxed preview. Network requests are disabled there. Use a local page for external data or Node integration. Choose a font, inspect an SVG element, or export the rendered score. For the full geometry and glyph tools, open the same example in Explorer.</p>`,
+    `<p>Choose a phrase you recognize, then make one change you can predict. Start with “Your first four notes”. Change the last pitch, choose <strong>Run</strong>, and check where its head moved. The example picker also has studies for chords, rhythm, lyrics, and guitar tab.</p>
+<p>Try an example with controls and open <strong>Example environment and output</strong>. The values in <code>params</code> match the controls. Edit the JavaScript if you want to go further. <strong>Reset</strong> restores that example’s original code and settings.</p>
+<p>Drafts stay in this browser when local storage is available. <strong>Save HTML</strong> keeps a runnable copy of your edits. <strong>Copy link</strong> gives a friend the original example to try. For a closer look at a glyph’s shape or dimensions, follow its Explorer link.</p>`,
     'Combine a melody with an annotation or tie. Export HTML to keep a standalone starting point for your app.',
     ['welcome', 'troubleshooting']
   ),

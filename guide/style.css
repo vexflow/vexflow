@@ -103,13 +103,17 @@ summary:focus-visible,
   text-decoration: none;
   font-weight: 750;
 }
-.brand span {
-  display: block;
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  font-weight: 400;
-  margin-top: 8px;
-  color: var(--muted);
+.masthead {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: baseline;
+}
+#version {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green);
+  text-underline-offset: 3px;
 }
 .site-header nav {
   display: flex;
@@ -182,14 +186,6 @@ summary:focus-visible,
   background: var(--soft);
   border-color: var(--green);
   font-weight: 650;
-}
-.version {
-  font-size: 10px;
-  color: var(--muted);
-  margin: 24px 0;
-}
-.version a {
-  font-family: ui-monospace, monospace;
 }
 #menu {
   display: none;
@@ -285,6 +281,37 @@ article table code {
   border: 1px solid #ccd6c9;
   border-radius: 6px;
   overflow: hidden;
+}
+article [data-show-example] {
+  font-size: 0.9em;
+  text-underline-offset: 3px;
+}
+#lesson-examples p {
+  font-size: 13px;
+  font-weight: 650;
+  margin: 14px 22px 0;
+}
+#lesson-examples ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  margin: 0;
+  padding: 6px 22px 14px;
+  list-style-position: inside;
+}
+#lesson-examples li {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+#lesson-examples a {
+  color: var(--green);
+  text-underline-offset: 3px;
+}
+#lesson-examples [aria-current='step'] {
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration-thickness: 2px;
 }
 .workbench-heading {
   padding: 20px 22px;
@@ -552,15 +579,21 @@ footer a {
   z-index: 10;
   max-width: 90vw;
 }
-.token.comment {
-  color: #73806d;
+.token.comment,
+.token.doctype {
+  color: #556850;
 }
+.token.tag,
 .token.keyword {
   color: #865341;
 }
+.token.attr-value,
 .token.string {
   color: #3f7047;
 }
+.token.attr-name,
+.token.class-name,
+.token.builtin,
 .token.function {
   color: #316f85;
 }
@@ -613,8 +646,8 @@ footer a {
   .brand {
     font-size: 29px;
   }
-  .brand span {
-    display: none;
+  .site-header {
+    flex-wrap: wrap;
   }
   .site-header nav {
     font-size: 11px;

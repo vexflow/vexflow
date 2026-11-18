@@ -8,12 +8,13 @@ export function renderEasyScoreStructure(VF, renderer, kind = 'tab', ink = '#243
   const tab = ['tab', 'grace-tab'].includes(kind);
   const bounds = { x: 20, width: renderer.width - 40 };
   const stave = tab ? score.make.tabStave(bounds) : score.make.stave(bounds);
+  // Clefs, tempo marks and repeat signs belong to the stave. Fret techniques attach to individual notes.
   const attach = (mark, position) => {
     score.attachToStave(stave, mark, position);
     marks.push(mark);
   };
   if (tab) {
-    notes = [3, 5, 7, 7].map((fret) => score.make.tabNote({ positions: [{ str: 2, fret }], duration: 'q' }));
+    notes = [3, 5, 7, 8].map((fret) => score.make.tabNote({ positions: [{ str: 2, fret }], duration: 'q' }));
     attach(score.make.clef('tab'));
     if (kind === 'tab') {
       const bend = score.make.bend([

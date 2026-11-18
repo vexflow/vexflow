@@ -37,13 +37,17 @@ Do not commit generated screenshots. Attach relevant ones to the issue with `gh 
 | `guide/cli.mjs`      | Build, preview server, upload command                            |
 | `guide/test.mjs`     | Browser and upload regressions                                   |
 
-Lesson IDs are stable fragment links: `#lesson/notation`. Playground links use `#playground/notes`.
+Lesson IDs are stable fragment links such as `#lesson/notation`. Pass example IDs to a lesson in teaching order.
+The lesson opens its first example, and each step has a direct link such as `#lesson/notation/two-pitches`.
+Playground links use `#playground/notes`.
 Keep IDs unchanged when revising titles. These routes need no server-side rewrite rules.
 
-Write short paragraphs, concrete examples, and one useful exercise per lesson.
+Start with something the reader can find in the score. Introduce one idea per step, then give an edit and a visible result to check.
+Comment the musical or layout decision in each runnable example. For worked code in lesson text, use
+`sample(language, source)` with `markup`, `bash`, `typescript`, or `javascript` so the literal source is escaped and highlighted.
 Lesson bodies are trusted, repository-authored HTML. Do not insert user input into this HTML.
 Use `repo:docs/example.md` source links for files in the same revision as the bundled library.
-The build records the package version and Git commit. Uncommitted library changes are included in builds,
+The header displays the version and links to the commit recorded inside the bundled library. Uncommitted library changes are included in builds,
 but the commit link cannot describe those edits; commit before publishing.
 
 Each teaching example follows Explorer's metadata shape: `id`, `title`, `group`, `description`,
@@ -115,7 +119,7 @@ Old assets remain available for cached pages. The guide command does not change 
 See [deployment setup](build.md#upload-static-sites) for authentication and public ACL requirements.
 
 After publishing, open `/guide/`, a lesson fragment, and a playground fragment on desktop and mobile.
-Edit a note, select another font, and save an SVG. Verify that the sidebar identifies the intended source revision.
+Edit a note, select another font, and save an SVG. Verify that the header identifies the intended source revision.
 
 ## Sources
 

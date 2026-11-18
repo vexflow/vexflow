@@ -1,6 +1,6 @@
 // Lesson navigation, shared Explorer widgets, local drafts, and downloadable examples.
 import { examples, lessons, sections } from './content.mjs';
-import { createEditor } from './explorer/editor.mjs';
+import { createEditor, highlightCode } from './explorer/editor.mjs';
 import { Preview } from './explorer/preview.mjs';
 import { findNotationRange } from './explorer/source.mjs';
 
@@ -58,9 +58,6 @@ const editor = createEditor($('editor'), () => {
   saveDraft();
   schedule();
 });
-$('version').textContent = `${version.version} · ${version.commit.slice(0, 8)}`;
-$('version').href = `https://github.com/vexflow/vexflow/commit/${version.commit}`;
-
 /** Search lesson titles and prose; preserve the four section headings. */
 function navigation() {
   const query = $('search').value.toLowerCase().trim();
@@ -113,6 +110,20 @@ function showLesson(lesson) {
   $('section-label').textContent = section.title;
   $('summary').textContent = lesson.summary;
   $('lesson').innerHTML = lesson.body;
+  $('lesson').querySelectorAll('code').forEach(highlightCode);
+  const steps = $('lesson-examples');
+  steps.replaceChildren();
+  steps.hidden = lesson.examples.length < 2;
+  if (!steps.hidden) {
+    const list = node('ol');
+    for (const id of lesson.examples) {
+      const item = node('li');
+      const example = examples.find((entry) => entry.id === id);
+      item.append(link(example.title, `#lesson/${lesson.id}/${id}`));
+      list.append(item);
+    }
+    steps.append(node('p', 'Examples in this lesson'), list);
+  }
   $('exercise').textContent = lesson.exercise;
   document.title = `${lesson.title} · VexFlow Guide`;
   $('reading').replaceChildren();
@@ -197,6 +208,7 @@ function renderControls() {
 /** Show the exact parameter object supplied to the snippet. */
 function environment() {
   $('params-code').textContent = `const params = ${JSON.stringify(params, null, 2)};`;
+  highlightCode($('params-code'));
 }
 
 /** Reuse the loaded library and fonts; the shared runtime cleans each example's effects. */
@@ -233,14 +245,22 @@ function route({ focus = false } = {}) {
   const lesson = playground
     ? lessons.find((item) => item.id === 'playground')
     : (lessons.find((item) => item.id === path[1]) ?? lessons[0]);
-  showLesson(lesson);
+  const changingLesson = lesson !== currentLesson;
+  if (changingLesson) showLesson(lesson);
   $('example-picker').hidden = $('example-description').hidden = !playground;
   $('open-playground').hidden = playground;
-  const example = examples.find((item) => item.id === (playground ? path[1] : lesson.example)) ?? examples[0];
+  const step = lesson.examples.includes(path[2]) ? path[2] : lesson.examples[0];
+  const selected = playground && path[0] === 'playground' ? path[1] : step;
+  const example =
+    examples.find((item) => item.id === selected) ?? examples.find((item) => item.id === lesson.examples[0]);
+  for (const anchor of $('lesson-examples').querySelectorAll('a')) {
+    if (anchor.hash === `#lesson/${lesson.id}/${step}`) anchor.setAttribute('aria-current', 'step');
+    else anchor.removeAttribute('aria-current');
+  }
   showExample(example);
   document.querySelector('.sidebar').classList.remove('open');
   $('menu').setAttribute('aria-expanded', 'false');
-  if (focus) {
+  if (focus && (changingLesson || playground)) {
     $('main').focus({ preventScroll: true });
     window.scrollTo(0, 0);
   }
@@ -385,6 +405,13 @@ $('reset').onclick = () => {
 $('auto-run').onchange = schedule;
 $('font').onchange = run;
 $('bounds').onchange = () => preview.post({ type: 'options', inspect: true, bounds: $('bounds').checked, grid: false });
+// Worked examples in the article jump directly to their shared, keyboard-accessible preview.
+$('lesson').addEventListener('click', (event) => {
+  if (!event.target.closest('a[data-show-example]') || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+    return;
+  $('example-title').focus({ preventScroll: true });
+  $('lesson-examples').scrollIntoView({ block: 'start' });
+});
 $('search').oninput = navigation;
 $('example-select').onchange = () => {
   location.hash = `playground/${$('example-select').value}`;
