@@ -7,6 +7,7 @@ import { join, resolve } from 'node:path';
 import puppeteer from 'puppeteer';
 import { analyzeLayout } from './render-metrics.mjs';
 import { makeContinuousStudy } from '../tests/engraving/continuous-studies.mjs';
+import { makeInstrumentStudy } from '../tests/engraving/instrument-studies.mjs';
 import { makePhraseStudy } from '../tests/engraving/phrase-studies.mjs';
 import { publicationStudy } from '../tests/engraving/publication-studies.mjs';
 import { registerStudies } from '../tests/engraving/studies.mjs';
@@ -104,6 +105,7 @@ async function capture(label, bundle, expectedRevision) {
       }
     });
     await page.evaluate(selectCases, cases);
+    await page.addScriptTag({ content: `window.makeInstrumentStudy = ${makeInstrumentStudy};` });
     await page.addScriptTag({ content: `window.makePhraseStudy = ${makePhraseStudy};` });
     await page.addScriptTag({ content: `window.makeContinuousStudy = ${makeContinuousStudy};` });
     await page.addScriptTag({ content: `window.publicationStudy = ${publicationStudy};` });

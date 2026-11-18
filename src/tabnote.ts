@@ -448,7 +448,8 @@ export class TabNote extends StemmableNote {
     const renderStem = this.beam === undefined && this.renderOptions.drawStem;
 
     const clsAttribute = this.getAttribute('class');
-    ctx.openGroup('tabnote' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
+    const group = ctx.openGroup('tabnote' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
+    if (this.notation.length) group?.setAttribute('aria-label', this.notation.map((entry) => entry.label).join(', '));
     this.drawPositions();
     this.drawStemThrough();
 

@@ -357,6 +357,7 @@ function semanticEvents(score: EasyScoreComposition, spec: EasyScoreCompositionS
                   voice,
                   event,
                   keys: n.getKeys(),
+                  ...(n.notation.length && { notation: n.notation }),
                   ticks: n.getTicks().toString(),
                   rest: n.isRest(),
                 },

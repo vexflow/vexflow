@@ -66,7 +66,17 @@ export interface ParsedNote {
   ticks: number;
 }
 
+/** Stable score identities for instruments and playing instructions. Display positions can differ from pitches. */
+export interface NotationIdentity {
+  kind: 'unpitched' | 'technique' | 'harmony' | 'tuning' | 'tremolo' | 'accidental';
+  id: string;
+  label: string;
+  /** Head or string position in the source chord, counted from zero. */
+  index?: number;
+}
+
 export interface NoteStruct {
+  notation?: readonly NotationIdentity[];
   /** Array of pitches, e.g: `['c/4', 'e/4', 'g/4']` */
   keys?: string[];
   /** The time length (e.g., `q` for quarter, `h` for half, `8` for eighth etc.). */
@@ -243,6 +253,8 @@ export abstract class Note extends Tickable {
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // INSTANCE MEMBERS
 
+  /** Source identities survive native drawing, Canvas inspection and print export. */
+  readonly notation: readonly NotationIdentity[];
   glyphProps: GlyphProps;
   keys: string[];
   keyProps: KeyProps[];
@@ -281,6 +293,8 @@ export abstract class Note extends Tickable {
     if (!noteStruct) {
       throw new RuntimeError('BadArguments', 'Note must have valid initialization data to identify duration and type.');
     }
+
+    this.notation = (noteStruct.notation ?? []).map((entry) => ({ ...entry }));
 
     /** Parses `noteStruct` and get note properties. */
     const parsedNoteStruct = Note.parseNoteStruct(noteStruct);

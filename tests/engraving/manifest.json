@@ -447,6 +447,22 @@
         "m5-score-letter": "Chamber score on Letter",
         "m5-part-letter": "Cello part on Letter"
       }
+    },
+    {
+      "module": "M6 studies",
+      "source": "tests/engraving/instrument-studies.mjs",
+      "gaps": ["VF-025", "VF-027", "VF-029", "VF-030", "VF-031", "VF-032", "VF-033", "VF-034", "VF-051", "VF-052"],
+      "review": "Read each original instrument study at playing size. Review kit lines and heads, tremolo strokes, string bends, accidentals and independent barlines.",
+      "cases": {
+        "m6-kit": "Kit groove and instrument legend",
+        "m6-line": "One-line side drum",
+        "m6-lead": "Harbor song over a repeated turnaround",
+        "m6-guitar": "Drop D with a second-fret capo",
+        "m6-techniques": "Alternating chords and playing instructions",
+        "m6-micro": "Quarter tones and Persian accidentals",
+        "m6-spelling": "Clarinet pickup across the bar",
+        "m6-meter": "Three against two and a cadenza"
+      }
     }
   ]
 }

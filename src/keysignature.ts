@@ -13,11 +13,24 @@ import { Stave } from './stave';
 import { StaveModifier, StaveModifierPosition } from './stavemodifier';
 import { Tables } from './tables';
 import { Category } from './typeguard';
-import { defined } from './util';
+import { defined, RuntimeError } from './util';
 
 export class KeySignature extends StaveModifier {
   static override get CATEGORY(): string {
     return Category.KeySignature;
+  }
+
+  /** Explicit positions are already in the target clef, from the top staff line down. */
+  private ordered?: { type: string; line: number }[];
+
+  setOrdered(entries: readonly { type: string; line: number }[]): this {
+    for (const entry of entries) {
+      if (!entry.type || !Number.isSafeInteger(entry.line * 2))
+        throw new RuntimeError('BadArguments', 'Expected an accidental and a staff line or space.');
+    }
+    this.ordered = entries.map((entry) => ({ ...entry }));
+    this.formatted = false;
+    return this;
   }
 
   protected paddingForced: boolean;
@@ -228,6 +241,7 @@ export class KeySignature extends StaveModifier {
   // Set the key signature to a specific key, ie: 'C' or 'Gm'
   setKeySig(keySpec: string, cancelKeySpec?: string, alterKeySpec?: string[]): this {
     this.formatted = false;
+    this.ordered = undefined;
     this.keySpec = keySpec;
     this.cancelKeySpec = cancelKeySpec;
     this.alterKeySpec = alterKeySpec;
@@ -269,6 +283,12 @@ export class KeySignature extends StaveModifier {
     this.formattedStaveY = stave.getY();
     this.width = 0;
     this.children = [];
+    if (this.ordered) {
+      this.ordered.forEach((entry, i, list) => this.convertToGlyph(entry, list[i + 1], stave));
+      this.calculateDimensions();
+      this.formatted = true;
+      return;
+    }
     this.accList = Tables.keySignature(defined(this.keySpec));
     const accList = this.accList;
     const firstAccidentalType = accList.length > 0 ? accList[0].type : undefined;

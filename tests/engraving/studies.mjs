@@ -390,4 +390,31 @@ export function registerStudies() {
         }
       });
     }
+
+  QUnit.module('M6 studies');
+  for (const [kind, name] of Object.entries({
+    kit: 'Kit groove and instrument legend',
+    line: 'One-line side drum',
+    lead: 'Harbor song over a repeated turnaround',
+    guitar: 'Drop D with a second-fret capo',
+    techniques: 'Alternating chords and playing instructions',
+    micro: 'Quarter tones and Persian accidentals',
+    spelling: 'Clarinet pickup across the bar',
+    meter: 'Three against two and a cadenza',
+  })) {
+    VF.Test.runTests(name, (test) => {
+      const factory = VF.Test.makeFactory(
+        test,
+        710,
+        { kit: 305, line: 152, lead: 345, guitar: 303, techniques: 307, micro: 280, spelling: 166, meter: 556 }[kind]
+      );
+      const { notes } = globalThis.makeInstrumentStudy(VF, factory, kind);
+      const attacks = notes.map((n) => [n.getNoteHeadBeginX(), n.getTicks().value()]);
+      test.assert.ok(
+        attacks.length && attacks.flat().every(Number.isFinite),
+        'Every attack has a position and duration'
+      );
+      document.getElementById(test.elementId).dataset.measurement = JSON.stringify({ attacks });
+    });
+  }
 }

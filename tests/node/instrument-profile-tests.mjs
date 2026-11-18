@@ -1,0 +1,244 @@
+// Test musical identities, performance time and rendered interactions for the M6 instrument profiles.
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import puppeteer from 'puppeteer';
+import { makeInstrumentStudy } from '../engraving/instrument-studies.mjs';
+
+test('instrument studies and score construction', async (t) => {
+  const browser = await puppeteer.launch({ headless: true, args: process.env.CI ? ['--no-sandbox'] : [] });
+  try {
+    const page = await browser.newPage();
+    await page.setContent('<main id="music"></main>');
+    await page.addScriptTag({ path: 'build/cjs/vexflow-debug.js' });
+    await page.addScriptTag({ content: 'window.makeStudy=' + makeInstrumentStudy });
+    await page.evaluate(async () => {
+      const VF = window.VexFlow;
+      await VF.loadFonts('Bravura', 'Academico');
+      VF.setFonts('Bravura', 'Academico');
+      window.study = (kind) => {
+        document.querySelector('main').replaceChildren();
+        const f = new VF.Factory({
+          renderer: { elementId: 'music', width: 710, height: 530, backend: VF.Renderer.Backends.SVG },
+        });
+        return makeStudy(VF, f, kind);
+      };
+    });
+
+    await t.test(
+      'percussion keeps mixed head identities and stems in native notes, compositions and exported parts',
+      async () => {
+        const result = await page.evaluate(() => {
+          const VF = VexFlow,
+            kit = new VF.PercussionMap();
+          const attack = kit.note(['snare', 'hat'], 'q');
+          const native = new VF.StaveNote(attack);
+          const { notes } = study('kit');
+          const name = document.getElementById('vf-' + notes[2].getAttribute('id')).getAttribute('aria-label');
+          const source = {
+            staves: [
+              {
+                id: 'drums',
+                clef: 'percussion',
+                measures: [
+                  {
+                    voices: [
+                      { notes: [{ id: 'backbeat', note: attack }, kit.note(['kick'], 'q'), kit.note(['hat'], 'h')] },
+                    ],
+                  },
+                ],
+              },
+            ],
+            continuous: {},
+          };
+          const result = new VF.Publication(source).render(document.querySelector('main'), { staves: ['drums'] });
+          const metadata = JSON.parse(result.pages[0].svg.querySelector('metadata').textContent);
+          const side = study('line').notes;
+          return {
+            name,
+            positions: native.getKeyProps().map((p) => p.line),
+            different: native.noteHeads[0].getText() !== native.noteHeads[1].getText(),
+            exported: metadata.events.find((e) => e.id === 'backbeat').notation,
+            kick: kit.note(['kick'], 'q').stemDirection,
+            override: kit.note(['kick'], 'q', 'up').stemDirection,
+            side: side.every((n) => n.getYs()[0] === n.checkStave().getYForLine(2)),
+          };
+        });
+        assert.deepEqual(result.positions, [3.5, 5.5]);
+        assert.equal(result.different, true);
+        assert.equal(result.side, true);
+        assert.equal(result.kick, -1);
+        assert.equal(result.override, 1);
+        assert.equal(result.name, 'Snare drum, Closed hi-hat');
+        assert.deepEqual(
+          result.exported.map((e) => [e.id, e.index]),
+          [
+            ['snare', 0],
+            ['hat', 1],
+          ]
+        );
+      }
+    );
+
+    await t.test(
+      'tremolo divides written duration while retaining strokes, and rejects unrelated endpoints',
+      async () => {
+        const data = await page.evaluate(() => {
+          const VF = VexFlow,
+            { notes } = study('techniques');
+          const bad = new VF.AlternatingTremolo(notes[0], notes[2], 3);
+          let rejected = false;
+          try {
+            bad.draw();
+          } catch (e) {
+            rejected = e.code === 'BadArguments';
+          }
+          return {
+            written: notes[0].getDuration(),
+            total: (notes[0].getTicks().value() + notes[1].getTicks().value()) / VF.RESOLUTION,
+            strokes: document.querySelectorAll('.vf-alternating-tremolo path').length,
+            rejected,
+            identities: notes.slice(2).flatMap((n) => n.notation.map((e) => e.id)),
+          };
+        });
+        assert.equal(data.written, 'h');
+        assert.equal(data.total, 0.5);
+        assert.equal(data.strokes, 3);
+        assert.equal(data.rejected, true);
+        assert.deepEqual(data.identities, ['harmonic', 'down-bow', 'pedal', 'finger-2', 'breath', 'sons-etouffes']);
+      }
+    );
+
+    await t.test(
+      'tuning and capo preserve displayed frets, and the diagram encodes open, muted and barred strings',
+      async () => {
+        const result = await page.evaluate(() => {
+          const VF = VexFlow;
+          const { notes } = study('guitar');
+          const frame = document.querySelector('.vf-fret-diagram');
+          const guitar = new VF.FrettedInstrument('dropd', 2);
+          const pair = guitar.attack(
+            [
+              { str: 6, fret: 0 },
+              { str: 2, fret: 3 },
+            ],
+            'q'
+          );
+          return {
+            keys: pair.note.keys,
+            frets: pair.tab.positions.map((p) => p.fret),
+            first: notes[0].getKeys()[0],
+            frame: frame.getAttribute('aria-label'),
+            ink: frame.getBBox().width,
+            bends: document.querySelectorAll('.vf-tabnote').length,
+          };
+        });
+        assert.deepEqual(result.keys, ['E/3', 'E/5']);
+        assert.deepEqual(result.frets, [0, 3]);
+        assert.equal(result.first, 'E/3');
+        assert.ok(result.ink > 30);
+        assert.match(result.frame, /x, 0, 2, 2, 2, 0, barre at fret 2/);
+        assert.ok(result.bends >= 4);
+      }
+    );
+
+    await t.test('two microtonal conventions preserve order, cancellation and octave-specific memory', async () => {
+      const data = await page.evaluate(() => {
+        const VF = VexFlow;
+        study('micro');
+        const signatures = [...document.querySelectorAll('.vf-keysignature')].map((g) => g.textContent).filter(Boolean);
+        const state = new VF.WrittenAccidentalState({ g: 'o' });
+        const sequence = [
+          state.sign('g/4', 'o'),
+          state.sign('g/4', 'n'),
+          state.sign('g/5', 'o'),
+          state.sign('g/4', 'n', true),
+        ];
+        state.reset();
+        sequence.push(state.sign('g/4', 'o'));
+        return {
+          sequence,
+          signatures,
+          expected: [
+            VF.Glyphs.accidentalQuarterToneFlatStein + VF.Glyphs.accidentalQuarterToneSharpStein,
+            VF.Glyphs.accidentalKoron + VF.Glyphs.accidentalSori,
+          ],
+        };
+      });
+      assert.deepEqual(data.sequence, [null, 'n', null, 'n', null]);
+      assert.deepEqual(data.signatures, data.expected);
+    });
+
+    await t.test(
+      'shared onsets stay aligned across staff-local barlines; a free cadenza permits a shorter sounding voice',
+      async () => {
+        const data = await page.evaluate(() => {
+          const { notes, bars, freeVoices } = study('meter');
+          return {
+            shared: notes.slice(0, 6).map((n, i) => n.getAbsoluteX() - notes[i + 6].getAbsoluteX()),
+            bars: bars.map(
+              ({ bar, before, after }) => bar.getX() > before.getAbsoluteX() && bar.getX() < after.getAbsoluteX()
+            ),
+            free: freeVoices.map((v) => v.getTicksUsed().value()),
+            silent: freeVoices[1].getTickables().at(-1) instanceof VexFlow.GhostNote,
+          };
+        });
+        assert.deepEqual(data.shared, [0, 0, 0, 0, 0, 0]);
+        assert.deepEqual(data.bars, [true, true, true]);
+        assert.equal(data.free[0], data.free[1]);
+        assert.equal(data.silent, true);
+      }
+    );
+
+    await t.test('pitch, key and rhythm changes are opt-in and preserve explicit spelling', async () => {
+      const data = await page.evaluate(() => {
+        const VF = VexFlow,
+          S = VF.NotationSpelling;
+        const invalid = (fn) => {
+          try {
+            fn();
+            return false;
+          } catch (e) {
+            return e.code === 'BadArguments';
+          }
+        };
+        const source = ['b/4', 'db/5'];
+        const lead = study('lead').notes;
+        return {
+          source,
+          pitches: source.map((k) => S.transpose(k, 2, 1)),
+          enharmonic: S.transpose('c/4', 1, 1),
+          key: S.transposeKey('Fm', 2, 1),
+          parts: S.rhythm(48, 40, [80, 64, 80]),
+          rests: S.rhythm(10, 24, [16, 32], true),
+          lead: lead.flatMap((n) => n.notation).length,
+          pickup: study('spelling').notes.map((n) => n.getDuration()),
+          rejected: [
+            invalid(() => new VF.PercussionMap().note(['missing'], 'q')),
+            invalid(() => new VF.FrettedInstrument().attack([{ str: 1, fret: -1 }], 'q')),
+            invalid(() => new VF.FretDiagram({ frets: ['x', 9] })),
+            invalid(() => S.transpose('c/4', 9, 0)),
+            invalid(() => S.rhythm(1, 0)),
+          ],
+        };
+      });
+      assert.deepEqual(data.source, ['b/4', 'db/5']);
+      assert.deepEqual(data.pitches, ['c#/5', 'eb/5']);
+      assert.equal(data.enharmonic, 'db/4');
+      assert.equal(data.key, 'Gm');
+      assert.deepEqual(
+        data.parts.map((p) => [p.start, p.duration, p.tieNext]),
+        [
+          [48, '4', true],
+          [64, '4', true],
+          [80, '8', false],
+        ]
+      );
+      assert.ok(data.rests.every((r) => !r.tieNext));
+      assert.equal(data.lead, 4);
+      assert.equal(data.pickup.length, 5);
+      assert.ok(data.rejected.every(Boolean));
+    });
+  } finally {
+    await browser.close();
+  }
+});

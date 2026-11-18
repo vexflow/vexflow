@@ -14,6 +14,13 @@
       "draw(): void"
     ]
   },
+  "alternatingtremolo": {
+    "AlternatingTremolo": [
+      "constructor(readonly first: StaveNote, readonly last: StaveNote, readonly strokes: number)",
+      "endpoint(note: StaveNoteStruct, strokes: number): StaveNoteStruct",
+      "draw(): void"
+    ]
+  },
   "annotation": {
     "AnnotationHorizontalJustify": "export enum AnnotationHorizontalJustify { LEFT = 1, CENTER = 2, RIGHT = 3, CENTER_STEM = 4, }",
     "AnnotationVerticalJustify": "export enum AnnotationVerticalJustify { TOP = 1, CENTER = 2, BOTTOM = 3, CENTER_STEM = 4, }",
@@ -129,6 +136,8 @@
     },
     "Bend": [
       "CATEGORY(): string",
+      "PREBEND",
+      "HOLD",
       "UP(): number",
       "DOWN(): number",
       "format(bends: Bend[], state: ModifierContextState): boolean",
@@ -868,6 +877,65 @@
       "getURLForFont(fontName: string): string | undefined"
     ]
   },
+  "fretdiagram": {
+    "FretDiagramSpec": {
+      "extends": [],
+      "fields": [
+        "frets: readonly (number | 'x')[];",
+        "firstFret?: number;",
+        "rows?: number;",
+        "barre?: { fret: number; from: number; to: number };"
+      ]
+    },
+    "FretDiagram": [
+      "constructor(spec: FretDiagramSpec)",
+      "getBoundingBox(): BoundingBox",
+      "draw(): void"
+    ]
+  },
+  "instrumentprofile": {
+    "PercussionInstrument": {
+      "extends": [],
+      "fields": [
+        "id: string;",
+        "label: string;",
+        "line: number;",
+        "head?: 'normal' | 'cross' | 'circle-cross' | 'triangle';",
+        "stem: 'up' | 'down';"
+      ]
+    },
+    "PercussionMap": [
+      "kit: readonly PercussionInstrument[]",
+      "instruments: readonly PercussionInstrument[]",
+      "constructor(entries: readonly PercussionInstrument[] = PercussionMap.kit)",
+      "note(ids: readonly string[], duration: string, stem?: 'up' | 'down'): StaveNoteStruct"
+    ],
+    "FrettedInstrument": [
+      "constructor(tuning: string = 'standard', readonly capo = 0)",
+      "attack(positions: readonly { str: number; fret: number }[], duration: string): { note: StaveNoteStruct; tab: TabNoteStruct }"
+    ]
+  },
+  "notationspelling": {
+    "RhythmSegment": {
+      "extends": [],
+      "fields": [
+        "start: number;",
+        "duration: string;",
+        "dots: number;",
+        "tieNext: boolean;"
+      ]
+    },
+    "NotationSpelling": [
+      "transpose(key: string, semitones: number, steps: number): string",
+      "transposeKey(key: string, semitones: number, steps: number): string",
+      "rhythm(start: number, length: number, cuts: readonly number[] = [], rest = false): RhythmSegment[]"
+    ],
+    "WrittenAccidentalState": [
+      "constructor(signature: Readonly<Record<string, string>> = {})",
+      "reset(): void",
+      "sign(key: string, sign: string, cautionary = false): string | undefined"
+    ]
+  },
   "flag": {
     "Flag": [
       "DEBUG: boolean",
@@ -1064,6 +1132,7 @@
   "keysignature": {
     "KeySignature": [
       "CATEGORY(): string",
+      "setOrdered(entries: readonly { type: string; line: number }[]): this",
       "constructor(keySpec: string, cancelKeySpec?: string, alterKeySpec?: string[])",
       "cancelKey(spec: string): this",
       "addToStave(stave: Stave): this",
@@ -1304,9 +1373,19 @@
         "ticks: number;"
       ]
     },
+    "NotationIdentity": {
+      "extends": [],
+      "fields": [
+        "kind: 'unpitched' | 'technique' | 'harmony' | 'tuning' | 'tremolo' | 'accidental';",
+        "id: string;",
+        "label: string;",
+        "index?: number;"
+      ]
+    },
     "NoteStruct": {
       "extends": [],
       "fields": [
+        "notation?: readonly NotationIdentity[];",
         "keys?: string[];",
         "duration: string;",
         "line?: number;",
@@ -1320,6 +1399,7 @@
       "CATEGORY(): string",
       "getGlyphProps(duration: string, type: string = 'n'): GlyphProps",
       "plotMetrics(ctx: RenderContext, note: Tickable, yPos: number): void",
+      "notation: readonly NotationIdentity[]",
       "glyphProps: GlyphProps",
       "keys: string[]",
       "keyProps: KeyProps[]",
@@ -2919,6 +2999,12 @@
       "SVGContext",
       "System",
       "Sheet",
+      "FrettedInstrument",
+      "PercussionMap",
+      "FretDiagram",
+      "AlternatingTremolo",
+      "WrittenAccidentalState",
+      "NotationSpelling",
       "Publication",
       "TabNote",
       "TabSlide",

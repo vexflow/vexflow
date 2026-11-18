@@ -4,9 +4,9 @@ Created: **2026-11-16**
 
 Last reviewed: **2026-11-18**
 
-**Primary status reference** · [M5 on upstream main at be9ce594](https://github.com/vexflow/vexflow/commit/be9ce594). Compare the branch to freshly fetched main at every milestone review and after merges. Keep 5.2.0 as the historical release reference. [Latest fixture comparison](m0.md#latest-comparison)
+**Primary status reference** · [Upstream main at a19932d4](https://github.com/vexflow/vexflow/commit/a19932d4). Compare the branch to freshly fetched main at every milestone review and after merges. Keep 5.2.0 as the historical release reference. [Latest fixture comparison](m0.md#latest-comparison)
 
-Status: **M0 through M5 are complete on main. The maintainer approved the VF6 score representation and the M1 beam, M2 local engraving, M3 phrase, M4 continuous-score and M5 print studies. M6–M8 remain proposed or deferred.**
+Status: **M0 through M5 are complete on main. The maintainer approved the VF6 score representation and the M1 beam, M2 local engraving, M3 phrase, M4 continuous-score and M5 print studies. M6 is implemented on the roadmap branch and awaits engraving review. M7 and M8 remain proposed or deferred.**
 
 Source of scope: [Notation gap register](vexflow-gaps.md)
 
@@ -343,6 +343,8 @@ Web compatibility, performance measurement, API parity, and documentation run th
 
 **Gaps:** VF-025, VF-027, VF-029–VF-034, VF-051/052. Specialist diagrams remain M8.
 
+[M6 coverage and review scores](m6.md) · [VF6 instrument requirements](requirements/instrument-notation.md)
+
 Deliver profiles independently. Do not hold a percussion fix behind an unrelated transposition or tab project.
 
 | Slice                       | Required examples                                                                                                 | Key dependencies                                       |
@@ -533,3 +535,4 @@ Review progress by **supported use case and unresolved severity**. Report confir
 | 2026-11-18 | Merged the approved M4 continuous-score layout into main. | [M4 engraving review](m4.md#engraving-review) · [Post-merge comparison](m0.md#latest-comparison). |
 | 2026-11-18 | Implemented M5 publication layout on the roadmap branch. Engraving review pending. | [M5 evidence](m5.md) · [VF6 requirements](requirements/publication-layout.md). |
 | 2026-11-18 | Merged the four approved M5 print editions into main. | [M5 review](m5.md#engraving-review) · [Post-merge comparison](m0.md#latest-comparison). |
+| 2026-11-18 | Implemented the M6 instrument profiles and bounded independent-meter experiment on the roadmap branch. Engraving review pending. | [M6 evidence](m6.md) · [VF6 requirements](requirements/instrument-notation.md). |

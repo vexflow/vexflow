@@ -2,6 +2,7 @@
 // MIT License
 
 export * from './accidental';
+export * from './alternatingtremolo';
 export * from './annotation';
 export * from './articulation';
 export * from './barnote';
@@ -21,6 +22,9 @@ export * from './engravinggeometry';
 export * from './engravingprofile';
 export * from './factory';
 export * from './font';
+export * from './fretdiagram';
+export * from './instrumentprofile';
+export * from './notationspelling';
 // Do not export './fonts/*' because they are used by the entry/* files.
 export * from './flag';
 export * from './formatter';

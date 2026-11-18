@@ -282,7 +282,8 @@ const voice = score.voice(score.notes('C5/h, G5/q'), { time: '3/4' });`
     `<p>Start with one note and ask the player to give it an accent. In the first example, change the articulation and watch the mark above or below the note. Moving the mark leaves the note’s pitch and duration intact.</p>
 <p>Next, open the grace-note example. These little notes lead into the main attack. Attach the whole grace group to the main note so the formatter gives the lead-in enough room.</p>
 <h2>Use the same ideas in EasyScore</h2>
-<p>In the last example, choose a family from the controls and find its branch in the editor. The grace branch builds the small notes together. The percussion branch combines a clef and chosen noteheads to show where and how to strike. Use this example when you want the EasyScore spelling for a mark you recognize.</p>`,
+<p>In the last example, choose a family from the controls and find its branch in the editor. The grace branch builds the small notes together. The percussion branch combines a clef and chosen noteheads to show where and how to strike. Use this example when you want the EasyScore spelling for a mark you recognize.</p>
+<p>For a named kit, pass <code>new VexFlow.PercussionMap().note(['snare', 'hat'], 'q')</code> to <code>score.make.note()</code>. The snare and closed hi-hat share a stem and keep separate head shapes and instrument names. Use the same map to build a legend.</p>`,
     'In the last example choose grace, edit a grace pitch, and run it. Follow that little note into its unchanged main note.',
     ['typed-notes', 'easy-structure'],
     ['repo:docs/easyscore.md', 'repo:docs/easyscore-coverage.json']

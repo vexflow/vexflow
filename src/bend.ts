@@ -24,6 +24,11 @@ export class Bend extends Modifier {
     return Category.Bend;
   }
 
+  /** A vertical attack into an already raised pitch. */
+  static readonly PREBEND = 2;
+  /** Continue at the raised pitch before a release. */
+  static readonly HOLD = 3;
+
   static get UP(): number {
     return 0;
   }
@@ -250,8 +255,18 @@ export class Bend extends Modifier {
         renderBend(start.x, start.y, lastDrawnWidth, bendHeight);
       }
 
+      if (bend.type === Bend.PREBEND || bend.type === Bend.HOLD) {
+        this.applyStyle(ctx, this.styleLine);
+        ctx.beginPath();
+        ctx.moveTo(start.x, bend.type === Bend.PREBEND ? start.y : bendHeight);
+        if (bend.type === Bend.PREBEND) ctx.lineTo(start.x, bendHeight);
+        ctx.lineTo(start.x + lastDrawnWidth, bendHeight);
+        ctx.stroke();
+        if (bend.type === Bend.PREBEND) renderArrowHead(start.x, bendHeight, +1);
+      }
+
       if (bend.type === Bend.DOWN) {
-        if (lastBend && lastBend.type === Bend.UP) {
+        if (lastBend && [Bend.UP, Bend.PREBEND, Bend.HOLD].includes(lastBend.type)) {
           renderRelease(start.x, start.y, lastDrawnWidth, bendHeight);
         }
 
