@@ -111,7 +111,7 @@ const threeVoices2 = createThreeVoicesTest(
     const headTop = lower.noteHeads[0].getBoundingBox().getY();
     for (const x of [lower.getNoteHeadBeginX(), lower.getNoteHeadEndX()]) {
       const edge = beam.getSlopeY(x, first.getStemX(), beam.getBeamYToDraw(), beam.slope);
-      assert.ok(edge < headTop, 'Middle beam stays above the second head of the lowest voice');
+      assert.ok(edge < headTop, `Middle beam edge at ${edge} clears lower head at ${headTop} (x=${x})`);
     }
   }
 );

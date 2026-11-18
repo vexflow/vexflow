@@ -694,7 +694,14 @@ export class Beam extends Element {
         }
       }
     }
-    if (required > 0 && required <= available) this.yShift += direction * required;
+    if (required <= 0) return;
+    if (required <= available) {
+      this.yShift += direction * required;
+    } else if (required - available < 2 * gap) {
+      // The ink fits but both preferred margins do not. Divide the remaining white
+      // space equally. If even the ink will not fit, keep the original beam slope and height.
+      this.yShift += direction * ((required + available) / 2);
+    }
   }
 
   /** Calculate a slope and y-shift for flat beams. */
