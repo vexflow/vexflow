@@ -452,6 +452,14 @@ test('before and after grace groups on two staves clear their hosts at the start
     assert.ok(pre.x + pre.w < head.x);
     assert.ok(post.x > head.x + head.w);
     assert.ok(pre.x >= host.checkStave().getX());
+    for (const [group, offset] of [
+      [before, 0],
+      [after, host.getGlyphWidth()],
+    ]) {
+      const slur = group.getLayoutElements().at(-1);
+      const start = slur.getFirstX() + slur.renderOptions.firstXShift - slur.renderOptions.tieSpacing;
+      assert.ok(Math.abs(start - host.getNoteHeadBeginX() - offset) < 1e-7);
+    }
     assert.equal(after.getGraceNotes()[0].getStave(), host.getStave());
   }
 });
@@ -482,4 +490,27 @@ test('four voice columns avoid heads and rests, preserve distinct attacks and re
     return entries.map((e) => e.notes.map((n) => [n.getNoteHeadBeginX(), n.getYs()[0]]));
   }
   assert.deepEqual(passage(true), passage(false));
+});
+
+test('bracket and label clear upper and lower ornament signs before drawing and after resize', () => {
+  for (const [position, location] of [
+    [VF.Modifier.Position.ABOVE, 1],
+    [VF.Modifier.Position.BELOW, -1],
+  ]) {
+    const { f } = factory(),
+      es = f.EasyScore();
+    const notes = es.notes('G4/8, A4/8, B4/8');
+    const mark = new VF.Ornament('turn').setPosition(position).setUpperAccidental('#').setLowerAccidental('b');
+    notes[1].addModifier(mark, 0);
+    const tuplet = f.Tuplet({ notes, options: { bracketed: true, location } });
+    const system = f.System({ width: 430, y: 80 });
+    system.addStave({ voices: [es.voice(notes, { mode: 'soft' })] });
+    for (const width of [430, 260, 430]) {
+      system.setWidth(width).format();
+      const bracket = measured(tuplet).ink,
+        sign = measured(mark).ink;
+      const gap = location === 1 ? sign.y - bracket.y - bracket.h : bracket.y - sign.y - sign.h;
+      assert.ok(gap >= 2, 'Bracket clears nearest auxiliary accidental by at least two pixels');
+    }
+  }
 });

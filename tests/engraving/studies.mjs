@@ -249,4 +249,76 @@ export function registerStudies() {
       'Retained notes rendered'
     );
   });
+
+  VF.Test.runTests('Grace groups on both sides of a host', (options) => {
+    const f = VF.Test.makeFactory(options, 515, 135),
+      es = f.EasyScore();
+    const notes = es.notes('E5/q, F5/q, G5/h');
+    for (const [side, keys] of [
+      [VF.Modifier.Position.LEFT, ['d/5']],
+      [VF.Modifier.Position.RIGHT, ['g/5', 'f/5']],
+    ]) {
+      const group = f
+        .GraceNoteGroup({
+          notes: keys.map((key) => f.GraceNote({ keys: [key], duration: '16', slash: true })),
+          slur: true,
+        })
+        .setPosition(side);
+      if (keys.length > 1) group.beamNotes();
+      notes[0].addModifier(group, 0);
+    }
+    f.System({ width: 490 })
+      .addStave({ voices: [es.voice(notes)] })
+      .addClef('treble');
+    f.draw();
+    options.assert.equal(notes[0].getModifiers().length, 2, 'Both grace groups remain attached to the first note');
+  });
+
+  VF.Test.runTests('Tuplet over a turn with auxiliary signs', (options) => {
+    const f = VF.Test.makeFactory(options, 515, 170),
+      es = f.EasyScore();
+    const notes = es.notes('G4/8, A4/8, B4/8, C5/q');
+    notes[1].addModifier(
+      new VF.Ornament('turn').setPosition(VF.Modifier.Position.ABOVE).setUpperAccidental('#').setLowerAccidental('b'),
+      0
+    );
+    const tuplet = f.Tuplet({ notes: notes.slice(0, 3), options: { bracketed: true } });
+    f.System({ width: 490, y: 60 })
+      .addStave({ voices: [es.voice(notes, { mode: 'soft' })] })
+      .addClef('treble');
+    f.draw();
+    options.assert.ok(Number.isFinite(tuplet.getYPosition()), 'Bracket has a resolved staff position');
+  });
+
+  VF.Test.runTests('Measured spacing with a short final attack', (options) => {
+    const f = VF.Test.makeFactory(options, 515, 160),
+      es = f.EasyScore();
+    const notes = es.notes('E4/h, A4/q, F#4/8, G4/16, A4/32, B4/64, C5/64');
+    const group = f
+      .GraceNoteGroup({ notes: ['f/4', 'g/4'].map((key) => f.GraceNote({ keys: [key], duration: '16' })) })
+      .beamNotes();
+    notes[1].addModifier(group, 0);
+    notes[2].addModifier(new VF.ChordSymbol().addText('Dmaj7'), 0);
+    const details = { spacing: { mode: 'optical' } };
+    try {
+      new VF.Formatter(details);
+    } catch (error) {
+      // Earlier builds reject optical mode. Their image shows their default engraving.
+      if (error.code !== 'BadArgument') throw error;
+      delete details.spacing;
+    }
+    f.System({ width: 490, y: 20, details })
+      .addStave({ voices: [es.voice(notes)] })
+      .addClef('treble');
+    f.draw();
+    const x = notes.map((n) => n.getNoteHeadBeginX());
+    options.assert.ok(
+      x.every((value, i) => !i || value > x[i - 1]),
+      'Each successive attack advances'
+    );
+    document.getElementById(options.elementId).dataset.measurement = JSON.stringify({
+      mode: details.spacing?.mode ?? 'default',
+      x,
+    });
+  });
 }

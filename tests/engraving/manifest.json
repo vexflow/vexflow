@@ -382,6 +382,17 @@
         "m2-contour": "Beam contour and staff contact",
         "m2-ornament-redraw": "Long fall and delayed turn after redraw"
       }
+    },
+    {
+      "module": "M2 studies",
+      "source": "tests/engraving/studies.mjs",
+      "gaps": ["VF-004", "VF-009", "VF-010", "VF-011"],
+      "review": "Follow each grace slur to its host, check the bracket above the upper accidental, and compare how the available width is distributed.",
+      "cases": {
+        "m2-grace-sides": "Grace groups on both sides of a host",
+        "m2-tuplet-turn": "Tuplet over a turn with auxiliary signs",
+        "m2-optical": "Measured spacing with a short final attack"
+      }
     }
   ]
 }

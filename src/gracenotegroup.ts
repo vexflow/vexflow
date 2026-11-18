@@ -179,18 +179,21 @@ export class GraceNoteGroup extends Modifier {
       const isStavenote = isStaveNote(note);
       const TieClass = isStavenote ? StaveTie : TabTie;
 
-      if (this.slur?.getNotes().firstNote !== note || this.slur?.getNotes().lastNote !== this.graceNotes[0])
+      const after = this.position === Modifier.Position.RIGHT;
+      const end = after ? this.graceNotes[this.graceNotes.length - 1] : this.graceNotes[0];
+      if (this.slur?.getNotes().firstNote !== note || this.slur?.getNotes().lastNote !== end)
         this.slur = new TieClass({
-          lastNote: this.graceNotes[0],
+          lastNote: end,
           firstNote: note,
           firstIndexes: [0],
           lastIndexes: [0],
         });
 
       // A normal tie starts beyond all right modifiers, including this group.
-      // Anchor an after-grace slur at the host head instead.
-      if (this.position === Modifier.Position.RIGHT && isStavenote) {
-        this.slur.renderOptions.firstXShift = note.getNoteHeadBeginX() + note.getGlyphWidth() - note.getTieRightX();
+      // Opposing slurs start at opposite edges of the same host head.
+      if (this.afterWidth && isStavenote) {
+        const hostEdge = note.getNoteHeadBeginX() + (after ? note.getGlyphWidth() : 0);
+        this.slur.renderOptions.firstXShift = hostEdge - note.getTieRightX();
       } else {
         this.slur.renderOptions.firstXShift = 0;
       }

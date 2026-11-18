@@ -241,7 +241,7 @@ Web compatibility, performance measurement, API parity, and documentation run th
 
 ## M2 — Stabilize local engraving
 
-**2026-11-18 · Branch implementation ready for engraving review.** [Engineering and compatibility](m2.md) · [Side-by-side examples](https://github.com/vexflow/vexflow/issues/358#issuecomment-6984363531) · [Requirements for VF6](requirements/local-engraving.md)
+**2026-11-18 · Branch implementation ready for engraving review.** [Engineering and compatibility](m2.md) · [Side-by-side examples on issue #358](https://github.com/vexflow/vexflow/issues/358) · [Requirements for VF6](requirements/local-engraving.md)
 
 **Gaps:** VF-004–VF-007, VF-009–VF-012. Boundary-dependent accidental behavior completes in M4.
 
