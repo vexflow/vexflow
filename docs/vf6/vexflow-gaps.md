@@ -4,11 +4,13 @@ Created: **2026-11-16**
 
 Last reviewed: **2026-11-18**
 
-**Primary status reference** · [M4 on upstream main at c1947602](https://github.com/vexflow/vexflow/commit/c1947602). M0 through M4 have landed on main. The pinned 5.2.0 release supplies historical evidence. [Latest fixture comparison](m0.md#latest-comparison)
+**Primary status reference** · [Upstream main at e3670d02](https://github.com/vexflow/vexflow/commit/e3670d02). M0 through M4 have landed on main. The pinned 5.2.0 release supplies historical evidence. [Latest fixture comparison](m0.md#latest-comparison)
 
 Status: **52 tracked items. Four verified on main and 48 remaining.**
 
 Companion: [Strategy and milestone plan](vexflow-gaps-plan.md)
+
+**M5 branch evidence · engraving review pending.** A4 and Letter editions of the conductor score and cello part exercise pagination (VF-018), independent layout views (VF-020) and print export (VF-039). [Examples and limits](m5.md) · [VF6 publication requirements](requirements/publication-layout.md)
 
 **M4 complete on main · all seven engraving studies approved.** The responsive choir, keyboard and ensemble studies exercise VF-014–017, VF-019, VF-021, VF-026 and VF-028. Related tests cover the continuation portions of VF-007–009, VF-022 and VF-024. The status columns below refer to upstream main. [Review cases and limits](m4.md) · [Proposed VF6 requirements](requirements/continuous-scores.md)
 
@@ -273,3 +275,4 @@ Track acceptance-case counts by repertoire and priority. Raw counts of closed ro
 | 2026-11-18 | Merged the approved M3 phrase layout into main. | [Scope and review](m3.md) · [Post-merge comparison](m0.md#latest-comparison). |
 | 2026-11-18 | Completed M4 on the roadmap branch. @0xfe approved all seven engraving studies. | [M4 evidence](m4.md) · [VF6 requirements](requirements/continuous-scores.md). |
 | 2026-11-18 | Merged the approved M4 continuous-score layout into main. | [M4 engraving review](m4.md#engraving-review) · [Post-merge comparison](m0.md#latest-comparison). |
+| 2026-11-18 | Implemented M5 publication layout on the roadmap branch. Engraving review pending. | [M5 evidence](m5.md) · [VF6 requirements](requirements/publication-layout.md). |

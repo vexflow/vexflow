@@ -4,9 +4,9 @@ Created: **2026-11-16**
 
 Last reviewed: **2026-11-18**
 
-**Primary status reference** · [M4 on upstream main at c1947602](https://github.com/vexflow/vexflow/commit/c1947602). Compare the branch to freshly fetched main at every milestone review and after merges. Keep 5.2.0 as the historical release reference. [Latest fixture comparison](m0.md#latest-comparison)
+**Primary status reference** · [Upstream main at e3670d02](https://github.com/vexflow/vexflow/commit/e3670d02). Compare the branch to freshly fetched main at every milestone review and after merges. Keep 5.2.0 as the historical release reference. [Latest fixture comparison](m0.md#latest-comparison)
 
-Status: **M0 through M4 are complete on main. The maintainer approved the VF6 score representation, both M1 beam examples and all seven M2 engraving examples and both M3 phrase examples. The maintainer approved all seven M4 engraving studies. M5–M8 remain proposed or deferred.**
+Status: **M0 through M4 are complete on main. The maintainer approved the VF6 score representation, both M1 beam examples and all seven M2 engraving examples and both M3 phrase examples. The maintainer approved all seven M4 engraving studies. M5 is implemented on the roadmap branch and awaits engraving review. M6–M8 remain proposed or deferred.**
 
 Source of scope: [Notation gap register](vexflow-gaps.md)
 
@@ -179,7 +179,7 @@ M0–M7 total **44–75 engineer-weeks before contingency**. Reserve roughly 25%
 | M2        | Reliable local engraving              | M1 contracts for affected classes             | 6–10 weeks           | Complete on main |
 | M3        | Collision-aware phrases and lyrics    | M1; relevant M2 placement                     | 7–12 weeks           | Complete on main |
 | M4        | Complete continuous scores            | M2/M3, minimal context from M1                | 7–12 weeks           | Complete on main |
-| M5        | Pages and basic part layouts          | M4, stable vertical envelopes                 | 4–7 weeks            | Proposed |
+| M5        | Pages and basic part layouts          | M4, stable vertical envelopes                 | 4–7 weeks            | Branch implementation, review pending |
 | M6        | Mainstream instrument profiles        | M2–M4; parts use M5                           | 8–14 weeks           | Proposed |
 | M7        | Web/integration quality release       | M0–M5 and P1 scope of M6                      | 5–9 weeks            | Proposed |
 | M8        | Specialist expansion                  | Explicit profile charter; required core gates | Estimate per profile | Deferred |
@@ -316,6 +316,8 @@ Web compatibility, performance measurement, API parity, and documentation run th
 **Deliverable:** responsive continuous scores, including vocal, keyboard and small-ensemble examples. A narrow viewport may require explicit overflow rather than illegibly compressed notation.
 
 ## M5 — Add publication layout
+
+**2026-11-18 · Implemented on the roadmap branch.** [VF5 print guide and review cases](m5.md) · [Proposed VF6 requirements](requirements/publication-layout.md)
 
 **Gaps:** VF-018, VF-020 basic layout views, page portion of VF-039.
 
@@ -529,3 +531,4 @@ Review progress by **supported use case and unresolved severity**. Report confir
 | 2026-11-18 | Merged M3 into main after engraving approval. | [Approved examples](m3.md) · [Post-merge comparison](m0.md#latest-comparison). |
 | 2026-11-18 | Completed M4 on the roadmap branch. @0xfe approved all seven engraving studies. | [M4 evidence](m4.md) · [VF6 requirements](requirements/continuous-scores.md). |
 | 2026-11-18 | Merged the approved M4 continuous-score layout into main. | [M4 engraving review](m4.md#engraving-review) · [Post-merge comparison](m0.md#latest-comparison). |
+| 2026-11-18 | Implemented M5 publication layout on the roadmap branch. Engraving review pending. | [M5 evidence](m5.md) · [VF6 requirements](requirements/publication-layout.md). |
