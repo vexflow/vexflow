@@ -6,7 +6,7 @@ Last reviewed: **2026-11-18**
 
 Reviewed against [main at 31405bc5](https://github.com/vexflow/vexflow/commit/31405bc51df59aa719161c26f7160e9ea26e32df), package version **5.2.0**.
 
-Status: **M0 complete. M1 is implemented on the roadmap branch and ready for review. M2–M8 remain proposed or deferred.**
+Status: **M0 complete. Both M1 beam examples passed maintainer review. The VF6 score representation awaits a decision. M2–M8 remain proposed or deferred.**
 
 Source of scope: [Notation gap register](vexflow-gaps.md)
 
