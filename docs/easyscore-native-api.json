@@ -58,6 +58,7 @@
       "easyScoreHook({ articulations }: { articulations: string }, note: StemmableNote, builder: Builder): void",
       "constructor(type: string)",
       "setBetweenLines(betweenLines = true): this",
+      "getInkBounds(): BoundingBox",
       "draw(): void"
     ]
   },
@@ -101,6 +102,8 @@
       "applyStemExtensions(): void",
       "lookupBeamDirection(duration: string, prevTick: number, tick: number, nextTick: number, noteIndex: number): PartialBeamDirection",
       "getBeamLines(duration: string): { start: number; end?: number }[]",
+      "getBoundingBox(): BoundingBox",
+      "resetLayout(): void",
       "preFormat(): this",
       "postFormat(): void",
       "draw(): void"
@@ -338,6 +341,7 @@
       "isPartial(): boolean",
       "renderCurve(params: CurveRenderParams): void",
       "getBoundingBox(): BoundingBox",
+      "getAnchors(): { start: Point; end: Point }",
       "draw(): boolean"
     ]
   },
@@ -625,6 +629,7 @@
       "getSVGElement(suffix: string = ''): SVGElement | undefined",
       "onIdChange(validate: (id: string | undefined) => void, changed: () => void): () => void",
       "setAttribute(name: string, value: string | undefined): this",
+      "getTextInk(x: number, y: number): BoundingBox",
       "getBoundingBox(): BoundingBox",
       "getContext(): RenderContext | undefined",
       "drawPointerRect()",
@@ -676,11 +681,67 @@
       "setOrigin(x: number, y: number): void"
     ]
   },
+  "engravinggeometry": {
+    "EngravingShape": {
+      "extends": [],
+      "fields": [
+        "parts: Bounds[];",
+        "anchors: Record<string, { x: number; y: number }>;"
+      ]
+    },
+    "GeometryDiagnostic": {
+      "extends": [],
+      "fields": [
+        "code: 'UnsupportedGeometry' | 'UnformattedGeometry' | 'InvalidGeometry' | 'LayoutOverflow';",
+        "phase: 'measure';",
+        "severity: 'error' | 'warning';",
+        "sourceId: string;"
+      ]
+    },
+    "GeometryOptions": {
+      "extends": [],
+      "fields": [
+        "extension?: (element: Element) => EngravingShape | undefined;",
+        "paddingPx?: number;",
+        "viewport?: Bounds;"
+      ]
+    },
+    "EngravingGeometry": {
+      "extends": [
+        "extends EngravingShape"
+      ],
+      "fields": [
+        "ink?: BoundingBox;",
+        "layout?: BoundingBox;",
+        "diagnostics: GeometryDiagnostic[];"
+      ]
+    },
+    "measureEngraving": "(element: Element, options: GeometryOptions = {}): EngravingGeometry"
+  },
+  "engravingprofile": {
+    "EngravingProfileOptions": {
+      "extends": [],
+      "fields": [
+        "musicFont: string;",
+        "metadata?: unknown;",
+        "beamThickness?: number;",
+        "clearance?: number;"
+      ]
+    },
+    "EngravingProfile": [
+      "musicFont: string",
+      "beamThickness: number",
+      "clearance: number",
+      "constructor(options: EngravingProfileOptions)",
+      "stemAnchor(glyph: string, direction: 'up' | 'down'): Anchor | undefined"
+    ]
+  },
   "factory": {
     "FactoryElementRole": "export type FactoryElementRole = 'note' | 'modifier' | 'staveModifier' | 'drawable';",
     "FactoryOptions": {
       "extends": [],
       "fields": [
+        "engraving?: EngravingProfile;",
         "stave?: { space: number; };",
         "renderer?: { elementId: string | null; backend?: number; width: number; height: number; background?: string; };"
       ]
@@ -949,6 +1010,7 @@
       "LEDGER_LINE_OFFSET(): number",
       "constructor(noteStruct: GraceNoteStruct)",
       "getStemExtension(): number",
+      "getSlash(): { x1: number; y1: number; x2: number; y2: number } | undefined",
       "draw(): void",
       "calcBeamedNotesSlashBBox(slashStemOffset: number, slashBeamOffset: number, protrusions: { beam: number; stem: number }): Record<string, number>"
     ]
@@ -966,6 +1028,7 @@
       "getWidth(): number",
       "getGraceNotes(): Note[]",
       "getBoundingBox(): BoundingBox",
+      "getLayoutElements(): (Note | Beam | StaveTie)[]",
       "draw(): void"
     ]
   },
@@ -1826,6 +1889,8 @@
         "extends NoteStruct"
       ],
       "fields": [
+        "musicFont?: string;",
+        "engraving?: EngravingProfile;",
         "stemDirection?: number;",
         "autoStem?: boolean;",
         "strokePx?: number;",
@@ -1842,6 +1907,7 @@
       "postFormat(notes: Note[]): boolean",
       "minLine: number",
       "maxLine: number",
+      "engraving: EngravingProfile",
       "constructor(noteStruct: StaveNoteStruct)",
       "reset(): this",
       "setBeam(beam: Beam): this",
@@ -1850,6 +1916,9 @@
       "autoStem(): void",
       "calculateOptimalStemDirection(): number",
       "calculateKeyProps(): void",
+      "getHeadInk(): BoundingBox[]",
+      "getFlagInk(): BoundingBox | undefined",
+      "getStemSegment(): ReturnType<Stem['getSegment']> | undefined",
       "getBoundingBox(includeModifiers = true): BoundingBox",
       "getLineNumber(isTopNote?: boolean): number",
       "isRest(): boolean",
@@ -1880,10 +1949,11 @@
       "getVoiceShiftWidth(): number",
       "calcNoteDisplacements(): void",
       "preFormat(): void",
-      "getNoteHeadBounds(): StaveNoteHeadBounds",
+      "getNoteHeadBounds(layoutX = false): StaveNoteHeadBounds",
       "getNoteHeadBeginX(): number",
       "getNoteHeadEndX(): number",
       "noteHeads(): NoteHead[]",
+      "getLedgerLines(): { x: number; y: number; width: number }[]",
       "drawLedgerLines(): void",
       "drawModifiers(noteheadParam: NoteHead): void",
       "shouldDrawFlag(): boolean",
@@ -1960,6 +2030,7 @@
       "setDirection(direction: number): this",
       "setNotes(notes: TieNotes): this",
       "isPartial(): boolean",
+      "getRibbonBounds(): BoundingBox",
       "renderTie(params: { direction: number; firstX: number; lastX: number; lastYs: number[]; firstYs: number[] }): void",
       "renderTieText(firstX: number, lastX: number): void",
       "getNotes(): TieNotes",
@@ -2014,12 +2085,14 @@
       "getExtension(): number",
       "setYBounds(yTop: number, yBottom: number): void",
       "getHeight(): number",
-      "getBoundingBox(): BoundingBox",
       "getExtents(): { topY: number; baseY: number }",
+      "isVisible(): boolean",
       "setVisibility(isVisible: boolean): this",
       "setStemlet(isStemlet: boolean, stemletHeight: number): this",
       "adjustHeightForFlag(): void",
       "adjustHeightForBeam(): void",
+      "getSegment(x?: number, adjustment = this.renderHeightAdjustment): { x: number; baseY: number; tipY: number }",
+      "getBoundingBox(): BoundingBox",
       "draw(): void"
     ]
   },
@@ -2451,6 +2524,8 @@
     },
     "TickContext": [
       "tContexts: TickContext[]",
+      "linkTimeline(contexts: TickContext[]): void",
+      "through(last: TickContext): Iterable<TickContext>",
       "getNextContext(tContext: TickContext): TickContext | undefined",
       "constructor(options?: TickContextOptions)",
       "getTickID(): number",
@@ -2496,6 +2571,7 @@
       "bottomLine: number",
       "topLine: number",
       "constructor(timeSpec: string = '4/4', customPadding = 15, validateArgs = true)",
+      "setMusicFont(family: string): this",
       "getTimeSigCode(key: string, smallSig = false): string",
       "makeTimeSignatureGlyph(topDigits: string, botDigits: string): void",
       "setTimeSig(timeSpec: string): this",
@@ -2607,6 +2683,8 @@
   "vexflow": {
     "VexFlow": [
       "BUILD",
+      "measureEngraving",
+      "EngravingProfile",
       "Accidental",
       "Annotation",
       "Articulation",

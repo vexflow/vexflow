@@ -649,6 +649,7 @@ export class Formatter {
       resolutionMultiplier,
     };
 
+    TickContext.linkTimeline(contexts.list.map((tick) => contexts.map[tick]));
     this.tickContexts = contexts;
     // Give each TickContext a link to the array of all TickContexts
     // for moving forward and backwards.
@@ -1106,6 +1107,11 @@ export class Formatter {
     };
 
     this.voices = voices;
+    for (const voice of voices) {
+      for (const tickable of voice.getTickables()) {
+        if (isNote(tickable)) tickable.getBeam()?.resetLayout();
+      }
+    }
     const softmaxFactor = this.formatterOptions.softmaxFactor;
     if (softmaxFactor) {
       this.voices.forEach((v) => v.setSoftmaxFactor(softmaxFactor));

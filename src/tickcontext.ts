@@ -49,6 +49,27 @@ export class TickContext {
   protected minTicks?: Fraction;
   protected minTickable?: Tickable;
   tContexts: TickContext[];
+  private nextAttack?: TickContext;
+
+  /** Link musical order independently of the legacy per-voice insertion order. */
+  static linkTimeline(contexts: TickContext[]): void {
+    contexts.forEach((context, i) => {
+      context.nextAttack = contexts[i + 1];
+    });
+  }
+
+  /** Visit only the attacks inside this beam, including interleaved voices. */
+  *through(last: TickContext): Iterable<TickContext> {
+    if (this.tickID > last.tickID) return;
+    yield this;
+    if (this === last) return;
+    let context = this.nextAttack;
+    while (context && context.tickID <= last.tickID) {
+      yield context;
+      if (context === last) return;
+      context = context.nextAttack;
+    }
+  }
 
   protected preFormatted: boolean = false;
   protected postFormatted: boolean = false;

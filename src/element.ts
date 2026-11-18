@@ -377,6 +377,17 @@ export class Element {
     return this;
   }
 
+  /** Visible text in renderer pixels at a supplied glyph origin. Positive y points down. */
+  getTextInk(x: number, y: number): BoundingBox {
+    const m = this.textMetrics;
+    return new BoundingBox(
+      x + this.xShift - m.actualBoundingBoxLeft,
+      y + this.yShift - m.actualBoundingBoxAscent,
+      m.actualBoundingBoxLeft + m.actualBoundingBoxRight,
+      m.actualBoundingBoxAscent + m.actualBoundingBoxDescent
+    );
+  }
+
   /** Get the boundingBox. */
   getBoundingBox(): BoundingBox {
     return new BoundingBox(

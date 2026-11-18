@@ -1,6 +1,6 @@
 # VF6 requirement 001 · Save a score or an excerpt
 
-**Draft 1 · 2026-11-18 · Decision owner: VexFlow maintainer (@0xfe) · M1 design review.** Parent gap [VF-013](../vexflow-gaps.md). The observable behavior below is the proposal. The file format and public API are open.
+**Revision 2 · 2026-11-18 · M1 study implemented · VF6 decision owner is @0xfe.** Parent gap [VF-013](../vexflow-gaps.md). The passage below is executable. The wire formats are study artifacts.
 
 ## Acceptance passage
 
@@ -23,11 +23,16 @@ EasyScore resolves local IDs, accepts notation strings and live objects, inherit
 
 ## M1 decision record
 
-| Choice to test                                      | Evidence needed for a decision                                                                                                                                          |
-| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Versioned serializable subset of EasyScore input    | Show what can be decoded without a live Factory. Identify how native extensions opt in and where decoding errors point.                                                 |
-| Independent score representation with a VF5 adapter | Run the identical full-score and excerpt checks. Measure what the adapter must synthesize and whether stable IDs survive conversion in both directions.                 |
-| Context and relationship ownership                  | Compare an initial context snapshot with referencing changes outside the excerpt. Specify how a partial pedal is represented and pasted into another score.             |
-| Manual placement and compatibility                  | Specify sign, unit, origin and precedence of the authored offset. Preserve current VF5 native positioning and default cross-measure behavior in any VF5 implementation. |
+**2026-11-18 · Engineering recommendation for maintainer review.** Use a versioned, measure-based representation for portable VF6 scores and excerpts. Use an adapter to construct VF5 notation through EasyScore. Keep live Factory-owned objects as supported VF5 inputs. Portability is an explicit operation. [Codecs](../../../tests/engraving/score-persistence.mjs) · [Native rendering adapter](../../../tests/engraving/score-layout.mjs) · [Tests](../../../tests/node/engraving-layout-tests.mjs)
 
-At M1 review record the chosen option, rejected alternatives, evidence, affected callers, migration and date here. Link the implementing fixture or prototype from this record and the parent gap. Until then, either implementation can run against the same requirements.
+| Question | Finding on the acceptance passage | Decision |
+| --- | --- | --- |
+| What must travel with the notes? | The EasyScore subset recreates native notes with stable IDs and derives onsets from durations. It also needs a sidecar for ordered measure IDs, voice IDs, rehearsal ownership, the dynamic offset and pedal endpoints. The measure-based file stores shared measures once and gives each event an explicit rational onset. | Use EasyScore composition as the compatible VF5 construction path. Prefer the measure-based file for VF6 edits and excerpts. Both candidates passed the identical tests. |
+| What happens at the left edge of an excerpt? | Bar 3 opens by itself in G major and 4/4. The pedal starts the excerpt already depressed and releases halfway through the bar. Rendering draws a continuation with an open left edge. | Materialize effective staff context at the boundary. Clip the logical span to the excerpt with an explicit continuation flag. A pasted excerpt carries its own incoming state. Reconnecting it to a destination pedal requires an explicit editing decision. |
+| Who owns marks? | One rehearsal mark belongs to m3 and is displayed on the upper staff. The pedal belongs to the lower staff. Its release uses the aligned half-bar attack even though the lower voice holds a whole note. The dynamic belongs to event u3b. All follow an insertion before m3. | Keep measure, staff, event and span IDs separate from physical staves and row fragments. Store the dynamic offset in staff spaces, positive downward from its automatically placed baseline. Recompute the baseline and then apply the offset once. |
+| What is saved across reflow? | Both encodings produced the same logical passage, two pedal fragments when wrapped, one when widened, and identical Canvas pixels on returning to the original width. The browser SVG contains one B and one dynamic at both widths. | Serialize authored music and overrides. Derive automatic positions, row breaks and fragment geometry at load or reflow. |
+| How do extensions migrate? | Encoding a live subclass or a dangling anchor fails with the offending source ID before a file is emitted. Native ownership checks continue to run when constructing a composition. | VF5 callers can keep native objects. A future portable extension must supply a versioned codec and stable references. Importers can project supported EasyScore data and provide missing measure and voice identity. |
+
+**Study limits.** Version 1 supports one pitched voice per staff, aligned 4/4 measures, boundary key changes, and canonical rational times on the sixteenth-note grid. It handles the three authored mark types in this passage. The VF5 adapter resolves a timed pedal from an aligned attack or bar boundary. Arbitrary unvoiced times, tuplets, grace ordering, transposition, opaque extension payloads and editorial paste reconciliation need additional fixtures. This study adds no public VF5 save/load API.
+
+**Review history.** M0 drafted the passage on 2026-11-18. M1 implemented and compared both encodings on the same date. Record the maintainer verdict, date, and any change to the supported behavior here.

@@ -3,6 +3,7 @@
 // This class implements varies types of ties between contiguous notes. The
 // ties include: regular ties, hammer ons, pull offs, and slides.
 
+import { BoundingBox } from './boundingbox';
 import { Element } from './element';
 import { Note } from './note';
 import { Category } from './typeguard';
@@ -128,12 +129,17 @@ export class StaveTie extends Element {
    * @param params.firstX is specified in pixels.
    * @param params.lastX is specified in pixels.
    */
-  renderTie(params: { direction: number; firstX: number; lastX: number; lastYs: number[]; firstYs: number[] }): void {
+  private *tieCurves(params: {
+    direction: number;
+    firstX: number;
+    lastX: number;
+    lastYs: number[];
+    firstYs: number[];
+  }) {
     if (params.firstYs.length === 0 || params.lastYs.length === 0) {
       throw new RuntimeError('BadArguments', 'No Y-values to render');
     }
 
-    const ctx = this.checkContext();
     let cp1 = this.renderOptions.cp1;
     let cp2 = this.renderOptions.cp2;
 
@@ -153,8 +159,6 @@ export class StaveTie extends Element {
     const firstIndexes = this.notes.firstIndexes!;
 
     const lastIndexes = this.notes.lastIndexes!;
-    const clsAttribute = this.getAttribute('class');
-    ctx.openGroup('stavetie' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
     for (let i = 0; i < firstIndexes.length; ++i) {
       const cpX = (params.lastX + lastXShift + (params.firstX + firstXShift)) / 2;
       // firstY and lastY are specified in pixels.
@@ -168,10 +172,47 @@ export class StaveTie extends Element {
       const topControlPointY = (firstY + lastY) / 2 + cp1 * params.direction;
       const bottomControlPointY = (firstY + lastY) / 2 + cp2 * params.direction;
 
+      yield {
+        x1: params.firstX + firstXShift,
+        x2: params.lastX + lastXShift,
+        firstY,
+        lastY,
+        cpX,
+        topControlPointY,
+        bottomControlPointY,
+      };
+    }
+  }
+
+  /** Conservative convex hull of filled ribbons, excluding optional tie text. */
+  getRibbonBounds(): BoundingBox {
+    this.synchronizeIndexes();
+    const curves = this.tieCurves({
+      firstX: this.getFirstX(),
+      lastX: this.getLastX(),
+      firstYs: this.getFirstYs(),
+      lastYs: this.getLastYs(),
+      direction: this.getDirection(),
+    });
+    let box: BoundingBox | undefined;
+    for (const { x1, x2, firstY, lastY, topControlPointY, bottomControlPointY } of curves) {
+      const top = Math.min(firstY, lastY, topControlPointY, bottomControlPointY);
+      const bottom = Math.max(firstY, lastY, topControlPointY, bottomControlPointY);
+      const part = new BoundingBox(Math.min(x1, x2), top, Math.abs(x2 - x1), bottom - top);
+      box = box ? box.mergeWith(part) : part;
+    }
+    return box ?? new BoundingBox(this.getFirstX(), this.getFirstYs()[0], 0, 0);
+  }
+
+  renderTie(params: { direction: number; firstX: number; lastX: number; lastYs: number[]; firstYs: number[] }): void {
+    const ctx = this.checkContext();
+    const clsAttribute = this.getAttribute('class');
+    ctx.openGroup('stavetie' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
+    for (const { x1, x2, firstY, lastY, cpX, topControlPointY, bottomControlPointY } of this.tieCurves(params)) {
       ctx.beginPath();
-      ctx.moveTo(params.firstX + firstXShift, firstY);
-      ctx.quadraticCurveTo(cpX, topControlPointY, params.lastX + lastXShift, lastY);
-      ctx.quadraticCurveTo(cpX, bottomControlPointY, params.firstX + firstXShift, firstY);
+      ctx.moveTo(x1, firstY);
+      ctx.quadraticCurveTo(cpX, topControlPointY, x2, lastY);
+      ctx.quadraticCurveTo(cpX, bottomControlPointY, x1, firstY);
       ctx.closePath();
       ctx.fill();
     }

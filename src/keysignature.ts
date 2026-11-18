@@ -48,7 +48,7 @@ export class KeySignature extends StaveModifier {
   ): void {
     const code = Tables.accidentalCodes(acc.type);
     const glyph = new Element(Category.KeySignature);
-    glyph.setText(code);
+    glyph.setFont(this.fontInfo).setText(code);
 
     // Determine spacing between current accidental and the next accidental
     let extraWidth = 1;

@@ -1,0 +1,44 @@
+{
+  "staves": [
+    { "id": "upper", "voice": "soprano", "clef": "treble", "key": "C", "time": "4/4" },
+    { "id": "lower", "voice": "bass", "clef": "bass", "key": "C", "time": "4/4" }
+  ],
+  "measures": [
+    {
+      "id": "m1",
+      "voices": {
+        "soprano": [{ "id": "u1", "pitch": "g/4", "at": "0/1", "duration": "1/1" }],
+        "bass": [{ "id": "l1", "pitch": "c/3", "at": "0/1", "duration": "1/1" }]
+      }
+    },
+    {
+      "id": "m2",
+      "key": "G",
+      "voices": {
+        "soprano": [{ "id": "u2", "pitch": "f#/4", "at": "0/1", "duration": "1/1" }],
+        "bass": [{ "id": "l2", "pitch": "d/3", "at": "0/1", "duration": "1/1" }]
+      }
+    },
+    {
+      "id": "m3",
+      "voices": {
+        "soprano": [
+          { "id": "u3a", "pitch": "a/4", "at": "0/1", "duration": "1/2" },
+          { "id": "u3b", "pitch": "g/4", "at": "1/2", "duration": "1/2" }
+        ],
+        "bass": [{ "id": "l3", "pitch": "g/2", "at": "0/1", "duration": "1/1" }]
+      }
+    }
+  ],
+  "marks": [
+    {
+      "kind": "pedal",
+      "id": "p1",
+      "staff": "lower",
+      "start": { "measure": "m2", "at": "0/1" },
+      "end": { "measure": "m3", "at": "1/2" }
+    },
+    { "kind": "rehearsal", "id": "r1", "measure": "m3", "staff": "upper", "text": "B" },
+    { "kind": "dynamic", "id": "d1", "event": "u3b", "text": "p", "offset": 1 }
+  ]
+}

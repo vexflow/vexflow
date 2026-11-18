@@ -72,6 +72,12 @@ export class TimeSignature extends StaveModifier {
     this.setPadding(padding);
   }
 
+  /** Apply one family to common-time glyphs and both numeric rows, then remeasure. */
+  setMusicFont(family: string): this {
+    for (const element of [this, this.topText, this.botText]) element.setFont({ ...element.fontInfo, family });
+    return this.setTimeSig(this.timeSpec);
+  }
+
   static getTimeSigCode(key: string, smallSig = false): string {
     let code: string = Glyphs.null;
     switch (key) {

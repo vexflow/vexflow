@@ -186,35 +186,33 @@ export class GraceNoteGroup extends Modifier {
     return boundingBox;
   }
 
-  override draw(): void {
-    const ctx: RenderContext = this.checkContext();
+  /** Positioned components, including the optional slur, shared with geometry consumers. */
+  getLayoutElements(): (Note | Beam | StaveTie)[] {
     const note = this.checkAttachedNote();
-    this.setRendered();
-
-    L('Drawing grace note group for:', note);
-
     this.positionGraceNotes();
-
-    // Draw grace notes.
-    this.graceNotes.forEach((graceNote) => graceNote.setContext(ctx).drawWithStyle());
-    // Draw beams.
-    this.beams.forEach((beam) => beam.setContext(ctx).drawWithStyle());
-
-    if (this.showSlur) {
-      // Create and draw slur.
+    if (this.showSlur && this.graceNotes.length) {
+      // Keep one slur for the current pair of endpoints. A native caller may reattach this group.
       const isStavenote = isStaveNote(note);
       const TieClass = isStavenote ? StaveTie : TabTie;
 
-      this.slur = new TieClass({
-        lastNote: this.graceNotes[0],
-        firstNote: note,
-        firstIndexes: [0],
-        lastIndexes: [0],
-      });
+      if (this.slur?.getNotes().firstNote !== note || this.slur?.getNotes().lastNote !== this.graceNotes[0])
+        this.slur = new TieClass({
+          lastNote: this.graceNotes[0],
+          firstNote: note,
+          firstIndexes: [0],
+          lastIndexes: [0],
+        });
 
       this.slur.renderOptions.cp2 = 12;
       this.slur.renderOptions.yShift = (isStavenote ? 7 : 5) + this.renderOptions.slurYShift;
-      this.slur.setContext(ctx).drawWithStyle();
     }
+    return [...this.graceNotes, ...this.beams, ...(this.slur ? [this.slur] : [])];
+  }
+
+  override draw(): void {
+    const ctx: RenderContext = this.checkContext();
+    this.setRendered();
+    L('Drawing grace note group for:', this.checkAttachedNote());
+    this.getLayoutElements().forEach((element) => element.setContext(ctx).drawWithStyle());
   }
 }

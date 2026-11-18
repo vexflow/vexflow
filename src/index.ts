@@ -17,6 +17,8 @@ export * from './curve';
 export * from './dot';
 export * from './easyscore';
 export * from './element';
+export * from './engravinggeometry';
+export * from './engravingprofile';
 export * from './factory';
 export * from './font';
 // Do not export './fonts/*' because they are used by the entry/* files.

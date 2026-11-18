@@ -15,6 +15,8 @@ import { Curve, CurvePosition } from './curve';
 import { Dot } from './dot';
 import { EasyScore, EasyScoreError } from './easyscore';
 import { Element } from './element';
+import { measureEngraving } from './engravinggeometry';
+import { EngravingProfile } from './engravingprofile';
 import { Factory } from './factory';
 import { Font, FontStyle, FontWeight } from './font';
 import { Formatter } from './formatter';
@@ -97,6 +99,8 @@ export class VexFlow {
     INFO: '',
   };
 
+  static measureEngraving = measureEngraving;
+  static EngravingProfile = EngravingProfile;
   static Accidental = Accidental;
   static Annotation = Annotation;
   static Articulation = Articulation;

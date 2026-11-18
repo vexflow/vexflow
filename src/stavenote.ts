@@ -12,6 +12,7 @@
 import { Beam } from './beam';
 import { BoundingBox } from './boundingbox';
 import { ElementStyle } from './element';
+import { EngravingProfile } from './engravingprofile';
 import { Glyphs } from './glyphs';
 import { Metrics } from './metrics';
 import { Modifier } from './modifier';
@@ -52,6 +53,9 @@ export interface StaveNoteFormatSettings {
 }
 
 export interface StaveNoteStruct extends NoteStruct {
+  /** Override the music glyph family for this note, its heads and its flag. */
+  musicFont?: string;
+  engraving?: EngravingProfile;
   /** `Stem.UP` or `Stem.DOWN`. */
   stemDirection?: number;
   autoStem?: boolean;
@@ -386,8 +390,13 @@ export class StaveNote extends StemmableNote {
   // Sorted variant of keyProps used internally.
   private sortedKeyProps: { keyProps: KeyProps; index: number }[] = [];
 
+  readonly engraving?: EngravingProfile;
+
   constructor(noteStruct: StaveNoteStruct) {
     super(noteStruct);
+    this.engraving = noteStruct.engraving;
+    const musicFont = noteStruct.musicFont ?? this.engraving?.musicFont;
+    if (musicFont) this.setFont({ ...this.fontInfo, family: musicFont });
 
     this.ledgerLineStyle = {};
 
@@ -599,6 +608,28 @@ export class StaveNote extends StemmableNote {
     this.sortedKeyProps.sort((a, b) => a.keyProps.line - b.keyProps.line);
   }
 
+  /** Absolute ink of each head after formatting, independent of previous draws. */
+  getHeadInk(): BoundingBox[] {
+    return this._noteHeads.map((head) => {
+      const displacement = head.isDisplaced() ? (head.getWidth() - Stem.WIDTH / 2) * this.getStemDirection() : 0;
+      return head.getTextInk(this.getNoteHeadBeginX() + displacement, head.getY());
+    });
+  }
+
+  /** Absolute flag ink; beamed notes and rests have no flag. */
+  getFlagInk(): BoundingBox | undefined {
+    if (!this.shouldDrawFlag()) return;
+    const { x, y } = this.getFlagPosition();
+    return this.flag.getTextInk(x, y);
+  }
+
+  /** Resolve the rendered stem before its parent writes the drawing coordinates. */
+  getStemSegment(): ReturnType<Stem['getSegment']> | undefined {
+    if (!this.stem?.isVisible() || (!this.hasStem() && !this.beam)) return;
+    const adjustment = this.shouldDrawFlag() ? Metrics.get('Stem.heightAdjustmentForFlag', -3) : undefined;
+    return this.checkStem().getSegment(this.getStemX(), adjustment);
+  }
+
   // Measure noteheads and flags from layout coordinates, including before draw().
   override getBoundingBox(includeModifiers = true): BoundingBox {
     const boundingBox = new BoundingBox(this.getAbsoluteX(), this.ys[0], 0, 0);
@@ -679,6 +710,18 @@ export class StaveNote extends StemmableNote {
     if (this.noteType === 'r') {
       return this.getCenterGlyphX();
     } else {
+      const up = this.stemDirection === Stem.UP;
+      const head = this.engraving && this._noteHeads.find((h) => !h.isDisplaced());
+      if (head && this.engraving?.musicFont === head.fontInfo.family) {
+        const anchor = this.engraving.stemAnchor(head.text, up ? 'up' : 'down');
+        if (anchor)
+          return (
+            this.getNoteHeadBeginX() +
+            head.getXShift() +
+            (anchor[0] * head.fontSizeInPixels) / 4 +
+            ((up ? -1 : 1) * Stem.WIDTH) / 2
+          );
+      }
       // We adjust the origin of the stem because we want the stem left-aligned
       // with the notehead if stemmed-down, and right-aligned if stemmed-up
       return super.getStemX() + (this.stemDirection ? Stem.WIDTH / (2 * -this.stemDirection) : 0);
@@ -957,7 +1000,13 @@ export class StaveNote extends StemmableNote {
     this._noteHeads.forEach((nh) => {
       const offset = Tables.noteHeadStemYOffsets[nh.text];
       const anchor = offset ? offset[anchorKey] : 0;
-      const y = nh.getY() - anchor * Tables.STAVE_LINE_DISTANCE;
+      const fontAnchor =
+        this.engraving && this.engraving.musicFont === nh.fontInfo.family
+          ? this.engraving.stemAnchor(nh.text, anchorKey)
+          : undefined;
+      // SMuFL specifies four staff spaces per em. Follow the glyph scale for grace notes too.
+      const y =
+        nh.getY() - (fontAnchor ? (fontAnchor[1] * nh.fontSizeInPixels) / 4 : anchor * Tables.STAVE_LINE_DISTANCE);
       yTop = Math.min(y, yTop);
       yBottom = Math.max(y, yBottom);
     });
@@ -972,7 +1021,7 @@ export class StaveNote extends StemmableNote {
    * Get the staff line and y value for the highest & lowest noteheads
    * @returns {noteHeadBounds}
    */
-  getNoteHeadBounds(): StaveNoteHeadBounds {
+  getNoteHeadBounds(layoutX = false): StaveNoteHeadBounds {
     // Top and bottom Y values for stem.
     let yTop: number = +Infinity;
     let yBottom: number = -Infinity;
@@ -994,11 +1043,13 @@ export class StaveNote extends StemmableNote {
       yBottom = Math.max(y, yBottom);
 
       if (displacedX === undefined && notehead.isDisplaced()) {
-        displacedX = notehead.getAbsoluteX();
+        displacedX = layoutX
+          ? this.getNoteHeadBeginX() + (notehead.getWidth() - Stem.WIDTH / 2) * this.getStemDirection()
+          : notehead.getAbsoluteX();
       }
 
       if (nonDisplacedX === undefined && !notehead.isDisplaced()) {
-        nonDisplacedX = notehead.getAbsoluteX();
+        nonDisplacedX = layoutX ? this.getNoteHeadBeginX() : notehead.getAbsoluteX();
       }
 
       highestLine = Math.max(line, highestLine);
@@ -1042,21 +1093,15 @@ export class StaveNote extends StemmableNote {
     return this._noteHeads.slice();
   }
 
-  // Draw the ledger lines between the stave and the highest/lowest keys
-  drawLedgerLines(): void {
+  /** Shared ledger segments after formatting, in renderer pixels. */
+  getLedgerLines(): { x: number; y: number; width: number }[] {
+    const lines: { x: number; y: number; width: number }[] = [];
     const stave = this.checkStave();
-    const {
-      renderOptions: { strokePx },
-    } = this;
-    const ctx = this.checkContext();
+    const { strokePx } = this.renderOptions;
     const width = this.getGlyphWidth() + strokePx * 2;
     const doubleWidth = 2 * (this.getGlyphWidth() + strokePx) - Stem.WIDTH / 2;
 
-    if (this.isRest()) return;
-    if (!ctx) {
-      throw new RuntimeError('NoCanvasContext', "Can't draw without a canvas context.");
-    }
-
+    if (this.isRest()) return lines;
     const {
       highestLine,
       lowestLine,
@@ -1066,10 +1111,10 @@ export class StaveNote extends StemmableNote {
       lowestNonDisplacedLine,
       displacedX,
       nonDisplacedX,
-    } = this.getNoteHeadBounds();
+    } = this.getNoteHeadBounds(true);
 
     // Early out if there are no ledger lines to draw.
-    if (highestLine < 6 && lowestLine > 0) return;
+    if (highestLine < 6 && lowestLine > 0) return lines;
 
     const minX = Math.min(displacedX ?? 0, nonDisplacedX ?? 0);
 
@@ -1080,15 +1125,8 @@ export class StaveNote extends StemmableNote {
       else x = (displacedX ?? 0) - strokePx;
       const ledgerWidth = normal && displaced ? doubleWidth : width;
 
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x + ledgerWidth, y);
-      ctx.stroke();
+      lines.push({ x, y, width: ledgerWidth });
     };
-
-    const style = { ...stave.getDefaultLedgerLineStyle(), ...this.getLedgerLineStyle() };
-    ctx.save();
-    this.applyStyle(ctx, style);
 
     // Draw ledger lines below the staff:
     for (let line = 6; line <= highestLine; ++line) {
@@ -1104,6 +1142,21 @@ export class StaveNote extends StemmableNote {
       drawLedgerLine(stave.getYForNote(line), normal, displaced);
     }
 
+    return lines;
+  }
+
+  drawLedgerLines(): void {
+    const lines = this.getLedgerLines();
+    if (!lines.length) return;
+    const ctx = this.checkContext();
+    ctx.save();
+    this.applyStyle(ctx, { ...this.checkStave().getDefaultLedgerLineStyle(), ...this.getLedgerLineStyle() });
+    for (const { x, y, width } of lines) {
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + width, y);
+      ctx.stroke();
+    }
     ctx.restore();
   }
 

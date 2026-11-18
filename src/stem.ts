@@ -9,7 +9,7 @@ import { Element } from './element';
 import { Metrics } from './metrics';
 import { Tables } from './tables';
 import { Category } from './typeguard';
-import { log, RuntimeError } from './util';
+import { log } from './util';
 
 // eslint-disable-next-line
 function L(...args: any[]) {
@@ -142,10 +142,6 @@ export class Stem extends Element {
     return unsignedHeight * this.stemDirection;
   }
 
-  override getBoundingBox(): BoundingBox {
-    throw new RuntimeError('NotImplemented', 'getBoundingBox() not implemented.');
-  }
-
   // Get the y coordinates for the very base of the stem to the top of
   // the extension
   getExtents(): { topY: number; baseY: number } {
@@ -158,6 +154,11 @@ export class Stem extends Element {
     const stemTipY = innerMostNoteheadY + stemHeight * -this.stemDirection;
 
     return { topY: stemTipY, baseY: outerMostNoteheadY };
+  }
+
+  /** Whether this segment contributes ink. */
+  isVisible(): boolean {
+    return !this.hide;
   }
 
   setVisibility(isVisible: boolean): this {
@@ -179,12 +180,8 @@ export class Stem extends Element {
     this.renderHeightAdjustment = -Stem.WIDTH / 2;
   }
 
-  // Render the stem onto the canvas
-  override draw(): void {
-    this.setRendered();
-    if (this.hide) return;
-    const ctx = this.checkContext();
-
+  /** Endpoints of the visible segment, including stemlets and flag shortening. */
+  getSegment(x?: number, adjustment = this.renderHeightAdjustment): { x: number; baseY: number; tipY: number } {
     let stemX;
     let stemY;
     const stemDirection = this.stemDirection;
@@ -209,13 +206,32 @@ export class Stem extends Element {
     // The offset from the stem's base which is required fo satisfy the stemlet height
     const stemletYOffset = this.isStemlet ? stemHeight - this.stemletHeight * this.stemDirection : 0;
 
+    return {
+      x: x ?? stemX,
+      baseY: stemY - stemletYOffset + yBaseOffset,
+      tipY: stemY - stemHeight - adjustment * stemDirection,
+    };
+  }
+
+  /** Bounds of the stroked segment. A hidden stem contributes no area. */
+  override getBoundingBox(): BoundingBox {
+    const { x, baseY, tipY } = this.getSegment();
+    if (this.hide) return new BoundingBox(x, baseY, 0, 0);
+    return new BoundingBox(x - Stem.WIDTH / 2, Math.min(baseY, tipY), Stem.WIDTH, Math.abs(baseY - tipY));
+  }
+
+  override draw(): void {
+    this.setRendered();
+    if (this.hide) return;
+    const ctx = this.checkContext();
+    const { x, baseY, tipY } = this.getSegment();
     // Draw the stem
     const clsAttribute = this.getAttribute('class');
     ctx.openGroup('stem' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
     ctx.beginPath();
     ctx.setLineWidth(Stem.WIDTH);
-    ctx.moveTo(stemX, stemY - stemletYOffset + yBaseOffset);
-    ctx.lineTo(stemX, stemY - stemHeight - this.renderHeightAdjustment * stemDirection);
+    ctx.moveTo(x, baseY);
+    ctx.lineTo(x, tipY);
     ctx.stroke();
     ctx.closeGroup();
   }

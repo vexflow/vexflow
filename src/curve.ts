@@ -235,6 +235,12 @@ export class Curve extends Element {
     return new BoundingBox(minX, minY, Math.max(...xs) - minX, Math.max(...ys) - minY);
   }
 
+  /** Endpoints on the rendered curve after authored shifts. */
+  getAnchors(): { start: Point; end: Point } {
+    const { first, last } = this.getBezierPoints(this.getRenderParams());
+    return { start: first, end: last };
+  }
+
   override draw(): boolean {
     this.checkContext();
     this.setRendered();

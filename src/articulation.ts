@@ -1,7 +1,9 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// Articulation placement, measurement and rendering.
 // @author Larry Kuhns.
 // MIT License
 
+import { BoundingBox } from './boundingbox';
 import { Builder } from './easyscore';
 import { Glyphs } from './glyphs';
 import { Modifier } from './modifier';
@@ -329,12 +331,16 @@ export class Articulation extends Modifier {
     this.reset();
   }
 
+  private betweenLinesOverride?: boolean;
+
   protected override reset(): void {
     this.articulation = Tables.articulationCodes(this.type);
     // Use type as glyph code, if not defined as articulation code
     if (!this.articulation) {
       this.articulation = { code: this.type, betweenLines: false };
     }
+    if (this.betweenLinesOverride !== undefined)
+      this.articulation = { ...this.articulation, betweenLines: this.betweenLinesOverride };
     const code =
       (this.position === ABOVE ? this.articulation.aboveCode : this.articulation.belowCode) ||
       this.articulation.code ||
@@ -344,16 +350,15 @@ export class Articulation extends Modifier {
 
   /** Set if articulation should be rendered between lines. */
   setBetweenLines(betweenLines = true): this {
-    this.articulation.betweenLines = betweenLines;
+    this.betweenLinesOverride = betweenLines;
+    this.articulation = { ...this.articulation, betweenLines };
     return this;
   }
 
-  /** Render articulation in position next to note. */
-  override draw(): void {
-    const ctx = this.checkContext();
+  /** Resolve the glyph origin after its owner and modifier context have been formatted. */
+  private getPlacement(): { x: number; y: number; centered: boolean } {
     const note = this.checkAttachedNote();
-    this.setRendered();
-
+    let centered = false;
     const index = this.checkIndex();
     const { position, textLine } = this;
     const canSitBetweenLines = this.articulation.betweenLines;
@@ -388,11 +393,30 @@ export class Articulation extends Modifier {
       const articLine = distanceFromNote + Number(noteLine);
       const snappedLine = snapLineToStaff(canSitBetweenLines, articLine, position, offsetDirection);
 
-      if (isWithinLines(snappedLine, position)) this.setOrigin(0.5, 0.5);
+      centered = isWithinLines(snappedLine, position);
 
       y += Math.abs(snappedLine - articLine) * staffSpace * offsetDirection;
     }
 
+    return { x, y, centered };
+  }
+
+  /** Get visible glyph ink without mutating its alignment or drawing coordinates. */
+  getInkBounds(): BoundingBox {
+    const { x, y, centered } = this.getPlacement();
+    const box = this.getTextInk(x, y);
+    if (centered) {
+      box.x += -this.width / 2 - this.xShift;
+      box.y = y - this.height / 2;
+    }
+    return box;
+  }
+
+  override draw(): void {
+    const ctx = this.checkContext();
+    const { x, y, centered } = this.getPlacement();
+    if (centered) this.setOrigin(0.5, 0.5);
+    this.setRendered();
     L(`Rendering articulation at (x: ${x}, y: ${y})`);
     this.x = x;
     this.y = y;

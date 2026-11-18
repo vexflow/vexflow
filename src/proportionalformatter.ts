@@ -107,6 +107,7 @@ export class ProportionalFormatter {
       anchor.prefixes.forEach((prefix) => array.push(...prefix.contexts));
       array.push(anchor.context);
     }
+    TickContext.linkTimeline(this.anchors.map((anchor) => anchor.context));
     array.forEach((context) => (context.tContexts = array));
     this.contexts = { map, array, list: this.anchors.map((anchor) => anchor.tick), resolutionMultiplier };
   }

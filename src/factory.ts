@@ -18,6 +18,7 @@ import { Curve, CurveOptions } from './curve';
 import { Dot } from './dot';
 import { EasyScore, EasyScoreOptions } from './easyscore';
 import { Element } from './element';
+import { EngravingProfile } from './engravingprofile';
 import { FontInfo } from './font';
 import { Formatter, FormatterOptions } from './formatter';
 import { FretHandFinger } from './frethandfinger';
@@ -80,6 +81,8 @@ import { isHTMLCanvas } from './web';
 export type FactoryElementRole = 'note' | 'modifier' | 'staveModifier' | 'drawable';
 
 export interface FactoryOptions {
+  /** Optional per-score pitched notation and beam policy. */
+  engraving?: EngravingProfile;
   stave?: {
     space: number;
   };
@@ -117,7 +120,7 @@ export class Factory {
     return new Factory({ renderer: { elementId, width, height } });
   }
 
-  protected options: Required<FactoryOptions>;
+  protected options: Required<Omit<FactoryOptions, 'engraving'>> & Pick<FactoryOptions, 'engraving'>;
 
   protected stave?: Stave;
   protected context!: RenderContext;
@@ -355,19 +358,27 @@ export class Factory {
     return this.adopt(new Bend(...args).setContext(this.context), 'modifier');
   }
 
+  /** Apply a score's music family to glyph elements while retaining their individual sizes. */
+  private musicGlyph<T extends Element>(element: T): T {
+    if (this.options.engraving) element.setFont({ ...element.fontInfo, family: this.options.engraving.musicFont });
+    return element;
+  }
+
   /** Construct a native Clef with an explicit drawing role. */
   Clef(...args: ConstructorParameters<typeof Clef>): Clef {
-    return this.adopt(new Clef(...args).setContext(this.context), 'staveModifier');
+    return this.adopt(this.musicGlyph(new Clef(...args)).setContext(this.context), 'staveModifier');
   }
 
   /** Construct a native KeySignature with an explicit drawing role. */
   KeySignature(...args: ConstructorParameters<typeof KeySignature>): KeySignature {
-    return this.adopt(new KeySignature(...args).setContext(this.context), 'staveModifier');
+    return this.adopt(this.musicGlyph(new KeySignature(...args)).setContext(this.context), 'staveModifier');
   }
 
   /** Construct a native TimeSignature with an explicit drawing role. */
   TimeSignature(...args: ConstructorParameters<typeof TimeSignature>): TimeSignature {
-    return this.adopt(new TimeSignature(...args).setContext(this.context), 'staveModifier');
+    const signature = new TimeSignature(...args);
+    if (this.options.engraving) signature.setMusicFont(this.options.engraving.musicFont);
+    return this.adopt(signature.setContext(this.context), 'staveModifier');
   }
 
   /** Construct a native Barline with an explicit drawing role. */
@@ -416,7 +427,7 @@ export class Factory {
   }
 
   StaveNote(noteStruct: StaveNoteStruct): StaveNote {
-    const note = new StaveNote(noteStruct);
+    const note = new StaveNote({ engraving: this.options.engraving, ...noteStruct });
     if (this.stave) note.setStave(this.stave);
     note.setContext(this.context);
     this.renderQ.push(note);
@@ -501,7 +512,7 @@ export class Factory {
   }
 
   GraceNote(noteStruct: GraceNoteStruct): GraceNote {
-    const note = new GraceNote(noteStruct);
+    const note = new GraceNote({ engraving: this.options.engraving, ...noteStruct });
     if (this.stave) note.setStave(this.stave);
     note.setContext(this.context);
     return this.own(note);
@@ -512,7 +523,7 @@ export class Factory {
   }
 
   Accidental(params: { type: string }): Accidental {
-    const accid = new Accidental(params.type);
+    const accid = this.musicGlyph(new Accidental(params.type));
     accid.setContext(this.context);
     return this.own(accid);
   }
@@ -567,7 +578,7 @@ export class Factory {
   }
 
   Articulation(params?: { betweenLines?: boolean; type?: string; position?: string | number }): Articulation {
-    const articulation = new Articulation(params?.type ?? 'a.');
+    const articulation = this.musicGlyph(new Articulation(params?.type ?? 'a.'));
 
     if (params?.position !== undefined) articulation.setPosition(params.position);
     if (params?.betweenLines !== undefined) articulation.setBetweenLines(params.betweenLines);

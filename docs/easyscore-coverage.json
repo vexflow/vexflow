@@ -63,6 +63,8 @@
     "tablature": ["gracetabnote", "tabnote", "tabslide", "tabstave", "tabtie", "tuning"],
     "infrastructure": [
       "boundingbox",
+      "engravinggeometry",
+      "engravingprofile",
       "canvascontext",
       "element",
       "flag",

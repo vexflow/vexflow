@@ -1,5 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 
+// Grace-note glyphs and the optional acciaccatura slash.
 import { StaveNote, StaveNoteStruct } from './stavenote';
 import { Stem } from './stem';
 import { Tables } from './tables';
@@ -46,52 +47,57 @@ export class GraceNote extends StaveNote {
     return ret;
   }
 
-  override draw(): void {
-    super.draw();
-    this.setRendered();
-    const stem = this.stem;
-    if (this.slash && stem) {
-      const scale = this.getFontScale();
+  /** Absolute endpoints of the grace slash used by both measurement and drawing. */
+  getSlash(): { x1: number; y1: number; x2: number; y2: number } | undefined {
+    if (!this.slash || !this.stem) return;
+    const scale = this.getFontScale();
 
-      let slashBBox = undefined;
-      const beam = this.beam;
-      if (beam) {
-        // FIXME: should render slash after beam?
-        if (!beam.postFormatted) {
-          beam.postFormat();
-        }
-
-        slashBBox = this.calcBeamedNotesSlashBBox(8 * scale, 8 * scale, {
-          stem: 6 * scale,
-          beam: 5 * scale,
-        });
-      } else {
-        const stemDirection = this.getStemDirection();
-        const noteHeadBounds = this.getNoteHeadBounds();
-        const noteHeadWidth = this.noteHeads[0].getWidth();
-        const x = stemDirection === Stem.DOWN ? this.getAbsoluteX() : this.getAbsoluteX() + noteHeadWidth;
-        const defaultOffsetY = (Tables.STEM_HEIGHT * scale) / 2;
-        const y =
-          stemDirection === Stem.DOWN ? noteHeadBounds.yBottom + defaultOffsetY : noteHeadBounds.yTop - defaultOffsetY;
-
-        if (stemDirection === Stem.DOWN) {
-          slashBBox = {
-            x1: x - noteHeadWidth,
-            y1: y - noteHeadWidth,
-            x2: x + noteHeadWidth,
-            y2: y + noteHeadWidth,
-          };
-        } else {
-          slashBBox = {
-            x1: x - noteHeadWidth,
-            y1: y + noteHeadWidth,
-            x2: x + noteHeadWidth,
-            y2: y - noteHeadWidth,
-          };
-        }
+    let slashBBox = undefined;
+    const beam = this.beam;
+    if (beam) {
+      // FIXME: should render slash after beam?
+      if (!beam.postFormatted) {
+        beam.postFormat();
       }
 
-      // FIXME: avoid staff lines, ledger lines or others.
+      slashBBox = this.calcBeamedNotesSlashBBox(8 * scale, 8 * scale, {
+        stem: 6 * scale,
+        beam: 5 * scale,
+      });
+    } else {
+      const stemDirection = this.getStemDirection();
+      const noteHeadBounds = this.getNoteHeadBounds();
+      const noteHeadWidth = this.noteHeads[0].getWidth();
+      const x = stemDirection === Stem.DOWN ? this.getAbsoluteX() : this.getAbsoluteX() + noteHeadWidth;
+      const defaultOffsetY = (Tables.STEM_HEIGHT * scale) / 2;
+      const y =
+        stemDirection === Stem.DOWN ? noteHeadBounds.yBottom + defaultOffsetY : noteHeadBounds.yTop - defaultOffsetY;
+
+      if (stemDirection === Stem.DOWN) {
+        slashBBox = {
+          x1: x - noteHeadWidth,
+          y1: y - noteHeadWidth,
+          x2: x + noteHeadWidth,
+          y2: y + noteHeadWidth,
+        };
+      } else {
+        slashBBox = {
+          x1: x - noteHeadWidth,
+          y1: y + noteHeadWidth,
+          x2: x + noteHeadWidth,
+          y2: y - noteHeadWidth,
+        };
+      }
+    }
+
+    return { x1: slashBBox.x1, y1: slashBBox.y1, x2: slashBBox.x2, y2: slashBBox.y2 };
+  }
+
+  override draw(): void {
+    super.draw();
+    const slashBBox = this.getSlash();
+    if (slashBBox) {
+      const scale = this.getFontScale();
 
       const ctx = this.checkContext();
       ctx.setLineWidth(1 * scale); // FIXME: use more appropriate value.

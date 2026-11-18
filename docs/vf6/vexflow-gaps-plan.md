@@ -6,7 +6,7 @@ Last reviewed: **2026-11-18**
 
 Reviewed against [main at 31405bc5](https://github.com/vexflow/vexflow/commit/31405bc51df59aa719161c26f7160e9ea26e32df), package version **5.2.0**.
 
-Status: **M0 complete. The five reviewed defects are fixed and both unison controls are expected. M1–M8 remain proposed or deferred.**
+Status: **M0 complete. M1 is implemented on the roadmap branch and ready for review. M2–M8 remain proposed or deferred.**
 
 Source of scope: [Notation gap register](vexflow-gaps.md)
 
@@ -175,7 +175,7 @@ M0–M7 total **44–75 engineer-weeks before contingency**. Reserve roughly 25%
 | Milestone | Outcome                               | Hard entry dependencies                       | Rough effort         | Status   |
 | --------- | ------------------------------------- | --------------------------------------------- | -------------------- | -------- |
 | M0        | Auditable corpus and baseline         | None                                          | 2–3 weeks            | Complete |
-| M1        | Geometry, policy and anchor contracts | M0 seed cases                                 | 5–8 weeks            | Proposed |
+| M1        | Geometry, policy and anchor contracts | M0 seed cases                                 | 5–8 weeks            | In review |
 | M2        | Reliable local engraving              | M1 contracts for affected classes             | 6–10 weeks           | Proposed |
 | M3        | Collision-aware phrases and lyrics    | M1; relevant M2 placement                     | 7–12 weeks           | Proposed |
 | M4        | Complete continuous scores            | M2/M3, minimal context from M1                | 7–12 weeks           | Proposed |
@@ -215,6 +215,8 @@ Web compatibility, performance measurement, API parity, and documentation run th
 **Review artifact:** browsable report with white-background examples, manifest and a short list of confirmed defects. Issue-specific material belongs in `issues/` only when needed; generated images stay under `build/` or temporary storage.
 
 ## M1 — Make layout measurable and policies explicit
+
+**2026-11-18 · Engineering gates passed on the branch.** [Implementation, geometry audit and reproduction](m1.md) · [VF6 representation recommendation and remaining scope](requirements/score-persistence.md#m1-decision-record)
 
 **Gaps:** VF-002, VF-013, VF-037, VF-038, initial VF-046.
 
@@ -510,3 +512,4 @@ Review progress by **supported use case and unresolved severity**. Report confir
 | 2026-11-17 | Split compatible V5 delivery from parallel V6 requirements and design.                                | Proposed by the maintainer. The planned prototype repository will carry V6 requirements. [Issue discussion](https://github.com/vexflow/vexflow/issues/358#issuecomment-6960644745) |
 | 2026-11-18 | Record M0 and start a branch-local VF6 requirements directory.                                        | [Evidence, priority and revised effort](m0.md). Seven cases have [engraving feedback](m0.md#maintainer-engraving-review).                                                          |
 | 2026-11-18 | Complete M0 with the five reviewed VF5 engraving fixes.                                               | Both unison fixtures are expected. [Closure evidence](m0.md#m0-closure).                                                                                                           |
+| 2026-11-18 | Implement M1 on VF5 and exercise both VF6 persistence options. | [Engineering gates and review items](m1.md). The recommendation is ready for maintainer review. |

@@ -2,6 +2,7 @@
 // MIT License
 // Beam grouping, slope fitting and stem geometry for rhythmic notation.
 
+import { BoundingBox } from './boundingbox';
 import { Element } from './element';
 import { Fraction } from './fraction';
 import { Note } from './note';
@@ -73,6 +74,9 @@ export class Beam extends Element {
   private readonly _ticks: number;
 
   protected override yShift: number = 0;
+  /** Derived extensions must be removed before formatting the next width. */
+  private fittedStems: { stem: Stem; before: number; after: number }[] = [];
+  private flatOffset?: { before?: number; after?: number };
   private breakOnIndexes: number[];
   private _beamCount: number;
   // note that this is never set and is a private property.  Remove?
@@ -523,6 +527,22 @@ export class Beam extends Element {
       flatBeams: false,
       minFlatBeamOffset: 15,
     };
+    const first = notes[0];
+    const profile = isStaveNote(first) ? first.engraving : undefined;
+    if (profile) {
+      // A beam can be constructed before its stave. Native pixel overrides still win.
+      let explicitWidth: number | undefined;
+      Object.defineProperty(this.renderOptions, 'beamWidth', {
+        enumerable: true,
+        configurable: true,
+        get: () =>
+          explicitWidth ??
+          profile.beamThickness * (first.getStave()?.getSpacingBetweenLines() ?? Tables.STAVE_LINE_DISTANCE),
+        set: (px: number) => {
+          explicitWidth = px;
+        },
+      });
+    }
   }
 
   /** Get the notes in this beam. */
@@ -644,17 +664,25 @@ export class Beam extends Element {
     this.yShift = yShift;
   }
 
-  /** Shorten stems together when a beam cuts through an outer voice at a shared attack. */
+  /** Shorten stems together when a beam cuts through an outer voice at or between attacks. */
   private clearOtherVoiceHeads(): void {
     const first = this.notes[0];
     const stave = first.getStave();
     const direction = this._stemDirection;
     if (!stave || this.notes.some((n) => n.getStave() !== stave || n.getStemDirection() !== direction)) return;
-    if (this.notes.every((note) => note.checkTickContext().getTickables().length === 1)) return;
+    const firstContext = first.checkTickContext();
+    const lastContext = this.notes[this.notes.length - 1].checkTickContext();
+    const contexts = firstContext.tContexts.length
+      ? [...firstContext.through(lastContext)]
+      : this.notes.map((n) => n.checkTickContext());
+    const peers = contexts
+      .flatMap((c) => c.getTickables())
+      .filter(isStaveNote)
+      .filter((n) => n.getBeam() !== this && n.getStave() === stave && !n.isRest());
+    if (!peers.length) return;
     const firstX = first.getStemX();
-    const lastX = this.notes[this.notes.length - 1].getStemX();
     const space = stave.getSpacingBetweenLines();
-    const gap = space / 4;
+    const gap = space * (isStaveNote(first) ? (first.engraving?.clearance ?? 0.25) : 0.25);
     const width = this.renderOptions.beamWidth;
     const origin = first.getStemExtents().topY + this.yShift;
     // In this axis, increasing coordinates point from heads toward stem tips.
@@ -671,27 +699,29 @@ export class Beam extends Element {
         const edge = direction === Stem.UP ? bounds.getY() : bounds.getY() + bounds.getH();
         available = Math.min(available, inner - edge * -direction - gap);
       }
-      for (const peer of note.checkTickContext().getTickables()) {
-        if (peer === note || !isStaveNote(peer) || peer.getStave() !== stave || peer.isRest()) continue;
-        for (const head of peer.noteHeads) {
-          const displacement = head.isDisplaced() ? (head.getWidth() - Stem.WIDTH / 2) * peer.getStemDirection() : 0;
-          const x = peer.getNoteHeadBeginX() + displacement + head.getXShift();
-          const left = Math.max(firstX, x);
-          const right = Math.min(lastX, x + head.getWidth());
+    }
+
+    // Test each actual strip. A short secondary beam occupies only part of the span.
+    const strips = Array.from(this.getStrips(origin));
+    for (const peer of peers) {
+      for (const box of peer.getHeadInk()) {
+        let outer = -Infinity;
+        let inner = Infinity;
+        for (const strip of strips) {
+          const left = Math.max(Math.min(strip.x1, strip.x2), box.x);
+          const right = Math.min(Math.max(strip.x1, strip.x2), box.x + box.w);
           if (right <= left) continue;
-          const outerEdge = Math.max(tip(left), tip(right));
-          const innerEdge = Math.min(tip(left), tip(right)) - depth;
-          const bounds = head.getBoundingBox();
-          const a = bounds.getY() * -direction;
-          const b = (bounds.getY() + bounds.getH()) * -direction;
-          const near = Math.min(a, b);
-          const far = Math.max(a, b);
-          if (far <= innerEdge) {
-            available = Math.min(available, innerEdge - far - gap);
-          } else if (near <= outerEdge && far >= innerEdge) {
-            required = Math.max(required, outerEdge - near + gap);
-          }
+          const offset = (strip.y1 - origin - (strip.x1 - firstX) * this.slope) * -direction;
+          outer = Math.max(outer, Math.max(tip(left), tip(right)) + offset);
+          inner = Math.min(inner, Math.min(tip(left), tip(right)) + offset - width);
         }
+        if (outer === -Infinity) continue;
+        const a = box.y * -direction;
+        const b = (box.y + box.h) * -direction;
+        const near = Math.min(a, b);
+        const far = Math.max(a, b);
+        if (far <= inner) available = Math.min(available, inner - far - gap);
+        else if (near <= outer && far >= inner) required = Math.max(required, outer - near + gap);
       }
     }
     if (required <= 0) return;
@@ -825,7 +855,9 @@ export class Beam extends Element {
           */
         }
 
-        stem.setExtension(preBeamExtension + beamExtension + crossStemExtension);
+        const after = preBeamExtension + beamExtension + crossStemExtension;
+        this.fittedStems.push({ stem, before: preBeamExtension, after });
+        stem.setExtension(after);
         stem.adjustHeightForBeam();
 
         if (note.isRest() && showStemlets) {
@@ -992,43 +1024,65 @@ export class Beam extends Element {
     }, this);
   }
 
-  // Render the beam lines
-  protected drawBeamLines(ctx: RenderContext): void {
-    const validBeamDurations = ['4', '8', '16', '32', '64', '128', '256', '512', '1024'];
-
-    const firstNote = this.notes[0];
-    let beamY = this.getBeamYToDraw();
-    const firstStemX = firstNote.getStemX();
-    const beamThickness = this.renderOptions.beamWidth * this._stemDirection;
-
-    // Draw the beams.
-    for (let i = 0; i < validBeamDurations.length; ++i) {
-      const duration = validBeamDurations[i];
-      const beamLines = this.getBeamLines(duration);
-
-      for (let j = 0; j < beamLines.length; ++j) {
-        const beamLine = beamLines[j];
-        const startBeamX = beamLine.start;
-
-        const startBeamY = this.getSlopeY(startBeamX, firstStemX, beamY, this.slope);
-        const lastBeamX = beamLine.end;
-        if (lastBeamX) {
-          const lastBeamY = this.getSlopeY(lastBeamX, firstStemX, beamY, this.slope);
-
-          ctx.beginPath();
-          ctx.moveTo(startBeamX, startBeamY);
-          ctx.lineTo(startBeamX, startBeamY + beamThickness);
-          ctx.lineTo(lastBeamX + 1, lastBeamY + beamThickness);
-          ctx.lineTo(lastBeamX + 1, lastBeamY);
-          ctx.closePath();
-          ctx.fill();
-        } else {
-          throw new RuntimeError('NoLastBeamX', 'lastBeamX undefined.');
-        }
+  /** Each filled strip has two sloping edges separated by a signed thickness. */
+  private *getStrips(beamY = this.getBeamYToDraw()) {
+    const firstX = this.notes[0].getStemX();
+    const thickness = this.renderOptions.beamWidth * this._stemDirection;
+    for (const duration of ['4', '8', '16', '32', '64', '128', '256', '512', '1024']) {
+      for (const { start, end } of this.getBeamLines(duration)) {
+        if (end === undefined) throw new RuntimeError('NoLastBeamX', 'lastBeamX undefined.');
+        yield {
+          x1: start,
+          x2: end + 1,
+          y1: this.getSlopeY(start, firstX, beamY, this.slope),
+          y2: this.getSlopeY(end, firstX, beamY, this.slope),
+          thickness,
+        };
       }
-
-      beamY += beamThickness * 1.5;
+      beamY += thickness * 1.5;
     }
+  }
+
+  /** Bounds of the beam strips alone. The note geometry owns the stem segments. */
+  override getBoundingBox(): BoundingBox {
+    this.postFormat();
+    let box: BoundingBox | undefined;
+    for (const { x1, x2, y1, y2, thickness } of this.getStrips()) {
+      const strip = new BoundingBox(
+        Math.min(x1, x2),
+        Math.min(y1, y2) + Math.min(0, thickness),
+        Math.abs(x2 - x1),
+        Math.abs(y2 - y1) + Math.abs(thickness)
+      );
+      box = box ? box.mergeWith(strip) : strip;
+    }
+    return box ?? new BoundingBox(this.notes[0].getStemX(), this.getBeamYToDraw(), 0, 0);
+  }
+
+  protected drawBeamLines(ctx: RenderContext): void {
+    for (const { x1, x2, y1, y2, thickness } of this.getStrips()) {
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x1, y1 + thickness);
+      ctx.lineTo(x2, y2 + thickness);
+      ctx.lineTo(x2, y2);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  /** Release only the adjustments from the last fit. Preserve intervening native edits. */
+  resetLayout(): void {
+    if (!this.postFormatted) return;
+    for (const { stem, before, after } of this.fittedStems) {
+      if (stem.getExtension() === after) stem.setExtension(before);
+    }
+    if (this.flatOffset && this.renderOptions.flatBeamOffset === this.flatOffset.after) {
+      this.renderOptions.flatBeamOffset = this.flatOffset.before;
+    }
+    this.fittedStems.length = 0;
+    this.flatOffset = undefined;
+    this.postFormatted = false;
   }
 
   /** Pre-format the beam. */
@@ -1046,7 +1100,9 @@ export class Beam extends Element {
 
     // Calculate a smart slope if we're not forcing the beams to be flat.
     if (isTabNote(this.notes[0]) || this.renderOptions.flatBeams) {
+      const before = this.renderOptions.flatBeamOffset;
       this.calculateFlatSlope();
+      this.flatOffset = { before, after: this.renderOptions.flatBeamOffset };
     } else {
       this.calculateSlope();
       this.clearOtherVoiceHeads();
