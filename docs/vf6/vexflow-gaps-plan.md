@@ -6,7 +6,7 @@ Last reviewed: **2026-11-18**
 
 **Primary status reference** · [M7 on upstream main at 2b07436c](https://github.com/vexflow/vexflow/commit/2b07436c). Compare the branch to freshly fetched main at every milestone review and after merges. Keep 5.2.0 as the historical release reference. [Latest fixture comparison](m0.md#latest-comparison)
 
-Status: **M0 through M7 are complete on main. The maintainer approved the VF6 score representation and the M1 beam, M2 local engraving, M3 phrase, M4 continuous-score, M5 print and M6 instrument studies. The maintainer also approved the M7 keyboard and screen-reader walkthrough. M8 awaits a charter for a specific notation profile.**
+Status: **M0 through M7 are complete on main. The maintainer approved the VF6 score representation and the M1 beam, M2 local engraving, M3 phrase, M4 continuous-score, M5 print and M6 instrument studies. The maintainer also approved the M7 keyboard and screen-reader walkthrough. M8 has a proposed three-track plan for contemporary notation, advanced ensemble layout and guitar TAB.**
 
 Source of scope: [Notation gap register](vexflow-gaps.md)
 
@@ -182,7 +182,7 @@ M0–M7 total **44–75 engineer-weeks before contingency**. Reserve roughly 25%
 | M5        | Pages and basic part layouts          | M4, stable vertical envelopes                 | 4–7 weeks            | Complete on main |
 | M6        | Mainstream instrument profiles        | M2–M4; parts use M5                           | 8–14 weeks           | Complete on main. [M6 approval](m6.md#engraving-review) |
 | M7        | Web/integration quality release       | M0–M5 and P1 scope of M6                      | 5–9 weeks            | Complete on main. Screen-reader walkthrough approved. [M7 evidence](m7.md) |
-| M8        | Specialist expansion                  | Explicit profile charter; required core gates | Estimate per profile | Deferred |
+| M8        | Specialist expansion                  | Reference scores and performer review | Estimate per increment | [Three-track proposal](m8.md) |
 
 Web compatibility, performance measurement, API parity, and documentation run throughout; M7 is their final integration gate. M6 P2 items may be delivered after the first quality release if explicitly deferred. P1 percussion support is part of the core repertoire target. M5 basic parts do not imply automatic condensing.
 
@@ -397,13 +397,9 @@ Deliver profiles independently. Do not hold a percussion fix behind an unrelated
 
 ## M8 — Expand specialist notation deliberately
 
-**Gaps:** VF-035, VF-036, VF-050; advanced VF-020 and deferred portions of VF-034.
+**Proposed scope.** Contemporary notation (VF-035), advanced ensemble layout (VF-020 and VF-034), and contemporary guitar TAB (VF-030). The detailed plan names the reference excerpts, existing VF5 capabilities, implementation order, review criteria and VF6 decisions. [M8 delivery plan](m8.md)
 
-Require a short charter for each profile: requesting users, notation tradition, reference editions, expert reviewer, candidate corpus, model changes, performance implications and acceptance criteria.
-
-Possible tracks include contemporary spatial notation, feathered beams/clusters, historical chant/mensural notation, figured bass, harp/wind diagrams, and advanced orchestral condensing. Research whether a specialized renderer or integration is more appropriate before extending the core.
-
-Keep the register honest: specialist features remain `Deferred` until scheduled, even when their glyphs are present. A sponsor-approved scope and estimate are prerequisites, not an open-ended promise of every notation system.
+Start with three guitar idioms, a contemporary passage and a two-player score. Review playable examples before expanding to free-time layout or automatic condensing. Historical notation (VF-036) and specialist instrument diagrams (VF-050) remain deferred.
 
 ## Validation strategy
 

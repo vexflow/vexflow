@@ -12,6 +12,8 @@ Companion: [Strategy and milestone plan](vexflow-gaps-plan.md)
 
 **M7 complete on main.** Three browser engines passed qualification. The maintainer approved the accessible score reader. Three MusicXML fixtures passed the adapter pilot. [Evidence and review instructions](m7.md) · [VF6 requirements](requirements/web-delivery.md)
 
+**M8 proposed scope.** Contemporary notation (VF-035), ensemble layout (VF-020 and VF-034), and guitar TAB (VF-030) have a staged proposal with reference scores and acceptance criteria. [M8 delivery plan](m8.md)
+
 **M6 complete on main · engraving approved.** Eight studies cover percussion, guitar, lead sheets, techniques, microtonal notation, spelling and an independent-meter experiment. [Coverage and limits](m6.md) · [VF6 requirements](requirements/instrument-notation.md)
 
 **M5 complete on main · engraving approved.** A4 and Letter editions of the conductor score and cello part exercise pagination (VF-018), independent layout views (VF-020) and print export (VF-039). [Examples and limits](m5.md) · [VF6 publication requirements](requirements/publication-layout.md)
