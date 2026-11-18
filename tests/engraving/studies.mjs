@@ -362,4 +362,32 @@ export function registerStudies() {
       });
     });
   }
+
+  QUnit.module('M5 studies');
+  for (const paper of ['A4', 'Letter'])
+    for (const part of [false, true]) {
+      VF.Test.runTests((part ? 'Cello part' : 'Chamber score') + ' on ' + paper, (test) => {
+        const root = document.getElementById(test.elementId);
+        const { source, options } = globalThis.publicationStudy(part, paper);
+        if (VF.Publication) {
+          const result = new VF.Publication(source).render(root, options);
+          test.assert.deepEqual(result.diagnostics, [], 'No engraving or page overflow');
+          root.style.cssText = 'display:flex;align-items:flex-start;gap:5px;background:white;width:max-content';
+          for (const page of result.pages) page.svg.style.cssText = 'width:300px;height:auto;border:1px solid #aaa';
+          root.dataset.measurement = JSON.stringify({ pages: result.pages.map((p) => p.systems) });
+        } else {
+          // At the same input width the earlier engines show continuous music. Capture its opening systems.
+          const factory = VF.Test.makeFactory(test, 950, part ? 350 : 600);
+          if (part) {
+            source.staves = source.staves.filter((s) => s.id === 'vc');
+            source.continuous.groups = [];
+            source.continuous.spans = source.continuous.spans.filter((s) => s.id === 'cello-swell');
+          }
+          source.sheet = { width: 925, x: 10, y: 5 };
+          factory.EasyScore().compose(source);
+          factory.draw();
+          test.assert.ok(root.querySelector('svg'), 'Continuous reference rendered');
+        }
+      });
+    }
 }

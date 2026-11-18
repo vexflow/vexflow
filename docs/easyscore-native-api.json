@@ -2805,6 +2805,52 @@
       "draw(context: RenderContext): void"
     ]
   },
+  "publication": {
+    "PublicationOptions": {
+      "extends": [
+        "extends PublicationView"
+      ],
+      "fields": [
+        "paper?: 'A4' | 'Letter' | { width: number; height: number };",
+        "staffSize?: number;",
+        "margins?: Partial<Record<'top' | 'right' | 'bottom' | 'left', number>>;",
+        "title?: string;",
+        "subtitle?: string;",
+        "header?: string;",
+        "footer?: string;",
+        "pageNumbers?: boolean;",
+        "systemGap?: number;",
+        "maxExtraGap?: number;",
+        "justifyLast?: boolean;"
+      ]
+    },
+    "PublicationDiagnostic": {
+      "extends": [],
+      "fields": [
+        "code: 'PageOverflow' | 'SystemOverflow' | 'TextOverflow' | 'ForbiddenTurn' | 'ExcludedAnchor' | 'Engraving';",
+        "measures: number[];",
+        "detail: string;",
+        "page?: number;"
+      ]
+    },
+    "PublicationPage": {
+      "extends": [],
+      "fields": [
+        "svg: SVGSVGElement;",
+        "number: number;",
+        "systems: { measures: number[]; x: number; y: number; width: number; height: number }[];"
+      ]
+    },
+    "PublicationResult": [
+      "constructor(readonly pages: PublicationPage[], readonly diagnostics: PublicationDiagnostic[], readonly paper: { width: number; height: number })",
+      "toSVG(pageNumber: number, fonts?: SVGFont[]): string",
+      "toPrintHTML(fonts: SVGFont[]): string"
+    ],
+    "Publication": [
+      "constructor(private readonly source: EasyScoreCompositionSpec)",
+      "render(target: HTMLElement, options: PublicationOptions = {}): PublicationResult"
+    ]
+  },
   "vexflow": {
     "VexFlow": [
       "BUILD",
@@ -2873,6 +2919,7 @@
       "SVGContext",
       "System",
       "Sheet",
+      "Publication",
       "TabNote",
       "TabSlide",
       "TabStave",

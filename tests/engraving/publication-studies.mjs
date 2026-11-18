@@ -1,0 +1,97 @@
+// A chamber score and a cello part share the same events on A4 and Letter paper.
+export function publicationStudy(part, paper) {
+  const count = 26;
+  const melody = [
+    ['g/4', 'b/4', 'd/5'],
+    ['e/5', 'd/5', 'b/4'],
+    ['a/4', 'c/5', 'b/4'],
+    ['g/4', 'a/4', 'd/5'],
+    ['d/5', 'c/5', 'a/4'],
+    ['b/4', 'a/4', 'g/4'],
+    ['e/4', 'g/4', 'a/4'],
+    ['d/5', 'b/4', 'g/4'],
+  ];
+  const bass = ['g/2', 'e/3', 'a/2', 'd/3', 'b/2', 'g/2', 'c/3', 'd/3'];
+  const middle = ['b/3', 'g/3', 'e/4', 'a/3', 'd/4', 'b/3', 'c/4', 'a/3'];
+  const make = (id, name, shortName, clef) => ({
+    id,
+    name,
+    shortName,
+    clef,
+    key: 'G',
+    time: '3/4',
+    measures: Array.from({ length: count }, (_, i) => {
+      let keys, ds;
+      if (id === 'fl') {
+        keys = melody[i % melody.length];
+        ds = i % 3 === 0 ? ['q', '8', '8', 'q'] : ['q', 'q', 'q'];
+      } else if (id === 'va') {
+        keys = [middle[i % 8], middle[(i + 2) % 8]];
+        ds = ['h', 'q'];
+      } else {
+        keys = [bass[i % 8], bass[(i + 3) % 8]];
+        ds = i === 15 || i === 17 ? ['hr', 'qr'] : i % 3 === 0 ? ['q', '8', '8', 'q'] : ['h', 'q'];
+      }
+      if (i === count - 1) {
+        keys = [id === 'fl' ? 'g/4' : id === 'va' ? 'b/3' : 'g/2'];
+        ds = ['h', 'q'];
+      }
+      return {
+        voices: [
+          {
+            autoBeam: true,
+            notes: ds.map((d, j) => ({
+              id: id + '-' + (i + 1) + '-' + (j + 1),
+              note: { keys: [keys[j % keys.length]], duration: d },
+            })),
+          },
+        ],
+      };
+    }),
+  });
+  const source = {
+    staves: [
+      make('fl', 'Flute', 'Fl.', 'treble'),
+      make('va', 'Viola', 'Va.', 'alto'),
+      make('vc', 'Violoncello', 'Vc.', 'bass'),
+    ],
+    accidentals: 'key-aware',
+    continuous: {
+      measureNumbers: true,
+      spans: [
+        { id: 'opening', kind: 'slur', from: 'fl-1-1', to: 'fl-2-3', side: 'above' },
+        { id: 'cello-swell', kind: 'crescendo', from: 'vc-9-1', to: 'vc-12-2' },
+      ],
+      boundaries: [
+        { measure: 9, rehearsal: 'B' },
+        { measure: 19, rehearsal: 'C' },
+      ],
+      groups: [{ first: 'fl', last: 'vc', type: 'bracket' }],
+    },
+  };
+  const options = {
+    paper,
+    title: 'Andante in G',
+    subtitle: part ? 'Violoncello' : 'Flute, viola and violoncello',
+    header: part ? 'Andante in G · Violoncello' : 'Andante in G · Score',
+    footer: 'Andante in G',
+    staffSize: part ? 7.2 : 7.8,
+    systemGap: part ? 6 : 7,
+    maxExtraGap: 8,
+    systemBreaks: part
+      ? [3, 6, 9, 12, 14, 17, 19, 21, 23, 25]
+      : Array.from({ length: count }, (_, i) => i + 1).filter((n) => n > 1 && (n - 1) % 4 === 0),
+    ...(part
+      ? {
+          staves: ['vc'],
+          preferredTurns: [16],
+          forbiddenTurns: [13],
+          regions: [
+            { kind: 'cue', staff: 'fl', measure: 16, label: 'Flute cue' },
+            { kind: 'ossia', staff: 'va', measure: 21, label: 'Ossia · viola' },
+          ],
+        }
+      : {}),
+  };
+  return { source, options };
+}

@@ -45,6 +45,7 @@ try {
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 for (const name of ${JSON.stringify(entries)}) for (const VF of [await import(name), require(name)]) {
+  assert.equal(typeof VF.Publication.prototype.render, 'function');
   assert.equal(new VF.EasyScore().parseNotation('C4/q, D4').success, true);
   const score = VF.EasyScore.create({renderer: {elementId: null, width: 500, height: 240}});
   for (const name of ['compose', 'withDefaults', 'autoBeam', 'attachToStave']) assert.equal(typeof score[name], 'function');
@@ -53,13 +54,15 @@ for (const name of ${JSON.stringify(entries)}) for (const VF of [await import(na
 `;
   writeFileSync(join(directory, 'runtime.mjs'), runtime);
   run(process.execPath, [join(directory, 'runtime.mjs')], directory);
-  const consumer = `import { EasyScore, EasyScoreComposition, EasyScoreCompositionSpec, EasyScoreTabSpan, TabNote, Fraction } from 'vexflow';
+  const consumer = `import { EasyScore, EasyScoreComposition, EasyScoreCompositionSpec, EasyScoreTabSpan, TabNote, Fraction, Publication, PublicationOptions } from 'vexflow';
 import { EasyScore as Core } from 'vexflow/core';
 import { EasyScore as Bravura } from 'vexflow/bravura';
 const score = EasyScore.create({renderer: {elementId: null, width: 500, height: 240}});
 const spec: EasyScoreCompositionSpec = {staves: [{id: 'staff', measures: [{voices: [{notes: 'C4/w'}]}]}]};
 const result: EasyScoreComposition = score.compose(spec);
 result.sheet.setWidth(400);
+const printOptions: PublicationOptions = {paper: 'Letter', staves: ['staff'], pageBreaks: [1]};
+new Publication(spec).render(document.createElement('main'), printOptions).toSVG(1);
 const tab: TabNote = score.make.tabNote({positions: [{str: 2, fret: 'X'}], duration: 'q'}, true);
 const span: EasyScoreTabSpan = {firstNote: tab};
 score.make.tabSlide(span, -1);

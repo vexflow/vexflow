@@ -44,6 +44,7 @@ import { Parenthesis } from './parenthesis';
 import { Parser } from './parser';
 import { PedalMarking } from './pedalmarking';
 import { PhraseLayout } from './phraselayout';
+import { Publication } from './publication';
 import { Registry } from './registry';
 import { RenderContext } from './rendercontext';
 import { Renderer, RendererBackends, RendererLineEndType } from './renderer';
@@ -165,6 +166,7 @@ export class VexFlow {
   static SVGContext = SVGContext;
   static System = System;
   static Sheet = Sheet;
+  static Publication = Publication;
   static TabNote = TabNote;
   static TabSlide = TabSlide;
   static TabStave = TabStave;

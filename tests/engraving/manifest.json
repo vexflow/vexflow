@@ -431,6 +431,18 @@
         "m4-greedy": "Greedy breaks on a short melody",
         "m4-balanced": "Balanced breaks on the same melody"
       }
+    },
+    {
+      "module": "M5 studies",
+      "source": "tests/engraving/publication-studies.mjs",
+      "gaps": ["VF-018", "VF-020", "VF-039"],
+      "review": "Inspect the first and last pages, margins, page furniture, cello cue, ossia and turn after bar 16.",
+      "cases": {
+        "m5-score-a4": "Chamber score on A4",
+        "m5-part-a4": "Cello part on A4",
+        "m5-score-letter": "Chamber score on Letter",
+        "m5-part-letter": "Cello part on Letter"
+      }
     }
   ]
 }

@@ -567,6 +567,10 @@ See the [continuous score guide](vf6/m4.md) for break constraints, rest grouping
 
 The Explorer's **EasyScore: responsive composition** example covers a grand staff, pickup, multiple voices, tuplets, changing meter, inline state, and both spacing modes.
 
+### Print a score and its parts
+
+Pass the same declarative composition to `new Publication(spec)`. Each call to `render(container, options)` builds a separate layout. A conductor score and a cello part can share note IDs and have different staff sizes, page breaks and turn preferences. Dimensions are in millimeters. Each returned page is a standalone SVG. The browser print adapter accepts outline fonts for portable PDF output. [Page and part examples](vf6/m5.md)
+
 ## Native customization and infrastructure
 
 Helpers expose native objects directly. Keep using their setters, render options, styles, subclasses, and measurement methods.

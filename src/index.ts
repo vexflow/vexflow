@@ -92,6 +92,7 @@ export * from './util';
 // Do not export './version'. It is accessible via VexFlow.BUILD.
 export * from './continuouslayout';
 export type { ContinuousSpan, ContinuousSpanKind, SpanFragment } from './continuousspan';
+export * from './publication';
 export * from './vexflow';
 export * from './vibrato';
 export * from './vibratobracket';

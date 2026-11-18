@@ -476,6 +476,7 @@ module.exports = (grunt) => {
         'tests/node/local-engraving-tests.mjs',
         'tests/node/phrase-layout-tests.mjs',
         'tests/node/continuous-score-tests.mjs',
+        'tests/node/publication-tests.mjs',
         'tests/node/chord-kerning-tests.mjs',
         'tests/node/proportional-spacing-tests.mjs',
         'tests/node/svg-export-tests.mjs',
