@@ -1,3 +1,20 @@
+# 5.3.0
+
+## Engraving
+
+- Add score-local engraving profiles for SMuFL stem anchors, beam thickness, and clearance.
+- Expose positioned glyph and beam bounds through `measureEngraving()`.
+- Add opt-in optical spacing and contour-aware beam slopes. Improve beam clearance in multi-voice passages.
+- Separate overlapping voices and altered unison noteheads, keeping accidentals, dots, and ledger lines with their notes.
+- Improve grace-note spacing and slur endpoints. EasyScore can track accidentals in the order of before-graces, host notes, and after-graces.
+- Let tuplets display a ratio independently of playback timing. Improve bracket clearance around ornaments and articulations.
+- Correct slur opening directions and separate simultaneous guitar bends on different strings.
+
+## Visual test gallery
+
+- Open the gallery on a module index with nine example scores. Each score links to its live rendering and source.
+- Load previews as readers move through the carousel. Run individual test modules from the index or the full suite at `tests/all.html`.
+
 # 5.2.0
 
 ## EasyScore
