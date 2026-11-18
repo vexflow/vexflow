@@ -26,6 +26,8 @@ export interface StaveLineConfig {
 export interface StaveOptions {
   /** Musical state when a repeated clef glyph is intentionally omitted. */
   clef?: string;
+  /** Optional barline endpoints, in staff spaces down from the top line. */
+  barlineSpan?: { top: number; bottom: number } | null;
   bottomTextPosition?: number;
   lineConfig?: StaveLineConfig[];
   spaceBelowStaffLn?: number;
@@ -109,6 +111,7 @@ export class Stave extends Element {
 
     this.options = {
       clef: 'treble',
+      barlineSpan: null,
       verticalBarWidth: 10, // Width around vertical bar end-marker
       numLines: 5,
       leftBar: true, // draw vertical bar on left
@@ -192,6 +195,15 @@ export class Stave extends Element {
     this.options.numLines = n;
     this.resetLines();
     return this;
+  }
+
+  /** Written extent of barlines, including shortened bars on a one-line percussion stave. */
+  getBarlineBounds(): { topY: number; botY: number } {
+    const span = this.options.barlineSpan;
+    if (!span) return { topY: this.getTopLineTopY(), botY: this.getBottomLineBottomY() };
+    if (!Number.isFinite(span.top) || !Number.isFinite(span.bottom) || span.top >= span.bottom)
+      throw new RuntimeError('StaveConfigError', 'Barline endpoints must increase from top to bottom.');
+    return { topY: this.getYForLine(span.top), botY: this.getYForLine(span.bottom) + (this.getStyle().lineWidth ?? 1) };
   }
 
   getTopLineTopY(): number {

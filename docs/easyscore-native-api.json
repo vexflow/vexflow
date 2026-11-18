@@ -1809,6 +1809,7 @@
       "extends": [],
       "fields": [
         "clef?: string;",
+        "barlineSpan?: { top: number; bottom: number } | null;",
         "bottomTextPosition?: number;",
         "lineConfig?: StaveLineConfig[];",
         "spaceBelowStaffLn?: number;",
@@ -1839,6 +1840,7 @@
       "getTieEndX(): number",
       "getNumLines(): number",
       "setNumLines(n: number): this",
+      "getBarlineBounds(): { topY: number; botY: number }",
       "getTopLineTopY(): number",
       "getBottomLineBottomY(): number",
       "setX(x: number): this",

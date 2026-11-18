@@ -60,12 +60,14 @@ test('instrument studies and score construction', async (t) => {
             exported: metadata.events.find((e) => e.id === 'backbeat').notation,
             kick: kit.note(['kick'], 'q').stemDirection,
             override: kit.note(['kick'], 'q', 'up').stemDirection,
+            barHeight: side[0].checkStave().getBarlineBounds().botY - side[0].checkStave().getBarlineBounds().topY,
             side: side.every((n) => n.getYs()[0] === n.checkStave().getYForLine(2)),
           };
         });
         assert.deepEqual(result.positions, [3.5, 5.5]);
         assert.equal(result.different, true);
         assert.equal(result.side, true);
+        assert.equal(result.barHeight, 21);
         assert.equal(result.kick, -1);
         assert.equal(result.override, 1);
         assert.equal(result.name, 'Snare drum, Closed hi-hat');

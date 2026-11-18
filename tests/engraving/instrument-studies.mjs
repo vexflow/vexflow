@@ -36,18 +36,23 @@ export function makeInstrumentStudy(VF, f, kind) {
     if (single) notes.forEach((n, i) => text(n, ['R', 'L', 'R', 'L', 'R', 'L'][i]));
     const voices = [voice(notes)];
     if (!single) voices.push(voice([make(['kick'], 'h', 'down'), make(['kick'], 'h', 'down')]));
-    const staff = row(22).addStave({ voices }).addClef('percussion').addTimeSignature('4/4');
+    const staff = row(22)
+      .addStave({ voices, options: single ? { barlineSpan: { top: 1, bottom: 3 } } : {} })
+      .addClef('percussion')
+      .addTimeSignature('4/4');
     if (single) {
       [0, 1, 3, 4].forEach((i) => staff.setConfigForLine(i, { visible: false }));
     } else {
-      const legend = entries.map((e) => {
-        const n = make([e.id], 'q', e.stem);
-        text(n, e.label);
-        return n;
-      });
-      row(142, 590, 58)
-        .addStave({ voices: [voice(legend)] })
-        .addClef('percussion');
+      const legend = entries.map((e) => make([e.id], 'q', e.stem));
+      const legendSystem = row(142, 590, 58);
+      const legendStaff = legendSystem.addStave({ voices: [voice(legend)] }).addClef('percussion');
+      const layout = legendSystem.getPhraseLayout?.();
+      if (layout)
+        layout.addVerse(
+          legendStaff,
+          legend.map((note, i) => ({ note, text: entries[i].label }))
+        );
+      else legend.forEach((n, i) => text(n, entries[i].label));
     }
     study.notes = notes;
   } else if (kind === 'lead') {

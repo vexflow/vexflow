@@ -1,5 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 //
+// Draws staff-local barlines, repeats and brackets.
 // @author: Larry Kuhns 2011
 
 import { Stave } from './stave';
@@ -182,8 +183,7 @@ export class Barline extends StaveModifier {
 
   drawVerticalBar(stave: Stave, x: number, doubleBar?: boolean): void {
     const staveCtx = stave.checkContext();
-    const topY = stave.getTopLineTopY();
-    const botY = stave.getBottomLineBottomY();
+    const { topY, botY } = stave.getBarlineBounds();
     if (doubleBar) {
       staveCtx.fillRect(x - 3, topY, 1, botY - topY);
     }
@@ -192,8 +192,7 @@ export class Barline extends StaveModifier {
 
   drawVerticalEndBar(stave: Stave, x: number): void {
     const staveCtx = stave.checkContext();
-    const topY = stave.getTopLineTopY();
-    const botY = stave.getBottomLineBottomY();
+    const { topY, botY } = stave.getBarlineBounds();
     staveCtx.fillRect(x - 5, topY, 1, botY - topY);
     staveCtx.fillRect(x - 2, topY, 3, botY - topY);
   }
@@ -236,8 +235,7 @@ export class Barline extends StaveModifier {
   drawRepeatBar(stave: Stave, x: number, begin: boolean): void {
     const staveCtx = stave.checkContext();
 
-    const topY = stave.getTopLineTopY();
-    const botY = stave.getBottomLineBottomY();
+    const { topY, botY } = stave.getBarlineBounds();
     let xShift = 3;
 
     if (!begin) {
@@ -266,7 +264,8 @@ export class Barline extends StaveModifier {
     const dotX = x + xShift + dotRadius / 2;
 
     // calculate the y offset based on number of stave lines
-    let yOffset = (stave.getNumLines() - 1) * stave.getSpacingBetweenLines();
+    const span = stave.options.barlineSpan;
+    let yOffset = (span ? span.bottom - span.top : stave.getNumLines() - 1) * stave.getSpacingBetweenLines();
     yOffset = yOffset / 2 - stave.getSpacingBetweenLines() / 2;
     let dotY = topY + yOffset + dotRadius / 2;
 
