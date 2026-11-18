@@ -1,5 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
+// Beam grouping, slope fitting and stem geometry for rhythmic notation.
 
 import { Element } from './element';
 import { Fraction } from './fraction';
@@ -643,6 +644,59 @@ export class Beam extends Element {
     this.yShift = yShift;
   }
 
+  /** Shorten stems together when a beam cuts through an outer voice at a shared attack. */
+  private clearOtherVoiceHeads(): void {
+    const first = this.notes[0];
+    const stave = first.getStave();
+    const direction = this._stemDirection;
+    if (!stave || this.notes.some((n) => n.getStave() !== stave || n.getStemDirection() !== direction)) return;
+    if (this.notes.every((note) => note.checkTickContext().getTickables().length === 1)) return;
+    const firstX = first.getStemX();
+    const lastX = this.notes[this.notes.length - 1].getStemX();
+    const space = stave.getSpacingBetweenLines();
+    const gap = space / 4;
+    const width = this.renderOptions.beamWidth;
+    const origin = first.getStemExtents().topY + this.yShift;
+    // In this axis, increasing coordinates point from heads toward stem tips.
+    const tip = (x: number) => (origin + (x - firstX) * this.slope) * -direction;
+    let required = 0;
+    let available = Infinity;
+    for (const note of this.notes) {
+      const depth = width * (1 + 1.5 * (note.getGlyphProps().beamCount - 1));
+      const inner = tip(note.getStemX()) - depth;
+      // Keep the innermost beam clear of the chord's own heads.
+      if (!isStaveNote(note)) return;
+      for (const head of note.noteHeads) {
+        const bounds = head.getBoundingBox();
+        const edge = direction === Stem.UP ? bounds.getY() : bounds.getY() + bounds.getH();
+        available = Math.min(available, inner - edge * -direction - gap);
+      }
+      for (const peer of note.checkTickContext().getTickables()) {
+        if (peer === note || !isStaveNote(peer) || peer.getStave() !== stave || peer.isRest()) continue;
+        for (const head of peer.noteHeads) {
+          const displacement = head.isDisplaced() ? (head.getWidth() - Stem.WIDTH / 2) * peer.getStemDirection() : 0;
+          const x = peer.getNoteHeadBeginX() + displacement + head.getXShift();
+          const left = Math.max(firstX, x);
+          const right = Math.min(lastX, x + head.getWidth());
+          if (right <= left) continue;
+          const outerEdge = Math.max(tip(left), tip(right));
+          const innerEdge = Math.min(tip(left), tip(right)) - depth;
+          const bounds = head.getBoundingBox();
+          const a = bounds.getY() * -direction;
+          const b = (bounds.getY() + bounds.getH()) * -direction;
+          const near = Math.min(a, b);
+          const far = Math.max(a, b);
+          if (far <= innerEdge) {
+            available = Math.min(available, innerEdge - far - gap);
+          } else if (near <= outerEdge && far >= innerEdge) {
+            required = Math.max(required, outerEdge - near + gap);
+          }
+        }
+      }
+    }
+    if (required > 0 && required <= available) this.yShift += direction * required;
+  }
+
   /** Calculate a slope and y-shift for flat beams. */
   calculateFlatSlope(): void {
     const {
@@ -988,6 +1042,7 @@ export class Beam extends Element {
       this.calculateFlatSlope();
     } else {
       this.calculateSlope();
+      this.clearOtherVoiceHeads();
     }
     this.applyStemExtensions();
 

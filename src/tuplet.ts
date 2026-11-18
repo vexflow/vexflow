@@ -49,6 +49,7 @@
  * }
  */
 
+import { Annotation } from './annotation';
 import { BoundingBox } from './boundingbox';
 import { Element } from './element';
 import { Formatter } from './formatter';
@@ -58,7 +59,7 @@ import { Note } from './note';
 import { Stem } from './stem';
 import { StemmableNote } from './stemmablenote';
 import { Tables } from './tables';
-import { Category } from './typeguard';
+import { Category, isAnnotation } from './typeguard';
 import { RuntimeError } from './util';
 
 export interface TupletOptions {
@@ -271,7 +272,7 @@ export class Tuplet extends Element {
         let modLines = 0;
         const mc = note.getModifierContext();
         if (mc) {
-          modLines = Math.max(modLines, mc.getState().topTextLine);
+          modLines = mc.getUnmeasuredTextLines(true);
         }
         const modY = note.getYForTopText(modLines) - 2 * Tables.STAVE_LINE_DISTANCE;
         if (note.hasStem() || note.isRest()) {
@@ -291,7 +292,7 @@ export class Tuplet extends Element {
       this.notes.forEach((nn) => {
         const mc = nn.getModifierContext();
         if (mc) {
-          lineCheck = Math.max(lineCheck, mc.getState().textLine + 1);
+          lineCheck = Math.max(lineCheck, mc.getUnmeasuredTextLines(false) + 1);
         }
       });
       yPosition = firstNote.checkStave().getYForLine(lineCheck) + 2 * Tables.STAVE_LINE_DISTANCE;
@@ -306,6 +307,29 @@ export class Tuplet extends Element {
             yPosition = bottomY;
           }
         }
+      }
+    }
+
+    // Annotation text lines reserve a whole font size. Measure the actual outer ink
+    // edge on each side, leaving room for the bracket hook and a little white space.
+    const above = this.options.location === Tuplet.LOCATION_TOP;
+    const side = above ? Annotation.VerticalJustify.TOP : Annotation.VerticalJustify.BOTTOM;
+    const hook = this.options.bracketed ? Metrics.get('Tuplet.bracket.legLength') : this.textElement.getHeight() / 2;
+    const padding = hook + firstNote.checkStave().getSpacingBetweenLines() / 4;
+    for (const note of this.notes) {
+      const annotations = note.getModifierContext()?.getMembers(Category.Annotation) ?? [];
+      for (const mark of annotations) {
+        if (
+          !isAnnotation(mark) ||
+          mark.getVerticalJustification() !== side ||
+          mark.checkAttachedNote().getStave() !== note.getStave()
+        )
+          continue;
+        const baseline = mark.computeY().y + mark.getYShift();
+        const ink = mark.getTextMetrics();
+        yPosition = above
+          ? Math.min(yPosition, baseline - ink.actualBoundingBoxAscent - padding)
+          : Math.max(yPosition, baseline + ink.actualBoundingBoxDescent + padding);
       }
     }
 

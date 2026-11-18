@@ -496,7 +496,18 @@ function alignedMixedElements(options: TestOptions): void {
   tuplet.setContext(context).drawWithStyle();
   tuplet2.setContext(context).drawWithStyle();
 
-  options.assert.ok(true);
+  // Compare bracket lines with the visible ink of the outer text on each side.
+  const outerText = (note: StaveNote) =>
+    note
+      .getModifiers()
+      .find((m) => m.getText() === 'ttt')!
+      .getBoundingBox();
+  const below = outerText(notes[0]);
+  const lowerGap = tuplet.getYPosition() - (below.getY() + below.getH());
+  const upperGap = outerText(notes2[1]).getY() - tuplet2.getYPosition();
+  const space = stave.getSpacingBetweenLines();
+  options.assert.ok(lowerGap >= space && lowerGap < 2 * space, 'Lower bracket clears the text');
+  options.assert.ok(Math.abs(upperGap - lowerGap) <= space / 2, 'Both brackets have comparable clearance');
 }
 
 function justifyStaveNotes(options: TestOptions): void {

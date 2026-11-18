@@ -1,10 +1,12 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
+// Tablature bend phrases, including nested bends on the strings of a chord.
 
 import { Element, ElementStyle } from './element';
 import { Metrics } from './metrics';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
+import { Note } from './note';
 import { Category, isTabNote } from './typeguard';
 import { RuntimeError } from './util';
 
@@ -34,24 +36,30 @@ export class Bend extends Modifier {
   static format(bends: Bend[], state: ModifierContextState): boolean {
     if (!bends || bends.length === 0) return false;
 
-    let lastWidth = 0;
-    // Format Bends
-    for (let i = 0; i < bends.length; ++i) {
-      const bend = bends[i];
+    // Keep each chord together even when modifiers from simultaneous voices interleave.
+    const chords = new Map<Note, Bend[]>();
+    for (const bend of bends) {
       const note = bend.checkAttachedNote();
-
-      if (isTabNote(note)) {
-        const stringPos = note.leastString() - 1;
-        if (state.topTextLine < stringPos) {
-          state.topTextLine = stringPos;
-        }
-      }
-      bend.setXShift(lastWidth);
-      lastWidth = bend.getWidth();
-      bend.setTextLine(state.topTextLine);
+      const chord = chords.get(note) ?? [];
+      chord.push(bend);
+      chords.set(note, chord);
+      if (isTabNote(note)) state.topTextLine = Math.max(state.topTextLine, note.leastString() - 1);
     }
 
-    state.rightShift += lastWidth;
+    let width = 0;
+    for (const [note, chord] of chords) {
+      if (isTabNote(note)) {
+        const positions = note.getPositions();
+        // The upper string takes the inside curve. A lower string must pass to its right.
+        chord.sort((a, b) => positions[a.checkIndex()].str - positions[b.checkIndex()].str);
+      }
+      for (const bend of chord) {
+        bend.setXShift(width);
+        width = bend.getWidth();
+        bend.setTextLine(state.topTextLine);
+      }
+    }
+    state.rightShift += width;
     state.topTextLine += 1;
     return true;
   }
@@ -231,10 +239,9 @@ export class Bend extends Modifier {
 
     for (let i = 0; i < this.phrase.length; ++i) {
       const bend = this.phrase[i];
-      if (!bend.drawWidth) bend.drawWidth = 0;
-      if (i === 0) bend.drawWidth += xShift;
+      const drawWidth = (bend.drawWidth ?? 0) + (i === 0 ? xShift : 0);
 
-      lastDrawnWidth = bend.drawWidth + lastBendDrawWidth - (i === 1 ? xShift : 0);
+      lastDrawnWidth = drawWidth + lastBendDrawWidth - (i === 1 ? xShift : 0);
       if (bend.type === Bend.UP) {
         if (lastBend && lastBend.type === Bend.UP) {
           renderArrowHead(start.x, bendHeight, +1);
@@ -254,14 +261,14 @@ export class Bend extends Modifier {
         }
 
         if (!lastBend) {
-          lastDrawnWidth = bend.drawWidth;
+          lastDrawnWidth = drawWidth;
           renderRelease(start.x, start.y, lastDrawnWidth, bendHeight);
         }
       }
 
       renderText(start.x + lastDrawnWidth, bend.text);
       lastBend = bend;
-      lastBendDrawWidth = bend.drawWidth;
+      lastBendDrawWidth = drawWidth;
       lastBend.x = start.x;
 
       start.x += lastDrawnWidth;

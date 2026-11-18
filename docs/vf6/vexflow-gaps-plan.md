@@ -6,7 +6,7 @@ Last reviewed: **2026-11-18**
 
 Reviewed against [main at 31405bc5](https://github.com/vexflow/vexflow/commit/31405bc51df59aa719161c26f7160e9ea26e32df), package version **5.2.0**.
 
-Status: **M0 baseline recorded. Maintainer feedback recorded for seven of 64 examples. M1–M8 remain proposed or deferred.**
+Status: **M0 complete. The five reviewed defects are fixed and both unison controls are expected. M1–M8 remain proposed or deferred.**
 
 Source of scope: [Notation gap register](vexflow-gaps.md)
 
@@ -172,17 +172,17 @@ All estimates below are **rough engineering effort**, not calendar promises. The
 
 M0–M7 total **44–75 engineer-weeks before contingency**. Reserve roughly 25% for discoveries and integration: **55–94 engineer-weeks**. Parallel staffing can reduce elapsed time, but the geometry → collision → system → page path is sequential. Re-estimate after M0 and after each architecture spike; do not commit a release date from these ranges.
 
-| Milestone | Outcome                               | Hard entry dependencies                       | Rough effort         | Status            |
-| --------- | ------------------------------------- | --------------------------------------------- | -------------------- | ----------------- |
-| M0        | Auditable corpus and baseline         | None                                          | 2–3 weeks            | Baseline recorded |
-| M1        | Geometry, policy and anchor contracts | M0 seed cases                                 | 5–8 weeks            | Proposed          |
-| M2        | Reliable local engraving              | M1 contracts for affected classes             | 6–10 weeks           | Proposed          |
-| M3        | Collision-aware phrases and lyrics    | M1; relevant M2 placement                     | 7–12 weeks           | Proposed          |
-| M4        | Complete continuous scores            | M2/M3, minimal context from M1                | 7–12 weeks           | Proposed          |
-| M5        | Pages and basic part layouts          | M4, stable vertical envelopes                 | 4–7 weeks            | Proposed          |
-| M6        | Mainstream instrument profiles        | M2–M4; parts use M5                           | 8–14 weeks           | Proposed          |
-| M7        | Web/integration quality release       | M0–M5 and P1 scope of M6                      | 5–9 weeks            | Proposed          |
-| M8        | Specialist expansion                  | Explicit profile charter; required core gates | Estimate per profile | Deferred          |
+| Milestone | Outcome                               | Hard entry dependencies                       | Rough effort         | Status   |
+| --------- | ------------------------------------- | --------------------------------------------- | -------------------- | -------- |
+| M0        | Auditable corpus and baseline         | None                                          | 2–3 weeks            | Complete |
+| M1        | Geometry, policy and anchor contracts | M0 seed cases                                 | 5–8 weeks            | Proposed |
+| M2        | Reliable local engraving              | M1 contracts for affected classes             | 6–10 weeks           | Proposed |
+| M3        | Collision-aware phrases and lyrics    | M1; relevant M2 placement                     | 7–12 weeks           | Proposed |
+| M4        | Complete continuous scores            | M2/M3, minimal context from M1                | 7–12 weeks           | Proposed |
+| M5        | Pages and basic part layouts          | M4, stable vertical envelopes                 | 4–7 weeks            | Proposed |
+| M6        | Mainstream instrument profiles        | M2–M4; parts use M5                           | 8–14 weeks           | Proposed |
+| M7        | Web/integration quality release       | M0–M5 and P1 scope of M6                      | 5–9 weeks            | Proposed |
+| M8        | Specialist expansion                  | Explicit profile charter; required core gates | Estimate per profile | Deferred |
 
 Web compatibility, performance measurement, API parity, and documentation run throughout; M7 is their final integration gate. M6 P2 items may be delivered after the first quality release if explicitly deferred. P1 percussion support is part of the core repertoire target. M5 basic parts do not imply automatic condensing.
 
@@ -467,7 +467,7 @@ Separate implementation completion from merge, release and deployment. A feature
 
 ### After the M0 baseline
 
-1. Review the flagged images in the [M0 report](m0.md) and record decisions by case ID.
+1. Use the [M0 closure record](m0.md#m0-closure) and its five regression cases as the VF5 starting point.
 2. Use the three-spelling chord as the first compatible VF5 repair candidate. Preserve explicit accidental spelling and the passing two-head control.
 3. Prototype pre-draw geometry for the collision in the three-voice fixture, an articulation stack and a lyric row.
 4. Compare the two persistence designs against the [score and excerpt requirement](requirements/score-persistence.md). Record the M1 decision independently of the VF5 repair.
@@ -509,3 +509,4 @@ Review progress by **supported use case and unresolved severity**. Report confir
 | 2026-11-17 | Use the merged 5.2.0 API and guide as the baseline. Add the score/excerpt persistence decision to M1. | VF-044/049 verified. VF-013 design remains open.                                                                                                                                   |
 | 2026-11-17 | Split compatible V5 delivery from parallel V6 requirements and design.                                | Proposed by the maintainer. The planned prototype repository will carry V6 requirements. [Issue discussion](https://github.com/vexflow/vexflow/issues/358#issuecomment-6960644745) |
 | 2026-11-18 | Record M0 and start a branch-local VF6 requirements directory.                                        | [Evidence, priority and revised effort](m0.md). Seven cases have [engraving feedback](m0.md#maintainer-engraving-review).                                                          |
+| 2026-11-18 | Complete M0 with the five reviewed VF5 engraving fixes.                                               | Both unison fixtures are expected. [Closure evidence](m0.md#m0-closure).                                                                                                           |

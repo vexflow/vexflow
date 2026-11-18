@@ -98,8 +98,8 @@ export class Curve extends Element {
       thickness: 2,
       xShift: 0,
       yShift: 10,
-      position: CurvePosition.NEAR_HEAD,
-      positionEnd: CurvePosition.NEAR_HEAD,
+      position: 'auto',
+      positionEnd: 'auto',
       invert: false,
       cps: [
         { x: 0, y: 10 },
@@ -188,65 +188,32 @@ export class Curve extends Element {
   private getRenderParams(): CurveRenderParams {
     const firstNote = this.from;
     const lastNote = this.to;
-    let firstX;
-    let lastX;
-    let firstY;
-    let lastY;
-    let stemDirection = 0;
+    const start = firstNote ?? lastNote!;
+    const end = lastNote ?? firstNote!;
+    const { openingDirection, invert } = this.renderOptions;
+    let direction = end.getStemDirection();
+    if (openingDirection === 'up') direction = 1;
+    if (openingDirection === 'down') direction = -1;
+    if (invert) direction *= -1;
 
-    let metric = 'baseY';
-    let endMetric = 'baseY';
-
-    function getPosition(position: string | number) {
-      return typeof position === 'string' ? Curve.PositionString[position] : position;
-    }
-    const position = getPosition(this.renderOptions.position);
-    const positionEnd = getPosition(this.renderOptions.positionEnd);
-
-    if (position === CurvePosition.NEAR_TOP) {
-      metric = 'topY';
-      endMetric = 'topY';
-    }
-
-    if (positionEnd === CurvePosition.NEAR_HEAD) {
-      endMetric = 'baseY';
-    } else if (positionEnd === CurvePosition.NEAR_TOP) {
-      endMetric = 'topY';
-    }
-
-    if (firstNote) {
-      firstX = firstNote.getTieRightX();
-      stemDirection = firstNote.getStemDirection();
-      firstY = firstNote.getStemExtents()[metric];
-    } else {
-      const stave = lastNote!.checkStave();
-      firstX = stave.getTieStartX();
-      firstY = lastNote!.getStemExtents()[metric];
-    }
-
-    if (lastNote) {
-      lastX = lastNote.getTieLeftX();
-      stemDirection = lastNote.getStemDirection();
-      lastY = lastNote.getStemExtents()[endMetric];
-    } else {
-      const stave = firstNote!.checkStave();
-      lastX = stave.getTieEndX();
-      lastY = firstNote!.getStemExtents()[endMetric];
-    }
-
-    if (this.renderOptions.openingDirection === 'up') {
-      stemDirection = 1;
-    }
-    if (this.renderOptions.openingDirection === 'down') {
-      stemDirection = -1;
+    // An opening-up slur sits below the staff. On its stem side, attach beyond the stem
+    // tip (and beam). Keep authored head/tip anchors and automatic-opening defaults.
+    function endpointY(note: Note, position: string | number): number {
+      const extents = note.getStemExtents();
+      const onStemSide = direction === -note.getStemDirection();
+      const useTip =
+        position === CurvePosition.NEAR_TOP ||
+        position === 'nearTop' ||
+        (position === 'auto' && openingDirection !== 'auto' && onStemSide);
+      return useTip ? extents.topY : extents.baseY;
     }
 
     return {
-      firstX,
-      lastX,
-      firstY,
-      lastY,
-      direction: stemDirection * (this.renderOptions.invert === true ? -1 : 1),
+      firstX: firstNote ? firstNote.getTieRightX() : end.checkStave().getTieStartX(),
+      lastX: lastNote ? lastNote.getTieLeftX() : start.checkStave().getTieEndX(),
+      firstY: endpointY(start, this.renderOptions.position),
+      lastY: endpointY(end, this.renderOptions.positionEnd),
+      direction,
     };
   }
 

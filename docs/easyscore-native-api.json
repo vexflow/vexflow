@@ -1076,6 +1076,7 @@
       "getLeftShift(): number",
       "getRightShift(): number",
       "getRightShiftForTie(): number",
+      "getUnmeasuredTextLines(above: boolean): number",
       "getState(): ModifierContextState",
       "getMetrics(): ModifierContextMetrics",
       "preFormat(): void",

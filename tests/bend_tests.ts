@@ -203,7 +203,19 @@ function reverseBends(options: TestOptions, contextBuilder: ContextBuilder): voi
       .preFormat()
       .setX(75 * i);
 
-    note.setStave(stave).setContext(ctx).drawWithStyle();
+    // Bends were attached lower string first. Compare the actual curve endpoints.
+    const arrowXs: number[] = [];
+    const quadratic = ctx.quadraticCurveTo.bind(ctx);
+    ctx.quadraticCurveTo = (cx, cy, x, y) => {
+      arrowXs.push(x);
+      return quadratic(cx, cy, x, y);
+    };
+    try {
+      note.setStave(stave).setContext(ctx).drawWithStyle();
+    } finally {
+      ctx.quadraticCurveTo = quadratic;
+    }
+    if (i < 2) options.assert.ok(arrowXs[0] > arrowXs[1], 'Lower string uses the outer curve');
     Note.plotMetrics(ctx, note, 140);
     options.assert.ok(true, 'Bend ' + i);
   }
