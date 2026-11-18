@@ -9,6 +9,7 @@ import { Beam } from '../src/beam';
 import { BuilderOptions } from '../src/easyscore';
 import { Factory } from '../src/factory';
 import { Note } from '../src/note';
+import { StaveNote } from '../src/stavenote';
 import { Voice } from '../src/voice';
 
 const ThreeVoicesTests = {
@@ -33,7 +34,8 @@ function createThreeVoicesTest(
   noteGroup1: [string, BuilderOptions],
   noteGroup2: [string, BuilderOptions],
   noteGroup3: [string, BuilderOptions],
-  setup: (f: Factory, v: Voice[]) => void
+  setup: (f: Factory, v: Voice[]) => void,
+  check?: (notes: StaveNote[][], assert: Assert) => void
 ) {
   return (options: TestOptions) => {
     const factory = VexFlowTests.makeFactory(options, 600, 200);
@@ -41,7 +43,7 @@ function createThreeVoicesTest(
     const score = factory.EasyScore();
 
     // Convert each noteGroup array to StaveNote[].
-    const noteGroups = [noteGroup1, noteGroup2, noteGroup3].map((args) => score.notes(...args));
+    const noteGroups = [noteGroup1, noteGroup2, noteGroup3].map((args) => score.notes(...args) as StaveNote[]);
 
     const voices = noteGroups.map((notes) => score.voice(notes));
 
@@ -62,6 +64,7 @@ function createThreeVoicesTest(
       beams[i].setContext(factory.getContext()).drawWithStyle();
     }
 
+    check?.(noteGroups, options.assert);
     options.assert.ok(true);
   };
 }
@@ -84,7 +87,7 @@ const threeVoices1 = createThreeVoicesTest(
 );
 
 /**
- * Lots of beamed notes. A beam and notehead overlap.
+ * The middle double beam must clear the second head of the lowest voice.
  */
 const threeVoices2 = createThreeVoicesTest(
   ['(a4 e5)/16, e5, e5, e5, e5/8, e5, e5/2', { stem: 'up' }],
@@ -100,6 +103,16 @@ const threeVoices2 = createThreeVoicesTest(
       .getTickables()[0]
       .addModifier(f.Fingering({ number: '0', position: 'left' }), 0)
       .addModifier(f.Fingering({ number: '4', position: 'left' }), 1);
+  },
+  (groups, assert) => {
+    const beam = groups[1][0].checkBeam();
+    const first = beam.getNotes()[0];
+    const lower = groups[2][1];
+    const headTop = lower.noteHeads[0].getBoundingBox().getY();
+    for (const x of [lower.getNoteHeadBeginX(), lower.getNoteHeadEndX()]) {
+      const edge = beam.getSlopeY(x, first.getStemX(), beam.getBeamYToDraw(), beam.slope);
+      assert.ok(edge < headTop, `Middle beam edge at ${edge} clears lower head at ${headTop} (x=${x})`);
+    }
   }
 );
 

@@ -35,7 +35,7 @@ type NoteParams = [string, BuilderOptions];
 function createTest(
   noteGroup1: NoteParams,
   noteGroup2: NoteParams,
-  setupCurves: (f: Factory, n: StemmableNote[]) => void
+  setupCurves: (f: Factory, n: StemmableNote[]) => void | ((assert: Assert) => void)
 ) {
   return (options: TestOptions) => {
     const factory = VexFlowTests.makeFactory(options, 350, 200);
@@ -48,13 +48,14 @@ function createTest(
       score.beam(score.notes(...noteGroup2)), // group 2
     ].reduce(concat);
 
-    setupCurves(factory, staveNotes);
+    const check = setupCurves(factory, staveNotes);
 
     const voices = [score.voice(staveNotes, { time: '4/4' })];
     factory.Formatter().joinVoices(voices).formatToStave(voices, stave);
     factory.draw();
 
-    options.assert.ok('Simple Curve');
+    check?.(options.assert);
+    options.assert.ok(true, 'Curve renders');
   };
 }
 
@@ -98,13 +99,17 @@ const openingDirUp = createTest(
       },
     });
 
-    f.Curve({
+    const lower = f.Curve({
       from: notes[4],
       to: notes[7],
       options: {
         openingDirection: 'up',
       },
     });
+    return (assert) => {
+      const tips = [notes[4], notes[7]].map((note) => note.getStemExtents().topY);
+      assert.ok(lower.getBoundingBox().getY() > Math.min(...tips), 'Opening-up slur clears the down-stem beam');
+    };
   }
 );
 
@@ -112,7 +117,7 @@ const openingDirDown = createTest(
   ['c4/8, f5, d5, g5', { stem: 'up' }], // beamGroup1
   ['d6/8, f5, d5, g5', { stem: 'down' }], // beamGroup2
   (f, notes) => {
-    f.Curve({
+    const upper = f.Curve({
       from: notes[0],
       to: notes[3],
       options: {
@@ -127,6 +132,11 @@ const openingDirDown = createTest(
         openingDirection: 'down',
       },
     });
+    return (assert) => {
+      const tips = [notes[0], notes[3]].map((note) => note.getStemExtents().topY);
+      const bounds = upper.getBoundingBox();
+      assert.ok(bounds.getY() + bounds.getH() < Math.max(...tips), 'Opening-down slur clears the up-stem beam');
+    };
   }
 );
 

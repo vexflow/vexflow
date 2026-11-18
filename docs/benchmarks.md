@@ -1,12 +1,15 @@
 # Score benchmarks
 
-The repository keeps three small, original score studies. They exercise realistic combinations of notation without copying large generated scores into the source tree.
+The repository keeps six small, original score studies. They exercise realistic combinations of notation without copying large generated scores into the source tree.
 
-| Study   | Workload at four systems                                    |
-| ------- | ----------------------------------------------------------- |
-| Chorale | 32 staves, 192 notes; multiple voices, lyrics, and ties     |
-| Piano   | 32 staves, 256 note objects; chords and beamed eighth notes |
-| Chamber | 48 staves, 576 notes; triplets, beams, and ornaments        |
+| Study      | Workload at four systems                                        |
+| ---------- | --------------------------------------------------------------- |
+| Chorale    | 32 staves, 192 notes; multiple voices, lyrics, and ties         |
+| Piano      | 32 staves, 256 note objects; chords and beamed eighth notes     |
+| Chamber    | 48 staves, 576 notes; triplets, beams, and ornaments            |
+| Lead sheet | 16 staves, 128 melody notes with chord symbols                  |
+| Percussion | 16 staves, 128 attacks with mixed heads and beams               |
+| Tab        | 16 tab staves, 128 fret positions with rhythmic stems and beams |
 
 The fixtures live in `tools/score-fixtures.mjs`. Their smoke checks run in `grunt test`.
 

@@ -130,6 +130,15 @@ export class ModifierContext {
     return this.state.rightShift - this.annotationRightShift;
   }
 
+  // Lines occupied by the outermost annotations. Tuplets can measure this text directly.
+  private measuredTopLines = 0;
+  private measuredBottomLines = 0;
+
+  /** Keep the line allowance for other marks when using actual annotation ink bounds. */
+  getUnmeasuredTextLines(above: boolean): number {
+    return above ? this.state.topTextLine - this.measuredTopLines : this.state.textLine - this.measuredBottomLines;
+  }
+
   getState(): ModifierContextState {
     return this.state;
   }
@@ -173,7 +182,11 @@ export class ModifierContext {
       state
     );
     const rightShiftBeforeAnnotations = state.rightShift;
+    const topBefore = state.topTextLine;
+    const bottomBefore = state.textLine;
     Annotation.format(annotations.filter(isOutsideNote), state);
+    const topAfter = state.topTextLine;
+    const bottomAfter = state.textLine;
     const rightShiftWithAnnotations = state.rightShift;
     // Keep annotation vertical placement in its original stage. Its horizontal
     // text box must not push nearby modifiers away from the notehead.
@@ -181,6 +194,10 @@ export class ModifierContext {
     ChordSymbol.format(members[Category.ChordSymbol] as ChordSymbol[], state);
     Bend.format(members[Category.Bend] as Bend[], state);
     Vibrato.format(members[Category.Vibrato] as Vibrato[], state, this);
+
+    // If a later mark stacked above the annotations, retain its full reserved height.
+    this.measuredTopLines = state.topTextLine === topAfter ? topAfter - topBefore : 0;
+    this.measuredBottomLines = state.textLine === bottomAfter ? bottomAfter - bottomBefore : 0;
 
     // Reserve enough note spacing for both the lyric and nearby modifiers.
     this.annotationRightShift = Math.max(0, rightShiftWithAnnotations - state.rightShift);

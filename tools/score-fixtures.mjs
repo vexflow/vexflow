@@ -1,11 +1,15 @@
 // Small original score studies for repeatable layout and rendering benchmarks.
 // No external score data or network access is needed. This function also runs inside Chromium.
+export const scoreKinds = ['chorale', 'piano', 'chamber', 'lead-sheet', 'percussion', 'tab'];
+
+/** Construct, format and draw four complete measures per system in the browser. */
 export function renderScore({ kind = 'chorale', systems = 4, containerId = 'score' } = {}) {
   const VF = globalThis.VexFlow;
   document.documentElement.style.cssText = 'background:white;color:black;color-scheme:light';
   const container = document.getElementById(containerId);
   container.replaceChildren();
-  const staffCount = kind === 'chamber' ? 3 : 2;
+  const singleStaff = ['lead-sheet', 'percussion', 'tab'].includes(kind);
+  const staffCount = singleStaff ? 1 : kind === 'chamber' ? 3 : 2;
   const systemHeight = staffCount * 150 + 40;
   const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
   renderer.resize(1100, systems * systemHeight);
@@ -18,19 +22,34 @@ export function renderScore({ kind = 'chorale', systems = 4, containerId = 'scor
   for (let system = 0; system < systems; system++) {
     for (let bar = 0; bar < 4; bar++) {
       for (let staff = 0; staff < staffCount; staff++) {
-        const clef = staff === staffCount - 1 ? 'bass' : 'treble';
-        const stave = new VF.Stave(15 + bar * 267, system * systemHeight + staff * 150 + 35, 267);
+        let clef = !singleStaff && staff === staffCount - 1 ? 'bass' : 'treble';
+        if (kind === 'percussion') clef = 'percussion';
+        if (kind === 'tab') clef = 'tab';
+        const Staff = kind === 'tab' ? VF.TabStave : VF.Stave;
+        const stave = new Staff(15 + bar * 267, system * systemHeight + staff * 150 + 35, 267);
         if (bar === 0) stave.addClef(clef).addTimeSignature('4/4');
         const voices = [];
         const beams = [];
         const tuplets = [];
         const ties = [];
         const notes = [];
-        const count = kind === 'chorale' ? 4 : kind === 'piano' ? 8 : 12;
+        const count = kind === 'chorale' ? 4 : kind === 'chamber' ? 12 : 8;
         for (let beat = 0; beat < count; beat++) {
           const key = clef === 'bass' ? ['c/3', 'g/2', 'a/2', 'f/2'][(bar + beat) % 4] : melody[(bar + beat) % 8];
           const keys = kind === 'piano' && staff === 1 ? [key, 'e/3', 'g/3'] : [key];
-          const note = new VF.StaveNote({ keys, clef, duration: count === 4 ? 'q' : '8', stemDirection: 1 });
+          let note;
+          if (kind === 'tab') {
+            note = new VF.TabNote(
+              { positions: [{ str: 1 + (beat % 3), fret: (beat + bar) % 8 }], duration: '8' },
+              true
+            );
+          } else {
+            const pitches = kind === 'percussion' ? (beat % 2 ? ['g/5/x2'] : ['c/5', 'g/5/x2']) : keys;
+            note = new VF.StaveNote({ keys: pitches, clef, duration: count === 4 ? 'q' : '8', stemDirection: 1 });
+          }
+          if (kind === 'lead-sheet' && beat === 0) {
+            note.addModifier(new VF.ChordSymbol().addText(['Cmaj7', 'Am7', 'Dm7', 'G7'][bar]), 0);
+          }
           if (kind === 'chorale' && staff === 0) {
             const lyric = new VF.Annotation(['Sing', 'with', 'gentle', 'voices'][beat]).setVerticalJustification(
               VF.Annotation.VerticalJustify.BOTTOM
@@ -46,7 +65,7 @@ export function renderScore({ kind = 'chorale', systems = 4, containerId = 'scor
             beams.push(new VF.Beam(notes.slice(i, i + 3)));
           }
           notes[0].addModifier(new VF.Ornament('tr'), 0);
-        } else if (kind === 'piano') {
+        } else if (kind === 'piano' || singleStaff) {
           for (let i = 0; i < notes.length; i += 4) beams.push(new VF.Beam(notes.slice(i, i + 4)));
         }
         voices.push(new VF.Voice('4/4').addTickables(notes));

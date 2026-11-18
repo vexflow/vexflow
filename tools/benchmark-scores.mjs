@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 import puppeteer from 'puppeteer';
 
-import { renderScore } from './score-fixtures.mjs';
+import { renderScore, scoreKinds } from './score-fixtures.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const args = Object.fromEntries(process.argv.slice(2).map((arg) => arg.replace(/^--/, '').split('=')));
@@ -27,11 +27,12 @@ try {
   await page.setContent('<div id="score"></div>');
   await page.addScriptTag({ path: resolve(args.bundle ?? join(root, 'build/cjs/vexflow-debug.js')) });
   await page.evaluate(async () => {
+    await Promise.all([...document.fonts].map((face) => face.load()));
     await document.fonts.ready;
     VexFlow.setFonts('Bravura', 'Academico');
   });
   const results = [];
-  for (const kind of ['chorale', 'piano', 'chamber']) {
+  for (const kind of scoreKinds) {
     await page.evaluate(renderScore, { kind, systems }); // Warm up the same score before measuring.
     const samples = [];
     for (let run = 0; run < repetitions; run++) {
