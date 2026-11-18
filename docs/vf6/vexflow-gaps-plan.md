@@ -6,7 +6,7 @@ Last reviewed: **2026-11-18**
 
 **Primary status reference** · [upstream main at 5082e902](https://github.com/vexflow/vexflow/commit/5082e902baddfc00a3ac94124a91ffca78531b78). Compare the branch to freshly fetched main at every milestone review and after merges. Keep 5.2.0 as the historical release reference. [Latest fixture comparison](m0.md#latest-comparison)
 
-Status: **M0 complete. Both M1 beam examples passed maintainer review. The VF6 score representation awaits a decision. M2 is complete on the roadmap branch. All seven engraving examples passed maintainer review. M3–M8 remain proposed or deferred.**
+Status: **M0 complete. M1 and M2 are complete on the roadmap branch. The maintainer approved the VF6 score representation, both M1 beam examples and all seven M2 engraving examples. M3–M8 remain proposed or deferred.**
 
 Source of scope: [Notation gap register](vexflow-gaps.md)
 
@@ -73,7 +73,7 @@ A relationship has one logical identity even if it has several visual fragments.
 
 #### M1 decision on score serialization
 
-The [first VF6 requirement](requirements/score-persistence.md) specifies the musical passage, candidate representations and open decisions.
+The [first VF6 requirement](requirements/score-persistence.md) records the acceptance passage, both tested representations and the approved design direction.
 
 Use one original three-measure, two-staff passage for the decision. Change key in measure two, start a pedal there and release it in measure three. Give measure three a rehearsal mark and a dynamic with an explicit staff-relative offset.
 
@@ -82,7 +82,7 @@ Use one original three-measure, two-staff passage for the decision. Change key i
 3. Record the rehearsal mark once at its musical location, define its display on the chosen staves, and attach the pedal to its staff and time range. Specify how those objects follow edits to their measures.
 4. Reload and render at two widths. Compare event IDs, rational onsets, effective context and endpoints. The manual dynamic offset should survive. Automatic breaks and collision displacements should be recomputed from the new width.
 
-Choose the smallest compatible V5 option that passes those checks. Record separately which representation best fits the V6 requirements and whether migrating V5 data would require an adapter. Either an adapter contract or a versioned portable subset can satisfy the test. Schema adoption remains a decision for M1.
+Both representations passed these checks. On 2026-11-18, @0xfe approved a versioned, measure-based document for portable VF6 scores and excerpts. An adapter constructs VF5 notation through EasyScore. The prototype files establish the tested behavior. The production schema still needs broader notation coverage.
 
 ### 2. Geometry available before drawing
 
@@ -175,7 +175,7 @@ M0–M7 total **44–75 engineer-weeks before contingency**. Reserve roughly 25%
 | Milestone | Outcome                               | Hard entry dependencies                       | Rough effort         | Status   |
 | --------- | ------------------------------------- | --------------------------------------------- | -------------------- | -------- |
 | M0        | Auditable corpus and baseline         | None                                          | 2–3 weeks            | Complete |
-| M1        | Geometry, policy and anchor contracts | M0 seed cases                                 | 5–8 weeks            | In review |
+| M1        | Geometry, policy and anchor contracts | M0 seed cases                                 | 5–8 weeks            | Complete on branch |
 | M2        | Reliable local engraving              | M1 contracts for affected classes             | 6–10 weeks           | Complete on branch |
 | M3        | Collision-aware phrases and lyrics    | M1; relevant M2 placement                     | 7–12 weeks           | Proposed |
 | M4        | Complete continuous scores            | M2/M3, minimal context from M1                | 7–12 weeks           | Proposed |
@@ -216,7 +216,7 @@ Web compatibility, performance measurement, API parity, and documentation run th
 
 ## M1 — Make layout measurable and policies explicit
 
-**2026-11-18 · Engineering gates passed on the branch.** [Implementation, geometry audit and reproduction](m1.md) · [VF6 representation recommendation and remaining scope](requirements/score-persistence.md#m1-decision-record)
+**2026-11-18 · M1 complete on the branch.** [Implementation, geometry audit and reproduction](m1.md) · [Approved VF6 representation and remaining scope](requirements/score-persistence.md#m1-decision-record)
 
 **Gaps:** VF-002, VF-013, VF-037, VF-038, initial VF-046.
 
@@ -515,6 +515,7 @@ Review progress by **supported use case and unresolved severity**. Report confir
 | 2026-11-17 | Split compatible V5 delivery from parallel V6 requirements and design.                                | Proposed by the maintainer. The planned prototype repository will carry V6 requirements. [Issue discussion](https://github.com/vexflow/vexflow/issues/358#issuecomment-6960644745) |
 | 2026-11-18 | Record M0 and start a branch-local VF6 requirements directory.                                        | [Evidence, priority and revised effort](m0.md). Seven cases have [engraving feedback](m0.md#maintainer-engraving-review).                                                          |
 | 2026-11-18 | Complete M0 with the five reviewed VF5 engraving fixes.                                               | Both unison fixtures are expected. [Closure evidence](m0.md#m0-closure).                                                                                                           |
-| 2026-11-18 | Implement M1 on VF5 and exercise both VF6 persistence options. | [Engineering gates and review items](m1.md). The recommendation is ready for maintainer review. |
+| 2026-11-18 | Implement M1 on VF5 and exercise both VF6 persistence options. | [Engineering gates and review items](m1.md). Both prototypes passed the acceptance passage. |
 | 2026-11-18 | Use upstream main to judge outstanding branch changes. Keep a second comparison against 5.2.0 for release history. | [Current results and refresh procedure](m0.md#latest-comparison). |
 | 2026-11-18 | Implement M2 on VF5. | [Local engraving checks, branch comparison and review](m2.md). |
+| 2026-11-18 | Approve the representation for portable VF6 scores and excerpts. | M1 complete on the branch. [Decision and study limits](requirements/score-persistence.md#m1-decision-record). |

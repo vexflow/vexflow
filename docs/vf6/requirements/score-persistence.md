@@ -1,6 +1,6 @@
 # VF6 requirement 001 · Save a score or an excerpt
 
-**Revision 2 · 2026-11-18 · M1 study implemented · VF6 decision owner is @0xfe.** Parent gap [VF-013](../vexflow-gaps.md). The passage below is executable. The wire formats are study artifacts.
+**Revision 3 · 2026-11-18 · VF6 representation approved by @0xfe.** Parent gap [VF-013](../vexflow-gaps.md). The passage below is executable. The wire formats are study artifacts.
 
 ## Acceptance passage
 
@@ -13,7 +13,7 @@ Use two staves, treble and bass, in 4/4. Times below are fractions of a whole no
 | m3     | A4, G4      | G2          | Rehearsal B at the measure start, displayed above the upper staff. Release p1 at 1/2. Attach _p_ to upper event u3b at 1/2 with an authored downward offset of one staff space. |
 
 1. Save and reload the full score. Compare ordered IDs, voices, pitch spellings, rational onsets and durations, effective key and meter, mark ownership and both pedal endpoints. Preserve one logical rehearsal mark.
-2. Save m3 alone and load it in a fresh process. It opens in G major and 4/4. Preserve the start-of-excerpt pedal state and the release at 1/2, or explicitly report the unresolved incoming span. M1 must select the supported behavior. Silent loss fails.
+2. Save m3 alone and load it in a fresh process. It opens in G major and 4/4. Carry the incoming pedal as a continuation and preserve its release at 1/2.
 3. Render at widths that fit three bars on one row and force a break before m3. The second layout retains event IDs, staff ownership, the logical pedal and the authored one-space offset. Recompute automatic positions and fragments. Widening again restores the first layout.
 4. Insert a bar before m3. The rehearsal mark, dynamic and pedal release follow m3. Try a dangling anchor and a live custom tickable without an encoder. Return a diagnostic identifying the offending object before producing an apparently complete portable file.
 
@@ -23,7 +23,7 @@ EasyScore resolves local IDs, accepts notation strings and live objects, inherit
 
 ## M1 decision record
 
-**2026-11-18 · Engineering recommendation for maintainer review.** Use a versioned, measure-based representation for portable VF6 scores and excerpts. Use an adapter to construct VF5 notation through EasyScore. Keep live Factory-owned objects as supported VF5 inputs. Portability is an explicit operation. [Codecs](../../../tests/engraving/score-persistence.mjs) · [Native rendering adapter](../../../tests/engraving/score-layout.mjs) · [Tests](../../../tests/node/engraving-layout-tests.mjs)
+**2026-11-18 · Representation approved by @0xfe.** Use a versioned, measure-based representation for portable VF6 scores and excerpts. Use an adapter to construct VF5 notation through EasyScore. Keep live Factory-owned objects as supported VF5 inputs. Portability is an explicit operation. [Codecs](../../../tests/engraving/score-persistence.mjs) · [Native rendering adapter](../../../tests/engraving/score-layout.mjs) · [Tests](../../../tests/node/engraving-layout-tests.mjs)
 
 | Question | Finding on the acceptance passage | Decision |
 | --- | --- | --- |
@@ -35,4 +35,4 @@ EasyScore resolves local IDs, accepts notation strings and live objects, inherit
 
 **Study limits.** Version 1 supports one pitched voice per staff, aligned 4/4 measures, boundary key changes, and canonical rational times on the sixteenth-note grid. It handles the three authored mark types in this passage. The VF5 adapter resolves a timed pedal from an aligned attack or bar boundary. Arbitrary unvoiced times, tuplets, grace ordering, transposition, opaque extension payloads and editorial paste reconciliation need additional fixtures. This study adds no public VF5 save/load API.
 
-**Review history.** M0 drafted the passage on 2026-11-18. M1 implemented and compared both encodings on the same date. Record the maintainer verdict, date, and any change to the supported behavior here.
+**Review history.** M0 drafted the passage on 2026-11-18. M1 implemented and compared both encodings on the same date. @0xfe approved the versioned, measure-based direction for VF6 and the EasyScore adapter for VF5 on 2026-11-18.
