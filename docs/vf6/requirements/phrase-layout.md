@@ -1,0 +1,15 @@
+# VF6 requirements from phrase layout
+
+**2026-11-18 · Proposed.** The VF5 choir and piano scores demonstrate the following requirements for a measure-based VF6 score. Update the decision column as the model and its readers evolve. [VF5 implementation and tests](../m3.md) · [Approved score representation](score-persistence.md#m1-decision-record)
+
+| ID | Requirement | Acceptance and open decision |
+| --- | --- | --- |
+| PH-01 | Give each verse stable identity, event-anchored syllables and explicit hyphen and melisma relationships. Keep the original Unicode text. | Round-trip both choir verses. Moving an intervening attack preserves the two links and their endpoint IDs. Decide how verse labels, elision and excerpt boundaries are encoded. |
+| PH-02 | Give pitch ties head-level endpoints. Give slurs event or head anchors, opening direction and optional authored controls. | A chord edit preserves the intended tied pitches. Resizing can change a slur’s derived rise while its endpoints and authored controls stay fixed. Specify continuation anchors in M4. |
+| PH-03 | Preserve author intent for shared lanes, side, order, fixed staff-relative baselines and locked gaps. Derive pixel positions during layout. | Round-trip a dynamic pair, wedge, pedal changes and ottava. Compare layout at two widths. Decide how imported page-absolute overrides interact with staff-relative coordinates. |
+| PH-04 | A placement diagnostic must identify the source events or marks, the conflicting constraint and whether the resulting geometry is partial. | A conflicting pin, a crossing pair, an unsupported participant and an exhausted pass budget must be distinguishable. VF5 supplies codes and native element IDs. VF6 needs persistent score IDs and an explicit severity policy. |
+| PH-05 | Measure stems, heads, connectors, loaded-font glyphs and curved ink before drawing. Represent legitimate joins separately from collisions. | A rest clears a mark at a different onset. A slur clears an accent. A stem touching its own beam passes. Moving a staff refits cross-staff members within a deterministic budget. M4 must include these envelopes in break decisions. |
+| PH-06 | Make text direction, language and fallback policy available to screen and export renderers. Preserve whole graphemes during measurement. | The VF5 tests preserve combining sequences and CJK text and identify unsupported Arabic shaping. M7 must test bidi, joining, font fallback, missing glyphs and exported appearance with suitable fonts. |
+| PH-07 | Keep fitted curves, candidate positions, pass counts and connector rectangles in the derived layout. | A save–load–resize cycle must reconstruct the phrase from musical events, relationships and author overrides. Decide how an excerpt records a syllable or span that starts outside its selected measures. |
+
+The first VF6 acceptance passage can use the two VF5 studies verbatim, replace their native object references with score IDs, serialize, reload and compare musical anchors before checking geometry. The VF6 reader, writer and cross-system rules remain design work. [Executable material](../../../tests/engraving/phrase-studies.mjs)

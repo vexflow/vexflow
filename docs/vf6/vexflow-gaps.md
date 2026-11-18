@@ -4,11 +4,13 @@ Created: **2026-11-16**
 
 Last reviewed: **2026-11-18**
 
-**Primary status reference** · [upstream main at c9879c62](https://github.com/vexflow/vexflow/commit/c9879c62a7ca99418e34803929e1b36e5d98ffef). M0, M1 and M2 have landed on main. The pinned 5.2.0 release supplies historical evidence. [Latest fixture comparison](m0.md#latest-comparison)
+**Primary status reference** · [upstream main at 18f11424](https://github.com/vexflow/vexflow/commit/18f11424bdf291599683d063b18ded0dc840f0e0). M0, M1 and M2 have landed on main. The pinned 5.2.0 release supplies historical evidence. [Latest fixture comparison](m0.md#latest-comparison)
 
 Status: **52 tracked items. Two verified on main and 50 remaining.**
 
 Companion: [Strategy and milestone plan](vexflow-gaps-plan.md)
+
+**M3 implemented on the roadmap branch, awaiting engraving review.** VF-003, VF-008, VF-011, VF-017 and VF-022–024 have new single-system evidence. Their main status below changes when the branch lands. [Phrase layout](m3.md) · [VF6 requirements](requirements/phrase-layout.md)
 
 **M2 complete on main** · [Local engraving and maintainer approval](m2.md) · [VF6 local engraving requirements](requirements/local-engraving.md)
 
