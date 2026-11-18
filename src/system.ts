@@ -263,7 +263,7 @@ export class System extends Element {
   }
 
   /** Format the system. */
-  format(): void {
+  format(row?: { staffOffsets?: readonly number[]; endPadding?: number }): void {
     this.phrase?.resetPlacement();
     const optionsDetails = this.options.details;
     let justifyWidth = 0;
@@ -276,6 +276,7 @@ export class System extends Element {
 
     this.partStaves.forEach((part, index) => {
       y = y + part.space(this.partStaveInfos[index].spaceAbove);
+      if (row?.staffOffsets) y = this.options.y + row.staffOffsets[index];
       part.setY(y);
       y = y + part.space(this.partStaveInfos[index].spaceBelow);
       y = y + part.space(this.options.spaceBetweenStaves);
@@ -301,7 +302,7 @@ export class System extends Element {
     this.partStaves.forEach((part) => part.setNoteStartX(startX));
     if (this.options.autoWidth && this.partVoices.length > 0) {
       justifyWidth = formatter.preCalculateMinTotalWidth(this.partVoices);
-      this.options.width = justifyWidth + Stave.rightPadding + (startX - this.options.x);
+      this.options.width = justifyWidth + Stave.rightPadding + (startX - this.options.x) + (row?.endPadding ?? 0);
       this.partStaves.forEach((part) => {
         part.setWidth(this.options.width);
       });
@@ -311,6 +312,7 @@ export class System extends Element {
         : this.options.width - (startX - this.options.x) - Stave.defaultPadding;
     }
     if (this.partVoices.length > 0) {
+      if (!this.options.autoWidth) justifyWidth -= row?.endPadding ?? 0;
       formatter.format(this.partVoices, this.options.noJustification ? 0 : justifyWidth, this.options.formatOptions);
     }
     formatter.postFormat();

@@ -409,6 +409,21 @@
       "gaps": ["VF-003", "VF-008", "VF-011", "VF-017", "VF-022", "VF-023", "VF-024"],
       "review": "Read each verse across the skipped attack and extender. Follow the slur around the accents and the crescendo between the dynamics. Inspect the space between staves.",
       "cases": { "m3-choir": "Two verses over a skipped attack", "m3-piano": "Slur, crescendo, ottava and pedal" }
+    },
+    {
+      "module": "M4 studies",
+      "source": "tests/engraving/continuous-studies.mjs",
+      "gaps": ["VF-014", "VF-015", "VF-016", "VF-017", "VF-019", "VF-021", "VF-022", "VF-024", "VF-028"],
+      "review": "Follow continuations through the breaks, check the returning instruments and compare greedy and balanced row lengths.",
+      "cases": {
+        "m4-choir-wide": "Vocal phrase on a wide system",
+        "m4-choir-narrow": "Vocal phrase across narrow systems",
+        "m4-keyboard": "Grand staff with beam, wedge and pedal",
+        "m4-chord": "Split chord and arpeggio on two staves",
+        "m4-ensemble": "Silent and returning ensemble staves",
+        "m4-greedy": "Greedy breaks on a short melody",
+        "m4-balanced": "Balanced breaks on the same melody"
+      }
     }
   ]
 }

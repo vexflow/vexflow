@@ -44,7 +44,8 @@ export function applyCompositionAccidentals(
   changes: KeyChange[],
   generated: Set<Accidental>,
   stave: Stave,
-  includeGrace = false
+  includeGrace = false,
+  placed?: Set<Accidental>
 ): void {
   const music = new Music();
   let scale = music.createScaleMap(key);
@@ -102,8 +103,11 @@ export function applyCompositionAccidentals(
         for (const mark of marks) {
           if (!explicit.includes(mark)) note.getModifiers().splice(note.getModifiers().indexOf(mark), 1);
         }
-        if (!explicit.length && (previous !== pitch || (simultaneous.get(id)?.size ?? 0) > 1))
-          score.attach(note, score.make.accidental({ type: accidental }), index);
+        if (!explicit.length && (previous !== pitch || (simultaneous.get(id)?.size ?? 0) > 1)) {
+          const mark = score.make.accidental({ type: accidental });
+          score.attach(note, mark, index);
+          placed?.add(mark);
+        }
         // Microtonal spellings have no native key-string representation. Force a fresh sign next time.
         const value = explicit.some((mark) => !Music.accidentals.includes(mark.type)) ? 'microtonal' : pitch;
         const values = updates.get(id) ?? new Set<string>();

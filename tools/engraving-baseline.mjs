@@ -6,6 +6,7 @@ import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import puppeteer from 'puppeteer';
 import { analyzeLayout } from './render-metrics.mjs';
+import { makeContinuousStudy } from '../tests/engraving/continuous-studies.mjs';
 import { makePhraseStudy } from '../tests/engraving/phrase-studies.mjs';
 import { registerStudies } from '../tests/engraving/studies.mjs';
 import { compareDirectories } from './visual-regression.mjs';
@@ -103,6 +104,7 @@ async function capture(label, bundle, expectedRevision) {
     });
     await page.evaluate(selectCases, cases);
     await page.addScriptTag({ content: `window.makePhraseStudy = ${makePhraseStudy};` });
+    await page.addScriptTag({ content: `window.makeContinuousStudy = ${makeContinuousStudy};` });
     await page.evaluate(registerStudies);
     const results = await page.evaluate(
       () =>

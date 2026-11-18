@@ -1707,6 +1707,8 @@
       ]
     },
     "Sheet": [
+      "setContinuousLayout(layout: ContinuousLayout): this",
+      "getContinuousLayout(): ContinuousLayout | undefined",
       "constructor(options: SheetOptions)",
       "addSystem(options: Omit<SystemOptions, 'factory' | 'width' | 'autoWidth' | 'noJustification'> = {}): System",
       "setWidth(width: number): this",
@@ -1742,6 +1744,7 @@
     "Stave": [
       "CATEGORY(): string",
       "options: Required<StaveOptions>",
+      "setBoundaryModifiers(modifiers: StaveModifier[]): void",
       "defaultPadding(): number",
       "rightPadding(): number",
       "constructor(x: number, y: number, width: number, options?: StaveOptions)",
@@ -2374,7 +2377,7 @@
       "addStave(params: SystemStave): Stave",
       "addVoices(voices: Voice[])",
       "getPhraseLayout(): PhraseLayout",
-      "format(): void",
+      "format(row?: { staffOffsets?: readonly number[]; endPadding?: number }): void",
       "getBoundingBox(): BoundingBox",
       "draw(): void"
     ]
@@ -2755,6 +2758,53 @@
     "normalizeAngle": "(a: number): number",
     "sumArray": "(arr: number[]): number"
   },
+  "continuouslayout": {
+    "ContinuousBoundary": {
+      "extends": [],
+      "fields": [
+        "measure: number;",
+        "breakBefore?: 'force' | 'keep';",
+        "rehearsal?: string;",
+        "navigation?: | { kind: 'segno' | 'coda'; id: string } | { kind: 'dalSegno' | 'toCoda'; target: string } | { kind: 'daCapo' | 'fine' };",
+        "repeatStart?: boolean;",
+        "repeatEnd?: boolean;",
+        "keepRest?: boolean;"
+      ]
+    },
+    "ContinuousOptions": {
+      "extends": [],
+      "fields": [
+        "mode?: 'balanced' | 'greedy';",
+        "boundaries?: readonly ContinuousBoundary[];",
+        "spans?: readonly ContinuousSpan[];",
+        "hideEmptyStaves?: boolean;",
+        "compressRests?: boolean;",
+        "measureNumbers?: boolean;",
+        "courtesy?: boolean;",
+        "splitChords?: readonly { id: string; upper: string; lower: string }[];",
+        "groups?: readonly { first: string; last: string; type: 'brace' | 'bracket'; barlines?: boolean }[];"
+      ]
+    },
+    "ContinuousRow": {
+      "extends": [
+        "extends SheetRow"
+      ],
+      "fields": [
+        "measures: number[];",
+        "visibleStaves: string[];",
+        "restGroups: number[][];"
+      ]
+    },
+    "ContinuousLayout": [
+      "hidden",
+      "diagnostics: { code: 'RowOverflow' | 'CurveCollision' | 'SplitStemAlignment' | 'SpanOverflow' | 'StaffSpacingLimit'; measures: number[]; source?: string; }[]",
+      "fragments: SpanFragment[]",
+      "rows: ContinuousRow[]",
+      "constructor(private readonly score: EasyScoreComposition, private readonly spec: EasyScoreCompositionSpec, starts: State[][], ends: State[][], placed?: Set<Accidental>)",
+      "format(options: Required<SheetOptions>): ContinuousRow[]",
+      "draw(context: RenderContext): void"
+    ]
+  },
   "vexflow": {
     "VexFlow": [
       "BUILD",
@@ -2960,6 +3010,7 @@
       "addTickables(tickables: Tickable[]): this",
       "preFormat(): this",
       "checkStave(): Stave",
+      "preserveStaveAssignments",
       "draw(context: RenderContext = this.checkContext(), stave?: Stave): void"
     ]
   },
@@ -3070,6 +3121,7 @@
         "extends EasyScoreStaffState"
       ],
       "fields": [
+        "instrument?: { name: string; shortName?: string };",
         "voices: readonly EasyScoreVoiceSpec[];",
         "span?: VoiceTime | string;"
       ]
@@ -3080,6 +3132,8 @@
       ],
       "fields": [
         "id: string;",
+        "name?: string;",
+        "shortName?: string;",
         "kind?: 'stave' | 'tab';",
         "options?: StaveOptions;",
         "spaceAbove?: number;",
@@ -3092,6 +3146,7 @@
       "extends": [],
       "fields": [
         "staves: readonly EasyScoreStaveSpec[];",
+        "continuous?: ContinuousOptions;",
         "sheet?: Omit<SheetOptions, 'factory'>;",
         "system?: Omit<SystemOptions, 'factory' | 'width' | 'autoWidth' | 'noJustification'>;",
         "accidentals?: 'literal' | 'key-aware';",

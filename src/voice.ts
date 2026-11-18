@@ -315,6 +315,9 @@ export class Voice extends Element {
     return defined(this.stave, 'NoStave', 'No stave attached to instance.');
   }
 
+  /** Preserve per-event cross-staff assignments when drawing a continuous score. */
+  preserveStaveAssignments = false;
+
   /**
    * Render the voice onto the canvas `context` and an optional `stave`.
    * If `stave` is omitted, it is expected that the notes have staves
@@ -324,13 +327,15 @@ export class Voice extends Element {
    * the notes. Note the similarities with this.getBoundingBox().
    */
   override draw(context: RenderContext = this.checkContext(), stave?: Stave): void {
-    stave = stave ?? this.stave;
+    const override = stave ?? (this.preserveStaveAssignments ? undefined : this.stave);
     this.setRendered();
     for (let i = 0; i < this.tickables.length; ++i) {
       const tickable = this.tickables[i];
       // Set the stave if provided.
-      if (stave) {
-        tickable.setStave(stave);
+      if (override) {
+        tickable.setStave(override);
+      } else if (this.preserveStaveAssignments && !tickable.getStave() && this.stave) {
+        tickable.setStave(this.stave);
       }
       defined(tickable.getStave(), 'MissingStave', 'The voice cannot draw tickables without staves.');
 

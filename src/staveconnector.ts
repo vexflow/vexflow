@@ -230,6 +230,7 @@ export class StaveConnector extends Element {
         break;
       }
       case StaveConnector.type.BRACKET:
+        topX += this.xShift;
         topY -= 6;
         botY += 6;
         attachmentHeight = botY - topY;

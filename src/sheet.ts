@@ -1,5 +1,6 @@
 // Optional continuous-sheet layout for existing Systems. No music data model or pagination.
 import { ClefNote } from './clefnote';
+import type { ContinuousLayout } from './continuouslayout';
 import { Factory } from './factory';
 import { Note } from './note';
 import { StaveNote } from './stavenote';
@@ -32,6 +33,18 @@ export interface SheetRow {
 /** Arrange measure-sized Systems left to right, wrapping at a requested width. */
 export class Sheet {
   private options: Required<SheetOptions>;
+  private continuous?: ContinuousLayout;
+
+  /** Composition installs a score-aware layout while retaining the native sheet resize and draw API. */
+  setContinuousLayout(layout: ContinuousLayout): this {
+    this.continuous = layout;
+    return this;
+  }
+
+  getContinuousLayout(): ContinuousLayout | undefined {
+    return this.continuous;
+  }
+
   private systems: System[] = [];
   private rows: SheetRow[] = [];
 
@@ -88,6 +101,10 @@ export class Sheet {
 
   /** Measure and pack rows. Always recompute, so repeated resize is deterministic. */
   format(): this {
+    if (this.continuous) {
+      this.rows = this.continuous.format(this.options);
+      return this;
+    }
     const widths = this.measureSystems();
     this.rows = [];
     let y = this.options.y;

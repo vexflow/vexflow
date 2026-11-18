@@ -132,6 +132,12 @@ export class Stroke extends Modifier {
       }
     }
 
+    // An explicit terminal chord can lie on another stave and outside this modifier context.
+    if (this.noteEnd) {
+      topY = Math.min(topY, ...this.noteEnd.getYs());
+      botY = Math.max(botY, ...this.noteEnd.getYs());
+    }
+
     let arrow = '';
     let arrowY = 0;
     let textY = 0;

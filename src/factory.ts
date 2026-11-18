@@ -959,12 +959,21 @@ export class Factory {
     // Clear draw flags so retained scores redraw beams and other queued elements.
     if (this.retained) this.renderQ.forEach((element) => element.setRendered(false));
     try {
-      this.staves.forEach((s) => s.setContext(ctx).drawWithStyle());
-      this.voices.forEach((v) => v.setContext(ctx).drawWithStyle());
-      this.renderQ.forEach((e) => {
-        if (!e.isRendered()) e.setContext(ctx).drawWithStyle();
+      const layouts = this.sheets.flatMap((sheet) => sheet.getContinuousLayout() ?? []);
+      const hidden = new Set(layouts.flatMap((layout) => [...layout.hidden]));
+      this.staves.forEach((s) => {
+        if (!hidden.has(s)) s.setContext(ctx).drawWithStyle();
       });
-      this.systems.forEach((s) => s.setContext(ctx).drawWithStyle());
+      this.voices.forEach((v) => {
+        if (!hidden.has(v)) v.setContext(ctx).drawWithStyle();
+      });
+      this.renderQ.forEach((e) => {
+        if (!hidden.has(e) && !e.isRendered()) e.setContext(ctx).drawWithStyle();
+      });
+      this.systems.forEach((s) => {
+        if (!hidden.has(s)) s.setContext(ctx).drawWithStyle();
+      });
+      layouts.forEach((layout) => layout.draw(ctx));
     } finally {
       ctx.setDefaultStyle(defaults);
       ctx.restore();

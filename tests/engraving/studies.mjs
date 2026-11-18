@@ -339,4 +339,27 @@ export function registerStudies() {
       });
     });
   }
+
+  QUnit.module('M4 studies');
+  for (const [kind, width, height, mode, name] of [
+    ['choir', 740, 220, 'balanced', 'Vocal phrase on a wide system'],
+    ['choir', 260, 540, 'balanced', 'Vocal phrase across narrow systems'],
+    ['keyboard', 490, 640, 'balanced', 'Grand staff with beam, wedge and pedal'],
+    ['chord', 375, 300, 'balanced', 'Split chord and arpeggio on two staves'],
+    ['ensemble', 430, 510, 'balanced', 'Silent and returning ensemble staves'],
+    ['breaks', 415, 305, 'greedy', 'Greedy breaks on a short melody'],
+    ['breaks', 415, 305, 'balanced', 'Balanced breaks on the same melody'],
+  ]) {
+    VF.Test.runTests(name, (options) => {
+      const f = VF.Test.makeFactory(options, width + 32, height);
+      const c = globalThis.makeContinuousStudy(VF, f, kind, width, mode);
+      f.draw();
+      const layout = c.sheet.getContinuousLayout?.();
+      options.assert.ok(c.sheet.getRows().length > 0, 'At least one formatted row');
+      document.getElementById(options.elementId).dataset.measurement = JSON.stringify({
+        rows: c.sheet.getRows().map((r) => [r.systems.length, r.width, r.height]),
+        spans: layout?.fragments.map((f) => [f.id, f.part, f.x1, f.y1, f.x2, f.y2]) ?? [],
+      });
+    });
+  }
 }

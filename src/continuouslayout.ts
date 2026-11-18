@@ -1,0 +1,802 @@
+// Row-dependent notation for a responsive EasyScore composition. Source measures and notes keep their identity.
+import { Accidental } from './accidental';
+import { Clef } from './clef';
+import {
+  ContinuousSpan,
+  drawSpan,
+  fitSpan,
+  continuationPitch,
+  ResolvedSpan,
+  spanAbove,
+  SpanAnchor,
+  SpanFragment,
+  spanLabel,
+} from './continuousspan';
+import type { EasyScoreComposition, EasyScoreCompositionSpec, EasyScoreStaffState } from './easyscore/composition';
+import { Element } from './element';
+import { measureEngraving } from './engravinggeometry';
+import { Fraction } from './fraction';
+import { Glyphs } from './glyphs';
+import { KeySignature } from './keysignature';
+import { MultiMeasureRest } from './multimeasurerest';
+import { Note } from './note';
+import { RenderContext } from './rendercontext';
+import type { SheetOptions, SheetRow } from './sheet';
+import { Barline, BarlineType } from './stavebarline';
+import { StaveConnector } from './staveconnector';
+import { StaveModifier, StaveModifierPosition as Position } from './stavemodifier';
+import { StaveNote } from './stavenote';
+import { Stem } from './stem';
+import type { System } from './system';
+import { BreakUnit, chooseSystemBreaks } from './systembreaks';
+import { TimeSignature } from './timesignature';
+import { RuntimeError } from './util';
+
+export interface ContinuousBoundary {
+  /** One-based source measure number, independent of rest compression. */
+  measure: number;
+  breakBefore?: 'force' | 'keep';
+  rehearsal?: string;
+  navigation?:
+    | { kind: 'segno' | 'coda'; id: string }
+    | { kind: 'dalSegno' | 'toCoda'; target: string }
+    | { kind: 'daCapo' | 'fine' };
+  repeatStart?: boolean;
+  repeatEnd?: boolean;
+  keepRest?: boolean;
+}
+export interface ContinuousOptions {
+  mode?: 'balanced' | 'greedy';
+  boundaries?: readonly ContinuousBoundary[];
+  spans?: readonly ContinuousSpan[];
+  hideEmptyStaves?: boolean;
+  compressRests?: boolean;
+  measureNumbers?: boolean;
+  courtesy?: boolean;
+  /** Unflagged heads on different staves sharing an onset, duration and stem direction. */
+  splitChords?: readonly { id: string; upper: string; lower: string }[];
+  groups?: readonly { first: string; last: string; type: 'brace' | 'bracket'; barlines?: boolean }[];
+}
+export interface ContinuousRow extends SheetRow {
+  measures: number[];
+  visibleStaves: string[];
+  restGroups: number[][];
+}
+type State = Required<EasyScoreStaffState>;
+type Marks = { start: StaveModifier[]; end: StaveModifier[] };
+interface Unit extends BreakUnit {
+  first: number;
+  last: number;
+}
+type PlacedMeasure = { u: Unit; sys: System; endPadding: number };
+type Draw = (context: RenderContext) => void;
+function invalid(message: string): never {
+  throw new RuntimeError('BadContinuousScore', message);
+}
+
+/** A row has one shared staff map. A compressed rest maps back to every original measure. */
+export class ContinuousLayout {
+  readonly hidden = new Set<Element>();
+  readonly diagnostics: {
+    code: 'RowOverflow' | 'CurveCollision' | 'SplitStemAlignment' | 'SpanOverflow' | 'StaffSpacingLimit';
+    measures: number[];
+    source?: string;
+  }[] = [];
+  readonly fragments: SpanFragment[] = [];
+  readonly rows: ContinuousRow[] = [];
+  private readonly marks: Marks[][];
+  private readonly boundaries = new Map<number, ContinuousBoundary>();
+  private readonly spans: ResolvedSpan[] = [];
+  private readonly names: { full?: Element; short?: Element }[][];
+  private readonly groups: { first: number; last: number; type: 'brace' | 'bracket'; barlines?: boolean }[];
+  private drawing: Draw[] = [];
+  private readonly headerLabels = new Map<string, Element>();
+
+  /** Reuse measured labels when a resize moves a measure to another row. */
+  private headerLabel(text: string, symbol = false) {
+    const key = (symbol ? 'glyph:' : 'text:') + text;
+    let mark = this.headerLabels.get(key);
+    if (!mark) {
+      mark = new Element(symbol ? 'Repetition' : 'Annotation').setText(text);
+      if (symbol) mark.setFontSize(18);
+      this.headerLabels.set(key, mark);
+    }
+    return mark;
+  }
+  private headerParts(i: number, atStart: boolean) {
+    const boundary = this.boundaries.get(i),
+      kind = boundary?.navigation?.kind;
+    const nav = kind
+      ? { segno: Glyphs.segno, coda: Glyphs.coda, dalSegno: 'D.S.', toCoda: 'To Coda', daCapo: 'D.C.', fine: 'Fine' }[
+          kind
+        ]
+      : '';
+    const texts = [
+      this.options.measureNumbers && atStart ? String(i + 1) : '',
+      boundary?.rehearsal,
+      ...(!atStart ? this.spec.staves.map((s) => s.measures[i].instrument?.name) : []),
+      nav,
+    ];
+    return texts.flatMap((text, k) =>
+      text
+        ? [
+            {
+              mark: this.headerLabel(text, k === texts.length - 1 && (kind === 'segno' || kind === 'coda')),
+              boxed: k === 1,
+            },
+          ]
+        : []
+    );
+  }
+  private readonly splitChords: { id: string; measure: number; upper: StaveNote; lower: StaveNote }[] = [];
+  private readonly spelledSpans = new Set<number>();
+
+  private readonly options: ContinuousOptions;
+  private readonly arrivals = new Map<number, { note: Note; mark: Accidental; index: number }[]>();
+
+  constructor(
+    private readonly score: EasyScoreComposition,
+    private readonly spec: EasyScoreCompositionSpec,
+    starts: State[][],
+    ends: State[][],
+    placed?: Set<Accidental>
+  ) {
+    this.options = spec.continuous ?? {};
+    for (const voice of score.voices.flat(2)) voice.preserveStaveAssignments = true;
+    if (this.options.mode && !['greedy', 'balanced'].includes(this.options.mode)) invalid('Unknown break mode.');
+    const ids = spec.staves.map((s) => s.id);
+    for (const b of this.options.boundaries ?? []) {
+      if (
+        !Number.isInteger(b.measure) ||
+        b.measure < 1 ||
+        b.measure > score.systems.length ||
+        this.boundaries.has(b.measure - 1)
+      )
+        invalid('Expected a unique, in-range boundary measure.');
+      if (b.breakBefore && !['force', 'keep'].includes(b.breakBefore)) invalid('Unknown break constraint.');
+      this.boundaries.set(b.measure - 1, { ...b });
+    }
+    const destinations = new Map<string, string>();
+    for (const { navigation: n } of this.boundaries.values())
+      if (n && 'id' in n) {
+        if (!n.id || destinations.has(n.id)) invalid('Duplicate or empty navigation destination.');
+        destinations.set(n.id, n.kind);
+      }
+    for (const { navigation: n } of this.boundaries.values())
+      if (n && 'target' in n && destinations.get(n.target) !== (n.kind === 'toCoda' ? 'coda' : 'segno'))
+        invalid('Navigation instruction needs a matching destination.');
+    this.groups = (this.options.groups ?? []).map((g) => {
+      const first = ids.indexOf(g.first),
+        last = ids.indexOf(g.last);
+      if (first < 0 || last <= first || !['brace', 'bracket'].includes(g.type)) invalid('Invalid staff group.');
+      return { ...g, first, last };
+    });
+    const label = (text?: string) => (text ? new Element('Annotation').setText(text) : undefined);
+    const names = spec.staves.map((s) => ({ full: label(s.name), short: label(s.shortName ?? s.name) }));
+    this.names = score.systems.map((_, i) =>
+      spec.staves.map((s, j) => {
+        const change = s.measures[i].instrument;
+        if (change) names[j] = { full: label(change.name), short: label(change.shortName ?? change.name) };
+        return names[j];
+      })
+    );
+    this.marks = starts.map((states, i) =>
+      states.map((state, j) => {
+        const stave = score.staves[i][j];
+        const boundary = this.boundaries.get(i);
+        if (boundary?.repeatStart) stave.setBegBarType(BarlineType.REPEAT_BEGIN);
+        if (boundary?.repeatEnd) stave.setEndBarType(BarlineType.REPEAT_END);
+        const start: StaveModifier[] = [],
+          end: StaveModifier[] = [];
+        const present = (category: string) => stave.getModifiers(Position.BEGIN, category).length > 0;
+        if (!present(Clef.CATEGORY)) start.push(new Clef(state.clef));
+        if (state.clef !== 'tab' && state.key !== 'C' && !present(KeySignature.CATEGORY))
+          start.push(new KeySignature(state.key));
+        // Meter is carried silently at a repeated row start. Explicit changes remain native modifiers.
+        const next = starts[i + 1]?.[j],
+          current = ends[i][j];
+        if (next && this.options.courtesy !== false) {
+          if (next.clef !== current.clef) end.push(new Clef(next.clef, 'small'));
+          if (next.clef !== 'tab' && next.key !== current.key) end.push(new KeySignature(next.key, current.key));
+          if (next.time !== current.time) end.push(new TimeSignature(next.time));
+        }
+        end.forEach((m) => m.setPosition(Position.END));
+        return { start, end };
+      })
+    );
+    const locations = new Map<Note, SpanAnchor>();
+    score.notes.forEach((parts, measure) =>
+      parts.flat(2).forEach((n) => {
+        if (n instanceof Note)
+          locations.set(n, { note: n, measure, staff: score.staves[measure].indexOf(n.checkStave()) });
+      })
+    );
+    const seen = new Set<string>();
+    const onset = (n: Note) => {
+      const time = new Fraction(0, 1);
+      for (const tick of n.getVoice().getTickables()) {
+        if (tick === n) break;
+        if (!tick.shouldIgnoreTicks()) time.add(tick.getTicks());
+      }
+      return time;
+    };
+    for (const sp of spec.spans ?? []) {
+      const from = sp.from && locations.get(score.getNote(sp.from)),
+        to = sp.to && locations.get(score.getNote(sp.to));
+      if (from && to) for (let i = from.measure; i <= to.measure; i++) this.spelledSpans.add(i);
+    }
+    for (const chord of this.options.splitChords ?? []) {
+      const a = locations.get(score.getNote(chord.upper)),
+        b = locations.get(score.getNote(chord.lower));
+      if (
+        !chord.id ||
+        seen.has(chord.id) ||
+        !a ||
+        !b ||
+        a.measure !== b.measure ||
+        a.staff >= b.staff ||
+        !(a.note instanceof StaveNote) ||
+        !(b.note instanceof StaveNote) ||
+        a.note.isRest() ||
+        b.note.isRest() ||
+        !['h', 'q', '2', '4'].includes(a.note.getDuration()) ||
+        a.note.getDuration() !== b.note.getDuration() ||
+        a.note.getStemDirection() !== b.note.getStemDirection() ||
+        !a.note.getTicks().equals(b.note.getTicks()) ||
+        !onset(a.note).equals(onset(b.note))
+      )
+        invalid('A split stem needs matching simultaneous half or quarter notes on ordered staves.');
+      seen.add(chord.id);
+      this.splitChords.push({ id: chord.id, measure: a.measure, upper: a.note, lower: b.note });
+    }
+    const kinds = [
+      'tie',
+      'slur',
+      'crescendo',
+      'diminuendo',
+      'pedal',
+      'lyric',
+      'hyphen',
+      'volta',
+      'ottava',
+      'trill',
+      'tuplet',
+    ];
+    for (const span of this.options.spans ?? []) {
+      const first = locations.get(score.getNote(span.from)),
+        last = locations.get(score.getNote(span.to));
+      if (
+        !span.id ||
+        seen.has(span.id) ||
+        !kinds.includes(span.kind) ||
+        !first ||
+        !last ||
+        first.measure > last.measure
+      )
+        invalid('Expected a unique span ID and ordered composition anchors.');
+      if (!(first.note instanceof StaveNote) || !(last.note instanceof StaveNote))
+        invalid('Continuous spans need staff-note anchors.');
+      for (const [head, n] of [
+        [span.fromHead ?? 0, first.note],
+        [span.toHead ?? 0, last.note],
+      ] as const)
+        if (!Number.isInteger(head) || head < 0 || head >= n.keys.length) invalid('Invalid span head index.');
+      if (first.measure === last.measure && onset(first.note).greaterThan(onset(last.note))) invalid('Reversed span.');
+      if (span.kind === 'tie' && first.measure !== last.measure) {
+        const fi = span.fromHead ?? 0,
+          li = span.toHead ?? 0;
+        if (first.note.getKeys()[fi].toLowerCase() !== last.note.getKeys()[li].toLowerCase())
+          invalid('Tied heads must have the same written pitch.');
+        const mark = last.note
+          .getModifiers()
+          .find((m): m is Accidental => m instanceof Accidental && m.getIndex() === li && !!placed?.has(m));
+        if (mark) {
+          const entries = this.arrivals.get(last.measure) ?? [];
+          entries.push({ note: last.note, mark, index: last.note.getModifiers().indexOf(mark) });
+          this.arrivals.set(last.measure, entries);
+        }
+      }
+      seen.add(span.id);
+      this.spans.push({ spec: { ...span }, first, last, label: spanLabel(span) });
+    }
+  }
+
+  /** Only undecorated, wholly resting measures can disappear into a numbered rest. */
+  private plainRest(i: number): boolean {
+    const boundary = this.boundaries.get(i);
+    if (
+      boundary ||
+      this.spelledSpans.has(i) ||
+      this.spec.staves.some((staff) => staff.measures[i].instrument) ||
+      this.spans.some((s) => s.first.measure <= i && i <= s.last.measure)
+    )
+      return false;
+    if (
+      this.score.staves[i].some((s) =>
+        s
+          .getModifiers()
+          .some((m) => !(m instanceof Barline) || ![BarlineType.SINGLE, BarlineType.NONE].includes(m.getType()))
+      )
+    )
+      return false;
+    return this.score.notes[i]
+      .flat(2)
+      .every(
+        (n) =>
+          n instanceof StaveNote && n.isRest() && !n.getModifiers().length && !n.getBeam() && !n.getTupletStack().length
+      );
+  }
+
+  /** Add cached signs for the candidate boundaries and reserve actual end-modifier width. */
+  private boundaryWidth(i: number, start: boolean, end: boolean): number {
+    // Only signs generated by key-aware composition change with a tied arrival. Authored signs survive.
+    for (const { note, mark, index } of this.arrivals.get(i) ?? []) {
+      const mods = note.getModifiers(),
+        current = mods.indexOf(mark);
+      if (start && current < 0) mods.splice(Math.min(index, mods.length), 0, mark);
+      else if (!start && current >= 0) mods.splice(current, 1);
+    }
+    const staves = this.score.staves[i];
+    return Math.max(
+      ...staves.map((s, j) => {
+        const marks = this.marks[i][j];
+        s.setBoundaryModifiers([...(start ? marks.start : []), ...(end ? marks.end : [])]);
+        const bar = s.getModifiers(Position.END, Barline.CATEGORY)[0] as Barline;
+        return Math.max(s.getX() + s.getWidth() - s.getNoteEndX(), -(bar?.getLayoutMetrics()?.xMin ?? 0));
+      })
+    );
+  }
+
+  private units(padding: number): Unit[] {
+    this.score.staves.flat().forEach((s) => s.setBoundaryModifiers([]));
+    const result: Unit[] = [];
+    for (let i = 0; i < this.score.systems.length; i++) {
+      let last = i;
+      if (this.options.compressRests && this.plainRest(i))
+        while (last + 1 < this.score.systems.length && this.plainRest(last + 1)) last++;
+      const sys = this.score.systems[i];
+      // Give end modifiers a finite reference edge before measuring intrinsic width.
+      sys.setX(0).setY(0).setWidth(1);
+      const measure = (start: boolean, end: boolean) => {
+        const tail = this.boundaryWidth(i, start, end);
+        sys.setWidth().format({ endPadding: tail });
+        return sys.getWidth();
+      };
+      const base = measure(false, false);
+      const prefix = measure(true, false) - base;
+      // A compressed run ends before a structural change, using the final source measure's courtesy signs.
+      const tail = this.endWidth(i, last);
+      const reserve = this.spans
+        .filter((s) => s.first.measure === i && s.label)
+        .reduce((w, s) => Math.max(w, s.label!.getWidth() + 12), 0);
+      result.push({
+        first: i,
+        last,
+        width: Math.max(
+          base + padding,
+          last > i ? 68 : 0,
+          reserve,
+          ...[false, true].map((atStart) =>
+            this.headerParts(i, atStart).reduce((w, p) => w + p.mark.getWidth() + (p.boxed ? 12 : 7), 0)
+          )
+        ),
+        start: Math.max(0, prefix),
+        end: tail,
+        breakBefore: this.boundaries.get(i)?.breakBefore,
+      });
+      i = last;
+    }
+    return result;
+  }
+
+  private endWidth(i: number, last: number): number {
+    const plain = this.boundaryWidth(i, false, false);
+    return Math.max(0, this.install(i, last, false, true) - plain);
+  }
+  private install(i: number, last: number, start: boolean, end: boolean): number {
+    if (i === last) return this.boundaryWidth(i, start, end);
+    return Math.max(
+      ...this.score.staves[i].map((stave, j) => {
+        const m = this.marks[i][j];
+        stave.setBoundaryModifiers([...(start ? m.start : []), ...(end ? this.marks[last][j].end : [])]);
+        return stave.getX() + stave.getWidth() - stave.getNoteEndX();
+      })
+    );
+  }
+  private indent(measure: number): number {
+    const widths = this.names[measure].map(
+      (n, j) => (measure === 0 || this.spec.staves[j].measures[measure].instrument ? n.full : n.short)?.getWidth() ?? 0
+    );
+    const w = Math.max(0, ...widths);
+    return (w ? w + 10 : 0) + this.groups.length * 9;
+  }
+  /** Preserve staves carrying a spanning instruction or cross-staff note, including silent middle rows. */
+  private visible(first: number, last: number): number[] {
+    const indices = this.spec.staves.map((_, i) => i);
+    if (!this.options.hideEmptyStaves) return indices;
+    const used = new Set<number>();
+    for (let i = first; i <= last; i++) {
+      this.score.notes[i].flat(2).forEach((n) => {
+        if (n instanceof Note && (!(n instanceof StaveNote) || !n.isRest() || n.getModifiers().length))
+          used.add(this.score.staves[i].indexOf(n.checkStave()));
+      });
+    }
+    for (const s of this.spans)
+      if (s.first.measure <= last && first <= s.last.measure) {
+        used.add(s.first.staff);
+        used.add(s.last.staff);
+      }
+    return used.size ? indices.filter((i) => used.has(i)) : [0];
+  }
+  private suppress(i: number, visible: number[], compressed: boolean, omitted: boolean): void {
+    if (omitted) this.hidden.add(this.score.systems[i]);
+    this.score.staves[i].forEach((s, j) => {
+      if (omitted || !visible.includes(j)) this.hidden.add(s);
+    });
+    for (const voice of this.score.voices[i].flat()) {
+      const ticks = voice.getTickables();
+      if (omitted || compressed || ticks.every((n) => this.hidden.has(n.getStave() ?? voice.getStave()!))) {
+        this.hidden.add(voice);
+        ticks.forEach((n) => this.hidden.add(n));
+      }
+    }
+  }
+
+  format(options: Required<SheetOptions>): ContinuousRow[] {
+    this.hidden.clear();
+    this.diagnostics.length = 0;
+    this.fragments.length = 0;
+    this.rows.length = 0;
+    this.drawing = [];
+    const units = this.units(options.measurePadding);
+    const groups = chooseSystemBreaks(
+      units,
+      options.width,
+      options.measureGap,
+      (i) => this.indent(units[i].first),
+      this.options.mode ?? 'balanced'
+    );
+    let y = options.y;
+    for (const indices of groups) {
+      const row = this.layoutRow(
+        indices.map((i) => units[i]),
+        options,
+        y
+      );
+      this.rows.push(row);
+      y += row.height + options.rowGap;
+    }
+    for (const s of this.spans) {
+      const parts = this.fragments.filter((f) => f.id === s.spec.id);
+      const total = parts.reduce((a, f) => a + f.x2 - f.x1, 0);
+      let prior = 0;
+      for (const f of parts) {
+        f.progress = [prior / total, (prior + f.x2 - f.x1) / total];
+        prior += f.x2 - f.x1;
+        this.drawing.push((ctx) => drawSpan(ctx, f, s.label));
+      }
+    }
+    return this.rows;
+  }
+
+  /** Measure native ink once the horizontal positions and beam fits for this row are known. */
+  private measureStaffInk(positions: PlacedMeasure[], visible: number[]) {
+    // Staff-relative extrema exclude crossing beams and their stems, which are refitted to these very gaps.
+    const ink = this.spec.staves.map(() => ({ top: Infinity, bottom: -Infinity }));
+    for (const { u } of positions)
+      for (const j of visible) {
+        const stave = this.score.staves[u.first][j],
+          base = stave.getY();
+        const take = (top: number, bottom: number) => {
+          ink[j].top = Math.min(ink[j].top, top - base);
+          ink[j].bottom = Math.max(ink[j].bottom, bottom - base);
+        };
+        take(stave.getYForLine(0) - stave.space(1.6), stave.getYForLine(stave.getNumLines() - 1) + stave.space(1.6));
+        for (const m of stave.getModifiers()) {
+          const boxes =
+            m instanceof Clef || m instanceof TimeSignature
+              ? [m.getInkBounds()]
+              : m instanceof KeySignature
+                ? m.getInkParts()
+                : [];
+          for (const box of boxes) take(box.y, box.y + box.h);
+        }
+        if (u.first === u.last)
+          for (const n of this.score.notes[u.first].flat(2)) {
+            if (!(n instanceof StaveNote) || n.getStave() !== stave) continue;
+            const bridge = n
+              .getBeam()
+              ?.getNotes()
+              .some((p) => p.getStave() !== stave);
+            for (const box of bridge ? n.getHeadInk() : measureEngraving(n).parts) take(box.y, box.y + box.h);
+            if (n.getBeam() && !bridge) {
+              const box = n.getBeam()!.getBoundingBox();
+              take(box.y, box.y + box.h);
+            }
+            for (const t of n.getTupletStack()) {
+              const box = t.getBoundingBox();
+              take(box.y, box.y + box.h);
+            }
+          }
+      }
+    return ink;
+  }
+
+  /** Share the largest required staff distance across all measures, bounded to four native refits. */
+  private alignStaves(positions: PlacedMeasure[], visible: number[], origin: number, offsets: number[]): boolean {
+    // A native phrase may demand a larger separation. Propagate that minimum to every measure.
+    for (let pass = 0; pass < 4; pass++) {
+      const next = offsets.slice();
+      for (const { sys, endPadding } of positions) {
+        sys.setY(origin).format({ staffOffsets: offsets, endPadding });
+        const staves = sys.getStaves();
+        for (let k = 1; k < visible.length; k++) {
+          const a = visible[k - 1],
+            b = visible[k];
+          next[b] = Math.max(next[b], next[a] + staves[b].getY() - staves[a].getY());
+        }
+      }
+      if (visible.every((j) => Math.abs(next[j] - offsets[j]) < 0.01)) return true;
+      if (pass === 3) return false;
+      next.forEach((v, j) => (offsets[j] = v));
+    }
+    return false;
+  }
+
+  /** Reconcile staff envelopes across all measures in a row, then translate the entire solved row once. */
+  private layoutRow(units: Unit[], options: Required<SheetOptions>, y: number): ContinuousRow {
+    const first = units[0].first,
+      last = units[units.length - 1].last;
+    const visible = this.visible(first, last);
+    const spans = this.spans.filter((s) => s.first.measure <= last && first <= s.last.measure);
+    const indent = this.indent(first);
+    const minimum =
+      indent +
+      units.reduce((sum, u) => sum + u.width, 0) +
+      units[0].start +
+      units[units.length - 1].end +
+      (units.length - 1) * options.measureGap;
+    const extra = options.justify ? Math.max(0, options.width - minimum) / units.length : 0;
+    let x = options.x + indent;
+    const offsets = this.spec.staves.map(() => 0);
+    const positions = units.map((u, k) => {
+      const begin = k === 0,
+        end = k === units.length - 1;
+      const sys = this.score.systems[u.first];
+      sys.setX(x).setY(0);
+      const endPadding = this.install(u.first, u.last, begin, end);
+      const width = u.width + extra + (begin ? u.start : 0) + (end ? u.end : 0);
+      sys.setWidth(width).format({ endPadding });
+      for (let j = 1; j < visible.length; j++) {
+        const staves = sys.getStaves(),
+          b = visible[j];
+        const nominal = staves[b].getY() - staves[b - 1].getY();
+        offsets[b] = Math.max(offsets[b], nominal);
+      }
+      for (let i = u.first; i <= u.last; i++) this.suppress(i, visible, u.first !== u.last, i !== u.first);
+      x += width + options.measureGap;
+      return { u, sys, endPadding };
+    });
+    const ink = this.measureStaffInk(positions, visible);
+    const lanes = new Map<ResolvedSpan, number>();
+    // Prefer the nearest free lane. Non-overlapping spans can reuse it.
+    const laneEnds = new Map<string, number[]>();
+    for (const s of spans) {
+      if (s.spec.kind === 'tie' || s.spec.kind === 'slur') continue;
+      const side = spanAbove(s.spec),
+        staff = s.first.staff,
+        key = staff + '-' + side;
+      const ends = laneEnds.get(key) ?? [];
+      let lane = ends.findIndex((v) => v < s.first.measure);
+      if (lane < 0) lane = ends.length;
+      ends[lane] = s.last.measure;
+      laneEnds.set(key, ends);
+      lanes.set(s, lane);
+    }
+    const limits = ink.map((bounds, j) => {
+      const space = this.score.staves[first][j].space(1);
+      const above = laneEnds.get(j + '-true')?.length ?? 0,
+        below = laneEnds.get(j + '-false')?.length ?? 0;
+      return { top: bounds.top - space * (2 + above * 2.5), bottom: bounds.bottom + space * (1 + below * 2.5) };
+    });
+    for (let j = 1; j < visible.length; j++) {
+      const a = visible[j - 1],
+        b = visible[j];
+      offsets[b] = offsets[a] + Math.max(offsets[b], limits[a].bottom - limits[b].top + 8);
+    }
+    const instrumentChange = units.some(
+      (u, k) => k > 0 && this.spec.staves.some((s) => s.measures[u.first].instrument)
+    );
+    const header =
+      instrumentChange ||
+      units.some((u) => this.boundaries.get(u.first)?.rehearsal || this.boundaries.get(u.first)?.navigation) ||
+      this.options.measureNumbers
+        ? 20
+        : 0;
+    const origin = y + header - limits[visible[0]].top;
+    const stable = this.alignStaves(positions, visible, origin, offsets);
+    const measures = Array.from({ length: last - first + 1 }, (_, i) => first + i + 1);
+    if (!stable) this.diagnostics.push({ code: 'StaffSpacingLimit', measures });
+    const row: ContinuousRow = {
+      systems: positions.map((p) => p.sys),
+      x: options.x,
+      y,
+      width: x - options.measureGap - options.x,
+      height: origin - y + offsets[visible[visible.length - 1]] + limits[visible[visible.length - 1]].bottom,
+      overflow: Math.max(0, minimum - options.width),
+      measures,
+      visibleStaves: visible.map((j) => this.spec.staves[j].id),
+      restGroups: units
+        .filter((u) => u.last > u.first)
+        .map((u) => Array.from({ length: u.last - u.first + 1 }, (_, k) => u.first + k + 1)),
+    };
+    if (row.overflow) this.diagnostics.push({ code: 'RowOverflow', measures });
+    this.decorate(units, visible, first === 0, y + 15);
+    for (const chord of this.splitChords) {
+      if (chord.measure < first || chord.measure > last) continue;
+      const a = chord.upper,
+        b = chord.lower,
+        x = a.getStemX(),
+        top = Math.max(...a.getYs()),
+        bottom = Math.min(...b.getYs());
+      if (Math.abs(x - b.getStemX()) > Stem.WIDTH)
+        this.diagnostics.push({ code: 'SplitStemAlignment', measures: [chord.measure + 1], source: chord.id });
+      else
+        this.drawing.push((ctx) => {
+          ctx.fillRect(x - Stem.WIDTH / 2, top, Stem.WIDTH, bottom - top);
+        });
+    }
+    for (const s of spans) {
+      const staff = s.first.staff;
+      const lane = lanes.get(s) ?? 0;
+      const yBase =
+        origin +
+        offsets[staff] +
+        (spanAbove(s.spec) ? ink[staff].top - lane * 25 - 4 : ink[staff].bottom + lane * 25 + 14);
+      this.addFragment(s, units, row, yBase);
+    }
+    return row;
+  }
+
+  /** Keep continuation hooks and labels on the correct end when a span crosses a row. */
+  private addFragment(s: ResolvedSpan, units: Unit[], row: ContinuousRow, baseline: number): void {
+    const first = units[0].first,
+      last = units[units.length - 1].first;
+    const starts = s.first.measure >= first,
+      ends = s.last.measure <= units[units.length - 1].last;
+    const { kind } = s.spec,
+      above = spanAbove(s.spec);
+    const startStaff = this.score.staves[first][s.first.staff],
+      endStaff = this.score.staves[last][ends ? s.last.staff : s.first.staff];
+    const space = startStaff.space(1),
+      sign = above ? -1 : 1;
+    let x1 = starts ? s.first.note.getAbsoluteX() : startStaff.getNoteStartX() + 2;
+    let x2 = ends ? s.last.note.getAbsoluteX() + s.last.note.getGlyphWidth() : endStaff.getNoteEndX() - 3;
+    let y1 = baseline,
+      y2 = baseline;
+    if (kind === 'tie' || kind === 'slur') {
+      if (starts) x1 = s.first.note.getTieRightX();
+      if (ends) x2 = s.last.note.getTieLeftX();
+      y1 =
+        (starts
+          ? s.first.note.getYs()[s.spec.fromHead ?? 0]
+          : continuationPitch(s.first, startStaff, s.spec.fromHead)) +
+        sign * space * (starts ? 0.5 : 1.1);
+      y2 =
+        (ends ? s.last.note.getYs()[s.spec.toHead ?? 0] : continuationPitch(s.last, endStaff, s.spec.toHead)) +
+        sign * space * (ends ? 0.5 : 1.1);
+    }
+    if (kind === 'volta') {
+      x1 = starts ? this.score.staves[s.first.measure][s.first.staff].getX() + 1 : startStaff.getX() + 1;
+      x2 = ends ? this.score.staves[s.last.measure][s.last.staff].getNoteEndX() : endStaff.getNoteEndX();
+    }
+    if (kind === 'hyphen' && ends) x2 = s.last.note.getAbsoluteX() - space * 0.3;
+    if (x2 <= x1 || (starts && s.label && x1 + s.label.getWidth() > x2)) {
+      this.diagnostics.push({ code: 'SpanOverflow', measures: row.measures, source: s.spec.id });
+      if (x2 <= x1) return;
+    }
+    const fragment: SpanFragment = {
+      id: s.spec.id,
+      kind,
+      row: this.rows.length,
+      part: starts ? (ends ? 'single' : 'first') : ends ? 'last' : 'middle',
+      x1,
+      x2,
+      y1,
+      y2,
+      progress: [0, 1],
+      above,
+      space,
+    };
+    if (kind === 'tie' || kind === 'slur') {
+      const events = units.flatMap((u) => {
+        const staves = this.score.staves[u.first];
+        return this.score.notes[u.first]
+          .flat(2)
+          .filter(
+            (n): n is StaveNote =>
+              n instanceof StaveNote &&
+              (n.getStave() === staves[s.first.staff] || n.getStave() === staves[s.last.staff])
+          );
+      });
+      const obstacles = events
+        .filter((n) => n !== s.first.note && n !== s.last.note)
+        .flatMap((n) => measureEngraving(n).parts);
+      if (kind === 'slur') {
+        const endpoint = (n: Note, y: number) =>
+          n.hasStem() && n.getStemDirection() === -sign ? n.getStemExtents().topY + sign * space * 0.4 : y;
+        if (starts) fragment.y1 = endpoint(s.first.note, y1);
+        if (ends) fragment.y2 = endpoint(s.last.note, y2);
+        const within = obstacles.filter((b) => b.x + b.w > x1 && b.x < x2);
+        const edge = above
+          ? Math.min(y1, y2, ...within.map((b) => b.y)) - space * 0.6
+          : Math.max(y1, y2, ...within.map((b) => b.y + b.h)) + space * 0.6;
+        if (!starts) fragment.y1 = edge;
+        if (!ends) fragment.y2 = edge;
+      }
+      if (!fitSpan(fragment, obstacles))
+        this.diagnostics.push({ code: 'CurveCollision', measures: row.measures, source: s.spec.id });
+    }
+    this.fragments.push(fragment);
+  }
+
+  /** Add labels, connectors and numbered rests after all native positions have settled. */
+  private decorate(units: Unit[], visible: number[], firstRow: boolean, headerY: number): void {
+    const head = this.score.staves[units[0].first];
+    for (const j of visible) {
+      const label =
+        firstRow || this.spec.staves[j].measures[units[0].first].instrument
+          ? this.names[units[0].first][j].full
+          : this.names[units[0].first][j].short;
+      if (label)
+        this.drawing.push((ctx) =>
+          label.renderText(
+            ctx,
+            head[j].getX() - this.groups.length * 9 - 7 - label.getWidth(),
+            head[j].getYForLine(2) + 4
+          )
+        );
+    }
+    for (const [index, g] of this.groups.entries()) {
+      const members = visible.filter((j) => j >= g.first && j <= g.last);
+      if (members.length < 2) continue;
+      const top = members[0],
+        bottom = members[members.length - 1];
+      const connector = new StaveConnector(head[top], head[bottom]).setType(g.type).setXShift(-index * 8);
+      this.drawing.push((ctx) => connector.setContext(ctx).drawWithStyle());
+      if (g.barlines)
+        for (const u of units) {
+          const staves = this.score.staves[u.first];
+          const line = new StaveConnector(staves[top], staves[bottom]).setType('singleRight');
+          this.drawing.push((ctx) => line.setContext(ctx).drawWithStyle());
+        }
+    }
+    for (const u of units) {
+      const staves = this.score.staves[u.first];
+      let x = staves[visible[0]].getX() + 2;
+      for (const { mark, boxed } of this.headerParts(u.first, u === units[0])) {
+        const left = x + (boxed ? 3 : 0);
+        this.drawing.push((ctx) => {
+          if (boxed) {
+            const box = mark.getTextInk(left, headerY);
+            ctx.beginPath();
+            ctx.rect(box.x - 3, box.y - 3, box.w + 6, box.h + 6);
+            ctx.stroke();
+          }
+          mark.renderText(ctx, left, headerY);
+        });
+        x += mark.getWidth() + (boxed ? 12 : 7);
+      }
+      if (u.last > u.first)
+        for (const j of visible) {
+          const count = u.last - u.first + 1,
+            rest = new MultiMeasureRest(count, { numberOfMeasures: count }).setStave(staves[j]);
+          this.drawing.push((ctx) => rest.setContext(ctx).drawWithStyle());
+        }
+    }
+  }
+
+  draw(context: RenderContext): void {
+    for (const draw of this.drawing) draw(context);
+  }
+}

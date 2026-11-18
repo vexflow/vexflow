@@ -1,5 +1,6 @@
 // Structured construction delegates timing and layout to native Voice, System, and Sheet objects.
 import { Accidental } from '../accidental';
+import { ContinuousLayout, ContinuousOptions } from '../continuouslayout';
 import type { EasyScore, EasyScoreVoiceOptions } from '../easyscore';
 import type { Element } from '../element';
 import { Factory } from '../factory';
@@ -82,6 +83,7 @@ export interface EasyScoreVoiceSpec {
 
 /** span is the actual duration of a pickup; time remains its displayed meter. */
 export interface EasyScoreMeasureSpec extends EasyScoreStaffState {
+  instrument?: { name: string; shortName?: string };
   voices: readonly EasyScoreVoiceSpec[];
   span?: VoiceTime | string;
 }
@@ -89,6 +91,8 @@ export interface EasyScoreMeasureSpec extends EasyScoreStaffState {
 /** Staves have aligned measure arrays. Missing or uneven measures are errors. */
 export interface EasyScoreStaveSpec extends EasyScoreStaffState {
   id: string;
+  name?: string;
+  shortName?: string;
   kind?: 'stave' | 'tab';
   options?: StaveOptions;
   spaceAbove?: number;
@@ -111,6 +115,7 @@ export type EasyScoreSpanSpec =
 /** Layout policies are explicit. Sheet does not split spans or repeat signatures at row starts. */
 export interface EasyScoreCompositionSpec {
   staves: readonly EasyScoreStaveSpec[];
+  continuous?: ContinuousOptions;
   sheet?: Omit<SheetOptions, 'factory'>;
   system?: Omit<SystemOptions, 'factory' | 'width' | 'autoWidth' | 'noJustification'>;
   accidentals?: 'literal' | 'key-aware';
@@ -406,7 +411,7 @@ export function compose(score: EasyScore, spec: EasyScoreCompositionSpec): EasyS
         getElement: (id) => score.getElement(id),
         getNote: (id) => score.getNote(id),
       };
-      if (spec.signatures !== 'every-measure')
+      if (!spec.continuous && spec.signatures !== 'every-measure')
         result.diagnostics.push({
           code: 'SignaturePolicy',
           message:
@@ -417,8 +422,18 @@ export function compose(score: EasyScore, spec: EasyScoreCompositionSpec): EasyS
         key: stave.key ?? 'C',
         time: stave.time ?? '4/4',
       }));
+      const starts: Required<EasyScoreStaffState>[][] = [],
+        ends: Required<EasyScoreStaffState>[][] = [];
+      const placed = spec.continuous ? new Set<Accidental>() : undefined;
       const noteMeasures = new Map<Note, number>();
       for (let index = 0; index < count; index++) {
+        starts.push(
+          spec.staves.map((staff, j) => {
+            const m = staff.measures[index],
+              p = states[j];
+            return { clef: m.clef ?? p.clef, key: m.key ?? p.key, time: m.time ?? p.time };
+          })
+        );
         const system = result.sheet.addSystem(spec.system);
         result.systems.push(system);
         const parts = spec.staves.map((staff, staffIndex) => {
@@ -454,15 +469,18 @@ export function compose(score: EasyScore, spec: EasyScoreCompositionSpec): EasyS
               policy.changes,
               generated,
               staves[staffIndex],
-              spec.graceAccidentals === 'ordered'
+              spec.graceAccidentals === 'ordered',
+              placed
             )
           );
         }
+        ends.push(states.slice());
         result.staves.push(staves);
         result.voices.push(voices);
         result.notes.push(notes);
       }
       result.spans = buildSpans(score, spec, noteMeasures, result.diagnostics);
+      if (spec.continuous) result.sheet.setContinuousLayout(new ContinuousLayout(result, spec, starts, ends, placed));
       return result;
     });
   } catch (error) {

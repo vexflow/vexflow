@@ -42,17 +42,17 @@ export interface StaveOptions {
 // The keys (computed property names) match the CATEGORY property in the
 // Barline, Clef, KeySignature, TimeSignature classes.
 const SORT_ORDER_BEG_MODIFIERS = {
-  [Barline.CATEGORY]: 0,
-  [Clef.CATEGORY]: 1,
-  [KeySignature.CATEGORY]: 2,
-  [TimeSignature.CATEGORY]: 3,
+  [Category.Barline]: 0,
+  [Category.Clef]: 1,
+  [Category.KeySignature]: 2,
+  [Category.TimeSignature]: 3,
 };
 
 const SORT_ORDER_END_MODIFIERS = {
-  [TimeSignature.CATEGORY]: 0,
-  [KeySignature.CATEGORY]: 1,
-  [Barline.CATEGORY]: 2,
-  [Clef.CATEGORY]: 3,
+  [Category.TimeSignature]: 0,
+  [Category.KeySignature]: 1,
+  [Category.Barline]: 2,
+  [Category.Clef]: 3,
 };
 
 export class Stave extends Element {
@@ -68,6 +68,14 @@ export class Stave extends Element {
   protected endClef?: string;
 
   protected formatted: boolean;
+  private boundaryModifiers: StaveModifier[] = [];
+
+  /** Replace only the derived row-start and courtesy signs on a responsive sheet. */
+  setBoundaryModifiers(modifiers: StaveModifier[]): void {
+    this.boundaryModifiers = modifiers;
+    for (const mark of modifiers) mark.setStave(this);
+    this.formatted = false;
+  }
   protected measure: number;
   protected bounds: Bounds;
   protected readonly modifiers: StaveModifier[];
@@ -438,7 +446,10 @@ export class Stave extends Element {
   }
 
   getEndClef(): string | undefined {
-    return this.endClef;
+    const courtesy = this.boundaryModifiers.find(
+      (m) => m instanceof Clef && m.getPosition() === StaveModifierPosition.END
+    );
+    return courtesy instanceof Clef ? courtesy.getType() : this.endClef;
   }
 
   setKeySignature(keySpec: string, cancelKeySpec?: string, position?: number): this {
@@ -560,19 +571,20 @@ export class Stave extends Element {
    * @returns array of StaveModifiers that match the provided position and category.
    */
   getModifiers(position?: number, category?: string): StaveModifier[] {
+    const modifiers = this.boundaryModifiers.length ? this.modifiers.concat(this.boundaryModifiers) : this.modifiers;
     const noPosition = position === undefined;
     const noCategory = category === undefined;
     if (noPosition && noCategory) {
-      return this.modifiers; // Should this be [...this.modifiers]?
+      return modifiers;
     } else if (noPosition) {
       // A category was provided.
-      return this.modifiers.filter((m: StaveModifier) => category === m.getCategory());
+      return modifiers.filter((m: StaveModifier) => category === m.getCategory());
     } else if (noCategory) {
       // A position was provided.
-      return this.modifiers.filter((m: StaveModifier) => position === m.getPosition());
+      return modifiers.filter((m: StaveModifier) => position === m.getPosition());
     } else {
       // Both position and category were provided!
-      return this.modifiers.filter((m: StaveModifier) => position === m.getPosition() && category === m.getCategory());
+      return modifiers.filter((m: StaveModifier) => position === m.getPosition() && category === m.getCategory());
     }
   }
 
@@ -718,8 +730,7 @@ export class Stave extends Element {
     ctx.closeGroup();
 
     // Draw the modifiers (bar lines, coda, segno, repeat brackets, etc.)
-    for (let i = 0; i < this.modifiers.length; i++) {
-      const modifier: StaveModifier = this.modifiers[i];
+    for (const modifier of this.getModifiers()) {
       modifier.setContext(ctx);
       modifier.setStave(this);
       modifier.drawWithStyle();

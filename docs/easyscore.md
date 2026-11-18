@@ -535,13 +535,35 @@ Call `result.sheet.setWidth(width).format()`, resize/clear the context, then cal
 `getRows()` reports row bounds and overflow. An oversized measure stays readable on its own row.
 Text and spanning marks may need additional `rowGap`; Sheet is not a general collision solver.
 
-`signatures: 'changes'` is the default. It shows initial signatures and explicit changes, with a diagnostic that wrapped row starts do not repeat them.
-`signatures: 'every-measure'` makes every measure suitable for a new row. Automatic row-start-only repetition is not implemented.
+For a composition using the default Sheet layout, `signatures: 'changes'` is the default. It shows initial signatures and explicit changes, with a diagnostic that wrapped row starts do not repeat them.
+`signatures: 'every-measure'` makes every measure suitable for a new row. To repeat signatures only where a row begins, opt into continuous layout.
 
-Structured `spans` accepts ties, curves, and hairpins with forward note IDs.
+Top-level `spans` accepts ties, curves, and hairpins with forward note IDs.
 Use returned notes and `make.*` for other native relationships.
 Cross-measure spans are rejected by default. `crossMeasureSpans: 'manual'` permits them and returns a diagnostic.
 The caller must replace them with native partial segments if they cross a row after reflow. Sheet never splits them silently.
+
+Pass a `continuous` object to use measured row starts, repeat barlines and automatic span continuation. Reference the IDs of the original events. Reflow the same Sheet when the viewport changes.
+
+```js
+const result = score.compose({
+  sheet: { width: 450 },
+  staves: [{ id: 'solo', measures: [
+    { voices: [{ notes: [{ id: 'a', note: { keys: ['g/4'], duration: 'w' } }] }] },
+    { voices: [{ notes: [{ id: 'b', note: { keys: ['d/5'], duration: 'w' } }] }] },
+  ] }],
+  continuous: {
+    mode: 'balanced',
+    measureNumbers: true,
+    spans: [{ id: 'phrase', kind: 'slur', from: 'a', to: 'b', side: 'above' }],
+  },
+});
+result.sheet.setWidth(300).format();
+const layout = result.sheet.getContinuousLayout();
+console.log(layout.rows, layout.fragments, layout.diagnostics);
+```
+
+See the [continuous score guide](vf6/m4.md) for break constraints, rest grouping, staff names and span conventions.
 
 The Explorer's **EasyScore: responsive composition** example covers a grand staff, pickup, multiple voices, tuplets, changing meter, inline state, and both spacing modes.
 
