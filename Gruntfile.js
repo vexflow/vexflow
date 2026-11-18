@@ -775,7 +775,8 @@ module.exports = (grunt) => {
         'after:bump': ['grunt', 'echo Adding build/ folder...', 'git add -f build/'],
         'after:npm:release': [],
         'after:git:release': [],
-        'after:github:release': [],
+        // Git has committed and tagged the exact version before the GitHub release is published.
+        'before:github:release': ['npm run report:release -- ${tagName}'],
         'after:release': ['echo Successfully released ${name} ${version} to https://github.com/${repo.repository}'],
       },
       git: {

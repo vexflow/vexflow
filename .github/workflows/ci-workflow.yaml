@@ -22,6 +22,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: npm ci
       - run: npm run audit:ci
+      - run: npm run report:test
       - run: npm run lint
       - run: npm test
       - run: npm run explorer:test

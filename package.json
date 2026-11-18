@@ -105,6 +105,7 @@
     "grunt-contrib-qunit": "11.0.0",
     "grunt-eslint": "^25.0.0",
     "grunt-webpack": "^7.0.0",
+    "istanbul-lib-instrument": "6.0.3",
     "jsdom": "^26.1.0",
     "jspdf": "^4.0.0",
     "opener": "^1.5.2",
@@ -145,7 +146,12 @@
     "guide": "node guide/cli.mjs serve",
     "guide:build": "node guide/cli.mjs build",
     "guide:test": "node guide/test.mjs",
-    "guide:upload": "node guide/cli.mjs upload"
+    "guide:upload": "node guide/cli.mjs upload",
+    "report": "node tools/reports/cli.mjs build",
+    "report:upload": "node tools/reports/cli.mjs upload",
+    "report:release": "node tools/reports/cli.mjs release",
+    "release:github": "node tools/reports/cli.mjs github",
+    "report:test": "node --test tools/reports/report.test.mjs"
   },
   "homepage": "https://vexflow.com/",
   "keywords": [

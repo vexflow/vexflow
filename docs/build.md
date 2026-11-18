@@ -232,21 +232,19 @@ Create a checksum:
 
 ### Tag and publish the GitHub release
 
-Write short release notes to `releases/$release_version/notes.md`. Include the changes, validation, and whether npm publication is still pending. `releases/` is ignored by Git.
+Write short release notes to `releases/$release_version/notes.md`. Include the changes, validation, the report link (`https://vexflow.com/reports/<release-commit>/`), and whether npm publication is still pending. `releases/` is ignored by Git.
 
 Tags use the version number without a `v` prefix:
 
 ```sh
 git tag -a "$release_version" "$release_commit" -m "VexFlow $release_version"
 git push origin "refs/tags/$release_version"
-gh release create "$release_version" \
-  --repo vexflow/vexflow --verify-tag --latest \
-  --title "VexFlow $release_version" \
-  --notes-file "releases/$release_version/notes.md" \
-  "$release_tarball" "releases/$release_version/SHA256SUMS"
+npm run release:github -- "$release_version"
 ```
 
-For a prerelease such as `X.Y.Z-beta.1`, replace `--latest` with `--prerelease --latest=false`.
+This command checks the tag’s package version, builds and uploads the tagged commit’s [quality report](quality-reports.md), then creates the GitHub release with the notes, npm tarball and checksums. Authenticate to the website bucket before running it. The archive lists the release version first and links to its report. Prerelease versions such as `X.Y.Z-beta.1` are published as GitHub prereleases.
+
+To rehearse locally after preparing the tag and assets, append `--dry-run`. If publication is interrupted, rerun the command. For a release that already exists on GitHub, use `npm run report:release -- "$release_version"` to publish or repair its report.
 
 The release tarball contains the built npm package. GitHub's automatic source archives contain the source checkout. Stop here when preparing a release for someone else to publish to npm.
 
@@ -276,6 +274,8 @@ The guide, Explorer, and visual test gallery are self-contained static sites. Th
 | User guide   | `npm run guide:build`    | `npm run guide:upload`    | `gs://vexflow.com/guide/`    | <https://vexflow.com/guide/>    |
 | Explorer     | `npm run explorer:build` | `npm run explorer:upload` | `gs://vexflow.com/explorer/` | <https://vexflow.com/explorer/> |
 | Test gallery | `npm run tests:build`    | `npm run tests:upload`    | `gs://vexflow.com/tests/`    | <https://vexflow.com/tests/>    |
+
+For commit-by-commit repository metrics, see [code quality reports](quality-reports.md). Build with `npm run report` and publish with `npm run report:upload`.
 
 Install the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install) and [authenticate](https://docs.cloud.google.com/sdk/docs/authenticate) with an account allowed to upload objects, set their public ACLs, and read them back:
 
