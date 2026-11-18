@@ -4,7 +4,7 @@ Created: **2026-11-16**
 
 Last reviewed: **2026-11-18**
 
-Reviewed against [main at 31405bc5](https://github.com/vexflow/vexflow/commit/31405bc51df59aa719161c26f7160e9ea26e32df), package version **5.2.0**.
+**Primary status reference** · [upstream main at 5082e902](https://github.com/vexflow/vexflow/commit/5082e902baddfc00a3ac94124a91ffca78531b78). M0 is merged. M1 is implemented on the roadmap branch. The pinned 5.2.0 release supplies historical evidence. [Latest fixture comparison](m0.md#latest-comparison)
 
 Status: **52 tracked items. Two verified on main and 50 remaining.**
 
@@ -105,7 +105,7 @@ Stable IDs are permanent. Split a large item into suffixed children, such as `VF
 | ------ | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
 | VF-001 | P0 / In progress / D         | The [M0 corpus](../../tests/engraving/manifest.json) connects 64 cases to rules, gaps and outcomes. Seven cases have [maintainer feedback](m0.md#maintainer-engraving-review). Existing galleries and benchmarks cover different slices.          | Versioned corpus manifest with positive, negative, interaction, and boundary cases; every P0/P1 item maps to fixtures and reviewer decisions.                                                               | M0     |
 | VF-002 | P0 / In progress / D         | M1 measures heads, stems, flags, ledgers, beams, curves, grace groups and selected marks after formatting. [Audit and remaining adapters](m1.md#pre-draw-geometry-audit).                                                                         | Every core layout participant exposes finite pre-draw ink/layout bounds and anchors after a documented phase; repeated measurement/draw and resize are stable.                                              | M1     |
-| VF-003 | P0 / Open / D                | A VF5 beam can clear a peer head at a shared attack or between attacks. Other marks, conflicting constraints and adjacent staves still need a general collision policy. [M1 evidence](m1.md).                                                     | Shared obstacle/clearance model handles different ticks, voices, modifiers, and adjacent staves; intentional overlaps are explicit; unsatisfied constraints produce diagnostics.                            | M3     |
+| VF-003 | P0 / Open / D                | Main clears a peer head at a shared attack. The M1 branch also clears a head between attacks. Other marks, conflicting constraints and adjacent staves still need a general collision policy. [M1 evidence](m1.md).                                                     | Shared obstacle/clearance model handles different ticks, voices, modifiers, and adjacent staves; intentional overlaps are explicit; unsatisfied constraints produce diagnostics.                            | M3     |
 | VF-004 | P0 / Open / A                | Existing rhythmic spacing and tuning lack a unified, inspectable quality contract for optical spacing, text constraints, and compression.                                                                                                         | Measure width includes all spacing participants; hard minima are preserved; tested density/stretch profiles and optical corrections outperform baseline on the agreed corpus. Keep proportional mode exact. | M2     |
 | VF-005 | P1 / Investigate / A,R       | Beam slope, staff-line contact, stem length, beamlet direction and mixed subdivisions need a systematic quality audit. Existing [beam code](../../src/beam.ts) already fits slopes and groups notes.                                              | Meter/tuplet-aware grouping plus reviewed slope/staff contact, secondary beams, rests and wide-spacing cases; explicit direction overrides remain stable.                                                   | M2     |
 | VF-006 | P1 / Open / D,R              | Displacement exists. M0 reproduces #523 with three spellings sharing two head positions. Audit unequal onsets, shared heads, dots, crossing stems and additional voices.                                                                          | Curated polyphony matrix has no unintended head/stem/rest/dot collisions; voice insertion order does not alter musical meaning or declared policy.                                                          | M2     |
@@ -240,12 +240,13 @@ Depends on: VF-002, VF-013, VF-014, VF-016
 V5 slice and compatibility evidence: unassessed
 V6 requirement / design reference: pending
 Issue / PR / release: —
-Evidence: fixture IDs, before/after artifacts, source reference
+Evidence: fixture IDs, checkout SHA, fetched main SHA and remaining differences
+Release history: differences from 5.2.0
 Acceptance: cases passed / cases required; reviewer and date
 Remaining exclusions: explicit list
 ```
 
-Link each V5 result to the corresponding V6 requirement. A partial V5 fix can close a child item while the parent remains open for other cases. Update the row, supporting record, and milestone together. Preserve completed rows as history. `Verified` requires a merged implementation, meaningful automated checks, visual review for engraving changes, documentation, and a release/commit reference. Record `implemented, awaiting review` as `In progress`, not `Verified`. Regressions reopen the same ID or create a linked child.
+Refresh the main reference after each merge. Record which fixtures still differ on the branch and which fixes have landed upstream. Keep differences from 5.2.0 in the release history. Link each V5 result to the corresponding V6 requirement. A partial V5 fix can close a child item while the parent remains open for other cases. Update the row, supporting record, and milestone together. Preserve completed rows as history. `Verified` requires a merged implementation, meaningful automated checks, visual review for engraving changes, documentation, and a release/commit reference. Record `implemented, awaiting review` as `In progress`, not `Verified`. Regressions reopen the same ID or create a linked child.
 
 Track acceptance-case counts by repertoire and priority. Raw counts of closed rows, glyphs, or passing tests are not a quality percentage. A split item must not artificially improve completion statistics.
 
@@ -261,3 +262,4 @@ Track acceptance-case counts by repertoire and priority. Raw counts of closed ro
 | 2026-11-18 | Recorded maintainer feedback on triplets, three voices, shared heads, curves and tab bends. | [Acceptance cases](m0.md#maintainer-engraving-review).                                                                           |
 | 2026-11-18 | Completed M0. Repaired the five reviewed cases and retained both unison controls.           | [Fixes and remaining scope](m0.md#m0-closure).                                                                                   |
 | 2026-11-18 | Implemented the M1 engineering gates on the roadmap branch. | [M1 scope, executable evidence and pending reviews](m1.md). |
+| 2026-11-18 | Made fetched main the primary status reference and kept 5.2.0 for release history. | [66-case comparison and remaining branch differences](m0.md#latest-comparison). |

@@ -1,5 +1,9 @@
 {
-  "reference": "VexFlow 5.2.0",
+  "reference": "origin/main",
+  "historicalRelease": {
+    "tag": "5.2.0",
+    "bundleSHA256": "14d30cef7899645816d1eb50b85cf4190e20eefc709219d60c4928af7a914021"
+  },
   "license": "MIT",
   "fonts": ["Bravura", "Academico"],
   "backend": "SVG",
@@ -8,14 +12,16 @@
   "defaultReview": "Pending",
   "outcomes": {
     "unison-triple": "Expected defect: three spellings occupy two head positions.",
-    "threevoice-1": "Fixed after 5.2.0. The middle double beam clears the second head of the bottom voice.",
+    "threevoice-1": "Fixed on main in M0. The middle double beam clears the second head of the bottom voice.",
     "beam-width": "Review slope reversal on the second group at 500 px.",
-    "formatter-3": "Fixed after 5.2.0. Upper and lower triplet brackets clear the outer text by comparable amounts.",
-    "curve-1": "Fixed after 5.2.0. The second opening-up slur clears the down-stem beam.",
-    "curve-2": "Fixed after 5.2.0. The first opening-down slur clears the up-stem beam.",
-    "bend-2": "Fixed after 5.2.0. The upper string uses the inner bend on both chords."
+    "formatter-3": "Fixed on main in M0. Upper and lower triplet brackets clear the outer text by comparable amounts.",
+    "curve-1": "Fixed on main in M0. The second opening-up slur clears the down-stem beam.",
+    "curve-2": "Fixed on main in M0. The first opening-down slur clears the up-stem beam.",
+    "bend-2": "Fixed on main in M0. The upper string uses the inner bend on both chords."
   },
   "reviews": {
+    "beam-between-attacks": "2026-11-18 · @0xfe · Approved the M1 clearance around the intervening notehead.",
+    "beam-retained-resize": "2026-11-18 · @0xfe · Approved the M1 slope and stem joins after narrowing the system.",
     "formatter-3": "2026-11-18 · @0xfe · Adjust triplet clearance. In bar 2 the upper bracket sits too far above the text stack. Use the lower bracket in bar 1 as the spacing reference and give that lower bracket a little more room.",
     "threevoice-1": "2026-11-18 · @0xfe · Collision at the second note of the bottom voice. Prefer raising the middle voice’s double beam just enough to clear that head.",
     "unison-2": "2026-11-18 · @0xfe · Expected. Sharing is disabled. Compare the separate heads with the same passage in unison-1.",
@@ -351,6 +357,16 @@
       "review": "Inspect the horizontal beam edges against the nearest line at each staff position.",
       "cases": {
         "beam-contact": "Horizontal beams inside the staff"
+      }
+    },
+    {
+      "module": "M1 studies",
+      "source": "tests/engraving/studies.mjs",
+      "gaps": ["VF-002", "VF-003", "VF-005"],
+      "review": "Check the clearance around the intervening head and all four stem joins after reflow.",
+      "cases": {
+        "beam-between-attacks": "Notehead between beamed attacks",
+        "beam-retained-resize": "Sloped beam after narrowing a retained system"
       }
     }
   ]

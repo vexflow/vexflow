@@ -1,5 +1,6 @@
-// Run the M0 manifest against two VF5 builds and publish a local engraving review report.
+// Compare the roadmap checkout to upstream main and a pinned release, then verify a repeat render.
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
@@ -10,8 +11,14 @@ import { compareDirectories } from './visual-regression.mjs';
 
 const release = process.argv[2];
 if (!release) throw new Error('Pass the released vexflow-debug-with-tests.js bundle as the first argument.');
-const current = 'build/cjs/vexflow-debug-with-tests.js';
+const bundleName = 'vexflow-debug-with-tests.js';
+const current = join('build/cjs', bundleName);
+const mainBundle = process.argv[3] ?? join('build/engraving-main/build/cjs', bundleName);
 const manifest = JSON.parse(await readFile('tests/engraving/manifest.json', 'utf8'));
+const revision = (ref) =>
+  execFileSync('git', ['rev-parse', '--verify', ref + '^{commit}'], { encoding: 'utf8' }).trim();
+const mainRevision = revision(manifest.reference);
+const checkoutRevision = revision('HEAD');
 const cases = manifest.groups.flatMap(({ module, gaps, review, cases }) =>
   Object.entries(cases).map(([id, name]) => ({ id, name, module, gaps, review }))
 );
@@ -60,7 +67,11 @@ function measure(element) {
 }
 
 /** A fresh page per pass isolates global metrics, font load, registry and QUnit state. */
-async function capture(label, bundle) {
+async function capture(label, bundle, expectedRevision) {
+  const bytes = await readFile(bundle);
+  const bundleSHA256 = hash(bytes);
+  if (label === 'release')
+    assert.equal(bundleSHA256, manifest.historicalRelease.bundleSHA256, 'Unexpected historical release bundle');
   const directory = join(output, label);
   await mkdir(directory);
   const page = await browser.newPage();
@@ -73,7 +84,14 @@ async function capture(label, bundle) {
       window.QUnit = { config: { autostart: false, reorder: false } };
     });
     await page.addScriptTag({ path: resolve('tests/qunit/qunit.js') });
-    await page.addScriptTag({ path: resolve(bundle) });
+    await page.addScriptTag({ content: bytes.toString('utf8') });
+    const build = await page.evaluate(() => VexFlow.BUILD);
+    if (expectedRevision)
+      assert.equal(
+        build.ID,
+        expectedRevision,
+        label + ': rebuild the bundle with grunt clean:webpack_cache webpack:debug'
+      );
     await page.evaluate(async () => {
       await Promise.all([...document.fonts].map((face) => face.load()));
       for (const family of ['Bravura', 'Academico']) {
@@ -129,7 +147,7 @@ async function capture(label, bundle) {
       await element.evaluate((el) => el.parentElement.remove());
     }
     console.log(label, Object.keys(records).length, 'examples');
-    return { bundleSHA256: hash(await readFile(bundle)), records };
+    return { build, bundleSHA256, records };
   } finally {
     await page.close();
   }
@@ -145,7 +163,18 @@ function checkTextControls(lyrics) {
 }
 
 /** Link all samples, including unchanged images awaiting a musical judgment. */
-function reviewPage(records) {
+function reviewPage(records, comparisons) {
+  const labels = {
+    main: 'Upstream main · ' + mainRevision.slice(0, 8),
+    release: 'Historical release · ' + manifest.historicalRelease.tag,
+    repeat: 'Checkout repeat',
+  };
+  const summary = Object.entries(comparisons)
+    .map(
+      ([key, result]) =>
+        `<li><a href="${key}-diff/index.html">${labels[key]}</a> · ${result.failed} image differences · ${result.geometryChanges.length} geometry differences · ${[...new Set([...result.imageChanges, ...result.geometryChanges])].map((id) => `<a href="#${id}">${id}</a>`).join(', ') || 'all cases match'}</li>`
+    )
+    .join('');
   const escape = (s) =>
     s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
   const flagged = [...new Set([...Object.keys(manifest.reviews), ...Object.keys(manifest.outcomes)])]
@@ -153,40 +182,52 @@ function reviewPage(records) {
     .join(' · ');
   const cards = cases.map(
     ({ id, module, name, review, gaps }) =>
-      `<article id="${id}"><h2>${id} · ${escape(module)} · ${escape(name)}</h2><p>${gaps.join(', ')} · Engraving review: ${escape(manifest.reviews[id] ?? manifest.defaultReview)}</p><p>${escape(manifest.outcomes[id] ?? '')} ${escape(records[id].study?.quality ?? '')}</p><p>${escape(review)}</p><a href="current/${id}.png"><img loading="lazy" src="current/${id}.png" alt="${id}"></a></article>`
+      `<article id="${id}"><h2>${id} · ${escape(module)} · ${escape(name)}</h2><p>${gaps.join(', ')} · Engraving review: ${escape(manifest.reviews[id] ?? manifest.defaultReview)}</p><p>${escape(manifest.outcomes[id] ?? '')} ${escape(records[id].study?.quality ?? '')}</p><p>${escape(review)}</p><p><a href="main/${id}.png">Main</a> · <a href="release/${id}.png">${manifest.historicalRelease.tag}</a> · <a href="current/${id}.png">Checkout</a></p><a href="current/${id}.png"><img loading="lazy" src="current/${id}.png" alt="${id}"></a></article>`
   );
-  return `<!doctype html><meta charset="utf-8"><title>M0 engraving review</title><style>body{font:16px system-ui;margin:2rem;background:white}article{border-top:1px solid #aaa;padding:1rem 0}img{max-width:100%;height:auto}h2{font-size:1.15rem}</style><h1>M0 engraving review</h1><p>Bravura and Academico · SVG · ${cases.length} examples. Cite the case ID and the mark or beat that needs attention.</p><p>Start with ${flagged}.</p><a href="release-diff/index.html">Release comparison</a> · <a href="repeat-diff/index.html">Repeat comparison</a> · <a href="results.json">Measurements</a>${cards.join('')}`;
+  return `<!doctype html><meta charset="utf-8"><title>Roadmap engraving review</title><style>body{font:16px system-ui;margin:2rem;background:white}article{border-top:1px solid #aaa;padding:1rem 0}img{max-width:100%;height:auto}h2{font-size:1.15rem}</style><h1>Roadmap engraving review</h1><p>Bravura and Academico · SVG · ${cases.length} examples. Cite the case ID and the mark or beat that needs attention.</p><p>Checkout ${checkoutRevision.slice(0, 8)}. Current review status is relative to upstream main.</p><ul>${summary}</ul><p><a href="results.json">Measurements</a></p><p>Cases with recorded reviews or observations: ${flagged}.</p>${cards.join('')}`;
+}
+
+/** Compare both pixels and geometry. A changed digest can matter even when the PNG matches. */
+async function compare(label, beforeDirectory, afterDirectory, before, after) {
+  const diff = await compareDirectories(
+    join(output, beforeDirectory),
+    join(output, afterDirectory),
+    join(output, label + '-diff')
+  );
+  const geometryChanges = cases
+    .filter(({ id }) => before.records[id].geometry !== after.records[id].geometry)
+    .map(({ id }) => id);
+  const imageReport = JSON.parse(await readFile(join(output, label + '-diff', 'results.json'), 'utf8'));
+  const imageChanges = imageReport.results
+    .filter((result) => result.status !== 'passed')
+    .map((result) => result.name.slice(0, -4));
+  return { ...diff, imageChanges, geometryChanges };
 }
 
 try {
-  const baseline = await capture('release', release);
-  const checkout = await capture('current', current);
-  const repeat = await capture('repeat', current);
-  const releaseDiff = await compareDirectories(
-    join(output, 'release'),
-    join(output, 'current'),
-    join(output, 'release-diff')
-  );
-  const repeatDiff = await compareDirectories(
-    join(output, 'current'),
-    join(output, 'repeat'),
-    join(output, 'repeat-diff')
-  );
-  const geometryChanges = cases
-    .filter(({ id }) => checkout.records[id].geometry !== baseline.records[id].geometry)
-    .map(({ id }) => id);
-  await writeFile(
-    join(output, 'results.json'),
-    JSON.stringify(
-      { chromium: await browser.version(), baseline, checkout, repeat, releaseDiff, repeatDiff, geometryChanges },
-      null,
-      2
-    )
-  );
-  await writeFile(join(output, 'index.html'), reviewPage(checkout.records));
-  console.log(output, { releaseDiff, repeatDiff, geometryChanges });
+  const main = await capture('main', mainBundle, mainRevision);
+  const checkout = await capture('current', current, checkoutRevision);
+  const releaseBuild = await capture('release', release);
+  const repeat = await capture('repeat', current, checkoutRevision);
+  const comparisons = {
+    main: await compare('main', 'main', 'current', main, checkout),
+    release: await compare('release', 'release', 'current', releaseBuild, checkout),
+    repeat: await compare('repeat', 'current', 'repeat', checkout, repeat),
+  };
+  const report = {
+    chromium: await browser.version(),
+    primaryReference: manifest.reference,
+    main,
+    checkout,
+    historicalRelease: { tag: manifest.historicalRelease.tag, ...releaseBuild },
+    repeat,
+    comparisons,
+  };
+  await writeFile(join(output, 'results.json'), JSON.stringify(report, null, 2));
+  await writeFile(join(output, 'index.html'), reviewPage(checkout.records, comparisons));
+  console.log(output, comparisons);
   assert.deepEqual(checkout, repeat, 'Repeat geometry or assertions changed');
-  assert.equal(repeatDiff.failed, 0, 'Repeat images differ');
+  assert.equal(comparisons.repeat.failed, 0, 'Repeat images differ');
 } finally {
   await browser.close();
 }

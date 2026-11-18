@@ -4,7 +4,7 @@ Created: **2026-11-16**
 
 Last reviewed: **2026-11-18**
 
-Reviewed against [main at 31405bc5](https://github.com/vexflow/vexflow/commit/31405bc51df59aa719161c26f7160e9ea26e32df), package version **5.2.0**.
+**Primary status reference** · [upstream main at 5082e902](https://github.com/vexflow/vexflow/commit/5082e902baddfc00a3ac94124a91ffca78531b78). Compare the branch to freshly fetched main at every milestone review and after merges. Keep 5.2.0 as the historical release reference. [Latest fixture comparison](m0.md#latest-comparison)
 
 Status: **M0 complete. Both M1 beam examples passed maintainer review. The VF6 score representation awaits a decision. M2–M8 remain proposed or deferred.**
 
@@ -25,7 +25,7 @@ At milestone review, link any shipped V5 fixture or unresolved constraint back t
 
 ## Starting point on main
 
-EasyScore and the guide are part of the 5.2.0 baseline. VF-044 and VF-049 are complete for their original scope. New features can use the existing typed helpers, composition tests, runnable guide examples and CI. [EasyScore contracts](../easyscore-contracts.md) · [Guide authoring and testing](../guide.md)
+EasyScore and the guide are on main and shipped in 5.2.0. VF-044 and VF-049 are complete for their original scope. New features can use the existing typed helpers, composition tests, runnable guide examples and CI. [EasyScore contracts](../easyscore-contracts.md) · [Guide authoring and testing](../guide.md)
 
 | Work                                                  | State on November 17                       | Use in this plan                                                                                                                                  |
 | ----------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -198,7 +198,7 @@ Web compatibility, performance measurement, API parity, and documentation run th
 2. Build a proposed `tests/engraving/` corpus manifest. Each case records ID, rule, gap, input builder, musical assertions, geometry assertions, reference revision/license, supported fonts/backends, expected outcome and review status.
 3. Start with approximately 60 small cases across spacing, beams, polyphony, accidentals, spans, lyrics and boundaries. This is a planning target; coverage of each selected rule matters more than the count.
 4. Adapt representative cases from the register's LilyPond crosswalk using original short music. Keep source/reference provenance even when no source is copied.
-5. Reproduce the legacy candidates on the checkout and current released package. Classify as current defect, already fixed, API misuse, documentation gap, duplicate, or unsupported feature. Coordinate applicable reports with #355.
+5. Reproduce legacy candidates on the checkout and a pinned upstream main build. Record the 5.2.0 release comparison separately. Classify as current defect, already fixed, API misuse, documentation gap, duplicate, or unsupported feature. Coordinate applicable reports with #355.
 6. Capture existing chorale, piano and chamber benchmarks; add planned lead-sheet, percussion and tab workloads. Record build mode, fonts, browser, hardware and input size.
 7. Extend the existing visual report with fixture IDs and review outcomes. Make sure negative controls detect deliberate clipping, wrong accidentals, invalid span endpoints and text collisions.
 
@@ -481,7 +481,8 @@ Separate implementation completion from merge, release and deployment. A feature
 Gap ID(s):
 Milestone / owner:
 Priority and confirmed impact:
-Current behavior and baseline commit:
+Current behavior on upstream main / main SHA / checkout SHA:
+Remaining branch differences / 5.2.0 historical differences:
 Target behavior and explicit exclusions:
 Reference rule / source revision:
 Dependencies, EasyScore contract and guide example:
@@ -513,3 +514,4 @@ Review progress by **supported use case and unresolved severity**. Report confir
 | 2026-11-18 | Record M0 and start a branch-local VF6 requirements directory.                                        | [Evidence, priority and revised effort](m0.md). Seven cases have [engraving feedback](m0.md#maintainer-engraving-review).                                                          |
 | 2026-11-18 | Complete M0 with the five reviewed VF5 engraving fixes.                                               | Both unison fixtures are expected. [Closure evidence](m0.md#m0-closure).                                                                                                           |
 | 2026-11-18 | Implement M1 on VF5 and exercise both VF6 persistence options. | [Engineering gates and review items](m1.md). The recommendation is ready for maintainer review. |
+| 2026-11-18 | Use upstream main to judge outstanding branch changes. Keep a second comparison against 5.2.0 for release history. | [Current results and refresh procedure](m0.md#latest-comparison). |

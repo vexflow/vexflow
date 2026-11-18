@@ -1,4 +1,4 @@
-// Original M0 passages. This function runs inside the browser against either VF5 bundle.
+// Original roadmap passages. Run the same native inputs on each comparison build.
 export function registerStudies() {
   const VF = globalThis.VexFlow;
   QUnit.module('M0 studies');
@@ -152,5 +152,43 @@ export function registerStudies() {
       'Repeated pitches have horizontal beams'
     );
     document.getElementById(options.elementId).dataset.measurement = JSON.stringify({ lines, tips });
+  });
+
+  QUnit.module('M1 studies');
+
+  VF.Test.runTests('Notehead between beamed attacks', (options) => {
+    const factory = VF.Test.makeFactory(options, 400, 140);
+    const score = factory.EasyScore();
+    const notes = score.notes('C4/8, C4/8', { stem: 'up' });
+    const other = factory.StaveNote({ keys: ['c/5'], duration: '16', stemDirection: 1 });
+    const voices = [notes, [factory.GhostNote('16'), other, factory.GhostNote('8')]];
+    const beam = factory.Beam({ notes });
+    factory
+      .System({ x: 10, y: 0, width: 370 })
+      .addStave({ voices: voices.map((v) => score.voice(v, { mode: 'soft' })) });
+    factory.draw();
+    const headBottom = other.getYs()[0] + other.noteHeads[0].getTextMetrics().actualBoundingBoxDescent;
+    const clearancePx = beam.getBeamYToDraw() - headBottom;
+    options.assert.ok(Number.isFinite(clearancePx), 'Measured clearance from head to horizontal beam');
+    document.getElementById(options.elementId).dataset.measurement = JSON.stringify({ clearancePx });
+  });
+
+  VF.Test.runTests('Sloped beam after narrowing a retained system', (options) => {
+    const factory = VF.Test.makeFactory(options, 540, 140);
+    const score = factory.EasyScore();
+    const notes = score.notes('A4/8, B4, C4, D4', { stem: 'up' });
+    const beam = factory.Beam({ notes });
+    const system = factory.System({ x: 10, y: 0, width: 520 });
+    system.addStave({ voices: [score.voice(notes, { mode: 'soft' })] });
+    factory.draw({ retain: true });
+    factory.getContext().clear();
+    system.setWidth(300);
+    factory.draw({ retain: true });
+    const stemTipErrorsPx = notes.map((note) => {
+      const beamY = beam.getBeamYToDraw() + beam.slope * (note.getStemX() - notes[0].getStemX());
+      return note.getStemExtents().topY - beamY;
+    });
+    options.assert.ok(stemTipErrorsPx.every(Number.isFinite), 'Measured each stem tip against the refitted line');
+    document.getElementById(options.elementId).dataset.measurement = JSON.stringify({ stemTipErrorsPx });
   });
 }
