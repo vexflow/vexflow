@@ -471,6 +471,31 @@
         "m6-spelling": "Clarinet pickup across the bar",
         "m6-meter": "Three against two and a cadenza"
       }
+    },
+    {
+      "module": "M8 reference scores",
+      "source": "tests/engraving/specialist-studies.mjs",
+      "gaps": ["VF-030"],
+      "review": "Play the figure using the indicated fingers, strings and rhythm. Check the target printed below the control.",
+      "cases": {
+        "m8-flamenco": "Four strokes and a golpe",
+        "m8-bossa": "Bass under an anticipation",
+        "m8-metal": "Pedal string and unison bend"
+      }
+    },
+    {
+      "module": "M8 reference scores",
+      "source": "tests/engraving/specialist-studies.mjs",
+      "gaps": ["VF-035"],
+      "review": "Read the acceleration, slowing and white-key cluster. Check the rendezvous with the flute.",
+      "cases": { "m8-contemporary": "Converging on beat two" }
+    },
+    {
+      "module": "M8 reference scores",
+      "source": "tests/engraving/specialist-studies.mjs",
+      "gaps": ["VF-020", "VF-034"],
+      "review": "Count the local bars and locate the sustained note and shared cue in the score and both parts.",
+      "cases": { "m8-ensemble": "Local bars and a common cue" }
     }
   ]
 }

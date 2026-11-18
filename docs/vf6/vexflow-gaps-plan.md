@@ -4,9 +4,9 @@ Created: **2026-11-16**
 
 Last reviewed: **2026-11-18**
 
-**Primary status reference** · [M7 on upstream main at 2b07436c](https://github.com/vexflow/vexflow/commit/2b07436c). Compare the branch to freshly fetched main at every milestone review and after merges. Keep 5.2.0 as the historical release reference. [Latest fixture comparison](m0.md#latest-comparison)
+**Primary status reference** · [M7 on upstream main at 97a8669d](https://github.com/vexflow/vexflow/commit/97a8669d). Compare the branch to freshly fetched main at every milestone review and after merges. Keep 5.2.0 as the historical release reference. [Latest fixture comparison](m0.md#latest-comparison)
 
-Status: **M0 through M7 are complete on main. The maintainer approved the VF6 score representation and the M1 beam, M2 local engraving, M3 phrase, M4 continuous-score, M5 print and M6 instrument studies. The maintainer also approved the M7 keyboard and screen-reader walkthrough. M8 has a proposed three-track plan for contemporary notation, advanced ensemble layout and guitar TAB.**
+Status: **M0 through M7 are complete on main. The maintainer approved the VF6 score representation and the M1 beam, M2 local engraving, M3 phrase, M4 continuous-score, M5 print and M6 instrument studies. The maintainer also approved the M7 keyboard and screen-reader walkthrough. The M8.0 reference scores are ready for performer review on the roadmap branch.**
 
 Source of scope: [Notation gap register](vexflow-gaps.md)
 
@@ -182,7 +182,7 @@ M0–M7 total **44–75 engineer-weeks before contingency**. Reserve roughly 25%
 | M5        | Pages and basic part layouts          | M4, stable vertical envelopes                 | 4–7 weeks            | Complete on main |
 | M6        | Mainstream instrument profiles        | M2–M4; parts use M5                           | 8–14 weeks           | Complete on main. [M6 approval](m6.md#engraving-review) |
 | M7        | Web/integration quality release       | M0–M5 and P1 scope of M6                      | 5–9 weeks            | Complete on main. Screen-reader walkthrough approved. [M7 evidence](m7.md) |
-| M8        | Specialist expansion                  | Reference scores and performer review | Estimate per increment | [Three-track proposal](m8.md) |
+| M8        | Specialist expansion                  | Reference scores and performer review | Estimate per increment | [M8.0 controls ready for review](m8-reference-scores.md) |
 
 Web compatibility, performance measurement, API parity, and documentation run throughout; M7 is their final integration gate. M6 P2 items may be delivered after the first quality release if explicitly deferred. P1 percussion support is part of the core repertoire target. M5 basic parts do not imply automatic condensing.
 
@@ -537,3 +537,4 @@ Review progress by **supported use case and unresolved severity**. Report confir
 | 2026-11-18 | Merged all eight approved M6 studies into main. P1 percussion is verified. | [Engraving approval](m6.md#engraving-review) · [Post-merge comparison](m0.md#latest-comparison). |
 | 2026-11-18 | Implemented M7 web qualification on the roadmap branch. Human assistive-technology review pending. | [M7 evidence](m7.md) · [VF6 requirements](requirements/web-delivery.md). |
 | 2026-11-18 | Merged M7 into main after @0xfe approved the keyboard and screen-reader walkthrough. | [Review record](m7.md#assistive-technology-review) · [Post-merge comparison](m0.md#latest-comparison). |
+| 2026-11-18 | Added the five M8.0 native controls on the roadmap branch. Performer review pending. | [Reference scores](m8-reference-scores.md) · [M8 delivery plan](m8.md). |

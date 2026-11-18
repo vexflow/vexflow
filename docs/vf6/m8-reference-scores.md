@@ -1,0 +1,27 @@
+# M8.0 · Five reference scores
+
+**2026-11-18 · Ready for performer review on the roadmap branch.** Each sheet pairs an original native VF5 score with its intended reading. VF5 can print all five controls. Several instructions still depend on text, duplicated part construction or hand-positioned marks. The questions below identify what needs a first-class representation. [M8 plan](m8.md) · [Executable scores and assertions](../../tests/engraving/specialist-studies.mjs)
+
+Read the score once before looking at the instructions beneath it. Cite the case ID, measure, beat or string if the two readings disagree. A screenshot establishes the printed result. A performer’s reading establishes whether the chosen convention communicates the gesture.
+
+| Case and reviewer role | Annotated target | What main does today | Question for review |
+| --- | --- | --- | --- |
+| **m8-flamenco** · flamenco guitarist | One bar in 4/4. On beat 1 play four sixteenths with a–m–i striking from bass to treble and i returning. Accent beat 2 and add a simultaneous golpe. The final beat is a freely rolled chord. | Four native brush arrows, the finger order, a return stroke, an accent and literal golpe instruction can be engraved across paired staff and rhythmic TAB. The final chord uses a native rasgueado mark. | Can you reproduce the finger sequence and tap the body at the intended instant? Would you change the arrow, finger placement or golpe sign for this edition? |
+| **m8-bossa** · Brazilian violão player | Two bars in 2/4. Hold the bass A under two offbeat chords. Tie the second chord into the new bar over bass E. Strike the muted upper strings on the next offbeat, while E continues. | Native voices, ties, silent TAB placeholders and dead-string Xs encode the rhythm and the string targets. A playable bossa pattern gives us a control before proposing any new gesture type. | Can you tap the bass and chord voices separately, including the tie and the muted attack? Which part of the batida would you mark differently? |
+| **m8-metal** · metal guitarist | In Drop D, mute only the open sixth string while the upper dyad rings. Carry that mute across a forced system break through the next bass attack. Tap fret 12, pull to 7 and hammer to 10. Bend string 3 up to the stationary E on string 2, then release. | TAB ties can label the legato figure. The bend belongs to the third-string head of the final chord. The continued mute is hand-labeled on both systems. The bend shape alone supplies no exact time to reach or release the target. | Can you identify the mute’s endpoint and the stationary string? Does the bend need an explicit hold or subdivision to communicate the phrase you would play? |
+| **m8-contemporary** · contemporary pianist or ensemble performer | Two 2/4 bars. In the first beat of each, the piano fits four attacks into a quarter, accelerating first and slowing the second time. On both second beats, play the white keys C5 through F5 together with the flute entrance on G4. | Regular beams with tempo words and a written-out four-note chord preserve the group length, pitches and meeting points. The native control spaces the four attacks as sixteenths. A graduated beam and a cluster sign are candidate readings for M8.2. | Given a fixed next beat, do you read the inner spacing freely? What indication would make the fan and the white-key boundaries unambiguous? |
+| **m8-ensemble** · conductor or score preparer, plus a part reader | Two flute bars of 3/4 and three cello bars of 2/4 occupy the same six quarters. Flute G sustains across the last cello barline. Both players enter at rehearsal B in 2/4 on a new score system. Each separate part places B on its existing line. | A jointly formatted six-quarter window aligns the attacks. Staff-local bars are drawn after formatting. The individual parts are constructed from the same pitches and durations with separate bar widths. | Can both players find B by counting their own local bars? Does the score make it clear that the flute continues through the last cello barline? |
+
+## How to inspect the results
+
+Open the engraving gallery's `index.html` and search for a case ID. **Main** shows the independent upstream build. **Checkout** shows this branch. **5.2.0** supplies the historical rendering. The GitHub web qualification artifact includes the gallery, individual PNGs and machine-readable results. The native controls run as part of the standard gallery command. [Baseline instructions](m0.md#latest-comparison) · [Browser workflow](../../.github/workflows/web-qualification.yaml)
+
+The tests measure staff and TAB onsets independently in sixteenths, including each voice ending. They check shared timing columns, tied string positions, the string carrying the bend, cluster membership, and matching pitches and durations in each ensemble part. For the free acceleration, the clock check covers the control’s written grid and the next shared beat. Exact performed subdivisions remain unspecified.
+
+The guitar gestures, bounded time and player-local bars expose three VF6 design decisions. [Specialist notation requirements](requirements/specialist-notation.md)
+
+## Review record
+
+| Revision | Disposition |
+| --- | --- |
+| 2026-11-18 · upstream main `97a8669d` | Five baseline controls rendered. Performer readings and proposed changes are awaiting review. |

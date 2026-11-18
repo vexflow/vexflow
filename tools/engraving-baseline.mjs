@@ -12,6 +12,7 @@ import { makeContinuousStudy } from '../tests/engraving/continuous-studies.mjs';
 import { makeInstrumentStudy } from '../tests/engraving/instrument-studies.mjs';
 import { makePhraseStudy } from '../tests/engraving/phrase-studies.mjs';
 import { publicationStudy } from '../tests/engraving/publication-studies.mjs';
+import { registerSpecialistStudies } from '../tests/engraving/specialist-studies.mjs';
 import { registerStudies } from '../tests/engraving/studies.mjs';
 import { analyzeLayout } from './render-metrics.mjs';
 import { compareDirectories } from './visual-regression.mjs';
@@ -119,6 +120,7 @@ async function capture(label, bundle, expectedRevision) {
     await page.addScriptTag({ content: `window.makeContinuousStudy = ${makeContinuousStudy};` });
     await page.addScriptTag({ content: `window.publicationStudy = ${publicationStudy};` });
     await page.evaluate(registerStudies);
+    await page.evaluate(registerSpecialistStudies);
     const results = await page.evaluate(
       () =>
         new Promise((done) => {
