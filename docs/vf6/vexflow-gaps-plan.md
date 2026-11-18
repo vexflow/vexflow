@@ -2,11 +2,11 @@
 
 Created: **2026-11-16**
 
-Last reviewed: **2026-11-17**
+Last reviewed: **2026-11-18**
 
-Reviewed against [main at 8b188731](https://github.com/vexflow/vexflow/commit/8b18873122b9b765ee130661d77692b3606fbcaf), package version **5.2.0**.
+Reviewed against [main at 31405bc5](https://github.com/vexflow/vexflow/commit/31405bc51df59aa719161c26f7160e9ea26e32df), package version **5.2.0**.
 
-Status: **Proposed plan; implementation not started by this task**
+Status: **M0 baseline recorded. Maintainer engraving review pending. M1–M8 remain proposed or deferred.**
 
 Source of scope: [Notation gap register](vexflow-gaps.md)
 
@@ -16,7 +16,7 @@ Pursue two tracks in parallel. Improve VexFlow 5 in small steps while using the 
 
 | Track                             | First work                                                                                                                                                                                                        | Evidence to keep                                                                                                                                                                           |
 | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| VexFlow 5 implementation          | Pick a reproducible defect from M0. Make the smallest correction that preserves current API contracts and musical semantics. For example, try the Smoosic text case once a minimal score is available.            | A failing fixture, the reviewed correction, compatibility checks, and the commit or release that contains it.                                                                              |
+| VexFlow 5 implementation          | Pick a reproducible defect from M0. Make the smallest correction that preserves current API contracts and musical semantics. Start with the coincident heads in the M0 altered-unison study.                      | A failing fixture, the reviewed correction, compatibility checks, and the commit or release that contains it.                                                                              |
 | VexFlow 6 requirements and design | Start in M0. Specify how a score or excerpt carries inherited state, anchors a modifier and preserves an authored placement. Compare a fresh V6 design with the existing composition adapter on the same passage. | A short, versioned requirement, an executable example or proposed acceptance test, the alternatives considered, and the maintainer decision. Link the prototype repository when available. |
 
 Triage each slice separately. If a public API or foundational behavior would have to change, capture the current and desired interpretation of one score, the affected callers and a migration option. For example, V5 composition rejects cross-measure spans by default. A V5 candidate must preserve that contract for existing callers. The V6 design can independently evaluate making a logical span survive every system break by default.
@@ -25,7 +25,7 @@ At milestone review, link any shipped V5 fixture or unresolved constraint back t
 
 ## Starting point on main
 
-EasyScore and the guide are part of the 5.2.0 baseline. VF-044 and VF-049 are complete for their original scope. New features can use the existing typed helpers, composition tests, runnable guide examples and CI. [EasyScore contracts](easyscore-contracts.md) · [Guide authoring and testing](guide.md)
+EasyScore and the guide are part of the 5.2.0 baseline. VF-044 and VF-049 are complete for their original scope. New features can use the existing typed helpers, composition tests, runnable guide examples and CI. [EasyScore contracts](../easyscore-contracts.md) · [Guide authoring and testing](../guide.md)
 
 | Work                                                  | State on November 17                       | Use in this plan                                                                                                                                  |
 | ----------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -57,7 +57,7 @@ These experiments can run on V5 where its contracts permit. For V6, evaluate the
 
 ### 1. Musical anchors and minimal score context
 
-For the V5 experiment, build on the existing `EasyScoreCompositionSpec`, which already describes staves, measures, voices, inline context changes and forward note references. Proposed additions should preserve these musical details across layout and save/load. [Current input types](../src/easyscore/composition.ts)
+For the V5 experiment, build on the existing `EasyScoreCompositionSpec`, which already describes staves, measures, voices, inline context changes and forward note references. Proposed additions should preserve these musical details across layout and save/load. [Current input types](../../src/easyscore/composition.ts)
 
 - Stable IDs for part, staff, voice, measure, event and logical relationship.
 - Rational onset and duration; grace ordering distinct from metrical time.
@@ -73,11 +73,11 @@ A relationship has one logical identity even if it has several visual fragments.
 
 #### M1 decision on score serialization
 
-Smoosic already handles many multi-measure editing tasks. Newman describes the cost of saving repeated key and time signatures and raises a question about which object owns a modifier. Compare SmoSchema’s change maps and sample scores with EasyScore’s inheritance rules before choosing a persistence interface. [Roadmap comment](https://github.com/vexflow/vexflow/issues/358#issuecomment-6952284512) · [SmoSchema at the reviewed revision](https://github.com/Smoosic/SmoSchema/tree/4bf4c87500f49d44e3349b415d7b481264f0c414)
+The [first VF6 requirement](requirements/score-persistence.md) specifies the musical passage, candidate representations and open decisions.
 
 Use one original three-measure, two-staff passage for the decision. Change key in measure two, start a pedal there and release it in measure three. Give measure three a rehearsal mark and a dynamic with an explicit staff-relative offset.
 
-1. Encode the passage with the serializable subset of EasyScore input and compare it with a small adapter modeled on SmoSchema. Specify versioning, stable references and how to report a live native tickable or unsupported extension.
+1. Encode the passage with the serializable subset of EasyScore input and compare it with an independent score adapter. Specify versioning, stable references and how to report a live native tickable or unsupported extension.
 2. Save the full passage and an excerpt starting at measure three. Recover its effective key and meter. Define whether the excerpt carries an incoming pedal continuation or reports its missing start anchor.
 3. Record the rehearsal mark once at its musical location, define its display on the chosen staves, and attach the pedal to its staff and time range. Specify how those objects follow edits to their measures.
 4. Reload and render at two widths. Compare event IDs, rational onsets, effective context and endpoints. The manual dynamic offset should survive. Automatic breaks and collision displacements should be recomputed from the new width.
@@ -98,7 +98,7 @@ Separate these concepts:
 
 Use staff spaces for engraving policy and convert at the renderer boundary. Preserve existing pixel/point APIs through documented conversion. Obtain font anchors/defaults from optional validated SMuFL metadata, with tested fallbacks. [SMuFL defines attachment anchors](https://smufl.formats.music/latest/specification/glyphswithanchors.html) and [engraving defaults in staff spaces](https://smufl.formats.music/latest/specification/engravingdefaults.html).
 
-Start with conservative boxes and piecewise vertical envelopes. Add contour/curve refinement only where false positives affect quality. Existing [render metrics](testing.md) remain useful diagnostics, but rectangle intersections are not themselves proof of musical collisions.
+Start with conservative boxes and piecewise vertical envelopes. Add contour/curve refinement only where false positives affect quality. Existing [render metrics](../testing.md) remain useful diagnostics, but rectangle intersections are not themselves proof of musical collisions.
 
 ### 3. Explicit layout phases
 
@@ -152,7 +152,7 @@ Use a staged solver, with explicit priorities and alignment groups:
 
 Positioning rules need exceptions: some articulations belong within the staff; lyrics usually expand horizontal space instead of floating into different verse rows; a whole dynamic phrase should align even when only one note creates an obstacle. [MuseScore's positioning documentation](https://handbook.musescore.org/formatting/positioning-of-elements) offers a useful comparison for horizontal versus vertical avoidance and overrides.
 
-Review a representative Smoosic workaround against the proposed shared collision rules. Capture the obstacle, the intended clearance and the expected effect of a manual override in a fixture. Newman identified Michael Scott Cuthbert as a potential source of input on systematic placement. [Discussion](https://github.com/vexflow/vexflow/issues/358#issuecomment-6952284512)
+Use the three-voice example from M0 to compare automatic clearance with an authored displacement. Record which relationships the collision pass must preserve.
 
 Record whether a position is automatic, preferred, or fixed. A fixed override that causes an overlap should be honored and reported. Reflow must not erase user intent or accumulate old offsets.
 
@@ -172,23 +172,25 @@ All estimates below are **rough engineering effort**, not calendar promises. The
 
 M0–M7 total **44–75 engineer-weeks before contingency**. Reserve roughly 25% for discoveries and integration: **55–94 engineer-weeks**. Parallel staffing can reduce elapsed time, but the geometry → collision → system → page path is sequential. Re-estimate after M0 and after each architecture spike; do not commit a release date from these ranges.
 
-| Milestone | Outcome                               | Hard entry dependencies                       | Rough effort         | Status   |
-| --------- | ------------------------------------- | --------------------------------------------- | -------------------- | -------- |
-| M0        | Auditable corpus and baseline         | None                                          | 2–3 weeks            | Proposed |
-| M1        | Geometry, policy and anchor contracts | M0 seed cases                                 | 5–8 weeks            | Proposed |
-| M2        | Reliable local engraving              | M1 contracts for affected classes             | 6–10 weeks           | Proposed |
-| M3        | Collision-aware phrases and lyrics    | M1; relevant M2 placement                     | 7–12 weeks           | Proposed |
-| M4        | Complete continuous scores            | M2/M3, minimal context from M1                | 7–12 weeks           | Proposed |
-| M5        | Pages and basic part layouts          | M4, stable vertical envelopes                 | 4–7 weeks            | Proposed |
-| M6        | Mainstream instrument profiles        | M2–M4; parts use M5                           | 8–14 weeks           | Proposed |
-| M7        | Web/integration quality release       | M0–M5 and P1 scope of M6                      | 5–9 weeks            | Proposed |
-| M8        | Specialist expansion                  | Explicit profile charter; required core gates | Estimate per profile | Deferred |
+| Milestone | Outcome                               | Hard entry dependencies                       | Rough effort         | Status            |
+| --------- | ------------------------------------- | --------------------------------------------- | -------------------- | ----------------- |
+| M0        | Auditable corpus and baseline         | None                                          | 2–3 weeks            | Baseline recorded |
+| M1        | Geometry, policy and anchor contracts | M0 seed cases                                 | 5–8 weeks            | Proposed          |
+| M2        | Reliable local engraving              | M1 contracts for affected classes             | 6–10 weeks           | Proposed          |
+| M3        | Collision-aware phrases and lyrics    | M1; relevant M2 placement                     | 7–12 weeks           | Proposed          |
+| M4        | Complete continuous scores            | M2/M3, minimal context from M1                | 7–12 weeks           | Proposed          |
+| M5        | Pages and basic part layouts          | M4, stable vertical envelopes                 | 4–7 weeks            | Proposed          |
+| M6        | Mainstream instrument profiles        | M2–M4; parts use M5                           | 8–14 weeks           | Proposed          |
+| M7        | Web/integration quality release       | M0–M5 and P1 scope of M6                      | 5–9 weeks            | Proposed          |
+| M8        | Specialist expansion                  | Explicit profile charter; required core gates | Estimate per profile | Deferred          |
 
 Web compatibility, performance measurement, API parity, and documentation run throughout; M7 is their final integration gate. M6 P2 items may be delivered after the first quality release if explicitly deferred. P1 percussion support is part of the core repertoire target. M5 basic parts do not imply automatic condensing.
 
 ## M0 — Establish evidence and acceptance
 
-**Gaps:** VF-001, VF-048, the VF-023 migration report, and initial work on VF-042 and VF-047.
+**Gaps:** VF-001, VF-048, and initial work on VF-042 and VF-047.
+
+[M0 results, reproduction commands and review queue](m0.md) · [Draft VF6 requirement](requirements/score-persistence.md)
 
 **Work packages**
 
@@ -199,8 +201,6 @@ Web compatibility, performance measurement, API parity, and documentation run th
 5. Reproduce the legacy candidates on the checkout and current released package. Classify as current defect, already fixed, API misuse, documentation gap, duplicate, or unsupported feature. Coordinate applicable reports with #355.
 6. Capture existing chorale, piano and chamber benchmarks; add planned lead-sheet, percussion and tab workloads. Record build mode, fonts, browser, hardware and input size.
 7. Extend the existing visual report with fixture IDs and review outcomes. Make sure negative controls detect deliberate clipping, wrong accidentals, invalid span endpoints and text collisions.
-
-8. Request the smallest Smoosic passage that shows the 4.x-to-5.x text problem, including the exact versions, fonts, expected placement and backend. Render the same passage with matched settings in both versions and 5.2.0. Compare text advances, baseline, alignment and ink at the native API and editor layers. Record a reproduction or the missing evidence against VF-023.
 
 **Exit gate**
 
@@ -403,7 +403,7 @@ Keep the register honest: specialist features remain `Deferred` until scheduled,
 | Human engraving review  | Legibility, convention, balance and sensible exceptions                                           | Runtime correctness across all inputs   |
 | Integration/performance | Browser behavior, adapters, memory and response costs                                             | Universal repertoire coverage           |
 
-Retain existing QUnit, Node, Explorer, visual-diff and benchmark tools. [Current testing guidance](testing.md) already documents negative controls and image-diff failure behavior; [benchmarks](benchmarks.md) separate construction, layout and drawing. Extend these rather than introducing a parallel test framework without a demonstrated need.
+Retain existing QUnit, Node, Explorer, visual-diff and benchmark tools. [Current testing guidance](../testing.md) already documents negative controls and image-diff failure behavior; [benchmarks](../benchmarks.md) separate construction, layout and drawing. Extend these rather than introducing a parallel test framework without a demonstrated need.
 
 ### Corpus design
 
@@ -419,7 +419,7 @@ Vary stem direction, staff position, duration, voice count, grace/cue size, font
 
 ### Proposed numeric gates
 
-These are **targets to validate at M0**, not measured current results:
+The [M0 baseline](m0.md) establishes deterministic single-browser comparisons and initial draw costs. The following targets apply to later release qualification:
 
 - 100% of selected P0/P1 acceptance cases have automated assertions and reviewed output where visual judgment is needed.
 - Zero unexpected timing/semantic changes, non-finite coordinates, crashes, unreported overflows or unresolved high-severity collisions in release fixtures.
@@ -465,15 +465,13 @@ Separate implementation completion from merge, release and deployment. A feature
 
 ## Execution and maintenance
 
-### First implementation iteration, when authorized
+### After the M0 baseline
 
-The current task produces documents only. The first later implementation iteration should:
-
-1. Confirm supported repertoire and the 5.2.0 baseline. Select a compatible V5 defect to reproduce and a V6 requirement to draft in parallel. Record an owner and acceptance example for each.
-2. Finish M0's seed manifest and select representative existing fixtures without changing their engraving.
-3. Reproduce three high-value candidates: altered-unison accidentals, mixed-subdivision beaming and cross-tick/three-voice collision.
-4. Prototype pre-draw geometry for a beam, articulation stack and lyric row. Use that evidence to settle M1 interfaces.
-5. Re-estimate M1–M4 and open small, linked implementation issues only when their scope and acceptance cases are concrete.
+1. Review the flagged images in the [M0 report](m0.md) and record decisions by case ID.
+2. Use the three-spelling chord as the first compatible VF5 repair candidate. Preserve explicit accidental spelling and the passing two-head control.
+3. Prototype pre-draw geometry for the collision in the three-voice fixture, an articulation stack and a lyric row.
+4. Compare the two persistence designs against the [score and excerpt requirement](requirements/score-persistence.md). Record the M1 decision independently of the VF5 repair.
+5. Re-estimate M1–M4 when those prototypes establish the cost of the shared contracts.
 
 ### Work-item template
 
@@ -502,11 +500,12 @@ Review progress by **supported use case and unresolved severity**. Report confir
 
 ## Milestone decision log
 
-| Date       | Decision                                                                                                                              | Status / follow-up                                                                                                                                                                 |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-11-16 | Preserve native VexFlow; add optional score layout around shared geometry and anchors.                                                | Proposed; validate with M1 prototypes.                                                                                                                                             |
-| 2026-11-16 | Use existing tests, visual tools and benchmarks as the foundation.                                                                    | Proposed; M0 measures coverage and reproducibility.                                                                                                                                |
-| 2026-11-16 | Treat #354 and #356 as parallel efforts already in progress.                                                                          | Confirmed by maintainer; integrate new capabilities without duplicating those plans.                                                                                               |
-| 2026-11-16 | Defer specialist profiles, full condensing and generalized polymeter commitments.                                                     | Revisit after core evidence and a scoped sponsor request.                                                                                                                          |
-| 2026-11-17 | Use the merged 5.2.0 API and guide as the baseline. Add the Smoosic text case to M0 and the score/excerpt persistence decision to M1. | VF-044/049 verified. VF-023 reproduction and VF-013 design remain open.                                                                                                            |
-| 2026-11-17 | Split compatible V5 delivery from parallel V6 requirements and design.                                                                | Proposed by the maintainer. The planned prototype repository will carry V6 requirements. [Issue discussion](https://github.com/vexflow/vexflow/issues/358#issuecomment-6960644745) |
+| Date       | Decision                                                                                              | Status / follow-up                                                                                                                                                                 |
+| ---------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-11-16 | Preserve native VexFlow; add optional score layout around shared geometry and anchors.                | Proposed; validate with M1 prototypes.                                                                                                                                             |
+| 2026-11-16 | Use existing tests, visual tools and benchmarks as the foundation.                                    | Proposed; M0 measures coverage and reproducibility.                                                                                                                                |
+| 2026-11-16 | Treat #354 and #356 as parallel efforts already in progress.                                          | Confirmed by maintainer; integrate new capabilities without duplicating those plans.                                                                                               |
+| 2026-11-16 | Defer specialist profiles, full condensing and generalized polymeter commitments.                     | Revisit after core evidence and a scoped sponsor request.                                                                                                                          |
+| 2026-11-17 | Use the merged 5.2.0 API and guide as the baseline. Add the score/excerpt persistence decision to M1. | VF-044/049 verified. VF-013 design remains open.                                                                                                                                   |
+| 2026-11-17 | Split compatible V5 delivery from parallel V6 requirements and design.                                | Proposed by the maintainer. The planned prototype repository will carry V6 requirements. [Issue discussion](https://github.com/vexflow/vexflow/issues/358#issuecomment-6960644745) |
+| 2026-11-18 | Record M0 and start a branch-local VF6 requirements directory.                                        | [Evidence, priority and revised effort](m0.md). Maintainer will review the examples.                                                                                               |

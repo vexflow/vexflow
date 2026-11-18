@@ -1,0 +1,337 @@
+{
+  "reference": "VexFlow 5.2.0",
+  "license": "MIT",
+  "fonts": ["Bravura", "Academico"],
+  "backend": "SVG",
+  "expected": "QUnit assertions pass and nonempty finite glyph geometry and pixels repeat.",
+  "reviewer": "0xfe",
+  "defaultReview": "Pending",
+  "outcomes": {
+    "unison-triple": "Expected defect: three spellings occupy two head positions.",
+    "threevoice-1": "Expected defect: the ascending inner beam crosses a lower voice head.",
+    "beam-width": "Review slope reversal on the second group at 500 px."
+  },
+  "reviews": {},
+  "groups": [
+    {
+      "module": "Formatter",
+      "source": "tests/formatter_tests.ts",
+      "gaps": ["VF-004"],
+      "review": "All simultaneous attacks align and short final notes retain clearance.",
+      "cases": {
+        "formatter-1": "Penultimate Note Padding",
+        "formatter-2": "Justification and alignment with accidentals",
+        "formatter-3": "Vertical alignment - many mixed elements",
+        "formatter-4": "Strict proportional spacing",
+        "formatter-5": "Tight"
+      }
+    },
+    {
+      "module": "Beam",
+      "source": "tests/beam_tests.ts",
+      "gaps": ["VF-005"],
+      "review": "Follow the outer notes and inspect the stem lengths and beamlet direction.",
+      "cases": {
+        "beam-1": "Close Trade-offs Beam",
+        "beam-2": "Outlier Beam",
+        "beam-3": "Partial Beam Direction",
+        "beam-4": "Complex Beams with Articulations two Staves"
+      }
+    },
+    {
+      "module": "Auto-Beaming",
+      "source": "tests/auto_beam_formatting_tests.ts",
+      "gaps": ["VF-005", "VF-009"],
+      "review": "Read the beat groups through the rests and tuplet boundary.",
+      "cases": {
+        "auto-beam-formatting-1": "Break Beams on Middle Rests Only",
+        "auto-beam-formatting-2": "Custom Beam Groups",
+        "auto-beam-formatting-3": "Simple Tuplet Auto Beaming"
+      }
+    },
+    {
+      "module": "CrossBeam",
+      "source": "tests/crossbeam_tests.ts",
+      "gaps": ["VF-003", "VF-028"],
+      "review": "Trace the beam between staves and check clearance on both sides.",
+      "cases": {
+        "crossbeam-1": "Vertical alignment - cross stave (beam up1)",
+        "crossbeam-2": "Mixed clef voice middle"
+      }
+    },
+    {
+      "module": "Three Voice Rests",
+      "source": "tests/threevoice_tests.ts",
+      "gaps": ["VF-003", "VF-006"],
+      "review": "Follow each voice independently through its beam, rests and heads.",
+      "cases": {
+        "threevoice-1": "Three Voices - #2 Complex",
+        "threevoice-2": "Auto Adjust Rest Positions - Three Voices #2"
+      }
+    },
+    {
+      "module": "Unison",
+      "source": "tests/unison_tests.ts",
+      "gaps": ["VF-006"],
+      "review": "Count the pitches, signs and dots when shared heads are enabled and disabled.",
+      "cases": {
+        "unison-1": "Accidentals(true)",
+        "unison-2": "Accidentals(false)",
+        "unison-3": "Dots(true)"
+      }
+    },
+    {
+      "module": "Accidental",
+      "source": "tests/accidental_tests.ts",
+      "gaps": ["VF-007", "VF-012"],
+      "review": "Read every sign against its notehead, including changes at unequal onsets.",
+      "cases": {
+        "accidental-1": "Cautionary Accidental",
+        "accidental-2": "Accidental Arrangement Special Cases",
+        "accidental-3": "Automatic Accidentals - Multi Voice Offset",
+        "accidental-4": "Microtonal (Iranian)"
+      }
+    },
+    {
+      "module": "Grace Notes",
+      "source": "tests/gracenote_tests.ts",
+      "gaps": ["VF-010"],
+      "review": "Follow grace order and check slash, slur and host attachment.",
+      "cases": {
+        "gracenote-1": "Grace Note Basic with Slurs",
+        "gracenote-2": "Grace Note Slash with Beams",
+        "gracenote-3": "Grace Notes Multiple Voices"
+      }
+    },
+    {
+      "module": "Tuplet",
+      "source": "tests/tuplet_tests.ts",
+      "gaps": ["VF-009"],
+      "review": "Read the hierarchy and match each number to its group.",
+      "cases": {
+        "tuplet-1": "Ratioed Tuplet",
+        "tuplet-2": "Awkward Tuplet",
+        "tuplet-3": "Nested Tuplets"
+      }
+    },
+    {
+      "module": "Articulation",
+      "source": "tests/articulation_tests.ts",
+      "gaps": ["VF-011"],
+      "review": "Check staff-space placement and clearance between stacked marks.",
+      "cases": {
+        "articulation-1": "Vertical Placement",
+        "articulation-2": "Inline/Multiple"
+      }
+    },
+    {
+      "module": "Ornament",
+      "source": "tests/ornament_tests.ts",
+      "gaps": ["VF-011"],
+      "review": "Distinguish the ornament from its auxiliary accidentals and adjacent marks.",
+      "cases": {
+        "ornament-1": "Stacked",
+        "ornament-2": "With Upper/Lower Accidentals"
+      }
+    },
+    {
+      "module": "StaveNote",
+      "source": "tests/stavenote_tests.ts",
+      "gaps": ["VF-012"],
+      "review": "Check dots against displaced heads, flags and ledger lines.",
+      "cases": {
+        "stavenote-1": "Displacements",
+        "stavenote-2": "Flag and Dots Placement - Stem Down"
+      }
+    },
+    {
+      "module": "Curve",
+      "source": "tests/curve_tests.ts",
+      "gaps": ["VF-008"],
+      "review": "Trace the opening and endpoints against the note contour.",
+      "cases": {
+        "curve-1": "Opening Direction - up",
+        "curve-2": "Opening Direction - down"
+      }
+    },
+    {
+      "module": "StaveTie",
+      "source": "tests/stavetie_tests.ts",
+      "gaps": ["VF-015"],
+      "review": "Follow the selected head and identify the open end at a boundary.",
+      "cases": {
+        "stavetie-1": "Chord StaveTie",
+        "stavetie-2": "No End Note With Clef",
+        "stavetie-3": "No Start Note With Clef"
+      }
+    },
+    {
+      "module": "Annotation",
+      "source": "tests/annotation_tests.ts",
+      "gaps": ["VF-017", "VF-022"],
+      "review": "Read each lyric or annotation against its event and adjacent beams.",
+      "cases": {
+        "annotation-1": "Lyrics",
+        "annotation-2": "Bottom Annotations with Beams"
+      }
+    },
+    {
+      "module": "ChordSymbol",
+      "source": "tests/chordsymbol_tests.ts",
+      "gaps": ["VF-004", "VF-023"],
+      "review": "Read adjacent chord names without crowding.",
+      "cases": {
+        "chordsymbol-1": "Wide Chord Symbols"
+      }
+    },
+    {
+      "module": "PedalMarking",
+      "source": "tests/pedalmarking_tests.ts",
+      "gaps": ["VF-024"],
+      "review": "Distinguish release and renewed depression at the same attack.",
+      "cases": {
+        "pedalmarking-1": "Release and Depress on Same Note 1"
+      }
+    },
+    {
+      "module": "StaveHairpin",
+      "source": "tests/stavehairpin_tests.ts",
+      "gaps": ["VF-024"],
+      "review": "Inspect both tips against the authored horizontal offset.",
+      "cases": {
+        "stavehairpin-1": "Horizontal Offset StaveHairpin"
+      }
+    },
+    {
+      "module": "KeySignature",
+      "source": "tests/keysignature_tests.ts",
+      "gaps": ["VF-016", "VF-033"],
+      "review": "Read the cancellation, clef and replacement signs in order.",
+      "cases": {
+        "keysignature-1": "Cancelled key (for each clef) test",
+        "keysignature-2": "Altered key test"
+      }
+    },
+    {
+      "module": "Stave",
+      "source": "tests/stave_tests.ts",
+      "gaps": ["VF-019", "VF-026"],
+      "review": "Follow the repeat ending or barline across adjacent measures.",
+      "cases": {
+        "stave-1": "Multiple Staves Volta Test",
+        "stave-2": "Multiple Stave Repeats Test"
+      }
+    },
+    {
+      "module": "MultiMeasureRest",
+      "source": "tests/multimeasurerest_tests.ts",
+      "gaps": ["VF-021"],
+      "review": "Check rest count and clearance from stave modifiers.",
+      "cases": {
+        "multimeasurerest-1": "Stave with modifiers Test"
+      }
+    },
+    {
+      "module": "Bend",
+      "source": "tests/bend_tests.ts",
+      "gaps": ["VF-030"],
+      "review": "Read the sequence of bend targets and releases.",
+      "cases": {
+        "bend-1": "Bend Phrase",
+        "bend-2": "Reverse Bends"
+      }
+    },
+    {
+      "module": "NoteHead",
+      "source": "tests/notehead_tests.ts",
+      "gaps": ["VF-032"],
+      "review": "Distinguish head shapes within a single drum chord.",
+      "cases": {
+        "notehead-1": "Drum Chord Heads"
+      }
+    },
+    {
+      "module": "TabNote",
+      "source": "tests/tabnote_tests.ts",
+      "gaps": ["VF-030"],
+      "review": "Check stem and dot placement against fret numbers.",
+      "cases": {
+        "tabnote-1": "TabNote Stems with Dots"
+      }
+    },
+    {
+      "module": "TimeSignature",
+      "source": "tests/timesignature_tests.ts",
+      "gaps": ["VF-016"],
+      "review": "Check horizontal alignment of the signatures across staves.",
+      "cases": {
+        "timesignature-1": "Time Signature multiple staves alignment test"
+      }
+    },
+    {
+      "module": "StaveConnector",
+      "source": "tests/staveconnector_tests.ts",
+      "gaps": ["VF-019"],
+      "review": "Follow the extent of the nested staff groups.",
+      "cases": {
+        "staveconnector-1": "Combined Draw Test"
+      }
+    },
+    {
+      "module": "M0 studies",
+      "source": "tests/engraving/studies.mjs",
+      "gaps": ["VF-006", "VF-007", "VF-012"],
+      "review": "Read each altered unison. Check whether its accidental touches a head or two distinct heads coincide.",
+      "cases": {
+        "unison-treble": "Altered whole-note unison",
+        "unison-bass": "Natural and flat in bass clef",
+        "unison-triple": "Three spellings on one line"
+      }
+    },
+    {
+      "module": "M0 studies",
+      "source": "tests/engraving/studies.mjs",
+      "gaps": ["VF-005", "VF-009"],
+      "review": "Read the eighth and both sixteenths as one beat after the quarter-note triplet.",
+      "cases": {
+        "beam-triplet": "Mixed subdivisions after a triplet"
+      }
+    },
+    {
+      "module": "M0 studies",
+      "source": "tests/engraving/studies.mjs",
+      "gaps": ["VF-005"],
+      "review": "Compare narrow and wide settings. Inspect slope in screen coordinates and contact with the staff.",
+      "cases": {
+        "beam-width": "Repeated contour at two widths"
+      }
+    },
+    {
+      "module": "M0 studies",
+      "source": "tests/engraving/studies.mjs",
+      "gaps": ["VF-022", "VF-017"],
+      "review": "Follow one syllable over the empty attack and check that the next syllable shares its baseline.",
+      "cases": {
+        "lyric-skip": "Lyric after a skipped attack"
+      }
+    },
+    {
+      "module": "M0 studies",
+      "source": "tests/engraving/studies.mjs",
+      "gaps": ["VF-032", "VF-044"],
+      "review": "Read a plain and a cross head at the same onset.",
+      "cases": {
+        "mixed-heads": "Two head shapes at one onset"
+      }
+    },
+    {
+      "module": "M0 studies",
+      "source": "tests/engraving/studies.mjs",
+      "gaps": ["VF-005"],
+      "review": "Inspect the horizontal beam edges against the nearest line at each staff position.",
+      "cases": {
+        "beam-contact": "Horizontal beams inside the staff"
+      }
+    }
+  ]
+}

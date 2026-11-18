@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 import puppeteer from 'puppeteer';
 
-import { renderScore } from '../../tools/score-fixtures.mjs';
+import { renderScore, scoreKinds } from '../../tools/score-fixtures.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 
@@ -53,14 +53,18 @@ test('score benchmark fixtures render', async () => {
     await page.setContent('<div id="score"></div>');
     await page.addScriptTag({ path: join(root, 'build/cjs/vexflow-debug.js') });
     await page.evaluate(async () => {
+      await Promise.all([...document.fonts].map((face) => face.load()));
       await document.fonts.ready;
     });
-    for (const kind of ['chorale', 'piano', 'chamber']) {
+    for (const kind of scoreKinds) {
       const result = await page.evaluate(renderScore, { kind, systems: 1 });
       const expected = {
         chorale: { notes: 48, staves: 8 },
         piano: { notes: 64, staves: 8 },
         chamber: { notes: 144, staves: 12 },
+        'lead-sheet': { notes: 32, staves: 4 },
+        percussion: { notes: 32, staves: 4 },
+        tab: { notes: 32, staves: 4 },
       }[kind];
       assert.deepEqual({ notes: result.notes, staves: result.staves }, expected);
       assert.ok(result.svg.includes('<path'));
