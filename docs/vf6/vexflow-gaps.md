@@ -4,11 +4,13 @@ Created: **2026-11-16**
 
 Last reviewed: **2026-11-18**
 
-**Primary status reference** · [M3 on upstream main at ca0be9e1](https://github.com/vexflow/vexflow/commit/ca0be9e1cacbe7677bedb527b0455ae50b794fd6). M0 through M3 have landed on main. The pinned 5.2.0 release supplies historical evidence. [Latest fixture comparison](m0.md#latest-comparison)
+**Primary status reference** · [Upstream main at bd522d6d](https://github.com/vexflow/vexflow/commit/bd522d6d). M0 through M3 have landed on main. The pinned 5.2.0 release supplies historical evidence. [Latest fixture comparison](m0.md#latest-comparison)
 
 Status: **52 tracked items. Two verified on main and 50 remaining.**
 
 Companion: [Strategy and milestone plan](vexflow-gaps-plan.md)
+
+**M4 branch evidence · engraving review pending.** The responsive choir, keyboard and ensemble studies exercise VF-014–017, VF-019, VF-021, VF-026 and VF-028. Related tests cover the continuation portions of VF-007–009, VF-022 and VF-024. The status columns below refer to upstream main. [Review cases and limits](m4.md) · [Proposed VF6 requirements](requirements/continuous-scores.md)
 
 **M3 complete on main.** The maintainer approved the choir and piano examples. The rows below record the single-system results for VF-003, VF-008, VF-011, VF-017 and VF-022–024. [Phrase layout](m3.md) · [VF6 requirements](requirements/phrase-layout.md)
 
@@ -269,3 +271,4 @@ Track acceptance-case counts by repertoire and priority. Raw counts of closed ro
 | 2026-11-18 | Made fetched main the primary status reference and kept 5.2.0 for release history. | [66-case comparison and remaining branch differences](m0.md#latest-comparison). |
 | 2026-11-18 | Record branch evidence for all eight M2 gaps. | [Engraving results and review](m2.md). |
 | 2026-11-18 | Merged the approved M3 phrase layout into main. | [Scope and review](m3.md) · [Post-merge comparison](m0.md#latest-comparison). |
+| 2026-11-18 | Implemented M4 continuous scores on the roadmap branch. Engraving review pending. | [M4 evidence](m4.md) · [VF6 requirements](requirements/continuous-scores.md). |

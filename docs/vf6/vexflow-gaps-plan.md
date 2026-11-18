@@ -4,9 +4,9 @@ Created: **2026-11-16**
 
 Last reviewed: **2026-11-18**
 
-**Primary status reference** · [M3 on upstream main at ca0be9e1](https://github.com/vexflow/vexflow/commit/ca0be9e1cacbe7677bedb527b0455ae50b794fd6). Compare the branch to freshly fetched main at every milestone review and after merges. Keep 5.2.0 as the historical release reference. [Latest fixture comparison](m0.md#latest-comparison)
+**Primary status reference** · [Upstream main at bd522d6d](https://github.com/vexflow/vexflow/commit/bd522d6d). Compare the branch to freshly fetched main at every milestone review and after merges. Keep 5.2.0 as the historical release reference. [Latest fixture comparison](m0.md#latest-comparison)
 
-Status: **M0 through M3 are complete on main. The maintainer approved the VF6 score representation, both M1 beam examples and all seven M2 engraving examples and both M3 phrase examples. M4–M8 remain proposed or deferred.**
+Status: **M0 through M3 are complete on main. The maintainer approved the VF6 score representation, both M1 beam examples and all seven M2 engraving examples and both M3 phrase examples. M4 is implemented on the roadmap branch and awaits engraving review. M5–M8 remain proposed or deferred.**
 
 Source of scope: [Notation gap register](vexflow-gaps.md)
 
@@ -178,7 +178,7 @@ M0–M7 total **44–75 engineer-weeks before contingency**. Reserve roughly 25%
 | M1        | Geometry, policy and anchor contracts | M0 seed cases                                 | 5–8 weeks            | Complete on main |
 | M2        | Reliable local engraving              | M1 contracts for affected classes             | 6–10 weeks           | Complete on main |
 | M3        | Collision-aware phrases and lyrics    | M1; relevant M2 placement                     | 7–12 weeks           | Complete on main |
-| M4        | Complete continuous scores            | M2/M3, minimal context from M1                | 7–12 weeks           | Proposed |
+| M4        | Complete continuous scores            | M2/M3, minimal context from M1                | 7–12 weeks           | Branch implementation, review pending |
 | M5        | Pages and basic part layouts          | M4, stable vertical envelopes                 | 4–7 weeks            | Proposed |
 | M6        | Mainstream instrument profiles        | M2–M4; parts use M5                           | 8–14 weeks           | Proposed |
 | M7        | Web/integration quality release       | M0–M5 and P1 scope of M6                      | 5–9 weeks            | Proposed |
@@ -290,6 +290,8 @@ Web compatibility, performance measurement, API parity, and documentation run th
 **Deliverable:** automatic placement for bounded, unbroken phrases. Multi-row continuation is deliberately accepted in M4, not inferred from this milestone.
 
 ## M4 — Lay out complete continuous scores
+
+**2026-11-18 · Implemented on the roadmap branch.** [VF5 guide and review cases](m4.md) · [Proposed VF6 requirements](requirements/continuous-scores.md)
 
 **Gaps:** VF-014–VF-017, VF-019, VF-021, VF-026, VF-028; complete continuation portions of VF-007/008/009/022/024.
 
@@ -471,6 +473,8 @@ Separate implementation completion from merge, release and deployment. A feature
 
 ## Execution and maintenance
 
+Open each milestone with a short bulleted comment on [the roadmap issue](https://github.com/vexflow/vexflow/issues/358). Include the current behavior on main, the planned changes and the examples or tests that will determine acceptance. After pushing, post a bulleted summary of the changes and verification, with representative white-background screenshots for engraving review. Record approval and merge status separately.
+
 ### After the M0 baseline
 
 1. Use the [M0 closure record](m0.md#m0-closure) and its five regression cases as the VF5 starting point.
@@ -523,3 +527,4 @@ Review progress by **supported use case and unresolved severity**. Report confir
 | 2026-11-18 | Approve the representation for portable VF6 scores and excerpts. | M1 complete on the branch. [Decision and study limits](requirements/score-persistence.md#m1-decision-record). |
 | 2026-11-18 | Implement opt-in, single-system phrase layout on VF5. | [Choir and piano review, three-way comparison and remaining scope](m3.md). |
 | 2026-11-18 | Merged M3 into main after engraving approval. | [Approved examples](m3.md) · [Post-merge comparison](m0.md#latest-comparison). |
+| 2026-11-18 | Implemented M4 continuous scores on the roadmap branch. Engraving review pending. | [M4 evidence](m4.md) · [VF6 requirements](requirements/continuous-scores.md). |

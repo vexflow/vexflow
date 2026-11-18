@@ -5,8 +5,8 @@ import { Glyphs } from './glyphs';
 import { Note } from './note';
 import { ribbonParts } from './phraseribbon';
 import { RenderContext } from './rendercontext';
-import { Tables } from './tables';
 import { Stave } from './stave';
+import { Tables } from './tables';
 
 export type ContinuousSpanKind =
   'tie' | 'slur' | 'crescendo' | 'diminuendo' | 'pedal' | 'lyric' | 'hyphen' | 'volta' | 'ottava' | 'trill' | 'tuplet';

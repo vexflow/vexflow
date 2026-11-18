@@ -2,10 +2,10 @@
 import { Accidental } from './accidental';
 import { Clef } from './clef';
 import {
+  continuationPitch,
   ContinuousSpan,
   drawSpan,
   fitSpan,
-  continuationPitch,
   ResolvedSpan,
   spanAbove,
   SpanAnchor,
