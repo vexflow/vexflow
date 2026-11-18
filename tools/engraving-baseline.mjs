@@ -21,7 +21,9 @@ const mainBundle = process.argv[3] ?? join('build/engraving-main/build/cjs', bun
 const manifest = JSON.parse(await readFile('tests/engraving/manifest.json', 'utf8'));
 const revision = (ref) =>
   execFileSync('git', ['rev-parse', '--verify', ref + '^{commit}'], { encoding: 'utf8' }).trim();
-const mainRevision = revision(manifest.reference);
+// A release gate pins its approved reference. Local development follows freshly fetched main.
+const reference = process.env.VF_ENGRAVING_REFERENCE ?? manifest.reference;
+const mainRevision = revision(reference);
 const checkoutRevision = revision('HEAD');
 const cases = manifest.groups.flatMap(({ module, gaps, review, cases }) =>
   Object.entries(cases).map(([id, name]) => ({ id, name, module, gaps, review }))
@@ -224,7 +226,7 @@ try {
   };
   const report = {
     chromium: await browser.version(),
-    primaryReference: manifest.reference,
+    primaryReference: reference,
     main,
     checkout,
     historicalRelease: { tag: manifest.historicalRelease.tag, ...releaseBuild },
@@ -236,6 +238,10 @@ try {
   console.log(output, comparisons);
   assert.deepEqual(checkout, repeat, 'Repeat geometry or assertions changed');
   assert.equal(comparisons.repeat.failed, 0, 'Repeat images differ');
+  if (process.env.VF_REQUIRE_REVIEWED_MATCH === '1') {
+    assert.deepEqual(comparisons.main.imageChanges, [], 'Review changed reference images');
+    assert.deepEqual(comparisons.main.geometryChanges, [], 'Review changed reference geometry');
+  }
 } finally {
   await browser.close();
 }

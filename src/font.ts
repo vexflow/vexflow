@@ -1,6 +1,7 @@
 // Font parsing, loading, and the built-in text faces used alongside SMuFL music fonts.
 import { Metrics } from './metrics';
 import { TextMetricsCache } from './textmetricscache';
+import { RuntimeError } from './util';
 
 export interface FontInfo {
   /** CSS font-family, e.g., 'Arial', 'Helvetica Neue, Arial, sans-serif', 'Times, serif' */
@@ -351,7 +352,17 @@ export class Font {
     }
     fontFaceSet?.add(fontFace);
     TextMetricsCache.clear();
-    return fontFaceLoadPromise.finally(() => TextMetricsCache.clear());
+    return fontFaceLoadPromise
+      .catch((cause: unknown) => {
+        throw new RuntimeError(
+          'FontLoadFailed',
+          'Could not load font "' +
+            fontName +
+            '". Check the font file, network response and CORS policy. ' +
+            String(cause)
+        );
+      })
+      .finally(() => TextMetricsCache.clear());
   }
 
   static getURLForFont(fontName: string): string | undefined {

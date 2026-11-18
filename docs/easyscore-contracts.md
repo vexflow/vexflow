@@ -5,6 +5,8 @@ The [coverage manifest](easyscore-coverage.json) records examples and tests.
 
 Named percussion, paired TAB and staff notes, alternating tremolos and written accidental state use the same native note descriptions as EasyScore. [Instrument recipes and support limits](vf6/m6.md)
 
+After drawing a composition, pass it and its source staves to `ScoreNavigation` to obtain ordered events and hit regions. [Accessible reader and browser contracts](vf6/m7.md)
+
 ## Native options and customization
 
 The [native API snapshot](easyscore-native-api.json) records every public source module, exported type, constructor, and public member.

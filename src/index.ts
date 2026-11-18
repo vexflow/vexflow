@@ -55,6 +55,7 @@ export * from './registry';
 export * from './rendercontext';
 export * from './renderer';
 export * from './repeatnote';
+export * from './scorenavigation';
 export * from './sheet';
 export * from './stave';
 export * from './stavebarline';

@@ -1761,6 +1761,39 @@
       "constructor(type: string, noteStruct?: NoteStruct, options?: GlyphNoteOptions)"
     ]
   },
+  "scorenavigation": {
+    "ScoreReadingEvent": {
+      "extends": [],
+      "fields": [
+        "id: string;",
+        "source?: string;",
+        "staff: string;",
+        "measure: number;",
+        "voice: number;",
+        "onset: string;",
+        "duration: string;",
+        "label: string;"
+      ]
+    },
+    "ScoreHitRegion": {
+      "extends": [
+        "extends Bounds"
+      ],
+      "fields": [
+        "id: string;",
+        "kind: 'event' | 'span';",
+        "source?: string;",
+        "row?: number;"
+      ]
+    },
+    "ScoreNavigation": [
+      "events: readonly ScoreReadingEvent[]",
+      "regions: readonly ScoreHitRegion[]",
+      "diagnostics: readonly GeometryDiagnostic[]",
+      "constructor(score: EasyScoreComposition, staves: readonly Pick<EasyScoreStaveSpec, 'id' | 'name'>[], sources: Readonly<Record<string, string>> = {})",
+      "hitTest(x: number, y: number): ScoreHitRegion | undefined"
+    ]
+  },
   "sheet": {
     "SheetOptions": {
       "extends": [],
@@ -3000,6 +3033,7 @@
       "Stroke",
       "SVGContext",
       "System",
+      "ScoreNavigation",
       "Sheet",
       "FrettedInstrument",
       "PercussionMap",

@@ -1,0 +1,9 @@
+{
+  "name": "vexflow-web-qualification",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "opensheetmusicdisplay": "2.3.1",
+    "playwright": "1.58.2"
+  }
+}

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Score reader · VexFlow</title>
+<style>
+* { box-sizing:border-box } body { margin:0; color:#20252b; background:#f5f4ef; font:16px/1.45 system-ui,sans-serif }
+main { margin:32px auto; width:min(94%,920px) } h1 { font:normal 2.4rem Georgia,serif; margin:0 0 .4em }
+form { display:flex; align-items:center; gap:20px; flex-wrap:wrap; margin-bottom:18px }
+select { font:inherit; background:white; color:inherit; border:1px solid #898b86; border-radius:4px }
+select:focus-visible { outline:3px solid #18589a; outline-offset:3px }
+#viewport { width:100%; background:white; overflow:auto; border:1px solid #c8c8c0; }
+#frame { position:relative; margin:0; color:#111; background:white } #surface svg,#surface canvas {display:block}
+#highlight { position:absolute; pointer-events:none; outline:2px solid #164d83; border-radius:3px; background:rgb(86 164 230 / 20%) }
+#events { width:100%; max-width:100%; padding:.3em } #events option {padding:.28em .45em}
+h2 {font-size:1rem; margin:20px 0 4px} p {margin:0 0 .8em}
+</style>
+<main>
+<h1>Harbor duet</h1>
+<form><label>Renderer <select id="backend"><option>SVG</option><option>Canvas</option></select></label>
+<label>Layout <select id="layout"><option>Fit width</option><option>Narrow</option></select></label></form>
+<div id="viewport" aria-hidden="true"><div id="frame"><div id="surface"></div><div id="highlight" hidden></div></div></div>
+<h2><label for="events">Score events</label></h2>
+<p id="help">Use the arrow keys to read the music in time order, or select a note in the score.</p>
+<select id="events" size="5" aria-describedby="help"></select>
+<p id="error" role="alert"></p>
+</main>
+<script src="../../build/cjs/vexflow-debug.js"></script>
+<script src="score-reader.js"></script>
+</html>

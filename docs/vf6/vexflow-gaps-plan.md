@@ -4,9 +4,9 @@ Created: **2026-11-16**
 
 Last reviewed: **2026-11-18**
 
-**Primary status reference** · [M6 on upstream main at 221af647](https://github.com/vexflow/vexflow/commit/221af647). Compare the branch to freshly fetched main at every milestone review and after merges. Keep 5.2.0 as the historical release reference. [Latest fixture comparison](m0.md#latest-comparison)
+**Primary status reference** · [M6 on upstream main at aa606df0](https://github.com/vexflow/vexflow/commit/aa606df0). Compare the branch to freshly fetched main at every milestone review and after merges. Keep 5.2.0 as the historical release reference. [Latest fixture comparison](m0.md#latest-comparison)
 
-Status: **M0 through M6 are complete on main. The maintainer approved the VF6 score representation and the M1 beam, M2 local engraving, M3 phrase, M4 continuous-score, M5 print and M6 instrument studies. M7 and M8 remain proposed or deferred.**
+Status: **M0 through M6 are complete on main. The maintainer approved the VF6 score representation and the M1 beam, M2 local engraving, M3 phrase, M4 continuous-score, M5 print and M6 instrument studies. M7 is implemented on the roadmap branch with assistive-technology review pending. M8 remains deferred.**
 
 Source of scope: [Notation gap register](vexflow-gaps.md)
 
@@ -181,7 +181,7 @@ M0–M7 total **44–75 engineer-weeks before contingency**. Reserve roughly 25%
 | M4        | Complete continuous scores            | M2/M3, minimal context from M1                | 7–12 weeks           | Complete on main |
 | M5        | Pages and basic part layouts          | M4, stable vertical envelopes                 | 4–7 weeks            | Complete on main |
 | M6        | Mainstream instrument profiles        | M2–M4; parts use M5                           | 8–14 weeks           | Complete on main. [M6 approval](m6.md#engraving-review) |
-| M7        | Web/integration quality release       | M0–M5 and P1 scope of M6                      | 5–9 weeks            | Proposed |
+| M7        | Web/integration quality release       | M0–M5 and P1 scope of M6                      | 5–9 weeks            | Branch implementation; human review pending. [M7 evidence](m7.md) |
 | M8        | Specialist expansion                  | Explicit profile charter; required core gates | Estimate per profile | Deferred |
 
 Web compatibility, performance measurement, API parity, and documentation run throughout; M7 is their final integration gate. M6 P2 items may be delivered after the first quality release if explicitly deferred. P1 percussion support is part of the core repertoire target. M5 basic parts do not imply automatic condensing.
@@ -369,6 +369,8 @@ Deliver profiles independently. Do not hold a percussion fix behind an unrelated
 
 ## M7 — Validate web delivery and ecosystem integration
 
+[M7 qualification and reviewer walkthrough](m7.md) · [VF6 web requirements](requirements/web-delivery.md)
+
 **Gaps:** VF-039–VF-043 and VF-045–VF-047. Finalize VF-023. Use the completed VF-044 and VF-049 checks for API and guide regressions.
 
 **Work packages**
@@ -537,3 +539,4 @@ Review progress by **supported use case and unresolved severity**. Report confir
 | 2026-11-18 | Merged the four approved M5 print editions into main. | [M5 review](m5.md#engraving-review) · [Post-merge comparison](m0.md#latest-comparison). |
 | 2026-11-18 | Implemented the M6 instrument profiles and bounded independent-meter experiment on the roadmap branch. Engraving review pending. | [M6 evidence](m6.md) · [VF6 requirements](requirements/instrument-notation.md). |
 | 2026-11-18 | Merged all eight approved M6 studies into main. P1 percussion is verified. | [Engraving approval](m6.md#engraving-review) · [Post-merge comparison](m0.md#latest-comparison). |
+| 2026-11-18 | Implemented M7 web qualification on the roadmap branch. Human assistive-technology review pending. | [M7 evidence](m7.md) · [VF6 requirements](requirements/web-delivery.md). |

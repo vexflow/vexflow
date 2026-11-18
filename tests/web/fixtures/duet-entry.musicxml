@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<score-partwise version="4.0">
+  <part-list><score-part id="P1"><part-name>Flute</part-name></score-part></part-list>
+  <part id="P1">
+    <measure number="1">
+      <attributes><divisions>2</divisions><key><fifths>0</fifths></key><time><beats>4</beats><beat-type>4</beat-type></time><clef><sign>G</sign><line>2</line></clef></attributes>
+      <note><pitch><step>C</step><octave>5</octave></pitch><duration>2</duration><type>quarter</type></note>
+      <note><pitch><step>B</step><alter>-1</alter><octave>4</octave></pitch><duration>2</duration><type>quarter</type><accidental>flat</accidental></note>
+      <note><rest/><duration>4</duration><type>half</type></note>
+    </measure>
+    <measure number="2">
+      <note><pitch><step>F</step><octave>4</octave></pitch><duration>4</duration><type>half</type></note>
+      <note><chord/><pitch><step>A</step><octave>4</octave></pitch><duration>4</duration><type>half</type></note>
+      <note><pitch><step>C</step><octave>5</octave></pitch><duration>4</duration><type>half</type></note>
+    </measure>
+  </part>
+</score-partwise>

@@ -8,3 +8,5 @@ Build the library from the main `vexflow/` directory:
 - `grunt`
 
 The header comments for each source file explain how to run each demo.
+
+The [Harbor duet score reader](ui/score-reader.html) demonstrates shared keyboard and pointer selection on SVG and Canvas. Build the debug bundle before opening the example. [Review instructions](../docs/vf6/m7.md#assistive-technology-review)

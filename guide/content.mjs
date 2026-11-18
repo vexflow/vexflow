@@ -380,7 +380,8 @@ const voice = score.voice(score.notes('C5/h, G5/q'), { time: '3/4' });`
     `<p>A barline gives the reader a place to count from again. To put a longer tune on a page, first divide it into complete measures. <code>score.measures('C5/h, E5 | G5/w')</code> gives you two arrays. The first bar contains two half notes and the second contains one whole note.</p>
 <p>The first example lays a series of measures into a <strong>Sheet</strong>. Narrow the row with its control and watch which measure moves to the next line. The sheet keeps each measure together. An especially wide measure may need horizontal scrolling.</p>
 <h2>Fit the drawing to the rows</h2>
-<p>Format the sheet before reading its height. After a width change, format again, resize the drawing surface, clear it, and redraw. In the second example <code>compose()</code> builds the measures for you and returns a sheet you can lay out the same way.</p>`,
+<p>Format the sheet before reading its height. After a width change, format again, resize the drawing surface, clear it, and redraw. In the second example <code>compose()</code> builds the measures for you and returns a sheet you can lay out the same way.</p>
+<p>To keep a selection during reflow, give each event an ID in the composition. After drawing, build <code>new VexFlow.ScoreNavigation(composition, spec.staves)</code>. Its events are in musical time order. A native HTML list can read the same descriptions with either renderer. Keep the selected ID and rebuild the hit regions when the width changes.</p>`,
     'Reduce the row-width control, then add another complete measure to the notation string.',
     ['structured-composition', 'composition', 'spacing'],
     ['repo:docs/sheets-and-themes.md']

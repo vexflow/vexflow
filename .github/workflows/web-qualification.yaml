@@ -1,0 +1,52 @@
+# Compare reviewed music in the same browser/OS as the candidate and retain the evidence on failure.
+name: Web notation qualification
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      VF_ENGRAVING_REFERENCE: aa606df0d6aa098c0860eab7eb03dc6baf2e4958
+      VF_REQUIRE_REVIEWED_MATCH: '1'
+      VF_WEB_REFERENCE: build/web-reference/build/cjs/vexflow-debug.js
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '26.13.1'
+      - run: npm ci
+      - run: npx grunt webpack:debug
+      - name: Check out the approved M6 reference
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: vexflow/vexflow
+          ref: aa606df0d6aa098c0860eab7eb03dc6baf2e4958
+          path: build/web-reference
+      - run: npm ci && npx grunt webpack:debug
+        working-directory: build/web-reference
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
+      - run: npm ci --ignore-scripts
+        working-directory: tests/web
+      - run: npx playwright install --with-deps chromium firefox webkit
+        working-directory: tests/web
+      - run: node tests/web/qualify.mjs
+      - name: Check the complete engraving gallery and historical release
+        run: |
+          git fetch --no-tags --depth=1 origin "$VF_ENGRAVING_REFERENCE"
+          npm pack vexflow@5.2.0 --pack-destination "$RUNNER_TEMP" --silent
+          tar -xzf "$RUNNER_TEMP/vexflow-5.2.0.tgz" -C "$RUNNER_TEMP" package/build/cjs/vexflow-debug-with-tests.js
+          node tools/engraving-baseline.mjs "$RUNNER_TEMP/package/build/cjs/vexflow-debug-with-tests.js" build/web-reference/build/cjs/vexflow-debug-with-tests.js
+      - name: Save browser reports, scores and standalone reader
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: web-notation-review
+          path: |
+            build/m7/
+            build/engraving/run-*/
+          if-no-files-found: warn
