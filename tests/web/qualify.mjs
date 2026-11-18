@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { arch, cpus, platform, release } from 'node:os';
 import { chromium, firefox, webkit } from 'playwright';
+import { guitarStudies } from './guitar.mjs';
 import { adapterPilot } from './adapter.mjs';
 import { makeInstrumentStudy } from '../engraving/instrument-studies.mjs';
 import { navigationContracts, diagnosticsContracts } from './navigation.mjs';
@@ -331,6 +332,7 @@ for (const engine of requested.length ? requested : Object.keys(engines)) {
     report.fonts = await fontsAndExport(page);
     report.mobile = await mobile(browser, engine);
     report.engraving = await engraving(context, engine);
+    report.guitar = await guitarStudies(context);
     report.adapter = await adapterPilot(page);
     if (engine === 'chromium') report.performance = await benchmark(page, context);
     console.log(engine, browser.version(), 'passed');

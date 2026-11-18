@@ -10,6 +10,7 @@
 import { Element } from './element';
 import { Font } from './font';
 import { Glyphs } from './glyphs';
+import { attachGuitarGestures } from './guitarmodifiers';
 import { Metrics } from './metrics';
 import { Modifier } from './modifier';
 import { Note } from './note';
@@ -179,6 +180,7 @@ export class TabNote extends StemmableNote {
     // Renders parenthesis around notes
     this.ghost = false;
     this.updateWidth();
+    if (this.notation.length) attachGuitarGestures(this);
   }
   // Return the number of the greatest string, which is the string lowest on the display
   greatestString = (): number => {

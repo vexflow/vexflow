@@ -49,6 +49,9 @@ try {
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 for (const name of ${JSON.stringify(entries)}) for (const VF of [await import(name), require(name)]) {
+  assert.equal(typeof VF.FrettedInstrument.prototype.rasgueado, 'function');
+  assert.equal(typeof VF.FrettedInstrument.prototype.bentAttack, 'function');
+  assert.equal(typeof VF.Bend.timed, 'function');
   assert.equal(typeof VF.ScoreNavigation.prototype.hitTest, 'function');
   assert.equal(typeof VF.Publication.prototype.render, 'function');
   assert.equal(new VF.EasyScore().parseNotation('C4/q, D4').success, true);
@@ -60,6 +63,13 @@ for (const name of ${JSON.stringify(entries)}) for (const VF of [await import(na
   writeFileSync(join(directory, 'runtime.mjs'), runtime);
   run(process.execPath, [join(directory, 'runtime.mjs')], directory);
   const consumer = `import { ScoreNavigation, EasyScore, EasyScoreComposition, EasyScoreCompositionSpec, EasyScoreTabSpan, TabNote, Fraction, Publication, PublicationOptions } from 'vexflow';
+import { FrettedInstrument, type GuitarStroke, type TimedStringBend } from 'vexflow';
+const guitar = new FrettedInstrument();
+const stroke: GuitarStroke = { finger: 'a', direction: 'bass-to-treble', golpe: true };
+const bend: TimedStringBend = { string: 2, semitones: 2, rise: [1, 2], release: [1, 1] };
+const grip = [{ str: 2, fret: 5 }];
+guitar.rasgueado(grip, [{ ...stroke, duration: '16' }]);
+guitar.bentAttack(grip, 'q', bend);
 import { EasyScore as Core } from 'vexflow/core';
 import { EasyScore as Bravura } from 'vexflow/bravura';
 const score = EasyScore.create({renderer: {elementId: null, width: 500, height: 240}});

@@ -9,10 +9,23 @@ import { Stave } from './stave';
 import { Tables } from './tables';
 
 export type ContinuousSpanKind =
-  'tie' | 'slur' | 'crescendo' | 'diminuendo' | 'pedal' | 'lyric' | 'hyphen' | 'volta' | 'ottava' | 'trill' | 'tuplet';
+  | 'tie'
+  | 'slur'
+  | 'crescendo'
+  | 'diminuendo'
+  | 'pedal'
+  | 'lyric'
+  | 'hyphen'
+  | 'volta'
+  | 'ottava'
+  | 'trill'
+  | 'tuplet'
+  | 'palmMute';
 export interface ContinuousSpan {
-  id: string;
   kind: ContinuousSpanKind;
+  /** Required for palmMute. String numbers are one-based. */
+  strings?: readonly number[];
+  id: string;
   from: string;
   to: string;
   /** Optional chord-head indices for each end of a tie or slur. */
@@ -44,6 +57,11 @@ export interface SpanFragment {
   y2: number;
   /** Fraction of the drawn span used to interpolate the aperture across a system break. */
   progress: [number, number];
+  /** String numbers covered by a palm-mute fragment. */
+  strings?: readonly number[];
+  /** Authored TAB endpoints appear on the fragments containing them. */
+  from?: string;
+  to?: string;
   rise?: number;
   above: boolean;
   space: number;
@@ -53,6 +71,7 @@ export interface SpanFragment {
 export function spanLabel(spec: ContinuousSpan): Element | undefined {
   const text =
     spec.text ??
+    (spec.kind === 'palmMute' ? 'P.M. ' + spec.strings!.join(',') : undefined) ??
     (
       { volta: '1.', ottava: '8va', trill: Glyphs.ornamentTrill, tuplet: '3' } as Partial<
         Record<ContinuousSpanKind, string>
@@ -199,7 +218,7 @@ export function drawSpan(ctx: RenderContext, f: SpanFragment, label?: Element): 
       ctx.stroke();
       return;
     }
-    if (kind === 'ottava') ctx.setLineDash([space * 0.45, space * 0.35]);
+    if (kind === 'ottava' || kind === 'palmMute') ctx.setLineDash([space * 0.45, space * 0.35]);
     const y = kind === 'ottava' ? y1 - space * 0.5 : kind === 'volta' ? y1 - space * 1.35 : y1;
     if (x2 > left) line(kind === 'volta' ? x1 : left, y, x2, y);
     ctx.setLineDash([]);
@@ -209,7 +228,7 @@ export function drawSpan(ctx: RenderContext, f: SpanFragment, label?: Element): 
     } else if (kind === 'volta') {
       if (start) line(x1, y, x1, y + space * 0.65);
       if (end) line(x2, y, x2, y + space * 0.65);
-    } else if (kind === 'ottava' && end) line(x2, y, x2, y - sign * space * 0.6);
+    } else if ((kind === 'ottava' || kind === 'palmMute') && end) line(x2, y, x2, y - sign * space * 0.6);
   } finally {
     ctx.restore();
   }

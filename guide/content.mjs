@@ -554,11 +554,12 @@ const voice = score.voice(score.notes('C5/h, G5/q'), { time: '3/4' });`
     'api',
     'Tablature and string techniques',
     'Represent frets and strings directly.',
-    ['tablature', 'tab-slides', 'tab-ties', 'bends'],
+    ['tablature', 'tab-slides', 'tab-ties', 'bends', 'rasgueado-golpe', 'bossa-anticipation', 'string-mute-bend'],
     `<p>Each line of the first example stands for a string. Read the fret numbers from left to right. Inside a <code>TabNote</code>, one <code>{ str, fret }</code> pair gives a single position. Put two pairs in the same <code>positions</code> array to play two strings together.</p>
 <h2>Show how to get to the next fret</h2>
 <p>In “Tab slides”, follow the diagonal line between two positions. A <code>TabSlide</code> needs those two notes as endpoints. Next try the hammer-on and pull-off study, where a letter over the curve tells the guitarist how to make the second sound.</p>
-<p>In “Bends”, look for the arrow rising from one fret. A <code>Bend</code> attaches to the fretted note and labels the change of pitch. The tab still displays the fret the finger starts from.</p>`,
+<p>In “Bends”, look for the arrow rising from one fret. A <code>Bend</code> attaches to the fretted note and labels the change of pitch. The tab still displays the fret the finger starts from.</p>
+<p>In the rasgueado study, change the arrow convention and follow the finger order on both staves. In the bossa nova study, follow the held bass through the tie and the muted upper-string attack. In the Drop D study, narrow the score and trace the string 6 palm mute across the break. Change the bend’s rise and hold fractions to move its peak and release.</p>`,
     'Change a fret number, then add another position to one note to create a tab chord.',
     ['structure', 'spans'],
     ['repo:src/tabnote.ts', 'repo:src/tabstave.ts']

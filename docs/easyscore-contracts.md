@@ -53,6 +53,8 @@ They do not need alternate notation constructors.
 | Guitar/tab | Tuning → fret positions → tab notes, bend, grace group, tie/slide → tab stave | Positive string numbers, muted frets, group-only grace drawing, tab endpoint types.              |
 | Percussion | Percussion clef, typed keys/head codes, explicit lines → voices/beams         | Head shape and position survive construction. Voice stems are explicit.                          |
 
+Paired guitar descriptions support measured rasgueado, muted strikes and a timed bend on one string. Continuous TAB layout carries string-specific palm mutes through system breaks. [Inputs and playable examples](vf6/m8-guitar.md)
+
 ## Limits and compatibility
 
 - Compact pitch strings keep their current grammar and return types.

@@ -6,6 +6,7 @@ import { Beam } from './beam';
 import { BoundingBox } from './boundingbox';
 import { Fraction } from './fraction';
 import { Glyphs } from './glyphs';
+import { copyBend, GuitarStroke, TimedStringBend } from './guitargesture';
 import { Metrics } from './metrics';
 import { Modifier } from './modifier';
 import { drawDot, RenderContext } from './rendercontext';
@@ -71,6 +72,9 @@ export interface NotationIdentity {
   kind: 'unpitched' | 'technique' | 'harmony' | 'tuning' | 'tremolo' | 'accidental';
   id: string;
   label: string;
+  /** Physical guitar actions survive reflow, navigation and publication metadata. */
+  stroke?: GuitarStroke;
+  bend?: TimedStringBend;
   /** Head or string position in the source chord, counted from zero. */
   index?: number;
 }
@@ -294,7 +298,11 @@ export abstract class Note extends Tickable {
       throw new RuntimeError('BadArguments', 'Note must have valid initialization data to identify duration and type.');
     }
 
-    this.notation = (noteStruct.notation ?? []).map((entry) => ({ ...entry }));
+    this.notation = (noteStruct.notation ?? []).map((entry) => ({
+      ...entry,
+      ...(entry.stroke && { stroke: { ...entry.stroke } }),
+      ...(entry.bend && { bend: copyBend(entry.bend) }),
+    }));
 
     /** Parses `noteStruct` and get note properties. */
     const parsedNoteStruct = Note.parseNoteStruct(noteStruct);

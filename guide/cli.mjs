@@ -51,6 +51,7 @@ export async function build() {
     Volta: 'stavevolta',
     Repetition: 'staverepetition',
     Stroke: 'strokes',
+    FrettedInstrument: 'instrumentprofile',
   };
   const formatted = await Promise.all(
     examples.map(async (example) => {

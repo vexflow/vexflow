@@ -452,7 +452,12 @@ function buildPages(
       spans: score.sheet
         .getContinuousLayout()!
         .fragments.filter((f) => f.row >= b.first && f.row < b.end)
-        .map((f) => ({ id: f.id, kind: f.kind, part: f.part })),
+        .map((f) => ({
+          id: f.id,
+          kind: f.kind,
+          part: f.part,
+          ...(f.strings && { strings: f.strings, from: f.from, to: f.to }),
+        })),
       text: Array.from(svg.querySelectorAll('text')).map((e) => e.textContent),
     });
     svg.append(metadata);

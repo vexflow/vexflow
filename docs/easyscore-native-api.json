@@ -141,6 +141,7 @@
       "UP(): number",
       "DOWN(): number",
       "format(bends: Bend[], state: ModifierContextState): boolean",
+      "timed(spec: TimedStringBend): Bend",
       "setStyleLine(style: ElementStyle): this",
       "getStyleLine(): ElementStyle",
       "renderOptions: { releaseWidth: number; bendWidth: number; }",
@@ -912,7 +913,9 @@
     ],
     "FrettedInstrument": [
       "constructor(tuning: string = 'standard', readonly capo = 0)",
-      "attack(positions: readonly { str: number; fret: number }[], duration: string): { note: StaveNoteStruct; tab: TabNoteStruct }"
+      "rasgueado(positions: readonly { str: number; fret: number }[], strokes: readonly (GuitarStroke & { duration: string })[])",
+      "bentAttack(positions: readonly { str: number; fret: number }[], duration: string, spec: TimedStringBend)",
+      "attack(positions: readonly ({ str: number; fret: number } | { str: number; fret: 'X'; displayKey: string })[], duration: string): { note: StaveNoteStruct; tab: TabNoteStruct }"
     ]
   },
   "notationspelling": {
@@ -1379,6 +1382,8 @@
         "kind: 'unpitched' | 'technique' | 'harmony' | 'tuning' | 'tremolo' | 'accidental';",
         "id: string;",
         "label: string;",
+        "stroke?: GuitarStroke;",
+        "bend?: TimedStringBend;",
         "index?: number;"
       ]
     },
@@ -1783,6 +1788,7 @@
         "id: string;",
         "kind: 'event' | 'span';",
         "source?: string;",
+        "strings?: readonly number[];",
         "row?: number;"
       ]
     },

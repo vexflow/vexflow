@@ -3,6 +3,7 @@
 // Tablature bend phrases, including nested bends on the strings of a chord.
 
 import { Element, ElementStyle } from './element';
+import { bendAmount, copyBend, TimedStringBend } from './guitargesture';
 import { Metrics } from './metrics';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
@@ -67,6 +68,17 @@ export class Bend extends Modifier {
     state.rightShift += width;
     state.topTextLine += 1;
     return true;
+  }
+
+  private timing?: TimedStringBend;
+
+  /** Construct a single rise with optional hold and release. Phase ends are fractions of the host attack. */
+  static timed(spec: TimedStringBend): Bend {
+    const timing = copyBend(spec);
+    const bend = new Bend([{ type: Bend.UP, text: bendAmount(timing) }]);
+    bend.timing = timing;
+    bend.updateWidth();
+    return bend;
   }
 
   protected tap: string;
@@ -161,6 +173,11 @@ export class Bend extends Modifier {
       return element.getWidth();
     };
 
+    if (this.timing) {
+      this.setWidth(this.xShift + Math.max(48, measureText(bendAmount(this.timing)) + 18));
+      return this;
+    }
+
     let totalWidth = 0;
     for (let i = 0; i < this.phrase.length; ++i) {
       const bend = this.phrase[i];
@@ -183,9 +200,12 @@ export class Bend extends Modifier {
   override draw(): void {
     const ctx = this.checkContext();
     const note = this.checkAttachedNote();
+    const index = this.checkIndex();
+    if (this.timing && (!isTabNote(note) || note.getPositions()[index]?.str !== this.timing.string))
+      throw new RuntimeError('BadArguments', 'Attach the timed bend to its authored TAB string.');
     this.setRendered();
 
-    const start = note.getModifierStartXY(Modifier.Position.RIGHT, this.index);
+    const start = note.getModifierStartXY(Modifier.Position.RIGHT, index);
     start.x += 3;
     start.y += 0.5;
     const xShift = this.xShift;
@@ -234,11 +254,35 @@ export class Bend extends Modifier {
       ctx.fillText(text, renderX, annotationY);
     };
 
+    if (this.timing) {
+      const { rise, hold, release } = this.timing;
+      const left = start.x + xShift;
+      const extent = this.getWidth() - xShift;
+      const phaseX = ([n, d]: readonly [number, number]) => left + (extent * n) / d;
+      const peak = phaseX(rise);
+      renderBend(left, start.y, peak - left, bendHeight);
+      renderArrowHead(peak, bendHeight, 1);
+      renderText(peak, bendAmount(this.timing));
+      const held = hold ? phaseX(hold) : peak;
+      if (hold) {
+        ctx.beginPath();
+        ctx.moveTo(peak, bendHeight);
+        ctx.lineTo(held, bendHeight);
+        ctx.stroke();
+      }
+      if (release) {
+        const end = phaseX(release);
+        renderRelease(held, start.y, end - held, bendHeight);
+        renderArrowHead(end, start.y, -1);
+      }
+      return;
+    }
+
     let lastBend = undefined;
     let lastBendDrawWidth = 0;
     let lastDrawnWidth = 0;
     if (this.tap?.length) {
-      const tapStart = note.getModifierStartXY(Modifier.Position.CENTER, this.index);
+      const tapStart = note.getModifierStartXY(Modifier.Position.CENTER, index);
       renderText(tapStart.x, this.tap);
     }
 

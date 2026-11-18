@@ -29,6 +29,7 @@ import { StaveNote } from './stavenote';
 import { Stem } from './stem';
 import type { System } from './system';
 import { BreakUnit, chooseSystemBreaks } from './systembreaks';
+import { TabNote } from './tabnote';
 import { TimeSignature } from './timesignature';
 import { RuntimeError } from './util';
 
@@ -261,6 +262,7 @@ export class ContinuousLayout {
       'ottava',
       'trill',
       'tuplet',
+      'palmMute',
     ];
     for (const span of this.options.spans ?? []) {
       const first = locations.get(score.getNote(span.from)),
@@ -274,13 +276,27 @@ export class ContinuousLayout {
         first.measure > last.measure
       )
         invalid('Expected a unique span ID and ordered composition anchors.');
-      if (!(first.note instanceof StaveNote) || !(last.note instanceof StaveNote))
-        invalid('Continuous spans need staff-note anchors.');
-      for (const [head, n] of [
-        [span.fromHead ?? 0, first.note],
-        [span.toHead ?? 0, last.note],
-      ] as const)
-        if (!Number.isInteger(head) || head < 0 || head >= n.keys.length) invalid('Invalid span head index.');
+      if (span.kind === 'palmMute') {
+        if (!(first.note instanceof TabNote) || !(last.note instanceof TabNote) || first.staff !== last.staff)
+          invalid('A palm mute needs two TAB anchors on the same staff.');
+        if (
+          !span.strings?.length ||
+          new Set(span.strings).size !== span.strings.length ||
+          !span.strings.every((n) => Number.isInteger(n) && n > 0 && n <= first.note.checkStave().getNumLines())
+        )
+          invalid('A palm mute needs distinct string numbers on its staff.');
+        for (const note of [first.note, last.note])
+          if (!note.getPositions().some((p) => span.strings!.includes(p.str)))
+            invalid('Each palm-mute anchor must play a targeted string.');
+      } else {
+        if (!(first.note instanceof StaveNote) || !(last.note instanceof StaveNote))
+          invalid('Continuous spans need staff-note anchors.');
+        for (const [head, n] of [
+          [span.fromHead ?? 0, first.note],
+          [span.toHead ?? 0, last.note],
+        ] as const)
+          if (!Number.isInteger(head) || head < 0 || head >= n.keys.length) invalid('Invalid span head index.');
+      }
       if (first.measure === last.measure && onset(first.note).greaterThan(onset(last.note))) invalid('Reversed span.');
       if (span.kind === 'tie' && first.measure !== last.measure) {
         const fi = span.fromHead ?? 0,
@@ -297,7 +313,8 @@ export class ContinuousLayout {
         }
       }
       seen.add(span.id);
-      this.spans.push({ spec: { ...span }, first, last, label: spanLabel(span) });
+      const spec = span.kind === 'palmMute' ? { ...span, strings: [...span.strings!] } : { ...span };
+      this.spans.push({ spec, first, last, label: spanLabel(spec) });
     }
   }
 
@@ -503,6 +520,10 @@ export class ContinuousLayout {
         }
         if (u.first === u.last)
           for (const n of this.score.notes[u.first].flat(2)) {
+            if (n instanceof TabNote && n.getStave() === stave && n.hasStem()) {
+              const { topY, baseY } = n.getStemExtents();
+              take(Math.min(topY, baseY), Math.max(topY, baseY));
+            }
             if (!(n instanceof StaveNote) || n.getStave() !== stave) continue;
             const bridge = n
               .getBeam()
@@ -690,6 +711,10 @@ export class ContinuousLayout {
       x1 = starts ? this.score.staves[s.first.measure][s.first.staff].getX() + 1 : startStaff.getX() + 1;
       x2 = ends ? this.score.staves[s.last.measure][s.last.staff].getNoteEndX() : endStaff.getNoteEndX();
     }
+    // On a short mute, keep the closing hook at the last string attack and let the label lead into it.
+    if (kind === 'palmMute' && starts && s.label) {
+      x1 = Math.max(startStaff.getX(), Math.min(x1, x2 - s.label.getWidth() - space));
+    }
     if (kind === 'hyphen' && ends) x2 = s.last.note.getAbsoluteX() - space * 0.3;
     if (x2 <= x1 || (starts && s.label && x1 + s.label.getWidth() > x2)) {
       this.diagnostics.push({ code: 'SpanOverflow', measures: row.measures, source: s.spec.id });
@@ -705,6 +730,11 @@ export class ContinuousLayout {
       y1,
       y2,
       progress: [0, 1],
+      ...(kind === 'palmMute' && {
+        strings: s.spec.strings,
+        ...(starts && { from: s.spec.from }),
+        ...(ends && { to: s.spec.to }),
+      }),
       above,
       space,
     };

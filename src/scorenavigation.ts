@@ -26,6 +26,8 @@ export interface ScoreHitRegion extends Bounds {
   id: string;
   kind: 'event' | 'span';
   source?: string;
+  /** Targeted strings for a technique span. */
+  strings?: readonly number[];
   /** Row index of a continuous span fragment, counted from zero. */
   row?: number;
 }
@@ -68,14 +70,20 @@ function describe(note: StaveNote | TabNote): string {
     const positions = note.getPositions().map((p) => 'string ' + p.str + ' fret ' + p.fret);
     return [...positions, ...note.notation.filter((n) => n.kind !== 'tuning').map((n) => n.label)].join(', ');
   }
-  if (note.notation.some((entry) => entry.kind === 'unpitched')) return marks.join(', ');
+  // A dead string in a mixed chord has a display position but no sounding pitch.
+  const unpitched = note.notation.filter((entry) => entry.kind === 'unpitched');
+  if (unpitched.some((entry) => entry.index === undefined)) return marks.join(', ');
   const accidentals = note.getModifiers().filter((m): m is Accidental => m instanceof Accidental);
   return [
-    ...note.getKeys().map((key, i) =>
-      spokenPitch(
-        key,
-        accidentals.find((a) => a.getIndex() === i)
-      )
+    ...note.getKeys().flatMap((key, i) =>
+      unpitched.some((entry) => entry.index === i)
+        ? []
+        : [
+            spokenPitch(
+              key,
+              accidentals.find((a) => a.getIndex() === i)
+            ),
+          ]
     ),
     ...marks,
   ].join(', ');
@@ -115,6 +123,17 @@ export class ScoreNavigation {
     const sourceFor = (id: string) => (Object.prototype.hasOwnProperty.call(sources, id) ? sources[id] : undefined);
     const seen = new Set<string>();
     const layout = score.sheet.getContinuousLayout();
+    const muteLabels = new Map<string, string[]>();
+    for (const fragment of layout?.fragments ?? []) {
+      if (!fragment.strings) continue;
+      const strings = (fragment.strings.length === 1 ? 'string ' : 'strings ') + fragment.strings.join(', ');
+      for (const [id, text] of [
+        [fragment.from, 'Begin palm mute on '],
+        [fragment.to, 'Last palm-muted attack on '],
+      ]) {
+        if (id) muteLabels.set(id, [...(muteLabels.get(id) ?? []), text + strings]);
+      }
+    }
     for (const [measure, staffNotes] of score.notes.entries()) {
       if (staffNotes.length !== staves.length)
         throw new RuntimeError('BadArguments', 'Pass the staves in composition order.');
@@ -140,6 +159,7 @@ export class ScoreNavigation {
               `voice ${voice + 1}`,
               describe(note),
               length + (note.isRest() ? ' rest' : ' note'),
+              ...(muteLabels.get(id) ?? []),
             ]
               .filter(Boolean)
               .join(', ');
@@ -172,6 +192,7 @@ export class ScoreNavigation {
       regions.push({
         id: fragment.id,
         row: fragment.row,
+        ...(fragment.strings && { strings: [...fragment.strings] }),
         source: sourceFor(fragment.id),
         kind: 'span',
         x: Math.min(fragment.x1, fragment.x2),

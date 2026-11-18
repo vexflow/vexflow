@@ -14,6 +14,7 @@ import { BoundingBox } from './boundingbox';
 import { ElementStyle } from './element';
 import { EngravingProfile } from './engravingprofile';
 import { Glyphs } from './glyphs';
+import { attachGuitarGestures } from './guitarmodifiers';
 import { Metrics } from './metrics';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
@@ -423,6 +424,7 @@ export class StaveNote extends StemmableNote {
     } else {
       this.setStemDirection(noteStruct.stemDirection ?? Stem.UP);
     }
+    if (this.notation.length) attachGuitarGestures(this);
   }
 
   override reset(): this {
