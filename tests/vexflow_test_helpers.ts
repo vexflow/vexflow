@@ -244,12 +244,13 @@ export class VexFlowTests {
    * @param name
    * @param testFunc
    * @param params
+   * @param fontStacks Limit a font-specific example to its intended faces on each backend.
    */
   // eslint-disable-next-line
-  static runTests(name: string, testFunc: TestFunction, params?: any): void {
-    VexFlowTests.runCanvasTest(name, testFunc, params);
-    VexFlowTests.runSVGTest(name, testFunc, params);
-    VexFlowTests.runNodeTest(name, testFunc, params);
+  static runTests(name: string, testFunc: TestFunction, params?: any, fontStacks?: string[]): void {
+    VexFlowTests.runCanvasTest(name, testFunc, params, fontStacks);
+    VexFlowTests.runSVGTest(name, testFunc, params, fontStacks);
+    VexFlowTests.runNodeTest(name, testFunc, params, fontStacks);
   }
 
   // eslint-disable-next-line
@@ -279,10 +280,17 @@ export class VexFlowTests {
   }
 
   // eslint-disable-next-line
-  static runCanvasTest(name: string, testFunc: TestFunction, params: any): void {
+  static runCanvasTest(name: string, testFunc: TestFunction, params: any, fontStacks?: string[]): void {
     if (VexFlowTests.RUN_CANVAS_TESTS) {
       const helper = null;
-      VexFlowTests.runWithParams({ ...CANVAS_TEST_CONFIG, name, testFunc, params, helper });
+      VexFlowTests.runWithParams({
+        ...CANVAS_TEST_CONFIG,
+        fontStacks: fontStacks ?? CANVAS_TEST_CONFIG.fontStacks,
+        name,
+        testFunc,
+        params,
+        helper,
+      });
     }
   }
 
@@ -295,10 +303,17 @@ export class VexFlowTests {
   }
 
   // eslint-disable-next-line
-  static runSVGTest(name: string, testFunc: TestFunction, params?: any): void {
+  static runSVGTest(name: string, testFunc: TestFunction, params?: any, fontStacks?: string[]): void {
     if (VexFlowTests.RUN_SVG_TESTS) {
       const helper = null;
-      VexFlowTests.runWithParams({ ...SVG_TEST_CONFIG, name, testFunc, params, helper });
+      VexFlowTests.runWithParams({
+        ...SVG_TEST_CONFIG,
+        fontStacks: fontStacks ?? SVG_TEST_CONFIG.fontStacks,
+        name,
+        testFunc,
+        params,
+        helper,
+      });
     }
   }
   // eslint-disable-next-line
@@ -309,10 +324,17 @@ export class VexFlowTests {
     }
   }
   // eslint-disable-next-line
-  static runNodeTest(name: string, testFunc: TestFunction, params: any): void {
+  static runNodeTest(name: string, testFunc: TestFunction, params: any, fontStacks?: string[]): void {
     if (VexFlowTests.RUN_NODE_TESTS) {
       const helper = VexFlowTests.runNodeTestHelper;
-      VexFlowTests.runWithParams({ ...NODE_TEST_CONFIG, name, testFunc, params, helper });
+      VexFlowTests.runWithParams({
+        ...NODE_TEST_CONFIG,
+        fontStacks: fontStacks ?? NODE_TEST_CONFIG.fontStacks,
+        name,
+        testFunc,
+        params,
+        helper,
+      });
     }
   }
 

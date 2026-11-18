@@ -15,6 +15,8 @@
 // To iterate faster during development, you can comment out most of this file
 // and focus on just testing the module(s) you are currently working on.
 
+import './demo_repertoire_tests';
+
 export * from './accidental_tests';
 export * from './annotation_tests';
 export * from './articulation_tests';

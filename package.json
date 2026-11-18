@@ -43,6 +43,8 @@
     "tests/flow.html",
     "tests/all.html",
     "tests/minuet.webp",
+    "tests/demos",
+    "tests/demo_petzold_tests.ts",
     "tests/fonts.css",
     "tests/qunit/qunit.css",
     "tests/qunit/qunit.js",

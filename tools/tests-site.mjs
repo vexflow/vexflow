@@ -50,6 +50,12 @@ export async function build() {
   for (const file of ['qunit.js', 'qunit.css'])
     assets.set(`qunit/${file}`, await readFile(join(root, 'tests/qunit', file)));
   assets.set('minuet.webp', await readFile(join(root, 'tests/minuet.webp')));
+  assets.set('demo_petzold_tests.txt', await readFile(join(root, 'tests/demo_petzold_tests.ts')));
+  // Include the same examples readers run, plus a readable copy of each source file.
+  for (const file of await readdir(join(root, 'tests/demos'))) {
+    if (/\.(ts|webp)$/.test(file))
+      assets.set('demos/' + file.replace(/\.ts$/, '.txt'), await readFile(join(root, 'tests/demos', file)));
+  }
   await bundleFonts(assets);
   const digest = hash(
     Buffer.concat([...assets.entries()].sort().flatMap(([name, bytes]) => [Buffer.from(name), bytes]))
@@ -76,8 +82,8 @@ export async function build() {
     await writeFile(join(staging, 'all.html'), runner);
     manifest.files['all.html'] = hash(runner);
     const html = (await readFile(join(root, 'tests/flow.html'), 'utf8')).replace(
-      'src="minuet.webp"',
-      `src="./${assetPath}/minuet.webp"`
+      /(src|href)="(minuet\.webp|demo_petzold_tests\.ts|demos\/[a-z]+\.(?:webp|ts))"/g,
+      (_, attr, file) => `${attr}="./${assetPath}/${file.replace(/\.ts$/, '.txt')}"`
     );
     await writeFile(join(staging, 'index.html'), html);
     manifest.files['index.html'] = hash(html);

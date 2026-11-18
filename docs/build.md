@@ -124,7 +124,7 @@ npx grunt webpack:debug
 npx grunt test:browser:cjs
 ```
 
-This opens the module index at `tests/flow.html`. Choose a module to see its results, or open `tests/all.html` for the full QUnit suite. The index displays a WebP export of the Minuet fixture in `tests/demo_petzold_tests.ts`. When adding or renaming a QUnit module, update its link in `tests/flow.html`; `npm run tests:test` checks the list against the registered suite.
+This opens the module index at `tests/flow.html`. Choose a module to see its results, or open `tests/all.html` for the full QUnit suite. The carousel shows score previews and links to each live example and its source. The Minuet is in `tests/demo_petzold_tests.ts`; the other scores are in `tests/demos/`. After editing one of those arrangements, run `npx grunt webpack:debug` and `node tools/gallery-previews.mjs` to refresh the WebP previews from the Canvas tests. When adding or renaming a QUnit module, update its link in `tests/flow.html`; `npm run tests:test` checks the list against the registered suite.
 
 For ESM, build and serve the repository root. For example, with Python 3:
 

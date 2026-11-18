@@ -78,6 +78,39 @@ test('standalone gallery runs with local fonts/scripts and preserves QUnit filte
       requests.filter((url) => !url.endsWith('/favicon.ico')).map((url) => new URL(url).pathname),
       ['/tests/', `/tests/${(await validate(output)).assetPath}/minuet.webp`]
     );
+    // Native buttons remain focused while slides change. Each score and its source
+    // must be present in the deployed asset graph; the runner loads only on navigation.
+    const featured = [
+      'petzold',
+      'saints',
+      'greensleeves',
+      'prelude',
+      'kesh',
+      'joy',
+      'electric',
+      'drums',
+      'quartertones',
+    ];
+    await page.focus('#next');
+    for (const [index, piece] of featured.entries()) {
+      if (index) await page.keyboard.press('Enter');
+      assert.equal(await page.$eval('#score-slide figure', (figure) => figure.dataset.piece), piece);
+      assert.ok(
+        await page.$eval('#score-slide img', async (img) => {
+          await img.decode();
+          return img.naturalWidth > 0;
+        })
+      );
+      assert.ok(await page.$eval('.sheet-image', (link) => link.href === link.querySelector('img').currentSrc));
+      const source = await page.$eval('#score-slide a[href$=".txt"]', (link) => link.href);
+      assert.ok((await fetch(source)).ok, `source for ${piece}`);
+      assert.equal(await page.evaluate(() => document.activeElement.id), 'next');
+    }
+    await page.click('#next');
+    assert.equal(await page.$eval('#score-slide figure', (figure) => figure.dataset.piece), 'petzold');
+    await page.click('#previous');
+    assert.equal(await page.$eval('#score-slide figure', (figure) => figure.dataset.piece), featured.at(-1));
+    assert.ok(requests.every((url) => !url.includes('vexflow-debug-with-tests')));
     const indexed = await page.$$eval('#modules li a', (links) =>
       links.map((link) => new URL(link.href).searchParams.get('module')).sort()
     );
