@@ -367,6 +367,18 @@ function semanticEvents(score: EasyScoreComposition, spec: EasyScoreCompositionS
   );
 }
 
+/** Measure running text at the same physical scale and with the same SVG styles used for the printed page. */
+function pageSurface(host: HTMLElement, size: Size): SVGSVGElement {
+  const svg = node('svg', {
+    width: size.width + 'mm',
+    height: size.height + 'mm',
+    viewBox: `0 0 ${size.width} ${size.height}`,
+    role: 'img',
+  });
+  host.append(svg);
+  return svg;
+}
+
 /** Mount measured systems at the page planner's offsets and preserve their text and source identity. */
 function buildPages(
   host: HTMLElement,
@@ -381,13 +393,7 @@ function buildPages(
   const uid = ++nextView;
   return breaks.map((b, index) => {
     const number = index + 1;
-    const svg = node('svg', {
-      width: size.width + 'mm',
-      height: size.height + 'mm',
-      viewBox: `0 0 ${size.width} ${size.height}`,
-      role: 'img',
-    });
-    host.append(svg);
+    const svg = pageSurface(host, size);
     svg.append(node('rect', { width: size.width, height: size.height, fill: 'white' }));
     const title = node('title');
     title.textContent = (options.title ?? 'Score') + ' · ' + number;
@@ -493,8 +499,11 @@ export class Publication {
       const rows = splitRows(ctx.svg, layout.rows, score);
       addInsets(host, this.source, options, score, rows, diagnostics);
       const measured = rows.map((r) => ({ ...r, height: (r.bottom - r.top + r.insetHeight) * size.scale }));
-      const first = furniture(ctx.svg, size, options, 1),
-        later = furniture(ctx.svg, size, options, 2);
+      const surface = pageSurface(host, size);
+      const first = furniture(surface, size, options, 1);
+      first.group.remove();
+      const later = furniture(surface, size, options, 2);
+      surface.remove();
       const breaks = paginate(measured, {
         firstHeight: first.height,
         laterHeight: later.height,

@@ -31,73 +31,49 @@ test('publication views, pagination and portable printing', async (t) => {
     for (const paper of ['A4', 'Letter'])
       for (const part of [false, true]) {
         await t.test((part ? 'cello' : 'score') + ' on ' + paper, async () => {
-          const { diagnostics, ranges, media, metadata, ids, boxes, footerTops, systemGap, printed, geometry, svg } =
-            await page.evaluate(
-              ({ part, paper }) => {
-                const { source, options } = study(part, paper),
-                  target = document.querySelector('main');
-                const result = new VexFlow.Publication(source).render(target, options);
-                const roots = result.pages.map((p) => p.svg);
-                const ids = roots.flatMap((s) => [...s.querySelectorAll('[id]')].map((el) => el.id));
-                const p = result.pages[0];
-                const xml = result.toSVG(1),
-                  outlined = result.toSVG(1, faces);
-                const parse = (s) => new DOMParser().parseFromString(s, 'image/svg+xml');
-                return {
-                  diagnostics: result.diagnostics,
-                  ranges: result.pages.map((p) => p.systems.flatMap((s) => s.measures)),
-                  media: roots.map((el) => [el.getAttribute('width'), el.getAttribute('height')]),
-                  metadata: roots.map((s) => JSON.parse(s.querySelector('metadata').textContent)),
-                  ids: ids.length === new Set(ids).size,
-                  boxes: result.pages.map((p) => p.systems),
-                  // In this edition the last two furniture elements are the footer and the page number.
-                  footerTops: roots.map((root) =>
-                    Math.min(
-                      ...Array.from(root.querySelector('[data-page-furniture]').children)
-                        .slice(-2)
-                        .map((el) => el.getBBox().y)
-                    )
-                  ),
-                  systemGap: options.systemGap,
-                  printed: result.toPrintHTML(faces),
-                  geometry: [...parse(outlined).querySelectorAll('[data-system]')].map((g) =>
-                    g.getAttribute('transform')
-                  ),
-                  svg: {
-                    transforms: [...p.svg.querySelectorAll('[data-system]')].map((g) => g.getAttribute('transform')),
-                    source: parse(xml).querySelectorAll('text').length,
-                    outlined: parse(outlined).querySelectorAll('text').length,
-                    meta:
-                      parse(outlined).querySelector('metadata').textContent ===
-                      p.svg.querySelector('metadata').textContent,
-                  },
-                };
-              },
-              { part, paper }
-            );
+          const { diagnostics, ranges, media, metadata, ids, boxes, printed, geometry, svg } = await page.evaluate(
+            ({ part, paper }) => {
+              const { source, options } = study(part, paper),
+                target = document.querySelector('main');
+              const result = new VexFlow.Publication(source).render(target, options);
+              const roots = result.pages.map((p) => p.svg);
+              const ids = roots.flatMap((s) => [...s.querySelectorAll('[id]')].map((el) => el.id));
+              const p = result.pages[0];
+              const xml = result.toSVG(1),
+                outlined = result.toSVG(1, faces);
+              const parse = (s) => new DOMParser().parseFromString(s, 'image/svg+xml');
+              return {
+                diagnostics: result.diagnostics,
+                ranges: result.pages.map((p) => p.systems.flatMap((s) => s.measures)),
+                media: roots.map((el) => [el.getAttribute('width'), el.getAttribute('height')]),
+                metadata: roots.map((s) => JSON.parse(s.querySelector('metadata').textContent)),
+                ids: ids.length === new Set(ids).size,
+                boxes: result.pages.map((p) => p.systems),
+                printed: result.toPrintHTML(faces),
+                geometry: [...parse(outlined).querySelectorAll('[data-system]')].map((g) =>
+                  g.getAttribute('transform')
+                ),
+                svg: {
+                  transforms: [...p.svg.querySelectorAll('[data-system]')].map((g) => g.getAttribute('transform')),
+                  source: parse(xml).querySelectorAll('text').length,
+                  outlined: parse(outlined).querySelectorAll('text').length,
+                  meta:
+                    parse(outlined).querySelector('metadata').textContent ===
+                    p.svg.querySelector('metadata').textContent,
+                },
+              };
+            },
+            { part, paper }
+          );
           assert.deepEqual(diagnostics, []);
           assert.deepEqual(
             ranges.flat(),
             Array.from({ length: 26 }, (_, i) => i + 1)
           );
-          const ends = ranges.map((r) => r.at(-1));
-          if (part) assert.deepEqual(ends, [16, 26]);
-          else if (paper === 'A4') assert.deepEqual(ends, [12, 24, 26]);
-          else {
-            // Bars 17–20 are close to the Letter page limit. Font ink metrics differ across browser hosts.
-            const middle = boxes.flat().filter((s) => s.measures[0] >= 9 && s.measures[0] <= 17);
-            assert.deepEqual(
-              middle.map((s) => s.measures[0]),
-              [9, 13, 17]
-            );
-            const needed = middle.reduce((height, s) => height + s.height, 2 * systemGap);
-            const available = footerTops[1] - 4 - boxes[1][0].y; // Reserve 4 mm above the footer.
-            assert.deepEqual(
-              ends,
-              [8, needed <= available ? 20 : 16, 26],
-              `Middle three systems need ${needed.toFixed(2)} mm in ${available.toFixed(2)} mm`
-            );
-          }
+          assert.deepEqual(
+            ranges.map((r) => r.at(-1)),
+            part ? [16, 26] : paper === 'A4' ? [12, 24, 26] : [8, 20, 26]
+          );
           const [w, h] = paper === 'A4' ? [210, 297] : [215.9, 279.4];
           assert.ok(media.every((m) => m[0] === w + 'mm' && m[1] === h + 'mm'));
           for (const systems of boxes)
@@ -141,6 +117,33 @@ test('publication views, pagination and portable printing', async (t) => {
           }
         });
       }
+    await t.test('pagination reserves running text at the final page scale', async () => {
+      const result = await page.evaluate(() => {
+        const style = document.createElement('style');
+        style.textContent = 'svg[role="img"] [data-page-furniture] text { font-size: 7px }';
+        document.head.append(style);
+        try {
+          const { source, options } = study(false, 'Letter');
+          const book = new VexFlow.Publication(source).render(document.querySelector('main'), options);
+          return book.pages.map((p) => {
+            const footer = Array.from(p.svg.querySelector('[data-page-furniture]').children).slice(-2);
+            const bottom = Math.min(...footer.map((el) => el.getBBox().y));
+            const last = p.systems.at(-1);
+            return { end: last.measures.at(-1), clearance: bottom - last.y - last.height };
+          });
+        } finally {
+          style.remove();
+        }
+      });
+      assert.deepEqual(
+        result.map((p) => p.end),
+        [8, 16, 24, 26]
+      );
+      assert.ok(
+        result.every((p) => p.clearance >= 3.99),
+        'Every system clears the footer reservation'
+      );
+    });
     await t.test(
       'an extracted cross-staff voice keeps its notes and reports a spanner ending in another part',
       async () => {
