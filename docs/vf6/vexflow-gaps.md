@@ -12,7 +12,7 @@ Companion: [Strategy and milestone plan](vexflow-gaps-plan.md)
 
 **M7 complete on main.** Three browser engines passed qualification. The maintainer approved the accessible score reader. Three MusicXML fixtures passed the adapter pilot. [Evidence and review instructions](m7.md) · [VF6 requirements](requirements/web-delivery.md)
 
-**M8.0 on the roadmap branch.** Contemporary notation (VF-035), ensemble layout (VF-020 and VF-034), and guitar TAB (VF-030) have five executable reference scores and a staged plan. [Review questions](m8-reference-scores.md) [M8 delivery plan](m8.md)
+**M8.0 complete on the roadmap branch.** The maintainer approved all five reference scores. Contemporary notation (VF-035), ensemble layout (VF-020 and VF-034), and guitar TAB (VF-030) have five executable reference scores and a staged plan. [Review questions](m8-reference-scores.md) [M8 delivery plan](m8.md)
 
 **M6 complete on main · engraving approved.** Eight studies cover percussion, guitar, lead sheets, techniques, microtonal notation, spelling and an independent-meter experiment. [Coverage and limits](m6.md) · [VF6 requirements](requirements/instrument-notation.md)
 
@@ -288,3 +288,4 @@ Track acceptance-case counts by repertoire and priority. Raw counts of closed ro
 | 2026-11-18 | Implemented M7 web qualification on the roadmap branch. Human assistive-technology review pending. | [M7 evidence](m7.md) · [VF6 requirements](requirements/web-delivery.md). |
 | 2026-11-18 | Merged M7 into main after @0xfe approved the keyboard and screen-reader walkthrough. | [Review record](m7.md#assistive-technology-review) · [Post-merge comparison](m0.md#latest-comparison). |
 | 2026-11-18 | Added the five M8.0 native controls on the roadmap branch. Performer review pending. | [Reference scores](m8-reference-scores.md) · [M8 delivery plan](m8.md). |
+| 2026-11-18 | @0xfe approved all five M8.0 reference scores. M8.1 guitar gestures are next. | [Approved score sheets](https://github.com/vexflow/vexflow/issues/358#issuecomment-6994227888) · [Review record](m8-reference-scores.md#review-record). |

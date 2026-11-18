@@ -1,6 +1,6 @@
 # M8.0 · Five reference scores
 
-**2026-11-18 · Ready for performer review on the roadmap branch.** Each sheet pairs an original native VF5 score with its intended reading. VF5 can print all five controls. Several instructions still depend on text, duplicated part construction or hand-positioned marks. The questions below identify what needs a first-class representation. [M8 plan](m8.md) · [Executable scores and assertions](../../tests/engraving/specialist-studies.mjs)
+**2026-11-18 · M8.0 complete on the roadmap branch. @0xfe approved all five reference sheets.** Each sheet pairs an original native VF5 score with its intended reading. VF5 can print all five controls. Several instructions still depend on text, duplicated part construction or hand-positioned marks. The questions below identify what needs a first-class representation. [M8 plan](m8.md) · [Executable scores and assertions](../../tests/engraving/specialist-studies.mjs)
 
 Read the score once before looking at the instructions beneath it. Cite the case ID, measure, beat or string if the two readings disagree. A screenshot establishes the printed result. A performer’s reading establishes whether the chosen convention communicates the gesture.
 
@@ -24,4 +24,4 @@ The guitar gestures, bounded time and player-local bars expose three VF6 design 
 
 | Revision | Disposition |
 | --- | --- |
-| 2026-11-18 · upstream main `97a8669d` | Five baseline controls rendered. Performer readings and proposed changes are awaiting review. |
+| 2026-11-18 · branch `2dcfea56` against upstream main `97a8669d` | @0xfe approved the appearance of all five reference scores. The player questions above carry forward to the corresponding implementation increments. [Approved score sheets](https://github.com/vexflow/vexflow/issues/358#issuecomment-6994227888) |
