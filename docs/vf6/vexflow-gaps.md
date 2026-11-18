@@ -10,7 +10,7 @@ Status: **52 tracked items. Two verified on main and 50 remaining.**
 
 Companion: [Strategy and milestone plan](vexflow-gaps-plan.md)
 
-**M2 evidence** · [Local engraving and review](m2.md) · [VF6 local engraving requirements](requirements/local-engraving.md)
+**M2 complete on the branch** · [Local engraving and maintainer approval](m2.md) · [VF6 local engraving requirements](requirements/local-engraving.md)
 
 **M1 evidence** · [Geometry and policy audit](m1.md) · [Score and excerpt decision](requirements/score-persistence.md#m1-decision-record)
 

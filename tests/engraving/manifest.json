@@ -23,6 +23,13 @@
     "bend-2": "Fixed on main in M0. The upper string uses the inner bend on both chords."
   },
   "reviews": {
+    "unison-triple": "2026-11-18 · @0xfe · Approved the three visible altered-unison heads.",
+    "m2-four-voices": "2026-11-18 · @0xfe · Approved the four-voice passage at shared and unequal onsets.",
+    "m2-contour": "2026-11-18 · @0xfe · Approved beam contour and staff contact at both widths.",
+    "m2-ornament-redraw": "2026-11-18 · @0xfe · Approved the retained fall and delayed turn after resizing.",
+    "m2-grace-sides": "2026-11-18 · @0xfe · Approved grace groups and slurs on both sides of the host.",
+    "m2-tuplet-turn": "2026-11-18 · @0xfe · Approved tuplet clearance above the turn and its auxiliary signs.",
+    "m2-optical": "2026-11-18 · @0xfe · Approved optical spacing through the short ending.",
     "beam-between-attacks": "2026-11-18 · @0xfe · Approved the M1 clearance around the intervening notehead.",
     "beam-retained-resize": "2026-11-18 · @0xfe · Approved the M1 slope and stem joins after narrowing the system.",
     "formatter-3": "2026-11-18 · @0xfe · Adjust triplet clearance. In bar 2 the upper bracket sits too far above the text stack. Use the lower bracket in bar 1 as the spacing reference and give that lower bracket a little more room.",
