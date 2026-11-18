@@ -38,7 +38,11 @@ jobs:
           PUPPETEER_SKIP_DOWNLOAD: 'true'
       - run: npm ci --ignore-scripts
         working-directory: tests/web
-      - run: node tests/web/qualify.mjs
+      - name: Run the three browser engines
+        run: |
+          # Firefox checks ownership of the home directory mounted by the Actions runner.
+          chown "$(id -u):$(id -g)" "$HOME"
+          node tests/web/qualify.mjs
       - name: Check the complete engraving gallery and historical release
         run: |
           git fetch --no-tags --depth=1 origin "$VF_ENGRAVING_REFERENCE"
