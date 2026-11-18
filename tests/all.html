@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- QUnit runner for one module, a filtered selection, or the entire visual suite. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8" />
+    <!--
+      IMPORTANT: Always declare the character encoding as UTF-8. Otherwise VexFlow scores may show weird symbols instead of music symbols.
+    -->
+    <title>VexFlow Tests</title>
+    <!-- fonts.css defines the music fonts via @font-face rules. -->
+    <link rel="stylesheet" href="fonts.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="qunit/qunit.css" />
+    <script src="qunit/qunit.js"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        font-size: 12px;
+        color: #17283c;
+        background: #f4f6f9;
+        margin: 0px;
+        padding: 0px;
+
+      }
+
+      /* Keep QUnit in page flow so its full-screen panel cannot cover gallery navigation. */
+      #qunit {
+        position: static;
+        display: block;
+      }
+      #qunit-tests {
+        overflow: visible;
+      }
+
+      a.button {
+        color: #204e78;
+        background: #edf4fb;
+        text-decoration: none;
+        padding: 5px;
+        margin: 2px;
+        border: 1px solid #c8d8e8;
+        border-radius: 6px;
+      }
+
+      div#error {
+        width: 60%;
+        padding: 10px;
+        color: red;
+        background: #faa;
+        border: 15px solid #d99;
+      }
+
+      div.testcanvas {
+        font-size: 18px;
+        color: #17283c;
+        background: white;
+        border: 1px solid #dce3ed;
+        border-radius: 8px;
+        margin: 16px;
+        padding: 16px;
+        overflow-x: auto;
+      }
+
+      div.testcanvas .vex-tabdiv {
+        background: white;
+      }
+
+      div.testcanvas .name {
+        font-size: 18px;
+        color: #204e78;
+      }
+
+      p.vf-footer {
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav aria-label="Test gallery" style="padding: 1rem; background: white">
+      <a id="gallery-link" href="flow.html">← Module index</a>
+    </nav>
+    <h1 id="run-title" style="margin: 1rem">All visual tests</h1>
+    <div id="qunit"></div>
+    <div id="qunit-fixture"></div>
+    <p style="margin: 1rem"><a id="vex-src"></a></p>
+    <div id="font-preload">
+      <!--
+        Preload fonts and styles for testing.
+        The empty tags <b></b>, <i></i>, and <span style="font-weight: xxx"></span> are for loading different font weights/styles.
+      -->
+      <span style="font-family: Academico"><b></b></span>
+      <span style="font-family: Bravura"></span>
+      <span style="font-family: Edwin">
+        <b></b><i></i><b><i></i></b>
+      </span>
+      <span style="font-family: Finale Ash"></span>
+      <span style="font-family: Finale Ash Text"></span>
+      <span style="font-family: Finale Broadway"></span>
+      <span style="font-family: Finale Broadway Text"></span>
+      <span style="font-family: Finale Jazz"></span>
+      <span style="font-family: Finale Jazz Text"></span>
+      <span style="font-family: Finale Maestro"></span>
+      <span style="font-family: Finale Maestro Text">
+        <b></b><i></i><b><i></i></b>
+      </span>
+      <span style="font-family: Gonville"></span>
+      <span style="font-family: Gootville"></span>
+      <span style="font-family: Leipzig"></span>
+      <span style="font-family: Leland"></span>
+      <span style="font-family: MuseJazz"></span>
+      <span style="font-family: MuseJazz Text"></span>
+      <span style="font-family: Nepomuk">
+        <b></b><i></i><b><i></i></b>
+      </span>
+      <span style="font-family: Petaluma"></span>
+      <span style="font-family: Petaluma Script"></span>
+      <span style="font-family: Roboto Slab">
+        <span style="font-weight: 500"></span><span style="font-weight: 700"></span>
+      </span>
+      <span style="font-family: Sebastian"></span>
+    </div>
+    <script type="module">
+      QUnit.config.autostart = false;
+
+      const queryParams = new URLSearchParams(location.search);
+      // When flow.html is hosted on unpkg.com, the query string is not available.
+      // Allow the user to specify params via the # fragment identifier.
+      const hashParams = new URLSearchParams(location.hash.substr(1));
+      // Static deployments supply a local, fingerprinted bundle. Keep all test filters available.
+      const bundledSource = document.querySelector('meta[name="vexflow-test-bundle"]')?.content;
+
+      // Optional: Specify the QUnit module or filter in the query params or fragment identifier.
+      let QUnitModule = queryParams.get('module') ?? hashParams.get('module');
+      let QUnitFilter = queryParams.get('filter') ?? hashParams.get('filter');
+
+      // The `ver` query param chooses which VexFlow version to load. If omitted, `ver` defaults to 'build'.
+      const ver = bundledSource ? 'bundled build' : (queryParams.get('ver') ?? hashParams.get('ver') ?? 'build');
+      let useESM = !bundledSource && (queryParams.get('esm') === 'true' || hashParams.get('esm') === 'true');
+      const isFileProtocol = location.protocol === 'file:';
+
+      // Determine if we are loading VexFlow from a CDN.
+      let cdnURLPath;
+      if (ver.includes('unpkg')) {
+        cdnURLPath = 'https://unpkg.com/';
+      } else if (ver.includes('jsdelivr')) {
+        cdnURLPath = 'https://cdn.jsdelivr.net/npm/';
+      }
+      const useCDN = typeof cdnURLPath !== 'undefined';
+
+      // Keep the chosen local or CDN build when returning to the module index.
+      const gallery = new URL(document.getElementById('gallery-link').href);
+      for (const key of ['ver', 'esm']) {
+        const value = queryParams.get(key) ?? hashParams.get(key);
+        if (value) gallery.searchParams.set(key, value);
+      }
+      document.getElementById('gallery-link').href = gallery;
+      checkESM_WarnIfNecessary();
+
+      const pathCJSorESM = (useESM ? 'esm/entry' : 'cjs') + '/vexflow-debug-with-tests.js';
+
+      let vexPlusTestsURL;
+      if (bundledSource) {
+        vexPlusTestsURL = bundledSource;
+      } else if (useCDN) {
+        // `ver` can specify a version hosted on the unpkg.com / jsdelivr.com CDN. We only support VexFlow 4 or newer:
+        //   ver=unpkg@4.2.3     =>  https://unpkg.com/vexflow@4.2.3/build/cjs/vexflow-debug-with-tests.js
+        //   ver=unpkg@alpha     =>  https://unpkg.com/vexflow@alpha/build/cjs/vexflow-debug-with-tests.js
+        //   ver=jsdelivr@4.2.3  =>  https://cdn.jsdelivr.net/npm/vexflow@4.2.3/build/cjs/vexflow-debug-with-tests.js
+        const versionNumber = ver.split('@')[1];
+        vexPlusTestsURL = `${cdnURLPath}vexflow@${versionNumber}/build/${pathCJSorESM}`;
+      } else {
+        // We are NOT loading from a CDN. Instead, we are loading from the local filesystem.
+        //   ver=build           =>  vexflow/build/
+        //   ver=reference       =>  vexflow/reference/
+        //   ver=releases/4.2.3  =>  vexflow/releases/4.2.3/
+        vexPlusTestsURL = `../${ver}/${pathCJSorESM}`;
+      }
+
+      showVexFlowVersion();
+
+      let loadVexFlow;
+
+      if (useESM && !isFileProtocol) {
+        console.log('LOADING ESM: ' + vexPlusTestsURL);
+        loadVexFlow = async () => {
+          const module = await import(vexPlusTestsURL);
+          window.VexFlow = module.VexFlow;
+          return VexFlow;
+        };
+      } else {
+        console.log('LOADING CJS: ' + vexPlusTestsURL);
+        loadVexFlow = async () => {
+          await loadScript(vexPlusTestsURL);
+          return VexFlow;
+        };
+      }
+
+      // Load deployed faces before tests measure them, even when the preload spans are empty.
+      if (bundledSource) await Promise.all([...document.fonts].map((face) => face.load()));
+      const fontFaceSet = await document.fonts.ready;
+
+      showFontLoadingStatus();
+
+      const VF = await loadVexFlow();
+      if (bundledSource) await document.fonts.ready;
+
+      // If you did not load the fonts via the div#font-preload above, you can load them with this API:
+      // await VF.loadFonts(); // Load all web fonts that VexFlow knows about (Font.FILES).
+      // await VF.loadFonts('Bravura', 'Academico'); // Load only the specified fonts.
+
+      if (QUnitModule) {
+        QUnit.config.module = QUnitModule;
+        document.title = `${QUnitModule} · VexFlow Tests`;
+        document.getElementById('run-title').textContent = QUnitModule;
+      }
+
+      if (QUnitFilter) {
+        QUnit.config.filter = QUnitFilter;
+      }
+
+      // Show only failed tests.
+      QUnit.config.hidepassed = true;
+      QUnit.config.noglobals = true;
+      VF.Test.run();
+      QUnit.start();
+
+      function loadScript(url) {
+        return new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.onload = resolve;
+          script.onerror = reject;
+          script.src = url;
+          document.getElementsByTagName('head')[0].appendChild(script);
+        });
+      }
+
+      // Display which VexFlow version we loaded.
+      function showVexFlowVersion() {
+        const srcLink = document.getElementById('vex-src');
+        srcLink.href = vexPlusTestsURL;
+        srcLink.innerText = `VexFlow Source [${ver}]`;
+      }
+
+      // ESM version only works if flow.html is accessed from a web server: e.g., `npx http-server` and browse to http://127.0.0.1:8080/tests/flow.html
+      function checkESM_WarnIfNecessary() {
+        if (useESM) {
+          if (!useCDN && isFileProtocol) {
+            prompt(
+              'ES modules require a web server for testing!\n\n' +
+                'Try `npx http-server` and browse to http://127.0.0.1:8080/tests/flow.html?esm=true\n\n' +
+                'We will fall back to CJS for now.',
+              'npx http-server'
+            );
+            useESM = false;
+          }
+        }
+      }
+
+      // Show font loading status in the console.
+      function showFontLoadingStatus() {
+        const fontFaces = [...fontFaceSet];
+        for (const fontFace of fontFaces) {
+          const fontInfo = fontFace.family + ' / ' + fontFace.weight + ' / ' + fontFace.style;
+          if (fontFace.status === 'loaded') {
+            console.log(fontInfo + ' loaded!');
+          } else if (fontFace.status === 'unloaded') {
+            console.warn('*** ' + fontInfo + ' IS NOT LOADED! ***');
+          } else if (fontFace.status === 'error') {
+            console.error(fontInfo + ' ERROR');
+          } else {
+            console.log(fontInfo + ' has status: ' + fontFace.status);
+          }
+        }
+      }
+    </script>
+  </body>
+</html>

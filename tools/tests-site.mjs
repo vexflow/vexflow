@@ -49,6 +49,7 @@ export async function build() {
     assets.set(file, await readFile(join(root, 'build/cjs', file)));
   for (const file of ['qunit.js', 'qunit.css'])
     assets.set(`qunit/${file}`, await readFile(join(root, 'tests/qunit', file)));
+  assets.set('minuet.webp', await readFile(join(root, 'tests/minuet.webp')));
   await bundleFonts(assets);
   const digest = hash(
     Buffer.concat([...assets.entries()].sort().flatMap(([name, bytes]) => [Buffer.from(name), bytes]))
@@ -63,14 +64,21 @@ export async function build() {
       await writeFile(join(staging, file), bytes);
       manifest.files[file] = hash(bytes);
     }
-    const html = (await readFile(join(root, 'tests/flow.html'), 'utf8'))
+    const runner = (await readFile(join(root, 'tests/all.html'), 'utf8'))
       .replace(
         '<head>',
         `<head>\n    <meta name="vexflow-test-bundle" content="./${assetPath}/vexflow-debug-with-tests.js" />`
       )
+      .replace('href="flow.html"', 'href="index.html"')
       .replace('href="fonts.css"', `href="./${assetPath}/fonts.css"`)
       .replace('href="qunit/qunit.css"', `href="./${assetPath}/qunit/qunit.css"`)
       .replace('src="qunit/qunit.js"', `src="./${assetPath}/qunit/qunit.js"`);
+    await writeFile(join(staging, 'all.html'), runner);
+    manifest.files['all.html'] = hash(runner);
+    const html = (await readFile(join(root, 'tests/flow.html'), 'utf8')).replace(
+      'src="minuet.webp"',
+      `src="./${assetPath}/minuet.webp"`
+    );
     await writeFile(join(staging, 'index.html'), html);
     manifest.files['index.html'] = hash(html);
     await writeFile(join(staging, 'manifest.json'), JSON.stringify(manifest, null, 2));

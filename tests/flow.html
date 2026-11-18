@@ -1,265 +1,240 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <!--
-      IMPORTANT: Always declare the character encoding as UTF-8. Otherwise VexFlow scores may show weird symbols instead of music symbols.
-    -->
-    <title>VexFlow Tests</title>
-    <!-- fonts.css defines the music fonts via @font-face rules. -->
-    <link rel="stylesheet" href="fonts.css" type="text/css" media="screen" />
-    <link rel="stylesheet" href="qunit/qunit.css" />
-    <script src="qunit/qunit.js"></script>
+    <!-- Static gallery index. Only the runner loads QUnit, test bundles, and music fonts. -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Visual test gallery · VexFlow</title>
+    <script>
+      // Preserve old runner links, including QUnit filters, sharded jobs, and score anchors.
+      const runner = new URL('all.html', location.href);
+      const query = new URLSearchParams(location.search);
+      const fragment = new URLSearchParams(location.hash.slice(1));
+      const buildOptions = new Set(['ver', 'esm']);
+      const runOptions = ['module', 'filter', 'moduleId', 'testId', 'jobs', 'job', 'seed', 'hidepassed'];
+      const isRunOption = (key) => runOptions.includes(key);
+      if ([...query.keys(), ...fragment.keys()].some(isRunOption) || /^#(?:svg|canvas)_/.test(location.hash)) {
+        runner.search = location.search;
+        runner.hash = location.hash;
+        location.replace(runner.href);
+      }
+    </script>
     <style>
-      body {
+      :root {
         font-family: system-ui, sans-serif;
-        font-size: 12px;
-        color: #17283c;
-        background: #f4f6f9;
-        margin: 0px;
-        padding: 0px;
-        height: 80%;
-      }
-
-      a.button {
-        color: #204e78;
-        background: #edf4fb;
-        text-decoration: none;
-        padding: 5px;
-        margin: 2px;
-        border: 1px solid #c8d8e8;
-        border-radius: 6px;
-      }
-
-      div#error {
-        width: 60%;
-        padding: 10px;
-        color: red;
-        background: #faa;
-        border: 15px solid #d99;
-      }
-
-      div.testcanvas {
-        font-size: 18px;
-        color: #17283c;
-        background: white;
-        border: 1px solid #dce3ed;
-        border-radius: 8px;
-        margin: 16px;
-        padding: 16px;
-        overflow-x: auto;
-      }
-
-      div.testcanvas .vex-tabdiv {
+        color: #172d3c;
         background: white;
       }
-
-      div.testcanvas .name {
-        font-size: 18px;
-        color: #204e78;
+      * {
+        box-sizing: border-box;
       }
-
-      p.vf-footer {
-        font-size: 14px;
+      body {
+        max-width: 84rem;
+        margin: auto;
+        padding: 0 clamp(1rem, 4vw, 4rem) 3rem;
+      }
+      header,
+      .module-heading {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+      header {
+        padding: 1.3rem 0;
+        border-bottom: 1px solid #cbd4d7;
+      }
+      header strong {
+        font-size: 1.25rem;
+      }
+      a {
+        color: #155875;
+        text-underline-offset: 0.18em;
+      }
+      a:hover {
+        color: #863d22;
+      }
+      a:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 3px;
+      }
+      main {
+        margin-top: 2rem;
+      }
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+      h1 {
+        font:
+          500 clamp(2.3rem, 5vw, 4.5rem)/1.1 Georgia,
+          serif;
+        letter-spacing: -0.035em;
+      }
+      .gallery {
+        margin-top: 2rem;
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(18rem, 1fr);
+        gap: clamp(2rem, 4vw, 4rem);
+      }
+      figure {
+        margin: 0;
+      }
+      figcaption {
+        border-top: 2px solid #233e49;
+        padding-top: 0.8rem;
+        line-height: 1.5;
+      }
+      figcaption strong {
+        display: block;
+        font:
+          500 1.65rem Georgia,
+          serif;
+      }
+      figcaption span {
+        color: #49616c;
+      }
+      figure img {
+        display: block;
+        width: 100%;
+        height: auto;
+        margin: 1rem 0;
+      }
+      .module-heading {
+        border-top: 2px solid #233e49;
+        padding-top: 0.8rem;
+        flex-wrap: wrap;
+      }
+      h2 {
+        font-size: 1.2rem;
+      }
+      ul {
+        padding: 0;
+        columns: 2;
+        column-gap: 1.2rem;
+        list-style: none;
+      }
+      li {
+        break-inside: avoid;
+        border-bottom: 1px solid #e4eaec;
+      }
+      li a {
+        display: block;
+        padding: 0.4rem 0;
+        overflow-wrap: anywhere;
+      }
+      @media (max-width: 700px) {
+        .gallery {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
   <body>
-    <div style="text-align: center">
-      <div id="qunit"></div>
-      <div id="qunit-fixture"></div>
-      <div>
-        <h2>[ <a href="https://vexflow.com">Home</a> ] [ <a href="https://github.com/vexflow/vexflow">GitHub</a> ]</h2>
-        <h3>
-          See the: <a id="vex-src" target="_blank"></a>. Don't forget to run the
-          <a href="https://github.com/0xfe/vexflow/wiki/Visual-Regression-Tests">Visual Regression Tests</a>!
-        </h3>
+    <header><strong>VexFlow</strong><a href="https://vexflow.com/">VexFlow home</a></header>
+    <main>
+      <h1>Visual test gallery</h1>
+      <div class="gallery">
+        <figure>
+          <figcaption>
+            <strong>Minuet in G major</strong><span>Christian Petzold · Notebook for Anna Magdalena Bach</span>
+          </figcaption>
+          <a href="all.html?module=Demo%20-%20Petzold" aria-label="Open the Minuet rendering tests"
+            ><img
+              src="minuet.webp"
+              width="1102"
+              height="705"
+              alt="Opening measures of the Minuet in G major, engraved for keyboard."
+          /></a>
+        </figure>
+        <nav id="modules" aria-labelledby="modules-heading">
+          <div class="module-heading">
+            <h2 id="modules-heading">Test modules</h2>
+            <a href="all.html">Run all tests</a>
+          </div>
+          <ul>
+            <li><a href="all.html?module=Accidental">Accidental</a></li>
+            <li><a href="all.html?module=Annotation">Annotation</a></li>
+            <li><a href="all.html?module=Articulation">Articulation</a></li>
+            <li><a href="all.html?module=Auto-Beaming">Auto-Beaming</a></li>
+            <li><a href="all.html?module=Barline">Barline</a></li>
+            <li><a href="all.html?module=Beam">Beam</a></li>
+            <li><a href="all.html?module=Bend">Bend</a></li>
+            <li><a href="all.html?module=BoundingBox">BoundingBox</a></li>
+            <li><a href="all.html?module=ChordSymbol">ChordSymbol</a></li>
+            <li><a href="all.html?module=Clef">Clef</a></li>
+            <li><a href="all.html?module=Clef%20Keys">Clef Keys</a></li>
+            <li><a href="all.html?module=CrossBeam">CrossBeam</a></li>
+            <li><a href="all.html?module=Curve">Curve</a></li>
+            <li><a href="all.html?module=Demo%20-%20Petzold">Demo - Petzold</a></li>
+            <li><a href="all.html?module=Dot">Dot</a></li>
+            <li><a href="all.html?module=EasyScore">EasyScore</a></li>
+            <li><a href="all.html?module=Factory">Factory</a></li>
+            <li><a href="all.html?module=Font">Font</a></li>
+            <li><a href="all.html?module=Formatter">Formatter</a></li>
+            <li><a href="all.html?module=Fraction">Fraction</a></li>
+            <li><a href="all.html?module=GhostNote">GhostNote</a></li>
+            <li><a href="all.html?module=GlyphNote">GlyphNote</a></li>
+            <li><a href="all.html?module=Grace%20Notes">Grace Notes</a></li>
+            <li><a href="all.html?module=Grace%20Tab%20Notes">Grace Tab Notes</a></li>
+            <li><a href="all.html?module=KeyManager">KeyManager</a></li>
+            <li><a href="all.html?module=KeySignature">KeySignature</a></li>
+            <li><a href="all.html?module=ModifierContext">ModifierContext</a></li>
+            <li><a href="all.html?module=MultiMeasureRest">MultiMeasureRest</a></li>
+            <li><a href="all.html?module=MusicTests">MusicTests</a></li>
+            <li><a href="all.html?module=NoteHead">NoteHead</a></li>
+            <li><a href="all.html?module=NoteSubGroup">NoteSubGroup</a></li>
+            <li><a href="all.html?module=OffscreenCanvas">OffscreenCanvas</a></li>
+            <li><a href="all.html?module=Ornament">Ornament</a></li>
+            <li><a href="all.html?module=Parser">Parser</a></li>
+            <li><a href="all.html?module=PedalMarking">PedalMarking</a></li>
+            <li><a href="all.html?module=Percussion">Percussion</a></li>
+            <li><a href="all.html?module=Registry">Registry</a></li>
+            <li><a href="all.html?module=Renderer">Renderer</a></li>
+            <li><a href="all.html?module=Rests">Rests</a></li>
+            <li><a href="all.html?module=Rhythm">Rhythm</a></li>
+            <li><a href="all.html?module=Stave">Stave</a></li>
+            <li><a href="all.html?module=StaveConnector">StaveConnector</a></li>
+            <li><a href="all.html?module=StaveHairpin">StaveHairpin</a></li>
+            <li><a href="all.html?module=StaveLine">StaveLine</a></li>
+            <li><a href="all.html?module=StaveModifier">StaveModifier</a></li>
+            <li><a href="all.html?module=StaveNote">StaveNote</a></li>
+            <li><a href="all.html?module=StaveTie">StaveTie</a></li>
+            <li><a href="all.html?module=StringNumber">StringNumber</a></li>
+            <li><a href="all.html?module=Strokes">Strokes</a></li>
+            <li><a href="all.html?module=Style">Style</a></li>
+            <li><a href="all.html?module=TabNote">TabNote</a></li>
+            <li><a href="all.html?module=TabSlide">TabSlide</a></li>
+            <li><a href="all.html?module=TabStave">TabStave</a></li>
+            <li><a href="all.html?module=TabTie">TabTie</a></li>
+            <li><a href="all.html?module=TextBracket">TextBracket</a></li>
+            <li><a href="all.html?module=TextNote">TextNote</a></li>
+            <li><a href="all.html?module=Three%20Voice%20Rests">Three Voice Rests</a></li>
+            <li><a href="all.html?module=TickContext">TickContext</a></li>
+            <li><a href="all.html?module=TimeSignature">TimeSignature</a></li>
+            <li><a href="all.html?module=Tremolo">Tremolo</a></li>
+            <li><a href="all.html?module=Tuning">Tuning</a></li>
+            <li><a href="all.html?module=Tuplet">Tuplet</a></li>
+            <li><a href="all.html?module=TypeGuard">TypeGuard</a></li>
+            <li><a href="all.html?module=Unison">Unison</a></li>
+            <li><a href="all.html?module=VF.%2A%20API">VF.* API</a></li>
+            <li><a href="all.html?module=Vibrato">Vibrato</a></li>
+            <li><a href="all.html?module=VibratoBracket">VibratoBracket</a></li>
+            <li><a href="all.html?module=Voice">Voice</a></li>
+          </ul>
+        </nav>
       </div>
-      <p>&nbsp;</p>
-      <p>&nbsp;</p>
-      <p class="vf-footer">
-        [ <a href="https://vexflow.com">Home</a> ] [ <a href="https://github.com/vexflow/vexflow">GitHub</a> ]
-      </p>
-    </div>
-    <div id="font-preload">
-      <!--
-        Preload fonts and styles for testing.
-        The empty tags <b></b>, <i></i>, and <span style="font-weight: xxx"></span> are for loading different font weights/styles.
-      -->
-      <span style="font-family: Academico"><b></b></span>
-      <span style="font-family: Bravura"></span>
-      <span style="font-family: Edwin">
-        <b></b><i></i><b><i></i></b>
-      </span>
-      <span style="font-family: Finale Ash"></span>
-      <span style="font-family: Finale Ash Text"></span>
-      <span style="font-family: Finale Broadway"></span>
-      <span style="font-family: Finale Broadway Text"></span>
-      <span style="font-family: Finale Jazz"></span>
-      <span style="font-family: Finale Jazz Text"></span>
-      <span style="font-family: Finale Maestro"></span>
-      <span style="font-family: Finale Maestro Text">
-        <b></b><i></i><b><i></i></b>
-      </span>
-      <span style="font-family: Gonville"></span>
-      <span style="font-family: Gootville"></span>
-      <span style="font-family: Leipzig"></span>
-      <span style="font-family: Leland"></span>
-      <span style="font-family: MuseJazz"></span>
-      <span style="font-family: MuseJazz Text"></span>
-      <span style="font-family: Nepomuk">
-        <b></b><i></i><b><i></i></b>
-      </span>
-      <span style="font-family: Petaluma"></span>
-      <span style="font-family: Petaluma Script"></span>
-      <span style="font-family: Roboto Slab">
-        <span style="font-weight: 500"></span><span style="font-weight: 700"></span>
-      </span>
-      <span style="font-family: Sebastian"></span>
-    </div>
-    <script type="module">
-      QUnit.config.autostart = false;
-
-      const queryParams = new URLSearchParams(location.search);
-      // When flow.html is hosted on unpkg.com, the query string is not available.
-      // Allow the user to specify params via the # fragment identifier.
-      const hashParams = new URLSearchParams(location.hash.substr(1));
-      // Static deployments supply a local, fingerprinted bundle. Keep all test filters available.
-      const bundledSource = document.querySelector('meta[name="vexflow-test-bundle"]')?.content;
-
-      // Optional: Specify the QUnit module or filter in the query params or fragment identifier.
-      let QUnitModule = queryParams.get('module') ?? hashParams.get('module');
-      let QUnitFilter = queryParams.get('filter') ?? hashParams.get('filter');
-
-      // The `ver` query param chooses which VexFlow version to load. If omitted, `ver` defaults to 'build'.
-      const ver = bundledSource ? 'bundled build' : (queryParams.get('ver') ?? hashParams.get('ver') ?? 'build');
-      let useESM = !bundledSource && (queryParams.get('esm') === 'true' || hashParams.get('esm') === 'true');
-      const isFileProtocol = location.protocol === 'file:';
-
-      // Determine if we are loading VexFlow from a CDN.
-      let cdnURLPath;
-      if (ver.includes('unpkg')) {
-        cdnURLPath = 'https://unpkg.com/';
-      } else if (ver.includes('jsdelivr')) {
-        cdnURLPath = 'https://cdn.jsdelivr.net/npm/';
-      }
-      const useCDN = typeof cdnURLPath !== 'undefined';
-
-      checkESM_WarnIfNecessary();
-
-      const pathCJSorESM = (useESM ? 'esm/entry' : 'cjs') + '/vexflow-debug-with-tests.js';
-
-      let vexPlusTestsURL;
-      if (bundledSource) {
-        vexPlusTestsURL = bundledSource;
-      } else if (useCDN) {
-        // `ver` can specify a version hosted on the unpkg.com / jsdelivr.com CDN. We only support VexFlow 4 or newer:
-        //   ver=unpkg@4.2.3     =>  https://unpkg.com/vexflow@4.2.3/build/cjs/vexflow-debug-with-tests.js
-        //   ver=unpkg@alpha     =>  https://unpkg.com/vexflow@alpha/build/cjs/vexflow-debug-with-tests.js
-        //   ver=jsdelivr@4.2.3  =>  https://cdn.jsdelivr.net/npm/vexflow@4.2.3/build/cjs/vexflow-debug-with-tests.js
-        const versionNumber = ver.split('@')[1];
-        vexPlusTestsURL = `${cdnURLPath}vexflow@${versionNumber}/build/${pathCJSorESM}`;
-      } else {
-        // We are NOT loading from a CDN. Instead, we are loading from the local filesystem.
-        //   ver=build           =>  vexflow/build/
-        //   ver=reference       =>  vexflow/reference/
-        //   ver=releases/4.2.3  =>  vexflow/releases/4.2.3/
-        vexPlusTestsURL = `../${ver}/${pathCJSorESM}`;
-      }
-
-      showVexFlowVersion();
-
-      let loadVexFlow;
-
-      if (useESM && !isFileProtocol) {
-        console.log('LOADING ESM: ' + vexPlusTestsURL);
-        loadVexFlow = async () => {
-          const module = await import(vexPlusTestsURL);
-          window.VexFlow = module.VexFlow;
-          return VexFlow;
-        };
-      } else {
-        console.log('LOADING CJS: ' + vexPlusTestsURL);
-        loadVexFlow = async () => {
-          await loadScript(vexPlusTestsURL);
-          return VexFlow;
-        };
-      }
-
-      // Load deployed faces before tests measure them, even when the preload spans are empty.
-      if (bundledSource) await Promise.all([...document.fonts].map((face) => face.load()));
-      const fontFaceSet = await document.fonts.ready;
-
-      showFontLoadingStatus();
-
-      const VF = await loadVexFlow();
-      if (bundledSource) await document.fonts.ready;
-
-      // If you did not load the fonts via the div#font-preload above, you can load them with this API:
-      // await VF.loadFonts(); // Load all web fonts that VexFlow knows about (Font.FILES).
-      // await VF.loadFonts('Bravura', 'Academico'); // Load only the specified fonts.
-
-      if (QUnitModule) {
-        QUnit.urlParams.module = QUnitModule;
-      }
-
-      if (QUnitFilter) {
-        QUnit.config.filter = QUnitFilter;
-      }
-
-      // Show only failed tests.
-      QUnit.config.hidepassed = true;
-      QUnit.config.noglobals = true;
-      VF.Test.run();
-      QUnit.start();
-
-      function loadScript(url) {
-        return new Promise((resolve, reject) => {
-          const script = document.createElement('script');
-          script.onload = resolve;
-          script.onerror = reject;
-          script.src = url;
-          document.getElementsByTagName('head')[0].appendChild(script);
-        });
-      }
-
-      // Display which VexFlow version we loaded.
-      function showVexFlowVersion() {
-        const srcLink = document.getElementById('vex-src');
-        srcLink.href = vexPlusTestsURL;
-        srcLink.innerText = `VexFlow Source [${ver}]`;
-      }
-
-      // ESM version only works if flow.html is accessed from a web server: e.g., `npx http-server` and browse to http://127.0.0.1:8080/tests/flow.html
-      function checkESM_WarnIfNecessary() {
-        if (useESM) {
-          if (!useCDN && isFileProtocol) {
-            prompt(
-              'ES modules require a web server for testing!\n\n' +
-                'Try `npx http-server` and browse to http://127.0.0.1:8080/tests/flow.html?esm=true\n\n' +
-                'We will fall back to CJS for now.',
-              'npx http-server'
-            );
-            useESM = false;
-          }
+    </main>
+    <script>
+      // Carry source-build options through the index, including older fragment-based CDN links.
+      for (const link of document.querySelectorAll('a[href^="all.html"]')) {
+        const target = new URL(link.href);
+        for (const key of buildOptions) {
+          const value = query.get(key) ?? fragment.get(key);
+          if (value) target.searchParams.set(key, value);
         }
-      }
-
-      // Show font loading status in the console.
-      function showFontLoadingStatus() {
-        const fontFaces = [...fontFaceSet];
-        for (const fontFace of fontFaces) {
-          const fontInfo = fontFace.family + ' / ' + fontFace.weight + ' / ' + fontFace.style;
-          if (fontFace.status === 'loaded') {
-            console.log(fontInfo + ' loaded!');
-          } else if (fontFace.status === 'unloaded') {
-            console.warn('*** ' + fontInfo + ' IS NOT LOADED! ***');
-          } else if (fontFace.status === 'error') {
-            console.error(fontInfo + ' ERROR');
-          } else {
-            console.log(fontInfo + ' has status: ' + fontFace.status);
-          }
-        }
+        link.href = target.href;
       }
     </script>
   </body>

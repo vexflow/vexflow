@@ -41,7 +41,9 @@
     "build/types",
     "changelog/CHANGELOG.md",
     "tests/flow.html",
-    "tests/flow.css",
+    "tests/all.html",
+    "tests/minuet.webp",
+    "tests/fonts.css",
     "tests/qunit/qunit.css",
     "tests/qunit/qunit.js",
     "AUTHORS.md"

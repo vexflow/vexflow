@@ -21,6 +21,7 @@ test('standalone gallery runs with local fonts/scripts and preserves QUnit filte
     '.css': 'text/css',
     '.woff2': 'font/woff2',
     '.otf': 'font/otf',
+    '.webp': 'image/webp',
   };
   const server = createServer(async (req, res) => {
     try {
@@ -65,24 +66,57 @@ test('standalone gallery runs with local fonts/scripts and preserves QUnit filte
     page.on('pageerror', (error) => errors.push(error.message));
     await page.evaluateOnNewDocument(() => {
       document.addEventListener('DOMContentLoaded', () =>
-        QUnit.done((result) => {
+        window.QUnit?.done((result) => {
           window.testResult = result;
         })
       );
     });
-    const run = async (suffix = '') => {
-      await page.goto(`${origin}/tests/${suffix}`);
+    // Opening the index needs only HTML and the featured score, even on a cold cache.
+    await page.goto(`${origin}/tests/`);
+    assert.ok(await page.$eval('figure img', (img) => img.complete && img.naturalWidth > 0));
+    assert.deepEqual(
+      requests.filter((url) => !url.endsWith('/favicon.ico')).map((url) => new URL(url).pathname),
+      ['/tests/', `/tests/${(await validate(output)).assetPath}/minuet.webp`]
+    );
+    const indexed = await page.$$eval('#modules li a', (links) =>
+      links.map((link) => new URL(link.href).searchParams.get('module')).sort()
+    );
+    await page.setViewport({ width: 375, height: 800 });
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    await page.setViewport({ width: 1280, height: 900 });
+
+    // Use the public links just as a reader or headless client would.
+    const result = async () => {
       await page.waitForFunction(() => window.testResult, { timeout: 120000 });
-      const result = await page.evaluate(() => window.testResult);
-      assert.equal(result.failed, 0, JSON.stringify(result));
-      assert.ok(await page.$('svg'), 'SVG examples rendered');
-      assert.ok(await page.$('canvas'), 'Canvas examples rendered');
-      return result.total;
+      const summary = await page.evaluate(() => window.testResult);
+      assert.equal(summary.failed, 0, JSON.stringify(summary));
+      assert.ok(await page.$('.testcanvas svg'), 'SVG examples rendered');
+      assert.ok(await page.$('.testcanvas canvas'), 'Canvas examples rendered');
+      return summary.total;
     };
-    const total = await run();
-    // Deployment stays self-contained even if an old link requests a CDN or ESM build.
-    const filtered = await run('?module=StaveNote&ver=unpkg@4.2.3&esm=true');
-    assert.ok(filtered > 0 && filtered < total, 'module filtering selects a smaller suite');
+    await page.click('#modules a[href$="module=StaveNote"]');
+    const filtered = await result();
+    assert.ok(filtered > 0);
+    assert.ok(
+      await page.$$eval('.testcanvas .name', (names) => names.every((n) => n.textContent.startsWith('StaveNote ›')))
+    );
+    await Promise.all([page.waitForNavigation(), page.click('#gallery-link')]);
+    await page.click('#modules a[href$="/all.html"]');
+    const total = await result();
+    assert.ok(total > filtered);
+    const registered = await page.evaluate(() =>
+      QUnit.config.modules
+        .map((module) => module.name)
+        .filter(Boolean)
+        .sort()
+    );
+    assert.deepEqual(indexed, registered, 'the index links every registered module exactly once');
+
+    // Old links retain their filters and the hosted runner always uses its bundled source.
+    await page.goto(`${origin}/tests/?module=StaveNote&ver=unpkg@4.2.3&esm=true`);
+    assert.equal(await result(), filtered);
+    await page.goto(`${origin}/tests/#module=StaveNote`);
+    assert.equal(await result(), filtered);
     assert.ok(
       requests.some((url) => /\/fonts\/.*\.woff2$/.test(url)),
       'font files loaded from deployment'
@@ -112,11 +146,12 @@ test('test upload targets its own prefix and retains immutable assets and short-
     const calls = (await readFile(log, 'utf8')).trim().split('\n').map(JSON.parse);
     assert.deepEqual(
       calls.map((args) => args[1]),
-      ['rsync', 'cp', 'cat']
+      ['rsync', 'cp', 'cat', 'cp', 'cat']
     );
     assert.ok(calls[0].includes('gs://vexflow.com/tests/assets/'));
     assert.ok(calls[0].includes('--cache-control=public,max-age=31536000,immutable'));
-    assert.ok(calls[1].includes('gs://vexflow.com/tests/index.html'));
+    assert.ok(calls[1].includes('gs://vexflow.com/tests/all.html'));
+    assert.ok(calls[3].includes('gs://vexflow.com/tests/index.html'));
     assert.ok(calls[1].includes('--cache-control=public,max-age=60,must-revalidate'));
     assert.ok(!calls.flat().some((arg) => arg.includes('delete')));
     await writeFile(log, '');

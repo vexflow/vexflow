@@ -124,7 +124,7 @@ npx grunt webpack:debug
 npx grunt test:browser:cjs
 ```
 
-This opens `tests/flow.html` and loads `build/cjs/vexflow-debug-with-tests.js`. Use the page's QUnit filters to select a module or test. After a rebuild, refresh the page.
+This opens the module index at `tests/flow.html`. Choose a module to see its results, or open `tests/all.html` for the full QUnit suite. The index displays a WebP export of the Minuet fixture in `tests/demo_petzold_tests.ts`. When adding or renaming a QUnit module, update its link in `tests/flow.html`; `npm run tests:test` checks the list against the registered suite.
 
 For ESM, build and serve the repository root. For example, with Python 3:
 
@@ -308,4 +308,4 @@ The destination must support the uploader's `publicRead` object ACLs. Custom hos
 
 Assets use fingerprinted paths and a one-year immutable cache. They upload first. `index.html` uploads last with a 60-second cache and mandatory revalidation, then is read back for a hash check. Old assets remain available for cached pages; the scripts do not delete remote objects.
 
-Verify the public pages after uploading. For the guide, check `/guide/#lesson/notation` and `/guide/#playground/notes`, edit a note, and verify the source revision in the sidebar. For the test gallery, filters such as `/tests/?module=StaveNote` still work. Hosted tests use their bundled VexFlow build, regardless of `ver` or `esm` query parameters.
+Verify the public pages after uploading. For the guide, check `/guide/#lesson/notation` and `/guide/#playground/notes`, edit a note, and verify the source revision in the sidebar. The hosted test gallery starts at `/tests/`. Use `/tests/all.html?module=StaveNote` for one module or `/tests/all.html` for a full browser or headless run. Existing links such as `/tests/?module=StaveNote` forward to the runner. Hosted tests use their bundled VexFlow build, regardless of `ver` or `esm` query parameters.

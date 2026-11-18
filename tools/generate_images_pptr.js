@@ -125,7 +125,7 @@ const launch = async (query, jobInfo) => {
   //   console.log(`  >> ${message.text()}`);
   // });
 
-  await page.goto('file://' + path.join(process.cwd(), `tests/flow.html${query ? query : ''}`)).catch((error) => {
+  await page.goto('file://' + path.join(process.cwd(), `tests/all.html${query ? query : ''}`)).catch((error) => {
     log(error);
     process.exit(3);
   });
