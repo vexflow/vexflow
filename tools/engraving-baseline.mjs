@@ -3,21 +3,25 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import { join, resolve } from 'node:path';
+
 import puppeteer from 'puppeteer';
-import { analyzeLayout } from './render-metrics.mjs';
+
 import { makeContinuousStudy } from '../tests/engraving/continuous-studies.mjs';
 import { makeInstrumentStudy } from '../tests/engraving/instrument-studies.mjs';
 import { makePhraseStudy } from '../tests/engraving/phrase-studies.mjs';
 import { publicationStudy } from '../tests/engraving/publication-studies.mjs';
 import { registerStudies } from '../tests/engraving/studies.mjs';
+import { analyzeLayout } from './render-metrics.mjs';
 import { compareDirectories } from './visual-regression.mjs';
 
-const release = process.argv[2];
+const args = process.argv.slice(2);
+const [release, referenceBundle] = args.filter((arg) => arg !== '--playwright');
 if (!release) throw new Error('Pass the released vexflow-debug-with-tests.js bundle as the first argument.');
 const bundleName = 'vexflow-debug-with-tests.js';
 const current = join('build/cjs', bundleName);
-const mainBundle = process.argv[3] ?? join('build/engraving-main/build/cjs', bundleName);
+const mainBundle = referenceBundle ?? join('build/engraving-main/build/cjs', bundleName);
 const manifest = JSON.parse(await readFile('tests/engraving/manifest.json', 'utf8'));
 const revision = (ref) =>
   execFileSync('git', ['rev-parse', '--verify', ref + '^{commit}'], { encoding: 'utf8' }).trim();
@@ -32,10 +36,12 @@ assert.equal(new Set(cases.map((c) => c.id)).size, cases.length);
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
 await mkdir('build/engraving', { recursive: true });
 const output = await mkdtemp('build/engraving/run-');
-const browser = await puppeteer.launch({
-  headless: true,
-  args: ['--disable-gpu', ...(process.env.CI ? ['--no-sandbox'] : [])],
-});
+// The web matrix runs the entire gallery in its locked Chromium. Standalone runs use the root Puppeteer install.
+const usePlaywright = args.includes('--playwright');
+const webTools = createRequire(new URL('../tests/web/package.json', import.meta.url));
+const browser = usePlaywright
+  ? await webTools('playwright').chromium.launch()
+  : await puppeteer.launch({ headless: true, args: ['--disable-gpu', ...(process.env.CI ? ['--no-sandbox'] : [])] });
 
 /** Select the first SVG registration (Bravura) for each exact module/test pair. Keep QUnit assertions live. */
 function selectCases(cases) {
@@ -80,9 +86,10 @@ async function capture(label, bundle, expectedRevision) {
     assert.equal(bundleSHA256, manifest.historicalRelease.bundleSHA256, 'Unexpected historical release bundle');
   const directory = join(output, label);
   await mkdir(directory);
-  const page = await browser.newPage();
+  const viewport = { width: 1500, height: 900 };
+  const page = usePlaywright ? await browser.newPage({ viewport, deviceScaleFactor: 1 }) : await browser.newPage();
   try {
-    await page.setViewport({ width: 1500, height: 900, deviceScaleFactor: 1 });
+    if (!usePlaywright) await page.setViewport({ ...viewport, deviceScaleFactor: 1 });
     await page.setContent(
       '<style>body{margin:0;background:white}.vex-tabdiv{width:max-content;background:white}svg{display:block}</style><div id="qunit-tests"></div>'
     );

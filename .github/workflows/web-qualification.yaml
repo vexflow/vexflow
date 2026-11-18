@@ -45,11 +45,10 @@ jobs:
           node tests/web/qualify.mjs
       - name: Check the complete engraving gallery and historical release
         run: |
-          npx puppeteer browsers install chrome
           git fetch --no-tags --depth=1 origin "$VF_ENGRAVING_REFERENCE"
           npm pack vexflow@5.2.0 --pack-destination "$RUNNER_TEMP" --silent
           tar -xzf "$RUNNER_TEMP/vexflow-5.2.0.tgz" -C "$RUNNER_TEMP" package/build/cjs/vexflow-debug-with-tests.js
-          node tools/engraving-baseline.mjs "$RUNNER_TEMP/package/build/cjs/vexflow-debug-with-tests.js" build/web-reference/build/cjs/vexflow-debug-with-tests.js
+          node tools/engraving-baseline.mjs "$RUNNER_TEMP/package/build/cjs/vexflow-debug-with-tests.js" build/web-reference/build/cjs/vexflow-debug-with-tests.js --playwright
       - name: Save browser reports, scores and standalone reader
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
