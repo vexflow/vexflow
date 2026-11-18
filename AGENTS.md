@@ -1,5 +1,15 @@
 # VexFlow repository guidance
 
+## GitHub Comments
+
+Whenever you make a comment (to an issue or PR or any such), start the comment with a line like so:
+
+Beep Boop. This is __MODEL__ (__REASONING__) on (__HARNESS__) speaking.
+
+For example:
+
+Beep Boop. This is Astra 6.0 (xhigh) on Codex speaking.
+
 ## GitHub Issues
 
 If addressing GitHub issues, first:
