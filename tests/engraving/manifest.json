@@ -23,6 +23,8 @@
     "bend-2": "Fixed on main in M0. The upper string uses the inner bend on both chords."
   },
   "reviews": {
+    "m3-choir": "2026-11-18 · @0xfe · Approved the two-verse choir example with hyphens and melisma extenders.",
+    "m3-piano": "2026-11-18 · @0xfe · Approved the piano example with the slur, articulations, crescendo, ottava and pedal.",
     "unison-triple": "2026-11-18 · @0xfe · Approved the three visible altered-unison heads.",
     "m2-four-voices": "2026-11-18 · @0xfe · Approved the four-voice passage at shared and unequal onsets.",
     "m2-contour": "2026-11-18 · @0xfe · Approved beam contour and staff contact at both widths.",

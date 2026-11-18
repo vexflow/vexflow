@@ -10,7 +10,7 @@ Status: **52 tracked items. Two verified on main and 50 remaining.**
 
 Companion: [Strategy and milestone plan](vexflow-gaps-plan.md)
 
-**M3 implemented on the roadmap branch, awaiting engraving review.** VF-003, VF-008, VF-011, VF-017 and VF-022–024 have new single-system evidence. Their main status below changes when the branch lands. [Phrase layout](m3.md) · [VF6 requirements](requirements/phrase-layout.md)
+**M3 complete on the roadmap branch. The maintainer approved both engraving examples.** VF-003, VF-008, VF-011, VF-017 and VF-022–024 have new single-system evidence. Their main status below changes when the branch lands. [Phrase layout](m3.md) · [VF6 requirements](requirements/phrase-layout.md)
 
 **M2 complete on main** · [Local engraving and maintainer approval](m2.md) · [VF6 local engraving requirements](requirements/local-engraving.md)
 

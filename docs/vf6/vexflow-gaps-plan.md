@@ -6,7 +6,7 @@ Last reviewed: **2026-11-18**
 
 **Primary status reference** · [upstream main at 18f11424](https://github.com/vexflow/vexflow/commit/18f11424bdf291599683d063b18ded0dc840f0e0). Compare the branch to freshly fetched main at every milestone review and after merges. Keep 5.2.0 as the historical release reference. [Latest fixture comparison](m0.md#latest-comparison)
 
-Status: **M0, M1 and M2 are complete on main. The maintainer approved the VF6 score representation, both M1 beam examples and all seven M2 engraving examples. M3 is implemented on the roadmap branch and awaits engraving review. M4–M8 remain proposed or deferred.**
+Status: **M0, M1 and M2 are complete on main. The maintainer approved the VF6 score representation, both M1 beam examples and all seven M2 engraving examples. M3 is complete on the roadmap branch with both engraving examples approved. M4–M8 remain proposed or deferred.**
 
 Source of scope: [Notation gap register](vexflow-gaps.md)
 
@@ -177,7 +177,7 @@ M0–M7 total **44–75 engineer-weeks before contingency**. Reserve roughly 25%
 | M0        | Auditable corpus and baseline         | None                                          | 2–3 weeks            | Complete |
 | M1        | Geometry, policy and anchor contracts | M0 seed cases                                 | 5–8 weeks            | Complete on main |
 | M2        | Reliable local engraving              | M1 contracts for affected classes             | 6–10 weeks           | Complete on main |
-| M3        | Collision-aware phrases and lyrics    | M1; relevant M2 placement                     | 7–12 weeks           | Branch review |
+| M3        | Collision-aware phrases and lyrics    | M1; relevant M2 placement                     | 7–12 weeks           | Complete on branch |
 | M4        | Complete continuous scores            | M2/M3, minimal context from M1                | 7–12 weeks           | Proposed |
 | M5        | Pages and basic part layouts          | M4, stable vertical envelopes                 | 4–7 weeks            | Proposed |
 | M6        | Mainstream instrument profiles        | M2–M4; parts use M5                           | 8–14 weeks           | Proposed |
@@ -266,7 +266,7 @@ Web compatibility, performance measurement, API parity, and documentation run th
 
 ## M3 — Solve interactions across phrases
 
-**2026-11-18 · Implemented on the roadmap branch.** [Engineering evidence and review examples](m3.md) · [Proposed VF6 requirements](requirements/phrase-layout.md)
+**2026-11-18 · Complete on the roadmap branch.** [Engineering evidence and approved examples](m3.md) · [Proposed VF6 requirements](requirements/phrase-layout.md)
 
 **Gaps:** VF-003, VF-008, VF-017, VF-022, VF-023 initial text scope, VF-024; finish VF-011 interactions.
 
