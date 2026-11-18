@@ -5,6 +5,7 @@
 import { BoundingBox } from './boundingbox';
 import { Element } from './element';
 import { Note } from './note';
+import { ribbonParts } from './phraseribbon';
 import { Category } from './typeguard';
 import { RuntimeError } from './util';
 
@@ -109,7 +110,35 @@ export class Curve extends Element {
       ...options,
     };
 
+    this.authoredControls = options?.cps !== undefined;
     this.setNotes(from, to);
+  }
+
+  private layoutRise = 0;
+  private readonly authoredControls: boolean;
+
+  /** Automatic routing changes only the derived lift, preserving the authored control points. */
+  setLayoutRise(rise: number): void {
+    this.layoutRise = rise;
+  }
+
+  hasManualControls(): boolean {
+    return this.authoredControls || this.renderOptions.cps.some((p) => p.x !== 0 || p.y !== 10);
+  }
+
+  getNotes(): { firstNote?: Note; lastNote?: Note } {
+    return { firstNote: this.from, lastNote: this.to };
+  }
+
+  /** Subdivided ink of the actual rendered cubic. */
+  getRouteParts(): BoundingBox[] {
+    const { first, last, cps, thicknessCps } = this.getBezierPoints(this.getRenderParams());
+    const outer = [first, ...cps, last];
+    return ribbonParts(
+      outer,
+      this.style?.lineDash ? outer : [first, ...thicknessCps.reverse(), last],
+      (this.getStyle().lineWidth ?? 1) / 2
+    );
   }
 
   setNotes(from: Note | undefined, to: Note | undefined): this {
@@ -150,9 +179,11 @@ export class Curve extends Element {
     const thickness = this.renderOptions.thickness;
 
     const cps = this.renderOptions.cps;
-    const { x: cp0x, y: cp0y } = cps[0];
-    const { x: cp1x, y: cp1y } = cps[1];
+    const { x: cp0x, y: y0 } = cps[0];
+    const { x: cp1x, y: y1 } = cps[1];
 
+    const cp0y = y0 + this.layoutRise,
+      cp1y = y1 + this.layoutRise;
     const controlPointSpacing = (lastX - firstX) / (cps.length + 2);
 
     return {

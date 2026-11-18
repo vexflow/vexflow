@@ -221,7 +221,11 @@ export class Ornament extends Modifier {
     return this;
   }
 
-  /** Render ornament in position next to note. */
+  private layoutShiftY = 0;
+  /** Move the whole ornament and its auxiliary signs together. */
+  setLayoutShiftY(y: number): void {
+    this.layoutShiftY = y;
+  }
   /** Recompute delayed and auxiliary positions against the current tick contexts. */
   private positionElements(): { element: Element; x: number; y: number }[] {
     const note = this.checkAttachedNote() as StemmableNote;
@@ -244,7 +248,8 @@ export class Ornament extends Modifier {
       glyphY = getBottomY(note, this.textLine) + (this.textLine + initialOffset + 1.5) * staffSpace;
     }
 
-    // Ajdust x position if ornament is delayed
+    glyphY += this.layoutShiftY;
+    // Adjust x position if ornament is delayed
     if (this.delayed) {
       let delayXShift = 0;
       const startX = note.getTickContext().getX();

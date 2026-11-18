@@ -344,6 +344,7 @@ export class Tuplet extends Element {
       for (const mark of annotations) {
         if (
           !isAnnotation(mark) ||
+          mark.phraseManaged ||
           mark.getVerticalJustification() !== side ||
           mark.checkAttachedNote().getStave() !== note.getStave()
         )

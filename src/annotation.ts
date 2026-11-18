@@ -88,7 +88,7 @@ export class Annotation extends Modifier {
       const note = annotation.checkAttachedNote();
       const glyphWidth = note.getGlyphWidth();
       // Get the text width from the font metrics.
-      const textWidth = annotation.getWidth();
+      const textWidth = annotation.getWidth() + 2 * annotation.connectorPadding;
       if (annotation.horizontalJustification === AnnotationHorizontalJustify.RIGHT) {
         maxLeftGlyphWidth = Math.max(glyphWidth, maxLeftGlyphWidth);
         leftWidth = Math.max(leftWidth, textWidth) + Annotation.minAnnotationPadding;
@@ -224,6 +224,26 @@ export class Annotation extends Modifier {
     return this;
   }
 
+  /** A phrase lane places this mark outside local tuplets. */
+  phraseManaged = false;
+  private layoutBaseline?: number;
+  private connectorPadding = 0;
+
+  /** Space reserved on both sides for a syllable connector during horizontal formatting. */
+  setConnectorPadding(px: number): this {
+    if (!Number.isFinite(px) || px < 0) throw new RangeError('Expected nonnegative connector padding.');
+    this.connectorPadding = px;
+    return this;
+  }
+
+  /** An authored baseline always takes precedence over automatic phrase placement. */
+  getTextBaseline(): number | undefined {
+    return this.textBaseline;
+  }
+  setLayoutBaseline(y?: number): void {
+    this.layoutBaseline = y;
+  }
+
   /** Use an absolute text baseline. Pass undefined to restore automatic placement. */
   setTextBaseline(y?: number): this {
     if (y !== undefined && !Number.isFinite(y)) {
@@ -256,7 +276,8 @@ export class Annotation extends Modifier {
   /** Compute the text baseline after formatting. Subclasses may override just this axis. */
   computeY(): { y: number; textHeight: number } {
     const textHeight = Font.convertSizeToPixelValue(this.fontInfo.size);
-    if (this.textBaseline !== undefined) return { y: this.textBaseline, textHeight };
+    const baseline = this.textBaseline ?? this.layoutBaseline;
+    if (baseline !== undefined) return { y: baseline, textHeight };
     const note = this.checkAttachedNote();
     const stemDirection = note.hasStem() ? note.getStemDirection() : Stem.UP;
     let y;

@@ -1060,6 +1060,30 @@ export class Beam extends Element {
     }
   }
 
+  /** Conservative local obstacles for sloping strips. Stems remain owned by the notes. */
+  getStripBounds(): BoundingBox[] {
+    this.postFormat();
+    const parts: BoundingBox[] = [];
+    for (const { x1, x2, y1, y2, thickness } of this.getStrips()) {
+      const count = Math.min(64, Math.max(1, Math.ceil(Math.abs(y2 - y1) / 2)));
+      for (let i = 0; i < count; i++) {
+        const x = x1 + ((x2 - x1) * i) / count,
+          y = y1 + ((y2 - y1) * i) / count;
+        const dx = (x2 - x1) / count,
+          dy = (y2 - y1) / count;
+        parts.push(
+          new BoundingBox(
+            x + Math.min(0, dx),
+            y + Math.min(0, dy) + Math.min(0, thickness),
+            Math.abs(dx),
+            Math.abs(dy) + Math.abs(thickness)
+          )
+        );
+      }
+    }
+    return parts;
+  }
+
   /** Bounds of the beam strips alone. The note geometry owns the stem segments. */
   override getBoundingBox(): BoundingBox {
     this.postFormat();

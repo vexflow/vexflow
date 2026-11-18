@@ -31,6 +31,10 @@
       "getVerticalJustification(): AnnotationVerticalJustify",
       "getJustification(): AnnotationHorizontalJustify",
       "setJustification(just: string | AnnotationHorizontalJustify): this",
+      "phraseManaged",
+      "setConnectorPadding(px: number): this",
+      "getTextBaseline(): number | undefined",
+      "setLayoutBaseline(y?: number): void",
       "setTextBaseline(y?: number): this",
       "computeX(): { x: number; textWidth: number }",
       "computeY(): { y: number; textHeight: number }",
@@ -59,6 +63,7 @@
       "easyScoreHook({ articulations }: { articulations: string }, note: StemmableNote, builder: Builder): void",
       "constructor(type: string)",
       "setBetweenLines(betweenLines = true): this",
+      "setLayoutShiftY(y: number): void",
       "getInkBounds(): BoundingBox",
       "draw(): void"
     ]
@@ -103,6 +108,7 @@
       "applyStemExtensions(): void",
       "lookupBeamDirection(duration: string, prevTick: number, tick: number, nextTick: number, noteIndex: number): PartialBeamDirection",
       "getBeamLines(duration: string): { start: number; end?: number }[]",
+      "getStripBounds(): BoundingBox[]",
       "getBoundingBox(): BoundingBox",
       "resetLayout(): void",
       "preFormat(): this",
@@ -281,6 +287,7 @@
       "setType(type: string, size: string = 'default', annotation?: string): this",
       "getPoint(size?: string): number",
       "setStave(stave: Stave): this",
+      "getInkBounds(): BoundingBox",
       "draw(): void"
     ]
   },
@@ -338,6 +345,10 @@
       "Position(): typeof CurvePosition",
       "PositionString(): Record<string, number>",
       "constructor(from: Note | undefined, to: Note | undefined, options: CurveOptions)",
+      "setLayoutRise(rise: number): void",
+      "hasManualControls(): boolean",
+      "getNotes(): { firstNote?: Note; lastNote?: Note }",
+      "getRouteParts(): BoundingBox[]",
       "setNotes(from: Note | undefined, to: Note | undefined): this",
       "isPartial(): boolean",
       "renderCurve(params: CurveRenderParams): void",
@@ -1064,6 +1075,7 @@
       "setKeySig(keySpec: string, cancelKeySpec?: string, alterKeySpec?: string[]): this",
       "alterKey(alterKeySpec: string[]): this",
       "format(): void",
+      "getInkParts(): BoundingBox[]",
       "draw(): void"
     ]
   },
@@ -1427,6 +1439,7 @@
       "setDelayed(delayed: boolean): this",
       "setUpperAccidental(accid: string): this",
       "setLowerAccidental(accid: string): this",
+      "setLayoutShiftY(y: number): void",
       "getBoundingBox(): BoundingBox",
       "draw(): void"
     ]
@@ -1507,10 +1520,55 @@
       "setType(type: string | number): this",
       "setCustomText(depress: string, release?: string): this",
       "setLine(line: number): this",
+      "getNotes(): readonly StaveNote[]",
+      "setLayoutBaseline(y?: number): void",
+      "getBoundingBox(): BoundingBox",
       "getYForStave(stave: Stave): number",
       "drawBracketed(): void",
       "drawText(): void",
       "draw(): void"
+    ]
+  },
+  "phraselayout": {
+    "PhraseSyllable": {
+      "extends": [],
+      "fields": [
+        "note: StaveNote;",
+        "text: string;",
+        "hyphenAfter?: boolean;",
+        "extendTo?: StaveNote;"
+      ]
+    },
+    "PhraseMark": "export type PhraseMark = Annotation | StaveHairpin | PedalMarking | TextBracket;",
+    "PhraseLaneOptions": {
+      "extends": [],
+      "fields": [
+        "side?: 'above' | 'below';",
+        "baselineSpaces?: number;"
+      ]
+    },
+    "PhraseDiagnostic": {
+      "extends": [],
+      "fields": [
+        "code: | 'PinnedCollision' | 'UnresolvedCollision' | 'CrossingSpans' | 'UnsupportedGeometry' | 'UnsupportedScript' | 'InvalidAnchor' | 'IterationLimit' | 'InsufficientLyricSpace';",
+        "sources: string[];"
+      ]
+    },
+    "PhraseLayout": [
+      "diagnostics: PhraseDiagnostic[]",
+      "bounds: BoundingBox",
+      "passes",
+      "addObstacle(stave: Stave, owner: Element): this",
+      "pin(owner: LocalMark | StaveNote | Route): this",
+      "lockStaffGap(stave: Stave): this",
+      "setPassLimit(limit: number): this",
+      "route(span: Route): this",
+      "addLane(stave: Stave, marks: PhraseMark[], options: PhraseLaneOptions = {}): this",
+      "addVerse(stave: Stave, syllables: PhraseSyllable[], options: PhraseLaneOptions = {}): Annotation[]",
+      "resetPlacement(): void",
+      "format(staves: Stave[], voices: Voice[]): void",
+      "getLyricConnectors(): BoundingBox[]",
+      "draw(context: RenderContext): void"
     ]
   },
   "registry": {
@@ -1806,6 +1864,10 @@
       "setPosition(position: number): this",
       "setRenderOptions(options: StaveHairpinRenderOptions): this",
       "setNotes(notes: Record<string, Note>): this",
+      "getNotes(): readonly (Note | undefined)[]",
+      "setLayoutBaseline(y?: number, left = 0, right = 0): void",
+      "getLayoutEdges()",
+      "getBoundingBox(): BoundingBox",
       "renderHairpin(params: { firstX: number; lastX: number; firstY: number; lastY: number; staffHeight: number }): void",
       "draw(): void"
     ]
@@ -2035,6 +2097,9 @@
       "setDirection(direction: number): this",
       "setNotes(notes: TieNotes): this",
       "isPartial(): boolean",
+      "setLayoutRise(rise: number): void",
+      "hasManualControls(): boolean",
+      "getRouteParts(): BoundingBox[]",
       "getRibbonBounds(): BoundingBox",
       "renderTie(params: { direction: number; firstX: number; lastX: number; lastYs: number[]; firstYs: number[] }): void",
       "renderTieText(firstX: number, lastX: number): void",
@@ -2308,6 +2373,7 @@
       "addConnector(type: StaveConnectorType = 'double'): StaveConnector",
       "addStave(params: SystemStave): Stave",
       "addVoices(voices: Voice[])",
+      "getPhraseLayout(): PhraseLayout",
       "format(): void",
       "getBoundingBox(): BoundingBox",
       "draw(): void"
@@ -2408,6 +2474,8 @@
       "applyStyle(ctx: RenderContext): this",
       "setDashed(dashed: boolean, dash?: number[]): this",
       "setLine(line: number): this",
+      "setLayoutBaseline(y?: number): void",
+      "getBoundingBox(): BoundingBox",
       "draw(): void"
     ]
   },
@@ -2587,6 +2655,7 @@
       "setIsNumeric(isNumeric: boolean)",
       "draw(): void",
       "drawAt(ctx: RenderContext, stave: Stave, x: number): void",
+      "getInkBounds(): BoundingBox",
       "getBoundingBox(): BoundingBox"
     ]
   },
@@ -2690,6 +2759,7 @@
     "VexFlow": [
       "BUILD",
       "measureEngraving",
+      "PhraseLayout",
       "EngravingProfile",
       "Accidental",
       "Annotation",

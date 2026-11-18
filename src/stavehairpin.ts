@@ -6,6 +6,7 @@
 // This class implements hairpins between notes.
 // Hairpins can be either crescendo or decrescendo.
 
+import { BoundingBox } from './boundingbox';
 import { Element } from './element';
 import { Modifier } from './modifier';
 import { Note } from './note';
@@ -152,31 +153,81 @@ export class StaveHairpin extends Element {
     return this;
   }
 
+  /** Both endpoints are required for a complete wedge on a single system. */
+  getNotes(): readonly (Note | undefined)[] {
+    return [this.firstNote, this.lastNote];
+  }
+
+  private layoutBaseline?: number;
+  private layoutLeft = 0;
+  private layoutRight = 0;
+
+  /** A phrase baseline passes through the middle of the wedge; trims clear adjacent dynamics. */
+  setLayoutBaseline(y?: number, left = 0, right = 0): void {
+    this.layoutBaseline = y;
+    this.layoutLeft = left;
+    this.layoutRight = right;
+  }
+
+  private parameters() {
+    const first = this.firstNote,
+      last = this.lastNote;
+    if (!first || !last) throw new RuntimeError('NoNote', 'Notes required to draw');
+    return {
+      firstX: first.getModifierStartXY(this.position, 0).x,
+      lastX: last.getModifierStartXY(this.position, 0).x,
+      firstY: first.checkStave().getY() + first.checkStave().getHeight(),
+      lastY: last.checkStave().getY() + last.checkStave().getHeight(),
+      staffHeight: first.checkStave().getHeight(),
+    };
+  }
+
+  private edges(params: { firstX: number; lastX: number; firstY: number; staffHeight: number }) {
+    const { yShift, height, leftShiftPx, rightShiftPx } = this.renderOptions;
+    const above = this.position === Modifier.Position.ABOVE;
+    const top =
+      this.layoutBaseline === undefined
+        ? params.firstY + (above ? 10 - params.staffHeight - yShift : 20 + yShift)
+        : this.layoutBaseline - height / 2 + (above ? -yShift : yShift);
+    return {
+      top,
+      left: params.firstX + leftShiftPx + this.layoutLeft,
+      right: params.lastX + rightShiftPx - this.layoutRight,
+      height,
+    };
+  }
+
+  /** Signed endpoint order is available to diagnose a wedge squeezed between two dynamics. */
+  getLayoutEdges() {
+    return this.edges(this.parameters());
+  }
+
+  override getBoundingBox(): BoundingBox {
+    const { top, left, right, height } = this.getLayoutEdges();
+    const pad = (this.getStyle().lineWidth ?? 1) / 2;
+    return new BoundingBox(
+      Math.min(left, right) - pad,
+      Math.min(top, top + height) - pad,
+      Math.abs(right - left) + 2 * pad,
+      Math.abs(height) + 2 * pad
+    );
+  }
+
   renderHairpin(params: { firstX: number; lastX: number; firstY: number; lastY: number; staffHeight: number }): void {
     const ctx = this.checkContext();
-    let dis = this.renderOptions.yShift + 20;
-    let yShift = params.firstY;
-
-    if (this.position === Modifier.Position.ABOVE) {
-      dis = -dis + 30;
-      yShift = params.firstY - params.staffHeight;
-    }
-
-    const leftShiftPx = this.renderOptions.leftShiftPx;
-    const rightShiftPx = this.renderOptions.rightShiftPx;
-
+    const { top, left, right, height } = this.edges(params);
     ctx.beginPath();
 
     switch (this.hairpin) {
       case StaveHairpin.type.CRESC:
-        ctx.moveTo(params.lastX + rightShiftPx, yShift + dis);
-        ctx.lineTo(params.firstX + leftShiftPx, yShift + this.renderOptions.height / 2 + dis);
-        ctx.lineTo(params.lastX + rightShiftPx, yShift + this.renderOptions.height + dis);
+        ctx.moveTo(right, top);
+        ctx.lineTo(left, top + height / 2);
+        ctx.lineTo(right, top + height);
         break;
       case StaveHairpin.type.DECRESC:
-        ctx.moveTo(params.firstX + leftShiftPx, yShift + dis);
-        ctx.lineTo(params.lastX + rightShiftPx, yShift + this.renderOptions.height / 2 + dis);
-        ctx.lineTo(params.firstX + leftShiftPx, yShift + this.renderOptions.height + dis);
+        ctx.moveTo(left, top);
+        ctx.lineTo(right, top + height / 2);
+        ctx.lineTo(left, top + height);
         break;
       default:
         // Default is NONE, so nothing to draw
@@ -191,19 +242,6 @@ export class StaveHairpin extends Element {
     this.checkContext();
     this.setRendered();
 
-    const firstNote = this.firstNote;
-    const lastNote = this.lastNote;
-    if (!firstNote || !lastNote) throw new RuntimeError('NoNote', 'Notes required to draw');
-
-    const start = firstNote.getModifierStartXY(this.position, 0);
-    const end = lastNote.getModifierStartXY(this.position, 0);
-
-    this.renderHairpin({
-      firstX: start.x,
-      lastX: end.x,
-      firstY: firstNote.checkStave().getY() + firstNote.checkStave().getHeight(),
-      lastY: lastNote.checkStave().getY() + lastNote.checkStave().getHeight(),
-      staffHeight: firstNote.checkStave().getHeight(),
-    });
+    this.renderHairpin(this.parameters());
   }
 }

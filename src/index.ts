@@ -46,6 +46,7 @@ export * from './ornament';
 export * from './parenthesis';
 export * from './parser';
 export * from './pedalmarking';
+export * from './phraselayout';
 export * from './registry';
 export * from './rendercontext';
 export * from './renderer';

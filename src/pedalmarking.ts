@@ -4,6 +4,7 @@
 // Pedal text and brackets with clearance for annotations in the marked passage.
 
 import { Annotation } from './annotation';
+import { BoundingBox } from './boundingbox';
 import { Element } from './element';
 import { Glyphs } from './glyphs';
 import { Metrics } from './metrics';
@@ -135,8 +136,53 @@ export class PedalMarking extends Element {
     return this;
   }
 
+  /** Ordered press, change and release anchors. Repeated notes represent a pedal change. */
+  getNotes(): readonly StaveNote[] {
+    return this.notes;
+  }
+
+  private layoutBaseline?: number;
+
+  /** A single-stave phrase may supply the pedal baseline after arranging the surrounding lanes. */
+  setLayoutBaseline(y?: number): void {
+    this.layoutBaseline = y;
+  }
+
+  private releaseX(note: StaveNote): number {
+    const notes = note.getVoice().getTickables();
+    return notes[notes.indexOf(note) + 1]?.getAbsoluteX() ?? note.checkStave().getX() + note.checkStave().getWidth();
+  }
+
+  /** Enclose actual pedal text, changes, end hooks and bracket stroke. */
+  override getBoundingBox(): BoundingBox {
+    const text = new Element('PedalMarking').setFont(this.fontInfo);
+    let box: BoundingBox | undefined;
+    const include = (part: BoundingBox) => {
+      box = box ? box.mergeWith(part) : part;
+    };
+    this.notes.forEach((note, i) => {
+      const down = i % 2 === 0,
+        x = note.getAbsoluteX(),
+        y = this.getYForStave(note.checkStave());
+      const repeated = note === this.notes[i - 1];
+      const end = this.releaseX(note);
+      if (this.type === PedalMarking.type.TEXT || (this.type === PedalMarking.type.MIXED && down && !repeated)) {
+        text.setText(down ? this.depressText : this.releaseText);
+        include(text.getTextInk(down ? x : end - text.getWidth(), y));
+      }
+      if (this.type !== PedalMarking.type.TEXT) {
+        const edge = down ? x + (repeated ? 5 : 0) : note === this.notes[i + 1] ? x : end - 5;
+        const pad = this.renderOptions.bracketLineWidth / 2,
+          h = this.renderOptions.bracketHeight;
+        include(new BoundingBox(edge - pad, y - h - pad, 2 * pad, h + 2 * pad));
+      }
+    });
+    return box ?? new BoundingBox(0, 0, 0, 0);
+  }
+
   /** Compute a baseline below annotations in participating voices on this stave. */
   getYForStave(stave: Stave): number {
+    if (this.layoutBaseline !== undefined) return this.layoutBaseline;
     let y = stave.getYForBottomText(this.line + 3);
     const events = this.notes.filter((note) => note.getStave() === stave);
     if (!events.length) return y;
@@ -221,16 +267,7 @@ export class PedalMarking extends Element {
         }
       } else {
         // Get the current note index and the total notes in the associated voice
-        const noteNdx = note.getVoice().getTickables().indexOf(note);
-        const voiceNotes = note.getVoice().getTickables().length;
-        // Get the absolute x position of the end of the current note
-        const noteEndX =
-          noteNdx + 1 < voiceNotes
-            ? // If the next note is in the same voice, use the x position of the next note
-              note.getVoice().getTickables()[noteNdx + 1].getAbsoluteX()
-            : // If this is the last note is the voice, use the x position of the next stave
-              (note.getStave()?.getX() ?? 0) + (note.getStave()?.getWidth() ?? 0);
-
+        const noteEndX = this.releaseX(note);
         // Draw end bracket
         ctx.beginPath();
         ctx.moveTo(prevX, prevY);
@@ -269,15 +306,7 @@ export class PedalMarking extends Element {
         textWidth = ctx.measureText(this.depressText).width;
         ctx.fillText(this.depressText, x, y);
       } else {
-        const noteNdx = note.getVoice().getTickables().indexOf(note);
-        const voiceNotes = note.getVoice().getTickables().length;
-        // Get the shift for the next note
-        const noteEndX =
-          noteNdx + 1 < voiceNotes
-            ? // If the next note is in the same voice, use the x position of the next note
-              note.getVoice().getTickables()[noteNdx + 1].getAbsoluteX()
-            : // If this is the last note is the voice, use the x position of the next stave
-              (note.getStave()?.getX() ?? 0) + (note.getStave()?.getWidth() ?? 0);
+        const noteEndX = this.releaseX(note);
         textWidth = ctx.measureText(this.releaseText).width;
         ctx.fillText(this.releaseText, noteEndX - textWidth, y);
       }
@@ -294,7 +323,7 @@ export class PedalMarking extends Element {
       ctx.setFillStyle(this.renderOptions.color);
     }
     this.applyStyle(ctx);
-    ctx.setFont(this.font);
+    ctx.setFont(this.fontInfo);
     L('Rendering Pedal Marking');
 
     if (this.type === PedalMarking.type.BRACKET || this.type === PedalMarking.type.MIXED) {

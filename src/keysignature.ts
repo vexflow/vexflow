@@ -266,6 +266,7 @@ export class KeySignature extends StaveModifier {
       this.setStave(stave);
     }
 
+    this.formattedStaveY = stave.getY();
     this.width = 0;
     this.children = [];
     this.accList = Tables.keySignature(defined(this.keySpec));
@@ -294,6 +295,14 @@ export class KeySignature extends StaveModifier {
 
     this.calculateDimensions();
     this.formatted = true;
+  }
+
+  private formattedStaveY?: number;
+
+  /** Refresh the accidental origins after moving a staff and return each positioned glyph. */
+  getInkParts(): BoundingBox[] {
+    if (!this.formatted || this.formattedStaveY !== this.checkStave().getY()) this.format();
+    return this.children.map((glyph) => glyph.getTextInk(this.x, 0));
   }
 
   // Render the key signature

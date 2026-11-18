@@ -43,6 +43,7 @@ import { Ornament } from './ornament';
 import { Parenthesis } from './parenthesis';
 import { Parser } from './parser';
 import { PedalMarking } from './pedalmarking';
+import { PhraseLayout } from './phraselayout';
 import { Registry } from './registry';
 import { RenderContext } from './rendercontext';
 import { Renderer, RendererBackends, RendererLineEndType } from './renderer';
@@ -100,6 +101,7 @@ export class VexFlow {
   };
 
   static measureEngraving = measureEngraving;
+  static PhraseLayout = PhraseLayout;
   static EngravingProfile = EngravingProfile;
   static Accidental = Accidental;
   static Annotation = Annotation;

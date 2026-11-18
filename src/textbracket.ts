@@ -6,6 +6,7 @@
 // The octave transposition markings (8va, 8vb, 15va, 15vb) can be created
 // using this class.
 
+import { BoundingBox } from './boundingbox';
 import { Element } from './element';
 import { Font } from './font';
 import { Note } from './note';
@@ -137,11 +138,14 @@ export class TextBracket extends Element {
     return this;
   }
 
-  // Draw the octave bracket on the rendering context
-  override draw(): void {
-    const ctx = this.checkContext();
-    this.setRendered();
+  private layoutBaseline?: number;
 
+  /** Shared baseline for automatic ottava placement. */
+  setLayoutBaseline(y?: number): void {
+    this.layoutBaseline = y;
+  }
+
+  private geometry() {
     let y = 0;
     switch (this.position) {
       case TextBracketPosition.TOP:
@@ -154,6 +158,7 @@ export class TextBracket extends Element {
         throw new RuntimeError('InvalidPosition', `The position ${this.position} is invalid.`);
     }
 
+    y = this.layoutBaseline ?? y;
     // Get the preliminary start and stop coordintates for the bracket
     const start = { x: this.start.getAbsoluteX(), y };
     const stop = { x: this.stop.getAbsoluteX(), y };
@@ -162,18 +167,12 @@ export class TextBracket extends Element {
 
     const bracketHeight = this.renderOptions.bracketHeight * this.position;
 
-    // Draw text
-    this.textElement.renderText(ctx, start.x, start.y);
-
     // Get the width and height for the octave number
     const mainWidth = this.textElement.getWidth();
     const mainHeight = this.textElement.getHeight();
 
     // Calculate the y position for the super script
     const superY = start.y - mainHeight / 2.5;
-
-    // To draw the superscript, we scale the font size by 1/1.4.
-    this.superscriptElement.renderText(ctx, start.x + mainWidth + 1, superY);
 
     // Determine width and height of the superscript
     const superWidth = this.superscriptElement.getWidth();
@@ -197,6 +196,33 @@ export class TextBracket extends Element {
       }
     }
 
+    return { start, superX: start.x + mainWidth + 1, superY, startX, endX, lineY, bracketHeight };
+  }
+
+  /** Text, superscript, horizontal line and hook share the same placement as drawing. */
+  override getBoundingBox(): BoundingBox {
+    const { start, superX, superY, startX, endX, lineY, bracketHeight } = this.geometry();
+    const pad = this.renderOptions.lineWidth / 2;
+    const height = this.renderOptions.showBracket ? bracketHeight : 0;
+    return this.textElement
+      .getTextInk(start.x, start.y)
+      .mergeWith(this.superscriptElement.getTextInk(superX, superY))
+      .mergeWith(
+        new BoundingBox(
+          Math.min(startX, endX) - pad,
+          Math.min(lineY, lineY + height) - pad,
+          Math.abs(endX - startX) + 2 * pad,
+          Math.abs(height) + 2 * pad
+        )
+      );
+  }
+
+  override draw(): void {
+    const ctx = this.checkContext();
+    this.setRendered();
+    const { start, superX, superY, startX, endX, lineY, bracketHeight } = this.geometry();
+    this.textElement.renderText(ctx, start.x, start.y);
+    this.superscriptElement.renderText(ctx, superX, superY);
     if (this.renderOptions.dashed) {
       // Main line
       Renderer.drawDashedLine(ctx, startX, lineY, endX, lineY, this.renderOptions.dash);

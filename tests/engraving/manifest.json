@@ -400,6 +400,13 @@
         "m2-tuplet-turn": "Tuplet over a turn with auxiliary signs",
         "m2-optical": "Measured spacing with a short final attack"
       }
+    },
+    {
+      "module": "M3 studies",
+      "source": "tests/engraving/phrase-studies.mjs",
+      "gaps": ["VF-003", "VF-008", "VF-011", "VF-017", "VF-022", "VF-023", "VF-024"],
+      "review": "Read each verse across the skipped attack and extender. Follow the slur around the accents and the crescendo between the dynamics. Inspect the space between staves.",
+      "cases": { "m3-choir": "Two verses over a skipped attack", "m3-piano": "Slur, crescendo, ottava and pedal" }
     }
   ]
 }

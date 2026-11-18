@@ -226,11 +226,7 @@ export class TimeSignature extends StaveModifier {
     if (this.isNumeric) {
       // render top text
       let startX = x + this.topStartX;
-      if (this.botText.getText().length > 0) {
-        this.topRenderY = stave.getYForLine(this.topLine - this.lineShift);
-      } else {
-        this.topRenderY = (stave.getYForLine(this.topLine) + stave.getYForLine(this.bottomLine)) / 2;
-      }
+      this.topRenderY = this.topBaseline(stave);
       this.topText.renderText(ctx, startX, this.topRenderY);
 
       // render bottom text
@@ -240,6 +236,25 @@ export class TimeSignature extends StaveModifier {
     } else {
       this.renderText(ctx, x - this.x, stave.getYForLine(this.line));
     }
+  }
+
+  /** Compute the top row baseline for fractional and single-row numeric meters. */
+  private topBaseline(stave: Stave): number {
+    return this.botText.getText().length
+      ? stave.getYForLine(this.topLine - this.lineShift)
+      : (stave.getYForLine(this.topLine) + stave.getYForLine(this.bottomLine)) / 2;
+  }
+
+  /** Positioned ink before drawing, including additive meters and cut time. */
+  getInkBounds(): BoundingBox {
+    const stave = this.checkStave();
+    if (!this.isNumeric) return this.getTextInk(this.x, stave.getYForLine(this.line));
+    const top = this.topText.getTextInk(this.x + this.topStartX, this.topBaseline(stave));
+    return this.botText.getText().length
+      ? top.mergeWith(
+          this.botText.getTextInk(this.x + this.botStartX, stave.getYForLine(this.bottomLine + this.lineShift))
+        )
+      : top;
   }
 
   // gets combined bounding box of time sig

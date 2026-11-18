@@ -6,6 +6,7 @@
 import { BoundingBox } from './boundingbox';
 import { Element } from './element';
 import { Note } from './note';
+import { ribbonParts } from './phraseribbon';
 import { Category } from './typeguard';
 import { RuntimeError } from './util';
 
@@ -169,8 +170,8 @@ export class StaveTie extends Element {
         throw new RuntimeError('BadArguments', 'Bad indexes for tie rendering.');
       }
 
-      const topControlPointY = (firstY + lastY) / 2 + cp1 * params.direction;
-      const bottomControlPointY = (firstY + lastY) / 2 + cp2 * params.direction;
+      const topControlPointY = (firstY + lastY) / 2 + (cp1 + this.layoutRise) * params.direction;
+      const bottomControlPointY = (firstY + lastY) / 2 + (cp2 + this.layoutRise) * params.direction;
 
       yield {
         x1: params.firstX + firstXShift,
@@ -182,6 +183,41 @@ export class StaveTie extends Element {
         bottomControlPointY,
       };
     }
+  }
+
+  private layoutRise = 0;
+
+  /** Fit the tied head pairs together without changing their pitch or authored offsets. */
+  setLayoutRise(rise: number): void {
+    this.layoutRise = rise;
+  }
+
+  hasManualControls(): boolean {
+    const { cp1, cp2, cp1Short, cp2Short } = this.renderOptions;
+    return cp1 !== 8 || cp2 !== 12 || cp1Short !== 2 || cp2Short !== 8;
+  }
+
+  getRouteParts(): BoundingBox[] {
+    this.synchronizeIndexes();
+    const ribbons = this.tieCurves({
+      firstX: this.getFirstX(),
+      lastX: this.getLastX(),
+      firstYs: this.getFirstYs(),
+      lastYs: this.getLastYs(),
+      direction: this.getDirection(),
+    });
+    const parts: BoundingBox[] = [];
+    for (const r of ribbons) {
+      const start = { x: r.x1, y: r.firstY },
+        end = { x: r.x2, y: r.lastY };
+      parts.push(
+        ...ribbonParts(
+          [start, { x: r.cpX, y: r.topControlPointY }, end],
+          [start, { x: r.cpX, y: r.bottomControlPointY }, end]
+        )
+      );
+    }
+    return parts;
   }
 
   /** Conservative convex hull of filled ribbons, excluding optional tie text. */

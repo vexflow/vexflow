@@ -1,7 +1,7 @@
 {
   "description": "Every public module is classified. Every named EasyScore constructor has a native return path, guide entry, executable example, and regression contract. The API snapshot detects native option drift; rendering tests cover representative combinations, not every possible combination.",
   "modules": {
-    "composition": ["easyscore", "factory", "system", "sheet", "voice", "formatter", "registry"],
+    "composition": ["easyscore", "factory", "system", "phraselayout", "sheet", "voice", "formatter", "registry"],
     "notes-and-rhythm": [
       "stavenote",
       "ghostnote",

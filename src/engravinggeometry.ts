@@ -10,9 +10,12 @@ import { Element } from './element';
 import { GraceNote } from './gracenote';
 import { GraceNoteGroup } from './gracenotegroup';
 import { Ornament } from './ornament';
+import { PedalMarking } from './pedalmarking';
+import { StaveHairpin } from './stavehairpin';
 import { StaveNote } from './stavenote';
 import { StaveTie } from './stavetie';
 import { Stem } from './stem';
+import { TextBracket } from './textbracket';
 import { Tuplet } from './tuplet';
 import { RuntimeError } from './util';
 
@@ -112,7 +115,13 @@ export function measureEngraving(element: Element, options: GeometryOptions = {}
         shape.anchors.center = { x: box.x + box.w / 2, y: box.y + box.h / 2 };
       } else if (kind === Accidental || kind === Dot) {
         shape.parts.push((owner as Accidental | Dot).getInkBounds());
-      } else if (kind === Tuplet || kind === Ornament) {
+      } else if (
+        kind === Tuplet ||
+        kind === Ornament ||
+        kind === PedalMarking ||
+        kind === StaveHairpin ||
+        kind === TextBracket
+      ) {
         shape.parts.push(owner.getBoundingBox());
       } else if (kind === Beam) {
         const beam = owner as Beam;

@@ -321,4 +321,22 @@ export function registerStudies() {
       x,
     });
   });
+
+  QUnit.module('M3 studies');
+  for (const [kind, name] of [
+    ['choir', 'Two verses over a skipped attack'],
+    ['piano', 'Slur, crescendo, ottava and pedal'],
+  ]) {
+    VF.Test.runTests(name, (options) => {
+      const f = VF.Test.makeFactory(options, 670, 330);
+      const { layout } = globalThis.makePhraseStudy(VF, f, kind);
+      f.draw();
+      const diagnostics = layout?.diagnostics ?? [];
+      options.assert.deepEqual(diagnostics, [], 'No unresolved phrase collisions');
+      document.getElementById(options.elementId).dataset.measurement = JSON.stringify({
+        diagnostics,
+        passes: layout?.passes ?? 0,
+      });
+    });
+  }
 }

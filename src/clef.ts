@@ -2,6 +2,7 @@
 // MIT License
 // Co-author: Benjamin W. Bohl
 
+import { BoundingBox } from './boundingbox';
 import { Glyphs } from './glyphs';
 import { Metrics } from './metrics';
 import { Stave } from './stave';
@@ -150,6 +151,11 @@ export class Clef extends StaveModifier {
   override setStave(stave: Stave): this {
     this.stave = stave;
     return this;
+  }
+
+  /** Positioned glyph ink, including an octave annotation if present. */
+  getInkBounds(): BoundingBox {
+    return this.getTextInk(this.getX(), this.checkStave().getYForLine(this.line));
   }
 
   /** Render clef. */

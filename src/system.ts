@@ -7,6 +7,7 @@ import { Element } from './element';
 import { Factory } from './factory';
 import { FormatParams, Formatter, FormatterOptions } from './formatter';
 import { Note } from './note';
+import { PhraseLayout } from './phraselayout';
 import { RenderContext } from './rendercontext';
 import { Stave, StaveOptions } from './stave';
 import { StaveConnector, StaveConnectorType } from './staveconnector';
@@ -255,8 +256,15 @@ export class System extends Element {
     });
   }
 
+  private phrase?: PhraseLayout;
+  /** Opt in to local phrase placement on this system and register its verses and spans. */
+  getPhraseLayout(): PhraseLayout {
+    return (this.phrase ??= new PhraseLayout());
+  }
+
   /** Format the system. */
   format(): void {
+    this.phrase?.resetPlacement();
     const optionsDetails = this.options.details;
     let justifyWidth = 0;
     const formatter = new Formatter(optionsDetails);
@@ -315,11 +323,13 @@ export class System extends Element {
     this.debugNoteMetricsYs = debugNoteMetricsYs;
     this.lastY = y;
     Stave.formatBegModifiers(this.partStaves);
+    this.phrase?.format(this.partStaves, this.partVoices);
   }
 
   /** Get the boundingBox. */
   override getBoundingBox(): BoundingBox {
-    return new BoundingBox(this.options.x, this.options.y, this.options.width, (this.lastY ?? 0) - this.options.y);
+    const box = new BoundingBox(this.options.x, this.options.y, this.options.width, (this.lastY ?? 0) - this.options.y);
+    return this.phrase?.bounds ? box.mergeWith(this.phrase.bounds) : box;
   }
 
   /** Render the system. */
@@ -331,6 +341,7 @@ export class System extends Element {
     }
     this.setRendered();
 
+    this.phrase?.draw(ctx);
     if (this.options.debugFormatter) {
       Formatter.plotDebugging(ctx, this.formatter, this.startX, this.options.y, this.lastY);
     }

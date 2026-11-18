@@ -129,8 +129,9 @@ export class Sheet {
 
   /** Include staff envelopes and note bounds in the ordinary vertical layout. */
   private verticalBounds(system: System): { top: number; bottom: number } {
-    let top = 0;
-    let bottom = system.getBoundingBox().getH();
+    const envelope = system.getBoundingBox();
+    let top = Math.min(0, envelope.y);
+    let bottom = envelope.y + envelope.h;
     // Spanning marks and arbitrary annotations still need caller-supplied rowGap.
     for (const voice of system.getVoices()) {
       for (const note of voice.getTickables()) {

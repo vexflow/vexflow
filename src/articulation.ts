@@ -355,6 +355,12 @@ export class Articulation extends Modifier {
     return this;
   }
 
+  private layoutShiftY = 0;
+  /** Derived clearance from neighboring attacks, recomputed at each phrase layout. */
+  setLayoutShiftY(y: number): void {
+    this.layoutShiftY = y;
+  }
+
   /** Resolve the glyph origin after its owner and modifier context have been formatted. */
   private getPlacement(): { x: number; y: number; centered: boolean } {
     const note = this.checkAttachedNote();
@@ -398,7 +404,7 @@ export class Articulation extends Modifier {
       y += Math.abs(snappedLine - articLine) * staffSpace * offsetDirection;
     }
 
-    return { x, y, centered };
+    return { x, y: y + this.layoutShiftY, centered };
   }
 
   /** Get visible glyph ink without mutating its alignment or drawing coordinates. */
