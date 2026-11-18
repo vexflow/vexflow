@@ -7,7 +7,7 @@ import { Stave } from './stave';
 import { StaveNote } from './stavenote';
 import { Stem } from './stem';
 import { Category } from './typeguard';
-import { defined, log } from './util';
+import { defined, log, RuntimeError } from './util';
 
 // eslint-disable-next-line
 function L(...args: any[]) {
@@ -21,6 +21,8 @@ export interface NoteHeadStruct extends NoteStruct {
   customGlyphCode?: string;
   stemDirection?: number;
   displaced?: boolean;
+  /** Column counted outward from the normal stem-side head. */
+  displacementColumn?: number;
   noteType?: string;
   x?: number;
   y?: number;
@@ -43,6 +45,7 @@ export class NoteHead extends Note {
 
   protected customGlyph: boolean = false;
   protected displaced: boolean;
+  private readonly displacementColumn: number;
   protected stemDirection: number;
 
   protected line: number;
@@ -62,7 +65,10 @@ export class NoteHead extends Note {
     this.x = noteStruct.x || 0;
     this.y = noteStruct.y || 0;
     if (noteStruct.noteType) this.noteType = noteStruct.noteType;
-    this.displaced = noteStruct.displaced || false;
+    this.displacementColumn = noteStruct.displacementColumn ?? (noteStruct.displaced ? 1 : 0);
+    if (!Number.isSafeInteger(this.displacementColumn) || this.displacementColumn < 0)
+      throw new RuntimeError('BadArguments', 'Head displacement column must be a nonnegative integer.');
+    this.displaced = this.displacementColumn !== 0;
     this.stemDirection = noteStruct.stemDirection || Stem.UP;
     this.line = noteStruct.line || 0;
 
@@ -120,11 +126,12 @@ export class NoteHead extends Note {
     // to its tick context
     const x = !this.preFormatted ? this.x : super.getAbsoluteX();
 
-    // For a more natural displaced notehead, we adjust the displacement amount
-    // by half the stem width in order to maintain a slight overlap with the stem
-    const displacementStemAdjustment = Stem.WIDTH / 2;
+    return x + this.getDisplacementX();
+  }
 
-    return x + (this.displaced ? (this.width - displacementStemAdjustment) * this.stemDirection : 0);
+  /** Offset shared by drawing, head geometry and ledger lines. */
+  getDisplacementX(): number {
+    return this.displacementColumn * (this.width - Stem.WIDTH / 2) * this.stemDirection;
   }
 
   /** Set notehead to a provided `stave`. */

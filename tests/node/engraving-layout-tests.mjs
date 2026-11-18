@@ -388,3 +388,98 @@ test('browser SVG keeps one rehearsal mark, the dynamic and the pedal through re
     await browser.close();
   }
 });
+
+test('contour beams preserve membership, minimum stems, beamlet overrides and endpoints across widths', () => {
+  for (const width of [190, 340, 790]) {
+    for (const stem of ['up', 'down']) {
+      const { f } = factory(),
+        es = f.EasyScore();
+      const notes = es.notes('G4/8, A4/16, B4/8, C4/8', { stem });
+      const beam = f.Beam({ notes });
+      beam.renderOptions.contourSlope = true;
+      beam.setPartialBeamSideAt(1, 'R');
+      const sys = f.System({ width, y: 60 });
+      sys.addStave({ voices: [es.voice(notes, { mode: 'soft' })] });
+      sys.format();
+      measured(beam);
+      assert.deepEqual(beam.getNotes(), notes);
+      const first = notes[0],
+        last = notes.at(-1);
+      assert.ok(beam.slope * (last.getYs()[0] - first.getYs()[0]) >= -1e-7);
+      for (const n of notes) {
+        const tip = n.getStemExtents().topY;
+        const expected = beam.getBeamYToDraw() + beam.slope * (n.getStemX() - first.getStemX());
+        assert.ok(Math.abs(tip - expected) < 1e-6);
+        assert.ok(Math.abs(tip - n.getYs()[0]) >= n.getStemMinimumLength() - 1);
+      }
+      const [beamlet] = beam.getBeamLines('8');
+      assert.equal(beamlet.end - beamlet.start, beam.renderOptions.partialBeamLength);
+    }
+  }
+});
+
+test('before and after grace groups on two staves clear their hosts at the start of a system', () => {
+  const { f } = factory(),
+    es = f.EasyScore();
+  const sys = f.System({ width: 650 });
+  const groups = [];
+  for (const key of ['c/5', 'e/4']) {
+    const host = f.StaveNote({ keys: [key], duration: 'w' });
+    const sides = [VF.Modifier.Position.LEFT, VF.Modifier.Position.RIGHT].map((side, i) => {
+      const grace = f
+        .GraceNoteGroup({
+          notes: Array.from({ length: i + 1 }, () => f.GraceNote({ keys: [key], duration: '16', slash: true })),
+          slur: true,
+        })
+        .setPosition(side);
+      if (i) grace.beamNotes();
+      host.addModifier(grace, 0);
+      return grace;
+    });
+    sys.addStave({ voices: [es.voice([host])] });
+    groups.push({ host, sides });
+  }
+  sys.format();
+  for (const {
+    host,
+    sides: [before, after],
+  } of groups) {
+    measured(before);
+    measured(after);
+    const [head] = host.getHeadInk();
+    const pre = before.getGraceNotes().at(-1).getHeadInk()[0];
+    const post = after.getGraceNotes()[0].getHeadInk()[0];
+    assert.ok(pre.x + pre.w < head.x);
+    assert.ok(post.x > head.x + head.w);
+    assert.ok(pre.x >= host.checkStave().getX());
+    assert.equal(after.getGraceNotes()[0].getStave(), host.getStave());
+  }
+});
+
+test('four voice columns avoid heads and rests, preserve distinct attacks and repeat for reversed voice input', () => {
+  function passage(reverse) {
+    const { f } = factory(),
+      es = f.EasyScore();
+    const entries = ['F5/q, G5/q', 'E5/8, C5/8, D5/q', 'D5/q, E5/q', 'B4/q/r, B4/q'].map((input, i) => {
+      const notes = es.notes(input, { stem: i % 2 ? 'down' : 'up' });
+      if (i === 0) VF.Dot.buildAndAttach([notes[0]]);
+      if (i === 2) notes[0].addModifier(new VF.Accidental('#'), 0);
+      return { notes, voice: es.voice(notes, { mode: 'soft' }) };
+    });
+    const sys = f.System({ width: 490 });
+    const voices = entries.map((e) => e.voice);
+    sys.addStave({ voices: reverse ? voices.reverse() : voices });
+    sys.format();
+    const boxes = entries.flatMap((e) =>
+      e.notes.flatMap((n) => [...n.getHeadInk(), ...n.getModifiers().map((m) => m.getInkBounds())])
+    );
+    for (const [i, a] of boxes.entries())
+      for (const b of boxes.slice(i + 1))
+        assert.ok(
+          a.x + a.w <= b.x + 1 || b.x + b.w <= a.x + 1 || a.y + a.h <= b.y + 1 || b.y + b.h <= a.y + 1,
+          'voice head, rest, dot or sign overlapped'
+        );
+    return entries.map((e) => e.notes.map((n) => [n.getNoteHeadBeginX(), n.getYs()[0]]));
+  }
+  assert.deepEqual(passage(true), passage(false));
+});

@@ -1,15 +1,19 @@
 // Pre-draw geometry of formatted VF5 notation. All coordinates are unscaled renderer pixels.
+import { Accidental } from './accidental';
 import { Annotation } from './annotation';
 import { Articulation } from './articulation';
 import { Beam } from './beam';
 import { BoundingBox, Bounds } from './boundingbox';
 import { Curve } from './curve';
+import { Dot } from './dot';
 import { Element } from './element';
 import { GraceNote } from './gracenote';
 import { GraceNoteGroup } from './gracenotegroup';
+import { Ornament } from './ornament';
 import { StaveNote } from './stavenote';
 import { StaveTie } from './stavetie';
 import { Stem } from './stem';
+import { Tuplet } from './tuplet';
 import { RuntimeError } from './util';
 
 /** Enclosing rectangles can be conservative for strokes and curves. */
@@ -106,6 +110,10 @@ export function measureEngraving(element: Element, options: GeometryOptions = {}
         const box = (owner as Articulation).getInkBounds();
         shape.parts.push(box);
         shape.anchors.center = { x: box.x + box.w / 2, y: box.y + box.h / 2 };
+      } else if (kind === Accidental || kind === Dot) {
+        shape.parts.push((owner as Accidental | Dot).getInkBounds());
+      } else if (kind === Tuplet || kind === Ornament) {
+        shape.parts.push(owner.getBoundingBox());
       } else if (kind === Beam) {
         const beam = owner as Beam;
         shape.parts.push(beam.getBoundingBox());

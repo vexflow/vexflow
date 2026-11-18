@@ -3,6 +3,7 @@
 // MIT License
 
 import { getBottomY, getInitialOffset, getTopY } from './articulation';
+import { BoundingBox } from './boundingbox';
 import { Element } from './element';
 import { Metrics } from './metrics';
 import { Modifier, ModifierPosition } from './modifier';
@@ -42,6 +43,8 @@ export class Ornament extends Modifier {
   protected type: string;
 
   protected delayed: boolean;
+  /** Side spacing is recomputed per format and is independent of authored shifts. */
+  private sideOffset = 0;
   protected adjustForStemDirection: boolean;
   public renderOptions: {
     accidentalUpperPadding: number;
@@ -63,11 +66,12 @@ export class Ornament extends Modifier {
       const ornament = ornaments[i];
       const increment = 2;
 
+      ornament.sideOffset = 0;
       if (ornament.position === ModifierPosition.RIGHT) {
-        ornament.xShift += rightShift + 2;
+        ornament.sideOffset = rightShift + 2;
         rightShift += ornament.width + Ornament.minPadding;
       } else if (ornament.position === ModifierPosition.LEFT) {
-        ornament.xShift -= leftShift + ornament.width + 2;
+        ornament.sideOffset = -(leftShift + ornament.width + 2);
         leftShift += ornament.width + Ornament.minPadding;
       } else if (ornament.position === ModifierPosition.ABOVE) {
         width = Math.max(ornament.getWidth(), width);
@@ -218,19 +222,14 @@ export class Ornament extends Modifier {
   }
 
   /** Render ornament in position next to note. */
-  override draw(): void {
-    const ctx = this.checkContext();
+  /** Recompute delayed and auxiliary positions against the current tick contexts. */
+  private positionElements(): { element: Element; x: number; y: number }[] {
     const note = this.checkAttachedNote() as StemmableNote;
-    this.setRendered();
-
     const stave = note.checkStave();
-
-    const clsAttribute = this.getAttribute('class');
-    ctx.openGroup('ornament' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
-
+    const parts: { element: Element; x: number; y: number }[] = [];
     // Get initial coordinates for the modifier position
     const start = note.getModifierStartXY(this.position, this.index);
-    let glyphX = start.x;
+    let glyphX = start.x + this.sideOffset;
 
     const staffSpace = stave.getSpacingBetweenLines();
     const initialOffset = getInitialOffset(note, this.position);
@@ -260,41 +259,55 @@ export class Ornament extends Modifier {
         } else {
           delayXShift += (stave.getX() + stave.getWidth() - glyphX) * 0.5;
         }
-        this.delayXShift = delayXShift;
       }
       glyphX += delayXShift;
     }
 
     L('Rendering ornament: ', this.text.charCodeAt(0), glyphX, glyphY);
     if (this.accidentalLower) {
-      this.accidentalLower.renderText(
-        ctx,
-        glyphX + this.xShift - this.accidentalLower.getWidth() * 0.5,
-        glyphY + this.yShift - this.accidentalLower.getTextMetrics().actualBoundingBoxDescent
-      );
+      parts.push({
+        element: this.accidentalLower,
+        x: glyphX + this.xShift - this.accidentalLower.getWidth() / 2,
+        y: glyphY + this.yShift - this.accidentalLower.getTextMetrics().actualBoundingBoxDescent,
+      });
       glyphY -= this.accidentalLower.getHeight() + this.renderOptions.accidentalLowerPadding;
     }
 
-    // ornament requires yShift
-    if (Ornament.ornamentYShift.indexOf(this.type) >= 0) {
-      this.yShift += this.getHeight();
-    }
-
+    const offset = Ornament.ornamentYShift.includes(this.type) ? this.getHeight() : 0;
     this.x =
       glyphX -
-      (this.position === ModifierPosition.ABOVE || this.position === ModifierPosition.BELOW ? this.width * 0.5 : 0);
-    this.y = glyphY;
-
-    this.renderText(ctx, 0, 0);
-
+      (this.position === ModifierPosition.ABOVE || this.position === ModifierPosition.BELOW ? this.width / 2 : 0);
+    this.y = glyphY + offset;
+    parts.push({ element: this, x: 0, y: 0 });
     if (this.accidentalUpper) {
-      glyphY -= this.getHeight() + this.renderOptions.accidentalUpperPadding;
-      this.accidentalUpper.renderText(
-        ctx,
-        glyphX + this.xShift - this.accidentalUpper.getWidth() * 0.5,
-        glyphY + this.yShift - this.accidentalUpper.getTextMetrics().actualBoundingBoxDescent
-      );
+      parts.push({
+        element: this.accidentalUpper,
+        x: glyphX + this.xShift - this.accidentalUpper.getWidth() / 2,
+        y:
+          this.y +
+          this.yShift -
+          this.getHeight() -
+          this.renderOptions.accidentalUpperPadding -
+          this.accidentalUpper.getTextMetrics().actualBoundingBoxDescent,
+      });
     }
+    return parts;
+  }
+
+  /** Include both auxiliary signs in the measured ornament. */
+  override getBoundingBox(): BoundingBox {
+    const boxes = this.positionElements().map(({ element, x, y }) =>
+      element.getTextInk(x + element.getX(), y + element.getY())
+    );
+    return boxes.reduce((bounds, box) => bounds.mergeWith(box));
+  }
+
+  override draw(): void {
+    const ctx = this.checkContext();
+    this.setRendered();
+    const clsAttribute = this.getAttribute('class');
+    ctx.openGroup('ornament' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
+    for (const { element, x, y } of this.positionElements()) element.renderText(ctx, x, y);
     this.drawPointerRect();
     ctx.closeGroup();
   }

@@ -10,6 +10,7 @@
       "setNote(note: Note): this",
       "setAsCautionary(): this",
       "isCautionary(): boolean",
+      "getInkBounds()",
       "draw(): void"
     ]
   },
@@ -81,7 +82,7 @@
     "PartialBeamDirection": "export type PartialBeamDirection = typeof BEAM_LEFT | typeof BEAM_RIGHT | typeof BEAM_BOTH;",
     "Beam": [
       "CATEGORY(): string",
-      "renderOptions: { flatBeamOffset?: number; flatBeams: boolean; secondaryBreakTicks?: number; showStemlets: boolean; beamWidth: number; maxSlope: number; minSlope: number; slopeIterations: number; slopeCost: number; stemletExtension: number; partialBeamLength: number; minFlatBeamOffset: number; }",
+      "renderOptions: { flatBeamOffset?: number; flatBeams: boolean; secondaryBreakTicks?: number; showStemlets: boolean; beamWidth: number; maxSlope: number; minSlope: number; /** Keep automatic slope in the endpoint contour and align level in-staff beams to a half-space. */ contourSlope?: boolean; slopeIterations: number; slopeCost: number; stemletExtension: number; partialBeamLength: number; minFlatBeamOffset: number; }",
       "notes: StemmableNote[]",
       "postFormatted: boolean",
       "slope: number",
@@ -354,6 +355,7 @@
       "constructor()",
       "setNote(note: Note): this",
       "setDotShiftY(y: number): this",
+      "getInkBounds()",
       "draw(): void"
     ]
   },
@@ -866,7 +868,7 @@
     "FormatterOptions": {
       "extends": [],
       "fields": [
-        "spacing?: ProportionalSpacing;",
+        "spacing?: MeasuredSpacing;",
         "softmaxFactor?: number;",
         "globalSoftmax?: boolean;",
         "maxIterations?: number;"
@@ -1020,7 +1022,7 @@
       "DEBUG: boolean",
       "CATEGORY(): string",
       "renderOptions: { slurYShift: number }",
-      "format(gracenoteGroups: GraceNoteGroup[], state: ModifierContextState): boolean",
+      "format(groups: GraceNoteGroup[], state: ModifierContextState): boolean",
       "constructor(graceNotes: StemmableNote[], showSlur?: boolean)",
       "preFormat(): void",
       "beamNotes(graceNotes?: StemmableNote[]): this",
@@ -1372,6 +1374,7 @@
         "customGlyphCode?: string;",
         "stemDirection?: number;",
         "displaced?: boolean;",
+        "displacementColumn?: number;",
         "noteType?: string;",
         "x?: number;",
         "y?: number;",
@@ -1387,6 +1390,7 @@
       "getLine(): number",
       "setLine(line: number): this",
       "getAbsoluteX(): number",
+      "getDisplacementX(): number",
       "setStave(stave: Stave): this",
       "preFormat(): this",
       "draw(): void"
@@ -1423,6 +1427,7 @@
       "setDelayed(delayed: boolean): this",
       "setUpperAccidental(accid: string): this",
       "setLowerAccidental(accid: string): this",
+      "getBoundingBox(): BoundingBox",
       "draw(): void"
     ]
   },
@@ -2621,6 +2626,7 @@
         "notesOccupied?: number;",
         "numNotes?: number;",
         "ratioed?: boolean;",
+        "displayRatio?: readonly [number, number];",
         "yOffset?: number;",
         "textYOffset?: number;",
         "suffix?: string;"
@@ -2978,7 +2984,7 @@
         "time?: string;"
       ]
     },
-    "EasyScoreContent": "export type EasyScoreContent = | string | StaveNoteStruct | Tickable | { note: StaveNoteStruct; id?: string; stave?: string } | { tab: TabNoteStruct; id?: string; stave?: string; drawStem?: boolean } | { change: EasyScoreStaffState };",
+    "EasyScoreContent": "export type EasyScoreContent = | string | StaveNoteStruct | Tickable | { note: StaveNoteStruct; id?: string; stave?: string; grace?: GraceGroupSpec; } | { tab: TabNoteStruct; id?: string; stave?: string; drawStem?: boolean } | { change: EasyScoreStaffState };",
     "EasyScoreVoiceSpec": {
       "extends": [],
       "fields": [
@@ -3019,6 +3025,7 @@
         "sheet?: Omit<SheetOptions, 'factory'>;",
         "system?: Omit<SystemOptions, 'factory' | 'width' | 'autoWidth' | 'noJustification'>;",
         "accidentals?: 'literal' | 'key-aware';",
+        "graceAccidentals?: 'explicit' | 'ordered';",
         "signatures?: 'changes' | 'every-measure';",
         "spans?: readonly EasyScoreSpanSpec[];",
         "crossMeasureSpans?: 'reject' | 'manual';"

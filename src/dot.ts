@@ -110,7 +110,7 @@ export class Dot extends Modifier {
 
       // Convert halfShiftY to a multiplier for dots.draw().
       if (note.isRest()) {
-        dot.dotShiftY += -halfShiftY;
+        dot.dotShiftY = dot.restShiftY - halfShiftY;
       } else {
         dot.dotShiftY = -halfShiftY;
       }
@@ -144,15 +144,17 @@ export class Dot extends Modifier {
     return this;
   }
 
+  private restShiftY = 0;
+
   setDotShiftY(y: number): this {
+    this.restShiftY = y;
     this.dotShiftY = y;
     return this;
   }
 
-  override draw(): void {
-    const ctx = this.checkContext();
+  /** Place the glyph using the same coordinates for measurement and drawing. */
+  private positionGlyph(): void {
     const note = this.checkAttachedNote();
-    this.setRendered();
 
     const stave = note.checkStave();
     const lineSpace = stave.getSpacingBetweenLines();
@@ -166,7 +168,18 @@ export class Dot extends Modifier {
 
     this.x = start.x;
     this.y = start.y + this.dotShiftY * lineSpace;
+  }
 
+  /** Visible glyph after formatting, including cautionary or authored shifts. */
+  getInkBounds() {
+    this.positionGlyph();
+    return this.getTextInk(this.x, this.y);
+  }
+
+  override draw(): void {
+    const ctx = this.checkContext();
+    this.positionGlyph();
+    this.setRendered();
     this.renderText(ctx, 0, 0);
   }
 }

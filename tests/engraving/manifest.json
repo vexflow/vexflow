@@ -11,9 +11,12 @@
   "reviewer": "0xfe",
   "defaultReview": "Pending",
   "outcomes": {
-    "unison-triple": "Expected defect: three spellings occupy two head positions.",
+    "unison-triple": "Main draws two head positions. The M2 branch draws three and preserves sharp, natural and flat.",
     "threevoice-1": "Fixed on main in M0. The middle double beam clears the second head of the bottom voice.",
-    "beam-width": "Review slope reversal on the second group at 500 px.",
+    "beam-width": "The default fitter reverses slope at 500 px. Compare the opt-in M2 contour study.",
+    "m2-contour": "The narrow group follows its endpoints and the wide group is level on the M2 branch.",
+    "m2-four-voices": "On the M2 branch all four visible voices participate at the shared onsets.",
+    "m2-ornament-redraw": "The M2 branch keeps the fall at its host and places the turn midway to the next attack after narrowing.",
     "formatter-3": "Fixed on main in M0. Upper and lower triplet brackets clear the outer text by comparable amounts.",
     "curve-1": "Fixed on main in M0. The second opening-up slur clears the down-stem beam.",
     "curve-2": "Fixed on main in M0. The first opening-down slur clears the up-stem beam.",
@@ -367,6 +370,17 @@
       "cases": {
         "beam-between-attacks": "Notehead between beamed attacks",
         "beam-retained-resize": "Sloped beam after narrowing a retained system"
+      }
+    },
+    {
+      "module": "M2 studies",
+      "source": "tests/engraving/studies.mjs",
+      "gaps": ["VF-005", "VF-006", "VF-011"],
+      "review": "Check voice separation, slope and staff contact at both widths, and the fall and turn after redraw.",
+      "cases": {
+        "m2-four-voices": "Four close voices and an unequal onset",
+        "m2-contour": "Beam contour and staff contact",
+        "m2-ornament-redraw": "Long fall and delayed turn after redraw"
       }
     }
   ]

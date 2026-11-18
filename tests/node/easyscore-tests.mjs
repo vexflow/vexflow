@@ -1052,3 +1052,80 @@ test('typed grace notes retain explicit stem direction over automatic defaults',
   assert.equal(grace.getStemDirection(), -1);
   assert.equal(grace.isAutoStem(), false);
 });
+
+test('grace order is explicit and simultaneous signs are independent of voice insertion', () => {
+  const marks = (note) =>
+    note
+      .getModifiers()
+      .filter((m) => m instanceof VF.Accidental)
+      .map((m) => m.type);
+  const voice = (side, pitches) => ({
+    notes: [
+      {
+        note: { keys: ['f#/4'], duration: 'h' },
+        grace: { side, notes: pitches.map((key) => ({ keys: [key], duration: '16' })) },
+      },
+      'F4/h',
+    ],
+  });
+  function arrays(voices, graceAccidentals) {
+    const result = create().compose({
+      accidentals: 'key-aware',
+      graceAccidentals,
+      staves: [{ id: 'a', measures: [{ voices }] }],
+    });
+    return result.notes[0][0].map(([host, last]) => {
+      const grace = host.getModifiers().find((m) => m instanceof VF.GraceNoteGroup);
+      return [grace.getGraceNotes().map(marks), marks(host), marks(last)];
+    });
+  }
+  const early = voice('before', ['f/4', 'f#/4']);
+  const conflict = voice('before', ['fb/4']);
+  const expected = [
+    [[[], ['#']], ['#'], ['n']],
+    [[['b']], ['#'], ['n']],
+  ];
+  assert.deepEqual(arrays([early, conflict], 'ordered'), expected);
+  assert.deepEqual(arrays([conflict, early], 'ordered'), expected.toReversed());
+  assert.deepEqual(arrays([early], 'explicit'), [[[[], []], ['#'], ['n']]]);
+  assert.deepEqual(arrays([voice('after', ['f/4', 'f#/4'])], 'ordered'), [[[['n'], ['#']], ['#'], ['n']]]);
+});
+
+test('explicit grace cautionaries survive ordered generation and suppress redundant host signs', () => {
+  const result = create().compose({
+    accidentals: 'key-aware',
+    graceAccidentals: 'ordered',
+    staves: [
+      {
+        id: 'a',
+        measures: [
+          {
+            voices: [
+              {
+                notes: [
+                  {
+                    note: { keys: ['f#/4'], duration: 'w' },
+                    grace: {
+                      side: 'before',
+                      notes: [
+                        { keys: ['f#/4'], duration: '8', accidentals: [{ index: 0, type: '#', cautionary: true }] },
+                      ],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+  const [host] = result.notes[0][0][0];
+  const [group] = host.getModifiers();
+  assert.equal(host.getModifiers().length, 1);
+  const marks = group.getGraceNotes()[0].getModifiers();
+  assert.deepEqual(
+    marks.map((m) => [m.type, m.isCautionary()]),
+    [['#', true]]
+  );
+});

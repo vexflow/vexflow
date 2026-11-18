@@ -7,7 +7,7 @@ import { BoundingBox } from './boundingbox';
 import { Fraction } from './fraction';
 import { Metrics } from './metrics';
 import { ModifierContext } from './modifiercontext';
-import { ProportionalFormatter, ProportionalSpacing } from './proportionalformatter';
+import { MeasuredSpacing, ProportionalFormatter } from './proportionalformatter';
 import { RenderContext } from './rendercontext';
 import { Stave } from './stave';
 import { StaveConnector } from './staveconnector';
@@ -29,11 +29,11 @@ interface Distance {
   fromTickablePx?: number;
 }
 
-export type { ProportionalSpacing } from './proportionalformatter';
+export type { MeasuredSpacing, ProportionalSpacing } from './proportionalformatter';
 
 export interface FormatterOptions {
   /** Omit to use the default engraving layout. */
-  spacing?: ProportionalSpacing;
+  spacing?: MeasuredSpacing;
 
   /** Defaults to Tables.SOFTMAX_FACTOR. */
   softmaxFactor?: number;
@@ -370,7 +370,7 @@ export class Formatter {
       maxIterations: 5,
       ...options,
     };
-    if (options?.spacing && options.spacing.mode !== 'proportional') {
+    if (options?.spacing && !['proportional', 'optical'].includes(options.spacing.mode)) {
       throw new RuntimeError('BadArgument', 'Unknown formatter spacing mode.');
     }
     this.justifyWidth = 0;

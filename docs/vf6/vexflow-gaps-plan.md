@@ -6,7 +6,7 @@ Last reviewed: **2026-11-18**
 
 **Primary status reference** · [upstream main at 5082e902](https://github.com/vexflow/vexflow/commit/5082e902baddfc00a3ac94124a91ffca78531b78). Compare the branch to freshly fetched main at every milestone review and after merges. Keep 5.2.0 as the historical release reference. [Latest fixture comparison](m0.md#latest-comparison)
 
-Status: **M0 complete. Both M1 beam examples passed maintainer review. The VF6 score representation awaits a decision. M2–M8 remain proposed or deferred.**
+Status: **M0 complete. Both M1 beam examples passed maintainer review. The VF6 score representation awaits a decision. M2 is implemented on the branch and awaits engraving review. M3–M8 remain proposed or deferred.**
 
 Source of scope: [Notation gap register](vexflow-gaps.md)
 
@@ -176,7 +176,7 @@ M0–M7 total **44–75 engineer-weeks before contingency**. Reserve roughly 25%
 | --------- | ------------------------------------- | --------------------------------------------- | -------------------- | -------- |
 | M0        | Auditable corpus and baseline         | None                                          | 2–3 weeks            | Complete |
 | M1        | Geometry, policy and anchor contracts | M0 seed cases                                 | 5–8 weeks            | In review |
-| M2        | Reliable local engraving              | M1 contracts for affected classes             | 6–10 weeks           | Proposed |
+| M2        | Reliable local engraving              | M1 contracts for affected classes             | 6–10 weeks           | In review |
 | M3        | Collision-aware phrases and lyrics    | M1; relevant M2 placement                     | 7–12 weeks           | Proposed |
 | M4        | Complete continuous scores            | M2/M3, minimal context from M1                | 7–12 weeks           | Proposed |
 | M5        | Pages and basic part layouts          | M4, stable vertical envelopes                 | 4–7 weeks            | Proposed |
@@ -240,6 +240,8 @@ Web compatibility, performance measurement, API parity, and documentation run th
 **Decision gate:** accept the geometry interfaces only after beam, lyric and cross-staff prototypes can consume them. Avoid abstracting every class before testing the difficult consumers.
 
 ## M2 — Stabilize local engraving
+
+**2026-11-18 · Branch implementation ready for engraving review.** [Engineering and compatibility](m2.md) · [Side-by-side examples](https://github.com/vexflow/vexflow/issues/358#issuecomment-6984363531) · [Requirements for VF6](requirements/local-engraving.md)
 
 **Gaps:** VF-004–VF-007, VF-009–VF-012. Boundary-dependent accidental behavior completes in M4.
 
@@ -515,3 +517,4 @@ Review progress by **supported use case and unresolved severity**. Report confir
 | 2026-11-18 | Complete M0 with the five reviewed VF5 engraving fixes.                                               | Both unison fixtures are expected. [Closure evidence](m0.md#m0-closure).                                                                                                           |
 | 2026-11-18 | Implement M1 on VF5 and exercise both VF6 persistence options. | [Engineering gates and review items](m1.md). The recommendation is ready for maintainer review. |
 | 2026-11-18 | Use upstream main to judge outstanding branch changes. Keep a second comparison against 5.2.0 for release history. | [Current results and refresh procedure](m0.md#latest-comparison). |
+| 2026-11-18 | Implement M2 on VF5. | [Local engraving checks, branch comparison and review](m2.md). |

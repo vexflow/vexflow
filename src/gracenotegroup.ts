@@ -45,58 +45,32 @@ export class GraceNoteGroup extends Modifier {
   protected slur?: StaveTie | TabTie;
   protected beams: Beam[];
 
-  /** Arranges groups inside a `ModifierContext`. */
-  static format(gracenoteGroups: GraceNoteGroup[], state: ModifierContextState): boolean {
-    const groupSpacingStave = 4;
-    const groupSpacingTab = 0;
+  /** Right-side material at the same onset must not move a before-grace cluster to the left. */
+  private afterWidth = 0;
+  private afterOffset = 0;
 
-    if (!gracenoteGroups || gracenoteGroups.length === 0) return false;
-
-    const groupList = [];
-    let prevNote = null;
-    let shift = 0;
-
-    for (let i = 0; i < gracenoteGroups.length; ++i) {
-      const gracenoteGroup = gracenoteGroups[i];
-      const note = gracenoteGroup.getNote();
-      const isStavenote = isStaveNote(note);
-      const spacing = isStavenote ? groupSpacingStave : groupSpacingTab;
-
-      if (isStavenote && note !== prevNote) {
-        // Iterate through all notes to get the displaced pixels
-        for (let n = 0; n < note.keys.length; ++n) {
-          shift = Math.max(note.getLeftDisplacedHeadPx(), shift);
-        }
-        prevNote = note;
-      }
-
-      groupList.push({ shift: shift, gracenoteGroup, spacing });
+  /** Opposing groups reserve their own side. Voices with simultaneous before-graces align at the host. */
+  static format(groups: GraceNoteGroup[], state: ModifierContextState): boolean {
+    if (!groups?.length) return false;
+    const entries = groups.map((group) => {
+      group.preFormat();
+      const note = group.getNote();
+      const width = group.getWidth() + (isStaveNote(note) ? 4 : 0);
+      return { group, note, width, after: group.position === Modifier.Position.RIGHT };
+    });
+    const afterWidth = Math.max(0, ...entries.filter((e) => e.after).map((e) => e.width));
+    const beforeWidth = Math.max(
+      0,
+      ...entries.filter((e) => !e.after).map((e) => Math.max(e.width, e.note.getLeftDisplacedHeadPx()))
+    );
+    for (const { group, width, after, note } of entries) {
+      group.afterWidth = afterWidth;
+      group.afterOffset =
+        note.getGlyphWidth() + note.getRightDisplacedHeadPx() + state.rightShift + StaveNote.minNoteheadPadding;
+      group.setSpacingFromNextModifier((after ? 0 : beforeWidth - width) + StaveNote.minNoteheadPadding);
     }
-
-    // If first note left shift in case it is displaced
-    let groupShift = groupList[0].shift;
-    let formatWidth;
-    let right = false;
-    let left = false;
-    for (let i = 0; i < groupList.length; ++i) {
-      const gracenoteGroup = groupList[i].gracenoteGroup;
-      if (gracenoteGroup.position === Modifier.Position.RIGHT) right = true;
-      else left = true;
-      gracenoteGroup.preFormat();
-      formatWidth = gracenoteGroup.getWidth() + groupList[i].spacing;
-      groupShift = Math.max(formatWidth, groupShift);
-    }
-
-    for (let i = 0; i < groupList.length; ++i) {
-      const gracenoteGroup = groupList[i].gracenoteGroup;
-      formatWidth = gracenoteGroup.getWidth() + groupList[i].spacing;
-      gracenoteGroup.setSpacingFromNextModifier(
-        groupShift - Math.min(formatWidth, groupShift) + StaveNote.minNoteheadPadding
-      );
-    }
-
-    if (right) state.rightShift += groupShift;
-    if (left) state.leftShift += groupShift;
+    state.leftShift += beforeWidth;
+    state.rightShift += afterWidth;
     return true;
   }
 
@@ -172,6 +146,16 @@ export class GraceNoteGroup extends Modifier {
     note.checkStave();
     this.preFormat();
     this.alignSubNotesWithNote(this.getGraceNotes(), note, this.position);
+    if (this.afterWidth) {
+      for (const grace of this.graceNotes) {
+        const tick = grace.getTickContext();
+        tick.setXOffset(
+          this.position === Modifier.Position.RIGHT
+            ? note.getTickContext().getX() + this.afterOffset
+            : tick.getXOffset() + this.afterWidth
+        );
+      }
+    }
     this.beams.forEach((beam) => beam.postFormat());
   }
 
@@ -203,6 +187,13 @@ export class GraceNoteGroup extends Modifier {
           lastIndexes: [0],
         });
 
+      // A normal tie starts beyond all right modifiers, including this group.
+      // Anchor an after-grace slur at the host head instead.
+      if (this.position === Modifier.Position.RIGHT && isStavenote) {
+        this.slur.renderOptions.firstXShift = note.getNoteHeadBeginX() + note.getGlyphWidth() - note.getTieRightX();
+      } else {
+        this.slur.renderOptions.firstXShift = 0;
+      }
       this.slur.renderOptions.cp2 = 12;
       this.slur.renderOptions.yShift = (isStavenote ? 7 : 5) + this.renderOptions.slurYShift;
     }

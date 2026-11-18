@@ -155,48 +155,36 @@ export class StaveNote extends StemmableNote {
       });
     }
 
-    let voices = 0;
-    let noteU = undefined;
-    let noteM = undefined;
-    let noteL = undefined;
-    const draw = [false, false, false];
-
-    for (let i = 0; i < notesList.length; i++) {
-      // If .draw is true or undefined, we set draw[i] = true
-      draw[i] = notesList[i].note.renderOptions.draw !== false;
-    }
-
-    if (draw[0] && draw[1] && draw[2]) {
-      // Three visible notes
-      voices = 3;
-      noteU = notesList[0];
-      noteM = notesList[1];
-      noteL = notesList[2];
-    } else if (draw[0] && draw[1]) {
-      // Two visible notes, 0 & 1
-      voices = 2;
-      noteU = notesList[0];
-      noteL = notesList[1];
-    } else if (draw[0] && draw[2]) {
-      // Two visible notes, 0 & 2
-      voices = 2;
-      noteU = notesList[0];
-      noteL = notesList[2];
-    } else if (draw[1] && draw[2]) {
-      // Two visible notes, 1 & 2
-      voices = 2;
-      noteU = notesList[1];
-      noteL = notesList[2];
-    } else {
-      // No shift required for less than 2 visible notes
+    const visible = notesList.filter((item) => item.note.renderOptions.draw !== false);
+    if (visible.length < 2) return true;
+    if (visible.length > 3) {
+      // Keep overlapping stem/head envelopes in separate columns. Pitch order makes
+      // placement independent of voice insertion for voices at distinct pitches.
+      const columns: { bottom: number; width: number; members: StaveNoteFormatSettings[] }[] = [];
+      for (const item of visible.sort((a, b) => b.maxLine - a.maxLine || b.line - a.line)) {
+        let column = columns.find((entry) => item.maxLine + 0.5 < entry.bottom);
+        if (!column) {
+          column = { bottom: item.minLine, width: 0, members: [] };
+          columns.push(column);
+        }
+        column.bottom = item.minLine;
+        column.width = Math.max(column.width, item.voiceShift);
+        column.members.push(item);
+      }
+      let x = 0;
+      for (const column of columns) {
+        for (const item of column.members) item.note.setXShift(x);
+        if (column !== columns[columns.length - 1]) x += column.width + 2;
+      }
+      state.rightShift += x;
       return true;
     }
-
-    // for two voice backward compatibility, ensure upper voice is stems up
-    // for three voices, the voices must be in order (upper, middle, lower)
+    const voices = visible.length;
+    let noteU = visible[0];
+    let noteL = visible[voices - 1];
+    const noteM = voices === 3 ? visible[1] : undefined;
     if (voices === 2 && noteU.stemDirection === -1 && noteL.stemDirection === 1) {
-      noteU = notesList[1];
-      noteL = notesList[0];
+      [noteU, noteL] = [noteL, noteU];
     }
 
     const voiceXShift = Math.max(noteU.voiceShift, noteL.voiceShift);
@@ -382,7 +370,8 @@ export class StaveNote extends StemmableNote {
 
   protected displaced: boolean;
   protected dotShiftY: number;
-  protected useDefaultHeadX: boolean;
+  protected useDefaultHeadX = false;
+  private extraHeadColumns = 0;
   protected ledgerLineStyle: ElementStyle;
 
   private _noteHeads: NoteHead[];
@@ -414,8 +403,6 @@ export class StaveNote extends StemmableNote {
     // if true, displace note to right
     this.displaced = false;
     this.dotShiftY = 0;
-    // for displaced ledger lines
-    this.useDefaultHeadX = false;
 
     // Drawing
     this._noteHeads = [];
@@ -482,9 +469,8 @@ export class StaveNote extends StemmableNote {
     const stemDirection = this.getStemDirection();
     const keys = this.getKeys();
 
-    let lastLine = undefined;
-    let lineDiff = undefined;
-    let displaced = false;
+    const lastLineInColumn: number[] = [];
+    this.extraHeadColumns = 0;
 
     // Draw notes from bottom to top.
 
@@ -507,25 +493,17 @@ export class StaveNote extends StemmableNote {
       const noteProps = this.sortedKeyProps[i].keyProps;
       const line = noteProps.line;
 
-      // Keep track of last line with a note head, so that consecutive heads
-      // are correctly displaced.
-      if (lastLine === undefined) {
-        lastLine = line;
-      } else {
-        lineDiff = Math.abs(lastLine - line);
-        if (lineDiff === 0 || lineDiff === 0.5) {
-          displaced = !displaced;
-        } else {
-          displaced = false;
-          this.useDefaultHeadX = true;
-        }
-      }
-      lastLine = line;
-
+      // Use the nearest free column. Seconds alternate sides as usual, while
+      // three spellings on one staff line each retain their own visible head.
+      let column = lastLineInColumn.findIndex((previous) => Math.abs(previous - line) >= 1);
+      if (i !== start && Math.abs(this.sortedKeyProps[i - step].keyProps.line - line) >= 1) this.useDefaultHeadX = true;
+      if (column < 0) column = lastLineInColumn.length;
+      lastLineInColumn[column] = line;
+      this.extraHeadColumns = Math.max(this.extraHeadColumns, column);
       const notehead = new NoteHead({
         duration: this.duration,
         noteType: this.noteType,
-        displaced,
+        displacementColumn: column,
         stemDirection,
         customGlyphCode: noteProps.code,
         line: noteProps.line,
@@ -559,7 +537,6 @@ export class StaveNote extends StemmableNote {
 
   // Calculates and stores the properties for each key in the note
   calculateKeyProps(): void {
-    let lastLine: number | undefined;
     for (let i = 0; i < this.keys.length; ++i) {
       const key = this.keys[i];
 
@@ -579,25 +556,6 @@ export class StaveNote extends StemmableNote {
         }
       }
 
-      // Calculate displacement of this note
-      const line = props.line;
-      if (lastLine === undefined) {
-        lastLine = line;
-      } else {
-        // < 1 means == 0.5 (second) or 0.0 (unison)
-        if (Math.abs(lastLine - line) < 1) {
-          this.displaced = true;
-          props.displaced = true;
-
-          // Have to mark the previous note as
-          // displaced as well, for modifier placement
-          if (this.keyProps.length > 0) {
-            this.keyProps[i - 1].displaced = true;
-          }
-        }
-      }
-
-      lastLine = line;
       this.keyProps.push(props);
     }
     // Sort the notes from lowest line to highest line in sortedKeyProps
@@ -606,12 +564,20 @@ export class StaveNote extends StemmableNote {
       this.sortedKeyProps.push({ keyProps, index });
     });
     this.sortedKeyProps.sort((a, b) => a.keyProps.line - b.keyProps.line);
+    for (let i = 1; i < this.sortedKeyProps.length; i++) {
+      const lower = this.sortedKeyProps[i - 1].keyProps;
+      const upper = this.sortedKeyProps[i].keyProps;
+      if (upper.line - lower.line < 1) {
+        this.displaced = true;
+        lower.displaced = upper.displaced = true;
+      }
+    }
   }
 
   /** Absolute ink of each head after formatting, independent of previous draws. */
   getHeadInk(): BoundingBox[] {
     return this._noteHeads.map((head) => {
-      const displacement = head.isDisplaced() ? (head.getWidth() - Stem.WIDTH / 2) * this.getStemDirection() : 0;
+      const displacement = head.getDisplacementX();
       return head.getTextInk(this.getNoteHeadBeginX() + displacement, head.getY());
     });
   }
@@ -634,9 +600,7 @@ export class StaveNote extends StemmableNote {
   override getBoundingBox(includeModifiers = true): BoundingBox {
     const boundingBox = new BoundingBox(this.getAbsoluteX(), this.ys[0], 0, 0);
     this._noteHeads.forEach((notehead) => {
-      const displacement = notehead.isDisplaced()
-        ? (notehead.getWidth() - Stem.WIDTH / 2) * this.getStemDirection()
-        : 0;
+      const displacement = notehead.getDisplacementX();
       const box = notehead.getBoundingBox();
       box.setX(this.getNoteHeadBeginX() + displacement + notehead.getXShift());
       boundingBox.mergeWith(box);
@@ -931,18 +895,19 @@ export class StaveNote extends StemmableNote {
   // formatting
   getVoiceShiftWidth(): number {
     // TODO: may need to accommodate for dot here.
-    return this.getGlyphWidth() * (this.displaced ? 2 : 1);
+    return this.getGlyphWidth() * (this.displaced ? 1 + Math.max(1, this.extraHeadColumns) : 1);
   }
 
   // Calculates and sets the extra pixels to the left or right
   // if the note is displaced.
   calcNoteDisplacements(): void {
-    this.setLeftDisplacedHeadPx(this.displaced && this.stemDirection === Stem.DOWN ? this.getGlyphWidth() : 0);
+    const extra = this.getVoiceShiftWidth() - this.getGlyphWidth();
+    this.setLeftDisplacedHeadPx(this.stemDirection === Stem.DOWN ? extra : 0);
 
     // For upstems with flags, the extra space is unnecessary, since it's taken
     // up by the flag.
     this.setRightDisplacedHeadPx(
-      !this.hasFlag() && this.displaced && this.stemDirection === Stem.UP ? this.getGlyphWidth() : 0
+      this.stemDirection === Stem.UP ? Math.max(0, extra - (this.hasFlag() ? this.getGlyphWidth() : 0)) : 0
     );
   }
 
@@ -1043,9 +1008,7 @@ export class StaveNote extends StemmableNote {
       yBottom = Math.max(y, yBottom);
 
       if (displacedX === undefined && notehead.isDisplaced()) {
-        displacedX = layoutX
-          ? this.getNoteHeadBeginX() + (notehead.getWidth() - Stem.WIDTH / 2) * this.getStemDirection()
-          : notehead.getAbsoluteX();
+        displacedX = layoutX ? this.getNoteHeadBeginX() + notehead.getDisplacementX() : notehead.getAbsoluteX();
       }
 
       if (nonDisplacedX === undefined && !notehead.isDisplaced()) {
@@ -1098,50 +1061,28 @@ export class StaveNote extends StemmableNote {
     const lines: { x: number; y: number; width: number }[] = [];
     const stave = this.checkStave();
     const { strokePx } = this.renderOptions;
-    const width = this.getGlyphWidth() + strokePx * 2;
-    const doubleWidth = 2 * (this.getGlyphWidth() + strokePx) - Stem.WIDTH / 2;
-
     if (this.isRest()) return lines;
-    const {
-      highestLine,
-      lowestLine,
-      highestDisplacedLine,
-      highestNonDisplacedLine,
-      lowestDisplacedLine,
-      lowestNonDisplacedLine,
-      displacedX,
-      nonDisplacedX,
-    } = this.getNoteHeadBounds(true);
-
-    // Early out if there are no ledger lines to draw.
-    if (highestLine < 6 && lowestLine > 0) return lines;
-
-    const minX = Math.min(displacedX ?? 0, nonDisplacedX ?? 0);
-
-    const drawLedgerLine = (y: number, normal: boolean, displaced: boolean) => {
-      let x;
-      if (displaced && normal) x = minX - strokePx;
-      else if (normal) x = (nonDisplacedX ?? 0) - strokePx;
-      else x = (displacedX ?? 0) - strokePx;
-      const ledgerWidth = normal && displaced ? doubleWidth : width;
-
-      lines.push({ x, y, width: ledgerWidth });
+    const { highestLine, lowestLine } = this.getNoteHeadBounds(true);
+    const addLedger = (line: number, heads: NoteHead[]) => {
+      if (!heads.length) return;
+      const left = Math.min(...heads.map((head) => head.getDisplacementX()));
+      const right = Math.max(...heads.map((head) => head.getDisplacementX() + head.getWidth()));
+      lines.push({
+        x: this.getNoteHeadBeginX() + left - strokePx,
+        y: stave.getYForNote(line),
+        width: right - left + 2 * strokePx,
+      });
     };
-
-    // Draw ledger lines below the staff:
-    for (let line = 6; line <= highestLine; ++line) {
-      const normal = nonDisplacedX !== undefined && line <= highestNonDisplacedLine;
-      const displaced = highestDisplacedLine !== undefined && line <= highestDisplacedLine;
-      drawLedgerLine(stave.getYForNote(line), normal, displaced);
-    }
-
-    // Draw ledger lines above the staff:
-    for (let line = 0; line >= lowestLine; --line) {
-      const normal = nonDisplacedX !== undefined && line >= lowestNonDisplacedLine;
-      const displaced = lowestDisplacedLine !== undefined && line >= lowestDisplacedLine;
-      drawLedgerLine(stave.getYForNote(line), normal, displaced);
-    }
-
+    for (let line = 6; line <= highestLine; ++line)
+      addLedger(
+        line,
+        this._noteHeads.filter((head) => head.getLine() >= line)
+      );
+    for (let line = 0; line >= lowestLine; --line)
+      addLedger(
+        line,
+        this._noteHeads.filter((head) => head.getLine() <= line)
+      );
     return lines;
   }
 

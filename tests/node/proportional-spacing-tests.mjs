@@ -243,3 +243,84 @@ test('unsupported numeric ranges fail before producing infinite coordinates', ()
   const v = voice();
   assert.throws(() => proportional(Number.MAX_VALUE).joinVoices([v]).format([v]), /pixel range/);
 });
+
+test('optical spacing fits measured obstacles, then stretches rhythmic intervals without moving clefs into notes', () => {
+  const stave = new Stave(10, 50, 900);
+  const notes = ['q', 'q', '8', '16', '32', '64'].map((duration) =>
+    new StaveNote({ keys: ['c/5'], duration }).setStave(stave)
+  );
+  notes[0].addModifier(new VF.Annotation('crescendo'), 0);
+  notes[1].addModifier(
+    new GraceNoteGroup(['d/5', 'e/5', 'f/5'].map((key) => new GraceNote({ keys: [key], duration: '16' }))),
+    0
+  );
+  notes[2].addModifier(new VF.ChordSymbol().addText('Cmaj7/G'), 0);
+  notes[3].addModifier(new Accidental('##'), 0);
+  const clef = new ClefNote('bass', 'small').setStave(stave);
+  const v = new Voice('4/4').setStrict(false).addTickables([notes[0], clef, ...notes.slice(1)]);
+  const f = new Formatter({ spacing: { mode: 'optical' } }).joinVoices([v]);
+  const minimum = f.preCalculateMinTotalWidth([v]);
+  assert.throws(() => f.format([v], minimum - 1), /InsufficientOpticalSpace.*px width/);
+  f.format([v], minimum);
+  const tight = positions(v);
+  for (let i = 1; i < notes.length; ++i) {
+    const prev = notes[i - 1].getMetrics(),
+      curr = notes[i].getMetrics();
+    assert.ok(
+      tight[i] - curr.modLeftPx - curr.leftDisplacedHeadPx >=
+        tight[i - 1] + prev.notePx + prev.rightDisplacedHeadPx + prev.modRightPx + 2 - 1e-7
+    );
+  }
+  assert.ok(clef.getAbsoluteX() + clef.getWidth() <= notes[1].getAbsoluteX());
+  f.format([v], minimum + 200);
+  const loose = positions(v);
+  const extra = (i) => loose[i] - loose[i - 1] - (tight[i] - tight[i - 1]);
+  close(extra(3) / extra(4), Math.sqrt(2));
+  f.tune();
+  assert.deepEqual(positions(v), loose);
+});
+
+test('nested 5:4 and 3:2 tuplets preserve every exact onset through reformat', () => {
+  const stave = new Stave(10, 50, 900);
+  const notes = Array.from({ length: 5 }, () => new StaveNote({ keys: ['c/5'], duration: '8' }).setStave(stave));
+  new Tuplet(notes, { numNotes: 5, notesOccupied: 4 });
+  new Tuplet(notes.slice(1, 4), { numNotes: 3, notesOccupied: 2 });
+  const v = new Voice('4/4').setStrict(false).addTickables(notes);
+  const f = proportional(200).joinVoices([v]).format([v]);
+  const expected = [0, 6, 10, 14, 18]; // units of one fifteenth of a quarter
+  const elapsed = new VF.Fraction(0, 1);
+  for (const [i, n] of notes.entries()) {
+    assert.ok(elapsed.equals(new VF.Fraction(expected[i] * 4096, 15)));
+    elapsed.add(n.getTicks());
+  }
+  assert.ok(elapsed.equals(new VF.Fraction(24 * 4096, 15)));
+  onsets(
+    v,
+    expected.map((value) => (value * 200) / 15)
+  );
+  f.format([v], 1600);
+  onsets(
+    v,
+    expected.map((value) => (value * 200) / 15)
+  );
+});
+
+test('optical and exact policies expose different minima for a very short final attack', () => {
+  const makeVoice = () => voice(['h', 'q', '8', '16', '32', '64', '64']);
+  const run = (spacing) => {
+    const v = makeVoice();
+    const f = new Formatter(spacing ? { spacing } : {}).joinVoices([v]);
+    const minimum = f.preCalculateMinTotalWidth([v]);
+    f.format([v], minimum);
+    assert.ok(positions(v).every(Number.isFinite));
+    return minimum;
+  };
+  const optical = run({ mode: 'optical' });
+  const exact = run({ mode: 'proportional' });
+  const legacy = run();
+  assert.ok(optical < exact);
+  assert.ok(legacy > 0);
+  const constrained = new Formatter({ spacing: { mode: 'proportional' } });
+  const v = makeVoice();
+  assert.throws(() => constrained.joinVoices([v]).format([v], optical), /InsufficientProportionalSpace/);
+});

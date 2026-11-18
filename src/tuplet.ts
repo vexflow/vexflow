@@ -50,12 +50,15 @@
  */
 
 import { Annotation } from './annotation';
+import { Articulation } from './articulation';
 import { BoundingBox } from './boundingbox';
 import { Element } from './element';
 import { Formatter } from './formatter';
 import { Glyphs } from './glyphs';
 import { Metrics } from './metrics';
+import { Modifier } from './modifier';
 import { Note } from './note';
+import { Ornament } from './ornament';
 import { Stem } from './stem';
 import { StemmableNote } from './stemmablenote';
 import { Tables } from './tables';
@@ -68,6 +71,8 @@ export interface TupletOptions {
   notesOccupied?: number;
   numNotes?: number;
   ratioed?: boolean;
+  /** Engraved numerator and denominator, independent of the duration multiplier. */
+  displayRatio?: readonly [number, number];
   yOffset?: number;
   textYOffset?: number;
   suffix?: string;
@@ -84,7 +89,7 @@ export class Tuplet extends Element {
   }
 
   notes: Note[];
-  protected options: Required<TupletOptions>;
+  protected options: Required<Omit<TupletOptions, 'displayRatio'>> & Pick<TupletOptions, 'displayRatio'>;
   protected textElement: Element;
   protected suffixElement: Element;
 
@@ -115,7 +120,13 @@ export class Tuplet extends Element {
     const textYOffset = options.textYOffset ?? Metrics.get('Tuplet.textYOffset');
     const suffix = options.suffix || '';
 
+    if (
+      options.displayRatio &&
+      (options.displayRatio.length !== 2 || !options.displayRatio.every((n) => Number.isSafeInteger(n) && n > 0))
+    )
+      throw new RuntimeError('BadArguments', 'Tuplet display ratio requires two positive integers.');
     this.options = {
+      displayRatio: options.displayRatio && [...options.displayRatio],
       bracketed,
       location,
       notesOccupied,
@@ -164,6 +175,7 @@ export class Tuplet extends Element {
    */
   setRatioed(ratioed: boolean): this {
     this.options.ratioed = ratioed;
+    this.resolveGlyphs();
     return this;
   }
 
@@ -204,14 +216,14 @@ export class Tuplet extends Element {
     // Ratio glyph calculations
     let numerator = '';
     let denominator = '';
-    let n = this.options.numNotes;
+    let n = this.options.displayRatio?.[0] ?? this.options.numNotes;
     while (n >= 1) {
       numerator = String.fromCharCode(0xe880 /* tuplet0 */ + (n % 10)) + numerator;
       n = Math.floor(n / 10);
     }
 
     if (this.options.ratioed) {
-      n = this.options.notesOccupied;
+      n = this.options.displayRatio?.[1] ?? this.options.notesOccupied;
       while (n >= 1) {
         denominator = String.fromCharCode(0xe880 /* tuplet0 */ + (n % 10)) + denominator;
         n = Math.floor(n / 10);
@@ -317,6 +329,17 @@ export class Tuplet extends Element {
     const hook = this.options.bracketed ? Metrics.get('Tuplet.bracket.legLength') : this.textElement.getHeight() / 2;
     const padding = hook + firstNote.checkStave().getSpacingBetweenLines() / 4;
     for (const note of this.notes) {
+      for (const mark of note.getModifiers()) {
+        if (mark.getPosition() !== (above ? Modifier.Position.ABOVE : Modifier.Position.BELOW)) continue;
+        const box =
+          mark instanceof Articulation
+            ? mark.getInkBounds()
+            : mark instanceof Ornament
+              ? mark.getBoundingBox()
+              : undefined;
+        if (box)
+          yPosition = above ? Math.min(yPosition, box.y - padding) : Math.max(yPosition, box.y + box.h + padding);
+      }
       const annotations = note.getModifierContext()?.getMembers(Category.Annotation) ?? [];
       for (const mark of annotations) {
         if (
@@ -336,7 +359,8 @@ export class Tuplet extends Element {
     return yPosition + nestedTupletYOffset + yOffset;
   }
 
-  override draw(): void {
+  /** Position the bracket and label from the current layout, including retained reflow. */
+  private positionElements() {
     const { location, bracketed, textYOffset, suffix } = this.options;
 
     const bracketPadding = Metrics.get('Tuplet.bracket.padding');
@@ -345,7 +369,6 @@ export class Tuplet extends Element {
     const extraSpacing = Metrics.get('Tuplet.suffix.extraSpacing');
     const suffixOffsetY = Metrics.get('Tuplet.suffix.suffixOffsetY');
 
-    const ctx = this.checkContext();
     let xPos = 0;
     let yPos = 0;
 
@@ -391,6 +414,16 @@ export class Tuplet extends Element {
     const commonTextY =
       yPos + this.textElement.getHeight() / 2 + (location === Tuplet.LOCATION_TOP ? -1 : 1) * textYOffset;
 
+    this.textElement.setX(notationStartX).setY(commonTextY);
+    if (suffix) this.suffixElement.setX(notationStartX + ratioWidth + extraSpacing).setY(commonTextY + suffixOffsetY);
+    return { xPos, yPos, bodyWidth, totalTextWidth, bracketPadding, bracketThickness, bracketLegLength };
+  }
+
+  override draw(): void {
+    const { location, bracketed, suffix } = this.options;
+    const { xPos, yPos, bodyWidth, totalTextWidth, bracketPadding, bracketThickness, bracketLegLength } =
+      this.positionElements();
+    const ctx = this.checkContext();
     // start grouping
     const clsAttribute = this.getAttribute('class');
     ctx.openGroup('tuplet' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
@@ -408,22 +441,8 @@ export class Tuplet extends Element {
       }
     }
 
-    // draw ratio text (x:y)
-    let currentX = notationStartX;
-    // set text element proper x and y
-    this.textElement.setX(currentX);
-    this.textElement.setY(commonTextY);
     this.textElement.renderText(ctx, 0, 0);
-    currentX += ratioWidth + extraSpacing;
-
-    // draw note glyph if wanted
-    if (suffix) {
-      const suffixY = commonTextY + suffixOffsetY;
-      this.suffixElement.setX(currentX);
-      this.suffixElement.setY(suffixY);
-      this.suffixElement.renderText(ctx, 0, 0);
-      currentX += noteWidth;
-    }
+    if (suffix) this.suffixElement.renderText(ctx, 0, 0);
 
     this.drawPointerRect();
     ctx.closeGroup();
@@ -431,6 +450,7 @@ export class Tuplet extends Element {
   }
 
   override getBoundingBox(): BoundingBox {
+    this.positionElements();
     const { bracketed, suffix } = this.options;
 
     const ratioBounding = this.textElement.getBoundingBox();

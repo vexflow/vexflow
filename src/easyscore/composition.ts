@@ -4,6 +4,8 @@ import type { EasyScore, EasyScoreVoiceOptions } from '../easyscore';
 import type { Element } from '../element';
 import { Factory } from '../factory';
 import { Fraction } from '../fraction';
+import { GraceNoteStruct } from '../gracenote';
+import { Modifier } from '../modifier';
 import { Note } from '../note';
 import { Sheet, SheetOptions } from '../sheet';
 import { Stave, StaveOptions } from '../stave';
@@ -25,12 +27,47 @@ export interface EasyScoreStaffState {
   time?: string;
 }
 
+/** Explicit signs survive key-aware generation, including cautionaries and microtones. */
+interface GracePitchSpec extends GraceNoteStruct {
+  accidentals?: readonly { index: number; type: string; cautionary?: boolean }[];
+}
+
+interface GraceGroupSpec {
+  side: 'before' | 'after';
+  notes: readonly GracePitchSpec[];
+  slur?: boolean;
+  beam?: boolean;
+}
+
+/** Construct and validate the host's complete grace group inside the composition transaction. */
+function buildGraceGroup(score: EasyScore, { side, notes, slur, beam }: GraceGroupSpec) {
+  if (!['before', 'after'].includes(side) || !notes.length) invalid('Expected a nonempty before or after grace group.');
+  const children = notes.map(({ accidentals, ...spec }) => {
+    const child = score.make.graceNote(spec);
+    for (const { index, type, cautionary } of accidentals ?? []) {
+      const mark = score.make.accidental({ type });
+      if (cautionary) mark.setAsCautionary();
+      score.attach(child, mark, index);
+    }
+    return child;
+  });
+  const group = score.make.graceNoteGroup({ notes: children, slur });
+  group.setPosition(side === 'after' ? Modifier.Position.RIGHT : Modifier.Position.LEFT);
+  if (beam) group.beamNotes();
+  return group;
+}
+
 /** Typed wrappers add IDs and cross-staff assignment without changing native note fields. */
 export type EasyScoreContent =
   | string
   | StaveNoteStruct
   | Tickable
-  | { note: StaveNoteStruct; id?: string; stave?: string }
+  | {
+      note: StaveNoteStruct;
+      id?: string;
+      stave?: string;
+      grace?: GraceGroupSpec;
+    }
   | { tab: TabNoteStruct; id?: string; stave?: string; drawStem?: boolean }
   | { change: EasyScoreStaffState };
 
@@ -77,6 +114,8 @@ export interface EasyScoreCompositionSpec {
   sheet?: Omit<SheetOptions, 'factory'>;
   system?: Omit<SystemOptions, 'factory' | 'width' | 'autoWidth' | 'noJustification'>;
   accidentals?: 'literal' | 'key-aware';
+  /** Include written grace pitches in key-aware state at their host onset. */
+  graceAccidentals?: 'explicit' | 'ordered';
   signatures?: 'changes' | 'every-measure';
   spans?: readonly EasyScoreSpanSpec[];
   crossMeasureSpans?: 'reject' | 'manual';
@@ -167,6 +206,9 @@ function buildVoice(
           'tab' in item
             ? score.make.tabNote(item.tab, item.drawStem)
             : score.make.note('note' in item ? item.note : item);
+        if ('grace' in item && item.grace) {
+          score.attach(note, buildGraceGroup(score, item.grace), 0);
+        }
         if ('id' in item && item.id !== undefined) note.setAttribute('id', item.id);
         if ('stave' in item && item.stave) assignments.set(note, item.stave);
         notes.push(note);
@@ -328,6 +370,10 @@ export function compose(score: EasyScore, spec: EasyScoreCompositionSpec): EasyS
   if (spec.staves.some((stave) => stave.measures.length !== count))
     invalid('All staves need the same number of measures.');
   if (spec.accidentals && !['literal', 'key-aware'].includes(spec.accidentals)) invalid('Unknown accidental policy.');
+  if (spec.graceAccidentals && !['explicit', 'ordered'].includes(spec.graceAccidentals))
+    invalid('Unknown grace accidental policy.');
+  if (spec.graceAccidentals === 'ordered' && spec.accidentals !== 'key-aware')
+    invalid('Ordered grace accidentals require key-aware accidentals.');
   if (spec.signatures && !['changes', 'every-measure'].includes(spec.signatures)) invalid('Unknown signature policy.');
   if (spec.crossMeasureSpans && !['reject', 'manual'].includes(spec.crossMeasureSpans)) invalid('Unknown span policy.');
   const nativeInputs: Note[] = [];
@@ -401,7 +447,15 @@ export function compose(score: EasyScore, spec: EasyScoreCompositionSpec): EasyS
         if (spec.accidentals === 'key-aware') {
           const generated = new Set(policies.flatMap((policy) => [...policy.generated]));
           policies.forEach((policy, staffIndex) =>
-            applyCompositionAccidentals(score, voices.flat(), policy.key, policy.changes, generated, staves[staffIndex])
+            applyCompositionAccidentals(
+              score,
+              voices.flat(),
+              policy.key,
+              policy.changes,
+              generated,
+              staves[staffIndex],
+              spec.graceAccidentals === 'ordered'
+            )
           );
         }
         result.staves.push(staves);

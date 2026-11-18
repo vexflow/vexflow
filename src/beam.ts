@@ -59,6 +59,8 @@ export class Beam extends Element {
     beamWidth: number;
     maxSlope: number;
     minSlope: number;
+    /** Keep automatic slope in the endpoint contour and align level in-staff beams to a half-space. */
+    contourSlope?: boolean;
     slopeIterations: number;
     slopeCost: number;
     stemletExtension: number;
@@ -618,8 +620,11 @@ export class Beam extends Element {
     let bestSlope = 0;
     let yShift = 0;
 
+    // Explicit slope bounds take precedence when they exclude the horizontal candidate.
+    const followContour = this.renderOptions.contourSlope && minSlope <= 0 && maxSlope >= 0;
     // iterate through slope values to find best weighted fit
     for (let slope = minSlope; slope <= maxSlope; slope += increment) {
+      if (followContour && Math.abs(slope) > 1e-8 && slope * initialSlope <= 0) continue;
       let totalStemExtension = 0;
       let yShiftTemp = 0;
 
@@ -660,6 +665,18 @@ export class Beam extends Element {
       }
     }
 
+    if (this.renderOptions.contourSlope && Math.abs(bestSlope) < 1e-8) {
+      // Snap the outer edge away from the heads so minimum stem lengths survive.
+      const stave = firstNote.checkStave();
+      const top = stave.getYForLine(0);
+      const edge = firstNote.getStemExtents().topY + yShift;
+      const step = stave.getSpacingBetweenLines() / 2;
+      if (edge >= top && edge <= stave.getYForLine(stave.getNumLines() - 1)) {
+        const slots = (edge - top) / step;
+        const snapped = stemDirection === Stem.UP ? Math.floor(slots) : Math.ceil(slots);
+        yShift += top + snapped * step - edge;
+      }
+    }
     this.slope = bestSlope;
     this.yShift = yShift;
   }

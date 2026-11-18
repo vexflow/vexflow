@@ -2,6 +2,8 @@
 import { Accidental } from '../accidental';
 import type { EasyScore } from '../easyscore';
 import { Fraction } from '../fraction';
+import { GraceNoteGroup } from '../gracenotegroup';
+import { Modifier } from '../modifier';
 import { Music } from '../music';
 import { Stave } from '../stave';
 import { StaveNote } from '../stavenote';
@@ -13,6 +15,27 @@ export interface KeyChange {
   key: string;
 }
 
+/** Grace attacks in different voices align at the host end of a before-group
+ * and at the beginning of an after-group. They never advance the voice clock. */
+function orderedAttacks(hosts: StaveNote[], includeGrace: boolean): StaveNote[][] {
+  const attacks = new Map<number, StaveNote[]>([[0, hosts.filter((note) => !note.isRest())]]);
+  if (includeGrace)
+    for (const host of hosts) {
+      for (const group of host.getModifiers()) {
+        if (!(group instanceof GraceNoteGroup)) continue;
+        const notes = group.getGraceNotes();
+        notes.forEach((note, i) => {
+          if (!(note instanceof StaveNote) || note.isRest()) return;
+          const offset = group.getPosition() === Modifier.Position.RIGHT ? i + 1 : i - notes.length;
+          const simultaneous = attacks.get(offset) ?? [];
+          simultaneous.push(note);
+          attacks.set(offset, simultaneous);
+        });
+      }
+    }
+  return [...attacks.entries()].sort(([a], [b]) => a - b).map(([, notes]) => notes);
+}
+
 /** Each onset is evaluated against one prior state, so voice ordering cannot change accidental output. */
 export function applyCompositionAccidentals(
   score: EasyScore,
@@ -20,7 +43,8 @@ export function applyCompositionAccidentals(
   key: string,
   changes: KeyChange[],
   generated: Set<Accidental>,
-  stave: Stave
+  stave: Stave,
+  includeGrace = false
 ): void {
   const music = new Music();
   let scale = music.createScaleMap(key);
@@ -32,7 +56,7 @@ export function applyCompositionAccidentals(
       if (note.shouldIgnoreTicks()) continue;
       const id = at.clone().simplify().toString();
       const group = positions.get(id) ?? { at: at.clone(), notes: [] };
-      if (note instanceof StaveNote && !note.isRest() && note.getStave() === stave) group.notes.push(note);
+      if (note instanceof StaveNote && note.getStave() === stave) group.notes.push(note);
       positions.set(id, group);
       at.add(note.getTicks());
     }
@@ -44,8 +68,13 @@ export function applyCompositionAccidentals(
       scale = music.createScaleMap(changes[changeIndex++].key);
       state.clear();
     }
+    for (const notes of orderedAttacks(group.notes, includeGrace)) applyAttack(notes);
+  }
+
+  /** Resolve each pitch against the same prior state before committing the whole attack. */
+  function applyAttack(notes: StaveNote[]) {
     const simultaneous = new Map<string, Set<string>>();
-    for (const note of group.notes)
+    for (const note of notes)
       for (const written of note.getKeys()) {
         const [name, octave] = written.split('/');
         const parts = music.getNoteParts(name);
@@ -55,7 +84,7 @@ export function applyCompositionAccidentals(
         simultaneous.set(id, values);
       }
     const updates = new Map<string, Set<string>>();
-    for (const note of group.notes) {
+    for (const note of notes) {
       note.getKeys().forEach((written, index) => {
         const [name, octave] = written.split('/');
         const parts = music.getNoteParts(name);

@@ -15,6 +15,9 @@ export interface ProportionalSpacing {
   pixelsPerQuarter?: number;
 }
 
+/** Optical spacing reserves measured ink first and distributes spare width by square-root duration. */
+export type MeasuredSpacing = ProportionalSpacing | { mode: 'optical' };
+
 /** One voice's non-rhythmic objects immediately before an anchor. */
 interface Prefix {
   contexts: TickContext[];
@@ -118,7 +121,7 @@ export class ProportionalFormatter {
   }
 
   /** Measure each stave independently so unrelated onsets on other staves do not compete. */
-  private measure(): void {
+  private measure(proportional = true): void {
     this.origin = PADDING;
     this.tail = PADDING;
     this.minimumScale = 0;
@@ -157,6 +160,7 @@ export class ProportionalFormatter {
         if (this.quarters(anchor) === this.duration) this.tail = Math.max(this.tail, extent.right + PADDING);
       }
     }
+    if (!proportional) return;
     // All pairs also cover a wide earlier object extending past an intervening narrow one.
     const previous = new Map<Stave | undefined, { time: number; extent: Extent }[]>();
     for (const anchor of this.anchors) {
@@ -209,19 +213,77 @@ export class ProportionalFormatter {
     return { scale, width: neededWidth };
   }
 
+  /** Find the earliest legal anchor at each onset. A wide mark still occupies
+   * its stave while other staves advance. Extra width can only enlarge gaps. */
+  private opticalLayout(width: number) {
+    if (!Number.isFinite(width) || width < 0)
+      throw new RuntimeError('BadArgument', 'Width must be finite and nonnegative.');
+    this.measure(false);
+    const rightEdges = new Map<Stave | undefined, number>();
+    const positions: number[] = [];
+    const weights: number[] = [];
+    let priorX = 0;
+    let time = 0;
+    let weight = 0;
+    for (const anchor of this.anchors) {
+      const onset = this.quarters(anchor);
+      let x = priorX + PADDING;
+      for (const [stave, extent] of anchor.extents)
+        x = Math.max(x, (rightEdges.get(stave) ?? 0) + PADDING + extent.left);
+      for (const [stave, extent] of anchor.extents) rightEdges.set(stave, x + extent.right);
+      weight += Math.sqrt(onset - time);
+      weights.push(weight);
+      positions.push(x);
+      priorX = x;
+      time = onset;
+    }
+    weight += Math.sqrt(this.duration - time);
+    const minimum = Math.max(
+      this.centeredWidth + 2 * PADDING,
+      priorX + PADDING,
+      ...Array.from(rightEdges.values(), (x) => x + PADDING)
+    );
+    if (width > 0 && width + EPSILON < minimum)
+      throw new RuntimeError(
+        'InsufficientOpticalSpace',
+        `Optical spacing requires at least ${required(minimum)} px width; received ${width.toFixed(2)} px.`
+      );
+    const available = width || minimum;
+    return {
+      width: available,
+      center: available / 2,
+      positions: positions.map((x, i) => x + (weight ? weights[i] / weight : 0) * (available - minimum)),
+    };
+  }
+
   /** Minimum total width for autoWidth, honoring a supplied exact scale. */
-  minimumWidth(spacing: ProportionalSpacing): number {
+  minimumWidth(spacing: MeasuredSpacing): number {
+    if (spacing.mode === 'optical') return this.opticalLayout(0).width;
     return this.dimensions(spacing, 0).width;
   }
 
-  /** Place anchors and prefixes, retaining the established centering exception for measure rests. */
-  format(spacing: ProportionalSpacing, width: number): number {
+  /** Convert a single exact time scale into the same placement data as optical spacing. */
+  private proportionalLayout(spacing: ProportionalSpacing, width: number) {
     const dimensions = this.dimensions(spacing, width);
-    for (const anchor of this.anchors) {
-      const x = this.origin + this.quarters(anchor) * dimensions.scale;
+    return {
+      width: dimensions.width,
+      center: this.origin + (this.duration * dimensions.scale) / 2,
+      positions: this.anchors.map((anchor) => this.origin + this.quarters(anchor) * dimensions.scale),
+    };
+  }
+
+  /** Place anchors and prefixes, retaining the established centering exception for measure rests. */
+  format(spacing: MeasuredSpacing, width: number): number {
+    const {
+      positions,
+      center,
+      width: usedWidth,
+    } = spacing.mode === 'optical' ? this.opticalLayout(width) : this.proportionalLayout(spacing, width);
+    for (const [i, anchor] of this.anchors.entries()) {
+      const x = positions[i];
       anchor.context.setX(x);
       anchor.context.getCenterAlignedTickables().forEach((note: Tickable) => {
-        note.setCenterXShift(this.origin + (this.duration * dimensions.scale) / 2 - x);
+        note.setCenterXShift(center - x);
       });
       anchor.prefixes.forEach((prefix) => {
         // Right-align each sequence just before the rhythmic note's left modifiers.
@@ -243,6 +305,6 @@ export class ProportionalFormatter {
         }
       });
     }
-    return dimensions.width;
+    return usedWidth;
   }
 }

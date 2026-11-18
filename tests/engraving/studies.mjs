@@ -191,4 +191,62 @@ export function registerStudies() {
     options.assert.ok(stemTipErrorsPx.every(Number.isFinite), 'Measured each stem tip against the refitted line');
     document.getElementById(options.elementId).dataset.measurement = JSON.stringify({ stemTipErrorsPx });
   });
+
+  QUnit.module('M2 studies');
+
+  VF.Test.runTests('Four close voices and an unequal onset', (options) => {
+    const factory = VF.Test.makeFactory(options, 420, 155);
+    const score = factory.EasyScore();
+    const voices = ['F5/q, G5/q', 'E5/8, C5/8, D5/q', 'D5/q, E5/q', 'C5/q, B4/q'].map((input, i) =>
+      score.voice(score.notes(input, { stem: i % 2 ? 'down' : 'up' }), { mode: 'soft' })
+    );
+    factory.System({ width: 390 }).addStave({ voices }).addClef('treble');
+    factory.draw();
+    const x = voices.map((v) => v.getTickables()[0].getNoteHeadBeginX());
+    options.assert.ok(x.every(Number.isFinite), 'Every voice has a head position');
+    document.getElementById(options.elementId).dataset.measurement = JSON.stringify({ x });
+  });
+
+  VF.Test.runTests('Beam contour and staff contact', (options) => {
+    const factory = VF.Test.makeFactory(options, 550, 265);
+    const score = factory.EasyScore();
+    const beams = [];
+    for (const [width, y] of [
+      [300, 10],
+      [520, 135],
+    ]) {
+      const notes = score.notes('G4/8, A4, B4, C4, E4, E4, F4, F4', { stem: 'up' });
+      factory
+        .System({ width, y })
+        .addStave({ voices: [score.voice(notes)] })
+        .addClef('treble');
+      for (const group of [notes.slice(0, 4), notes.slice(4, 6), notes.slice(6)]) {
+        const beam = factory.Beam({ notes: group });
+        beam.renderOptions.contourSlope = true;
+        beams.push(beam);
+      }
+    }
+    factory.draw();
+    const slopes = beams.map((beam) => beam.slope);
+    options.assert.ok(slopes.every(Number.isFinite), 'Every beam has a finite slope');
+    document.getElementById(options.elementId).dataset.measurement = JSON.stringify({ slopes });
+  });
+
+  VF.Test.runTests('Long fall and delayed turn after redraw', (options) => {
+    const factory = VF.Test.makeFactory(options, 440, 175);
+    const score = factory.EasyScore();
+    const notes = score.notes('G4/q, A4/q, B4/h');
+    notes[0].addModifier(new VF.Ornament('fallLong'), 0);
+    notes[1].addModifier(new VF.Ornament('turn').setDelayed(true).setUpperAccidental('#'), 0);
+    const system = factory.System({ width: 410, y: 20 });
+    system.addStave({ voices: [score.voice(notes)] }).addClef('treble');
+    factory.draw({ retain: true });
+    factory.getContext().clear();
+    system.setWidth(320);
+    factory.draw({ retain: true });
+    options.assert.ok(
+      notes.every((n) => n.isRendered()),
+      'Retained notes rendered'
+    );
+  });
 }

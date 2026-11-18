@@ -566,18 +566,29 @@ export class Accidental extends Modifier {
   }
 
   /** Render accidental onto canvas. */
-  override draw(): void {
+  /** Place the glyph using the same coordinates for measurement and drawing. */
+  private positionGlyph(): void {
     const { type, position, index } = this;
 
-    const ctx = this.checkContext();
     const note = this.checkAttachedNote();
-    this.setRendered();
 
     // Figure out the start `x` and `y` coordinates for note and index.
     const start = note.getModifierStartXY(position, index);
     this.x = start.x - this.width;
     this.y = start.y;
     L('Rendering: ', type, start.x, start.y);
+  }
+
+  /** Visible glyph after formatting, including cautionary or authored shifts. */
+  getInkBounds() {
+    this.positionGlyph();
+    return this.getTextInk(this.x, this.y);
+  }
+
+  override draw(): void {
+    const ctx = this.checkContext();
+    this.positionGlyph();
+    this.setRendered();
     this.renderText(ctx, 0, 0);
   }
 }
