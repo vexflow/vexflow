@@ -27,7 +27,7 @@ Existing elements retain the fonts they were created with. `setFonts()` resets t
 
 | Role | Default treatment |
 | --- | --- |
-| Chord names | 13 pt Academico. Raised and lowered chord extensions scale with the root. |
+| Chord names | 14 pt Academico. Raised and lowered chord extensions scale with the root. |
 | Verse syllables and continuous lyric labels | 12 pt Academico. Use `system.getPhraseLayout().addVerse(stave, syllables)` for a line of lyrics. |
 | Standard-staff technique letters and written bend instructions such as “full” | Score text face, normally Academico. |
 | Single-letter technique labels on a tab tie | 10 pt bold Arial, with Helvetica and the system sans serif as fallbacks. |

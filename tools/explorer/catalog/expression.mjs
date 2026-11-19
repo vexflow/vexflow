@@ -67,7 +67,8 @@ const sub = { symbolModifier: VF.ChordSymbol.symbolModifiers.SUBSCRIPT };
     .addStave({ voices: [voice] }).addClef('treble');
 });
 factory.draw();
-ctx.setFont('sans-serif', 10);
+// Match the captions to the score’s selected text face.
+ctx.setFont(VF.getTextFonts().join(','), 10);
 ctx.fillText('Default: none', 30, 22);
 ctx.fillText('Opt-in: auto', 30, 172);
 // Inspect the complete chord's ink bounds, including both script rows.
@@ -81,7 +82,7 @@ if (params.bounds === 'yes') {
 }`,
     [
       text('root', 'Root', 'A'),
-      number('size', 'Font size (pt)', 18, 10, 28),
+      number('size', 'Font size (pt)', 14, 10, 28),
       select('bounds', 'Chord bounds', 'no', ['no', 'yes']),
     ],
     'Auto supports regular Academico/Bravura and Petaluma Script/Petaluma. Other font combinations keep the default layout. Set the chord font before formatting.'

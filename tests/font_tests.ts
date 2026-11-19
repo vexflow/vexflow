@@ -186,7 +186,7 @@ function textFontDefaults(assert: Assert): void {
     VexFlow.setFonts('Bravura', 'Academico');
     const note = new VexFlow.TabNote({ positions: [{ str: 1, fret: 5 }], duration: 'q' });
     const ends = { firstNote: note, lastNote: note };
-    assert.equal(new VexFlow.ChordSymbol().fontSizeInPoints, 13);
+    assert.equal(new VexFlow.ChordSymbol().fontSizeInPoints, 14);
     assert.equal(Metrics.getFontInfo('Annotation.lyric').size, 12);
     assert.equal(new VexFlow.TabTie(ends, 'H').fontInfo.family.split(',')[0], 'Arial');
     assert.equal(new VexFlow.StaveTie(ends, 'H').fontInfo.family.split(',')[0], 'Academico');

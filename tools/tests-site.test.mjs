@@ -200,6 +200,14 @@ test('standalone gallery runs with local fonts/scripts and preserves QUnit filte
         assert.match(label, piece === 'drums' ? /Snare drum.*hi-hat/i : /string 3.*bend 2 semitones/i);
       } else if (piece === 'sumer') {
         await page.select('#edition', 'Full ensemble');
+        await page.select('#width', 'Page width');
+        // The opening two measures belong to one singer. Their different stems share one lyric baseline.
+        const baselines = await page.$$eval(
+          '#vf-part0-0-0 .vf-annotation text, #vf-part0-1-0 .vf-annotation text',
+          (els) => els.filter((el) => ['Su-', 'cum-'].includes(el.textContent)).map((el) => el.getAttribute('y'))
+        );
+        assert.equal(baselines.length, 2);
+        assert.equal(baselines[0], baselines[1]);
         const labels = await page.$$eval('#events option', (opts) => opts.map((o) => o.text).join(' '));
         for (const part of ['Singer 4', 'Pes 1', 'Pes 2']) assert.ok(labels.includes(part));
         await page.select('#edition', 'Singer 2');

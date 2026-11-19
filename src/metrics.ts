@@ -147,7 +147,7 @@ export const MetricsDefaults: Record<string, any> = {
 
   ChordSymbol: {
     isText: true,
-    fontSize: 13,
+    fontSize: 14,
     spacing: 0.05,
     subscriptOffset: 0.2,
     superscriptOffset: -0.4,

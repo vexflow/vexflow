@@ -488,7 +488,9 @@ function doubleBottom(options: TestOptions): void {
 }
 
 function wide(options: TestOptions): void {
-  const f = VexFlowTests.makeFactory(options, 300 * 1.5, 680);
+  // A left-justified extension can extend beyond the last barline. Keep its ink on the page.
+  const pageWidth = 370;
+  const f = VexFlowTests.makeFactory(options, pageWidth * 1.5, 680);
   const ctx = f.getContext();
   ctx.scale(1.5, 1.5);
 
@@ -500,6 +502,8 @@ function wide(options: TestOptions): void {
       note(f, ['c/4', 'e/4', 'B/4'], 'h', chord2),
     ];
     Formatter.FormatAndDraw(ctx, stave, notes);
+    const last = chord2.getBoundingBox();
+    options.assert.ok(last.x + last.w < pageWidth, 'The final chord and its extension fit on the page');
   }
 
   let chord1 = f.ChordSymbol().addText('FrogToad7').setHorizontal('left').addGlyphOrText('(#11b9)', superscript);
