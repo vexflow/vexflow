@@ -4,7 +4,7 @@ import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 import puppeteer from 'puppeteer';
 import { createCanvas, registerFont } from 'canvas';
-import { makeContinuousStudy } from '../engraving/continuous-studies.mjs';
+import { makeContinuousStudy, tabEndingStudy } from '../engraving/continuous-studies.mjs';
 const VF = await import(new URL('../../build/esm/entry/vexflow-core.js', import.meta.url));
 for (const family of ['Bravura', 'Academico']) {
   const name = family.toLowerCase();
@@ -216,6 +216,55 @@ test('span families retain the source anchors and continuous parameter at first,
     for (let i = 1; i < fs.length; i++) assert.equal(fs[i - 1].progress[1], fs[i].progress[0]);
   }
 });
+test('tab ties stay on the selected string through reflow and leave a visible incoming curve', () => {
+  for (const selectors of [{ string: 2 }, { fromHead: 1 }, { toHead: 0 }, { fromHead: 1, toHead: 0 }, {}]) {
+    const source = tabEndingStudy();
+    const tie = source.continuous.spans[0];
+    delete tie.fromHead;
+    Object.assign(tie, selectors);
+    const string = Object.keys(selectors).length ? 2 : 1;
+    const { f } = factory();
+    const score = f.EasyScore().compose(source);
+    const layout = score.sheet.getContinuousLayout();
+    function frame(width) {
+      score.sheet.setWidth(width);
+      f.draw({ retain: true });
+      assert.deepEqual(layout.diagnostics, []);
+      return structuredClone(layout.fragments);
+    }
+    const wide = frame(420);
+    assert.deepEqual(
+      wide.map((f) => f.part),
+      ['single', 'single']
+    );
+    const narrow = frame(122);
+    for (const kind of ['tie', 'volta'])
+      assert.deepEqual(
+        narrow.filter((f) => f.kind === kind).map((f) => f.part),
+        ['first', 'last']
+      );
+    for (const f of narrow.filter((f) => f.kind === 'tie')) {
+      const stave = score.staves[f.row][0];
+      assert.deepEqual(f.strings, [string]);
+      assert.ok(f.x2 - f.x1 >= stave.space(1), 'visible tie on each side of the break');
+      const line = stave.getYForLine(string - 1);
+      assert.ok(f.y1 < line && f.y1 > line - stave.space(0.5));
+      assert.equal(f.y1, f.y2);
+    }
+    assert.deepEqual(frame(420), wide);
+  }
+});
+
+test('tab ties reject unmatched strings, frets and invalid chord positions before drawing', () => {
+  for (const selectors of [{ string: 7 }, { string: 3 }, { fromHead: -1 }, { toHead: 2 }, { fromHead: 1, toHead: 1 }]) {
+    const source = tabEndingStudy();
+    Object.assign(source.continuous.spans[0], selectors);
+    assert.throws(() => factory().f.EasyScore().compose(source), /tab tie/i);
+  }
+  const source = tabEndingStudy();
+  source.staves[0].measures[1].voices[0].notes[0].tab.positions[0] = { str: 2, fret: 11 };
+  assert.throws(() => factory().f.EasyScore().compose(source), /same string and fret/);
+});
 test('boundary key, clef and meter move together; explicit signs survive and returned tied accidentals reflow', () => {
   const { f } = factory(),
     es = f.EasyScore();
@@ -248,6 +297,31 @@ test('boundary key, clef and meter move together; explicit signs survive and ret
   b.sheet.setWidth(800).format();
   assert.deepEqual(signs(VF.StaveModifier.Position.END), [VF.Barline.CATEGORY]);
 });
+test('an authored rest remains visible on a silent staff and breaks a compressed rest run', () => {
+  const measures = Array.from({ length: 3 }, (_, i) => ({
+    voices: [{ notes: [{ note: { keys: ['r/4'], duration: 'wr', ...(i === 1 && { restLine: 0 }) } }] }],
+  }));
+  const source = { staves: [{ id: 'rest', measures }], continuous: { compressRests: true, hideEmptyStaves: true } };
+  const { f } = factory();
+  const score = f.EasyScore().compose(source);
+  score.sheet.format();
+  assert.deepEqual(
+    score.sheet.getContinuousLayout().rows.flatMap((row) => row.restGroups),
+    []
+  );
+  const melody = spec(3, {}).staves[0];
+  const duet = factory()
+    .f.EasyScore()
+    .compose({ ...source, staves: [melody, ...source.staves] });
+  duet.sheet.format();
+  assert.ok(
+    duet.sheet
+      .getContinuousLayout()
+      .rows.find((row) => row.measures.includes(2))
+      .visibleStaves.includes('rest')
+  );
+});
+
 test('structural marks interrupt rest compression; navigation targets and span heads validate atomically', () => {
   const { f } = factory(),
     es = f.EasyScore(),

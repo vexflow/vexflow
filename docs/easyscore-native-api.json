@@ -889,6 +889,7 @@
       ]
     },
     "FretDiagram": [
+      "CATEGORY(): string",
       "constructor(spec: FretDiagramSpec)",
       "getBoundingBox(): BoundingBox",
       "draw(): void"
@@ -1865,7 +1866,7 @@
     "Stave": [
       "CATEGORY(): string",
       "options: Required<StaveOptions>",
-      "setBoundaryModifiers(modifiers: StaveModifier[]): void",
+      "setBoundaryModifiers(modifiers: StaveModifier[], notePadding = 0): void",
       "defaultPadding(): number",
       "rightPadding(): number",
       "constructor(x: number, y: number, width: number, options?: StaveOptions)",
@@ -2081,6 +2082,7 @@
         "extends NoteStruct"
       ],
       "fields": [
+        "restLine?: number;",
         "musicFont?: string;",
         "engraving?: EngravingProfile;",
         "stemDirection?: number;",
@@ -2136,6 +2138,8 @@
       "getFlagStyle(): ElementStyle | undefined",
       "getGlyphWidth(): number",
       "setKeyStyle(index: number, style: ElementStyle): this",
+      "restLine(): number | undefined",
+      "setRestLine(line: number | undefined): this",
       "setKeyLine(index: number, line: number): this",
       "getKeyLine(index: number): number",
       "getVoiceShiftWidth(): number",
@@ -2865,7 +2869,7 @@
     "isStaveNote": "inferred",
     "isStemmableNote": "inferred",
     "isTabNote": "inferred",
-    "Category": "export const enum Category { Accidental = 'Accidental', Annotation = 'Annotation', Articulation = 'Articulation', Barline = 'Barline', BarNote = 'BarNote', Beam = 'Beam', Bend = 'Bend', ChordSymbol = 'ChordSymbol', Clef = 'Clef', ClefNote = 'ClefNote', Crescendo = 'Crescendo', Curve = 'Curve', Dot = 'Dot', Element = 'Element', Flag = 'Flag', Fraction = 'Fraction', FretHandFinger = 'FretHandFinger', GhostNote = 'GhostNote', Glyph = 'Glyph', GlyphNote = 'GlyphNote', GraceNote = 'GraceNote', GraceNoteGroup = 'GraceNoteGroup', GraceTabNote = 'GraceTabNote', KeySignature = 'KeySignature', KeySigNote = 'KeySigNote', Modifier = 'Modifier', MultiMeasureRest = 'MultiMeasureRest', Note = 'Note', NoteHead = 'NoteHead', NoteSubGroup = 'NoteSubGroup', Ornament = 'Ornament', Parenthesis = 'Parenthesis', PedalMarking = 'PedalMarking', RenderContext = 'RenderContext', RepeatNote = 'RepeatNote', Repetition = 'Repetition', Stave = 'Stave', StaveConnector = 'StaveConnector', StaveHairpin = 'StaveHairpin', StaveLine = 'StaveLine', StaveModifier = 'StaveModifier', StaveNote = 'StaveNote', StaveSection = 'StaveSection', StaveTempo = 'StaveTempo', StaveText = 'StaveText', StaveTie = 'StaveTie', Stem = 'Stem', StemmableNote = 'StemmableNote', StringNumber = 'StringNumber', Stroke = 'Stroke', System = 'System', TabNote = 'TabNote', TabSlide = 'TabSlide', TabStave = 'TabStave', TabTie = 'TabTie', TextBracket = 'TextBracket', TextDynamics = 'TextDynamics', TextNote = 'TextNote', Tickable = 'Tickable', TimeSignature = 'TimeSignature', TimeSigNote = 'TimeSigNote', Tremolo = 'Tremolo', Tuplet = 'Tuplet', Vibrato = 'Vibrato', VibratoBracket = 'VibratoBracket', Voice = 'Voice', Volta = 'Volta', }"
+    "Category": "export const enum Category { Accidental = 'Accidental', Annotation = 'Annotation', Articulation = 'Articulation', Barline = 'Barline', BarNote = 'BarNote', Beam = 'Beam', Bend = 'Bend', ChordSymbol = 'ChordSymbol', Clef = 'Clef', ClefNote = 'ClefNote', Crescendo = 'Crescendo', Curve = 'Curve', Dot = 'Dot', Element = 'Element', Flag = 'Flag', Fraction = 'Fraction', FretDiagram = 'FretDiagram', FretHandFinger = 'FretHandFinger', GhostNote = 'GhostNote', Glyph = 'Glyph', GlyphNote = 'GlyphNote', GraceNote = 'GraceNote', GraceNoteGroup = 'GraceNoteGroup', GraceTabNote = 'GraceTabNote', KeySignature = 'KeySignature', KeySigNote = 'KeySigNote', Modifier = 'Modifier', MultiMeasureRest = 'MultiMeasureRest', Note = 'Note', NoteHead = 'NoteHead', NoteSubGroup = 'NoteSubGroup', Ornament = 'Ornament', Parenthesis = 'Parenthesis', PedalMarking = 'PedalMarking', RenderContext = 'RenderContext', RepeatNote = 'RepeatNote', Repetition = 'Repetition', Stave = 'Stave', StaveConnector = 'StaveConnector', StaveHairpin = 'StaveHairpin', StaveLine = 'StaveLine', StaveModifier = 'StaveModifier', StaveNote = 'StaveNote', StaveSection = 'StaveSection', StaveTempo = 'StaveTempo', StaveText = 'StaveText', StaveTie = 'StaveTie', Stem = 'Stem', StemmableNote = 'StemmableNote', StringNumber = 'StringNumber', Stroke = 'Stroke', System = 'System', TabNote = 'TabNote', TabSlide = 'TabSlide', TabStave = 'TabStave', TabTie = 'TabTie', TextBracket = 'TextBracket', TextDynamics = 'TextDynamics', TextNote = 'TextNote', Tickable = 'Tickable', TimeSignature = 'TimeSignature', TimeSigNote = 'TimeSigNote', Tremolo = 'Tremolo', Tuplet = 'Tuplet', Vibrato = 'Vibrato', VibratoBracket = 'VibratoBracket', Voice = 'Voice', Volta = 'Volta', }"
   },
   "util": {
     "RuntimeError": [
@@ -3281,7 +3285,8 @@
       "fields": [
         "clef?: string;",
         "key?: string;",
-        "time?: string;"
+        "time?: string;",
+        "showTimeSignature?: boolean;"
       ]
     },
     "EasyScoreContent": "export type EasyScoreContent = | string | StaveNoteStruct | Tickable | { note: StaveNoteStruct; id?: string; stave?: string; grace?: GraceGroupSpec; } | { tab: TabNoteStruct; id?: string; stave?: string; drawStem?: boolean } | { change: EasyScoreStaffState };",
@@ -3302,7 +3307,10 @@
       "fields": [
         "instrument?: { name: string; shortName?: string };",
         "voices: readonly EasyScoreVoiceSpec[];",
-        "span?: VoiceTime | string;"
+        "span?: VoiceTime | string;",
+        "endBarline?: BarlineType;",
+        "chords?: readonly LeadMark[];",
+        "verses?: readonly (readonly LyricMark[])[];"
       ]
     },
     "EasyScoreStaveSpec": {

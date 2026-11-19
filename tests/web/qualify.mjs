@@ -14,7 +14,7 @@ const output = 'build/m7';
 await mkdir(output, { recursive: true });
 const reference = process.env.VF_WEB_REFERENCE ?? 'build/engraving-main/build/cjs/vexflow-debug.js';
 const current = 'build/cjs/vexflow-debug.js';
-const reviewed = '72ca768d22f0535dfcae58a030690701be9cd1bc';
+const reviewed = '82d46d08310df4a94d1be076743b1e5654ced560';
 const html = await readFile('demos/ui/score-reader.html', 'utf8');
 const app = await readFile('demos/ui/score-reader.js', 'utf8');
 const bundle = await readFile(current, 'utf8');

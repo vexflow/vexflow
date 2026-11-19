@@ -1,6 +1,7 @@
 // A standalone chord frame. Strings run from the lowest (left) to the highest (right).
 import { BoundingBox } from './boundingbox';
 import { Element } from './element';
+import { Category } from './typeguard';
 import { RuntimeError } from './util';
 
 /** Frets are absolute; 0 = open, 'x' = muted. A barre names one-based string numbers. */
@@ -12,6 +13,11 @@ export interface FretDiagramSpec {
 }
 
 export class FretDiagram extends Element {
+  /** The registry and font metrics both use the diagram category. */
+  static override get CATEGORY(): string {
+    return Category.FretDiagram;
+  }
+
   private readonly frets: readonly (number | 'x')[];
   private readonly first: number;
   private readonly rows: number;
@@ -67,8 +73,10 @@ export class FretDiagram extends Element {
       'aria-label',
       'Chord frame, low to high: ' + this.frets.join(', ') + (this.barre ? ', barre at fret ' + this.barre.fret : '')
     );
-    ctx.setFont('sans-serif', 9);
-    if (this.first > 1) ctx.fillText(String(this.first), this.getX() + 2, top + 9);
+    if (this.first > 1) {
+      ctx.setFont(this.fontInfo);
+      ctx.fillText(String(this.first), this.getX() + 2, top + 9);
+    }
     for (let row = 0; row <= this.rows; row++) {
       ctx.setLineWidth(row === 0 && this.first === 1 ? 2.5 : 1);
       line(left, top + row * 11, right, top + row * 11);

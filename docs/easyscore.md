@@ -113,6 +113,8 @@ Attach modifiers with `score.attach(note, modifier, chordIndex)`.
 `make.dot()` adds a visual dot. Set `dots` or `durationOverride` in the typed note to change its musical duration.
 String dots continue to handle both duration and display automatically.
 
+Set `restLine` on a typed rest to keep its vertical position during formatting. For example, `score.make.note({ keys: ['r/4'], duration: 'hr', restLine: 0 })` puts a half rest on the first ledger below a five-line staff. Key line 5 is the top staff line. On an existing rest, `setRestLine(line)` pins the position and `setRestLine(undefined)` releases it.
+
 ## Grace and subnote groups
 
 ```js
@@ -514,6 +516,23 @@ Assignments survive Sheet reflow. Key-aware accidentals follow the target stave.
 const bass = score.withDefaults({ clef: 'bass', stem: 'down' }, (s) => s.notes('C3/h, G2'));
 ```
 
+### Lead sheets and extracted parts
+
+Put chord names and lyric verses on the staff measure that owns their note IDs. Each inner verse array is one line of lyrics. A syllable can hyphenate to the next syllable or extend to a later note in that measure.
+
+```js
+const measure = {
+  time: '6/8',
+  showTimeSignature: false,
+  voices: [{ notes: 'C4/q.[id="day"], G4/q.[id="light"]' }],
+  chords: [{ note: 'day', text: 'Cmaj7' }],
+  verses: [[{ note: 'day', text: 'Day', hyphenAfter: true }, { note: 'light', text: 'light' }]],
+  endBarline: VexFlow.Barline.type.END,
+};
+```
+
+`showTimeSignature` carries forward on the staff. Set it to `true` to print the active meter again. The meter still governs voice timing and automatic beaming while hidden. Use `Barline.type.DOUBLE` for a double bar. The same descriptors drive screen reflow and the selected staff in a `Publication`.
+
 ### Accidental policy
 
 The default is `literal`: existing EasyScore accidental behavior stays unchanged.
@@ -563,6 +582,10 @@ result.sheet.setWidth(300).format();
 const layout = result.sheet.getContinuousLayout();
 console.log(layout.rows, layout.fragments, layout.diagnostics);
 ```
+
+For tab, use `{ id: 'hold', kind: 'tie', from: 'a', to: 'b', string: 2 }` to sustain a fret on the second string of the same staff. Both chords must play that fret on that string, in any position order. You can also select a position with a zero-based `fromHead` or `toHead`. With no selector, the tie starts at the first position of the opening chord.
+
+A tab ending uses `{ id: 'ending', kind: 'volta', from: 'a', to: 'b', text: '1.' }`. The bracket and ties split at system breaks and follow the guitar into an extracted part.
 
 See the [continuous score guide](vf6/m4.md) for break constraints, rest grouping, staff names and span conventions.
 

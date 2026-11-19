@@ -83,6 +83,7 @@ export const enum Category {
   Element = 'Element',
   Flag = 'Flag',
   Fraction = 'Fraction',
+  FretDiagram = 'FretDiagram',
   FretHandFinger = 'FretHandFinger',
   GhostNote = 'GhostNote',
   Glyph = 'Glyph',

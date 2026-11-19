@@ -335,7 +335,7 @@ export class Formatter {
 
         // If activated rests not on default can be rendered as specified.
         const line = currTickable.getLineForRest();
-        if (line !== 3) {
+        if (currTickable.restLine !== undefined || line !== 3) {
           return;
         }
 

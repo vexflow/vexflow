@@ -145,3 +145,29 @@ export function makeContinuousStudy(VF, factory, kind, width, mode = 'balanced')
   if (!main && kind === 'choir') result.getNote('v00').addModifier(factory.Annotation({ text: 'Sing' }), 0);
   return result;
 }
+
+/** Two quarter-note chords reorder their tab positions but sustain string two across the barline. */
+export function tabEndingStudy() {
+  const positions = [
+    { str: 1, fret: 12 },
+    { str: 2, fret: 10 },
+  ];
+  return {
+    staves: [
+      {
+        id: 'guitar',
+        kind: 'tab',
+        time: '1/4',
+        measures: [positions, [...positions].reverse()].map((chord, i) => ({
+          voices: [{ notes: [{ id: 'tab' + i, tab: { duration: 'q', positions: chord } }] }],
+        })),
+      },
+    ],
+    continuous: {
+      spans: [
+        { id: 'hold', kind: 'tie', from: 'tab0', to: 'tab1', fromHead: 1 },
+        { id: 'ending', kind: 'volta', from: 'tab0', to: 'tab1', text: '1.' },
+      ],
+    },
+  };
+}

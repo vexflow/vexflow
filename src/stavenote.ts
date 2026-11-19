@@ -27,6 +27,12 @@ import { Tables } from './tables';
 import { Category } from './typeguard';
 import { defined, log, midLine, RuntimeError } from './util';
 
+/** Bravura's SMuFL stemUpSE and stemDownNW anchors, in staff spaces from the glyph origin. */
+const bravuraSlashAnchors: Record<string, { up: readonly [number, number]; down: readonly [number, number] }> = {
+  [Glyphs.noteheadSlashVerticalEnds]: { up: [1.46, 0.656], down: [0, -0.664] },
+  [Glyphs.noteheadSlashWhiteHalf]: { up: [3.12, 1], down: [0, -1] },
+};
+
 export interface StaveNoteHeadBounds {
   yTop: number;
   yBottom: number;
@@ -54,6 +60,8 @@ export interface StaveNoteFormatSettings {
 }
 
 export interface StaveNoteStruct extends NoteStruct {
+  /** Fixed rest position in key-line coordinates. On a five-line stave, 1 is the bottom line. */
+  restLine?: number;
   /** Override the music glyph family for this note, its heads and its flag. */
   musicFont?: string;
   engraving?: EngravingProfile;
@@ -158,7 +166,18 @@ export class StaveNote extends StemmableNote {
 
     const visible = notesList.filter((item) => item.note.renderOptions.draw !== false);
     if (visible.length < 2) return true;
-    if (visible.length > 3) {
+    const positioned = visible.some(({ note }) => note.restLine !== undefined);
+    if (positioned && visible.length <= 3) {
+      // Move only automatic rests. Visit obstacles in travel order so each shift clears earlier ones.
+      for (const rest of visible.filter((v) => v.isrest && v.note.restLine === undefined)) {
+        const direction = rest.note.getStemDirection();
+        const peers = visible.filter((v) => v !== rest).sort((a, b) => direction * (a.minLine - b.minLine));
+        for (const peer of peers) {
+          if (rest.minLine <= peer.maxLine && peer.minLine <= rest.maxLine) shiftRestVertical(rest, peer, direction);
+        }
+      }
+    }
+    if (visible.length > 3 || positioned) {
       // Keep overlapping stem/head envelopes in separate columns. Pitch order makes
       // placement independent of voice insertion for voices at distinct pitches.
       const columns: { bottom: number; width: number; members: StaveNoteFormatSettings[] }[] = [];
@@ -369,6 +388,8 @@ export class StaveNote extends StemmableNote {
   protected readonly clef: string;
   protected readonly octaveShift?: number;
 
+  /** Preserve the previous line so releasing an explicit position restores automatic placement. */
+  private lineBeforeRestPin?: number;
   protected displaced: boolean;
   protected dotShiftY: number;
   protected useDefaultHeadX = false;
@@ -424,6 +445,7 @@ export class StaveNote extends StemmableNote {
     } else {
       this.setStemDirection(noteStruct.stemDirection ?? Stem.UP);
     }
+    if (noteStruct.restLine !== undefined) this.setRestLine(noteStruct.restLine);
     if (this.notation.length) attachGuitarGestures(this);
   }
 
@@ -672,21 +694,31 @@ export class StaveNote extends StemmableNote {
     return super.hasFlag() && !this.isRest();
   }
 
+  /** Use explicit font metadata first, then the bundled anchors for Bravura rhythm slashes. */
+  private stemAnchor(head: NoteHead, direction: 'up' | 'down'): readonly [number, number] | undefined {
+    const family = head.fontInfo.family;
+    if (this.engraving?.musicFont === family) {
+      const anchor = this.engraving.stemAnchor(head.text, direction);
+      if (anchor) return anchor;
+    }
+    const slash = bravuraSlashAnchors[head.text];
+    if (slash && /^\s*(?:Bravura|"Bravura"|'Bravura')\s*(?:,|$)/i.test(family)) return slash[direction];
+  }
+
   override getStemX(): number {
     if (this.noteType === 'r') {
       return this.getCenterGlyphX();
     } else {
       const up = this.stemDirection === Stem.UP;
-      const head = this.engraving && this._noteHeads.find((h) => !h.isDisplaced());
-      if (head && this.engraving?.musicFont === head.fontInfo.family) {
-        const anchor = this.engraving.stemAnchor(head.text, up ? 'up' : 'down');
-        if (anchor)
-          return (
-            this.getNoteHeadBeginX() +
-            head.getXShift() +
-            (anchor[0] * head.fontSizeInPixels) / 4 +
-            ((up ? -1 : 1) * Stem.WIDTH) / 2
-          );
+      const head = this._noteHeads.find((h) => !h.isDisplaced());
+      const anchor = head && this.stemAnchor(head, up ? 'up' : 'down');
+      if (head && anchor) {
+        return (
+          this.getNoteHeadBeginX() +
+          head.getXShift() +
+          (anchor[0] * head.fontSizeInPixels) / 4 +
+          ((up ? -1 : 1) * Stem.WIDTH) / 2
+        );
       }
       // We adjust the origin of the stem because we want the stem left-aligned
       // with the notehead if stemmed-down, and right-aligned if stemmed-up
@@ -883,6 +915,27 @@ export class StaveNote extends StemmableNote {
     return this;
   }
 
+  /** The explicit key line, or undefined when rest placement is automatic. */
+  get restLine(): number | undefined {
+    return this.lineBeforeRestPin === undefined ? undefined : this.getKeyLine(0);
+  }
+
+  /** Pin this rest to a line. Passing undefined releases it for automatic placement. */
+  setRestLine(line: number | undefined): this {
+    if (!this.isRest() || (line !== undefined && !Number.isFinite(line)))
+      throw new RuntimeError('BadArguments', 'Rest positioning requires a rest and a finite line.');
+    if (line !== undefined) {
+      this.lineBeforeRestPin ??= this.getKeyLine(0);
+      return this.setKeyLine(0, line);
+    }
+    if (this.lineBeforeRestPin !== undefined) {
+      const previous = this.lineBeforeRestPin;
+      this.lineBeforeRestPin = undefined;
+      this.setKeyLine(0, previous);
+    }
+    return this;
+  }
+
   setKeyLine(index: number, line: number): this {
     this.keyProps[index].line = line;
     this.reset();
@@ -967,10 +1020,7 @@ export class StaveNote extends StemmableNote {
     this._noteHeads.forEach((nh) => {
       const offset = Tables.noteHeadStemYOffsets[nh.text];
       const anchor = offset ? offset[anchorKey] : 0;
-      const fontAnchor =
-        this.engraving && this.engraving.musicFont === nh.fontInfo.family
-          ? this.engraving.stemAnchor(nh.text, anchorKey)
-          : undefined;
+      const fontAnchor = this.stemAnchor(nh, anchorKey);
       // SMuFL specifies four staff spaces per em. Follow the glyph scale for grace notes too.
       const y =
         nh.getY() - (fontAnchor ? (fontAnchor[1] * nh.fontSizeInPixels) / 4 : anchor * Tables.STAVE_LINE_DISTANCE);

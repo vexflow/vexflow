@@ -77,6 +77,27 @@ function invalid(message: string): never {
   throw new RuntimeError('BadContinuousScore', message);
 }
 
+/** Resolve each end independently because chord positions can be reordered between attacks. */
+function resolveTabTie(span: ContinuousSpan, first: TabNote, last: TabNote): ContinuousSpan {
+  const start = first.getPositions();
+  const end = last.getPositions();
+  for (const head of [span.fromHead, span.toHead]) {
+    if (head !== undefined && (!Number.isInteger(head) || head < 0)) invalid('Invalid tab tie position index.');
+  }
+  const selected =
+    span.fromHead === undefined && span.toHead !== undefined ? end[span.toHead] : start[span.fromHead ?? 0];
+  const string = span.string ?? selected?.str;
+  if (string === undefined || !Number.isInteger(string) || string < 1 || string > first.checkStave().getNumLines())
+    invalid('A tab tie needs a string on its staff.');
+  const fromHead = span.fromHead ?? start.findIndex((p) => p.str === string);
+  const toHead = span.toHead ?? end.findIndex((p) => p.str === string);
+  const from = start[fromHead],
+    to = end[toHead];
+  if (!from || !to || from.str !== string || to.str !== string || String(from.fret) !== String(to.fret))
+    invalid('Tab tie endpoints must play the same string and fret.');
+  return { ...span, fromHead, toHead, string, side: span.side ?? 'above' };
+}
+
 /** A row has one shared staff map. A compressed rest maps back to every original measure. */
 export class ContinuousLayout {
   readonly hidden = new Set<Element>();
@@ -135,6 +156,8 @@ export class ContinuousLayout {
   private readonly spelledSpans = new Set<number>();
 
   private readonly options: ContinuousOptions;
+  /** A leading tab fret needs room for the incoming tie after the repeated clef. */
+  private readonly tabTiePadding = new Map<Stave, number>();
   private readonly arrivals = new Map<number, { note: Note; mark: Accidental; index: number }[]>();
 
   constructor(
@@ -201,7 +224,7 @@ export class ContinuousLayout {
         if (next && this.options.courtesy !== false) {
           if (next.clef !== current.clef) end.push(new Clef(next.clef, 'small'));
           if (next.clef !== 'tab' && next.key !== current.key) end.push(new KeySignature(next.key, current.key));
-          if (next.time !== current.time) end.push(new TimeSignature(next.time));
+          if (next.showTimeSignature && next.time !== current.time) end.push(new TimeSignature(next.time));
         }
         end.forEach((m) => m.setPosition(Position.END));
         return { start, end };
@@ -278,6 +301,9 @@ export class ContinuousLayout {
         first.measure > last.measure
       )
         invalid('Expected a unique span ID and ordered composition anchors.');
+      let spec = { ...span };
+      if (span.string !== undefined && !(span.kind === 'tie' && first.note instanceof TabNote))
+        invalid('A string selector requires a tab tie.');
       if (span.kind === 'palmMute') {
         if (!(first.note instanceof TabNote) || !(last.note instanceof TabNote) || first.staff !== last.staff)
           invalid('A palm mute needs two TAB anchors on the same staff.');
@@ -290,6 +316,17 @@ export class ContinuousLayout {
         for (const note of [first.note, last.note])
           if (!note.getPositions().some((p) => span.strings!.includes(p.str)))
             invalid('Each palm-mute anchor must play a targeted string.');
+        spec.strings = [...span.strings];
+      } else if (first.note instanceof TabNote && last.note instanceof TabNote) {
+        if (first.staff !== last.staff || (span.kind !== 'tie' && span.kind !== 'volta'))
+          invalid('Tab ties and endings need anchors on the same tab staff.');
+        if (span.kind === 'tie') {
+          spec = resolveTabTie(span, first.note, last.note);
+          if (first.measure !== last.measure && onset(last.note).numerator === 0) {
+            const stave = last.note.checkStave();
+            this.tabTiePadding.set(stave, stave.space(1.5));
+          }
+        }
       } else {
         if (!(first.note instanceof StaveNote) || !(last.note instanceof StaveNote))
           invalid('Continuous spans need staff-note anchors.');
@@ -312,7 +349,7 @@ export class ContinuousLayout {
         invalid(
           'An anchored lyric extender needs a syllable ID and two notes on the same staff. Its annotation supplies the text and font.'
         );
-      if (span.kind === 'tie' && first.measure !== last.measure) {
+      if (span.kind === 'tie' && first.note instanceof StaveNote && first.measure !== last.measure) {
         const fi = span.fromHead ?? 0,
           li = span.toHead ?? 0;
         if (first.note.getKeys()[fi].toLowerCase() !== last.note.getKeys()[li].toLowerCase())
@@ -327,7 +364,6 @@ export class ContinuousLayout {
         }
       }
       seen.add(span.id);
-      const spec = span.kind === 'palmMute' ? { ...span, strings: [...span.strings!] } : { ...span };
       this.spans.push({ spec, first, last, label: spanLabel(spec) });
     }
   }
@@ -354,7 +390,12 @@ export class ContinuousLayout {
       .flat(2)
       .every(
         (n) =>
-          n instanceof StaveNote && n.isRest() && !n.getModifiers().length && !n.getBeam() && !n.getTupletStack().length
+          n instanceof StaveNote &&
+          n.isRest() &&
+          n.restLine === undefined &&
+          !n.getModifiers().length &&
+          !n.getBeam() &&
+          !n.getTupletStack().length
       );
   }
 
@@ -371,7 +412,10 @@ export class ContinuousLayout {
     return Math.max(
       ...staves.map((s, j) => {
         const marks = this.marks[i][j];
-        s.setBoundaryModifiers([...(start ? marks.start : []), ...(end ? marks.end : [])]);
+        s.setBoundaryModifiers(
+          [...(start ? marks.start : []), ...(end ? marks.end : [])],
+          start ? this.tabTiePadding.get(s) : 0
+        );
         const bar = s.getModifiers(Position.END, Barline.CATEGORY)[0] as Barline;
         return Math.max(s.getX() + s.getWidth() - s.getNoteEndX(), -(bar?.getLayoutMetrics()?.xMin ?? 0));
       })
@@ -448,7 +492,10 @@ export class ContinuousLayout {
     const used = new Set<number>();
     for (let i = first; i <= last; i++) {
       this.score.notes[i].flat(2).forEach((n) => {
-        if (n instanceof Note && (!(n instanceof StaveNote) || !n.isRest() || n.getModifiers().length))
+        if (
+          n instanceof Note &&
+          (!(n instanceof StaveNote) || !n.isRest() || n.restLine !== undefined || n.getModifiers().length)
+        )
           used.add(this.score.staves[i].indexOf(n.checkStave()));
       });
     }
@@ -745,14 +792,23 @@ export class ContinuousLayout {
     if (kind === 'tie' || kind === 'slur') {
       if (starts) x1 = s.first.note.getTieRightX();
       if (ends) x2 = s.last.note.getTieLeftX();
-      y1 =
-        (starts
-          ? s.first.note.getYs()[s.spec.fromHead ?? 0]
-          : continuationPitch(s.first, startStaff, s.spec.fromHead)) +
-        sign * space * (starts ? 0.5 : 1.1);
-      y2 =
-        (ends ? s.last.note.getYs()[s.spec.toHead ?? 0] : continuationPitch(s.last, endStaff, s.spec.toHead)) +
-        sign * space * (ends ? 0.5 : 1.1);
+      if (s.spec.string !== undefined) {
+        // Follow the same physical string at both row edges, with clearance for the fret numbers.
+        if (!starts) x1 -= this.tabTiePadding.get(startStaff) ?? 0;
+        const line = s.spec.string - 1;
+        const clearance = sign * space * 0.3;
+        y1 = (starts ? s.first.note.checkStave() : startStaff).getYForLine(line) + clearance;
+        y2 = (ends ? s.last.note.checkStave() : endStaff).getYForLine(line) + clearance;
+      } else {
+        y1 =
+          (starts
+            ? s.first.note.getYs()[s.spec.fromHead ?? 0]
+            : continuationPitch(s.first, startStaff, s.spec.fromHead)) +
+          sign * space * (starts ? 0.5 : 1.1);
+        y2 =
+          (ends ? s.last.note.getYs()[s.spec.toHead ?? 0] : continuationPitch(s.last, endStaff, s.spec.toHead)) +
+          sign * space * (ends ? 0.5 : 1.1);
+      }
     }
     if (kind === 'volta') {
       x1 = starts ? this.score.staves[s.first.measure][s.first.staff].getX() + 1 : startStaff.getX() + 1;
@@ -777,8 +833,8 @@ export class ContinuousLayout {
       y1,
       y2,
       progress: [0, 1],
-      ...(kind === 'palmMute' && {
-        strings: s.spec.strings,
+      ...((kind === 'palmMute' || s.spec.string !== undefined) && {
+        strings: s.spec.string !== undefined ? [s.spec.string] : s.spec.strings,
         ...(starts && { from: s.spec.from }),
         ...(ends && { to: s.spec.to }),
       }),
