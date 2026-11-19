@@ -14,13 +14,26 @@ The generator builds the current declarations and browser bundle, Guide, Explore
 
 Open `build/improvements/index.html` directly, or serve it locally. Search the change summaries, open paired score images, or browse the complete commit and declaration inventories. The JSON files contain the underlying inventories and image provenance. To update editorial groupings, edit `tools/improvements/topics.mjs`. The release bundle, API comparison, figures and commit history are rebuilt from source on each run.
 
-## Publish under a path
+## Upload the illustrated report
 
-Upload the **contents** of `build/improvements/` to `vexflow.com/reports/ai2026/`, retaining the `assets/` subdirectory. Upload `index.html` last. All assets use relative paths and the page also works offline. The optional commands below use the existing website bucket credentials.
+From the repository root, use the same authenticated Google Cloud CLI account that publishes the VexFlow website.
 
 ```sh
-gcloud storage rsync --recursive --exclude='^index[.]html$' build/improvements/ gs://vexflow.com/reports/ai2026/
-gcloud storage cp build/improvements/index.html gs://vexflow.com/reports/ai2026/index.html
+npm run improvements:upload
 ```
+
+The command publishes the reviewed copy in `build/improvements/` to [vexflow.com/reports/ai2026/](https://vexflow.com/reports/ai2026/). If the report is missing, it builds and browser-checks it first. For a fresh build, install the build prerequisites above.
+
+```sh
+npm run improvements:upload -- --dry-run   # Validate the bundle and print the upload commands.
+npm run improvements:upload -- --rebuild   # Generate, browser-check, and upload the current checkout.
+```
+
+| Files                                                     | Public cache lifetime                                                        |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Images, fonts, license, CSS, and JavaScript               | One year, immutable. A change to the asset set produces a new directory URL. |
+| `changes.json`, `render-inventory.json`, and `index.html` | 60 seconds, then revalidate. These URLs stay stable across uploads.          |
+
+The script stages a copy of the bundle, checks its manifest, uploads assets first, and verifies the JSON downloads against the bucket before publishing and verifying the HTML. Older assets stay available to readers with a cached page. If an upload fails, rerun the same command.
 
 The versioned engineering metrics archive uses its own publisher. [Quality report publication](quality-reports.md)

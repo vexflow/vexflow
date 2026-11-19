@@ -147,6 +147,7 @@
     "guide:build": "node guide/cli.mjs build",
     "guide:test": "node guide/test.mjs",
     "guide:upload": "node guide/cli.mjs upload",
+    "improvements:upload": "node tools/improvements/upload.mjs",
     "report": "node tools/reports/cli.mjs build",
     "report:upload": "node tools/reports/cli.mjs upload",
     "report:release": "node tools/reports/cli.mjs release",

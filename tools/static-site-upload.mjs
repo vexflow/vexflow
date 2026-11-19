@@ -1,14 +1,18 @@
 // Publish a frozen, verified build to a bucket prefix: immutable assets first, HTML last.
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { copyFile, mkdir, mkdtemp, readFile, rm } from 'node:fs/promises';
+import { copyFile, mkdir, mkdtemp, readFile, rm, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
 
 /** Validate manifest paths and contents before any remote operation. */
-export async function validate(directory) {
+export async function validate(directory, jsonFiles = []) {
+  for (const file of jsonFiles) {
+    if (!/^[a-z][a-z0-9-]*\.json$/.test(file) || file === 'manifest.json')
+      throw new Error('Invalid JSON download name.');
+  }
   const manifest = JSON.parse(await readFile(join(directory, 'manifest.json'), 'utf8'));
   if (!/^assets\/[a-f0-9]{16}$/.test(manifest.assetPath) || !manifest.files['index.html'])
     throw new Error('Invalid static-site manifest.');
@@ -16,6 +20,7 @@ export async function validate(directory) {
     if (
       file !== 'index.html' &&
       file !== 'all.html' &&
+      !jsonFiles.includes(file) &&
       (!file.startsWith(manifest.assetPath + '/') || file.split('/').includes('..'))
     )
       throw new Error('Unsafe manifest path.');
@@ -28,10 +33,18 @@ export async function validate(directory) {
   }
   return manifest;
 }
-export async function upload({ destination, dryRun = false, directory, command = 'gcloud', publicURL } = {}) {
+/** Upload immutable assets, then short-lived downloads and pages. Verify each stable URL after writing it. */
+export async function upload({
+  destination,
+  dryRun = false,
+  directory,
+  command = 'gcloud',
+  publicURL,
+  jsonFiles = [],
+} = {}) {
   if (!/^gs:\/\/[a-z0-9][a-z0-9._-]+\/(?:[a-zA-Z0-9_-]+\/)+$/.test(destination))
     throw new Error('Use a bucket and nonempty prefix, such as gs://vexflow.com/explorer/.');
-  const original = await validate(directory);
+  const original = await validate(directory, jsonFiles);
   const staging = await mkdtemp(join(tmpdir(), 'vexflow-static-upload-'));
   try {
     // Copy only manifest members. Extra local files must never become public assets.
@@ -39,13 +52,16 @@ export async function upload({ destination, dryRun = false, directory, command =
       await mkdir(dirname(join(staging, file)), { recursive: true });
       await copyFile(join(directory, file), join(staging, file));
     }
-    const manifest = await validate(staging);
-    const run = (args, capture = false) => {
+    const manifest = await validate(staging, jsonFiles);
+    const run = (args, captureBytes = 0) => {
       if (dryRun) {
         console.log([command, ...args].join(' '));
         return '';
       }
-      const result = spawnSync(command, args, { encoding: 'utf8', stdio: capture ? 'pipe' : 'inherit' });
+      const result = spawnSync(command, args, {
+        stdio: captureBytes ? 'pipe' : 'inherit',
+        maxBuffer: Math.max(1024 * 1024, captureBytes),
+      });
       if (result.error) throw result.error;
       if (result.status !== 0)
         throw new Error(`gcloud failed (${result.status ?? result.signal}). HTML publication stopped.`);
@@ -61,8 +77,7 @@ export async function upload({ destination, dryRun = false, directory, command =
       '--predefined-acl=publicRead',
       '--cache-control=public,max-age=31536000,immutable',
     ]);
-    // Publish the optional gallery runner before the index that links to it.
-    for (const page of ['all.html', 'index.html'].filter((name) => manifest.files[name])) {
+    for (const page of [...jsonFiles, 'all.html', 'index.html'].filter((name) => manifest.files[name])) {
       run([
         'storage',
         'cp',
@@ -70,10 +85,13 @@ export async function upload({ destination, dryRun = false, directory, command =
         destination + page,
         '--predefined-acl=publicRead',
         '--cache-control=public,max-age=60,must-revalidate',
-        '--content-type=text/html',
+        page.endsWith('.json') ? '--content-type=application/json' : '--content-type=text/html',
       ]);
-      if (!dryRun && hash(run(['storage', 'cat', destination + page], true)) !== manifest.files[page])
-        throw new Error(`Uploaded HTML differs from the build (${page}). Check for a concurrent upload.`);
+      if (!dryRun) {
+        const size = (await stat(join(staging, page))).size;
+        if (hash(run(['storage', 'cat', destination + page], size + 1)) !== manifest.files[page])
+          throw new Error(`Uploaded file differs from the build (${page}). Check for a concurrent upload.`);
+      }
     }
     console.log(
       dryRun ? 'Dry run complete. No files uploaded.' : `Published ${destination}${publicURL ? ` → ${publicURL}` : ''}`

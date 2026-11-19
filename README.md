@@ -104,7 +104,7 @@ A good way to learn the API is to look at our examples & unit tests:
 ## More Resources
 
 - [Building, testing, releasing, and uploading static sites](docs/build.md).
-- [Generate and publish the illustrated changes report since 5.0.0](docs/improvements-report.md).
+- Publish the illustrated changes report since 5.0.0 with `npm run improvements:upload`. [Build and upload instructions](docs/improvements-report.md).
 - [Code quality reports and commit archive](docs/quality-reports.md).
 
 - [Text fonts and lyric layout](docs/text-and-lyrics.md), [jsdom rendering](docs/jsdom.md), and [score benchmarks](docs/benchmarks.md).
