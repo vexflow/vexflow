@@ -75,8 +75,10 @@
           upper(m, i).addModifier(score.make.fingering({ number, position: 'left' }));
         const tap = (i) => c.getNote('tab-7-0-' + i);
         // The tapped attack appears on both staves. Only the tab uses the sans-serif technique alphabet.
-        upper(7, 1).addModifier(score.make.annotation({ text: 'T', vJustify: 'top', font: { weight: 'bold' } }));
-        tap(1).addModifier(score.make.annotation({ text: 'T', vJustify: 'top' }).setFont('Arial', 10, 'bold'));
+        upper(7, 1).addModifier(
+          score.make.annotation({ text: 'T', vJustify: 'top', font: { size: 11, weight: 'bold' } })
+        );
+        tap(1).addModifier(score.make.annotation({ text: 'T', vJustify: 'top' }).setFont('Arial', 11, 'bold'));
         for (const [i, text] of [
           [1, 'P'],
           [2, 'H'],

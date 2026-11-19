@@ -30,7 +30,9 @@ Existing elements retain the fonts they were created with. `setFonts()` resets t
 | Annotations, standard-staff technique letters, written bends such as “full” | 10 pt regular. |
 | Tempo | 14 pt bold for the name, 14 pt regular for the beat count. The metronome note uses the music face at 25 pt. |
 | Rehearsal marks, fretting-hand fingerings, string numbers | Bold. Rehearsal marks and string numbers use 10 pt. Fingerings use 9 pt. |
-| Single-letter technique labels on a tab tie | 10 pt bold Arial, with Helvetica and the system sans serif as fallbacks. |
+| Tab fret numbers | 11 pt regular, centered on each string. Grace frets use two thirds of that size. Call `note.setFontSize(9)` before formatting for a smaller fret. |
+| Guitar stroke labels | 11 pt for picking-hand letters such as *p*, *i*, *m*, and *a*, including “i + golpe”. The rolled stroke’s *R* uses 11 pt bold italic. |
+| Single-letter technique labels on a tab tie | 11 pt bold Arial, with Helvetica and the system sans serif as fallbacks. |
 
 The full and Bravura builds register regular and bold Academico. In the browser, await `document.fonts.ready` after importing the bundle and before laying out the first system. With the core build, load each face yourself. This example assumes the local font directory contains the files from the VexFlow font packages.
 

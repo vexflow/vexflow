@@ -9,6 +9,7 @@ import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 import { Dot } from '../src/dot';
 import { Formatter } from '../src/formatter';
 import { Metrics } from '../src/metrics';
+import { ModifierPosition } from '../src/modifier';
 import { RenderContext } from '../src/rendercontext';
 import { ContextBuilder } from '../src/renderer';
 import { Stave } from '../src/stave';
@@ -26,6 +27,7 @@ const TabNoteTests = {
     QUnit.test('Width', width);
 
     const run = VexFlowTests.runTests;
+    run('Fret size and string clearance', fretClearance, undefined, ['Bravura']);
     run('TabNote Draw', draw);
     run('TabNote Stems Up', drawStemsUp);
     run('TabNote Stems Down', drawStemsDown);
@@ -80,6 +82,49 @@ function width(assert: Assert): void {
   });
 
   assert.throws(() => note.getWidth(), /UnformattedNote/, 'Unformatted note should have no width');
+}
+
+/** Check the ink and string masks from a six-string chord at the normal tab stave spacing. */
+function fretClearance({ assert, elementId }: TestOptions, contextBuilder: ContextBuilder): void {
+  const ctx = contextBuilder(elementId, 280, 140);
+  const stave = new TabStave(10, 10, 260).addTabGlyph().setContext(ctx).drawWithStyle();
+  const positions = [0, 12, 10, 15, 13, 11].map((fret, i) => ({ str: i + 1, fret }));
+  class TestChord extends TabNote {
+    get frets() {
+      return this.fretElement;
+    }
+  }
+  const chord = new TestChord({ duration: 'q', positions });
+  const small = new TestChord({ duration: 'q', positions }).setFontSize(9);
+  const gaps: { left: number; right: number; centerY: number }[] = [];
+  const clearRect = ctx.clearRect.bind(ctx);
+  ctx.clearRect = (x, y, w, h) => {
+    gaps.push({ left: x, right: x + w, centerY: y + h / 2 });
+    return clearRect(x, y, w, h);
+  };
+  Formatter.FormatAndDraw(ctx, stave, [chord, small]);
+  assert.equal(gaps.length, positions.length * 2, 'Each fret clears its own string');
+  assert.ok(chord.getWidth() > small.getWidth(), 'Formatting reserves the measured fret width');
+  for (const [index, note] of [chord, small].entries()) {
+    let previousBottom = -Infinity;
+    const leftAnchor = note.getModifierStartXY(ModifierPosition.LEFT, 0).x;
+    const rightAnchor = note.getModifierStartXY(ModifierPosition.RIGHT, 0).x;
+    assert.equal(note.getModifierStartXY(ModifierPosition.ABOVE, 0).x, note.getStemX());
+    for (const [i, fret] of note.frets.entries()) {
+      const ink = fret.getTextMetrics();
+      const { left, right, centerY } = gaps[index * positions.length + i];
+      assert.ok(leftAnchor <= left + 0.01 && rightAnchor >= right - 0.01, 'Side markings clear every string gap');
+      const x = note.getAbsoluteX() - fret.getWidth() / 2;
+      const baseline = note.getYs()[i] + fret.getYShift();
+      const top = baseline - ink.actualBoundingBoxAscent;
+      const bottom = baseline + ink.actualBoundingBoxDescent;
+      assert.equal(fret.fontSizeInPoints, index === 0 ? 11 : 9);
+      assert.ok(Math.abs((bottom + top) / 2 - centerY) < 0.01, 'Ink centers on the cleared string');
+      assert.ok(x - ink.actualBoundingBoxLeft >= left + 1 && x + ink.actualBoundingBoxRight <= right - 1);
+      assert.ok(top >= previousBottom + 2, 'Adjacent strings have at least two pixels of clear space');
+      previousBottom = bottom;
+    }
+  }
 }
 
 function draw(options: TestOptions, contextBuilder: ContextBuilder): void {

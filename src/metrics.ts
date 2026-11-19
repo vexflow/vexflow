@@ -131,6 +131,9 @@ export const MetricsDefaults: Record<string, any> = {
   Annotation: {
     isText: true,
     fontSize: 10,
+    guitarStroke: {
+      fontSize: 11,
+    },
     lyric: {
       fontSize: 12,
     },
@@ -276,7 +279,7 @@ export const MetricsDefaults: Record<string, any> = {
   Stroke: {
     text: {
       isText: true,
-      fontSize: 10,
+      fontSize: 11,
       fontStyle: 'italic',
       fontWeight: 'bold',
     },
@@ -285,7 +288,7 @@ export const MetricsDefaults: Record<string, any> = {
   TabNote: {
     text: {
       isText: true,
-      fontSize: 9,
+      fontSize: 11,
     },
   },
 
@@ -307,6 +310,7 @@ export const MetricsDefaults: Record<string, any> = {
     fontSize: 10,
     techniqueLetter: {
       fontFamily: 'Arial, Helvetica, sans-serif',
+      fontSize: 11,
       fontWeight: 'bold',
     },
   },

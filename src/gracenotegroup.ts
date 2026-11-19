@@ -17,7 +17,7 @@ import { StaveTie } from './stavetie';
 import { StemmableNote } from './stemmablenote';
 import { Tables } from './tables';
 import { TabTie } from './tabtie';
-import { Category, isStaveNote } from './typeguard';
+import { Category, isStaveNote, isTabNote } from './typeguard';
 import { log } from './util';
 import { Voice } from './voice';
 
@@ -146,13 +146,15 @@ export class GraceNoteGroup extends Modifier {
     note.checkStave();
     this.preFormat();
     this.alignSubNotesWithNote(this.getGraceNotes(), note, this.position);
-    if (this.afterWidth) {
+    // Tab fret numbers extend left of their tick. A before-grace must clear that edge as well.
+    const fretOverhang = isTabNote(note) ? note.getLeftDisplacedHeadPx() : 0;
+    if (this.afterWidth || fretOverhang) {
       for (const grace of this.graceNotes) {
         const tick = grace.getTickContext();
         tick.setXOffset(
           this.position === Modifier.Position.RIGHT
             ? note.getTickContext().getX() + this.afterOffset
-            : tick.getXOffset() + this.afterWidth
+            : tick.getXOffset() + this.afterWidth - fretOverhang
         );
       }
     }

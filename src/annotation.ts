@@ -312,7 +312,8 @@ export class Annotation extends Modifier {
       if (hasStem && stemDirection === Stem.UP) {
         // If the stem is above the stave already, go with default line width vs. actual
         // since the lines between don't really matter.
-        spacing = stemExt.topY < stave.getTopLineTopY() ? Tables.STAVE_LINE_DISTANCE : spacing;
+        // Tab articulations stack in actual string spaces, including above an up-stem.
+        if (!isTabNote(note) && stemExt.topY < stave.getTopLineTopY()) spacing = Tables.STAVE_LINE_DISTANCE;
         y = Math.min(y, stemExt.topY - spacing * (this.textLine + 1));
       }
     } /* CENTER_STEM */ else {

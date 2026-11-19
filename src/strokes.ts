@@ -113,7 +113,8 @@ export class Stroke extends Modifier {
     let yPositions = note.getYs();
     let topY = start.y;
     let botY = start.y;
-    const x = start.x - 5;
+    // Leave a visible gap between a tab fret's string mask and the tip of a broad arrow.
+    const x = start.x - 5 - (isTabNote(note) ? Metrics.get('NoteHead.minPadding') : 0);
     const lineSpace = note.checkStave().getSpacingBetweenLines();
 
     const notes = this.checkModifierContext().getMembers(note.getCategory());

@@ -263,6 +263,9 @@ export class TabNote extends StemmableNote {
       this.fretElement.push(el);
       this.width = Math.max(el.getWidth(), this.width);
     }
+    // The tick lies at the middle of a fret. Reserve its two halves on the corresponding sides.
+    this.setLeftDisplacedHeadPx(this.width / 2);
+    this.setRightDisplacedHeadPx(this.width / 2);
   }
 
   // Set the `stave` to the note
@@ -300,18 +303,16 @@ export class TabNote extends StemmableNote {
       throw new RuntimeError('NoYValues', 'No Y-Values calculated for this note.');
     }
 
-    let x = 0;
+    // Frets straddle the tick. Keep side modifiers outside the widest member of the chord.
+    let x = this.getAbsoluteX();
     if (position === Modifier.Position.LEFT) {
-      x = -1 * 2; // FIXME: modifier padding, move to font file
+      x = this.getTieLeftX();
     } else if (position === Modifier.Position.RIGHT) {
-      x = this.width + 2; // FIXME: modifier padding, move to font file
-    } else if (position === Modifier.Position.BELOW || position === Modifier.Position.ABOVE) {
-      const noteGlyphWidth = this.width;
-      x = noteGlyphWidth / 2;
+      x = this.getTieRightX();
     }
 
     return {
-      x: this.getAbsoluteX() + x,
+      x,
       y: this.ys[index],
     };
   }
