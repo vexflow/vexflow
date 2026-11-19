@@ -564,6 +564,10 @@ const layout = result.sheet.getContinuousLayout();
 console.log(layout.rows, layout.fragments, layout.diagnostics);
 ```
 
+For tab, use `{ id: 'hold', kind: 'tie', from: 'a', to: 'b', string: 2 }` to sustain a fret on the second string of the same staff. Both chords must play that fret on that string, in any position order. You can also select a position with a zero-based `fromHead` or `toHead`. With no selector, the tie starts at the first position of the opening chord.
+
+A tab ending uses `{ id: 'ending', kind: 'volta', from: 'a', to: 'b', text: '1.' }`. The bracket and ties split at system breaks and follow the guitar into an extracted part.
+
 See the [continuous score guide](vf6/m4.md) for break constraints, rest grouping, staff names and span conventions.
 
 The Explorer's **EasyScore: responsive composition** example covers a grand staff, pickup, multiple voices, tuplets, changing meter, inline state, and both spacing modes.

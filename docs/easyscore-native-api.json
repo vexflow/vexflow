@@ -1865,7 +1865,7 @@
     "Stave": [
       "CATEGORY(): string",
       "options: Required<StaveOptions>",
-      "setBoundaryModifiers(modifiers: StaveModifier[]): void",
+      "setBoundaryModifiers(modifiers: StaveModifier[], notePadding = 0): void",
       "defaultPadding(): number",
       "rightPadding(): number",
       "constructor(x: number, y: number, width: number, options?: StaveOptions)",
