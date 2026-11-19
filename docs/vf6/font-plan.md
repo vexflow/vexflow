@@ -76,3 +76,16 @@ Review both the QUnit and interactive editions. Compare Saints in its handwritte
 Run the Node and QUnit suites, guide, Explorer, gallery, packaged API checks, and three-engine web qualification. Exercise SVG, Canvas, standalone outlined SVG with fonts blocked, and PDF. Review affected images against the pinned reference on the same browser and OS. Update visual references only for accepted differences. Document the chosen role sizes, font loading, text overrides, and how to combine words with music glyphs. [Rendering comparisons](../testing.md) · [CI commands](../build.md#test-locally) · [Browser qualification](m7.md)
 
 At each milestone, update the issue with the tested revision, results, and decisions still needed. Attach representative before/after images on a white background to the issue. Mark the milestone complete after visual review. Close the issue when the agreed treatments pass the delivery checks.
+
+### Milestone 5 results
+
+Qualified the score rendering from `f223c134` against the approved `614c3462` reference. All 98 engraving examples matched the reference and a fresh repeat in both pixels and geometry.
+
+| Surface | Result |
+| --- | --- |
+| Library and package | 303 Node tests and 1,929 QUnit tests passed. The packed full, Bravura, and core builds passed the ESM, CommonJS, and TypeScript consumer checks. |
+| Browser and demos | Chromium, Firefox, and WebKit passed the SVG and Canvas qualification. All 15 guide, 12 Explorer, and 2 tests-site checks passed. |
+| Standalone SVG | The export test compares an accented verse, a 14 pt chord root, and its 8.4 pt flat ninth to the actual font outlines. It covers Bravura with Academico and Petaluma with either Academico or Petaluma Script. Each outlined score also renders in a fresh document with fonts and network access blocked. |
+| Print | All five Letter pages matched the approved milestone 4 pages pixel for pixel at 96 dpi. The Minuet and Fugue each occupy two pages and the Ballade occupies one. |
+
+The [score lettering guide](../text-and-lyrics.md) lists the role sizes, explains how to load or override the fonts, and builds a measure that combines words, chord alterations, and a metronome mark.

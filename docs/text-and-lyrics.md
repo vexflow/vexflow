@@ -2,14 +2,12 @@
 
 ## Text fonts
 
-Text elements now prefer a text font. Music glyphs keep their music-first stack.
+By default VexFlow draws score lettering in Academico and engraved symbols in Bravura. To change the character of the notation while keeping the lyrics and harmony familiar, pair Petaluma with Academico. For a handwritten lead sheet, select Petaluma Script for the lettering too.
 
 ```javascript
-VexFlow.setFonts('Bravura', 'Academico');
-// Annotations and other text: Academico,Bravura
-// Music glyphs: Bravura,Academico
-
-VexFlow.setFonts('Petaluma', 'Petaluma Script');
+VexFlow.setFonts('Petaluma', 'Academico');
+// To use handwritten lettering throughout the score, choose this pairing instead.
+// VexFlow.setFonts('Petaluma', 'Petaluma Script');
 ```
 
 `setFonts` recognizes VexFlow's built-in text faces. A music-only stack uses Academico for text. For a custom text face, select it explicitly after `setFonts`:
@@ -19,7 +17,7 @@ VexFlow.setFonts('My Music Font');
 VexFlow.setTextFonts('My Text Font', 'serif');
 ```
 
-Load the chosen fonts before creating notes or measuring text. A per-element `setFont()` call still takes precedence. Class-specific `MetricsDefaults.Annotation.fontFamily` overrides also work; call `Metrics.clear()` after editing metrics.
+Load the chosen fonts before creating notes or measuring text. To change one direction, set its font before attaching it to the note. For example, `new VexFlow.Annotation('dolce').setFont('Academico', 11)` gives that word an 11 pt face. For a class-wide override, import `MetricsDefaults` and `Metrics` from `vexflow`, edit `MetricsDefaults.Annotation.fontFamily`, and call `Metrics.clear()` before creating annotations.
 
 Existing elements retain the fonts they were created with. `setFonts()` resets the shared text selection, so call `setTextFonts()` afterward when using a custom face.
 
@@ -27,12 +25,14 @@ Existing elements retain the fonts they were created with. `setFonts()` resets t
 
 | Role | Default treatment |
 | --- | --- |
-| Chord names | 14 pt Academico. Raised and lowered chord extensions scale with the root. |
+| Chord names | 14 pt Academico. Raised and lowered extensions use 60% of the root size (8.4 pt by default). |
 | Verse syllables and continuous lyric labels | 12 pt Academico. Use `system.getPhraseLayout().addVerse(stave, syllables)` for a line of lyrics. |
-| Standard-staff technique letters and written bend instructions such as “full” | Score text face, normally Academico. |
+| Annotations, standard-staff technique letters, written bends such as “full” | 10 pt regular. |
+| Tempo | 14 pt bold for the name, 14 pt regular for the beat count. The metronome note uses the music face at 25 pt. |
+| Rehearsal marks, fretting-hand fingerings, string numbers | Bold. Rehearsal marks and string numbers use 10 pt. Fingerings use 9 pt. |
 | Single-letter technique labels on a tab tie | 10 pt bold Arial, with Helvetica and the system sans serif as fallbacks. |
 
-The full and Bravura builds include regular and bold Academico. When using core with self-hosted fonts, load both weights before engraving bold directions. This example assumes the local font directory contains the files from the VexFlow font packages.
+The full and Bravura builds register regular and bold Academico. In the browser, await `document.fonts.ready` after importing the bundle and before laying out the first system. With the core build, load each face yourself. This example assumes the local font directory contains the files from the VexFlow font packages.
 
 ```js
 VexFlow.Font.HOST_URL = '/fonts/';
@@ -42,6 +42,34 @@ await Promise.all([
 ]);
 VexFlow.setFonts('Bravura', 'Academico');
 ```
+
+### Combine lettering and engraved symbols
+
+Give the tempo its name, beat unit, and speed. VexFlow draws the name and number in the text face and the beat unit in the music face. A chord works the same way. Use `addText()` for the root and `addGlyphOrText()` for an alteration such as a flat ninth. Its flat follows the music font and its digit follows the text font.
+
+```js
+// Place <div id="score"></div> in the page and load the full VexFlow bundle.
+await document.fonts.ready;
+const factory = new VexFlow.Factory({ renderer: { elementId: 'score', width: 500, height: 220 } });
+const score = factory.EasyScore();
+const notes = score.notes('G4/q, B4, D5, F5');
+const system = factory.System({ x: 15, y: 65, width: 465 });
+const stave = system.addStave({ voices: [score.voice(notes)] }).addClef('treble');
+stave.setTempo({ name: 'Andante', duration: 'q', bpm: 76 }, -12);
+
+// Raise the alteration as a unit and keep the chord aligned with the second note.
+const chord = factory.ChordSymbol().addText('G7').addGlyphOrText('b9', {
+  symbolModifier: VexFlow.ChordSymbol.symbolModifiers.SUPERSCRIPT,
+});
+notes[1].addModifier(chord);
+system.getPhraseLayout().addVerse(stave, [
+  { note: notes[0], text: 'Sing' },
+  { note: notes[1], text: 'softly' },
+]);
+factory.draw();
+```
+
+Use `TextDynamics` for engraved dynamics such as *p* and *mf*. To share a standalone SVG, supply the music face and each text weight used on the page to the outline exporter. [Portable SVG export](portable-svg.md#font-faces-and-fallback)
 
 ## Shared lyric baselines
 

@@ -23,6 +23,7 @@
     "bend-2": "Fixed on main in M0. The upper string uses the inner bend on both chords."
   },
   "reviews": {
+    "chordsymbol-1": "2026-11-19 · @0xfe · Approved 14 pt chord lettering and scaled extensions in the wide chord study (#361).",
     "m8-flamenco": "2026-11-18 · @0xfe · Approved reference score. Four strokes and a golpe.",
     "m8-bossa": "2026-11-18 · @0xfe · Approved reference score. Bass under an anticipation.",
     "m8-metal": "2026-11-18 · @0xfe · Approved reference score. Pedal string and unison bend.",
@@ -30,7 +31,7 @@
     "m8-ensemble": "2026-11-18 · @0xfe · Approved reference score. Local bars and a common cue.",
     "m6-kit": "2026-11-18 · @0xfe · Approved. Kit groove and instrument legend.",
     "m6-line": "2026-11-18 · @0xfe · Approved. One-line side drum.",
-    "m6-lead": "2026-11-18 · @0xfe · Approved. Harbor song over a repeated turnaround.",
+    "m6-lead": "2026-11-19 · @0xfe · Approved 14 pt harmony over the repeated turnaround in Harbor song (#361).",
     "m6-guitar": "2026-11-18 · @0xfe · Approved. Drop D with a second-fret capo.",
     "m6-techniques": "2026-11-18 · @0xfe · Approved. Alternating chords and playing instructions.",
     "m6-micro": "2026-11-18 · @0xfe · Approved. Quarter tones and Persian accidentals.",
@@ -55,7 +56,7 @@
     "m2-ornament-redraw": "2026-11-18 · @0xfe · Approved the retained fall and delayed turn after resizing.",
     "m2-grace-sides": "2026-11-18 · @0xfe · Approved grace groups and slurs on both sides of the host.",
     "m2-tuplet-turn": "2026-11-18 · @0xfe · Approved tuplet clearance above the turn and its auxiliary signs.",
-    "m2-optical": "2026-11-18 · @0xfe · Approved optical spacing through the short ending.",
+    "m2-optical": "2026-11-19 · @0xfe · Approved 14 pt chord lettering with optical spacing through the short ending (#361).",
     "beam-between-attacks": "2026-11-18 · @0xfe · Approved the M1 clearance around the intervening notehead.",
     "beam-retained-resize": "2026-11-18 · @0xfe · Approved the M1 slope and stem joins after narrowing the system.",
     "formatter-3": "2026-11-18 · @0xfe · Adjust triplet clearance. In bar 2 the upper bracket sits too far above the text stack. Use the lower bracket in bar 1 as the spacing reference and give that lower bracket a little more room.",

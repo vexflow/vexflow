@@ -98,42 +98,81 @@ test('portable SVG paths retain score geometry and render with fonts and styles 
       italicError: true,
     });
 
-    for (const [name, music, text] of [
-      ['bravura', 'Bravura', 'Academico'],
-      ['petaluma', 'Petaluma', 'Petaluma Script'],
+    for (const [music, text] of [
+      ['Bravura', 'Academico'],
+      ['Petaluma', 'Academico'],
+      ['Petaluma', 'Petaluma Script'],
     ]) {
       const drawings = await page.evaluate(
         ({ music, text }) => {
           document.querySelector('#score').replaceChildren();
           VexFlow.setFonts(music, text);
-          const renderer = new VexFlow.Renderer(document.querySelector('#score'), VexFlow.Renderer.Backends.SVG);
-          renderer.resize(620, 240);
-          const context = renderer.getContext();
-          const stave = new VexFlow.Stave(15, 35, 580).addClef('treble').addKeySignature('D').addTimeSignature('4/4');
-          stave.setContext(context).draw();
-          const notes = [
-            new VexFlow.StaveNote({ keys: ['c/5', 'e/5', 'g/5'], duration: 'q' }).addModifier(
-              new VexFlow.Accidental('#'),
-              0
-            ),
-            new VexFlow.StaveNote({ keys: ['b/4'], duration: 'q' }),
-            new VexFlow.StaveNote({ keys: ['a/4'], duration: 'q' }),
-            new VexFlow.StaveNote({ keys: ['b/4'], duration: 'qr' }),
-          ];
-          VexFlow.Formatter.FormatAndDraw(context, stave, notes);
+          const factory = new VexFlow.Factory({ renderer: { elementId: 'score', width: 620, height: 240 } });
+          const context = factory.getContext();
+          const score = factory.EasyScore();
+          const notes = score.notes('(C#5 E5 G5)/q, B4, A4, B4/q/r');
+          const system = factory.System({ x: 15, y: 60, width: 580 });
+          const stave = system
+            .addStave({ voices: [score.voice(notes)] })
+            .addClef('treble')
+            .addKeySignature('D')
+            .addTimeSignature('4/4');
+          // Exercise real text and music glyphs in the same raised extension.
+          notes[1].addModifier(
+            factory.ChordSymbol().addText('G').addGlyphOrText('b9', {
+              symbolModifier: VexFlow.ChordSymbol.symbolModifiers.SUPERSCRIPT,
+            })
+          );
+          system.getPhraseLayout().addVerse(stave, [
+            { note: notes[0], text: 'Chanté' },
+            { note: notes[1], text: 'dolce' },
+          ]);
+          factory.draw();
           context.setFont(`${text},Academico`, '14pt').fillText('Andante — AV', 20, 28);
-          context.setFont(`${text},Academico`, '12pt').fillText('Sing clearly', 200, 195);
           const before = context.toSVG();
           const after = context.toSVG(window.outlineFonts);
-          const originalBounds = Array.from(context.svg.querySelectorAll('text')).map((node) => {
-            const { x, y, width, height } = node.getBBox();
-            return { x, y, width, height };
-          });
           const clone = new DOMParser().parseFromString(after, 'image/svg+xml').documentElement;
-          return { before, after, glyphs: originalBounds.length, paths: clone.querySelectorAll('path').length };
+          // Compare each role at its live SVG origin with the outline from the approved face and point size.
+          const regularFace = (family) =>
+            window.outlineFonts.find((face) => face.family === family && !face.weight).font;
+          const letters = regularFace(text);
+          const symbols = regularFace(music);
+          const verifyRole = (selector, expected) => {
+            const live = context.svg.querySelectorAll(selector + ' text');
+            const paths = clone.querySelectorAll(selector + ' path');
+            return (
+              live.length === expected.length &&
+              paths.length === expected.length &&
+              expected.every(
+                (outline, i) =>
+                  paths[i].getAttribute('d') ===
+                  outline(Number(live[i].getAttribute('x')), Number(live[i].getAttribute('y')))
+              )
+            );
+          };
+          const outline = (word, pt) => (x, y) =>
+            letters.getPath(word, x, y, VexFlow.Font.convertSizeToPixelValue(pt)).toPathData(5);
+          const raisedNinth = (x, y) => {
+            const flat = VexFlow.Glyphs.csymAccidentalFlat;
+            const size = VexFlow.Font.convertSizeToPixelValue(8.4);
+            return (
+              symbols.getPath(flat, x, y, size).toPathData(5) +
+              outline('9', 8.4)(x + symbols.getAdvanceWidth(flat, size), y)
+            );
+          };
+          return {
+            before,
+            after,
+            glyphs: context.svg.querySelectorAll('text').length,
+            paths: clone.querySelectorAll('path').length,
+            chords: verifyRole('.vf-chordsymbol', [outline('G', 14), raisedNinth]),
+            lyrics: verifyRole('.vf-annotation', [outline('Chanté', 12), outline('dolce', 12)]),
+          };
         },
         { music, text }
       );
+      assert.ok(drawings.chords, `chord outlines in ${music} and ${text}`);
+      assert.ok(drawings.lyrics, `verse outlines in ${text}`);
       assert.ok(drawings.glyphs > 10);
       assert.ok(drawings.paths >= drawings.glyphs);
       assert.doesNotMatch(drawings.after, /<text\b|@font-face|<use\b/);
