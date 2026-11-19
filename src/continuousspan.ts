@@ -80,7 +80,10 @@ export function spanLabel(spec: ContinuousSpan): Element | undefined {
       >
     )[spec.kind];
   if (!text) return;
-  const label = new Element(spec.kind === 'trill' ? 'Ornament' : 'Annotation').setText(text);
+  let category = 'Annotation';
+  if (spec.kind === 'trill') category = 'Ornament';
+  if (spec.kind === 'lyric' || spec.kind === 'hyphen') category = 'Annotation.lyric';
+  const label = new Element(category).setText(text);
   if (spec.labelFontSize !== undefined) label.setFontSize(spec.labelFontSize);
   return label;
 }

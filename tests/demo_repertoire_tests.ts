@@ -12,9 +12,9 @@ import { prelude } from './demos/prelude';
 import { quartertones } from './demos/quartertones';
 import { saints } from './demos/saints';
 
-/** Keep the lead sheet in its handwritten face on every enabled backend. */
+/** Pair the lead sheet's handwritten music with engraved words and chord names. */
 const repertoire = [
-  { title: 'When the Saints Go Marching In', render: saints, fonts: ['Petaluma'] },
+  { title: 'When the Saints Go Marching In', render: saints, fonts: ['Petaluma with Academico'] },
   { title: 'Greensleeves', render: greensleeves },
   { title: 'Prelude in C major', render: prelude },
   { title: 'Fugue No. 6 in D minor', render: fugue },

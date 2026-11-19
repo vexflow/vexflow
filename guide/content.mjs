@@ -516,7 +516,7 @@ const voice = score.voice(score.notes('C5/h, G5/q'), { time: '3/4' });`
     'Lyrics, annotations, and chord symbols',
     'Choose text objects by how they align with the music.',
     ['annotations', 'chord-symbols', 'text-notes'],
-    `<p>Sing the four words under the first bar, one word on each note. Edit the words in the control and see how each label follows its note. An <code>Annotation</code> works well for a syllable or a short direction. Supply the syllables yourself when a word spans multiple notes.</p>
+    `<p>Sing the four words under the first bar, one word on each note. Edit the words and watch them follow their notes. <code>addVerse()</code> places the syllables on a shared baseline in 12 pt type. For a spoken direction on a single note, use an <code>Annotation</code>.</p>
 <p>Open the chord-symbol study. A chord name sits above the harmony and may mix letters, raised numbers, and music glyphs. <code>ChordSymbol</code> assembles these pieces into a single label. Try a different root and watch what stays in place.</p>
 <p>In the last example, find the <code>TextNote</code>. It has a rhythmic position of its own, so you can place text between attacks by giving it a separate voice. Load the text font before formatting and allow vertical room for longer lyrics.</p>`,
     'In “Lyrics & annotations”, replace the four words with four syllables of your own. Change their position and see how they remain aligned with the melody.',

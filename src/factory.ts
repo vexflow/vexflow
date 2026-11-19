@@ -565,14 +565,13 @@ export class Factory {
     const chordSymbol = new ChordSymbol();
     chordSymbol.setHorizontal(p.hJustify);
     chordSymbol.setVertical(p.vJustify);
-    // There is a default font based on the engraving font.  Only set then
-    // font if it is specific, else use the default
-    if (typeof p.fontFamily === 'string' && typeof p.fontSize === 'number') {
-      if (typeof p.fontWeight === 'string') chordSymbol.setFont(p.fontFamily, p.fontSize, p.fontWeight);
-      else chordSymbol.setFont(p.fontFamily, p.fontSize, '');
-    } else if (typeof p.fontSize === 'number') {
-      chordSymbol.setFontSize(p.fontSize);
-    }
+    // Override individual properties so a custom family can still follow the score's chord size.
+    chordSymbol.setFont(
+      p.fontFamily ?? chordSymbol.fontInfo.family,
+      p.fontSize ?? chordSymbol.fontInfo.size,
+      p.fontWeight ?? chordSymbol.fontInfo.weight,
+      chordSymbol.fontInfo.style
+    );
     chordSymbol.setContext(this.context);
     return this.own(chordSymbol);
   }

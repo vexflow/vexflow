@@ -12,8 +12,12 @@ export class Metrics {
   static clear(key?: string) {
     TextMetricsCache.clear();
     if (key) {
-      this.cacheFont.delete(key);
-      this.cacheStyle.delete(key);
+      // Nested roles such as Annotation.lyric inherit values from the parent category.
+      for (const cache of [this.cacheFont, this.cacheStyle]) {
+        for (const category of cache.keys()) {
+          if (category === key || category.startsWith(key + '.')) cache.delete(category);
+        }
+      }
     } else {
       this.cacheFont.clear();
       this.cacheStyle.clear();
@@ -127,6 +131,9 @@ export const MetricsDefaults: Record<string, any> = {
   Annotation: {
     isText: true,
     fontSize: 10,
+    lyric: {
+      fontSize: 12,
+    },
   },
 
   Bend: {
@@ -140,7 +147,7 @@ export const MetricsDefaults: Record<string, any> = {
 
   ChordSymbol: {
     isText: true,
-    fontSize: 12,
+    fontSize: 13,
     spacing: 0.05,
     subscriptOffset: 0.2,
     superscriptOffset: -0.4,
@@ -293,6 +300,10 @@ export const MetricsDefaults: Record<string, any> = {
   TabTie: {
     isText: true,
     fontSize: 10,
+    techniqueLetter: {
+      fontFamily: 'Arial, Helvetica, sans-serif',
+      fontWeight: 'bold',
+    },
   },
 
   TextBracket: {

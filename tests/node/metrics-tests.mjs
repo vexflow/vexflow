@@ -155,11 +155,13 @@ test('category font/style caches refresh after edits to defaults', () => {
     MetricsDefaults[key] = { fontSize: 12, fillStyle: '#123456' };
     Metrics.clear(key);
     assert.equal(Metrics.getFontInfo(key).size, 12);
+    assert.equal(Metrics.getFontInfo(key + '.child').size, 12);
     assert.equal(Metrics.getStyle(key).fillStyle, '#123456');
     MetricsDefaults[key].fontSize = 24;
     MetricsDefaults[key].fillStyle = '#abcdef';
     Metrics.clear(key);
     assert.equal(Metrics.getFontInfo(key).size, 24);
+    assert.equal(Metrics.getFontInfo(key + '.child').size, 24);
     assert.equal(Metrics.getStyle(key).fillStyle, '#abcdef');
   } finally {
     delete MetricsDefaults[key];

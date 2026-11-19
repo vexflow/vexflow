@@ -262,12 +262,13 @@ export class StaveTie extends Element {
    */
   renderTieText(firstX: number, lastX: number): void {
     const ctx = this.checkContext();
-    let centerX = (firstX + lastX) / 2;
-    centerX -= ctx.measureText(this.text).width / 2;
     const stave = this.notes.firstNote?.checkStave() ?? this.notes.lastNote?.checkStave();
     if (stave) {
+      ctx.save();
       ctx.setFont(this.fontInfo);
+      const centerX = (firstX + lastX - ctx.measureText(this.text).width) / 2;
       ctx.fillText(this.text, centerX + this.renderOptions.textShiftX, stave.getYForTopText() - 1);
+      ctx.restore();
     }
   }
 

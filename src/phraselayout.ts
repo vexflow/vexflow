@@ -9,6 +9,7 @@ import { Element } from './element';
 import { measureEngraving } from './engravinggeometry';
 import { GhostNote } from './ghostnote';
 import { KeySignature } from './keysignature';
+import { Metrics } from './metrics';
 import { Modifier } from './modifier';
 import { Note } from './note';
 import { Ornament } from './ornament';
@@ -146,6 +147,7 @@ export class PhraseLayout {
       throw new RangeError('A syllable must belong to the requested stave.');
     const marks = syllables.map((s, i) =>
       new Annotation(s.text)
+        .setFont(Metrics.getFontInfo('Annotation.lyric'))
         .setVerticalJustification(options.side === 'above' ? 'top' : 'bottom')
         .setConnectorPadding(s.hyphenAfter || syllables[i - 1]?.hyphenAfter ? stave.space(0.4) : 0)
     );

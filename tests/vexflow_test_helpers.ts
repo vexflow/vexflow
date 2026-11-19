@@ -223,6 +223,7 @@ export class VexFlowTests {
     Leipzig: ['Leipzig', 'Academico'],
     MuseJazz: ['MuseJazz', 'MuseJazz Text'],
     Petaluma: ['Petaluma', 'Petaluma Script'],
+    'Petaluma with Academico': ['Petaluma', 'Academico'],
     Sebastian: ['Sebastian', 'Nepomuk'],
   };
 

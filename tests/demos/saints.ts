@@ -3,10 +3,13 @@ import { TestOptions, VexFlowTests } from '../vexflow_test_helpers';
 
 import { BarlineType, ChordSymbol, StemmableNote } from '../../src/index';
 
+import { Metrics } from '../../src/metrics';
+
 /** Render a compact, sixteen-bar setting of the traditional refrain, with its three-note pickup. */
 export function saints(options: TestOptions): void {
   const factory = VexFlowTests.makeFactory(options, 900, 540);
   const score = factory.EasyScore({ throwOnError: true });
+  const lyricFont = Metrics.getFontInfo('Annotation.lyric');
   const bars = [
     ['G4/w', 'saints', 'C:6/9'],
     ['B4/q/r, C4/q, E4, F4', '|go|march-|ing', 'Am:7'],
@@ -29,7 +32,9 @@ export function saints(options: TestOptions): void {
   const pickup = score.notes('C4/q, E4, F4');
   const pickupLabels = ['Oh', 'when', 'the'];
   pickup.forEach((note, i) =>
-    note.addModifier(factory.Annotation({ text: pickupLabels[i], vJustify: 'bottom' }).setTextBaseline(123))
+    note.addModifier(
+      factory.Annotation({ text: pickupLabels[i], font: lyricFont, vJustify: 'bottom' }).setTextBaseline(123)
+    )
   );
   factory
     .System({ x: 10, y: 16, width: 180 })
@@ -48,7 +53,10 @@ export function saints(options: TestOptions): void {
     if (i === 5 || i === 14) sustained = notes[0];
     if ((i === 6 || i === 15) && sustained) score.make.tie({ from: sustained, to: notes[0] });
     words.split('|').forEach((text, n) => {
-      if (text) notes[n].addModifier(factory.Annotation({ text, vJustify: 'bottom' }).setTextBaseline(y + 107));
+      if (text)
+        notes[n].addModifier(
+          factory.Annotation({ text, font: lyricFont, vJustify: 'bottom' }).setTextBaseline(y + 107)
+        );
     });
     // Split the chord into root and extension so Petaluma supplies proper accidental glyphs.
     if (harmony) {

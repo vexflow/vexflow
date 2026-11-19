@@ -184,6 +184,14 @@ function textFontDefaults(assert: Assert): void {
   const previous = MetricsDefaults.Annotation.fontFamily;
   try {
     VexFlow.setFonts('Bravura', 'Academico');
+    const note = new VexFlow.TabNote({ positions: [{ str: 1, fret: 5 }], duration: 'q' });
+    const ends = { firstNote: note, lastNote: note };
+    assert.equal(new VexFlow.ChordSymbol().fontSizeInPoints, 13);
+    assert.equal(Metrics.getFontInfo('Annotation.lyric').size, 12);
+    assert.equal(new VexFlow.TabTie(ends, 'H').fontInfo.family.split(',')[0], 'Arial');
+    assert.equal(new VexFlow.StaveTie(ends, 'H').fontInfo.family.split(',')[0], 'Academico');
+    assert.equal(new VexFlow.TabTie(ends, 'hold').fontInfo.family.split(',')[0], 'Academico');
+    assert.equal(new Bend([{ type: Bend.UP, text: 'full' }]).fontInfo.family.split(',')[0], 'Academico');
     const annotation = new VexFlow.Annotation('Sing with gentle voices');
     const ctx = document.createElement('canvas').getContext('2d')!;
     ctx.font = Font.toCSSString(annotation.fontInfo);

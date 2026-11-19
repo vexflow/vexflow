@@ -174,9 +174,28 @@ test('standalone gallery runs with local fonts/scripts and preserves QUnit filte
       await page.select('#width', 'Narrow');
       assert.equal(await page.$eval('#events', (s) => s.value), original, piece + ' retained selection on reflow');
       if (piece === 'saints') {
+        const lyrics = await page.$$eval('#score text', (texts) =>
+          texts.filter((el) => el.textContent === 'in').map((el) => getComputedStyle(el).font)
+        );
+        assert.ok(
+          lyrics.length > 1 && lyrics.every((font) => font.includes('16px Academico')),
+          '12 pt sung and held syllables'
+        );
         await page.select('#edition', 'Traditional');
         assert.equal(await page.$eval('#events', (s) => s.value), 'v6-0');
       } else if (piece === 'electric' || piece === 'drums') {
+        if (piece === 'electric') {
+          const marks = await page.$$eval('#score text', (texts) =>
+            texts
+              .filter((el) => ['T', 'full'].includes(el.textContent))
+              .map((el) => [el.textContent, getComputedStyle(el).fontFamily.split(',')[0]])
+          );
+          assert.deepEqual(marks.sort(), [
+            ['T', 'Academico'],
+            ['T', 'Arial'],
+            ['full', 'Academico'],
+          ]);
+        }
         const label = await page.$eval('#events', (s) => s.selectedOptions[0].text);
         assert.match(label, piece === 'drums' ? /Snare drum.*hi-hat/i : /string 3.*bend 2 semitones/i);
       } else if (piece === 'sumer') {

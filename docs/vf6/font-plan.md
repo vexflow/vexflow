@@ -33,6 +33,10 @@ The issue review compares Saints at 11, 12, and 13 pt Academico with its 15 pt h
 
 ## Milestone 2 · Resolve the right face for each role
 
+**Approved from the first review.** Use 13 pt chord roots and 12 pt lyrics. The Saints editions pair Petaluma notation with Academico lyrics and harmony. Use bold Arial for guitar tab technique letters and the selected text face for written directions and standard-staff letters. High Wire shows the same tapped attack on both staves.
+
+The full and Bravura builds register both Academico weights. Core can load the regular face on demand and register the bold face explicitly. Browser inspection verified the faces used for accented lyrics, chords, bold directions, and music glyphs in each build. Existing font-load, export, and override tests cover fallback and switching. [Usage and overrides](../text-and-lyrics.md#default-score-lettering)
+
 Inventory other text paths in the library, guide, Explorer, and score examples. Include stave and instrument names, repeat instructions, measure numbers, pedal words, and text notes. Route ordinary text through the existing text metrics. For mixed marks, specify which parts use letters and which use the music font. Cover text pedal instructions alongside the pedal sign, and a tempo name alongside its metronome note.
 
 **Verify** the full, Bravura, and core builds with loaded fonts, after a delayed font load, and after switching fonts. Cover regular and bold Academico, custom text stacks, explicit element fonts, and Petaluma Script. Check accented names and fallback for missing characters. Use the existing metrics cache tests to catch stale measurements. Verify music-only passages against the reference. [Metrics tests](../../tests/node/metrics-tests.mjs)

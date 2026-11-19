@@ -23,6 +23,26 @@ Load the chosen fonts before creating notes or measuring text. A per-element `se
 
 Existing elements retain the fonts they were created with. `setFonts()` resets the shared text selection, so call `setTextFonts()` afterward when using a custom face.
 
+### Default score lettering
+
+| Role | Default treatment |
+| --- | --- |
+| Chord names | 13 pt Academico. Raised and lowered chord extensions scale with the root. |
+| Verse syllables and continuous lyric labels | 12 pt Academico. Use `system.getPhraseLayout().addVerse(stave, syllables)` for a line of lyrics. |
+| Standard-staff technique letters and written bend instructions such as “full” | Score text face, normally Academico. |
+| Single-letter technique labels on a tab tie | 10 pt bold Arial, with Helvetica and the system sans serif as fallbacks. |
+
+The full and Bravura builds include regular and bold Academico. When using core with self-hosted fonts, load both weights before engraving bold directions. This example assumes the local font directory contains the files from the VexFlow font packages.
+
+```js
+VexFlow.Font.HOST_URL = '/fonts/';
+await Promise.all([
+  VexFlow.loadFonts('Bravura', 'Academico'),
+  VexFlow.Font.load('Academico', '/fonts/academico/academico-bold.woff2', { weight: 'bold' }),
+]);
+VexFlow.setFonts('Bravura', 'Academico');
+```
+
 ## Shared lyric baselines
 
 Annotations can use an absolute baseline in the renderer's coordinates. Give all lyrics in a row the same baseline:

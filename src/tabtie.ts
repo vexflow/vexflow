@@ -2,9 +2,9 @@
 // MIT License
 //
 // ## Description
-// This class implements varies types of ties between contiguous notes. The
-// ties include: regular ties, hammer ons, pull offs, and slides.
+// Tablature ties carry technique letters between frets, including hammer-ons and pull-offs.
 
+import { Metrics } from './metrics';
 import { StaveTie, TieNotes } from './stavetie';
 import { Category } from './typeguard';
 
@@ -34,6 +34,8 @@ export class TabTie extends StaveTie {
    */
   constructor(notes: TieNotes, text?: string) {
     super(notes, text);
+    // A one-letter tab technique has a distinct face from a written direction or a slide abbreviation.
+    if (text && /^[a-z]$/i.test(text)) this.setFont(Metrics.getFontInfo('TabTie.techniqueLetter'));
 
     this.renderOptions.cp1 = 9;
     this.renderOptions.cp2 = 11;

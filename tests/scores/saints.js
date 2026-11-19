@@ -7,7 +7,7 @@
   const choices = ['Reharmonized', 'Traditional'];
   const control = 'Harmony';
   const focus = 'v6-0';
-  const fonts = ['Petaluma', 'Petaluma Script'];
+  const fonts = ['Petaluma', 'Academico'];
 
   // The opening pickup and final quarter together complete a bar.
   const bars = [
@@ -31,7 +31,6 @@
   ];
 
   function create(VF, score, choice) {
-    const lyricSize = 15;
     const measures = bars.map(([music], m) => ({
       span: m === 0 ? '3/4' : m === 16 ? '1/4' : undefined,
       voices: [
@@ -49,7 +48,7 @@
         kind,
         from: 'v' + m + '-0',
         to: 'v' + (m + 1) + '-0',
-        ...(kind === 'lyric' ? { text: 'in', labelFontSize: lyricSize } : {}),
+        ...(kind === 'lyric' ? { text: 'in' } : {}),
       }))
     );
     return {
@@ -69,10 +68,7 @@
             .flatMap((text, i) =>
               text && text !== '_' ? [{ text, note: composition.getNote('v' + m + '-' + i) }] : []
             );
-          if (syllables.length) {
-            const verse = composition.systems[m].getPhraseLayout().addVerse(composition.staves[m][0], syllables);
-            for (const syllable of verse) syllable.setFontSize(lyricSize);
-          }
+          if (syllables.length) composition.systems[m].getPhraseLayout().addVerse(composition.staves[m][0], syllables);
         });
       },
     };

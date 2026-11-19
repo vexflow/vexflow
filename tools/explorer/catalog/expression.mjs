@@ -9,13 +9,19 @@ export const expression = [
     group,
     'Align lyrics below notes or annotations above them.',
     'Annotation',
-    staff(
-      "score.notes('C5/q, E5, G5, C6')",
-      `// Pair each word with the note at the same position in the melody.
-params.words.split(' ').slice(0, notes.length).forEach((word, i) => {
-  notes[i].addModifier(factory.Annotation({ text: word, vJustify: params.position }), 0);
-});`
-    ),
+    `${setup}
+
+const notes = score.notes('C5/q, E5, G5, C6');
+const system = factory.System({ x: 30, y: 65, width: width - 60 });
+const stave = system.addStave({ voices: [score.voice(notes)] }).addClef('treble');
+
+// Give each sung word a note. The verse shares a baseline and uses the score's lyric size.
+const words = params.words.trim().split(/\\s+/).filter(Boolean).slice(0, notes.length);
+if (words.length) {
+  const verse = words.map((text, i) => ({ text, note: notes[i] }));
+  system.getPhraseLayout().addVerse(stave, verse, { side: params.position === 'top' ? 'above' : 'below' });
+}
+factory.draw();`,
     [text('words', 'Words', 'One two three four'), select('position', 'Position', 'bottom', ['bottom', 'top'])]
   ),
   e(

@@ -33,9 +33,7 @@ export function electric(options: TestOptions): void {
     if (i === 0) stave.addTimeSignature('4/4').setTempo({ duration: 'q', bpm: 96 }, -8);
     if (i === 3) stave.setEndBarType(BarlineType.END);
     const legato = (start: number, label: string) =>
-      score.make
-        .tabTie({ firstNote: notes[start], lastNote: notes[start + 1] }, label)
-        .setFont('Arial, Helvetica, sans-serif', 9, 'bold');
+      score.make.tabTie({ firstNote: notes[start], lastNote: notes[start + 1] }, label);
     if (i === 0) {
       score.beam(notes.slice(1, 3));
       legato(1, 'H');
