@@ -75,12 +75,12 @@ export function renderReport(d) {
   const sections = groups(d.topics, 0),
     count = d.topics.reduce((n, row) => n + row[2].length, 0);
   const nav = [...sections, 'Visual index', 'API inventory', 'Documentation', 'Commit history', 'Method'];
-  const lead = d.figures.find((f) => f.id === 'm3-choir');
+  const lead = d.figures.find((f) => f.module === 'Demo - Ballade No. 3 in A-flat major');
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="An illustrated, searchable account of VexFlow changes since 5.0.0."><title>VexFlow · Changes since 5.0.0</title><link rel="stylesheet" href="assets/report.css"><script src="assets/app.js" defer></script></head><body>
 <a class="skip" href="#main">Skip to report</a><header class="mast"><a href="#main" class="wordmark">VexFlow</a><span>Engineering reports</span><a class="download" href="changes.json" download>Download data ↓</a></header>
 <div class="shell"><aside><nav aria-label="Report sections"><details id="menu" open><summary>Contents</summary>${nav.map((t) => anchor('#' + slug(t), t.replace(' and accessibility', ' & accessibility'))).join('')}</details></nav></aside>
 <main id="main"><div class="hero"><div class="dateline">Change report <span> / </span> ${esc(d.date)}</div><h1>VexFlow since<br><i>5.0.0</i></h1><p>From a note on a stave to a score you can reflow, read by keyboard and prepare for print.</p><div class="range">${anchor(repo + '/releases/tag/5.0.0', '5.0.0')} <span>→</span> ${anchor(repo + '/commit/' + d.head, d.head.slice(0, 8))}</div></div>
-<a class="cover open-score" data-plate="${lead.id}" href="#plate-${lead.id}"><img src="${lead.right}" alt="A two-verse vocal score with syllable connectors"><span>Two verses over a skipped attack <b>Explore the score ↗</b></span></a>
+<a class="cover open-score" data-plate="${lead.id}" href="#plate-${lead.id}"><img src="${lead.right}" alt="Opening system of Chopin’s Ballade, with fingering and pedal marks"><span>Frédéric Chopin · ${esc(lead.name)}, Op. 47 <b>Explore the score ↗</b></span></a>
 <div class="stats">${[
     [d.commits.length, 'commits'],
     [count, 'change summaries'],

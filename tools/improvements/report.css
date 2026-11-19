@@ -166,8 +166,10 @@ h1 i:before {
 }
 .cover img {
   width: 100%;
-  height: clamp(170px, 22vw, 245px);
-  object-fit: contain;
+  /* Frame the opening system of the portrait score at every viewport width. */
+  aspect-ratio: 3.3 / 1;
+  object-fit: cover;
+  object-position: center 5%;
   display: block;
 }
 .cover span,
@@ -185,6 +187,9 @@ h1 i:before {
 .sample b {
   color: var(--rust);
   font-weight: 600;
+}
+.cover b {
+  white-space: nowrap;
 }
 .stats {
   display: grid;
