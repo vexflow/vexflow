@@ -3280,7 +3280,8 @@
       "fields": [
         "clef?: string;",
         "key?: string;",
-        "time?: string;"
+        "time?: string;",
+        "showTimeSignature?: boolean;"
       ]
     },
     "EasyScoreContent": "export type EasyScoreContent = | string | StaveNoteStruct | Tickable | { note: StaveNoteStruct; id?: string; stave?: string; grace?: GraceGroupSpec; } | { tab: TabNoteStruct; id?: string; stave?: string; drawStem?: boolean } | { change: EasyScoreStaffState };",
@@ -3301,7 +3302,10 @@
       "fields": [
         "instrument?: { name: string; shortName?: string };",
         "voices: readonly EasyScoreVoiceSpec[];",
-        "span?: VoiceTime | string;"
+        "span?: VoiceTime | string;",
+        "endBarline?: BarlineType;",
+        "chords?: readonly LeadMark[];",
+        "verses?: readonly (readonly LyricMark[])[];"
       ]
     },
     "EasyScoreStaveSpec": {

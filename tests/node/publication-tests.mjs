@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
 import puppeteer from 'puppeteer';
 import { tabEndingStudy } from '../engraving/continuous-studies.mjs';
-import { publicationStudy } from '../engraving/publication-studies.mjs';
+import { leadSheetStudy, publicationStudy } from '../engraving/publication-studies.mjs';
 
 test('publication views, pagination and portable printing', async (t) => {
   const browser = await puppeteer.launch({ headless: true, args: process.env.CI ? ['--no-sandbox'] : [] });
@@ -219,6 +219,53 @@ test('publication views, pagination and portable printing', async (t) => {
         );
       }
     );
+    await t.test('lead sheet marks stay on their notes through reflow and part extraction', async () => {
+      await page.addScriptTag({ content: 'window.leadSheetStudy=' + leadSheetStudy });
+      const result = await page.evaluate(() => {
+        const source = leadSheetStudy();
+        const host = document.querySelector('aside');
+        host.replaceChildren();
+        host.id = 'lead-score';
+        const factory = new VexFlow.Factory({ renderer: { elementId: host.id, width: 800, height: 1200 } });
+        const score = factory.EasyScore().compose(source);
+        const read = (svg) => {
+          const anchor = (id) => svg.querySelector('#vf-' + id + ', [data-vf-id="vf-' + id + '"]');
+          const marks = (id) => Array.from(anchor(id).querySelectorAll('.vf-annotation text'), (t) => t.textContent);
+          const bars = [...svg.querySelectorAll('.vf-stavebarline')].map((el) =>
+            Array.from(el.querySelectorAll('rect[stroke="none"]'), (r) => Number(r.getAttribute('width')))
+          );
+          return {
+            opening: marks('a0'),
+            second: marks('a3'),
+            meterSigns: svg.querySelectorAll('.vf-timesignature').length,
+            double: bars.filter((w) => w.join() === '1,1').length,
+            final: bars.filter((w) => w.join() === '1,3').length,
+            beams: svg.querySelectorAll('.vf-beam').length,
+          };
+        };
+        const samples = [760, 270].map((width) => {
+          factory.getContext().clear();
+          score.sheet.setWidth(width);
+          factory.draw({ retain: true });
+          return { rows: score.sheet.getRows().length, drawing: read(host) };
+        });
+        const beamSizes = [...new Set(score.notes[0][0][0].map((n) => n.getBeam()))].map((b) => b.getNotes().length);
+        const book = new VexFlow.Publication(source).render(document.querySelector('main'), {
+          staves: ['lead'],
+          systemBreaks: [2],
+          paper: 'A4',
+        });
+        return { samples, beamSizes, printed: read(book.pages[0].svg), diagnostics: book.diagnostics };
+      });
+      const drawing = { opening: ['Cmaj7', 'Day'], second: ['light'], meterSigns: 0, double: 1, final: 1, beams: 4 };
+      assert.deepEqual(result.samples, [
+        { rows: 1, drawing },
+        { rows: 2, drawing },
+      ]);
+      assert.deepEqual(result.beamSizes, [3, 3]);
+      assert.deepEqual(result.printed, drawing);
+      assert.deepEqual(result.diagnostics, []);
+    });
     await t.test('a fingering and its transparent hit area stay with the printed note', async () => {
       const owner = await page.evaluate(() => {
         const measures = Array.from({ length: 6 }, (_, i) => ({

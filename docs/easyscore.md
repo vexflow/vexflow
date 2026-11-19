@@ -514,6 +514,23 @@ Assignments survive Sheet reflow. Key-aware accidentals follow the target stave.
 const bass = score.withDefaults({ clef: 'bass', stem: 'down' }, (s) => s.notes('C3/h, G2'));
 ```
 
+### Lead sheets and extracted parts
+
+Put chord names and lyric verses on the staff measure that owns their note IDs. Each inner verse array is one line of lyrics. A syllable can hyphenate to the next syllable or extend to a later note in that measure.
+
+```js
+const measure = {
+  time: '6/8',
+  showTimeSignature: false,
+  voices: [{ notes: 'C4/q.[id="day"], G4/q.[id="light"]' }],
+  chords: [{ note: 'day', text: 'Cmaj7' }],
+  verses: [[{ note: 'day', text: 'Day', hyphenAfter: true }, { note: 'light', text: 'light' }]],
+  endBarline: VexFlow.Barline.type.END,
+};
+```
+
+`showTimeSignature` carries forward on the staff. Set it to `true` to print the active meter again. The meter still governs voice timing and automatic beaming while hidden. Use `Barline.type.DOUBLE` for a double bar. The same descriptors drive screen reflow and the selected staff in a `Publication`.
+
 ### Accidental policy
 
 The default is `literal`: existing EasyScore accidental behavior stays unchanged.

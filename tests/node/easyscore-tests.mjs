@@ -895,6 +895,53 @@ test('composition failures roll back IDs and queues and enforce shared staff sta
   assert.equal(result.notes[0][0][0][0], native);
 });
 
+test('hidden meter changes stay silent at courtesy breaks and can be revealed in the following bar', () => {
+  const score = create().compose({
+    staves: [
+      {
+        id: 'melody',
+        time: '2/4',
+        measures: [
+          { voices: [{ notes: 'C4/h' }] },
+          { time: '6/8', showTimeSignature: false, voices: [{ notes: 'D4/q., G4/q.' }] },
+          { showTimeSignature: true, voices: [{ notes: 'F4/q., D4/q.' }] },
+        ],
+      },
+    ],
+    continuous: { boundaries: [{ measure: 2, breakBefore: 'force' }] },
+  });
+  score.sheet.format();
+  assert.deepEqual(
+    score.staves.map(([s]) => s.getModifiers().filter((m) => m instanceof VF.TimeSignature).length),
+    [1, 0, 1]
+  );
+});
+
+test('invalid lead-mark anchors restore a caller-owned note and its original modifiers', () => {
+  const score = create();
+  const note = score.make.note({ keys: ['c/4'], duration: 'w' }).setAttribute('id', 'owned');
+  const existing = score.make.annotation({ text: 'dolce' });
+  score.attach(note, existing);
+  assert.throws(
+    () =>
+      score.compose({
+        staves: [
+          {
+            id: 'melody',
+            measures: [
+              { voices: [{ notes: [note] }], chords: [{ note: 'owned', text: 'C' }] },
+              { voices: [{ notes: 'D4/w' }], verses: [[{ note: 'owned', text: 'wrong bar' }]] },
+            ],
+          },
+        ],
+      }),
+    /another staff or measure/
+  );
+  assert.deepEqual(note.getModifiers(), [existing]);
+  assert.equal(note.getStave(), undefined);
+  assert.throws(() => note.getVoice(), /No voice/i);
+});
+
 test('key-aware composition preserves literal pitches and explicit marks across rational onsets and key changes', () => {
   const marks = (note) =>
     note

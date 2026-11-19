@@ -95,3 +95,35 @@ export function publicationStudy(part, paper) {
   };
   return { source, options };
 }
+
+/** A two-bar compound-meter lead sheet with independent harmony and lyric anchors. */
+export function leadSheetStudy() {
+  const measure = (id, pitches) => ({
+    voices: [
+      {
+        notes: pitches.map((key, i) => ({ id: id + i, note: { keys: [key], duration: '8' } })),
+        autoBeam: true,
+      },
+    ],
+  });
+  const first = measure('a', ['c/4', 'd/4', 'e/4', 'g/4', 'a/4', 'g/4']);
+  const second = measure('b', ['e/4', 'f/4', 'g/4', 'f/4', 'e/4', 'c/4']);
+  first.chords = [{ note: 'a0', text: 'Cmaj7' }];
+  first.verses = [
+    [
+      { note: 'a0', text: 'Day', hyphenAfter: true },
+      { note: 'a3', text: 'light', extendTo: 'a5' },
+    ],
+  ];
+  first.endBarline = VexFlow.Barline.type.DOUBLE;
+  second.endBarline = VexFlow.Barline.type.END;
+  const lead = { id: 'lead', time: '6/8', showTimeSignature: false, measures: [first, second] };
+  const bass = {
+    id: 'bass',
+    clef: 'bass',
+    time: '6/8',
+    showTimeSignature: false,
+    measures: [0, 1].map(() => ({ voices: [{ notes: 'C3/q., G3/q.' }] })),
+  };
+  return { staves: [lead, bass], continuous: {} };
+}
