@@ -29,7 +29,7 @@ export async function validate(directory, jsonFiles = []) {
   for (const page of ['index.html', 'all.html'].filter((name) => manifest.files[name])) {
     const html = await readFile(join(directory, page), 'utf8');
     for (const match of html.matchAll(/(?:src|href)="\.\/([^"#]+)"/g))
-      if (!manifest.files[match[1]]) throw new Error(`Missing page asset: ${match[1]}`);
+      if (!manifest.files[match[1].split('?')[0]]) throw new Error(`Missing page asset: ${match[1]}`);
   }
   return manifest;
 }

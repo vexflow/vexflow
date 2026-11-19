@@ -90,7 +90,10 @@ test('standalone gallery runs with local fonts/scripts and preserves QUnit filte
       'electric',
       'drums',
       'quartertones',
+      'falseta',
+      'sumer',
     ];
+    const editions = new Map();
     await page.focus('#next');
     for (const [index, piece] of featured.entries()) {
       if (index) await page.keyboard.press('Enter');
@@ -102,8 +105,10 @@ test('standalone gallery runs with local fonts/scripts and preserves QUnit filte
         })
       );
       assert.ok(await page.$eval('.sheet-image', (link) => link.href === link.querySelector('img').currentSrc));
-      const source = await page.$eval('#score-slide a[href$=".txt"]', (link) => link.href);
+      const source = await page.$eval('#score-slide a[href$=".txt"], #score-slide a[href$=".js"]', (link) => link.href);
       assert.ok((await fetch(source)).ok, `source for ${piece}`);
+      const open = await page.$eval('#score-slide', (el) => el.querySelector('a[href*="?piece="]')?.href);
+      if (open) editions.set(piece, open);
       assert.equal(await page.evaluate(() => document.activeElement.id), 'next');
     }
     await page.click('#next');
@@ -117,6 +122,89 @@ test('standalone gallery runs with local fonts/scripts and preserves QUnit filte
     await page.setViewport({ width: 375, height: 800 });
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     await page.setViewport({ width: 1280, height: 900 });
+
+    // Exercise the published score URLs with their real runtime and a cold, local-only network.
+    for (const [piece, url] of editions) {
+      await page.goto(url);
+      await page.waitForSelector('#tools:not([hidden])');
+      assert.ok(await page.$('#score svg'), piece);
+      if (piece === 'kesh') {
+        const chords = await page.$$eval('#score .vf-chordsymbol', (marks) => marks.map((mark) => mark.textContent));
+        assert.ok(
+          ['G', 'D', 'Am', 'C'].every((chord) => chords.includes(chord)),
+          'printed fiddle harmony'
+        );
+        await page.select('#edition', 'Flute part');
+        assert.equal(await page.$$eval('#score svg', (svgs) => svgs.length), 1);
+        assert.match(await page.$eval('#score', (el) => el.textContent), /Fiddle cue/);
+        const part = await page.$eval('#score metadata', (el) => JSON.parse(el.textContent));
+        assert.deepEqual(part.staves, ['fl']);
+        assert.ok(await page.$('#score .vf-chordsymbol'), 'the fiddle cue retains its source decorations');
+        assert.ok(part.events.filter((e) => e.measure <= 9).every((e) => e.rest));
+        assert.ok(part.events.some((e) => e.measure === 10 && !e.rest));
+        assert.ok(
+          await page.$$eval('#score [data-system="1"] .vf-stave', (staves) => staves.length < 9),
+          'the opening rests share a counted bar before the cue'
+        );
+        await page.evaluate(() => {
+          window.print = () => {
+            window.didPrint = true;
+          };
+        });
+        await page.click('#print');
+        assert.ok(await page.evaluate(() => window.didPrint));
+        continue;
+      }
+      if (piece === 'drums') {
+        const rowSizes = await page.$$eval('#score .vf-stave', (staves) => {
+          const rows = new Map();
+          for (const stave of staves) {
+            const y = Math.round(stave.getBoundingClientRect().top);
+            rows.set(y, (rows.get(y) ?? 0) + 1);
+          }
+          return [...rows.values()];
+        });
+        assert.deepEqual(rowSizes, [3, 3], 'six-bar groove at page width');
+        assert.match(await page.$eval('#score', (el) => el.textContent), /In the pocket/);
+      }
+      if (piece === 'prelude') await page.select('#events', 'arp-3-7');
+      const original = await page.$eval('#events', (s) => s.value);
+      await page.select('#width', 'Narrow');
+      assert.equal(await page.$eval('#events', (s) => s.value), original, piece + ' retained selection on reflow');
+      if (piece === 'saints') {
+        await page.select('#edition', 'Traditional');
+        assert.equal(await page.$eval('#events', (s) => s.value), 'v6-0');
+      } else if (piece === 'electric' || piece === 'drums') {
+        const label = await page.$eval('#events', (s) => s.selectedOptions[0].text);
+        assert.match(label, piece === 'drums' ? /Snare drum.*hi-hat/i : /string 3.*bend 2 semitones/i);
+      } else if (piece === 'sumer') {
+        await page.select('#edition', 'Full ensemble');
+        const labels = await page.$$eval('#events option', (opts) => opts.map((o) => o.text).join(' '));
+        for (const part of ['Singer 4', 'Pes 1', 'Pes 2']) assert.ok(labels.includes(part));
+        await page.select('#edition', 'Singer 2');
+        assert.doesNotMatch(await page.$eval('#events', (s) => s.textContent), /Singer 1/);
+      } else if (piece === 'falseta') {
+        await page.select('#edition', 'Hand direction');
+        assert.match(await page.$eval('#legend', (el) => el.textContent), /↓ bass to treble/);
+      }
+      // No ink may be clipped when an indivisible measure exceeds a phone-width line.
+      assert.ok(
+        await page.$eval('#score svg', (svg) => {
+          const b = svg.getBBox(),
+            v = svg.viewBox.baseVal;
+          return (
+            b.x >= v.x - 1 &&
+            b.y >= v.y - 1 &&
+            b.x + b.width <= v.x + v.width + 1 &&
+            b.y + b.height <= v.y + v.height + 1
+          );
+        }),
+        piece + ' ink bounds'
+      );
+    }
+    assert.equal(editions.size, 8);
+
+    await page.goto(origin + '/tests/');
 
     // Use the public links just as a reader or headless client would.
     const result = async () => {

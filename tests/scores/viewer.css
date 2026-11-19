@@ -1,0 +1,132 @@
+/* The reader shares a coordinate system with the SVG. Print only the selected physical pages. */
+:root {
+  font-family: system-ui, sans-serif;
+  color: #183530;
+  background: #f4f5f1;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+main {
+  max-width: 70rem;
+  margin: auto;
+  padding: 1.25rem clamp(1rem, 4vw, 3.5rem) 3rem;
+}
+header,
+#tools {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+header {
+  justify-content: space-between;
+  border-bottom: 1px solid #b8c8bf;
+  padding-bottom: 0.8rem;
+}
+a {
+  color: #205b52;
+}
+h1 {
+  font:
+    500 clamp(2rem, 5vw, 3.8rem)/1.08 Georgia,
+    serif;
+  margin: 1.4rem 0 0.4rem;
+}
+#credit {
+  margin: 0;
+  color: #55625b;
+}
+#intro {
+  line-height: 1.5;
+  max-width: 68ch;
+}
+#tools {
+  margin: 1.25rem 0;
+}
+button,
+select {
+  font: inherit;
+  padding: 0.48rem 0.65rem;
+  border: 1px solid #a1b3aa;
+  background: white;
+  color: inherit;
+  border-radius: 0.28rem;
+  max-width: 100%;
+}
+button {
+  cursor: pointer;
+}
+label {
+  font-weight: 600;
+}
+select {
+  font-weight: 400;
+}
+#page {
+  overflow: auto;
+  background: white;
+  border: 1px solid #cbd4cd;
+}
+#frame {
+  position: relative;
+  margin: 0 auto;
+}
+#highlight {
+  position: absolute;
+  pointer-events: none;
+  background: #2e977720;
+  outline: 2px solid #157a62;
+  border-radius: 3px;
+}
+#reading {
+  display: grid;
+  gap: 0.35rem;
+  margin: 1rem 0;
+}
+#score > svg {
+  display: block;
+}
+.publication #score > svg {
+  height: auto;
+  width: min(100%, 210mm);
+  margin: auto;
+  border-bottom: 1px solid #b8c8bf;
+}
+[hidden],
+#reading[hidden],
+#tools[hidden] {
+  display: none;
+}
+@page {
+  size: A4;
+  margin: 0;
+}
+@media print {
+  body,
+  main,
+  #page,
+  #frame {
+    background: white;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    overflow: visible;
+    max-width: none;
+  }
+  main > :not(#page) {
+    display: none !important;
+  }
+  .publication #score > svg {
+    width: 210mm;
+    height: 297mm;
+    border: 0;
+    break-after: page;
+  }
+  .publication #score > svg:last-child {
+    break-after: auto;
+  }
+}

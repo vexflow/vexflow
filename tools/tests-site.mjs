@@ -56,6 +56,19 @@ export async function build() {
     if (/\.(ts|webp)$/.test(file))
       assets.set('demos/' + file.replace(/\.ts$/, '.txt'), await readFile(join(root, 'tests/demos', file)));
   }
+  // The score reader uses the library bundle on demand. Its modules and previews are portable together.
+  assets.set('vexflow-debug.js', await readFile(join(root, 'build/cjs/vexflow-debug.js')));
+  for (const file of await readdir(join(root, 'tests/scores'))) {
+    let bytes = await readFile(join(root, 'tests/scores', file));
+    if (file === 'index.html')
+      bytes = Buffer.from(
+        bytes
+          .toString()
+          .replace('../../build/cjs/vexflow-debug.js', '../vexflow-debug.js')
+          .replace('../flow.html', '../../../index.html')
+      );
+    assets.set('scores/' + file, bytes);
+  }
   await bundleFonts(assets);
   const digest = hash(
     Buffer.concat([...assets.entries()].sort().flatMap(([name, bytes]) => [Buffer.from(name), bytes]))
@@ -82,7 +95,7 @@ export async function build() {
     await writeFile(join(staging, 'all.html'), runner);
     manifest.files['all.html'] = hash(runner);
     const html = (await readFile(join(root, 'tests/flow.html'), 'utf8')).replace(
-      /(src|href)="(minuet\.webp|demo_petzold_tests\.ts|demos\/[a-z]+\.(?:webp|ts))"/g,
+      /(src|href)="(minuet\.webp|demo_petzold_tests\.ts|demos\/[a-z]+\.(?:webp|ts)|scores\/[a-z]+\.(?:html(?:\?piece=[a-z]+)?|js|webp))"/g,
       (_, attr, file) => `${attr}="./${assetPath}/${file.replace(/\.ts$/, '.txt')}"`
     );
     await writeFile(join(staging, 'index.html'), html);

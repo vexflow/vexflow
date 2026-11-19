@@ -34,6 +34,8 @@ export interface ContinuousSpan {
   side?: 'above' | 'below';
   /** Syllable, ending number, tuplet ratio or octave label, according to kind. */
   text?: string;
+  /** Optional type size for this label, in points. Measured before system breaks are chosen. */
+  labelFontSize?: number;
 }
 export interface SpanAnchor {
   measure: number;
@@ -78,7 +80,9 @@ export function spanLabel(spec: ContinuousSpan): Element | undefined {
       >
     )[spec.kind];
   if (!text) return;
-  return new Element(spec.kind === 'trill' ? 'Ornament' : 'Annotation').setText(text);
+  const label = new Element(spec.kind === 'trill' ? 'Ornament' : 'Annotation').setText(text);
+  if (spec.labelFontSize !== undefined) label.setFontSize(spec.labelFontSize);
+  return label;
 }
 
 export function spanAbove(span: ContinuousSpan): boolean {

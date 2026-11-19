@@ -1,6 +1,6 @@
 // Print-ready SVG pages over independent EasyScore views. Public dimensions are millimeters.
 import type { ContinuousRow } from './continuouslayout';
-import type { EasyScoreComposition, EasyScoreCompositionSpec } from './easyscore';
+import type { CommitHook, EasyScoreComposition, EasyScoreCompositionSpec } from './easyscore';
 import { Factory } from './factory';
 import { Metrics } from './metrics';
 import { Note } from './note';
@@ -15,6 +15,8 @@ export type { PublicationRegion, PublicationView } from './publicationview';
 
 /** Paper, staff height (four spaces), margins, and inter-system gaps are measured in millimeters. */
 export interface PublicationOptions extends PublicationView {
+  /** Apply the source's EasyScore note decorations to every independently built part and cue. */
+  noteHooks?: readonly CommitHook[];
   paper?: 'A4' | 'Letter' | { width: number; height: number };
   staffSize?: number;
   margins?: Partial<Record<'top' | 'right' | 'bottom' | 'left', number>>;
@@ -75,10 +77,12 @@ function dimensions(o: PublicationOptions) {
 type Size = ReturnType<typeof dimensions>;
 
 /** The staging SVG must participate in browser font measurement, including for detached destinations. */
-function compose(host: HTMLElement, spec: EasyScoreCompositionSpec) {
+function compose(host: HTMLElement, spec: EasyScoreCompositionSpec, hooks: readonly CommitHook[] = []) {
   const ctx = new SVGContext(host);
   const factory = new Factory({ renderer: { elementId: null, width: 1, height: 1 } }).setContext(ctx);
-  const score = factory.EasyScore().compose(spec);
+  const easyScore = factory.EasyScore();
+  for (const hook of hooks) easyScore.addCommitHook(hook);
+  const score = easyScore.compose(spec);
   return { ctx, factory, score };
 }
 
@@ -271,7 +275,7 @@ function addInsets(
       sheet: { x: 0, y: 0, width: stave.getWidth() / scale, measurePadding: 4 },
       continuous: {},
     };
-    const inset = compose(host, insetSpec);
+    const inset = compose(host, insetSpec, o.noteHooks);
     inset.factory.draw();
     row.references.push({
       ...r,
@@ -486,14 +490,14 @@ export class Publication {
         (this.source.spans?.length ||
           this.source.continuous?.spans?.length ||
           this.source.continuous?.splitChords?.length)
-          ? compose(host, this.source).score
+          ? compose(host, this.source, options.noteHooks).score
           : undefined;
       // A one-unit inset keeps edge strokes inside the requested margin.
       const width = size.musicWidth / size.scale - 2;
       const spec = projectScore(this.source, options, width, ref, (id, measures) =>
         diagnostics.push({ code: 'ExcludedAnchor', measures, detail: id })
       );
-      const { ctx, factory, score } = compose(host, spec);
+      const { ctx, factory, score } = compose(host, spec, options.noteHooks);
       factory.draw();
       const layout = score.sheet.getContinuousLayout()!;
       for (const d of layout.diagnostics)

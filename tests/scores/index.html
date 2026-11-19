@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Featured score · VexFlow</title>
+    <link rel="stylesheet" href="viewer.css" />
+    <script defer src="../../build/cjs/vexflow-debug.js"></script>
+    <script defer src="viewer.js"></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <a id="gallery" href="../flow.html">← Featured scores</a><a id="source" hidden>View score code</a>
+      </header>
+      <h1 id="title">Featured score</h1>
+      <p id="credit"></p>
+      <p id="intro"></p>
+      <form id="tools" hidden>
+        <label id="edition-label" hidden
+          ><span></span
+          ><select id="edition"></select
+        ></label>
+        <label id="width-label"
+          >Layout
+          <select id="width">
+            <option>Page width</option>
+            <option>Narrow</option>
+          </select></label
+        >
+        <button type="button" id="action" hidden></button
+        ><button type="button" id="print" hidden>Print this edition</button>
+      </form>
+      <p id="legend" hidden></p>
+      <label id="reading" hidden
+        >Score events
+        <select id="events"></select
+      ></label>
+      <div id="page">
+        <div id="frame">
+          <div id="score"></div>
+          <div id="highlight" hidden></div>
+        </div>
+      </div>
+      <p id="status" role="status">Loading score…</p>
+    </main>
+  </body>
+</html>

@@ -42,3 +42,16 @@ Bounding boxes contain empty glyph space. These checks are useful heuristics, no
 Negative-control tests deliberately move boxes, clip them, corrupt images, and alter pixels. These verify that diagnostics can detect defects. Add similar controls when introducing a new metric.
 
 Keep generated images and reports under `build/` or a temporary directory. Attach issue evidence to GitHub. Commit reusable fixtures and regression checks, not issue-specific screenshots.
+
+## Featured score carousel
+
+`npm run tests:build` produces a self-contained gallery in `build/tests-site/`. Serve that directory over HTTP to browse the test carousel and open its scores.
+
+Interactive editions live in `tests/scores/`. Each module describes the music, its controls and any native notation it adds to the EasyScore composition. Kesh uses the same publication source for the ensemble and the printable flute edition. The original session chart and the rendering fixtures remain available from the gallery.
+
+To refresh the score artwork from the current library, run:
+
+```sh
+npx grunt webpack:debug
+node tools/gallery-previews.mjs --interactive
+```
