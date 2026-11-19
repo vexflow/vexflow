@@ -27,6 +27,12 @@ import { Tables } from './tables';
 import { Category } from './typeguard';
 import { defined, log, midLine, RuntimeError } from './util';
 
+/** Bravura's SMuFL stemUpSE and stemDownNW anchors, in staff spaces from the glyph origin. */
+const bravuraSlashAnchors: Record<string, { up: readonly [number, number]; down: readonly [number, number] }> = {
+  [Glyphs.noteheadSlashVerticalEnds]: { up: [1.46, 0.656], down: [0, -0.664] },
+  [Glyphs.noteheadSlashWhiteHalf]: { up: [3.12, 1], down: [0, -1] },
+};
+
 export interface StaveNoteHeadBounds {
   yTop: number;
   yBottom: number;
@@ -672,21 +678,31 @@ export class StaveNote extends StemmableNote {
     return super.hasFlag() && !this.isRest();
   }
 
+  /** Use explicit font metadata first, then the bundled anchors for Bravura rhythm slashes. */
+  private stemAnchor(head: NoteHead, direction: 'up' | 'down'): readonly [number, number] | undefined {
+    const family = head.fontInfo.family;
+    if (this.engraving?.musicFont === family) {
+      const anchor = this.engraving.stemAnchor(head.text, direction);
+      if (anchor) return anchor;
+    }
+    const slash = bravuraSlashAnchors[head.text];
+    if (slash && /^\s*(?:Bravura|"Bravura"|'Bravura')\s*(?:,|$)/i.test(family)) return slash[direction];
+  }
+
   override getStemX(): number {
     if (this.noteType === 'r') {
       return this.getCenterGlyphX();
     } else {
       const up = this.stemDirection === Stem.UP;
-      const head = this.engraving && this._noteHeads.find((h) => !h.isDisplaced());
-      if (head && this.engraving?.musicFont === head.fontInfo.family) {
-        const anchor = this.engraving.stemAnchor(head.text, up ? 'up' : 'down');
-        if (anchor)
-          return (
-            this.getNoteHeadBeginX() +
-            head.getXShift() +
-            (anchor[0] * head.fontSizeInPixels) / 4 +
-            ((up ? -1 : 1) * Stem.WIDTH) / 2
-          );
+      const head = this._noteHeads.find((h) => !h.isDisplaced());
+      const anchor = head && this.stemAnchor(head, up ? 'up' : 'down');
+      if (head && anchor) {
+        return (
+          this.getNoteHeadBeginX() +
+          head.getXShift() +
+          (anchor[0] * head.fontSizeInPixels) / 4 +
+          ((up ? -1 : 1) * Stem.WIDTH) / 2
+        );
       }
       // We adjust the origin of the stem because we want the stem left-aligned
       // with the notehead if stemmed-down, and right-aligned if stemmed-up
@@ -967,10 +983,7 @@ export class StaveNote extends StemmableNote {
     this._noteHeads.forEach((nh) => {
       const offset = Tables.noteHeadStemYOffsets[nh.text];
       const anchor = offset ? offset[anchorKey] : 0;
-      const fontAnchor =
-        this.engraving && this.engraving.musicFont === nh.fontInfo.family
-          ? this.engraving.stemAnchor(nh.text, anchorKey)
-          : undefined;
+      const fontAnchor = this.stemAnchor(nh, anchorKey);
       // SMuFL specifies four staff spaces per em. Follow the glyph scale for grace notes too.
       const y =
         nh.getY() - (fontAnchor ? (fontAnchor[1] * nh.fontSizeInPixels) / 4 : anchor * Tables.STAVE_LINE_DISTANCE);
