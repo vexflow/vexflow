@@ -277,6 +277,31 @@ test('boundary key, clef and meter move together; explicit signs survive and ret
   b.sheet.setWidth(800).format();
   assert.deepEqual(signs(VF.StaveModifier.Position.END), [VF.Barline.CATEGORY]);
 });
+test('an authored rest remains visible on a silent staff and breaks a compressed rest run', () => {
+  const measures = Array.from({ length: 3 }, (_, i) => ({
+    voices: [{ notes: [{ note: { keys: ['r/4'], duration: 'wr', ...(i === 1 && { restLine: 0 }) } }] }],
+  }));
+  const source = { staves: [{ id: 'rest', measures }], continuous: { compressRests: true, hideEmptyStaves: true } };
+  const { f } = factory();
+  const score = f.EasyScore().compose(source);
+  score.sheet.format();
+  assert.deepEqual(
+    score.sheet.getContinuousLayout().rows.flatMap((row) => row.restGroups),
+    []
+  );
+  const melody = spec(3, {}).staves[0];
+  const duet = factory()
+    .f.EasyScore()
+    .compose({ ...source, staves: [melody, ...source.staves] });
+  duet.sheet.format();
+  assert.ok(
+    duet.sheet
+      .getContinuousLayout()
+      .rows.find((row) => row.measures.includes(2))
+      .visibleStaves.includes('rest')
+  );
+});
+
 test('structural marks interrupt rest compression; navigation targets and span heads validate atomically', () => {
   const { f } = factory(),
     es = f.EasyScore(),

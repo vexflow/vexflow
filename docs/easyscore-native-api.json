@@ -2081,6 +2081,7 @@
         "extends NoteStruct"
       ],
       "fields": [
+        "restLine?: number;",
         "musicFont?: string;",
         "engraving?: EngravingProfile;",
         "stemDirection?: number;",
@@ -2136,6 +2137,8 @@
       "getFlagStyle(): ElementStyle | undefined",
       "getGlyphWidth(): number",
       "setKeyStyle(index: number, style: ElementStyle): this",
+      "restLine(): number | undefined",
+      "setRestLine(line: number | undefined): this",
       "setKeyLine(index: number, line: number): this",
       "getKeyLine(index: number): number",
       "getVoiceShiftWidth(): number",

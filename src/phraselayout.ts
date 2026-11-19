@@ -161,7 +161,9 @@ export class PhraseLayout {
   resetPlacement(): void {
     for (const lane of this.lanes) for (const mark of lane.marks) mark.setLayoutBaseline(undefined);
     for (const route of this.routes) route.setLayoutRise(0);
-    for (const [note, line] of this.restLines) if (note.getKeyLine(0) === line.after) note.setKeyLine(0, line.before);
+    for (const [note, line] of this.restLines) {
+      if (note.restLine === undefined && note.getKeyLine(0) === line.after) note.setKeyLine(0, line.before);
+    }
     this.restLines.clear();
   }
 
@@ -246,7 +248,9 @@ export class PhraseLayout {
       if (stave && !this.fixed.some((f) => f.owner === e)) this.measure(e, stave);
     }
     for (const { owner, stave } of this.fixed) if (!tuplets.has(owner as Tuplet)) this.measure(owner, stave);
-    for (const n of rests) this.placeRest(n);
+    // Record authored rest positions first so automatic rests can clear them in either voice order.
+    for (const n of rests) if (n.restLine !== undefined) this.placeRest(n);
+    for (const n of rests) if (n.restLine === undefined) this.placeRest(n);
     for (const m of marks) this.placeAttachment(m);
     for (const t of tuplets) this.measure(t, t.getNotes()[0].checkStave());
     for (const stave of staves) {
@@ -269,7 +273,8 @@ export class PhraseLayout {
     if (original.diagnostics.length) this.report('UnsupportedGeometry', note);
     let parts = original.parts;
     const hits = this.hits(parts, stave, gap);
-    if (hits.length && !this.pins.has(note)) {
+    const pinned = note.restLine !== undefined || this.pins.has(note);
+    if (hits.length && !pinned) {
       // Try whole staff spaces, nearest first, on both sides of the authored rest.
       const sign = note.getStemDirection();
       for (const step of [1, -1, 2, -2, 3, -3, 4, -4]) {
@@ -285,8 +290,7 @@ export class PhraseLayout {
       }
     }
     const remaining = this.hits(parts, stave, gap);
-    if (remaining.length)
-      this.report(this.pins.has(note) ? 'PinnedCollision' : 'UnresolvedCollision', note, remaining[0].owner);
+    if (remaining.length) this.report(pinned ? 'PinnedCollision' : 'UnresolvedCollision', note, remaining[0].owner);
     this.addParts(note, stave, parts);
   }
   private placeAttachment(mark: LocalMark): void {

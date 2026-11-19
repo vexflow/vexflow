@@ -113,6 +113,8 @@ Attach modifiers with `score.attach(note, modifier, chordIndex)`.
 `make.dot()` adds a visual dot. Set `dots` or `durationOverride` in the typed note to change its musical duration.
 String dots continue to handle both duration and display automatically.
 
+Set `restLine` on a typed rest to keep its vertical position during formatting. For example, `score.make.note({ keys: ['r/4'], duration: 'hr', restLine: 0 })` puts a half rest on the first ledger below a five-line staff. Key line 5 is the top staff line. On an existing rest, `setRestLine(line)` pins the position and `setRestLine(undefined)` releases it.
+
 ## Grace and subnote groups
 
 ```js

@@ -54,6 +54,8 @@ export interface StaveNoteFormatSettings {
 }
 
 export interface StaveNoteStruct extends NoteStruct {
+  /** Fixed rest position in key-line coordinates. On a five-line stave, 1 is the bottom line. */
+  restLine?: number;
   /** Override the music glyph family for this note, its heads and its flag. */
   musicFont?: string;
   engraving?: EngravingProfile;
@@ -158,7 +160,18 @@ export class StaveNote extends StemmableNote {
 
     const visible = notesList.filter((item) => item.note.renderOptions.draw !== false);
     if (visible.length < 2) return true;
-    if (visible.length > 3) {
+    const positioned = visible.some(({ note }) => note.restLine !== undefined);
+    if (positioned && visible.length <= 3) {
+      // Move only automatic rests. Visit obstacles in travel order so each shift clears earlier ones.
+      for (const rest of visible.filter((v) => v.isrest && v.note.restLine === undefined)) {
+        const direction = rest.note.getStemDirection();
+        const peers = visible.filter((v) => v !== rest).sort((a, b) => direction * (a.minLine - b.minLine));
+        for (const peer of peers) {
+          if (rest.minLine <= peer.maxLine && peer.minLine <= rest.maxLine) shiftRestVertical(rest, peer, direction);
+        }
+      }
+    }
+    if (visible.length > 3 || positioned) {
       // Keep overlapping stem/head envelopes in separate columns. Pitch order makes
       // placement independent of voice insertion for voices at distinct pitches.
       const columns: { bottom: number; width: number; members: StaveNoteFormatSettings[] }[] = [];
@@ -369,6 +382,8 @@ export class StaveNote extends StemmableNote {
   protected readonly clef: string;
   protected readonly octaveShift?: number;
 
+  /** Preserve the previous line so releasing an explicit position restores automatic placement. */
+  private lineBeforeRestPin?: number;
   protected displaced: boolean;
   protected dotShiftY: number;
   protected useDefaultHeadX = false;
@@ -424,6 +439,7 @@ export class StaveNote extends StemmableNote {
     } else {
       this.setStemDirection(noteStruct.stemDirection ?? Stem.UP);
     }
+    if (noteStruct.restLine !== undefined) this.setRestLine(noteStruct.restLine);
     if (this.notation.length) attachGuitarGestures(this);
   }
 
@@ -880,6 +896,27 @@ export class StaveNote extends StemmableNote {
   // `shadowBlur`, `fillStyle`, `strokeStyle`
   setKeyStyle(index: number, style: ElementStyle): this {
     this._noteHeads[index].setStyle(style);
+    return this;
+  }
+
+  /** The explicit key line, or undefined when rest placement is automatic. */
+  get restLine(): number | undefined {
+    return this.lineBeforeRestPin === undefined ? undefined : this.getKeyLine(0);
+  }
+
+  /** Pin this rest to a line. Passing undefined releases it for automatic placement. */
+  setRestLine(line: number | undefined): this {
+    if (!this.isRest() || (line !== undefined && !Number.isFinite(line)))
+      throw new RuntimeError('BadArguments', 'Rest positioning requires a rest and a finite line.');
+    if (line !== undefined) {
+      this.lineBeforeRestPin ??= this.getKeyLine(0);
+      return this.setKeyLine(0, line);
+    }
+    if (this.lineBeforeRestPin !== undefined) {
+      const previous = this.lineBeforeRestPin;
+      this.lineBeforeRestPin = undefined;
+      this.setKeyLine(0, previous);
+    }
     return this;
   }
 
