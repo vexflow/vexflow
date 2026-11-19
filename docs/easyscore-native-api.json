@@ -2174,6 +2174,7 @@
       "CATEGORY(): string",
       "constructor(section: string, x: number = 0, yShift: number = 0, drawRect = true)",
       "setDrawRect(drawRect: boolean): this",
+      "getBoundingBox(): BoundingBox",
       "draw(): void"
     ]
   },
@@ -2354,6 +2355,7 @@
     "State": {
       "extends": [],
       "fields": [
+        "font?: string;",
         "state: Attributes;",
         "attributes: Attributes;"
       ]

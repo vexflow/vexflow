@@ -52,6 +52,8 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 const TWO_PI = 2 * Math.PI;
 
 export interface State {
+  /** Font shorthand returned by getFont() at the matching save(). */
+  font?: string;
   state: Attributes;
   attributes: Attributes;
 }
@@ -589,6 +591,7 @@ export class SVGContext extends RenderContext {
 
   save(): this {
     this.stateStack.push({
+      font: this.fontCSSString,
       state: structuredClone(this.state),
       attributes: structuredClone(this.attributes),
     });
@@ -598,9 +601,16 @@ export class SVGContext extends RenderContext {
   restore(): this {
     const savedState = this.stateStack.pop();
     if (savedState) {
-      const state = savedState;
-      this.state = structuredClone(state.state);
-      this.attributes = structuredClone(state.attributes);
+      this.state = structuredClone(savedState.state);
+      this.attributes = structuredClone(savedState.attributes);
+      this.fontCSSString =
+        savedState.font ??
+        Font.toCSSString({
+          family: this.attributes['font-family'],
+          size: this.attributes['font-size'],
+          weight: this.attributes['font-weight'],
+          style: this.attributes['font-style'],
+        });
     }
     return this;
   }

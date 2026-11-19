@@ -47,6 +47,12 @@ Measure with the same family, size, weight, and style used to draw. Start with t
 
 **Verify** SVG and Canvas with wide → narrow → wide reflow and at two staff sizes. Look for stable lyric baselines, extenders that clear their syllables, legible chord scripts, and centered labels even after the previous draw used a different font. Add focused geometry assertions for failures found in the samples. Record any intentional change to a system or page break. [Chord tests](../../tests/node/chord-kerning-tests.mjs) · [Print tests](../../tests/node/publication-tests.mjs)
 
+### Milestone 3 results
+
+- The interactive Saints verse uses a baseline 7.5 staff spaces below the top line. Its two held syllables own their extenders. Each line starts 0.35 staff spaces past the visible word and keeps its height across a system break. At the gallery review width the same 17 bars still occupy three systems, and the narrow view still uses nine. SVG and Canvas restore the original geometry after resizing at both 9 px and 10 px staff spacing.
+- Rehearsal frames now enclose the measured letters, including descenders. Moving a section shifts its lettering and frame together. Standard and tab tie labels center in their drawing font after either an 8 pt or a 32 pt preceding mark. SVG restores the previous font for the next caller.
+- The 13 pt chord checks cover root and extension bounds. Letter and A4 publication checks cover running text, fingerings and system placement. The print fixtures retain their page breaks. [Verse and extender example](../text-and-lyrics.md#shared-lyric-baselines)
+
 ## Milestone 4 · Review the repertoire
 
 Review both the QUnit and interactive editions. Compare Saints in its handwritten style with an Academico specimen. Use the default chord face in Greensleeves and both Kesh editions. Compare the H/P/T lettering in High Wire with the proposed default. Use the original Ballade edition as the reference for its title and dedication. Record a choice for each of these on the issue. Check Prelude dynamics, Sumer’s overlapping parts, and the drum and microtonal scores for crowded labels.

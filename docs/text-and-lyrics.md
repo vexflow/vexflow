@@ -57,6 +57,25 @@ note.addModifier(lyric, 0);
 
 Call `setTextBaseline()` without an argument to restore automatic positioning. The caller chooses a baseline that clears the notes, stems, and adjacent staves. Each verse can have its own baseline.
 
+For a responsive verse, set the distance below the top staff line in staff spaces. Use the same distance in each measure. A held syllable can own the start of its extender. Give the lyric span a `syllableId` in the composition, then set that ID on the corresponding verse annotation before formatting.
+
+```js
+// In spec.continuous.spans, “hold” and “release” are note IDs on the same staff.
+const extender = { id: 'hold-line', kind: 'lyric', from: 'hold', to: 'release', syllableId: 'held-word' };
+```
+
+```js
+// After composing the score, attach the word to its first note.
+const [word] = composition.systems[0].getPhraseLayout().addVerse(
+  composition.staves[0][0],
+  [{ note: composition.getNote('hold'), text: 'sing' }],
+  { baselineSpaces: 7.5 }
+);
+word.setAttribute('id', 'held-word');
+```
+
+The annotation supplies the text and font. The line starts just past the word’s visible ink and continues at the same staff-relative height after a system break. [Complete Saints example](../tests/scores/saints.js)
+
 ## Layout before drawing
 
 Attach notes to their staves and format the voice before requesting coordinates:

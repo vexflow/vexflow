@@ -174,7 +174,7 @@ test('publication views, pagination and portable printing', async (t) => {
       ]);
     });
     await t.test('a fingering and its transparent hit area stay with the printed note', async () => {
-      const owner = await page.evaluate(() => {
+      const printed = await page.evaluate(() => {
         const measures = Array.from({ length: 6 }, (_, i) => ({
           voices: [{ notes: i === 5 ? 'C5/w[id="fingered",fingerings="4.left"]' : 'G4/w' }],
         }));
@@ -183,9 +183,17 @@ test('publication views, pagination and portable printing', async (t) => {
           systemBreaks: [2, 3, 4, 5, 6],
         });
         const note = book.pages.map((p) => p.svg.querySelector('[data-vf-id="vf-fingered"]')).find(Boolean);
-        return note.closest('[data-system]').getAttribute('data-system');
+        const digit = Array.from(note.querySelectorAll('text'))
+          .find((el) => el.textContent === '4')
+          .getBoundingClientRect();
+        const head = note.querySelector('.vf-notehead text').getBoundingClientRect();
+        return {
+          system: note.closest('[data-system]').getAttribute('data-system'),
+          clear: digit.right < head.left,
+          aligned: digit.top < head.bottom && head.top < digit.bottom,
+        };
       });
-      assert.equal(owner, '6');
+      assert.deepEqual(printed, { system: '6', clear: true, aligned: true });
     });
     await t.test('pagination reserves running text at the final page scale', async () => {
       const result = await page.evaluate(() => {

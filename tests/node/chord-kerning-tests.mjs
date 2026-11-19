@@ -21,7 +21,7 @@ const state = () => ({ leftShift: 0, rightShift: 0, topTextLine: 0, textLine: 0 
 const close = (a, b, tolerance = 0.04) => assert.ok(Math.abs(a - b) < tolerance, `${a} ≈ ${b}`);
 
 /** Attach a real note so normal formatter width accounting is exercised. */
-function chord(mode = 'auto', family = 'Academico,Bravura', size = 12) {
+function chord(mode = 'auto', family = 'Academico,Bravura', size = VF.Metrics.getFontInfo('ChordSymbol').size) {
   const symbol = new ChordSymbol().setFont(family, size).setKerning(mode);
   new StaveNote({ keys: ['c/5'], duration: 'q' }).addModifier(symbol, 0);
   return symbol;
@@ -151,7 +151,7 @@ test('custom profiles are isolated and shift the following advance as well as in
     musicFont: 'Bravura',
     pairs: [{ left: 'A', right: Glyphs.csymDiminished, position: 'superscript', adjustmentEm: 0 }],
   };
-  const make = () => diminished(chord()).addText('7');
+  const make = () => diminished(chord('auto', 'Academico,Bravura', 12)).addText('7');
   const base = format(make().setKerningProfile(profile));
   profile.pairs[0].adjustmentEm = -0.1;
   const adjusted = format(make().setKerningProfile(profile));
