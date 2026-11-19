@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
 import puppeteer from 'puppeteer';
+import { tabEndingStudy } from '../engraving/continuous-studies.mjs';
 import { publicationStudy } from '../engraving/publication-studies.mjs';
 
 test('publication views, pagination and portable printing', async (t) => {
@@ -173,6 +174,51 @@ test('publication views, pagination and portable printing', async (t) => {
         { id: 'tab2', ticks: '7168/1', partTicks: '7168/1', screenDots: 2, partDots: 2 },
       ]);
     });
+    await t.test(
+      'an extracted tab part prints the tied string and the ending across its own system break',
+      async () => {
+        const source = tabEndingStudy();
+        source.staves.unshift({
+          id: 'melody',
+          time: '1/4',
+          measures: [1, 2].map(() => ({ voices: [{ notes: 'C4/q' }] })),
+        });
+        const result = await page.evaluate((source) => {
+          const book = new VexFlow.Publication(source).render(document.querySelector('main'), {
+            staves: ['guitar'],
+            systemBreaks: [2],
+          });
+          const svg = book.pages[0].svg;
+          const meta = JSON.parse(svg.querySelector('metadata').textContent);
+          return {
+            diagnostics: book.diagnostics,
+            staves: meta.staves,
+            spans: meta.spans,
+            systems: [...svg.querySelectorAll('[data-system]')].map((g) => ({
+              endings: [...g.querySelectorAll('text')].filter((e) => e.textContent === '1.').length,
+              curves: [...g.querySelectorAll('path')].filter((e) => /Q/i.test(e.getAttribute('d'))).length,
+            })),
+          };
+        }, source);
+        assert.deepEqual(result.diagnostics, []);
+        assert.deepEqual(result.staves, ['guitar']);
+        assert.deepEqual(result.systems, [
+          { endings: 1, curves: 1 },
+          { endings: 0, curves: 1 },
+        ]);
+        assert.deepEqual(
+          result.spans.filter((s) => s.id === 'hold'),
+          [
+            { id: 'hold', kind: 'tie', part: 'first', strings: [2], from: 'tab0' },
+            { id: 'hold', kind: 'tie', part: 'last', strings: [2], to: 'tab1' },
+          ]
+        );
+        assert.deepEqual(
+          result.spans.filter((s) => s.id === 'ending').map((s) => s.part),
+          ['first', 'last']
+        );
+      }
+    );
     await t.test('a fingering and its transparent hit area stay with the printed note', async () => {
       const owner = await page.evaluate(() => {
         const measures = Array.from({ length: 6 }, (_, i) => ({

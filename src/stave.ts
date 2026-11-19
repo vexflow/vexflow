@@ -72,8 +72,12 @@ export class Stave extends Element {
   protected formatted: boolean;
   private boundaryModifiers: StaveModifier[] = [];
 
-  /** Replace only the derived row-start and courtesy signs on a responsive sheet. */
-  setBoundaryModifiers(modifiers: StaveModifier[]): void {
+  /** Space after the row-start signs for a continuation arriving at the first note. */
+  private boundaryNotePadding = 0;
+
+  /** Replace the derived row-start and courtesy signs and their note clearance. */
+  setBoundaryModifiers(modifiers: StaveModifier[], notePadding = 0): void {
+    this.boundaryNotePadding = notePadding;
     this.boundaryModifiers = modifiers;
     for (const mark of modifiers) mark.setStave(this);
     this.formatted = false;
@@ -652,7 +656,7 @@ export class Stave extends Element {
       if (padding + width === 0) offset--;
     }
 
-    this.startX = x;
+    this.startX = x + this.boundaryNotePadding;
     x = this.x + this.width;
 
     const widths = {

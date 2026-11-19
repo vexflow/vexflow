@@ -23,12 +23,14 @@ export type ContinuousSpanKind =
   | 'palmMute';
 export interface ContinuousSpan {
   kind: ContinuousSpanKind;
+  /** One-based string of a tab tie. Defaults to the string of the selected chord position. */
+  string?: number;
   /** Required for palmMute. String numbers are one-based. */
   strings?: readonly number[];
   id: string;
   from: string;
   to: string;
-  /** Optional chord-head indices for each end of a tie or slur. */
+  /** Optional zero-based chord-head indices. On a tab tie these index the positions arrays. */
   fromHead?: number;
   toHead?: number;
   side?: 'above' | 'below';
@@ -59,7 +61,7 @@ export interface SpanFragment {
   y2: number;
   /** Fraction of the drawn span used to interpolate the aperture across a system break. */
   progress: [number, number];
-  /** String numbers covered by a palm-mute fragment. */
+  /** String numbers covered by a tab tie or palm-mute fragment. */
   strings?: readonly number[];
   /** Authored TAB endpoints appear on the fragments containing them. */
   from?: string;
