@@ -3,6 +3,36 @@
 export const topics = [
   [
     'Features',
+    'New in 5.6.0',
+    [
+      [
+        'Score lettering at reading size',
+        'Chord roots use 14 pt Academico and their extensions use 8.4 pt. Verse syllables use 12 pt. A held syllable can anchor its extender so the line clears the word and keeps its height across a system break.',
+        'docs/text-and-lyrics.md',
+        'm6-lead',
+      ],
+      [
+        'Fret numbers and picking-hand letters',
+        'Tab frets use 11 pt and reserve space on both sides of the string position. Stroke arrows clear the widest fret in the chord. In the rasgueado study the accent sits between the stem and the picking-hand label “i + golpe”.',
+        'issues/371',
+        'example-rasgueado-golpe',
+      ],
+      [
+        'A tied string across a system break',
+        'Select a string for a tablature tie even when the two chords list their frets in different orders. Ties and repeat endings split at system breaks and carry into an extracted guitar part.',
+        'docs/easyscore.md',
+        'example-bossa-anticipation',
+      ],
+      [
+        'Written rhythm on screen and paper',
+        'Structured chord notes engrave augmentation dots on each head. Rhythmic tab places the dots at the shared stem. Lead sheets retain their barlines and signature choices in printed parts. Explicit rest positions retain their ledger lines, and Bravura slash heads meet their stems at the font anchors.',
+        'docs/easyscore.md',
+        'tabnote-1',
+      ],
+    ],
+  ],
+  [
+    'Features',
     'Rhythm and beaming',
     [
       [
