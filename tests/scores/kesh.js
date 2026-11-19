@@ -36,8 +36,7 @@
   /** Build the native marks in the factory that owns this particular score or cue. */
   function fiddleMarks({ chord, cut }, note, builder) {
     const f = builder.getFactory();
-    if (chord)
-      note.addModifier(f.ChordSymbol({ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: 12 }).addText(chord));
+    if (chord) note.addModifier(f.ChordSymbol().addText(chord));
     if (cut) {
       const grace = f.GraceNote({ keys: [cut], duration: '8', slash: true });
       note.addModifier(f.GraceNoteGroup({ notes: [grace], slur: true }));

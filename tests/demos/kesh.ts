@@ -11,8 +11,6 @@ export function kesh(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, 900, 580);
   const score = f.EasyScore({ throwOnError: true });
   score.set({ time: '6/8' });
-  // Use the same upright lettering for a change on either beat of the bar.
-  const chordFont = { fontFamily: 'Arial, Helvetica, sans-serif', fontSize: 12 };
   // The McNeela chart suggests two changes within some bars and different pickups at the repeats.
   const strains: JigBar[][] = [
     [
@@ -54,8 +52,8 @@ export function kesh(options: TestOptions): void {
       for (const beat of beats) {
         if (beat.length === 3) score.beam(beat);
       }
-      if (chord) beats[0][0].addModifier(score.make.chordSymbol(chordFont).addText(chord));
-      if (nextChord) beats[1][0].addModifier(score.make.chordSymbol(chordFont).addText(nextChord));
+      if (chord) beats[0][0].addModifier(score.make.chordSymbol().addText(chord));
+      if (nextChord) beats[1][0].addModifier(score.make.chordSymbol().addText(nextChord));
       if (i === 0 || i === 4) {
         const grace = score.make.graceNote({ keys: [part ? 'd/5' : 'b/4'], duration: '8', slash: true });
         notes[1].addModifier(score.make.graceNoteGroup({ notes: [grace], slur: true }));

@@ -28,8 +28,6 @@ const positions: Record<string, [number, number]> = {
 export function greensleeves(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, 900, 486);
   const score = f.EasyScore({ throwOnError: true });
-  // Upright sans-serif chord names sit above the melody, including the slash bass in Dm/F.
-  const chordFont = { fontFamily: 'Arial, Helvetica, sans-serif', fontSize: 12 };
   const bars = [
     ['', 'A4/q'],
     ['Am', 'A3+E4+A4+C5/h D5/q'],
@@ -56,7 +54,7 @@ export function greensleeves(options: TestOptions): void {
       return `${chord}/${duration}`;
     });
     const notes = score.notes(music.join(', '));
-    if (chordName) notes[0].addModifier(score.make.chordSymbol(chordFont).addText(chordName));
+    if (chordName) notes[0].addModifier(score.make.chordSymbol().addText(chordName));
     const tab = events.map(({ pitches, duration }) =>
       score.make.tabNote({
         positions: pitches.map((pitch) => {

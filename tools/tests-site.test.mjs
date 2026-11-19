@@ -227,6 +227,24 @@ test('standalone gallery runs with local fonts/scripts and preserves QUnit filte
     await page.click('#modules a[href$="/all.html"]');
     const total = await result();
     assert.ok(total > filtered);
+    // The session charts should inherit the selected text face on every chord, including slash basses.
+    for (const [piece, chord] of [
+      ['Greensleeves', 'Dm/F'],
+      ['The_Kesh_Jig', 'Am'],
+    ]) {
+      const selector = `[id="svg_Demo___${piece}.${piece}.Bravura"] + div .vf-chordsymbol text`;
+      const marks = await page.$$eval(selector, (texts) =>
+        texts.map((text) => ({ chord: text.textContent, family: getComputedStyle(text).fontFamily }))
+      );
+      assert.ok(
+        marks.some((mark) => mark.chord === chord),
+        piece
+      );
+      assert.ok(
+        marks.every((mark) => mark.family.split(',')[0] === 'Academico'),
+        piece
+      );
+    }
     const registered = await page.evaluate(() =>
       QUnit.config.modules
         .map((module) => module.name)
