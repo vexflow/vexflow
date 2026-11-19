@@ -1,3 +1,11 @@
+# 5.5.0
+
+- Preserve EasyScore note decorations in printed scores, parts, and cues with `PublicationOptions.noteHooks`. Invisible pointer targets no longer affect page breaks.
+- Set the size of lyrics and other text on continuous spans with `labelFontSize`. The layout measures the label before choosing system breaks.
+- Explore interactive guitar, jazz, percussion, and microtonal arrangements in the [test gallery](https://vexflow.com/tests/). The opening score features the first 24 bars of Chopin’s Ballade No. 3.
+- Generate print editions of Petzold’s Minuet, Bach’s Fugue, and Chopin’s Ballade with `npm run pdf`. The generated PDF index links each score to its source.
+- Read the [5.5.0 code quality report](https://vexflow.com/reports/5.5.0/).
+
 # 5.4.0
 
 - Lay out lyrics, curves, and markings across a system. Break continuous scores into systems, then paginate full scores and individual parts for print.

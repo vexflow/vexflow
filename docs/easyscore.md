@@ -571,6 +571,8 @@ The Explorer's **EasyScore: responsive composition** example covers a grand staf
 
 Pass the same declarative composition to `new Publication(spec)`. Each call to `render(container, options)` builds a separate layout. A conductor score and a cello part can share note IDs and have different staff sizes, page breaks and turn preferences. Dimensions are in millimeters. Each returned page is a standalone SVG. The browser print adapter accepts outline fonts for portable PDF output. [Page and part examples](vf6/m5.md)
 
+If your arrangement uses EasyScore commit hooks to add fingerings or ornaments, pass the same functions to `render(container, { noteHooks: [decorateNote] })`. The print renderer calls them as it builds the notes for each part and cue.
+
 ## Native customization and infrastructure
 
 Helpers expose native objects directly. Keep using their setters, render options, styles, subclasses, and measurement methods.

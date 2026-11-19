@@ -1,6 +1,6 @@
 {
   "name": "vexflow",
-  "version": "5.4.0",
+  "version": "5.5.0",
   "description": "A JavaScript library for rendering music notation and guitar tablature.",
   "exports": {
     ".": {
@@ -44,6 +44,7 @@
     "tests/all.html",
     "tests/minuet.webp",
     "tests/demos",
+    "tests/scores",
     "tests/demo_petzold_tests.ts",
     "tests/fonts.css",
     "tests/qunit/qunit.css",

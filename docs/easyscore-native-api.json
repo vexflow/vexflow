@@ -2932,6 +2932,7 @@
         "extends PublicationView"
       ],
       "fields": [
+        "noteHooks?: readonly CommitHook[];",
         "paper?: 'A4' | 'Letter' | { width: number; height: number };",
         "staffSize?: number;",
         "margins?: Partial<Record<'top' | 'right' | 'bottom' | 'left', number>>;",
