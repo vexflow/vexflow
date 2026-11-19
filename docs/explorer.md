@@ -91,3 +91,7 @@ The script follows the asset-before-HTML pattern in [Lilbox's uploader](https://
 - [Observable Plot](https://observablehq.com/plot/): example-led exploration and searchable concepts.
 - [p5.js Web Editor](https://editor.p5js.org/): code beside immediate visual feedback and explicit run controls.
 - [SVG Path Editor](https://yqnn.github.io/svg-path-editor/): selecting geometry to expose coordinates and editable properties.
+
+## Contemporary guitar studies
+
+The tablature lesson and Explorer’s **Strings & tablature** category share three editable scores. Compare the physical rasgueado directions, the tied bossa nova anticipation and the string-specific Drop D mute. The metal study wraps at narrow widths. [Playing instructions and API contracts](vf6/m8-guitar.md)

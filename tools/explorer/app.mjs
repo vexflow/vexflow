@@ -156,7 +156,12 @@ function showExample(id) {
   document.title = `${current.title} · VexFlow Explorer`;
   $('api-tips').textContent = current.tips || current.description;
   $('api-links').replaceChildren();
-  const filenames = { Stroke: 'strokes', Volta: 'stavevolta', Repetition: 'staverepetition' };
+  const filenames = {
+    FrettedInstrument: 'instrumentprofile',
+    Stroke: 'strokes',
+    Volta: 'stavevolta',
+    Repetition: 'staverepetition',
+  };
   for (const api of current.api) {
     const a = node('a', `${api} ↗`, 'api-link');
     a.href = `https://github.com/vexflow/vexflow/blob/main/src/${filenames[api] ?? api.toLowerCase()}.ts`;

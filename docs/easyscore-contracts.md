@@ -62,5 +62,5 @@ Paired guitar descriptions support measured rasgueado, muted strikes and a timed
 - `draw()` clears queues; references survive until `reset()`.
 - Native customizations remain available. Global fonts and metrics are still global.
 - Composition describes input, not a persistent editable score tree.
-- Sheet has no pagination, automatic span splitting, or general collision solver.
+- A basic Sheet wraps measure systems. Continuous composition can split supported spans at system breaks. Publication adds physical pages and extracted views. [Continuous layout](vf6/m4.md) · [Publication](vf6/m5.md)
 - Key-aware accidentals, voice stem roles, signature repetition, and pickup duration must be explicit policies.

@@ -381,7 +381,8 @@ const voice = score.voice(score.notes('C5/h, G5/q'), { time: '3/4' });`
 <p>The first example lays a series of measures into a <strong>Sheet</strong>. Narrow the row with its control and watch which measure moves to the next line. The sheet keeps each measure together. An especially wide measure may need horizontal scrolling.</p>
 <h2>Fit the drawing to the rows</h2>
 <p>Format the sheet before reading its height. After a width change, format again, resize the drawing surface, clear it, and redraw. In the second example <code>compose()</code> builds the measures for you and returns a sheet you can lay out the same way.</p>
-<p>To keep a selection during reflow, give each event an ID in the composition. After drawing, build <code>new VexFlow.ScoreNavigation(composition, spec.staves)</code>. Its events are in musical time order. A native HTML list can read the same descriptions with either renderer. Keep the selected ID and rebuild the hit regions when the width changes.</p>`,
+<p>To keep a selection during reflow, give each event an ID in the composition. After drawing, build <code>new VexFlow.ScoreNavigation(composition, spec.staves)</code>. Its events are in musical time order. A native HTML list can read the same descriptions with either renderer. Keep the selected ID and rebuild the hit regions when the width changes.</p>
+<p>For a printed edition, pass the composition specification to <code>new VexFlow.Publication(spec)</code>. Its <code>render</code> method lays out the score or selected staves on physical pages. A part can take a different page turn while retaining the same musical event IDs.</p>`,
     'Reduce the row-width control, then add another complete measure to the notation string.',
     ['structured-composition', 'composition', 'spacing'],
     ['repo:docs/sheets-and-themes.md']
@@ -559,7 +560,7 @@ const voice = score.voice(score.notes('C5/h, G5/q'), { time: '3/4' });`
 <h2>Show how to get to the next fret</h2>
 <p>In “Tab slides”, follow the diagonal line between two positions. A <code>TabSlide</code> needs those two notes as endpoints. Next try the hammer-on and pull-off study, where a letter over the curve tells the guitarist how to make the second sound.</p>
 <p>In “Bends”, look for the arrow rising from one fret. A <code>Bend</code> attaches to the fretted note and labels the change of pitch. The tab still displays the fret the finger starts from.</p>
-<p>In the rasgueado study, change the arrow convention and follow the finger order on both staves. In the bossa nova study, follow the held bass through the tie and the muted upper-string attack. In the Drop D study, narrow the score and trace the string 6 palm mute across the break. Change the bend’s rise and hold fractions to move its peak and release.</p>`,
+<p>In the rasgueado study, change the arrow convention and follow the finger order on both staves. In the bossa nova study, follow the held bass through the tie and the muted upper-string attack. In the Drop D study, narrow the score and trace the string 6 palm mute across the break. Change the bend’s rise and hold fractions to move its peak and release. All three studies also open in Explorer under Strings &amp; tablature for glyph inspection and SVG export.</p>`,
     'Change a fret number, then add another position to one note to create a tab chord.',
     ['structure', 'spans'],
     ['repo:src/tabnote.ts', 'repo:src/tabstave.ts']

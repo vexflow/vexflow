@@ -1,6 +1,6 @@
 # VF6 requirements · Specialist notation
 
-**2026-11-18 · Proposed from the M8.0 reference scores.** Use these cases to decide how much musical information the score must retain across views. Revisit each proposal after performer review. [Reference scores and reading targets](../m8-reference-scores.md)
+**2026-11-18 · Proposed from the M8.0 reference scores.** Use these cases to decide how much musical information the score must retain across views. The M8.1 guitar screenshots were approved at closeout. Use the later specialist charters for additional performer evidence. [Reference scores and reading targets](../m8-reference-scores.md)
 
 | Question | Evidence from M8.0 | Next increment |
 | --- | --- | --- |
@@ -16,4 +16,4 @@
 | Identify individual strings across views. | A muted strike has duration and a written placement. A palm mute covers an inclusive range of attacks and only the named strings. Its fragments preserve that scope after reflow and in the exported part. | Define stable string and head identities when a player changes tuning or an editor reorders a chord. |
 | Preserve performed pitch changes relative to written time. | A bend targets one physical string and retains its semitone change and rational phase endpoints. The neighboring string stays at its written pitch. | Define pitch envelopes spanning several tied attacks, prebends already in progress, and playback interpolation. |
 
-The three play-through verdicts belong in the [guitar review record](../m8-guitar.md#evidence-and-review-record).
+The screenshot approval and remaining idiom-specific playing questions are recorded in the [guitar review record](../m8-guitar.md#evidence-and-review-record).

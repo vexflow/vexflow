@@ -1,0 +1,523 @@
+// Editorial index for the 5.x change report. Entries point to source, documentation and reproducible exhibit IDs.
+// Keep implementation details in the linked files; the API and commit inventories are generated from Git.
+export const topics = [
+  [
+    'Features',
+    'Rhythm and beaming',
+    [
+      [
+        'Extended written durations',
+        'Longa and maxima join the long-duration vocabulary. At the other end, notes can carry 256th, 512th and 1024th values with matching flags and tick counts.',
+        'src/tables.ts',
+        'example-extended-durations',
+      ],
+      [
+        'Tuplet labels and nesting',
+        'A suffix glyph can show a reference note alongside a tuplet number or ratio. Nested groups retain their own identity and placement, including brackets below the staff.',
+        'src/tuplet.ts',
+        'case-5e07bd45d80528a6',
+      ],
+      [
+        'Beam groups and rhythmic relationships',
+        'EasyScore builds automatic groups from the meter and explicit groupings. Tuplets, ties and beams can refer to the same managed notes and preserve strict voice timing.',
+        'docs/easyscore.md',
+        'example-easyscore-rhythm',
+      ],
+      [
+        'Contour and partial beams',
+        'A beam can follow a selected contour, use an explicit partial-beam side and honor flat-beam settings. Stem joins are recomputed after resize.',
+        'docs/vf6/m2.md',
+        'm2-contour',
+      ],
+      [
+        'Measured tremolo',
+        'Two chords can share an alternating tremolo with explicit stroke count, occupied time and written values. The M6 study combines it with literal keyboard, wind and string instructions.',
+        'src/alternatingtremolo.ts',
+        'm6-techniques',
+      ],
+    ],
+  ],
+  [
+    'Features',
+    'Horizontal and vertical layout',
+    [
+      [
+        'Responsive sheets',
+        'Sheet groups formatted systems into rows and exposes their bounds and overflow. Retained drawing lets a host change the available width and lay out the same notes again.',
+        'docs/sheets-and-themes.md',
+        'example-sheet',
+      ],
+      [
+        'Proportional and optical spacing',
+        'Strict proportional spacing aligns events against a common rhythmic timeline. Optical spacing reserves measured ink and reports a minimum width when an inline prefix or short ending needs room.',
+        'docs/proportional-spacing.md',
+        'm2-optical',
+      ],
+      [
+        'Engraving measurements and profiles',
+        'Callers can inspect qualified note, stem and beam regions before drawing. Engraving policy can use staff-space units and a score-specific profile with font metadata and fallback.',
+        'docs/vf6/m1.md',
+        'beam-between-attacks',
+      ],
+      [
+        'Verse layout',
+        'Phrase layout assigns verses to shared baselines and draws hyphens and melisma extenders. Skipped attacks preserve the syllable sequence and alignment with the music.',
+        'docs/vf6/m3.md',
+        'm3-choir',
+      ],
+      [
+        'Curves and outside marks',
+        'A phrase can fit a slur past intervening ink and reserve lanes for dynamics, hairpins, pedal and octave lines. Infeasible pinned positions produce a diagnostic.',
+        'src/phraselayout.ts',
+        'm3-piano',
+      ],
+      [
+        'Continuous system breaks',
+        'Greedy and balanced break selection use measured row costs, authored keeps and mandatory breaks. Changing width can move a complete group to another system.',
+        'src/continuouslayout.ts',
+        'm4-balanced',
+      ],
+      [
+        'Spans across systems',
+        'Ties, slurs, wedges, pedals, lyrics, tuplets, endings, octave and trill lines split into indexed fragments. Labels, continuation pitch and wedge aperture follow the logical span across the break.',
+        'src/continuousspan.ts',
+        'm4-choir-narrow',
+      ],
+      [
+        'Grand staff and ensemble policy',
+        'Cross-staff beams and split-chord stems follow displayed staves, while empty-staff hiding and multimeasure rests preserve the original measures. Returning players retain their identity.',
+        'docs/vf6/m4.md',
+        'm4-chord',
+      ],
+      [
+        'Pages, score and extracted parts',
+        'Publication lays out physical paper sizes, page furniture, margins, turn constraints and independent part views. SVG pages retain source IDs; cues and ossias remain distinguishable from the performing voice.',
+        'docs/vf6/m5.md',
+        'm5-part-a4',
+      ],
+      [
+        'Inherited themes',
+        'Factory styles propagate through staves, notes, stems, ledger lines and separately queued marks. Element-specific colors can still highlight an individual note.',
+        'docs/sheets-and-themes.md',
+        'example-styles',
+      ],
+    ],
+  ],
+  [
+    'Features',
+    'Pitch, symbols and instruments',
+    [
+      [
+        'Extended key signatures',
+        'The numbered sharps and flats syntax supports signatures beyond seven signs and explicit zero-sign keys. The key parser validates the range and preserves the requested sign family.',
+        'src/keysignature.ts',
+        'example-extended-keys',
+      ],
+      [
+        'Optional repeat brackets',
+        'Repeat barlines can use straight or curved bracket wings. The existing unadorned repeat remains available, including at the beginning of a stave.',
+        'src/stavebarline.ts',
+        'example-repeat-ends',
+      ],
+      [
+        'Spelling, transposition and microtones',
+        'Explicit pitch spelling, ordered microtonal signatures, courtesy signs and cancellation survive construction. The clarinet study exercises a pickup and a tied spelling through an instrument change.',
+        'docs/vf6/m6.md',
+        'm6-micro',
+      ],
+      [
+        'Percussion profiles',
+        'A kit maps instrument names to staff positions and head shapes. The drum-set study includes a legend, mixed heads and independent voices; a second study uses a single visible staff line.',
+        'src/instrumentprofile.ts',
+        'm6-kit',
+      ],
+      [
+        'Chord typography and lead sheets',
+        'Optional font-specific kerning tightens selected chord-symbol combinations for supported font pairs. The Harbor Song study combines literal chord names, slash bass, lyrics, rhythmic slashes and a repeat.',
+        'docs/chord-symbols.md',
+        'example-chord-kerning',
+      ],
+      [
+        'Independent meter studies',
+        'A fixed six-quarter window aligns two bars of 3/4 with three bars of 2/4. The later ensemble control prints separate parts with a common rehearsal entrance. General independent-meter pagination remains a future requirement.',
+        'docs/vf6/m6.md',
+        'm6-meter',
+      ],
+      [
+        'Contemporary performance controls',
+        'An original piano-and-flute study tests the meeting point after a measured group and the limits of a white-key cluster. Conventional notation establishes a reading target for future feathered and spatial notation.',
+        'docs/vf6/m8-reference-scores.md',
+        'm8-contemporary',
+      ],
+    ],
+  ],
+  [
+    'Features',
+    'Guitar and rhythmic tablature',
+    [
+      [
+        'Paired notation and fret diagrams',
+        'A fretted instrument derives staff and TAB descriptions from tuning, string positions and capo. The Drop D study combines a fret frame, grace slide, prebend, hold and release.',
+        'docs/vf6/m6.md',
+        'm6-guitar',
+      ],
+      [
+        'Rasgueado and golpe',
+        'Each measured stroke records its finger and physical direction. Reversing the printed arrow convention preserves the performed order, and a simultaneous golpe consumes no extra time.',
+        'docs/vf6/m8-guitar.md',
+        'example-rasgueado-golpe',
+      ],
+      [
+        'Bossa nova accompaniment',
+        'Independent bass and chord voices preserve offbeat attacks and a three-head tie across the bar. A struck muted string has a timed X on TAB and a crosshead at its written display position.',
+        'docs/vf6/m8-guitar.md',
+        'example-bossa-anticipation',
+      ],
+      [
+        'Palm mute and timed string bend',
+        'A mute targets named strings between inclusive attacks and continues over a system break. A bend on one member of a dyad retains its semitone change and exact rise, hold and release fractions.',
+        'docs/vf6/m8-guitar.md',
+        'example-string-mute-bend',
+      ],
+    ],
+  ],
+  [
+    'Bug fixes',
+    'Engraving corrections',
+    [
+      [
+        'Unisons, voices and accidentals',
+        'Three enharmonically distinct heads on one line now remain visible. Shared positions and accidental columns are ordered consistently across voices, and four close voices reserve separate columns where needed.',
+        'docs/vf6/m2.md',
+        'unison-triple',
+      ],
+      [
+        'Stem attachment to X heads',
+        'Stems use the SMuFL attachment for X noteheads. This affects percussion and muted notes where the old join visibly missed the head.',
+        'commit/c26dd617',
+        'notehead-1',
+      ],
+      [
+        'Beams between attacks',
+        'A beamed middle voice now clears a lower head at the shared attack. Later clearance checks include intervening heads between beamed attacks and preserve stem joins after reflow.',
+        'docs/vf6/m1.md',
+        'threevoice-1',
+      ],
+      [
+        'Automatic stems across a beam group',
+        'EasyScore resolves automatic stem direction for the complete group before drawing. The regression includes a group passing through the middle staff line.',
+        'commit/f4e7bea0',
+        'case-380dd2b32bbfc93e',
+      ],
+      [
+        'Tuplet bracket clearance',
+        'Brackets now reserve space above mixed marks and beneath the reference triplet. Nested groups and auxiliary ornament signs contribute to the measured clearance.',
+        'docs/vf6/m2.md',
+        'formatter-3',
+      ],
+      [
+        'Opening direction of curves',
+        'Upward and downward slurs now follow the requested opening and clear the intervening group in both reference passages. Endpoints remain attached to the intended notes.',
+        'src/curve.ts',
+        'curve-1',
+      ],
+      [
+        'Bends on adjacent strings',
+        'Multiple bends on one chord are ordered and nested by string. The half bend sits inside the full bend and two quarter bends remain traceable to their own arrows.',
+        'src/bend.ts',
+        'bend-2',
+      ],
+      [
+        'Rests against sounding voices',
+        'Rest placement checks the other voice’s chord and stem at the same rhythmic position. The comparison shows the additional vertical clearance.',
+        'issues/203',
+        'archive-203-Bravura-0',
+      ],
+      [
+        'Pedal beneath annotations',
+        'The pedal baseline accounts for intervening bottom annotations along the span. Text, brackets and change notches share the resulting reservation.',
+        'issues/206',
+        'archive-206-Bravura-0',
+      ],
+      [
+        'Grace group measurement',
+        'A formatted grace group exposes bounds before drawing. Repeated queries preserve the note positions and the group continues to use the parent staff.',
+        'issues/253',
+        'archive-253-Bravura-0',
+      ],
+      [
+        'Grace TAB fret size',
+        'Explicit and default grace fret sizes now affect both text and measured width. Multi-digit fret numbers stay centered even after ghost-note changes.',
+        'issues/255',
+        'archive-255-Bravura-0',
+      ],
+      [
+        'Grace accidentals and side',
+        'Ordered grace accidental policy resolves before-groups, hosts and after-groups in sequence. Groups attached to opposite sides reserve separate space and their slurs meet the appropriate head edges.',
+        'docs/vf6/m2.md',
+        'm2-grace-sides',
+      ],
+      [
+        'Text fonts and lyric baselines',
+        'Annotations prefer the text face while notation glyphs retain the music face. Lyric syllables can share an explicit baseline across notes with different stems and pitches.',
+        'issues/152',
+        'archive-152-Bravura',
+      ],
+      [
+        'Ties beneath lyrics',
+        'Lyric widths no longer shorten a note-to-note tie. Both endpoints follow the noteheads independently of the length of an attached word.',
+        'issues/182',
+        'archive-182-Bravura',
+      ],
+      [
+        'Repeated drawing and bounds',
+        'Drawing an articulation twice preserves its position. Curves, strokes, clefs, signatures and tuplets gained or corrected bounds used by pointer targeting and measurement.',
+        'src/articulation.ts',
+        'case-87bbdb963607a449',
+      ],
+      [
+        'Ornaments after resize',
+        'Delayed turns and long falls recompute their offset from the current neighboring note. Retained draws avoid accumulating offsets from an earlier width.',
+        'docs/vf6/m2.md',
+        'm2-ornament-redraw',
+      ],
+      [
+        'Percussion barline height',
+        'A one-line percussion part now has barlines spanning its visible line. The kit legend aligns with the written instruments.',
+        'commit/87ca315d',
+        'm6-line',
+      ],
+      [
+        'Page turns and text metrics',
+        'Pagination measures headings and footers in the physical print viewport. The Letter turn uses the available space after accounting for the actual footer and system height.',
+        'commit/a19932d4',
+        'm5-score-letter',
+      ],
+    ],
+  ],
+  [
+    'Bug fixes',
+    'Timing, rendering and delivery',
+    [
+      [
+        'Tuplet duration edits',
+        'Repeated attachment is idempotent. Voices refresh total ticks, shortest duration and spacing weights after tuplet changes, including nesting and detachment.',
+        'issues/268',
+        'case-e07e32e7ff453379',
+      ],
+      [
+        'Clef state and key spelling',
+        'Composed key changes preserve the active clef and numbered sharp signatures keep their sharps. Both changes prevent the printed sign or position from contradicting the source.',
+        'commit/72bafda3',
+        'example-accidental-policy',
+      ],
+      [
+        'SVG groups and dimensions',
+        'Group class attributes are retained for styling and inspection. Resizing the SVG surface uses valid CSS lengths and keeps viewBox geometry consistent.',
+        'src/svgcontext.ts',
+        'case-ac8da66e557631ef',
+      ],
+      [
+        'Modules and older Safari',
+        'Published ESM imports resolve under Node, and the package verifies ESM, CommonJS and declarations with an external consumer. A structured-clone ponyfill covers older Safari runtimes.',
+        'issues/346',
+      ],
+      [
+        'Preview state and errors',
+        'Guide and Explorer reuse a warm runtime across edits and navigation. Async failures keep their error details, reset isolates prior execution, and scaled pointer coordinates resolve the intended target.',
+        'docs/explorer.md',
+        'tool-explorer',
+      ],
+    ],
+  ],
+  [
+    'Security',
+    'Runtime and toolchain',
+    [
+      [
+        'Registry keys',
+        'Null-prototype maps at both index levels isolate caller-supplied IDs and class names. Unknown index names fail explicitly.',
+        'issues/347',
+      ],
+      [
+        'Bounded notation parsing',
+        'Malformed duration and notation input is bounded. Invalid meter values fail before entering loops that require a valid advancing beat.',
+        'issues/349',
+      ],
+      [
+        'Release and font tools',
+        'Release downloads validate version input and pass process arguments separately. The font inspection demo treats font metadata as text.',
+        'docs/dependencies.md',
+      ],
+      [
+        'Dependency advisories',
+        'The project updated DOMPurify, shell-quote, fast-uri, zod and ip-address, plus browser download and build dependencies. Scoped overrides cover specified minimatch, basic-ftp and shell-quote paths.',
+        'docs/dependencies.md',
+      ],
+      [
+        'Locked tools and audit policy',
+        'CI checks the locked dependency graph. The dated picomatch exception applies to named development-tool paths and has an expiry and removal procedure.',
+        'SECURITY.md',
+      ],
+      [
+        'Editable examples',
+        'The host runs editable code inside a sandboxed preview iframe and handles its messages and errors. Standalone downloads and resets have regression checks for isolation.',
+        'tools/explorer/preview.mjs',
+        'tool-explorer',
+      ],
+    ],
+  ],
+  [
+    'API and behavior',
+    'Construction and ownership',
+    [
+      [
+        'Managed EasyScore facade',
+        'Typed constructors cover staff and TAB notes, rests, modifiers, grace groups and stave markings. Batch construction, validation and scoped defaults support editing without leaking temporary settings.',
+        'docs/easyscore-contracts.md',
+        'example-easyscore-families',
+      ],
+      [
+        'References and source selection',
+        'Authored IDs, source spans and validated native adoption let a host map a drawn note back to its input. Relationships validate endpoints and Factory ownership.',
+        'docs/easyscore.md',
+        'example-easyscore-references',
+      ],
+      [
+        'Composition policy',
+        'Declarative staves and measures support pickups, inherited clef and key, signature repetition, explicit accidental policy and responsive systems. Existing native objects can participate through their owning factory.',
+        'docs/easyscore.md',
+        'example-easyscore-composition',
+      ],
+      [
+        'Opt-in engraving behavior',
+        'Retained drawing, optical spacing, exact spacing, ordered grace accidentals and font-specific chord kerning have explicit entry points. Applications depending on old collision positions may see different geometry after updating.',
+        'docs/vf6/m2.md',
+        'example-proportional-spacing',
+      ],
+      [
+        'Portable SVG',
+        'Callers can supply matching fonts to convert music and text to paths for standalone SVG. Missing glyphs or unsupported text produce diagnostics during the export.',
+        'docs/portable-svg.md',
+        'archive-bravura',
+      ],
+      [
+        'Persistence design',
+        'The approved VF6 direction stores versioned measures, rational time, stable IDs, portable excerpts and authored overrides. The executable adapter study documents boundaries of the proposed format.',
+        'docs/vf6/requirements/score-persistence.md',
+      ],
+    ],
+  ],
+  [
+    'Tools and accessibility',
+    'Interactive applications',
+    [
+      [
+        'Notation Explorer',
+        'Edit and run a score, change font or controls, inspect glyphs and element bounds, and select the original notation. The standalone export preserves editable code alongside the local runtime.',
+        'docs/explorer.md',
+        'tool-explorer',
+      ],
+      [
+        'Glyph atlas',
+        'Search music glyphs by name or Unicode value and compare coverage in the selected music font. The inspector exposes the glyph identity and rendering code.',
+        'docs/explorer.md',
+        'tool-glyphs',
+      ],
+      [
+        'Canvas on mobile',
+        'A host-owned list provides the same reading order as SVG. A tap or keyboard move selects the corresponding event even after resizing a high-density Canvas surface.',
+        'demos/ui/score-reader.js',
+        'tool-canvas-reader',
+      ],
+      [
+        'Interactive user guide',
+        'Progressive lessons take a reader from four notes to composition and layout. Lesson deep links, keyboard navigation, local drafts and a shared playground keep examples editable and runnable.',
+        'docs/guide.md',
+        'tool-guide',
+      ],
+      [
+        'Visual test gallery',
+        'The public module index leads to individual QUnit examples and playable score studies. Bundled fonts, local source and a versioned asset manifest make the site portable.',
+        'docs/testing.md',
+        'tool-gallery',
+      ],
+      [
+        'Keyboard and screen-reader score navigation',
+        'ScoreNavigation orders logical events by measure, onset, staff and voice. A native list and renderer-independent hit regions preserve selection across SVG, Canvas, zoom and reflow. The roadmap records a human assistive-technology walkthrough.',
+        'docs/vf6/m7.md',
+        'tool-reader',
+      ],
+      [
+        'Playable gallery repertoire',
+        'Eight additional musical examples exercise complete passages, including a jig, a chorale melody and original studies. Their module index links the rendered music to editable source.',
+        'tests/flow.html',
+        'case-2a3a048766cd81bf',
+      ],
+      [
+        'Commit and release quality reports',
+        'Each commit report measures source, coverage, complexity, unused declarations, compressed bundles and locked dependencies. Release publishing links measurements to a tag and records them in a versioned archive.',
+        'docs/quality-reports.md',
+        'tool-quality',
+      ],
+    ],
+  ],
+  [
+    'Engineering and docs',
+    'Verification, performance and publishing',
+    [
+      [
+        'Regression comparison',
+        'The 98-case roadmap gallery compares candidate and reviewed main pixels and geometry in the same browser, retains the 5.2.0 historical pass and checks a fresh repeat. Reviewed exceptions and source IDs are recorded per case.',
+        'docs/vf6/m0.md',
+      ],
+      [
+        'Browser and importer qualification',
+        'A pinned Playwright matrix exercises Chromium, Firefox and WebKit, mobile scaling, font readiness, keyboard selection and export. The MusicXML adapter pilot compares parse results, note identity, timing and layout through OSMD.',
+        'docs/vf6/m7.md',
+      ],
+      [
+        'Performance studies',
+        'Six original score workloads separate construction, layout and drawing times. Later experiments measure retained and local updates against a clean layout and record host and browser metadata.',
+        'docs/benchmarks.md',
+      ],
+      [
+        'Text measurement and rendering work',
+        'A shared measurement cache reduces repeated work for identical text and font settings. Engraving probes distinguish measured geometry from rasterized ink.',
+        'commit/a7a3f4a4',
+      ],
+      [
+        'Fonts and rendering diagnostics',
+        'Failed font requests now identify the requested face. Tests cover delayed loads, failed glyph lookup, fallback behavior and agreement between live text and exported outlines.',
+        'docs/vf6/m7.md',
+        'archive-petaluma',
+      ],
+      [
+        'Demo migration',
+        'Browser, worker, ESM and CommonJS examples were updated for the 5.x package entry points and font loading. The local sandbox can test a debug build inside an iframe.',
+        'demos/README.md',
+      ],
+      [
+        'Headless and package workflows',
+        'The jsdom path supports headless notation rendering. An external package consumer checks declarations and each published module entry point, complementing in-repository tests.',
+        'docs/jsdom.md',
+      ],
+      [
+        'Build and release instructions',
+        'Build, testing, package verification and deployment procedures are consolidated. The Guide, Explorer and gallery use versioned local assets; uploads validate files and publish assets before the HTML.',
+        'docs/build.md',
+      ],
+      [
+        'Contributor and user documentation',
+        'The README adds UTF-8 setup and links to worked examples. API contracts, score-layout policies, portable export, security guidance and the roadmap have dedicated reference documents.',
+        'README.md',
+        'tool-guide',
+      ],
+      [
+        'VF6 acceptance baseline',
+        'The requirements connect each design decision to a score or test, record screenshot and assistive-technology approval, and identify future contemporary notation and ensemble work.',
+        'docs/vf6/requirements/README.md',
+      ],
+    ],
+  ],
+];

@@ -133,3 +133,7 @@ The lessons synthesize and update these project-owned references:
   [chord symbols](chord-symbols.md), [portable SVG](portable-svg.md), and [Node setup](jsdom.md).
 
 Each lesson links its relevant sources. Current source and executable examples take precedence over old API spellings.
+
+## Contemporary guitar studies
+
+The tablature lesson and Explorer’s **Strings & tablature** category share three editable scores. Compare the physical rasgueado directions, the tied bossa nova anticipation and the string-specific Drop D mute. The metal study wraps at narrow widths. [Playing instructions and API contracts](vf6/m8-guitar.md)

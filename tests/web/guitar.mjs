@@ -1,6 +1,6 @@
 // Exercise the three playable guide scores on both renderers and verify their musical identities.
 import assert from 'node:assert/strict';
-import { teachingExamples } from '../../guide/examples.mjs';
+import { guitar } from '../../tools/explorer/catalog/guitar.mjs';
 
 const studies = ['rasgueado-golpe', 'bossa-anticipation', 'string-mute-bend'];
 
@@ -152,7 +152,7 @@ export async function guitarStudies(context) {
     });
     assert.deepEqual(checks.bend, { string: 3, semitones: 2, rise: [1, 2], hold: [3, 4], release: [1, 1] });
     for (const id of studies) {
-      const { code } = teachingExamples.find((e) => e.id === id);
+      const { code } = guitar.find((e) => e.id === id);
       let reference;
       for (const backend of ['SVG', 'Canvas'])
         for (const width of [820, 420]) {

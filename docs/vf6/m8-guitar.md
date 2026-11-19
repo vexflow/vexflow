@@ -1,6 +1,6 @@
 # M8.1 · Contemporary guitar
 
-**2026-11-18 · Implemented on the roadmap branch. Play-through review is open.** The three approved M8.0 scores supply the musical controls. The new guide scores preserve the same rhythms while making finger strokes, muted strings and bend timing explicit. [Reference scores](m8-reference-scores.md) · [M8 roadmap](m8.md)
+**2026-11-18 · The maintainer approved all three M8.1 screenshots and closed this delivery scope.** The three approved M8.0 scores supply the musical controls. The new guide scores preserve the same rhythms while making finger strokes, muted strings and bend timing explicit. [Reference scores](m8-reference-scores.md) · [M8 roadmap](m8.md)
 
 ## Play the studies
 
@@ -28,4 +28,4 @@ The browser tests run the actual guide examples in Chromium, Firefox and WebKit 
 | Date | Evidence | Disposition |
 | --- | --- | --- |
 | 2026-11-18 | Engraving controls on upstream main `97a8669d` and historical 5.2.0 | Maintainer approved the five M8.0 sheets, including all three guitar controls. [Review record](m8-reference-scores.md#review-record) |
-| 2026-11-18 | M8.1 guide scores and browser contracts | Awaiting a play-through of each idiom. Record flamenco direction and golpe, Brazilian bass and ties, and metal string scope and timing separately. |
+| 2026-11-18 | M8.1 guide scores and browser contracts | @0xfe approved the three screenshots and ended this roadmap increment. A separate idiom-specific player demonstration was not reported. Preserve the playing questions for a future edition. [Reviewed images](https://github.com/vexflow/vexflow/issues/358#issuecomment-6994640477) |
