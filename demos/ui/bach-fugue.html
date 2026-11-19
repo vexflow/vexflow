@@ -1,0 +1,82 @@
+<!doctype html>
+<!-- Standalone eight-bar reading of the same Bach fugue engraved by the PDF demo. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fugue No. 6 in D minor · J. S. Bach</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        color: #22271e;
+        background: #f6f5ef;
+        font-family: system-ui, sans-serif;
+      }
+      main {
+        max-width: 72rem;
+        margin: auto;
+        padding: clamp(1rem, 4vw, 3rem);
+      }
+      header {
+        border-top: 2px solid #596245;
+        padding-top: 1rem;
+      }
+      h1 {
+        font:
+          normal clamp(2.4rem, 5vw, 4.2rem)/1.1 Georgia,
+          serif;
+        margin: 0.4rem 0;
+      }
+      p {
+        line-height: 1.55;
+      }
+      .work {
+        margin: 0;
+        color: #535d47;
+      }
+      .edition {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        margin: 1.6rem 0 0.6rem;
+      }
+      a {
+        color: #364b34;
+        text-underline-offset: 0.2em;
+      }
+      #score {
+        background: white;
+        border: 1px solid #d9ddcf;
+      }
+      #score svg {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+    </style>
+    <script defer src="../../build/cjs/vexflow-debug.js"></script>
+    <script defer src="../../tests/scores/fugue.js"></script>
+    <script defer src="bach-fugue.js"></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="work">The Well-Tempered Clavier · Book I</p>
+        <h1>Fugue No. 6 in D minor</h1>
+        <p class="work">Johann Sebastian Bach · BWV 851</p>
+      </header>
+      <p>
+        The upper voice introduces the subject alone. Listen for its answer on A in bar 3, then follow the bass entrance
+        on D in bar 6.
+      </p>
+      <div class="edition"><strong>Bars 1–8</strong><a href="../../build/pdfs/fugue.pdf">Complete score (PDF)</a></div>
+      <section id="score" aria-label="Keyboard score, bars 1 to 8"></section>
+      <p id="status" role="status">Loading the score…</p>
+    </main>
+  </body>
+</html>

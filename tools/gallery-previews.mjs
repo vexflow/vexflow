@@ -2,10 +2,14 @@
 import { writeFile } from 'node:fs/promises';
 import puppeteer from 'puppeteer';
 
+const requestedPiece = process.argv.find((arg) => arg.startsWith('--piece='))?.slice('--piece='.length);
 const pieces = [
+  ['petzold', 'Petzold'],
   ['saints', 'When the Saints Go Marching In'],
   ['greensleeves', 'Greensleeves'],
   ['prelude', 'Prelude in C major'],
+  ['ballade', 'Ballade No. 3 in A-flat major'],
+  ['fugue', 'Fugue No. 6 in D minor'],
   ['kesh', 'The Kesh Jig'],
   ['joy', 'Ode to Joy'],
   ['electric', 'High Wire'],
@@ -14,14 +18,37 @@ const pieces = [
 ];
 
 /** Composite on paper white so transparent notation remains legible on any background. */
-function exportScore(canvas) {
+function exportScore(canvas, piece) {
+  const cropMargins = piece === 'petzold';
   const paper = document.createElement('canvas');
-  paper.width = canvas.width;
-  paper.height = canvas.height;
+  // Keep the Minuet preview at its original reading size.
+  const scale = cropMargins ? 1 / devicePixelRatio : 1;
+  paper.width = canvas.width * scale;
+  let top = 0;
+  let bottom = canvas.height;
+  if (piece === 'ballade') {
+    // Show the first two complete systems of the printed page, through the pedal releases.
+    top = Math.floor(canvas.width * 0.132);
+    bottom = Math.ceil(canvas.width * 0.572);
+  }
+  if (cropMargins) {
+    // The keyboard fixture leaves room for a larger test canvas. Frame the first and last marks.
+    const { data, width } = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
+    const hasInk = (row) => {
+      for (let i = row * width * 4; i < (row + 1) * width * 4; i += 4)
+        if (data[i + 3] > 100 && data[i] < 160) return true;
+      return false;
+    };
+    while (top < bottom && !hasInk(top)) top++;
+    while (bottom > top && !hasInk(bottom - 1)) bottom--;
+    top = Math.max(0, top - 12 * devicePixelRatio);
+    bottom = Math.min(canvas.height, bottom + 12 * devicePixelRatio);
+  }
+  paper.height = Math.ceil((bottom - top) * scale);
   const ctx = paper.getContext('2d');
   ctx.fillStyle = 'white';
   ctx.fillRect(0, 0, paper.width, paper.height);
-  ctx.drawImage(canvas, 0, 0);
+  ctx.drawImage(canvas, 0, top, canvas.width, bottom - top, 0, 0, paper.width, paper.height);
   return paper.toDataURL('image/webp', 0.97).split(',')[1];
 }
 
@@ -37,6 +64,7 @@ try {
     );
   });
   for (const [id, title] of process.argv.includes('--interactive') ? [] : pieces) {
+    if (requestedPiece && requestedPiece !== id) continue;
     const url = new URL('../tests/all.html', import.meta.url);
     url.searchParams.set('module', 'Demo - ' + title);
     await page.goto(url.href);
@@ -45,13 +73,15 @@ try {
       () => window.galleryResult.failed && document.querySelector('#qunit-tests .fail')?.textContent
     );
     if (error !== 0) throw new Error(title + ': ' + error);
-    const image = await page.$eval('canvas.vex-tabdiv', exportScore);
-    await writeFile(new URL(`../tests/demos/${id}.webp`, import.meta.url), Buffer.from(image, 'base64'));
+    const image = await page.$eval('canvas.vex-tabdiv', exportScore, id);
+    const file = id === 'petzold' ? 'minuet.webp' : `demos/${id}.webp`;
+    await writeFile(new URL(`../tests/${file}`, import.meta.url), Buffer.from(image, 'base64'));
     console.log(`Exported ${title}`);
   }
   // Capture a complete group of systems from the actual viewer. Stop at the widest band
   // of white paper near the requested height so the preview never cuts through a stave.
   for (const id of ['saints', 'electric', 'prelude', 'quartertones', 'drums', 'falseta', 'sumer', 'kesh']) {
+    if (requestedPiece && requestedPiece !== id) continue;
     await page.goto(new URL('../tests/scores/index.html?piece=' + id, import.meta.url).href);
     await page.waitForFunction(() => !document.getElementById('tools').hidden);
     await page.$eval('#highlight', (el) => {

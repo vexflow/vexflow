@@ -139,6 +139,8 @@
     "explorer:build": "node tools/explorer/cli.mjs build",
     "explorer:test": "node tools/explorer/test.mjs",
     "explorer:upload": "node tools/explorer/upload.mjs",
+    "pdf": "grunt webpack:debugLibrary && node tools/pdf.mjs",
+    "pdf:upload": "npm run pdf -- --upload",
     "tests:build": "node tools/tests-site.mjs build",
     "tests:upload": "node tools/tests-site.mjs upload",
     "tests:test": "node tools/tests-site.test.mjs",

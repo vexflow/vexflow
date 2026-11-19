@@ -265,6 +265,22 @@ If publishing in a new shell, set `release_version` again. If working from anoth
 
 For prereleases, use `--tag beta` (or `alpha` / `rc`) instead of `--tag latest`. An existing npm version cannot be overwritten. See [npm publish](https://docs.npmjs.com/cli/v11/commands/npm-publish/) for authentication and package-publication options. After publication, update any release note that says npm publication is pending.
 
+## Generate and upload the PDF demos
+
+Run `npm run pdf` to engrave the piano scores in `build/pdfs/`. The print demos use VexFlow and Puppeteer’s Chrome, with installed Google Chrome as a fallback. The Minuet and Fugue each occupy two US Letter pages. The Ballade follows the first page of the supplied Op. 47 edition, with bars 1–24 on five systems.
+
+| Score | Local output | Published URL |
+| --- | --- | --- |
+| Petzold, Minuet in G major, BWV Anh. 114 | `build/pdfs/minuet.pdf` | [minuet.pdf](https://vexflow.com/pdfs/minuet.pdf) |
+| Chopin, Ballade No. 3 in A-flat major, Op. 47 (opening page) | `build/pdfs/ballade.pdf` | [ballade.pdf](https://vexflow.com/pdfs/ballade.pdf) |
+| Bach, Fugue No. 6 in D minor, BWV 851 | `build/pdfs/fugue.pdf` | [fugue.pdf](https://vexflow.com/pdfs/fugue.pdf) |
+
+Open `build/pdfs/index.html` to browse the editions, preview the opening systems, and read their local engraving code. Run `npm run pdf:upload` to regenerate and publish the [score library](https://vexflow.com/pdfs/), its PDFs, and their source files with the same Google Cloud credentials as the website uploads.
+
+Open the [standalone web fugue](../demos/ui/bach-fugue.html) after building. It draws the first eight bars from the [full fugue source](../tests/scores/fugue.js) and reflows when the window changes width. The same excerpt runs in the test gallery on Canvas and SVG. The boxed entries, dynamics, hairpins and pedalling are editorial suggestions for piano. The piece is the one in [ClassicMan’s reference](https://musescore.com/classicman/scores/298826). Its notes and ornaments follow [Stelios Samelis’s public-domain edition for Mutopia](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=988).
+
+The [Minuet print score](../demos/pdf/minuet.js) includes the pitches, fingerings, editorial dynamics and page settings. Its notation follows [Allen Garvin’s public-domain transcription for Mutopia](https://www.mutopiaproject.org/ftp/BachJS/BWVAnh114/anna-magdalena-04/anna-magdalena-04.ly).
+
 ## Upload static sites
 
 The guide, Explorer, and visual test gallery are self-contained static sites. Their upload commands build current source and bundle the required scripts and fonts.

@@ -340,6 +340,8 @@ function webpackConfigs() {
     prod: () => prodConfig(),
     // grunt webpack:debug
     debug: () => debugConfig(),
+    // Build the standalone library for tools that do not load the test runner.
+    debugLibrary: () => getConfig(VEX_DEBUG, DEVELOPMENT_MODE, BANNER),
     // grunt webpack:watchProd
     watchProd: () => prodConfig(WATCH),
     // grunt webpack:watchDebug

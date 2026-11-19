@@ -6,7 +6,6 @@
 import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
-import { ModifierPosition } from '../src';
 import { Accidental } from '../src/accidental';
 import { Annotation } from '../src/annotation';
 import { Articulation } from '../src/articulation';
@@ -16,6 +15,7 @@ import { Factory } from '../src/factory';
 import { Formatter } from '../src/formatter';
 import { GraceNote, GraceNoteStruct } from '../src/gracenote';
 import { GraceNoteGroup } from '../src/gracenotegroup';
+import { ModifierPosition } from '../src/modifier';
 import { StaveNote, StaveNoteStruct } from '../src/stavenote';
 
 const GraceNoteTests = {

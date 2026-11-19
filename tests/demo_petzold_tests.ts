@@ -1,11 +1,11 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
-// Demo - Petzold
+// Petzold’s Minuet in G, an 18-bar keyboard excerpt with editorial performance markings.
 
 import { concat, TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
-import { BarlineType, Factory, Registry, StaveNote } from '../src/index';
+import { BarlineType, Factory, Registry, StaveHairpin, StaveNote } from '../src/index';
 
 const DemoPetzoldTests = {
   Start(): void {
@@ -53,10 +53,10 @@ function minuetInG(options: TestOptions): void {
     .addClef('treble')
     .addKeySignature('G')
     .addTimeSignature('3/4')
-    .setTempo({ name: 'Allegretto', duration: 'h', dots: 1, bpm: 66 }, -30);
+    .setTempo({ name: 'Allegretto', duration: 'q', bpm: 132 }, -30);
 
   system
-    .addStave({ voices: [voice(notes('(G3 B3 D4)/h, A3/q', { clef: 'bass' }))] })
+    .addStave({ voices: [voice(notes('(G3 B3 D4)/h[id="ped1"], A3/q[id="lift1"]', { clef: 'bass' }))] })
     .addClef('bass')
     .addKeySignature('G')
     .addTimeSignature('3/4');
@@ -64,6 +64,8 @@ function minuetInG(options: TestOptions): void {
   system.addConnector('singleRight');
   system.addConnector('singleLeft');
 
+  // Release the pedal as the bass moves off G.
+  f.PedalMarking({ notes: [id('ped1'), id('lift1')] });
   id('m1a').addModifier(f.Fingering({ number: '5' }), 0);
 
   /*  Measure 2 */
@@ -90,8 +92,11 @@ function minuetInG(options: TestOptions): void {
   /*  Measure 3 */
   system = appendSystem(150);
   system.addStave({
-    voices: [voice([notes('E5/q[id="m3a"]'), beam(notes('C5/8, D5, E5, F5', { stem: 'down' }))].reduce(concat))],
+    voices: [
+      voice([notes('E5/q[id="m3a"]'), beam(notes('C5/8[id="m3cut"], D5, E5, F5', { stem: 'down' }))].reduce(concat)),
+    ],
   });
+  id('m3cut').addModifier(f.Ornament('mordent'));
   id('m3a').addModifier(f.Fingering({ number: '3', position: 'above' }), 0);
 
   system.addStave({ voices: [voice(notes('C4/h.', { clef: 'bass' }))] });
@@ -113,8 +118,8 @@ function minuetInG(options: TestOptions): void {
     to: id('m4a'),
     options: {
       cps: [
-        { x: 0, y: 20 },
-        { x: 0, y: 20 },
+        { x: 0, y: 39 },
+        { x: 0, y: 39 },
       ],
     },
   });
@@ -160,6 +165,7 @@ function minuetInG(options: TestOptions): void {
   system
     .addStave({
       voices: [
+        voice([f.TextDynamics({ text: 'mf', duration: 'h', dots: 1, line: 10 })]),
         voice([notes('F4/q[id="m7a"]'), beam(notes('G4/8[id="m7b"], A4, B4, G4', { stem: 'up' }))].reduce(concat)),
       ],
     })
@@ -174,13 +180,14 @@ function minuetInG(options: TestOptions): void {
   system.addConnector('singleRight');
   system.addConnector('singleLeft');
 
+  id('m7a').addModifier(f.Articulation({ type: 'a-', position: 'above' }));
   id('m7a').addModifier(f.Fingering({ number: '2', position: 'below' }), 0);
   id('m7b').addModifier(f.Fingering({ number: '1' }), 0);
   id('m7c').addModifier(f.Fingering({ number: '3', position: 'above' }), 0);
 
   /*  Measure 8 */
   system = appendSystem(180);
-  const grace = f.GraceNote({ keys: ['d/3'], clef: 'bass', duration: '4', slash: false });
+  const grace = f.GraceNote({ keys: ['b/4'], duration: '8', slash: true });
 
   system.addStave({ voices: [voice(notes('A4/h.[id="m8c"]'))] });
   system.addStave({
@@ -193,7 +200,7 @@ function minuetInG(options: TestOptions): void {
   system.addConnector('singleRight');
 
   id('m8b').addModifier(f.Fingering({ number: '1', position: 'above' }), 0);
-  id('m8c').addModifier(f.GraceNoteGroup({ notes: [grace] }), 0);
+  id('m8c').addModifier(f.GraceNoteGroup({ notes: [grace], slur: true }), 0);
 
   f.Curve({
     from: id('m7a'),
@@ -209,12 +216,11 @@ function minuetInG(options: TestOptions): void {
     },
   });
 
-  f.StaveTie({ from: grace, to: id('m8c') });
-
   /*  Measure 9 */
   system = appendSystem(180);
   system.addStave({
     voices: [
+      voice([f.TextDynamics({ text: 'pp', duration: 'h', dots: 1, line: 9 })]),
       score
         .set({ clef: 'treble' })
         .voice([notes('D5/q[id="m9a"]'), beam(notes('G4/8, A4, B4, C5', { stem: 'up' }))].reduce(concat)),
@@ -251,8 +257,11 @@ function minuetInG(options: TestOptions): void {
   /*  Measure 11 */
   system = appendSystem(150);
   system.addStave({
-    voices: [voice([notes('E5/q[id="m11a"]'), beam(notes('C5/8, D5, E5, F5', { stem: 'down' }))].reduce(concat))],
+    voices: [
+      voice([notes('E5/q[id="m11a"]'), beam(notes('C5/8[id="m11cut"], D5, E5, F5', { stem: 'down' }))].reduce(concat)),
+    ],
   });
+  id('m11cut').addModifier(f.Ornament('mordent'));
   id('m11a').addModifier(f.Fingering({ number: '3', position: 'above' }), 0);
 
   system.addStave({ voices: [voice(notes('C4/h.', { clef: 'bass' }))] });
@@ -283,8 +292,8 @@ function minuetInG(options: TestOptions): void {
     to: id('m12a'),
     options: {
       cps: [
-        { x: 0, y: 20 },
-        { x: 0, y: 20 },
+        { x: 0, y: 39 },
+        { x: 0, y: 39 },
       ],
     },
   });
@@ -324,7 +333,7 @@ function minuetInG(options: TestOptions): void {
     voices: [
       score
         .set({ clef: 'treble' })
-        .voice([notes('B4/q'), beam(notes('C5/8, b4, a4, g4', { stem: 'up' }))].reduce(concat)),
+        .voice([notes('B4/q'), beam(notes('C5/8, b4, a4, g4[id="m14end"]', { stem: 'up' }))].reduce(concat)),
     ],
   });
 
@@ -359,7 +368,7 @@ function minuetInG(options: TestOptions): void {
     .setEndBarType(BarlineType.REPEAT_END);
 
   system
-    .addStave({ voices: [voice(notes('g3/h[id="m16b"], g2/q', { clef: 'bass' }))] })
+    .addStave({ voices: [voice(notes('g3/h[id="m16b"], g2/q[id="lift16"]', { clef: 'bass' }))] })
     .setEndBarType(BarlineType.REPEAT_END);
   system.addConnector('boldDoubleRight');
 
@@ -424,6 +433,11 @@ function minuetInG(options: TestOptions): void {
       ],
     },
   });
+
+  // Shape the two descents differently and clear the pedal before the repeat.
+  f.StaveHairpin({ from: id('m5a'), to: id('m6a'), type: StaveHairpin.type.CRESC });
+  f.StaveHairpin({ from: id('m13a'), to: id('m14end'), type: StaveHairpin.type.DECRESC });
+  f.PedalMarking({ notes: [id('m16b'), id('lift16')] });
 
   /* Done */
   f.draw();

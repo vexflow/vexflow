@@ -1,0 +1,203 @@
+<!doctype html>
+<!-- Printable VexFlow editions. The builder embeds the opening system from each finished score. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Score library · VexFlow</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #243027;
+        --muted: #515e53;
+        --line: #c8cbbd;
+        --paper: #f8f7f0;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font:
+          1rem/1.55 system-ui,
+          sans-serif;
+      }
+      header,
+      main {
+        max-width: 76rem;
+        padding-inline: clamp(1rem, 5vw, 4rem);
+        margin: auto;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 1rem;
+        padding-block: 1.25rem;
+        border-bottom: 1px solid var(--line);
+      }
+      header > a {
+        font:
+          bold 1.5rem Georgia,
+          serif;
+        text-decoration: none;
+      }
+      nav,
+      .links {
+        display: flex;
+        gap: 0.75rem 1.25rem;
+        flex-wrap: wrap;
+        align-items: baseline;
+      }
+      a {
+        color: #2d503e;
+        text-underline-offset: 0.22em;
+      }
+      a:hover {
+        color: #743820;
+      }
+      a:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 4px;
+      }
+      h1,
+      h2 {
+        font-family: 'Iowan Old Style', Georgia, serif;
+        font-weight: normal;
+        line-height: 1.06;
+        text-wrap: balance;
+      }
+      h1 {
+        font-size: clamp(3rem, 7vw, 5.7rem);
+        margin: 0 0 1rem;
+        letter-spacing: -0.04em;
+      }
+      main {
+        padding-block: clamp(2.4rem, 6vw, 5.25rem);
+      }
+      main > p {
+        color: var(--muted);
+        max-width: 56ch;
+        margin: 0 0 2.6rem;
+        font-size: 1.1rem;
+      }
+      .shelf {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+        gap: 2.25rem;
+      }
+      article {
+        border-top: 3px solid var(--ink);
+      }
+      .excerpt {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        aspect-ratio: 3 / 1;
+        padding: 0.7rem;
+        border: 1px solid var(--line);
+        border-top: none;
+        background: white;
+      }
+      .excerpt.fugue {
+        background: #f7f5ed;
+      }
+      .excerpt img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .composer {
+        margin: 1.1rem 0 0.35rem;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      h2 {
+        font-size: clamp(2rem, 3.5vw, 2.7rem);
+        margin: 0;
+      }
+      .spec {
+        margin: 0.6rem 0 1.2rem;
+        color: var(--muted);
+      }
+      .links {
+        font-size: 0.91rem;
+      }
+      .open {
+        background: var(--ink);
+        border-radius: 0.2rem;
+        color: white;
+        text-decoration: none;
+        padding: 0.45rem 0.85rem;
+      }
+      .open:hover {
+        color: white;
+        background: #40543e;
+      }
+      @media (max-width: 32rem) {
+        header {
+          align-items: center;
+        }
+        nav {
+          font-size: 0.9rem;
+          gap: 0.75rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a href="https://vexflow.com/">VexFlow</a>
+      <nav aria-label="VexFlow">
+        <a href="https://vexflow.com/tests/">Test gallery</a><a href="https://vexflow.com/guide/">User guide</a>
+      </nav>
+    </header>
+    <main>
+      <h1>Score library</h1>
+      <p>Print a keyboard score or explore how it was engraved. Each edition is laid out for US Letter paper.</p>
+      <div class="shelf">
+        <article>
+          <a class="excerpt" href="minuet.pdf" aria-label="Open the Minuet PDF"
+            ><img src="{{minuetPreview}}" alt="Opening system of the Minuet in G major"
+          /></a>
+          <p class="composer">Christian Petzold</p>
+          <h2>Minuet in G major</h2>
+          <p class="spec">BWV Anh. 114 · 32 bars · Piano</p>
+          <div class="links">
+            <a class="open" href="minuet.pdf">Open PDF</a><a href="minuet.js">Engraving code</a
+            ><a href="../../tests/all.html?module=Demo%20-%20Petzold">Web demo</a>
+          </div>
+        </article>
+        <article>
+          <a class="excerpt fugue" href="fugue.pdf" aria-label="Open the Fugue PDF"
+            ><img src="{{fuguePreview}}" alt="Opening subject and answering voices of the D minor fugue"
+          /></a>
+          <p class="composer">Johann Sebastian Bach</p>
+          <h2>Fugue No. 6 in D minor</h2>
+          <p class="spec">BWV 851 · 44 bars · Piano</p>
+          <div class="links">
+            <a class="open" href="fugue.pdf">Open PDF</a><a href="fugue-music.js">Score code</a
+            ><a href="fugue.js">Page layout</a
+            ><a href="../../tests/all.html?module=Demo%20-%20Fugue%20No.%206%20in%20D%20minor">Web demo</a>
+          </div>
+        </article>
+        <article>
+          <a class="excerpt" href="ballade.pdf" aria-label="Open the Ballade PDF"
+            ><img src="{{balladePreview}}" alt="Allegretto opening on a grand staff, with a small left-hand ossia"
+          /></a>
+          <p class="composer">Frédéric Chopin</p>
+          <h2>Ballade No. 3 in A-flat major</h2>
+          <p class="spec">Op. 47 · Opening page · 24 bars</p>
+          <div class="links">
+            <a class="open" href="ballade.pdf">Open PDF</a><a href="ballade-music.js">Score code</a
+            ><a href="ballade.js">Page layout</a
+            ><a href="../../tests/all.html?module=Demo%20-%20Ballade%20No.%203%20in%20A-flat%20major">Web demo</a>
+          </div>
+        </article>
+      </div>
+    </main>
+  </body>
+</html>

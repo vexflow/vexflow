@@ -181,6 +181,15 @@
       let loadVexFlow;
 
       if (useESM && !isFileProtocol) {
+        // Browsers need a URL for the bare package import in a local ESM build.
+        if (!useCDN) {
+          const map = document.createElement('script');
+          map.type = 'importmap';
+          map.textContent = JSON.stringify({
+            imports: { 'structured-clone-es': '../node_modules/structured-clone-es/dist/index.mjs' },
+          });
+          document.head.append(map);
+        }
         console.log('LOADING ESM: ' + vexPlusTestsURL);
         loadVexFlow = async () => {
           const module = await import(vexPlusTestsURL);

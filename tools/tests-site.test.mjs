@@ -76,15 +76,17 @@ test('standalone gallery runs with local fonts/scripts and preserves QUnit filte
     assert.ok(await page.$eval('figure img', (img) => img.complete && img.naturalWidth > 0));
     assert.deepEqual(
       requests.filter((url) => !url.endsWith('/favicon.ico')).map((url) => new URL(url).pathname),
-      ['/tests/', `/tests/${(await validate(output)).assetPath}/minuet.webp`]
+      ['/tests/', `/tests/${(await validate(output)).assetPath}/demos/ballade.webp`]
     );
     // Native buttons remain focused while slides change. Each score and its source
     // must be present in the deployed asset graph; the runner loads only on navigation.
     const featured = [
+      'ballade',
       'petzold',
       'saints',
       'greensleeves',
       'prelude',
+      'fugue',
       'kesh',
       'joy',
       'electric',
@@ -112,7 +114,7 @@ test('standalone gallery runs with local fonts/scripts and preserves QUnit filte
       assert.equal(await page.evaluate(() => document.activeElement.id), 'next');
     }
     await page.click('#next');
-    assert.equal(await page.$eval('#score-slide figure', (figure) => figure.dataset.piece), 'petzold');
+    assert.equal(await page.$eval('#score-slide figure', (figure) => figure.dataset.piece), featured[0]);
     await page.click('#previous');
     assert.equal(await page.$eval('#score-slide figure', (figure) => figure.dataset.piece), featured.at(-1));
     assert.ok(requests.every((url) => !url.includes('vexflow-debug-with-tests')));

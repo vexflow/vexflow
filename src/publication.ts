@@ -116,6 +116,8 @@ function musicGroup(svg: SVGSVGElement) {
 
 /** SVG text boxes include an entire music font's ascent. Use glyph ink to keep cues close to their notes. */
 function inkBox(el: SVGGraphicsElement, context: CanvasRenderingContext2D): DOMRect | undefined {
+  // Invisible pointer targets can extend well beyond a modifier's ink. They must not move notes to another system.
+  if (el.getAttribute('opacity') === '0') return;
   let box: DOMRect;
   if (el.tagName === 'g') {
     const children = Array.from(el.children).flatMap((c) => inkBox(c as SVGGraphicsElement, context) ?? []);

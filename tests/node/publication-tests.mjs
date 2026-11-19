@@ -117,6 +117,20 @@ test('publication views, pagination and portable printing', async (t) => {
           }
         });
       }
+    await t.test('a fingering and its transparent hit area stay with the printed note', async () => {
+      const owner = await page.evaluate(() => {
+        const measures = Array.from({ length: 6 }, (_, i) => ({
+          voices: [{ notes: i === 5 ? 'C5/w[id="fingered",fingerings="4.left"]' : 'G4/w' }],
+        }));
+        const music = { staves: [{ id: 'keyboard', measures }] };
+        const book = new VexFlow.Publication(music).render(document.querySelector('main'), {
+          systemBreaks: [2, 3, 4, 5, 6],
+        });
+        const note = book.pages.map((p) => p.svg.querySelector('[data-vf-id="vf-fingered"]')).find(Boolean);
+        return note.closest('[data-system]').getAttribute('data-system');
+      });
+      assert.equal(owner, '6');
+    });
     await t.test('pagination reserves running text at the final page scale', async () => {
       const result = await page.evaluate(() => {
         const style = document.createElement('style');
@@ -223,7 +237,8 @@ test('publication views, pagination and portable printing', async (t) => {
 });
 
 test('equally feasible pages prefer a performing rest and respect a forbidden turn and last-page spacing', async () => {
-  const { paginate } = await import('../../build/esm/src/pagebreaks.js');
+  // Load the built module at runtime so the ESM compiler does not also treat its output as a source file.
+  const { paginate } = await import(new URL('../../build/esm/src/pagebreaks.js', import.meta.url).href);
   const rows = Array.from({ length: 5 }, (_, i) => ({ measures: [i + 1], height: 10, restAtEnd: i === 1 }));
   const rules = {
     firstHeight: 34,
