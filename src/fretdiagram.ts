@@ -18,7 +18,7 @@ export class FretDiagram extends Element {
   private readonly barre?: FretDiagramSpec['barre'];
 
   constructor(spec: FretDiagramSpec) {
-    super();
+    super('FretDiagram');
     this.frets = [...spec.frets];
     this.first = spec.firstFret ?? 1;
     this.rows = spec.rows ?? 4;
@@ -67,8 +67,10 @@ export class FretDiagram extends Element {
       'aria-label',
       'Chord frame, low to high: ' + this.frets.join(', ') + (this.barre ? ', barre at fret ' + this.barre.fret : '')
     );
-    ctx.setFont('sans-serif', 9);
-    if (this.first > 1) ctx.fillText(String(this.first), this.getX() + 2, top + 9);
+    if (this.first > 1) {
+      ctx.setFont(this.fontInfo);
+      ctx.fillText(String(this.first), this.getX() + 2, top + 9);
+    }
     for (let row = 0; row <= this.rows; row++) {
       ctx.setLineWidth(row === 0 && this.first === 1 ? 2.5 : 1);
       line(left, top + row * 11, right, top + row * 11);

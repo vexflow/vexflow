@@ -154,6 +154,11 @@ export const MetricsDefaults: Record<string, any> = {
     superSubRatio: 0.6,
   },
 
+  FretDiagram: {
+    isText: true,
+    fontSize: 9,
+  },
+
   FretHandFinger: {
     isText: true,
     fontSize: 9,

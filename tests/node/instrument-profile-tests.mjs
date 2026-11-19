@@ -24,6 +24,46 @@ test('instrument studies and score construction', async (t) => {
       };
     });
 
+    await t.test('fret position labels follow score and diagram fonts on SVG and Canvas', async () => {
+      const labels = await page.evaluate(() => {
+        const VF = VexFlow;
+        const spec = { firstFret: 7, frets: ['x', 7, 9, 9, 8, 7] };
+        const result = [];
+        for (const backend of ['svg', 'canvas']) {
+          const host = document.createElement('div');
+          const canvas = document.createElement('canvas').getContext('2d');
+          const ctx = backend === 'svg' ? new VF.SVGContext(host) : new VF.CanvasContext(canvas);
+          const fillText = canvas.fillText.bind(canvas);
+          canvas.fillText = (text, x, y) => {
+            result.push([text, canvas.font]);
+            fillText(text, x, y);
+          };
+          for (const [family, override] of [
+            ['Academico', false],
+            ['serif', false],
+            ['serif', true],
+          ]) {
+            VF.setTextFonts(family);
+            const diagram = new VF.FretDiagram(spec).setContext(ctx);
+            if (override) diagram.setFont('monospace', 11, 'bold');
+            diagram.draw();
+            if (backend === 'svg') {
+              const label = [...host.querySelectorAll('text')].at(-1);
+              result.push([label.textContent, label.getAttribute('font-family')]);
+            }
+          }
+        }
+        VF.setFonts('Bravura', 'Academico');
+        return result;
+      });
+      for (let i = 0; i < labels.length; i++) {
+        assert.equal(labels[i][0], '7');
+        assert.match(labels[i][1], [/Academico/, /serif/, /monospace/][i % 3]);
+      }
+      assert.equal(labels.length, 6);
+      assert.match(labels[5][1], /bold/);
+    });
+
     await t.test(
       'percussion keeps mixed head identities and stems in native notes, compositions and exported parts',
       async () => {
