@@ -124,6 +124,26 @@ function spec(count, continuous, notes = (i) => [{ id: 'n' + i, note: { keys: ['
     continuous,
   };
 }
+test('a lyric extender resolves a unique word on its source note during formatting', () => {
+  const span = { id: 'hold', kind: 'lyric', from: 'n0', to: 'n1', syllableId: 'word' };
+  const compose = (config) =>
+    factory()
+      .f.EasyScore()
+      .compose(spec(2, { spans: [config] }));
+  for (const invalid of [{ text: 'duplicate' }, { kind: 'tie' }, { syllableId: '' }]) {
+    assert.throws(() => compose({ ...span, ...invalid }), /anchored lyric extender/);
+  }
+  const c = compose(span);
+  const format = () => c.sheet.setWidth(600).format();
+  assert.throws(format, /Expected one lyric annotation/);
+  const source = c.getNote('n0');
+  const word = () => new VF.Annotation('word').setAttribute('id', 'word');
+  source.addModifier(word());
+  format();
+  source.addModifier(word());
+  assert.throws(format, /Expected one lyric annotation/);
+});
+
 test('hard keeps overflow together and forced breaks win over spare space', () => {
   const { f } = factory();
   const c = f.EasyScore().compose(
@@ -362,7 +382,59 @@ test('instrument changes survive hiding and reflow and the new full name reserve
   assert.ok(c.staves[2][0].getX() < c.staves[1][0].getX());
 });
 
-test('choir, piano and ensemble reflow in browser SVG and Canvas with two font pairs', async () => {
+/** Measure the actual Saints verse and capture each renderer's text calls across line breaks. */
+function renderSaints({ backend, space }) {
+  const VF = window.VexFlow;
+  VF.setFonts('Petaluma', 'Academico');
+  const target = document.createElement(backend === 'svg' ? 'div' : 'canvas');
+  target.id = 'saints';
+  document.body.replaceChildren(target);
+  const score = VF.EasyScore.create({ renderer: { elementId: target.id, width: 1100, height: 1800 } });
+  const edition = window.FeaturedScores.saints.create(VF, score, 'Reharmonized');
+  edition.spec.staves[0].options = { spacingBetweenLinesPx: space };
+  edition.spec.sheet = { width: 1000, x: 16, y: 42, rowGap: 26, measurePadding: 18 };
+  const music = score.compose(edition.spec);
+  edition.decorate(music);
+  const ctx = score.factory.getContext();
+  const drawText = ctx.fillText.bind(ctx);
+  let painted = [];
+  ctx.fillText = (text, x, y) => {
+    if (text === 'in') painted.push(y);
+    return drawText(text, x, y);
+  };
+  return [1000, 356, 1000].map((width) => {
+    music.sheet.setWidth(width).format();
+    const { rows, fragments, diagnostics } = music.sheet.getContinuousLayout();
+    const words = music.notes.flat(3).flatMap((n) => n.getModifiers().filter((a) => a.phraseManaged));
+    const expected = words.filter((a) => a.text === 'in').map((a) => a.computeY().y);
+    const baselines = words.map((a) => a.computeY().y - a.checkAttachedNote().checkStave().getYForLine(0));
+    const extenders = fragments
+      .filter((f) => f.kind === 'lyric')
+      .map((f) => {
+        const spec = edition.spec.continuous.spans.find((s) => s.id === f.id);
+        const word = music
+          .getNote(spec.from)
+          .getModifiers()
+          .find((a) => a.getAttribute('id') === spec.syllableId);
+        const ink = word.getTextInk(word.computeX().x, word.computeY().y);
+        const staff = music.staves[rows[f.row].measures[0] - 1][0];
+        return { part: f.part, y: f.y1 - staff.getYForLine(0), gap: f.x1 - (ink.x + ink.w), length: f.x2 - f.x1 };
+      });
+    ctx.clear();
+    painted = [];
+    score.draw({ retain: true });
+    return {
+      bars: rows.map((r) => r.measures),
+      baselines,
+      extenders,
+      expected,
+      painted,
+      diagnostics: structuredClone(diagnostics),
+    };
+  });
+}
+
+test('Saints, choir, piano and ensemble reflow in browser SVG and Canvas with two font pairs', async () => {
   const browser = await puppeteer.launch({ headless: true, args: process.env.CI ? ['--no-sandbox'] : [] });
   try {
     const page = await browser.newPage();
@@ -380,6 +452,32 @@ test('choir, piano and ensemble reflow in browser SVG and Canvas with two font p
         family,
         data.toString('base64')
       );
+    }
+    await page.evaluate(() => {
+      window.FeaturedScores = {};
+    });
+    await page.addScriptTag({ path: new URL('../scores/saints.js', import.meta.url).pathname });
+    for (const backend of ['svg', 'canvas']) {
+      for (const space of [9, 10]) {
+        const frames = await page.evaluate(renderSaints, { backend, space });
+        assert.deepEqual(frames[2], frames[0], 'returning to page width restores all verse geometry');
+        assert.ok(frames[1].bars.length > frames[0].bars.length);
+        assert.ok(
+          frames[1].extenders.some((f) => f.part === 'last'),
+          'a held syllable crosses a system break'
+        );
+        for (const frame of frames) {
+          assert.deepEqual(frame.diagnostics, []);
+          assert.equal(frame.expected.length, 4);
+          assert.deepEqual(frame.painted, frame.expected, 'each syllable is drawn once at its measured baseline');
+          for (const y of frame.baselines) assert.ok(Math.abs(y - 7.5 * space) < 0.01);
+          for (const line of frame.extenders) {
+            assert.ok(Math.abs(line.y - 7.5 * space) < 0.01);
+            assert.ok(line.length > 0);
+            if (line.part === 'first' || line.part === 'single') assert.ok(Math.abs(line.gap - 0.35 * space) < 0.01);
+          }
+        }
+      }
     }
     for (const backend of ['svg', 'canvas'])
       for (const kind of ['choir', 'keyboard', 'ensemble'])

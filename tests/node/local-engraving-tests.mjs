@@ -78,6 +78,57 @@ function renderMatrix({ family, textFamily, backend, metadata }) {
   return { before, after, rows, sizes, pixels, drawnLabel };
 }
 
+/** Compare the text actually sent to each renderer with the frame and tie endpoints. */
+function labelGeometry(backend) {
+  const VF = window.VexFlow;
+  VF.setFonts('Bravura', 'Academico');
+  const target = document.createElement(backend === 'SVG' ? 'div' : 'canvas');
+  document.body.replaceChildren(target);
+  const ctx = new VF.Renderer(target, VF.Renderer.Backends[backend]).resize(400, 200).getContext();
+  const stave = new VF.Stave(20, 80, 350).setContext(ctx);
+  const note = new VF.StaveNote({ keys: ['c/4'], duration: 'q' }).setStave(stave);
+  const label = stave.setSection('Bridge', 0).getModifiers().at(-1);
+  const measurements = [];
+  let frame, painted;
+  const rect = ctx.rect.bind(ctx),
+    fillText = ctx.fillText.bind(ctx);
+  ctx.rect = (x, y, w, h) => {
+    frame = { x, y, w, h };
+    return rect(x, y, w, h);
+  };
+  ctx.fillText = (text, x, y) => {
+    painted = { x, y, width: ctx.measureText(text).width };
+    return fillText(text, x, y);
+  };
+  for (const [dx, dy] of [
+    [0, 0],
+    [17, -9],
+  ]) {
+    label.setXShift(dx).setYShift(dy);
+    const before = label.getBoundingBox();
+    label.draw();
+    const m = label.getTextMetrics();
+    const gaps = [
+      painted.x - m.actualBoundingBoxLeft - frame.x,
+      frame.x + frame.w - painted.x - m.actualBoundingBoxRight,
+      painted.y - m.actualBoundingBoxAscent - frame.y,
+      frame.y + frame.h - painted.y - m.actualBoundingBoxDescent,
+    ];
+    measurements.push({ x: painted.x, y: painted.y, gaps, frame, before: { ...before } });
+  }
+  const centers = [];
+  for (const Tie of [VF.StaveTie, VF.TabTie]) {
+    const tie = new Tie({ firstNote: note }, 'H').setContext(ctx);
+    for (const size of [8, 32]) {
+      ctx.setFont('monospace', size);
+      const previous = ctx.getFont();
+      tie.renderTieText(30, 140);
+      centers.push({ x: painted.x + painted.width / 2, restored: previous === ctx.getFont() });
+    }
+  }
+  return { measurements, centers };
+}
+
 test('Bravura, Petaluma and metadata-free Leland render local parts at normal, cue and grace sizes', async () => {
   const browser = await puppeteer.launch({ headless: true, args: process.env.CI ? ['--no-sandbox'] : [] });
   try {
@@ -95,6 +146,25 @@ test('Bravura, Petaluma and metadata-free Leland render local parts at normal, c
         },
         family,
         bytes.toString('base64')
+      );
+    }
+    for (const backend of ['SVG', 'CANVAS']) {
+      const {
+        measurements: [original, shifted],
+        centers,
+      } = await page.evaluate(labelGeometry, backend);
+      assert.equal(shifted.x - original.x, 17);
+      assert.equal(shifted.y - original.y, -9);
+      for (const { gaps, frame, before } of [original, shifted]) {
+        assert.deepEqual(before, frame);
+        assert.ok(
+          gaps[0] > 0 && gaps.every((gap) => Math.abs(gap - gaps[0]) < 0.01),
+          'equal ink padding on every edge'
+        );
+      }
+      assert.ok(
+        centers.every((c) => c.restored && Math.abs(c.x - 85) < 0.01),
+        'tie text uses its own drawing font'
       );
     }
     for (const [family, textFamily] of [

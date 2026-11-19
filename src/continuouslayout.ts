@@ -1,5 +1,6 @@
 // Row-dependent notation for a responsive EasyScore composition. Source measures and notes keep their identity.
 import { Accidental } from './accidental';
+import { Annotation } from './annotation';
 import { Clef } from './clef';
 import {
   continuationPitch,
@@ -336,6 +337,18 @@ export class ContinuousLayout {
           if (!Number.isInteger(head) || head < 0 || head >= n.keys.length) invalid('Invalid span head index.');
       }
       if (first.measure === last.measure && onset(first.note).greaterThan(onset(last.note))) invalid('Reversed span.');
+      if (
+        span.syllableId !== undefined &&
+        (typeof span.syllableId !== 'string' ||
+          span.syllableId.length === 0 ||
+          span.kind !== 'lyric' ||
+          first.staff !== last.staff ||
+          span.text !== undefined ||
+          span.labelFontSize !== undefined)
+      )
+        invalid(
+          'An anchored lyric extender needs a syllable ID and two notes on the same staff. Its annotation supplies the text and font.'
+        );
       if (span.kind === 'tie' && first.note instanceof StaveNote && first.measure !== last.measure) {
         const fi = span.fromHead ?? 0,
           li = span.toHead ?? 0;
@@ -508,6 +521,15 @@ export class ContinuousLayout {
   }
 
   format(options: Required<SheetOptions>): ContinuousRow[] {
+    // A verse can be attached after composition. Resolve its current mark before every reflow.
+    for (const span of this.spans) {
+      if (!span.spec.syllableId) continue;
+      const matches = span.first.note
+        .getModifiers()
+        .filter((m): m is Annotation => m instanceof Annotation && m.getAttribute('id') === span.spec.syllableId);
+      if (matches.length !== 1) invalid('Expected one lyric annotation on the source note: ' + span.spec.syllableId);
+      span.syllable = matches[0];
+    }
     this.hidden.clear();
     this.diagnostics.length = 0;
     this.fragments.length = 0;
@@ -652,6 +674,15 @@ export class ContinuousLayout {
     const laneEnds = new Map<string, number[]>();
     for (const s of spans) {
       if (s.spec.kind === 'tie' || s.spec.kind === 'slur') continue;
+      if (s.syllable) {
+        // A continuation row may have no sung words of its own. Include the extender in that staff's envelope.
+        const stave = this.score.staves[first][s.first.staff];
+        const relativeY = this.lyricBaseline(s.syllable, stave) - stave.getY();
+        const bounds = ink[s.first.staff];
+        bounds.top = Math.min(bounds.top, relativeY);
+        bounds.bottom = Math.max(bounds.bottom, relativeY + 2);
+        continue;
+      }
       const side = spanAbove(s.spec),
         staff = s.first.staff,
         key = staff + '-' + side;
@@ -727,6 +758,13 @@ export class ContinuousLayout {
     return row;
   }
 
+  /** Carry the source syllable's distance from its top staff line to each continuation. */
+  private lyricBaseline(word: Annotation, stave: Stave): number {
+    const source = word.checkAttachedNote().checkStave();
+    const spaces = (word.computeY().y + word.getYShift() - source.getYForLine(0)) / source.space(1);
+    return stave.getYForLine(0) + stave.space(spaces);
+  }
+
   /** Keep continuation hooks and labels on the correct end when a span crosses a row. */
   private addFragment(s: ResolvedSpan, units: Unit[], row: ContinuousRow, baseline: number): void {
     const first = units[0].first,
@@ -743,6 +781,14 @@ export class ContinuousLayout {
     let x2 = ends ? s.last.note.getAbsoluteX() + s.last.note.getGlyphWidth() : endStaff.getNoteEndX() - 3;
     let y1 = baseline,
       y2 = baseline;
+    if (s.syllable) {
+      y1 = y2 = this.lyricBaseline(s.syllable, startStaff);
+      if (starts) {
+        const ink = s.syllable.getTextInk(s.syllable.computeX().x, s.syllable.computeY().y);
+        x1 = ink.x + ink.w + space * 0.35;
+      }
+      if (ends) x2 = (s.last.note as StaveNote).getNoteHeadBeginX() + s.last.note.getGlyphWidth();
+    }
     if (kind === 'tie' || kind === 'slur') {
       if (starts) x1 = s.first.note.getTieRightX();
       if (ends) x2 = s.last.note.getTieLeftX();

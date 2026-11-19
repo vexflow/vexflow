@@ -1,4 +1,5 @@
 // Logical event anchors and renderer-independent drawing of continuous-score span fragments.
+import type { Annotation } from './annotation';
 import { Bounds } from './boundingbox';
 import { Element } from './element';
 import { Glyphs } from './glyphs';
@@ -38,6 +39,8 @@ export interface ContinuousSpan {
   text?: string;
   /** Optional type size for this label, in points. Measured before system breaks are chosen. */
   labelFontSize?: number;
+  /** For a lyric extender, take the baseline and ink edge from this Annotation on the source note. */
+  syllableId?: string;
 }
 export interface SpanAnchor {
   measure: number;
@@ -49,6 +52,7 @@ export interface ResolvedSpan {
   first: SpanAnchor;
   last: SpanAnchor;
   label?: Element;
+  syllable?: Annotation;
 }
 export interface SpanFragment {
   id: string;

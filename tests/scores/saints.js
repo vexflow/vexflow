@@ -17,7 +17,7 @@
     ['G4/w', 'in', 'C', 'Dm:11'],
     ['B4/q/r, C4/q, E4, F4', '_ Oh when the', 'C', 'G:13'],
     ['G4/q, E4, C4, E4', 'saints go march- ing', 'C', 'C:maj9'],
-    ['D4/w', '', 'G:7', 'Am:11'],
+    ['D4/w', 'in', 'G:7', 'Am:11'],
     ['D4/w', '', 'G:7', 'D:9'],
     ['B4/q/r, E4/q, E4, D4', '_ Oh Lord I', 'G:7', 'G:13'],
     ['C4/h, C4/q, E4', 'want to be', 'C', 'Gm:13'],
@@ -26,7 +26,7 @@
     ['B4/q/r, C4/q, E4, F4', '_ Oh when the', 'F', 'Fm:maj7'],
     ['G4/h, E4/q, C4', 'saints go march-', 'C', 'Em:7'],
     ['D4/w', 'ing', 'G:7', 'Db:7b9'],
-    ['C4/w', '', 'C', 'C:6/9'],
+    ['C4/w', 'in', 'C', 'C:6/9'],
     ['C4/q', '', '', ''],
   ];
 
@@ -42,13 +42,14 @@
         },
       ],
     }));
-    const spans = [6, 15].flatMap((m) =>
+    const heldBars = [6, 15];
+    const spans = heldBars.flatMap((m) =>
       ['lyric', 'tie'].map((kind) => ({
         id: kind + m,
         kind,
         from: 'v' + m + '-0',
         to: 'v' + (m + 1) + '-0',
-        ...(kind === 'lyric' ? { text: 'in' } : {}),
+        ...(kind === 'lyric' ? { syllableId: 'held-in-' + m } : {}),
       }))
     );
     return {
@@ -68,7 +69,13 @@
             .flatMap((text, i) =>
               text && text !== '_' ? [{ text, note: composition.getNote('v' + m + '-' + i) }] : []
             );
-          if (syllables.length) composition.systems[m].getPhraseLayout().addVerse(composition.staves[m][0], syllables);
+          if (syllables.length) {
+            // A single verse line sits below the lowest pickup. Hold the vowel across the next bar.
+            const words = composition.systems[m].getPhraseLayout().addVerse(composition.staves[m][0], syllables, {
+              baselineSpaces: 7.5,
+            });
+            if (heldBars.includes(m)) words[0].setAttribute('id', 'held-in-' + m);
+          }
         });
       },
     };
