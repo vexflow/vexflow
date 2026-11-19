@@ -109,6 +109,41 @@ test('two live scores independently consume glyph metrics, anchors and beam poli
   assert.throws(() => profile('Bravura', { beamThickness: NaN }), RangeError);
 });
 
+test('default Bravura slash stems meet the published glyph anchors at normal and grace sizes', () => {
+  const reference = profile('Bravura');
+  const { f } = factory();
+  for (const make of [f.StaveNote.bind(f), f.GraceNote.bind(f)])
+    for (const duration of ['q', '8', 'h'])
+      for (const direction of [VF.Stem.UP, VF.Stem.DOWN]) {
+        const note = make({ keys: ['b/4'], duration, type: 's', stemDirection: direction });
+        const stave = f.Stave({ x: 10, y: 60, width: 240 });
+        VF.Formatter.FormatAndDraw(f.getContext(), stave, [note]);
+        const head = note.noteHeads[0];
+        const [x, y] = reference.stemAnchor(head.text, direction === VF.Stem.UP ? 'up' : 'down');
+        const space = head.fontSizeInPixels / 4;
+        const stem = note.getStem().getSegment();
+        assert.equal(stem.x, note.getNoteHeadBeginX() + head.getXShift() + x * space - (direction * VF.Stem.WIDTH) / 2);
+        assert.equal(stem.baseY, head.getY() - y * space);
+      }
+});
+
+test('slash anchors follow the note font and respect explicit metadata', () => {
+  const { f } = factory();
+  const custom = new VF.EngravingProfile({
+    musicFont: 'Bravura',
+    metadata: { fontName: 'Bravura', glyphsWithAnchors: { noteheadSlashVerticalEnds: { stemUpSE: [1.25, 0.4] } } },
+  });
+  for (const [options, expectedY] of [
+    [{ engraving: custom }, 0.4],
+    [{ musicFont: 'Petaluma, Bravura' }, 0],
+  ]) {
+    const note = f.StaveNote({ keys: ['b/4'], duration: 'q', type: 's', stemDirection: VF.Stem.UP, ...options });
+    VF.Formatter.FormatAndDraw(f.getContext(), f.Stave({ x: 10, y: 60, width: 240 }), [note]);
+    const head = note.noteHeads[0];
+    assert.equal(note.getStem().getSegment().baseY, head.getY() - (expectedY * head.fontSizeInPixels) / 4);
+  }
+});
+
 test('beam clears a head whose attack falls strictly between its stems', () => {
   const build = (peerKey) => {
     const { f } = factory();
