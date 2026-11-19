@@ -12,7 +12,7 @@ jobs:
     container: mcr.microsoft.com/playwright@sha256:6446946a1d9fd62d9ae501312a2d76a43ee688542b21622056a372959b65d63d
     timeout-minutes: 20
     env:
-      VF_ENGRAVING_REFERENCE: f1d3973fec27f6888b8b6eeb5626d3bdce946462
+      VF_ENGRAVING_REFERENCE: 72ca768d22f0535dfcae58a030690701be9cd1bc
       VF_REQUIRE_REVIEWED_MATCH: '1'
       VF_WEB_REFERENCE: build/web-reference/build/cjs/vexflow-debug.js
     steps:
@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: vexflow/vexflow
-          ref: f1d3973fec27f6888b8b6eeb5626d3bdce946462
+          ref: 72ca768d22f0535dfcae58a030690701be9cd1bc
           path: build/web-reference
       - run: npm ci && npx grunt webpack:debug
         working-directory: build/web-reference
