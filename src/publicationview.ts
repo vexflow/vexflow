@@ -154,11 +154,12 @@ function homeStaff(staff: EasyScoreStaveSpec, selected: ReadonlySet<string>): Ea
 
 /** Carry written clef, key and meter into a one-measure inset, including preceding inline changes. */
 export function insetStaff(staff: EasyScoreStaveSpec, measure: number): EasyScoreStaveSpec {
-  const state = { clef: staff.clef, key: staff.key, time: staff.time };
+  const state = { clef: staff.clef, key: staff.key, time: staff.time, showTimeSignature: staff.showTimeSignature };
   for (const m of staff.measures.slice(0, measure - 1)) {
     state.clef = m.clef ?? state.clef;
     state.key = m.key ?? state.key;
     state.time = m.time ?? state.time;
+    state.showTimeSignature = m.showTimeSignature ?? state.showTimeSignature;
     for (const v of m.voices.slice(0, 1))
       if (typeof v.notes !== 'string')
         for (const item of v.notes) if (typeof item === 'object' && 'change' in item) Object.assign(state, item.change);

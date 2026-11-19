@@ -223,7 +223,7 @@ export class ContinuousLayout {
         if (next && this.options.courtesy !== false) {
           if (next.clef !== current.clef) end.push(new Clef(next.clef, 'small'));
           if (next.clef !== 'tab' && next.key !== current.key) end.push(new KeySignature(next.key, current.key));
-          if (next.time !== current.time) end.push(new TimeSignature(next.time));
+          if (next.showTimeSignature && next.time !== current.time) end.push(new TimeSignature(next.time));
         }
         end.forEach((m) => m.setPosition(Position.END));
         return { start, end };
