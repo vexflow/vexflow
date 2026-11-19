@@ -175,6 +175,57 @@ test('nested quadratic and cubic routes preserve tied chord indices, manual cont
   system.format();
   assert.ok(layout.diagnostics.some((d) => d.code === 'CrossingSpans' && d.sources.includes(cross.getAttribute('id'))));
 });
+test('authored whole and half rests retain their supporting line across staves and formatting passes', () => {
+  for (const lines of [4, 5]) {
+    const f = factory();
+    const stave = f.Stave({ options: { numLines: lines } });
+    for (const [duration, plain, ledger] of [
+      ['hr', VF.VexFlow.Glyphs.restHalf, VF.VexFlow.Glyphs.restHalfLegerLine],
+      ['wr', VF.VexFlow.Glyphs.restWhole, VF.VexFlow.Glyphs.restWholeLegerLine],
+    ]) {
+      const bottom = 6 - lines;
+      for (const line of [bottom - 1, bottom, 3, 5, 6]) {
+        const rest = f.StaveNote({ keys: ['r/4'], duration, restLine: line });
+        const other = f.StaveNote({ keys: ['b/4'], duration: 'w', stemDirection: VF.Stem.DOWN });
+        const voices = [rest, other].map((n) => f.Voice().setMode(VF.Voice.Mode.SOFT).addTickable(n));
+        for (let pass = 0; pass < 2; pass++) {
+          new VF.Formatter().joinVoices(voices).formatToStave(voices, stave, { alignRests: true });
+          for (const voice of voices) voice.draw(f.getContext(), stave);
+          const [head] = rest.noteHeads;
+          assert.equal(rest.getKeyLine(0), line);
+          assert.equal(head.getY(), stave.getYForNote(line));
+          assert.equal(head.getText(), line < bottom || line > 5 ? ledger : plain);
+        }
+      }
+    }
+  }
+  const rest = new VF.StaveNote({ keys: ['r/4'], duration: 'wr', restLine: 1 });
+  rest.setStave(new VF.Stave(0, 0, 100, { numLines: 4 }));
+  assert.equal(rest.noteHeads[0].text, VF.VexFlow.Glyphs.restWholeLegerLine);
+  rest.setStave(new VF.Stave(0, 0, 100));
+  assert.equal(rest.noteHeads[0].text, VF.VexFlow.Glyphs.restWhole);
+});
+
+test('automatic rests clear a fixed rest and resume alignment after releasing a pin', () => {
+  const f = factory();
+  const next = f.StaveNote({ keys: ['d/5'], duration: 'q' });
+  const fixed = f.StaveNote({ keys: ['r/4'], duration: 'qr', restLine: 3 });
+  VF.Formatter.AlignRestsToNotes([fixed, next], true);
+  assert.equal(fixed.getKeyLine(0), 3);
+  const auto = f.StaveNote({ keys: ['r/4'], duration: 'qr' });
+  const stave = f.Stave();
+  const voices = [fixed, auto].map((n) => f.Voice().setMode(VF.Voice.Mode.SOFT).addTickable(n));
+  new VF.Formatter().joinVoices(voices).formatToStave(voices, stave);
+  assert.equal(fixed.getKeyLine(0), 3);
+  assert.notEqual(auto.getKeyLine(0), 3);
+  assert.notEqual(auto.renderOptions.draw, false);
+  fixed.setRestLine(0).setRestLine(undefined);
+  VF.Formatter.AlignRestsToNotes([fixed, next], true);
+  assert.equal(fixed.getKeyLine(0), next.getLineForRest());
+  assert.throws(() => next.setRestLine(1), /rest/i);
+  assert.throws(() => auto.setRestLine(NaN), /finite/);
+});
+
 test('a rest clears ink anchored at an earlier attack and reports a collision when pinned', () => {
   function restCase(pin) {
     const { f, system, staff, layout, notes } = score('G4/q, B4/q/r, G4/q');
@@ -187,13 +238,14 @@ test('a rest clears ink anchored at an earlier attack and reports a collision wh
     obstruction.setXShift(a.x - b.x).setTextBaseline(obstruction.computeY().y + b.y - a.y);
     assert.ok(rest.isRest());
     const original = rest.getKeyLine(0);
-    if (pin) layout.pin(rest);
+    if (pin === 'phrase') layout.pin(rest);
+    if (pin === 'rest') rest.setRestLine(original);
     system.format();
-    assert.equal(intersects(measured(rest).ink, measured(obstruction).ink), pin);
-    assert.equal(rest.getKeyLine(0) === original, pin);
+    assert.equal(intersects(measured(rest).ink, measured(obstruction).ink), Boolean(pin));
+    assert.equal(rest.getKeyLine(0) === original, Boolean(pin));
     assert.equal(
       layout.diagnostics.some((d) => d.code === 'PinnedCollision'),
-      pin
+      Boolean(pin)
     );
     const line = rest.getKeyLine(0);
     system.format();
@@ -201,7 +253,8 @@ test('a rest clears ink anchored at an earlier attack and reports a collision wh
     assert.equal(host.getStave(), staff);
   }
   restCase(false);
-  restCase(true);
+  restCase('phrase');
+  restCase('rest');
 });
 test('staff separation refits cross-staff beams to the visible stem tips after resizing', () => {
   const { f, system, staff, layout, notes } = score('G4/8, C5/8, G4/q');

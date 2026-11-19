@@ -1,7 +1,9 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
+// Notehead geometry and selection of rest glyphs for the attached stave.
 
 import { ElementStyle } from './element';
+import { Glyphs } from './glyphs';
 import { Note, NoteStruct } from './note';
 import { Stave } from './stave';
 import { StaveNote } from './stavenote';
@@ -54,8 +56,8 @@ export class NoteHead extends Note {
 
   // map notehead SMuFL codes to the corresponding SMuFL code with ledger line
   protected ledger: Record<string, string> = {
-    '\ue4e3' /*restWhole*/: '\ue4f4' /*restWholeLegerLine*/,
-    '\ue4e4' /*restHalf*/: '\ue4f5' /*restHalfLegerLine*/,
+    [Glyphs.restWhole]: Glyphs.restWholeLegerLine,
+    [Glyphs.restHalf]: Glyphs.restHalfLegerLine,
   };
 
   constructor(noteStruct: NoteHeadStruct) {
@@ -81,15 +83,9 @@ export class NoteHead extends Note {
       `No glyph found for duration '${this.duration}' and type '${this.noteType}'`
     );
 
-    // Swap out the glyph with ledger lines
-    if ((this.line > 5 || this.line < 0) && this.ledger[this.glyphProps.codeHead]) {
-      this.glyphProps.codeHead = this.ledger[this.glyphProps.codeHead];
-    }
-    this.text = this.glyphProps.codeHead;
-    if (noteStruct.customGlyphCode) {
-      this.customGlyph = true;
-      this.text = noteStruct.customGlyphCode;
-    }
+    this.text = noteStruct.customGlyphCode || this.glyphProps.codeHead;
+    this.customGlyph = !!noteStruct.customGlyphCode;
+    this.updateRestGlyph();
 
     this.setStyle(noteStruct.style ?? {});
     this.slashed = noteStruct.slashed || false;
@@ -98,6 +94,17 @@ export class NoteHead extends Note {
       ...this.renderOptions,
     };
   }
+  /** Select the supporting ledger at the actual note position, preserving custom head glyphs. */
+  private updateRestGlyph(): void {
+    const plain = this.glyphProps.codeHead;
+    const ledger = this.ledger[plain];
+    if (!ledger || (this.text !== plain && this.text !== ledger)) return;
+    // getYForNote anchors key line 5 at the top on staves of every size.
+    const bottomLine = 6 - (this.stave?.getNumLines() ?? 5);
+    const glyph = this.line > 5 || this.line < bottomLine ? ledger : plain;
+    if (this.text !== glyph) this.setText(glyph);
+  }
+
   /** Get the width of the notehead. */
   override getWidth(): number {
     return this.width;
@@ -116,6 +123,8 @@ export class NoteHead extends Note {
   /** Set the stave line the notehead is placed on. */
   setLine(line: number): this {
     this.line = line;
+    if (this.stave) return this.setStave(this.stave);
+    this.updateRestGlyph();
     return this;
   }
 
@@ -139,6 +148,7 @@ export class NoteHead extends Note {
     const line = this.getLine();
 
     this.stave = stave;
+    this.updateRestGlyph();
     if (this.stave) {
       this.setY(this.stave.getYForNote(line));
       this.setContext(this.stave.getContext());

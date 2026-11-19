@@ -377,7 +377,12 @@ export class ContinuousLayout {
       .flat(2)
       .every(
         (n) =>
-          n instanceof StaveNote && n.isRest() && !n.getModifiers().length && !n.getBeam() && !n.getTupletStack().length
+          n instanceof StaveNote &&
+          n.isRest() &&
+          n.restLine === undefined &&
+          !n.getModifiers().length &&
+          !n.getBeam() &&
+          !n.getTupletStack().length
       );
   }
 
@@ -474,7 +479,10 @@ export class ContinuousLayout {
     const used = new Set<number>();
     for (let i = first; i <= last; i++) {
       this.score.notes[i].flat(2).forEach((n) => {
-        if (n instanceof Note && (!(n instanceof StaveNote) || !n.isRest() || n.getModifiers().length))
+        if (
+          n instanceof Note &&
+          (!(n instanceof StaveNote) || !n.isRest() || n.restLine !== undefined || n.getModifiers().length)
+        )
           used.add(this.score.staves[i].indexOf(n.checkStave()));
       });
     }
