@@ -38,6 +38,19 @@ function put(storage, url, html, generation, cache) {
   );
 }
 
+/** Preserve the first measurements at an immutable URL and verify new writes before indexing. */
+function publishOnce(storage, url, html) {
+  try {
+    put(storage, url, html, '0', 'public,max-age=31536000,immutable');
+  } catch (err) {
+    if (err.kind !== 'conflict') throw err;
+    return storage(['cat', url]);
+  }
+  const saved = storage(['cat', url]);
+  if (saved !== html) throw Error('Published report failed readback: ' + url);
+  return saved;
+}
+
 /** Read exactly the generation we will replace. Retry if another publisher removes that generation. */
 function readArchive(storage, url) {
   let generation;
@@ -74,6 +87,8 @@ export async function uploadReport({
     return entries[0];
   };
   const local = validateCommit(html);
+  if (local.releaseTag && !/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(local.version))
+    throw Error('Invalid release report version.');
   const commitURL = destination + commit + '/index.html',
     indexURL = destination + 'index.html';
   if (dryRun) {
@@ -82,20 +97,17 @@ export async function uploadReport({
     );
     return;
   }
-  let created = true;
-  try {
-    put(storage, commitURL, html, '0', 'public,max-age=31536000,immutable');
-  } catch (err) {
-    if (err.kind !== 'conflict') throw err;
-    created = false;
-  }
-  const canonical = storage(['cat', commitURL]);
-  if (created && canonical !== html) throw Error('Published commit page failed readback.');
+  const canonical = publishOnce(storage, commitURL, html);
   const entry = validateCommit(canonical);
   // A commit can acquire a release tag after its immutable measurements have been published.
   if (local.releaseTag && local.version !== entry.version)
     throw Error('Published package version differs from the tagged report.');
-  if (local.releaseTag) entry.releaseTag = local.releaseTag;
+  if (local.releaseTag) {
+    const versionURL = destination + local.version + '/index.html';
+    if (publishOnce(storage, versionURL, canonical) !== canonical)
+      throw Error('Release URL already points to a different report: ' + versionURL);
+    entry.releaseTag = local.releaseTag;
+  }
   for (let attempt = 0; attempt < 10; attempt++) {
     try {
       const { generation, entries } = readArchive(storage, indexURL);

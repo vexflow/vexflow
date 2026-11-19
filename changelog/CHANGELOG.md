@@ -1,3 +1,11 @@
+# 5.4.0
+
+- Lay out lyrics, curves, and markings across a system. Break continuous scores into systems, then paginate full scores and individual parts for print.
+- Add instrument profiles and playable reference scores. The guitar studies show how to lay out bends, slides, and other gestures in tablature.
+- Expose a renderer-independent score reader for accessible navigation. Qualify web rendering in Chromium, Firefox, and WebKit.
+- Learn VexFlow through progressive, editable examples in the [user guide](https://vexflow.com/guide/). Experiment in the [Explorer](https://vexflow.com/explorer/) or browse the [visual tests and example scores](https://vexflow.com/tests/).
+- Read the [illustrated history of changes since VexFlow 5.0](https://vexflow.com/reports/ai2026) and the [5.4.0 code quality report](https://vexflow.com/reports/5.4.0/).
+
 # 5.3.0
 
 ## Engraving

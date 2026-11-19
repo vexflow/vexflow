@@ -237,9 +237,14 @@ test('tagging an already published commit promotes its original measurements and
   files.set(index, { generation: 1, html: archivePage([newer]) });
   await uploadReport(options);
   const original = files.get(url).html;
+  const permalink = destination + e.version + '/index.html';
+  assert.equal(files.has(permalink), false);
   await writeFile(path, examplePage(tagged));
   await uploadReport(options);
   const archive = files.get(index).html;
+  assert.equal(files.get(permalink).html, original);
+  await uploadReport(options);
+  assert.equal(files.get(permalink).generation, 1);
   assert.deepEqual(readEntries(archive), [{ ...e, releaseTag: e.version }, newer]);
   assert.match(archive, /<strong class="release-label">Release<\/strong>/);
   assert.match(examplePage(tagged), /<h1>VexFlow 5.3.0 quality report<\/h1>/);

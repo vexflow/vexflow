@@ -27,6 +27,8 @@ Local reports live under the normal build directory. Commands such as `npm test`
 
 ## Release reports
 
+Each new release also publishes its report at `https://vexflow.com/reports/<version>/`. Use this permalink in the changelog before the release commit exists.
+
 `npm run release:github -- <tag>` publishes the tagged report before creating the GitHub release. The legacy Grunt release path calls the same report publisher. See [cutting a release](build.md#release-a-version) for tag and artifact preparation.
 
 To publish the report for an existing release, run `npm run report:release -- <tag>`. Append `--dry-run` to build and preview locally. The command measures the commit the tag identifies, including prereleases, and verifies its package version. The archive puts tagged releases first with an explicit **Release** label beside the version. When a previously reported commit becomes a release, its existing measurements stay at the same URL and its archive entry gains the release label.
