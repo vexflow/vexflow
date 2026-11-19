@@ -117,6 +117,62 @@ test('publication views, pagination and portable printing', async (t) => {
           }
         });
       }
+    await t.test('structured chords and rhythmic tab retain written dots in independent parts', async () => {
+      const samples = await page.evaluate(() => {
+        const keys = ['c/4', 'e/4'];
+        const positions = [
+          { str: 1, fret: 12 },
+          { str: 2, fret: 10 },
+        ];
+        const source = {
+          staves: ['stave', 'tab'].map((kind) => ({
+            id: kind,
+            kind,
+            time: '13/16',
+            measures: [
+              {
+                voices: [
+                  {
+                    notes: [1, 2].map((dots) => ({
+                      id: kind + dots,
+                      ...(kind === 'tab'
+                        ? { tab: { duration: 'q', positions, dots }, drawStem: true }
+                        : { note: { duration: 'q', keys, dots } }),
+                    })),
+                  },
+                ],
+              },
+            ],
+          })),
+        };
+        const host = document.querySelector('aside');
+        host.replaceChildren();
+        host.id = 'dot-score';
+        const factory = new VexFlow.Factory({ renderer: { elementId: host.id, width: 500, height: 330 } });
+        const screen = factory.EasyScore().compose(source);
+        factory.draw();
+        const countDots = (group) =>
+          [...group.querySelectorAll('text')].filter((el) => el.textContent === VexFlow.Glyphs.augmentationDot).length;
+        return source.staves.flatMap(({ id }) => {
+          const book = new VexFlow.Publication(source).render(document.querySelector('main'), { staves: [id] });
+          const svg = book.pages[0].svg;
+          const events = JSON.parse(svg.querySelector('metadata').textContent).events;
+          return events.map((event) => ({
+            id: event.id,
+            ticks: screen.getNote(event.id).getTicks().toString(),
+            partTicks: event.ticks,
+            screenDots: countDots(host.querySelector('#vf-' + event.id)),
+            partDots: countDots(svg.querySelector('[data-vf-id="vf-' + event.id + '"]')),
+          }));
+        });
+      });
+      assert.deepEqual(samples, [
+        { id: 'stave1', ticks: '6144/1', partTicks: '6144/1', screenDots: 2, partDots: 2 },
+        { id: 'stave2', ticks: '7168/1', partTicks: '7168/1', screenDots: 4, partDots: 4 },
+        { id: 'tab1', ticks: '6144/1', partTicks: '6144/1', screenDots: 1, partDots: 1 },
+        { id: 'tab2', ticks: '7168/1', partTicks: '7168/1', screenDots: 2, partDots: 2 },
+      ]);
+    });
     await t.test('a fingering and its transparent hit area stay with the printed note', async () => {
       const owner = await page.evaluate(() => {
         const measures = Array.from({ length: 6 }, (_, i) => ({

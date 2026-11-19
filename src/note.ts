@@ -259,6 +259,8 @@ export abstract class Note extends Tickable {
 
   /** Source identities survive native drawing, Canvas inspection and print export. */
   readonly notation: readonly NotationIdentity[];
+  /** Augmentation dots in the written duration, independent of tick overrides or modifiers. */
+  readonly writtenDots: number;
   glyphProps: GlyphProps;
   keys: string[];
   keyProps: KeyProps[];
@@ -316,6 +318,7 @@ export abstract class Note extends Tickable {
     this.keyProps = [];
 
     this.duration = parsedNoteStruct.duration;
+    this.writtenDots = parsedNoteStruct.dots;
     this.noteType = parsedNoteStruct.type;
     this.customTypes = parsedNoteStruct.customTypes;
 

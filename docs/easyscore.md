@@ -490,6 +490,7 @@ No silent rests or padding are inserted. A note cannot belong to two voices.
 
 Voice `notes` accepts a string or an array of strings, typed note structs, and owned native tickables.
 Each string starts its own duration inheritance. Use `{ note: nativeStruct, id: 'name' }` or `{ tab: nativeStruct, id: 'name', drawStem: true }` for named typed notes.
+In a composition descriptor, `dots: 2` on a quarter note engraves a double-dotted quarter and sets its duration. Each pitched chord head gets two dots. A tab chord with `drawStem: true` gets two dots at its shared stem.
 Adopt native notes before passing them in. They must not already belong to a voice.
 When native inputs are present, apply beams, tuplets, and accidental policy beforehand. This keeps failed composition from rewriting caller-owned notation.
 

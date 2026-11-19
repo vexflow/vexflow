@@ -1405,6 +1405,7 @@
       "getGlyphProps(duration: string, type: string = 'n'): GlyphProps",
       "plotMetrics(ctx: RenderContext, note: Tickable, yPos: number): void",
       "notation: readonly NotationIdentity[]",
+      "writtenDots: number",
       "glyphProps: GlyphProps",
       "keys: string[]",
       "keyProps: KeyProps[]",

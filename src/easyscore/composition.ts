@@ -1,6 +1,7 @@
 // Structured construction delegates timing and layout to native Voice, System, and Sheet objects.
 import { Accidental } from '../accidental';
 import { ContinuousLayout, ContinuousOptions } from '../continuouslayout';
+import { Dot } from '../dot';
 import type { EasyScore, EasyScoreVoiceOptions } from '../easyscore';
 import type { Element } from '../element';
 import { Factory } from '../factory';
@@ -207,10 +208,14 @@ function buildVoice(
         }
         score.set({ clef: state.clef, time: state.time });
       } else {
-        const note =
-          'tab' in item
-            ? score.make.tabNote(item.tab, item.drawStem)
-            : score.make.note('note' in item ? item.note : item);
+        const tab = 'tab' in item;
+        const note = tab
+          ? score.make.tabNote(item.tab, item.drawStem)
+          : score.make.note('note' in item ? item.note : item);
+        // Each pitched head gets its own dots. Rhythmic tab shares one set at the stem.
+        if (!tab || item.drawStem) {
+          for (let i = 0; i < note.writtenDots; i++) Dot.buildAndAttach([note], { all: !tab });
+        }
         if ('grace' in item && item.grace) {
           score.attach(note, buildGraceGroup(score, item.grace), 0);
         }
