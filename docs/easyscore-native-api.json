@@ -297,6 +297,7 @@
       "setType(type: string, size: string = 'default', annotation?: string): this",
       "getPoint(size?: string): number",
       "setStave(stave: Stave): this",
+      "getGlyphY(): number",
       "getInkBounds(): BoundingBox",
       "draw(): void"
     ]
@@ -306,6 +307,7 @@
       "CATEGORY(): string",
       "constructor(type: string, size: string = 'default', annotation?: string)",
       "setType(type: string, size: string, annotation?: string): this",
+      "setStave(stave: Stave): this",
       "getClef(): Clef",
       "preFormat(): this",
       "draw(): void",
