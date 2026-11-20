@@ -68,3 +68,26 @@ export function makePhraseStudy(VF, f, kind, width = 615) {
     .addLane(staff, [octave], { side: 'above' });
   return { system, layout, notes, lower, staff, bass, slur, dynamics, hairpin, pedal, octave };
 }
+
+/** Two three-note bars, with an elision in verse one and independent connectors in bar two. */
+export function elisionStudy(width) {
+  const measures = [0, 1].map((bar) => {
+    const ids = [0, 1, 2].map((beat) => 'word-' + bar + '-' + beat);
+    return {
+      voices: [
+        { notes: ['e/4', 'f/4', 'g/4'].map((key, i) => ({ id: ids[i], note: { keys: [key], duration: 'q' } })) },
+      ],
+      verses: [
+        [
+          { note: ids[0], text: 'la', elideWith: 'mi', hyphenAfter: bar === 1 },
+          { note: ids[1], text: 'fa' },
+          { note: ids[2], text: 'sol' },
+        ],
+        bar === 0
+          ? ids.map((note, i) => ({ note, text: ['do', 're', 'mi'][i] }))
+          : [{ note: ids[0], text: 'do', extendTo: ids[2] }],
+      ],
+    };
+  });
+  return { staves: [{ id: 'voice', time: '3/4', measures }], sheet: { width, x: 10, y: 8 }, continuous: {} };
+}

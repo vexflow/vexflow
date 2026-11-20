@@ -4,7 +4,7 @@ import test from 'node:test';
 import { createCanvas, registerFont } from 'canvas';
 import { readFile } from 'node:fs/promises';
 import puppeteer from 'puppeteer';
-import { makePhraseStudy } from '../engraving/phrase-studies.mjs';
+import { elisionStudy, makePhraseStudy } from '../engraving/phrase-studies.mjs';
 const VF = await import(new URL('../../build/esm/entry/vexflow-core.js', import.meta.url));
 
 for (const family of ['Bravura', 'Academico']) {
@@ -357,6 +357,88 @@ test('choir and piano phrases render through SVG and Canvas with Bravura and Pet
           assert.notDeepEqual(result.results[0], result.results[1]);
           assert.equal(result.results[0].connectors.length, kind === 'choir' ? 5 : 0);
         }
+  } finally {
+    await browser.close();
+  }
+});
+
+// The default text face supplies the syllables and the music face supplies the undertie.
+test('two elided syllables share one centered anchor and clear both lyric connectors after reflow', async () => {
+  const browser = await puppeteer.launch({ headless: true, args: process.env.CI ? ['--no-sandbox'] : [] });
+  try {
+    const page = await browser.newPage();
+    await page.setContent('<body></body>');
+    await page.addScriptTag({ path: new URL('../../build/cjs/vexflow-debug.js', import.meta.url).pathname });
+    await page.evaluate(async () => {
+      await VexFlow.loadFonts('Bravura', 'Academico');
+      await document.fonts.ready;
+    });
+    for (const backend of ['SVG', 'Canvas']) {
+      const frames = await page.evaluate(
+        ({ backend, spec }) => {
+          const VF = VexFlow;
+          const host = document.createElement(backend === 'SVG' ? 'div' : 'canvas');
+          host.id = 'lyrics';
+          document.body.replaceChildren(host);
+          const factory = new VF.Factory({ renderer: { elementId: host.id, width: 660, height: 530 } });
+          const music = factory.EasyScore().compose(spec);
+          const note = music.getNote('word-1-0');
+          const [group, plain] = note.getModifiers();
+          return [620, 220, 620].map((width) => {
+            music.sheet.setWidth(width);
+            factory.getContext().clear();
+            factory.draw({ retain: true });
+            const baseline = group.computeY().y;
+            const { x, textWidth } = group.computeX();
+            const geometry = group.getTextInk(x, baseline);
+            const [hyphen, extender] = music.systems[1].getPhraseLayout().getLyricConnectors();
+            // Check the actual SVG glyph extent or look for Canvas ink below the baseline between the two syllables.
+            let undertieInk;
+            if (backend === 'SVG') {
+              const node = document.getElementById('vf-' + group.getAttribute('id')).querySelector('text');
+              const extent = node.getExtentOfChar(2);
+              undertieInk = node.textContent === 'la' + VF.Glyphs.lyricsElision + 'mi' && extent.width > 0;
+            } else {
+              const ctx = host.getContext('2d');
+              ctx.font = VF.Font.toCSSString(group.fontInfo);
+              const midpoint = x + ctx.measureText('la').width + ctx.measureText(VF.Glyphs.lyricsElision).width / 2;
+              undertieInk = ctx
+                .getImageData(Math.floor(midpoint) - 1, Math.floor(baseline), 3, 4)
+                .data.some((v, i) => i % 4 === 3 && v > 0);
+            }
+            return {
+              rows: music.sheet.getRows().length,
+              x,
+              baseline,
+              textWidth,
+              undertieInk,
+              attached: group.checkAttachedNote() === note && plain.checkAttachedNote() === note,
+              sameCenter: Math.abs(x + textWidth / 2 - plain.computeX().x - plain.getWidth() / 2) < 1e-6,
+              plain: plain.text,
+              verseOrder: baseline < plain.computeY().y,
+              reserved: textWidth > VF.Element.measureWidth('lami', 'Annotation.lyric'),
+              hyphenClear: geometry.x + geometry.w < hyphen.x,
+              extenderEnd: extender.x + extender.w,
+              lastHead: music.getNote('word-1-2').getNoteHeadBeginX() + music.getNote('word-1-2').getGlyphWidth(),
+              diagnostics: music.systems[1].getPhraseLayout().diagnostics,
+            };
+          });
+        },
+        { backend, spec: elisionStudy(620) }
+      );
+      assert.deepEqual(
+        frames.map((f) => f.rows),
+        [1, 2, 1]
+      );
+      assert.deepEqual(frames[2], frames[0]);
+      for (const frame of frames) {
+        assert.ok(frame.attached && frame.sameCenter && frame.verseOrder);
+        assert.equal(frame.plain, 'do');
+        assert.ok(frame.undertieInk && frame.reserved && frame.hyphenClear, backend + JSON.stringify(frame));
+        assert.equal(frame.extenderEnd, frame.lastHead);
+        assert.deepEqual(frame.diagnostics, []);
+      }
+    }
   } finally {
     await browser.close();
   }
