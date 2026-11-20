@@ -1,10 +1,13 @@
 // Contracts for single-source continuous scores, hard breaks and retained row-dependent notation.
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { readFile } from 'node:fs/promises';
-import puppeteer from 'puppeteer';
+import test from 'node:test';
+
 import { createCanvas, registerFont } from 'canvas';
-import { makeContinuousStudy, tabEndingStudy } from '../engraving/continuous-studies.mjs';
+import puppeteer from 'puppeteer';
+
+import { beamedSplitChordStudy, makeContinuousStudy, tabEndingStudy } from '../engraving/continuous-studies.mjs';
+
 const VF = await import(new URL('../../build/esm/entry/vexflow-core.js', import.meta.url));
 for (const family of ['Bravura', 'Academico']) {
   const name = family.toLowerCase();
@@ -124,6 +127,101 @@ function spec(count, continuous, notes = (i) => [{ id: 'n' + i, note: { keys: ['
     continuous,
   };
 }
+/** Capture circles while the native Canvas context paints the wedges. */
+function paintedTips(ctx, draw) {
+  const circles = [];
+  const arc = ctx.arc;
+  ctx.arc = function (x, y, radius, ...angles) {
+    circles.push({ x, y, radius });
+    return arc.call(this, x, y, radius, ...angles);
+  };
+  try {
+    draw();
+    return circles;
+  } finally {
+    ctx.arc = arc;
+  }
+}
+
+test('native niente circles touch the wedge, have open centers and fit its measured stroke bounds', () => {
+  for (const space of [8, 12]) {
+    const { f, ctx } = factory();
+    const source = spec(2, {});
+    source.staves[0].options = { spacingBetweenLinesPx: space };
+    const c = f.EasyScore().compose(source);
+    c.sheet.setWidth(500).format();
+    const from = c.getNote('n0'),
+      to = c.getNote('n1');
+    for (const type of [VF.StaveHairpin.type.CRESC, VF.StaveHairpin.type.DECRESC]) {
+      const hairpin = f.StaveHairpin({ from, to, type, options: { height: 2 } }).setStyle({ lineWidth: 2 });
+      const render = () => paintedTips(f.getContext(), () => hairpin.drawWithStyle());
+      assert.deepEqual(render(), []);
+      const plain = hairpin.getBoundingBox();
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      hairpin.setRenderOptions({ ...hairpin.renderOptions, niente: true });
+      const circles = render();
+      assert.equal(circles.length, 1);
+      const [{ x, y, radius }] = circles;
+      assert.equal(radius, space * 0.35);
+      const grows = type === VF.StaveHairpin.type.CRESC;
+      const tip = (grows ? from : to).getModifierStartXY(VF.Modifier.Position.BELOW, 0);
+      assert.ok(Math.abs((grows ? x + radius : x - radius) - tip.x) < 1e-6);
+      const box = hairpin.getBoundingBox();
+      assert.ok(Math.abs(box.w - plain.w - 2 * radius) < 1e-6);
+      assert.ok(Math.abs(box.h - 2 * (radius + 1)) < 1e-6);
+      assert.equal(ctx.getImageData(Math.floor(x), Math.floor(y), 1, 1).data[3], 0);
+      assert.ok(ctx.getImageData(Math.floor(x), Math.floor(y - radius), 1, 1).data[3] > 0);
+      const shifted = paintedTips(f.getContext(), () =>
+        VF.StaveHairpin.FormatByTicksAndDraw(
+          f.getContext(),
+          { pixelsPerTick: 2 },
+          { firstNote: from, lastNote: to },
+          type,
+          VF.Modifier.Position.BELOW,
+          { ...hairpin.renderOptions, leftShiftTicks: 2, rightShiftTicks: -2 }
+        )
+      );
+      assert.deepEqual(shifted, [{ x: x + (grows ? 4 : -4), y, radius }]);
+    }
+  }
+});
+
+test('a wrapped niente circle belongs only to its closed musical endpoint and its hit region', () => {
+  for (const space of [8, 12]) {
+    const { f } = factory();
+    const spans = ['crescendo', 'diminuendo'].map((kind) => ({ id: kind, kind, from: 'n0', to: 'n4', niente: true }));
+    const source = spec(5, { spans: [...spans, { ...spans[0], id: 'plain', niente: false }] });
+    source.staves[0].options = { spacingBetweenLinesPx: space };
+    const c = f.EasyScore().compose(source);
+    for (const width of [600, 120, 600]) {
+      c.sheet.setWidth(width).format();
+      const layout = c.sheet.getContinuousLayout();
+      const marked = layout.fragments.filter((f) => f.nienteTip);
+      assert.deepEqual(
+        marked.map((f) => f.id),
+        ['crescendo', 'diminuendo']
+      );
+      assert.deepEqual(
+        marked.map((f) => f.part),
+        width === 120 ? ['first', 'last'] : ['single', 'single']
+      );
+      if (width === 120) assert.ok(layout.fragments.some((f) => f.part === 'middle'));
+      assert.deepEqual(
+        paintedTips(f.getContext(), () => layout.draw(f.getContext())),
+        marked.map((f) => f.nienteTip)
+      );
+      const nav = new VF.ScoreNavigation(c, source.staves);
+      for (const fragment of marked) {
+        const { x, y, radius } = fragment.nienteTip;
+        const side = fragment.kind === 'crescendo' ? -1 : 1;
+        const vertex = side < 0 ? fragment.x1 : fragment.x2;
+        assert.ok(Math.abs(x - side * radius - vertex) < 1e-6);
+        assert.equal(nav.hitTest(x + side * radius, y)?.id, fragment.id);
+      }
+    }
+  }
+});
+
 test('a lyric extender resolves a unique word on its source note during formatting', () => {
   const span = { id: 'hold', kind: 'lyric', from: 'n0', to: 'n1', syllableId: 'word' };
   const compose = (config) =>
@@ -371,6 +469,82 @@ test('the shared stem and arpeggio follow the two native heads at each width', (
   frame(160);
   assert.deepEqual(frame(375), wide);
 });
+
+/** Count rendered stems and heads, then check the joins independently against native geometry. */
+test('beamed split piano chords keep one stem and one beam attachment per attack at either staff distance', () => {
+  for (const direction of [VF.Stem.UP, VF.Stem.DOWN]) {
+    for (const beamStaff of ['upper', 'lower']) {
+      const { f, canvas, ctx } = factory();
+      const c = f.EasyScore().compose(beamedSplitChordStudy(VF, direction, 8, beamStaff));
+      const beam = c.getNote(beamStaff + '0').getBeam();
+      const phrase = c.systems[0].getPhraseLayout();
+      const stems = [];
+      const heads = [];
+      const render = f.getContext();
+      const openGroup = render.openGroup.bind(render);
+      render.openGroup = (name, ...args) => {
+        if (name === 'stem') stems.push(args[0]);
+        if (name === 'stavenote') heads.push(args[0]);
+        return openGroup(name, ...args);
+      };
+      const frame = (gap) => {
+        c.systems[0].setOptions({ factory: f, spaceBetweenStaves: gap });
+        stems.length = heads.length = 0;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        f.draw({ retain: true });
+        assert.deepEqual(phrase.diagnostics, []);
+        assert.equal(stems.length, 4);
+        assert.equal(heads.length, 8);
+        assert.deepEqual(c.sheet.getContinuousLayout().diagnostics, []);
+        assert.equal(beam.getNotes().length, 4);
+        for (let i = 0; i < 4; i++) {
+          const upper = c.getNote('upper' + i);
+          const lower = c.getNote('lower' + i);
+          const member = c.getNote(beamStaff + i);
+          const other = member === upper ? lower : upper;
+          assert.equal(beam.getNotes()[i], member);
+          assert.equal(other.getStemSegment(), undefined);
+          assert.equal(member.shouldDrawFlag() || other.shouldDrawFlag(), false);
+          assert.equal(upper.checkTickContext(), lower.checkTickContext());
+          assert.equal(upper.checkTickContext().getTickID(), (i * VF.VexFlow.RESOLUTION) / 8);
+          assert.equal(upper.getTicks().value(), VF.VexFlow.RESOLUTION / 8);
+          assert.equal(lower.getTicks().value(), VF.VexFlow.RESOLUTION / 8);
+          const { baseY, tipY, x } = member.getStemSegment();
+          assert.equal(x, other.getStemX());
+          const [near, far] = direction === VF.Stem.UP ? [upper, lower] : [lower, upper];
+          assert.equal(baseY, far.getYs()[0]);
+          assert.ok(direction * (near.getYs()[0] - tipY) > 0, 'the stem crosses both heads');
+          assert.ok(
+            beam.getStripBounds().some((b) => x >= b.x && x <= b.x + b.w && tipY >= b.y && tipY <= b.y + b.h),
+            'the visible tip meets the beam at its own x'
+          );
+        }
+        return { gap: c.staves[0][1].getY() - c.staves[0][0].getY(), pixels: canvas.toBuffer() };
+      };
+      const narrow = frame(8);
+      assert.ok(frame(18).gap > narrow.gap);
+      assert.deepEqual(frame(8), narrow);
+    }
+  }
+});
+
+test('a split eighth must have exactly one beam owner and a unique pair of notes', () => {
+  for (const beams of [false, true]) {
+    const source = beamedSplitChordStudy(VF, VF.Stem.UP, 8);
+    for (const staff of source.staves) staff.measures[0].voices[0].autoBeam = beams;
+    assert.throws(() => factory().f.EasyScore().compose(source).sheet.format(), /beam on exactly one/);
+  }
+  const f = factory().f;
+  const source = beamedSplitChordStudy(VF, VF.Stem.UP, 8);
+  source.staves[0].measures[0].voices[0].autoBeam = false;
+  const c = f.EasyScore().compose(source);
+  f.Beam({ notes: c.notes[0][0][0] });
+  c.sheet.format();
+  assert.equal(c.getNote('lower0').shouldDrawFlag(), false);
+  source.continuous.splitChords.push({ ...source.continuous.splitChords[0], id: 'again' });
+  assert.throws(() => factory().f.EasyScore().compose(source), /only one split chord/);
+});
+
 test('instrument changes survive hiding and reflow and the new full name reserves row-start width', () => {
   const s = spec(3, { boundaries: [{ measure: 2, breakBefore: 'force' }] });
   s.staves[0].name = 'Flute';

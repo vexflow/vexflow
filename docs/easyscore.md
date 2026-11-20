@@ -229,7 +229,7 @@ Attached modifiers draw through their notes. Ties draw through the Factory queue
 | Helper                  | Endpoint / timing contract                                                                                  |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `make.curve()`          | Native Curve options; one or two note endpoints.                                                            |
-| `make.hairpin()`        | Two note endpoints, crescendo/decrescendo type, native render offsets.                                      |
+| `make.hairpin()`        | Two note endpoints, wedge direction, native render offsets, optional circle (`options.niente`).              |
 | `make.line()`           | Two StaveNotes and nonempty, matched chord-index arrays.                                                    |
 | `make.textBracket()`    | Two endpoints, text/superscript, position, line, font.                                                      |
 | `make.vibratoBracket()` | One or two endpoints, code and line.                                                                        |
@@ -510,6 +510,11 @@ Typed note wrappers can include `stave: 'other-staff-id'` for cross-staff placem
 Supply the appropriate native note `clef` when its target differs from its voice's staff.
 Assignments survive Sheet reflow. Key-aware accidentals follow the target stave.
 
+To share a stem across two piano staves, add one entry per attack to `continuous.splitChords`,
+such as `{ id: 'attack1', upper: 'rh1', lower: 'lh1' }`. Give both notes the same onset, duration and stem direction.
+Half and quarter notes can share a stem. For beamed eighths, create a beam in either voice with `autoBeam` or
+attach a native beam before formatting. The other voice supplies the second head at each attack.
+
 `withDefaults()` scopes imperative defaults to a synchronous construction callback. It restores them on success or failure.
 
 ```js
@@ -582,6 +587,8 @@ result.sheet.setWidth(300).format();
 const layout = result.sheet.getContinuousLayout();
 console.log(layout.rows, layout.fragments, layout.diagnostics);
 ```
+
+For a hairpin that grows from silence, pass `{ id: 'swell', kind: 'crescendo', from: 'a', to: 'b', niente: true }` in `continuous.spans`. A crescendo carries the circle on its opening fragment. A diminuendo carries it on its final fragment.
 
 For tab, use `{ id: 'hold', kind: 'tie', from: 'a', to: 'b', string: 2 }` to sustain a fret on the second string of the same staff. Both chords must play that fret on that string, in any position order. You can also select a position with a zero-based `fromHead` or `toHead`. With no selector, the tie starts at the first position of the opening chord.
 

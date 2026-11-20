@@ -281,6 +281,7 @@
       "getVertical(): number",
       "setHorizontal(hj: ChordSymbolHorizontalJustify | string | number): this",
       "getHorizontal(): number",
+      "getHorizontalInk(): { left: number; right: number }",
       "draw(): void",
       "getBoundingBox(): BoundingBox"
     ]
@@ -1976,6 +1977,7 @@
     "StaveHairpinRenderOptions": {
       "extends": [],
       "fields": [
+        "niente?: boolean;",
         "rightShiftTicks?: number;",
         "leftShiftTicks?: number;",
         "leftShiftPx: number;",

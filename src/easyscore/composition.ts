@@ -1,6 +1,7 @@
 // Structured construction delegates timing and layout to native Voice, System, and Sheet objects.
 import { Accidental } from '../accidental';
 import { Annotation } from '../annotation';
+import { leadChordAnnotations } from '../chordspacing';
 import { ContinuousLayout, ContinuousOptions } from '../continuouslayout';
 import { Dot } from '../dot';
 import type { EasyScore, EasyScoreVoiceOptions } from '../easyscore';
@@ -337,6 +338,7 @@ function addLeadMarks(score: EasyScore, system: System, measure: EasyScoreMeasur
     const note = anchor(chord.note);
     if (!chord.text) invalid('A chord label needs text.');
     const mark = score.make.annotation({ text: chord.text, vJustify: 'top', font: Metrics.getFontInfo('ChordSymbol') });
+    leadChordAnnotations.add(mark);
     score.attach(note, mark);
     if (note instanceof StaveNote) {
       const stave = note.checkStave();

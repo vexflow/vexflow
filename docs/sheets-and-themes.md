@@ -54,6 +54,8 @@ Retaining is opt-in. Without it, `draw()` clears the factory's queues as before.
 
 `getSystems()` exposes the measures. Their existing getters expose staves and voices. `getRows()` returns row bounds, membership, and overflow in pixels. `getHeight()` gives the required height, including the top inset.
 
+Adjacent measures share a half staff space between chord labels on the same side of a staff. Sheet measures each formatted `ChordSymbol` and each literal EasyScore `measure.chords` label. It reserves space inside the bar or wraps the following measure. With `setReportWidth(false)`, a chord can extend over local notes while still clearing the next bar’s chord. Independent `Formatter.formatToStave()` calls only see one bar at a time.
+
 A measure wider than the available width occupies its own row. It keeps its minimum width and reports overflow. Use a wider viewport or horizontal scrolling for that case.
 
 Sheet does not add clefs or key signatures, split measures, paginate, or split spanning ties and beams at row breaks. The example repeats clefs explicitly. Keep connected marks within a measure, or manage their row breaks yourself. Use consistent stave spacing across measures. Note bounds and staff envelopes determine row heights; increase `rowGap` for extra lyrics or spanning annotations.
