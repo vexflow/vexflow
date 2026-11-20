@@ -1,7 +1,9 @@
 // Test musical identities, performance time and rendered interactions for the M6 instrument profiles.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+
 import puppeteer from 'puppeteer';
+
 import { makeInstrumentStudy } from '../engraving/instrument-studies.mjs';
 
 test('instrument studies and score construction', async (t) => {
@@ -22,6 +24,61 @@ test('instrument studies and score construction', async (t) => {
         });
         return makeStudy(VF, f, kind);
       };
+    });
+
+    await t.test('written harmonies transpose independently spelled roots and basses with the melody', async () => {
+      const result = await page.evaluate(() => {
+        const V = VexFlow;
+        const spelling = V.NotationSpelling;
+        const slash = Object.freeze({ root: 'G', quality: '7', bass: 'B' });
+        const raised = spelling.transposeChord(slash, 2, 1);
+        const altered = { root: 'Bb', quality: '7(b9,#11)', bass: 'Db' };
+        const flat = spelling.transposeChord({ root: 'C' }, 1, 1);
+        const sharp = spelling.transposeChord({ root: 'C' }, 1, 0);
+        document.getElementById('music').replaceChildren();
+        const factory = new V.Factory({ renderer: { elementId: 'music', width: 700, height: 190 } });
+        const melody = ['b/3', 'd/4', 'f/4', 'g/4'].map((key) => spelling.transpose(key, 2, 1));
+        const notes = melody.map((key, i) => ({ id: 'n' + i, note: { keys: [key], duration: 'q' } }));
+        const chords = [
+          { note: 'n0', harmony: raised },
+          { note: 'n1', harmony: spelling.transposeChord(altered, 2, 1) },
+          { note: 'n2', harmony: flat },
+          { note: 'n3', text: 'N.C.' },
+        ];
+        const score = factory.EasyScore().compose({
+          sheet: { width: 670 },
+          staves: [{ id: 'lead', measures: [{ voices: [{ notes }], chords }] }],
+        });
+        factory.draw();
+        const rejects = (harmony, semitones, steps) => {
+          try {
+            spelling.transposeChord(harmony, semitones, steps);
+            return false;
+          } catch (error) {
+            return error.code === 'BadArguments';
+          }
+        };
+        return {
+          raised,
+          roundTrip: spelling.transposeChord(raised, -2, -1),
+          original: slash,
+          pitches: notes.map(({ id }) => score.getNote(id).getKeys()[0]),
+          labels: [...document.querySelectorAll('#music .vf-annotation text')].map((e) => e.textContent),
+          enharmonics: [flat, sharp].map((chord) => spelling.chordText(chord)),
+          invalid: [
+            rejects({ root: 'H' }, 2, 1),
+            rejects({ root: 'C', bass: 'B/3' }, 2, 1),
+            rejects({ root: 'C' }, 9, 0),
+          ],
+        };
+      });
+      assert.deepEqual(result.raised, { root: 'A', quality: '7', bass: 'C#' });
+      assert.deepEqual(result.roundTrip, { root: 'G', quality: '7', bass: 'B' });
+      assert.deepEqual(result.roundTrip, result.original);
+      assert.deepEqual(result.pitches, ['c#/4', 'e/4', 'g/4', 'a/4']);
+      assert.deepEqual(result.labels, ['A7/C♯', 'C7(b9,#11)/E♭', 'D♭', 'N.C.']);
+      assert.deepEqual(result.enharmonics, ['D♭', 'C♯']);
+      assert.ok(result.invalid.every(Boolean));
     });
 
     await t.test('fret position labels follow score and diagram fonts on SVG and Canvas', async () => {

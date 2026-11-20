@@ -1,6 +1,20 @@
-// Opt-in written pitch and rhythm spelling. Neither helper edits an existing voice.
+// Written pitch, chord and rhythm spelling for constructing a score or transposed part.
 import { Tables } from './tables';
 import { RuntimeError } from './util';
+
+/** A chord's transposable pitches and its literal quality, extensions and alterations. */
+export interface ChordHarmony {
+  root: string;
+  quality?: string;
+  bass?: string;
+}
+
+/** Read an octave-free pitch name. Keep the letter so enharmonic roots transpose differently. */
+function chordPitch(name: string): string {
+  if (typeof name !== 'string' || !/^[A-Ga-g](?:#{1,2}|b{1,2}|♯{1,2}|♭{1,2})?$/.test(name))
+    throw new RuntimeError('BadArguments', 'Expected a chord pitch such as G, Bb or C#.');
+  return name[0].toUpperCase() + name.slice(1).replace(/♯/g, '#').replace(/♭/g, 'b');
+}
 
 /** One printable segment. tieNext joins a pitched continuation across a requested boundary. */
 export interface RhythmSegment {
@@ -30,6 +44,27 @@ export class NotationSpelling {
     if (!(Math.abs(delta) <= 2))
       throw new RuntimeError('BadArguments', 'Spelling requires more than a double accidental.');
     return letters[letter] + signs[delta + 2] + '/' + targetOctave;
+  }
+
+  /** Return a new harmony. Only its root and optional slash bass participate in pitch spelling. */
+  static transposeChord(harmony: ChordHarmony, semitones: number, steps: number): ChordHarmony {
+    const pitch = (name: string) => {
+      // A reference octave lets the pitch helper account for crossings such as B to C-sharp.
+      const written = this.transpose(chordPitch(name) + '/4', semitones, steps).split('/')[0];
+      return written[0].toUpperCase() + written.slice(1);
+    };
+    const result = { ...harmony, root: pitch(harmony.root) };
+    if (harmony.bass !== undefined) result.bass = pitch(harmony.bass);
+    return result;
+  }
+
+  /** Print the spelled pitches with musical accidentals and copy the chord suffix verbatim. */
+  static chordText(harmony: ChordHarmony): string {
+    const print = (name: string) => chordPitch(name).replace(/#/g, '♯').replace(/b/g, '♭');
+    if (harmony.quality !== undefined && typeof harmony.quality !== 'string')
+      throw new RuntimeError('BadArguments', 'Expected chord quality to be text.');
+    const bass = harmony.bass === undefined ? '' : '/' + print(harmony.bass);
+    return print(harmony.root) + (harmony.quality ?? '') + bass;
   }
 
   /** Preserve the mode while spelling the transposed tonic. Reject unavailable standard signatures. */

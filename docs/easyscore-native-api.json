@@ -923,6 +923,14 @@
     ]
   },
   "notationspelling": {
+    "ChordHarmony": {
+      "extends": [],
+      "fields": [
+        "root: string;",
+        "quality?: string;",
+        "bass?: string;"
+      ]
+    },
     "RhythmSegment": {
       "extends": [],
       "fields": [
@@ -934,6 +942,8 @@
     },
     "NotationSpelling": [
       "transpose(key: string, semitones: number, steps: number): string",
+      "transposeChord(harmony: ChordHarmony, semitones: number, steps: number): ChordHarmony",
+      "chordText(harmony: ChordHarmony): string",
       "transposeKey(key: string, semitones: number, steps: number): string",
       "rhythm(start: number, length: number, cuts: readonly number[] = [], rest = false): RhythmSegment[]"
     ],
@@ -3314,7 +3324,7 @@
         "voices: readonly EasyScoreVoiceSpec[];",
         "span?: VoiceTime | string;",
         "endBarline?: BarlineType;",
-        "chords?: readonly LeadMark[];",
+        "chords?: readonly (LeadMark | { note: string; harmony: ChordHarmony })[];",
         "verses?: readonly (readonly LyricMark[])[];"
       ]
     },

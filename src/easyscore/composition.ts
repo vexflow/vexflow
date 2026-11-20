@@ -11,6 +11,7 @@ import { Fraction } from '../fraction';
 import { GraceNoteStruct } from '../gracenote';
 import { Metrics } from '../metrics';
 import { Modifier } from '../modifier';
+import { ChordHarmony, NotationSpelling } from '../notationspelling';
 import { Note } from '../note';
 import { Sheet, SheetOptions } from '../sheet';
 import { Stave, StaveOptions } from '../stave';
@@ -107,8 +108,8 @@ export interface EasyScoreMeasureSpec extends EasyScoreStaffState {
   span?: VoiceTime | string;
   /** The barline drawn at this measure's right edge. */
   endBarline?: BarlineType;
-  /** Literal chord names sharing a lane above their notes. */
-  chords?: readonly LeadMark[];
+  /** Literal labels or spelled harmonies sharing a lane above their notes. */
+  chords?: readonly (LeadMark | { note: string; harmony: ChordHarmony })[];
   /** Each ordered list of syllables forms a separate lyric lane. */
   verses?: readonly (readonly LyricMark[])[];
 }
@@ -336,8 +337,10 @@ function addLeadMarks(score: EasyScore, system: System, measure: EasyScoreMeasur
   const chordLanes = new Map<Stave, Annotation[]>();
   for (const chord of measure.chords ?? []) {
     const note = anchor(chord.note);
-    if (!chord.text) invalid('A chord label needs text.');
-    const mark = score.make.annotation({ text: chord.text, vJustify: 'top', font: Metrics.getFontInfo('ChordSymbol') });
+    if ('harmony' in chord && 'text' in chord) invalid('Choose either chord harmony or literal text.');
+    const text = 'harmony' in chord ? NotationSpelling.chordText(chord.harmony) : chord.text;
+    if (!text) invalid('A chord label needs text.');
+    const mark = score.make.annotation({ text, vJustify: 'top', font: Metrics.getFontInfo('ChordSymbol') });
     leadChordAnnotations.add(mark);
     score.attach(note, mark);
     if (note instanceof StaveNote) {
