@@ -284,3 +284,37 @@ export function makeInstrumentStudy(VF, f, kind) {
   }
   return study;
 }
+
+/** A single measured tremolo. Redraw the same voice after moving its lower piano staff. */
+export function makeTremoloStudy(VF, ctx, duration, strokes, crossStaff = false) {
+  const beats = { w: 4, h: 2, q: 1 }[duration];
+  const upper = new VF.Stave(12, 2, 235)
+    .addClef('treble')
+    .addTimeSignature(beats + '/4')
+    .setContext(ctx);
+  const lower = crossStaff ? new VF.Stave(12, 100, 235).addClef('bass').setContext(ctx) : upper;
+  const descriptors = [
+    { keys: ['c/5'], clef: 'treble', duration, stemDirection: -1 },
+    {
+      keys: [crossStaff ? 'c/3' : 'g/4'],
+      clef: crossStaff ? 'bass' : 'treble',
+      duration,
+      stemDirection: crossStaff ? 1 : -1,
+    },
+  ];
+  const notes = descriptors.map((spec) => new VF.StaveNote(VF.AlternatingTremolo.endpoint(spec, strokes)));
+  const voice = new VF.Voice({ numBeats: beats, beatValue: 4 }).addTickables(notes).setStave(upper);
+  voice.preserveStaveAssignments = true;
+  const tremolo = new VF.AlternatingTremolo(notes[0], notes[1], strokes).setContext(ctx);
+  const draw = (gap = 82) => {
+    if (crossStaff) lower.setY(upper.getY() + gap).setNoteStartX(upper.getNoteStartX());
+    notes[0].setStave(upper);
+    notes[1].setStave(lower);
+    new VF.Formatter().joinVoices([voice]).formatToStave([voice], upper);
+    upper.draw();
+    if (crossStaff) lower.draw();
+    voice.draw(ctx);
+    tremolo.draw();
+  };
+  return { voice, notes, draw };
+}

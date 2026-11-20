@@ -4,7 +4,7 @@ import { test } from 'node:test';
 
 import puppeteer from 'puppeteer';
 
-import { makeInstrumentStudy } from '../engraving/instrument-studies.mjs';
+import { makeInstrumentStudy, makeTremoloStudy } from '../engraving/instrument-studies.mjs';
 
 test('instrument studies and score construction', async (t) => {
   const browser = await puppeteer.launch({ headless: true, args: process.env.CI ? ['--no-sandbox'] : [] });
@@ -13,6 +13,7 @@ test('instrument studies and score construction', async (t) => {
     await page.setContent('<main id="music"></main>');
     await page.addScriptTag({ path: 'build/cjs/vexflow-debug.js' });
     await page.addScriptTag({ content: 'window.makeStudy=' + makeInstrumentStudy });
+    await page.addScriptTag({ content: 'window.makeTremoloStudy=' + makeTremoloStudy });
     await page.evaluate(async () => {
       const VF = window.VexFlow;
       await VF.loadFonts('Bravura', 'Academico');
@@ -204,6 +205,111 @@ test('instrument studies and score construction', async (t) => {
         assert.equal(data.strokes, 3);
         assert.equal(data.rejected, true);
         assert.deepEqual(data.identities, ['harmonic', 'down-bow', 'pedal', 'finger-2', 'breath', 'sons-etouffes']);
+      }
+    );
+
+    await t.test(
+      'whole-note, four-stroke and cross-staff tremolos retain written time and join their endpoints',
+      async () => {
+        const result = await page.evaluate(() => {
+          const VF = VexFlow;
+          const render = (duration, strokes, crossStaff) => {
+            const host = document.createElement('div');
+            document.body.append(host);
+            const ctx = new VF.SVGContext(host);
+            const { voice, notes, draw } = makeTremoloStudy(VF, ctx, duration, strokes, crossStaff);
+            return (gap) => {
+              ctx.clear();
+              draw(gap);
+              const bars = Array.from(host.querySelectorAll('.vf-alternating-tremolo path'), (path) => {
+                const values = path
+                  .getAttribute('d')
+                  .match(/-?\d+(?:\.\d+)?/g)
+                  .map(Number);
+                return {
+                  x1: values[0],
+                  y1: values[1],
+                  x2: values[2],
+                  y2: values[3],
+                  bottom2: values[5],
+                  bottom1: values[7],
+                };
+              });
+              return {
+                bars,
+                extensions: Array.from(host.querySelectorAll('.vf-alternating-tremolo rect'), (rect) => {
+                  const box = rect.getBBox();
+                  return { x: box.x + box.width / 2, y: box.y, bottom: box.y + box.height };
+                }),
+                stems: notes.map((n) => n.getStemSegment() ?? null),
+                heads: notes.map((n) => n.getHeadInk()[0]),
+                ticks: notes.map((n) => n.getTicks().value() / VF.RESOLUTION),
+                complete: voice.isComplete(),
+                stemCount: host.querySelectorAll('.vf-stem').length,
+              };
+            };
+          };
+          const cross = render('h', 3, true);
+          const testHost = document.createElement('div');
+          const testContext = new VF.SVGContext(testHost);
+          const pair = makeTremoloStudy(VF, testContext, 'h', 3, true);
+          pair.draw();
+          const [first, last] = pair.notes;
+          last.checkStave().setX(400);
+          let disjointError;
+          try {
+            new VF.AlternatingTremolo(first, last, 3).setContext(testContext).draw();
+          } catch (error) {
+            disjointError = error.code;
+          }
+          return {
+            disjointError,
+            whole: render('w', 3, false)(),
+            four: render('h', 4, false)(),
+            three: render('h', 3, false)(),
+            quarter: render('q', 3, false)(),
+            gaps: [cross(82), cross(132), cross(82)],
+          };
+        });
+        const { whole, four, three, quarter, gaps } = result;
+        assert.equal(result.disjointError, 'BadArguments');
+        assert.equal(whole.stemCount, 0);
+        assert.equal(whole.bars.length, 3);
+        assert.deepEqual(whole.ticks, [0.5, 0.5]);
+        assert.ok(
+          whole.bars.every(
+            (b) => b.x1 > whole.heads[0].x + whole.heads[0].w && b.x2 < whole.heads[1].x && b.y1 === b.y2
+          )
+        );
+        assert.deepEqual(four.ticks, [0.25, 0.25]);
+        assert.deepEqual(quarter.ticks, [0.125, 0.125]);
+        assert.equal(quarter.bars.length, 3);
+        assert.equal(four.bars.length, 4);
+        assert.deepEqual(four.bars.slice(0, 3), three.bars);
+        const step = four.bars[1].y1 - four.bars[0].y1;
+        assert.ok(Math.abs(step) > Math.abs(four.bars[0].bottom1 - four.bars[0].y1));
+        assert.ok(Math.abs(four.bars[3].y1 - four.bars[2].y1 - step) < 0.01);
+        for (const frame of gaps) {
+          const [left, right] = frame.stems;
+          assert.equal(frame.bars.length, 3);
+          assert.deepEqual(frame.ticks, [0.25, 0.25]);
+          const leftExtension = frame.extensions.find((r) => Math.abs(r.x - left.x) < 0.01);
+          const rightExtension = frame.extensions.find((r) => Math.abs(r.x - right.x) < 0.01);
+          assert.ok(leftExtension && rightExtension);
+          assert.ok(Math.abs(leftExtension.y - left.tipY) < 0.01);
+          assert.ok(Math.abs(rightExtension.bottom - right.tipY) < 0.01);
+          for (const bar of frame.bars) {
+            assert.ok(Math.abs((bar.y2 - bar.y1) / (bar.x2 - bar.x1)) <= 0.251);
+            assert.ok(Math.abs(bar.x1 - left.x) < 0.01 && Math.abs(bar.x2 - right.x) < 0.01);
+            assert.ok(bar.y1 >= left.baseY && bar.bottom1 <= leftExtension.bottom + 0.01);
+            assert.ok(bar.y2 >= rightExtension.y - 0.01 && bar.bottom2 <= right.baseY);
+          }
+          assert.ok(Math.abs(frame.bars[2].bottom1 - leftExtension.bottom) < 0.01);
+          assert.ok(Math.abs(frame.bars[0].y2 - rightExtension.y) < 0.01);
+        }
+        assert.equal(gaps[1].stems[1].tipY - gaps[0].stems[1].tipY, 50);
+        assert.deepEqual(gaps[2], gaps[0]);
+        assert.ok([whole, three, four, quarter, ...gaps].every((frame) => frame.complete));
       }
     );
 
