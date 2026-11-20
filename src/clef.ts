@@ -158,13 +158,16 @@ export class Clef extends StaveModifier {
       this.text = this.code = Glyphs.fourStringTabClef;
       this.line = 1.5;
       // Music fonts have different TAB outlines. Measure the selected face at the
-      // normal point size, leaving clearance for each of the three string spaces.
+      // normal point size before fitting it between the outer strings.
       const reference = Clef.getPoint('default');
       this.fontInfo.size = reference;
       const { actualBoundingBoxAscent, actualBoundingBoxDescent } = this.measureText();
       const inkHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
       if (inkHeight > 0) {
-        const height = Math.max(1, stave.space(3) - 3 * (stave.getStyle().lineWidth ?? 1));
+        const lineWidth = stave.getStyle().lineWidth ?? 1;
+        // Leave one stroke width plus an eighth of a space beyond each inner stroke edge.
+        const clearance = lineWidth + stave.space(1 / 8);
+        const height = Math.max(1, stave.space(3) - lineWidth - 2 * clearance);
         this.setFontSize((Clef.getPoint(this.size) * height) / inkHeight);
       }
     } else if (this.code === Glyphs.fourStringTabClef) {

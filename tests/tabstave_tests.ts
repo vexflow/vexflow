@@ -56,12 +56,14 @@ function fourStringClefs(options: TestOptions, contextBuilder: ContextBuilder): 
     for (const clef of [start, end]) {
       options.assert.equal(clef.code, Glyphs.fourStringTabClef, 'Select four-string TAB before drawing');
       const ink = clef.getInkBounds();
-      options.assert.ok(ink.h > 0 && ink.y >= stave.getYForLine(0) - 1, 'Ink clears the top string');
-      options.assert.ok(ink.y + ink.h <= stave.getYForLine(3) + 1, 'Ink clears the bottom string');
+      options.assert.ok(ink.h > 0, 'TAB glyph has visible ink');
       const topString = stave.getYForLine(0) + (lineWidth === 1 ? 0.5 : 0);
       const bottomString = topString + 3 * spacing;
-      const topGap = ink.y - topString;
-      const bottomGap = bottomString - (ink.y + ink.h);
+      const topGap = ink.y - (topString + lineWidth / 2);
+      const bottomGap = bottomString - lineWidth / 2 - (ink.y + ink.h);
+      // Allow for fractional font sizes and pixel rounding in the renderer.
+      const minimumGap = lineWidth + spacing / 8 - 0.5;
+      options.assert.ok(topGap >= minimumGap && bottomGap >= minimumGap, 'TAB clears both inner stroke edges');
       options.assert.ok(Math.abs(topGap - bottomGap) < 0.01, 'Equal clearance from the drawn outer strings');
     }
     options.assert.ok(end.getInkBounds().h < full.h, 'Courtesy clef stays smaller');
