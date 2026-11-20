@@ -3,10 +3,13 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
+
 import { createCanvas, registerFont } from 'canvas';
 import puppeteer from 'puppeteer';
-import { compositionInput, excerpt, loadScore, saveScore } from '../engraving/score-persistence.mjs';
+
 import { passageView } from '../engraving/score-layout.mjs';
+import { compositionInput, excerpt, loadScore, saveScore } from '../engraving/score-persistence.mjs';
+import { featheredBeamStudy } from '../engraving/specialist-studies.mjs';
 
 const VF = await import(new URL('../../build/esm/entry/vexflow-core.js', import.meta.url));
 const passage = JSON.parse(readFileSync(new URL('../engraving/m1-passage.json', import.meta.url)));
@@ -548,4 +551,131 @@ test('bracket and label clear upper and lower ornament signs before drawing and 
       assert.ok(gap >= 2, 'Bracket clears nearest auxiliary accidental by at least two pixels');
     }
   }
+});
+
+test('feathered beam ink fits its bounds and both players retain their beat-two entry through reflow', async () => {
+  const browser = await puppeteer.launch({ headless: true, args: process.env.CI ? ['--no-sandbox'] : [] });
+  try {
+    const page = await browser.newPage();
+    await page.setContent('<main id="music"></main>');
+    await page.addScriptTag({ path: 'build/cjs/vexflow-debug.js' });
+    await page.addScriptTag({ content: 'window.featheredBeamStudy=' + featheredBeamStudy });
+    const results = await page.evaluate(async () => {
+      const VF = VexFlow;
+      await VF.loadFonts('Bravura', 'Academico');
+      await document.fonts.ready;
+      function frames(feathered, direction) {
+        const host = document.querySelector('main');
+        host.replaceChildren();
+        const f = new VF.Factory({ renderer: { elementId: 'music', width: 680, height: 520 } });
+        const c = featheredBeamStudy(VF, f, 620, feathered, direction);
+        return [620, 190, 620].map((width) => {
+          f.getContext().clear();
+          c.sheet.setWidth(width);
+          f.draw({ retain: true });
+          const bars = [0, 1].map((bar) => {
+            const notes = Array.from({ length: 5 }, (_, i) => c.getNote('lead-' + bar + '-' + i));
+            const beam = notes[0].getBeam();
+            const group = document.getElementById('vf-' + beam.getAttribute('id'));
+            const strips = Array.from(group.children).filter((el) => el.tagName === 'path');
+            // Opposite corners lie half a perimeter apart on each parallelogram.
+            const top = (path) => [0, 1].map((t) => path.getPointAtLength(t === 0 ? 0 : path.getTotalLength() / 2));
+            const box = VF.measureEngraving(beam).ink;
+            const contains = strips.every((path) => {
+              const b = path.getBBox();
+              return (
+                b.x >= box.x - 0.02 &&
+                b.y >= box.y - 0.02 &&
+                b.x + b.width <= box.x + box.w + 0.02 &&
+                b.y + b.height <= box.y + box.h + 0.02
+              );
+            });
+            const edges = strips.map((p) => top(p).map((pt) => pt.y));
+            const spread = edges[0].map((v, i) => Math.abs(v - edges[1][i]));
+            const primary = beam.getBeamYToDraw();
+            const attached = notes
+              .slice(0, 4)
+              .every(
+                (n) =>
+                  Math.abs(
+                    n.getStemExtents().topY - beam.getSlopeY(n.getStemX(), notes[0].getStemX(), primary, beam.slope)
+                  ) < 0.02
+              );
+            return {
+              contains,
+              spread,
+              attached,
+              ticks: notes.map((n) => n.getTicks().value() / VF.RESOLUTION),
+              entry: notes[4].getAbsoluteX(),
+              bass: c.getNote('entry-' + bar).getAbsoluteX(),
+            };
+          });
+          return { bars, rows: c.sheet.getRows().map((r) => r.systems.length) };
+        });
+      }
+      return [-1, 1].map((direction) => ({ fan: frames(true, direction), plain: frames(false, direction) }));
+    });
+    for (const { fan, plain } of results) {
+      assert.deepEqual(fan[0], fan[2]);
+      assert.deepEqual(fan[0].rows, [2]);
+      assert.deepEqual(fan[1].rows, [1, 1]);
+      for (const [frameIndex, frame] of fan.entries()) {
+        for (const [bar, b] of frame.bars.entries()) {
+          const control = plain[frameIndex].bars[bar];
+          assert.ok(b.contains && b.attached);
+          assert.deepEqual(b.ticks, [1 / 16, 1 / 16, 1 / 16, 1 / 16, 1 / 4]);
+          assert.equal(b.entry, b.bass);
+          assert.equal(b.entry, control.entry);
+          assert.ok(b.spread[bar] < 0.03 && b.spread[1 - bar] > 5);
+          assert.ok(Math.abs(control.spread[0] - control.spread[1]) < 0.03);
+        }
+      }
+    }
+  } finally {
+    await browser.close();
+  }
+});
+
+test('the two sides of a broken feathered beam share the same secondary spacing', () => {
+  const { f } = factory();
+  const notes = (bar) =>
+    Array.from({ length: 4 }, (_, i) => ({
+      id: 's' + bar + i,
+      note: { keys: ['c/5'], duration: '16', stemDirection: -1 },
+    }));
+  const c = f.EasyScore().compose({
+    staves: [{ id: 'solo', time: '1/4', measures: [0, 1].map((bar) => ({ voices: [{ notes: notes(bar) }] })) }],
+    continuous: {
+      spans: [{ id: 'fan', kind: 'beam', from: 's00', to: 's13' }],
+      boundaries: [{ measure: 2, breakBefore: 'force' }],
+    },
+  });
+  const beam = c.getNote('s00').getBeam();
+  // Record the beam renderer's filled strips. Stems and staff lines are stroked.
+  const ctx = f.getContext(),
+    paths = [];
+  ctx.beginPath = () => {
+    paths.push([]);
+    return ctx;
+  };
+  ctx.moveTo = ctx.lineTo = (x, y) => {
+    paths.at(-1).push({ x, y });
+    return ctx;
+  };
+  function spreads(direction) {
+    beam.renderOptions.feathered = direction;
+    c.sheet.format();
+    paths.length = 0;
+    beam.setContext(ctx).draw();
+    const beams = paths.filter((p) => p.length === 4);
+    assert.equal(beams.length, 4);
+    return [0, 2].flatMap((i) => [0, 3].map((j) => Math.abs(beams[i][j].y - beams[i + 1][j].y)));
+  }
+  for (const direction of ['left', 'right']) {
+    const [first, outgoing, incoming, last] = spreads(direction);
+    assert.ok(Math.abs(incoming - outgoing) < 0.001);
+    assert.ok(outgoing > Math.min(first, last) && outgoing < Math.max(first, last));
+    assert.equal(first > last, direction === 'left');
+  }
+  assert.deepEqual(new Set(spreads(undefined)), new Set([7.5]));
 });

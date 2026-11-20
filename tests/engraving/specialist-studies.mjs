@@ -424,3 +424,41 @@ export function registerSpecialistStudies() {
     });
   }
 }
+
+/** Two four-sixteenth groups open in opposite directions against a second player's beat-two entry. */
+export function featheredBeamStudy(VF, factory, width, feathered = true, stemDirection = -1) {
+  const measures = [0, 1].map((bar) => ({
+    voices: [
+      {
+        autoBeam: {
+          groups: [new VF.Fraction(1, 4)],
+          stemDirection,
+          ...(feathered && { feathered: bar ? 'left' : 'right' }),
+        },
+        notes: ['16', '16', '16', '16', 'q'].map((duration, i) => ({
+          id: 'lead-' + bar + '-' + i,
+          note: { keys: [i === 4 ? 'd/5' : 'c/5'], duration, stemDirection },
+        })),
+      },
+    ],
+  }));
+  const bass = [0, 1].map((bar) => ({
+    voices: [
+      {
+        notes: [
+          { note: { keys: ['d/3'], duration: 'qr' } },
+          { id: 'entry-' + bar, note: { keys: ['g/3'], duration: 'q' } },
+        ],
+      },
+    ],
+  }));
+  return factory.EasyScore().compose({
+    sheet: { width, x: 16, y: 12, measurePadding: 12, rowGap: 15 },
+    system: { spaceBetweenStaves: 5 },
+    staves: [
+      { id: 'lead', time: '2/4', measures },
+      { id: 'bass', clef: 'bass', time: '2/4', measures: bass },
+    ],
+    continuous: { groups: [{ first: 'lead', last: 'bass', type: 'bracket', barlines: true }] },
+  });
+}

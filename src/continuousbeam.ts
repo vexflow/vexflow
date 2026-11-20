@@ -90,9 +90,11 @@ export class ContinuousBeam extends Beam {
     if (!piece) {
       const before = this.members[start - 1]?.note,
         after = this.members[end]?.note;
+      // Both ends of a system cut share one position in the logical fan, halfway between the two attacks.
+      const progressAtCut = (index: number) => (index - 0.5) / (this.members.length - 1);
       const edges: BeamContinuation = {
-        ...(before && { left: { levels: before.getBeamCount(), x: 0 } }),
-        ...(after && { right: { levels: after.getBeamCount(), x: 0 } }),
+        ...(before && { left: { levels: before.getBeamCount(), x: 0, progress: progressAtCut(start) } }),
+        ...(after && { right: { levels: after.getBeamCount(), x: 0, progress: progressAtCut(end) } }),
       };
       const notes = members.map((m) => m.note);
       piece = { beam: new Beam(notes, false, edges), edges };
@@ -102,7 +104,7 @@ export class ContinuousBeam extends Beam {
     }
     if (piece.edges.left) piece.edges.left.x = left.getStemX() - left.checkStave().space(1.25);
     if (piece.edges.right) piece.edges.right.x = right.checkStave().getNoteEndX() - 2;
-    Object.assign(piece.beam.renderOptions, this.renderOptions);
+    Object.assign(piece.beam.renderOptions, { feathered: undefined }, this.renderOptions);
     piece.beam.postFormat();
     return piece;
   }

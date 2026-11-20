@@ -8,7 +8,7 @@ import { Accidental } from './accidental';
 import { Annotation, AnnotationHorizontalJustify, AnnotationVerticalJustify } from './annotation';
 import { Articulation } from './articulation';
 import { BarNote } from './barnote';
-import { Beam, PartialBeamDirection } from './beam';
+import { Beam, FeatheredBeamDirection, PartialBeamDirection } from './beam';
 import { Bend } from './bend';
 import { ChordSymbol } from './chordsymbol';
 import { Clef } from './clef';
@@ -694,6 +694,7 @@ export class Factory {
     notes: StemmableNote[];
     options?: {
       autoStem?: boolean;
+      feathered?: FeatheredBeamDirection;
       secondaryBeamBreaks?: number[];
       partialBeamDirections?: {
         [noteIndex: number]: PartialBeamDirection;
@@ -701,6 +702,7 @@ export class Factory {
     };
   }): Beam {
     const beam = new Beam(params.notes, params.options?.autoStem).setContext(this.context);
+    if (params.options?.feathered) beam.renderOptions.feathered = params.options.feathered;
     beam.breakSecondaryAt(params.options?.secondaryBeamBreaks ?? []);
     if (params.options?.partialBeamDirections) {
       Object.entries(params.options?.partialBeamDirections).forEach(([noteIndex, direction]) => {

@@ -92,23 +92,24 @@
     "BEAM_RIGHT": "inferred",
     "BEAM_BOTH": "inferred",
     "PartialBeamDirection": "export type PartialBeamDirection = typeof BEAM_LEFT | typeof BEAM_RIGHT | typeof BEAM_BOTH;",
+    "FeatheredBeamDirection": "export type FeatheredBeamDirection = 'left' | 'right';",
     "BeamContinuation": {
       "extends": [],
       "fields": [
-        "left?: { x: number; levels: number };",
-        "right?: { x: number; levels: number };"
+        "left?: { x: number; levels: number; progress?: number };",
+        "right?: { x: number; levels: number; progress?: number };"
       ]
     },
     "Beam": [
       "CATEGORY(): string",
-      "renderOptions: { flatBeamOffset?: number; flatBeams: boolean; secondaryBreakTicks?: number; showStemlets: boolean; beamWidth: number; maxSlope: number; minSlope: number; /** Keep automatic slope in the endpoint contour and align level in-staff beams to a half-space. */ contourSlope?: boolean; slopeIterations: number; slopeCost: number; stemletExtension: number; partialBeamLength: number; minFlatBeamOffset: number; }",
+      "renderOptions: { /** Fan the secondary beams toward this end. The primary beam and written timing stay fixed. */ feathered?: FeatheredBeamDirection; flatBeamOffset?: number; flatBeams: boolean; secondaryBreakTicks?: number; showStemlets: boolean; beamWidth: number; maxSlope: number; minSlope: number; /** Keep automatic slope in the endpoint contour and align level in-staff beams to a half-space. */ contourSlope?: boolean; slopeIterations: number; slopeCost: number; stemletExtension: number; partialBeamLength: number; minFlatBeamOffset: number; }",
       "notes: StemmableNote[]",
       "postFormatted: boolean",
       "slope: number",
       "getStemDirection(): number",
       "getDefaultBeamGroups(timeSig: string): Fraction[]",
       "applyAndGetBeams(voice: Voice, stemDirection?: number, groups?: Fraction[]): Beam[]",
-      "generateBeams(notes: StemmableNote[], config: { flatBeamOffset?: number; flatBeams?: boolean; secondaryBreaks?: string; showStemlets?: boolean; maintainStemDirections?: boolean; /** Optional facade policy. Omitted preserves the native generator's historical behavior. */ stemPolicy?: 'auto' | 'explicit' | 'preserve'; beamMiddleOnly?: boolean; beamRests?: boolean; groups?: Fraction[]; stemDirection?: number; } = {}): Beam[]",
+      "generateBeams(notes: StemmableNote[], config: { feathered?: FeatheredBeamDirection; flatBeamOffset?: number; flatBeams?: boolean; secondaryBreaks?: string; showStemlets?: boolean; maintainStemDirections?: boolean; /** Optional facade policy. Omitted preserves the native generator's historical behavior. */ stemPolicy?: 'auto' | 'explicit' | 'preserve'; beamMiddleOnly?: boolean; beamRests?: boolean; groups?: Fraction[]; stemDirection?: number; } = {}): Beam[]",
       "constructor(notes: StemmableNote[], autoStem: boolean = false, private readonly continuation?: BeamContinuation)",
       "getNotes(): StemmableNote[]",
       "getBeamCount(): number",
@@ -606,7 +607,7 @@
       "setContext(context: RenderContext): this",
       "parseNotation(line: string, options: BuilderOptions = {}): EasyScoreParseResult",
       "parse(line: string, options: BuilderOptions = {}): Result",
-      "beam(notes: StemmableNote[], options?: { autoStem?: boolean; secondaryBeamBreaks?: number[]; partialBeamDirections?: { [noteIndex: number]: PartialBeamDirection; }; }): StemmableNote[]",
+      "beam(notes: StemmableNote[], options?: Parameters<Factory['Beam']>[0]['options']): StemmableNote[]",
       "autoBeam(notes: StemmableNote[], options: EasyScoreAutoBeamOptions = {})",
       "tuplet(notes: StemmableNote[], options?: TupletOptions): StemmableNote[]",
       "notes(line: string, options: BuilderOptions = {}): StemmableNote[]",
@@ -838,7 +839,7 @@
       "StaveConnector(params: { topStave: Stave; bottomStave: Stave; type: StaveConnectorType }): StaveConnector",
       "Formatter(options?: FormatterOptions): Formatter",
       "Tuplet(params?: { notes?: Note[]; options?: TupletOptions }): Tuplet",
-      "Beam(params: { notes: StemmableNote[]; options?: { autoStem?: boolean; secondaryBeamBreaks?: number[]; partialBeamDirections?: { [noteIndex: number]: PartialBeamDirection; }; }; }): Beam",
+      "Beam(params: { notes: StemmableNote[]; options?: { autoStem?: boolean; feathered?: FeatheredBeamDirection; secondaryBeamBreaks?: number[]; partialBeamDirections?: { [noteIndex: number]: PartialBeamDirection; }; }; }): Beam",
       "Curve(params: { from: Note | undefined; to: Note | undefined; options: CurveOptions }): Curve",
       "StaveTie(params: { from?: Note | null; to?: Note | null; firstIndexes?: number[]; lastIndexes?: number[]; text?: string; options?: { direction?: number }; }): StaveTie",
       "StaveLine(params: { from: StaveNote; to: StaveNote; firstIndexes: number[]; lastIndexes: number[]; options?: { text?: string; font?: FontInfo }; }): StaveLine",
