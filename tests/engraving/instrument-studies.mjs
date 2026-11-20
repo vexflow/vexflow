@@ -318,3 +318,42 @@ export function makeTremoloStudy(VF, ctx, duration, strokes, crossStaff = false)
   };
   return { voice, notes, draw };
 }
+
+/** One string of a paired guitar dyad rises in the first bar and releases during the tied quarter in the next. */
+export function tiedBendStudy(VF, boundaries = []) {
+  const guitar = new VF.FrettedInstrument();
+  const grip = [
+    { str: 3, fret: 7 },
+    { str: 2, fret: 5 },
+  ];
+  const pair = guitar.attack(grip, 'q');
+  const continued = guitar.attack([...grip].reverse(), 'q');
+  const neighbor = guitar.attack([{ str: 4, fret: 5 }], 'q');
+  const event = (data, view, id) => ({ id: view + id, [view]: data[view] });
+  return {
+    sheet: { width: 520, measurePadding: 28, rowGap: 22 },
+    staves: ['note', 'tab'].map((view) => ({
+      id: view,
+      kind: view === 'tab' ? 'tab' : 'stave',
+      time: '2/4',
+      measures: [
+        [event(neighbor, view, 'lead'), event(pair, view, 'rise')],
+        [event(continued, view, 'release'), event(neighbor, view, 'last')],
+      ].map((notes) => ({ voices: [{ notes }] })),
+    })),
+    continuous: {
+      boundaries,
+      spans: [
+        { id: 'written-tie', kind: 'tie', from: 'noterise', to: 'noterelease', fromHead: 0, toHead: 1, side: 'below' },
+        {
+          id: 'tied-bend',
+          kind: 'tie',
+          from: 'tabrise',
+          to: 'tabrelease',
+          string: 3,
+          bend: { semitones: 2, rise: [1, 2], hold: [1, 2], release: [1, 1] },
+        },
+      ],
+    },
+  };
+}

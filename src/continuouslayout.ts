@@ -21,6 +21,7 @@ import { Element } from './element';
 import { measureEngraving } from './engravinggeometry';
 import { Fraction } from './fraction';
 import { Glyphs } from './glyphs';
+import { bendAmount, copyTiedBend } from './guitargesture';
 import { nienteTip } from './hairpintip';
 import { KeySignature } from './keysignature';
 import { MultiMeasureRest } from './multimeasurerest';
@@ -37,6 +38,7 @@ import { Stem } from './stem';
 import type { System } from './system';
 import { BreakUnit, chooseSystemBreaks } from './systembreaks';
 import { TabNote } from './tabnote';
+import { layoutTiedBend } from './tiedbend';
 import { TimeSignature } from './timesignature';
 import { RuntimeError } from './util';
 
@@ -100,7 +102,22 @@ function resolveTabTie(span: ContinuousSpan, first: TabNote, last: TabNote): Con
     to = end[toHead];
   if (!from || !to || from.str !== string || to.str !== string || String(from.fret) !== String(to.fret))
     invalid('Tab tie endpoints must play the same string and fret.');
-  return { ...span, fromHead, toHead, string, side: span.side ?? 'above' };
+  if (span.bend && !Number.isFinite(Number(from.fret))) invalid('A tied bend needs a pitched fret.');
+  return { ...span, fromHead, toHead, string, side: span.side ?? (span.bend ? 'below' : 'above') };
+}
+
+/** A string sustains into the immediately following event of the same rhythmic voice. */
+function adjacentBendEvents(score: EasyScoreComposition, first: SpanAnchor, last: SpanAnchor): boolean {
+  const parts = score.notes[first.measure][first.staff];
+  const voice = parts.findIndex((notes) => notes.includes(first.note));
+  if (voice < 0 || last.measure > first.measure + 1) return false;
+  const members = parts[voice].filter((n) => !n.shouldIgnoreTicks());
+  const index = members.indexOf(first.note);
+  if (first.measure === last.measure) return members[index + 1] === last.note;
+  return (
+    index === members.length - 1 &&
+    score.notes[last.measure][last.staff][voice]?.find((n) => !n.shouldIgnoreTicks()) === last.note
+  );
 }
 
 /** A row has one shared staff map. A compressed rest maps back to every original measure. */
@@ -318,6 +335,11 @@ export class ContinuousLayout {
       )
         invalid('Expected a unique span ID and ordered composition anchors.');
       let spec = { ...span };
+      if (
+        span.bend !== undefined &&
+        !(span.kind === 'tie' && first.note instanceof TabNote && last.note instanceof TabNote)
+      )
+        invalid('A tied bend needs two TAB endpoints.');
       if (span.string !== undefined && !(span.kind === 'tie' && first.note instanceof TabNote))
         invalid('A string selector requires a tab tie.');
       if (span.kind === 'palmMute') {
@@ -338,6 +360,11 @@ export class ContinuousLayout {
           invalid('Tab ties and endings need anchors on the same tab staff.');
         if (span.kind === 'tie') {
           spec = resolveTabTie(span, first.note, last.note);
+          if (span.bend) {
+            if (!adjacentBendEvents(score, first, last))
+              invalid('A tied bend needs adjacent events in the same TAB voice.');
+            spec.bend = copyTiedBend(span.bend);
+          }
           if (first.measure !== last.measure && onset(last.note).numerator === 0) {
             const stave = last.note.checkStave();
             this.continuationPadding.set(stave, stave.space(1.5));
@@ -395,6 +422,7 @@ export class ContinuousLayout {
       }
       seen.add(span.id);
       const resolved: ResolvedSpan = { spec, first, last, label: spanLabel(spec) };
+      if (spec.bend) resolved.bendLabel = new Element('Bend').setText(bendAmount(spec.bend));
       if (span.kind === 'beam') {
         const members = beamMembers(score, first, last);
         for (const { note, measure } of members) {
@@ -625,7 +653,7 @@ export class ContinuousLayout {
           f.y1 = glissandoY(s, firstStave, f.progress[0]);
           f.y2 = glissandoY(s, lastStave, f.progress[1]);
         }
-        if (!s.beam) this.drawing.push((ctx) => drawSpan(ctx, f, s.label));
+        if (!s.beam) this.drawing.push((ctx) => drawSpan(ctx, f, s.label, s.bendLabel));
       }
     }
     for (const { beam } of this.spans) {
@@ -758,7 +786,8 @@ export class ContinuousLayout {
     // Prefer the nearest free lane. Non-overlapping spans can reuse it.
     const laneEnds = new Map<string, number[]>();
     for (const s of spans) {
-      if (s.beam || s.spec.kind === 'tie' || s.spec.kind === 'slur' || s.spec.kind === 'glissando') continue;
+      if (s.beam || (s.spec.kind === 'tie' && !s.spec.bend) || s.spec.kind === 'slur' || s.spec.kind === 'glissando')
+        continue;
       if (s.syllable) {
         // A continuation row may have no sung words of its own. Include the extender in that staff's envelope.
         const stave = this.score.staves[first][s.first.staff];
@@ -768,7 +797,7 @@ export class ContinuousLayout {
         bounds.bottom = Math.max(bounds.bottom, relativeY + 2);
         continue;
       }
-      const side = spanAbove(s.spec),
+      const side = s.spec.bend !== undefined || spanAbove(s.spec),
         staff = s.first.staff,
         key = staff + '-' + side;
       const ends = laneEnds.get(key) ?? [];
@@ -841,7 +870,7 @@ export class ContinuousLayout {
       const yBase =
         origin +
         offsets[staff] +
-        (spanAbove(s.spec) ? ink[staff].top - lane * 25 - 4 : ink[staff].bottom + lane * 25 + 14);
+        (s.spec.bend || spanAbove(s.spec) ? ink[staff].top - lane * 25 - 4 : ink[staff].bottom + lane * 25 + 14);
       this.addFragment(s, units, row, yBase);
     }
     return row;
@@ -942,6 +971,19 @@ export class ContinuousLayout {
       above,
       space,
     };
+    if (s.spec.bend && s.bendLabel) {
+      fragment.bend = layoutTiedBend(
+        s.spec.bend,
+        starts ? s.first.note : undefined,
+        ends ? s.last.note : undefined,
+        x1,
+        endStaff.getNoteEndX() - space * 0.35,
+        startStaff.getYForLine(s.spec.string! - 1),
+        baseline,
+        space,
+        s.bendLabel
+      );
+    }
     if (s.spec.niente && kind === 'crescendo' && starts) fragment.nienteTip = nienteTip(x1, y1, space, 'left');
     if (s.spec.niente && kind === 'diminuendo' && ends) fragment.nienteTip = nienteTip(x2, y2, space, 'right');
     if (kind === 'tie' || kind === 'slur') {

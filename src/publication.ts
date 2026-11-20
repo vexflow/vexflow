@@ -463,6 +463,7 @@ function buildPages(
           kind: f.kind,
           part: f.part,
           ...(f.strings && { strings: f.strings, from: f.from, to: f.to }),
+          ...(f.bend && { bend: f.bend.envelope }),
         })),
       text: Array.from(svg.querySelectorAll('text')).map((e) => e.textContent),
     });
