@@ -6,7 +6,12 @@ import test from 'node:test';
 import { createCanvas, registerFont } from 'canvas';
 import puppeteer from 'puppeteer';
 
-import { beamedSplitChordStudy, makeContinuousStudy, tabEndingStudy } from '../engraving/continuous-studies.mjs';
+import {
+  beamedSplitChordStudy,
+  continuousBeamStudy,
+  makeContinuousStudy,
+  tabEndingStudy,
+} from '../engraving/continuous-studies.mjs';
 
 const VF = await import(new URL('../../build/esm/entry/vexflow-core.js', import.meta.url));
 for (const family of ['Bravura', 'Academico']) {
@@ -698,4 +703,118 @@ test('Saints, choir, piano and ensemble reflow in browser SVG and Canvas with tw
   } finally {
     await browser.close();
   }
+});
+
+test('a cross-bar beam refits the same four attacks on one row or two', () => {
+  const { f, ctx, canvas } = factory();
+  const c = f.EasyScore().compose(continuousBeamStudy());
+  const l = c.sheet.getContinuousLayout();
+  const members = ['b', 'c', 'd', 'e'].map((id) => c.getNote(id));
+  const beam = members[0].getBeam();
+  const timeline = () =>
+    c.voices.flat(2).map((voice) => {
+      let onset = 0;
+      return voice.getTickables().map((t) => {
+        const time = [t.getAttribute('id'), onset, t.getTicks().value()];
+        onset += time[2];
+        return time;
+      });
+    });
+  const original = timeline();
+  const groups = [];
+  const renderer = f.getContext(),
+    open = renderer.openGroup.bind(renderer);
+  renderer.openGroup = (name, ...args) => {
+    groups.push(name);
+    return open(name, ...args);
+  };
+  function frame(width, roles) {
+    groups.length = 0;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    c.sheet.setWidth(width);
+    f.draw({ retain: true });
+    assert.deepEqual(
+      l.fragments.map((f) => f.part),
+      roles
+    );
+    assert.equal(groups.filter((g) => g === 'beam').length, roles.length);
+    assert.equal(groups.filter((g) => g === 'stem').length, 6);
+    assert.deepEqual(beam.getNotes(), members);
+    assert.deepEqual(timeline(), original);
+    assert.equal(c.getNote('g').hasBeam(), false);
+    assert.equal(c.getNote('f').hasBeam(), false);
+    assert.deepEqual(l.diagnostics, []);
+    for (const n of members) {
+      assert.equal(n.getBeam(), beam);
+      assert.equal(n.shouldDrawFlag(), false);
+      const row = l.rows.findIndex((r) => r.systems.some((s) => s.getStaves().includes(n.getStave())));
+      const line = l.fragments[row],
+        x = n.getStemX();
+      const y = line.y1 + ((line.y2 - line.y1) * (x - line.x1)) / (line.x2 - line.x1);
+      assert.ok(Math.abs(y - n.getStemExtents().topY) < 0.001, 'stem touches the local beam edge');
+    }
+    return canvas.toBuffer();
+  }
+  const wide = frame(450, ['single']);
+  frame(160, ['first', 'last']);
+  assert.ok(l.fragments[0].x2 > members[1].getStemX());
+  assert.ok(l.fragments[1].x1 < members[2].getStemX());
+  assert.deepEqual(frame(450, ['single']), wide);
+  const forced = factory()
+    .f.EasyScore()
+    .compose(continuousBeamStudy([{ measure: 2, breakBefore: 'force' }]));
+  forced.sheet.setWidth(450).format();
+  assert.deepEqual(
+    forced.sheet.getContinuousLayout().fragments.map((f) => f.part),
+    ['first', 'last']
+  );
+});
+
+test('a system break can leave a single beamed attack, with secondary levels continued only where shared', () => {
+  const { f } = factory();
+  const source = continuousBeamStudy([{ measure: 2, breakBefore: 'force' }]);
+  const measures = source.staves[0].measures;
+  measures[0].voices[0].notes = [
+    { id: 'g', note: { keys: ['g/4'], duration: 'q', dots: 1 } },
+    { id: 'b', note: { keys: ['b/4'], duration: '16', stemDirection: -1 } },
+    { id: 'c', note: { keys: ['c/5'], duration: '16', stemDirection: -1 } },
+  ];
+  source.continuous.spans[0].from = 'c';
+  const c = f.EasyScore().compose(source);
+  f.draw({ retain: true });
+  const [outgoing, incoming] = c.sheet.getContinuousLayout().fragments;
+  const n = c.getNote('c');
+  assert.ok(outgoing.x1 <= n.getStemX() && outgoing.x2 > n.getStemX());
+  assert.equal(outgoing.y1, outgoing.y2);
+  assert.ok(incoming.x1 < c.getNote('d').getStemX());
+  assert.ok(
+    n
+      .getBeam()
+      .getStripBounds()
+      .every((b) => Number.isFinite(b.x + b.y + b.w + b.h))
+  );
+  for (const bad of ['g', 'f']) {
+    const input = continuousBeamStudy();
+    if (bad === 'g') input.continuous.spans[0].from = bad;
+    else input.continuous.spans[0].to = bad;
+    assert.throws(() => factory().f.EasyScore().compose(input), /beamable pitched notes/);
+  }
+});
+
+test('a same-measure continuous beam matches native beam ink', () => {
+  function render(continuous) {
+    const { f, canvas } = factory();
+    const source = continuousBeamStudy();
+    source.staves[0].measures.length = 1;
+    const notes = source.staves[0].measures[0].voices[0].notes;
+    notes[0].note.stemDirection = 1;
+    notes[1].note.stemDirection = 1;
+    notes[2].note.stemDirection = 1;
+    source.continuous.spans = continuous ? [{ id: 'local', kind: 'beam', from: 'b', to: 'c' }] : [];
+    const c = f.EasyScore().compose(source);
+    if (!continuous) f.Beam({ notes: [c.getNote('b'), c.getNote('c')] });
+    f.draw();
+    return canvas.toBuffer();
+  }
+  assert.deepEqual(render(true), render(false));
 });

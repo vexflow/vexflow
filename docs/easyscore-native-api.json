@@ -92,6 +92,13 @@
     "BEAM_RIGHT": "inferred",
     "BEAM_BOTH": "inferred",
     "PartialBeamDirection": "export type PartialBeamDirection = typeof BEAM_LEFT | typeof BEAM_RIGHT | typeof BEAM_BOTH;",
+    "BeamContinuation": {
+      "extends": [],
+      "fields": [
+        "left?: { x: number; levels: number };",
+        "right?: { x: number; levels: number };"
+      ]
+    },
     "Beam": [
       "CATEGORY(): string",
       "renderOptions: { flatBeamOffset?: number; flatBeams: boolean; secondaryBreakTicks?: number; showStemlets: boolean; beamWidth: number; maxSlope: number; minSlope: number; /** Keep automatic slope in the endpoint contour and align level in-staff beams to a half-space. */ contourSlope?: boolean; slopeIterations: number; slopeCost: number; stemletExtension: number; partialBeamLength: number; minFlatBeamOffset: number; }",
@@ -102,7 +109,7 @@
       "getDefaultBeamGroups(timeSig: string): Fraction[]",
       "applyAndGetBeams(voice: Voice, stemDirection?: number, groups?: Fraction[]): Beam[]",
       "generateBeams(notes: StemmableNote[], config: { flatBeamOffset?: number; flatBeams?: boolean; secondaryBreaks?: string; showStemlets?: boolean; maintainStemDirections?: boolean; /** Optional facade policy. Omitted preserves the native generator's historical behavior. */ stemPolicy?: 'auto' | 'explicit' | 'preserve'; beamMiddleOnly?: boolean; beamRests?: boolean; groups?: Fraction[]; stemDirection?: number; } = {}): Beam[]",
-      "constructor(notes: StemmableNote[], autoStem: boolean = false)",
+      "constructor(notes: StemmableNote[], autoStem: boolean = false, private readonly continuation?: BeamContinuation)",
       "getNotes(): StemmableNote[]",
       "getBeamCount(): number",
       "breakSecondaryAt(indexes: number[]): this",

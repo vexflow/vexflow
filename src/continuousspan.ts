@@ -1,6 +1,7 @@
 // Logical event anchors and renderer-independent drawing of continuous-score span fragments.
 import type { Annotation } from './annotation';
 import { Bounds } from './boundingbox';
+import type { ContinuousBeam } from './continuousbeam';
 import { Element } from './element';
 import { Glyphs } from './glyphs';
 import { drawNienteTip, NienteTip } from './hairpintip';
@@ -11,6 +12,7 @@ import { Stave } from './stave';
 import { Tables } from './tables';
 
 export type ContinuousSpanKind =
+  | 'beam'
   | 'tie'
   | 'slur'
   | 'crescendo'
@@ -56,6 +58,7 @@ export interface ResolvedSpan {
   last: SpanAnchor;
   label?: Element;
   syllable?: Annotation;
+  beam?: ContinuousBeam;
 }
 export interface SpanFragment {
   id: string;
