@@ -10,6 +10,7 @@ import { ClefNote } from '../src/clefnote';
 import { Glyphs } from '../src/glyphs';
 import { ContextBuilder } from '../src/renderer';
 import { TabStave } from '../src/tabstave';
+import { TimeSignature } from '../src/timesignature';
 
 const TabStaveTests = {
   Start(): void {
@@ -18,6 +19,7 @@ const TabStaveTests = {
     run('TabStave Draw Test', draw);
     run('Four-string TAB clefs', fourStringClefs);
     run('TAB clef by string count', stringCounts);
+    run('Time signatures by string count', timeSignatures);
   },
 };
 
@@ -110,6 +112,36 @@ function stringCounts(options: TestOptions, contextBuilder: ContextBuilder): voi
       const below = bottom - ink.y - ink.h;
       options.assert.ok(Math.abs(above - below) < 0.01, `${strings} strings: equal clearance`);
       options.assert.ok(above >= 1 + span / 24 - 0.5 && ink.h > 0, `${strings} strings: visible outer margins`);
+    }
+  }
+}
+
+/** Compare stacked, single-row, common and cut meters against the midpoint of the drawn strings. */
+function timeSignatures(options: TestOptions, contextBuilder: ContextBuilder): void {
+  const ctx = contextBuilder(options.elementId, 490, 250);
+  for (const [index, strings] of [4, 5, 6, 7].entries()) {
+    const x = 12 + (index % 2) * 245;
+    const y = 25 + Math.floor(index / 2) * 115;
+    const stave = new TabStave(x, y, 225, { numLines: strings, spaceAboveStaffLn: 0 })
+      .setContext(ctx)
+      .addClef('tab')
+      .addTimeSignature('4/4')
+      .addTimeSignature('6/8')
+      .addTimeSignature('3')
+      .addTimeSignature('C')
+      .addEndTimeSignature('C|');
+    ctx.save();
+    ctx.setFont('Arial', 10);
+    ctx.fillText(`${strings} strings`, x, y - 9);
+    ctx.restore();
+    stave.draw();
+    for (const meter of stave.getModifiers(undefined, TimeSignature.CATEGORY) as TimeSignature[]) {
+      const ink = meter.getInkBounds();
+      const center = stave.getYForDrawnLine((strings - 1) / 2);
+      options.assert.ok(
+        ink.h > 0 && Math.abs(ink.y + ink.h / 2 - center) < 0.01,
+        `${meter.getTimeSpec()} centered on ${strings} strings`
+      );
     }
   }
 }
