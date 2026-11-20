@@ -4,7 +4,6 @@
 
 import { Accidental } from './accidental';
 import { Articulation } from './articulation';
-import { PartialBeamDirection } from './beam';
 import { Clef } from './clef';
 import { Dot } from './dot';
 import { compose, EasyScoreComposition, EasyScoreCompositionSpec } from './easyscore/composition';
@@ -962,16 +961,7 @@ export class EasyScore {
    * Resolve automatic stems for the whole group while respecting explicit stems.
    * autoStem: true overrides explicit directions; false preserves all directions.
    */
-  beam(
-    notes: StemmableNote[],
-    options?: {
-      autoStem?: boolean;
-      secondaryBeamBreaks?: number[];
-      partialBeamDirections?: {
-        [noteIndex: number]: PartialBeamDirection;
-      };
-    }
-  ): StemmableNote[] {
+  beam(notes: StemmableNote[], options?: Parameters<Factory['Beam']>[0]['options']): StemmableNote[] {
     if (this.options.strictOptions) this.make.beam({ notes, options });
     else {
       const autoStem = options?.autoStem ?? this.resolveBeamStems(notes);
