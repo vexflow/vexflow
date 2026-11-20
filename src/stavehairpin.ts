@@ -4,17 +4,21 @@
 // @author Raffaele Viglianti, 2012 http://itisnotsound.wordpress.com/
 //
 // This class implements hairpins between notes.
-// Hairpins can be either crescendo or decrescendo.
+// Hairpins can be either crescendo or decrescendo, with an optional circled niente tip.
 
 import { BoundingBox } from './boundingbox';
 import { Element } from './element';
+import { drawNienteTip, nienteBounds, nienteTip } from './hairpintip';
 import { Modifier } from './modifier';
 import { Note } from './note';
 import { RenderContext } from './rendercontext';
+import { Tables } from './tables';
 import { Category } from './typeguard';
 import { RuntimeError } from './util';
 
 export interface StaveHairpinRenderOptions {
+  /** Draw an open niente circle at the closed end of the wedge. */
+  niente?: boolean;
   rightShiftTicks?: number;
   leftShiftTicks?: number;
   leftShiftPx: number;
@@ -76,8 +80,7 @@ export class StaveHairpin extends Element {
     const rightShiftPx = ppt * (options.rightShiftTicks ?? 0);
 
     const hairpinOptions = {
-      height: options.height,
-      yShift: options.yShift,
+      ...options,
       leftShiftPx,
       rightShiftPx,
       rightShiftTicks: 0,
@@ -189,53 +192,55 @@ export class StaveHairpin extends Element {
       this.layoutBaseline === undefined
         ? params.firstY + (above ? 10 - params.staffHeight - yShift : 20 + yShift)
         : this.layoutBaseline - height / 2 + (above ? -yShift : yShift);
+    const left = params.firstX + leftShiftPx + this.layoutLeft;
+    const right = params.lastX + rightShiftPx - this.layoutRight;
+    const crescendo = this.hairpin === StaveHairpin.type.CRESC;
+    const closedX = crescendo ? left : right;
+    const openX = crescendo ? right : left;
+    const space = this.firstNote?.getStave()?.space(1) ?? Tables.STAVE_LINE_DISTANCE;
+    const side = right >= left === crescendo ? 'left' : 'right';
+    const tip = this.renderOptions.niente ? nienteTip(closedX, top + height / 2, space, side) : undefined;
+    return { top, left, right, height, closedX, openX, tip };
+  }
+
+  /** Horizontal extents for spacing adjacent dynamics, including the diameter of a circled tip. */
+  getLayoutEdges() {
+    const { top, left, right, height, closedX, tip } = this.edges(this.parameters());
+    const outerTip = tip ? 2 * tip.x - closedX : closedX;
     return {
       top,
-      left: params.firstX + leftShiftPx + this.layoutLeft,
-      right: params.lastX + rightShiftPx - this.layoutRight,
+      left: this.hairpin === StaveHairpin.type.CRESC ? outerTip : left,
+      right: this.hairpin === StaveHairpin.type.DECRESC ? outerTip : right,
       height,
     };
   }
 
-  /** Signed endpoint order is available to diagnose a wedge squeezed between two dynamics. */
-  getLayoutEdges() {
-    return this.edges(this.parameters());
-  }
-
   override getBoundingBox(): BoundingBox {
-    const { top, left, right, height } = this.getLayoutEdges();
+    const { top, left, right, height, tip } = this.edges(this.parameters());
     const pad = (this.getStyle().lineWidth ?? 1) / 2;
-    return new BoundingBox(
+    const box = new BoundingBox(
       Math.min(left, right) - pad,
       Math.min(top, top + height) - pad,
       Math.abs(right - left) + 2 * pad,
       Math.abs(height) + 2 * pad
     );
+    return tip ? box.mergeWith(nienteBounds(tip, pad)) : box;
   }
 
   renderHairpin(params: { firstX: number; lastX: number; firstY: number; lastY: number; staffHeight: number }): void {
     const ctx = this.checkContext();
-    const { top, left, right, height } = this.edges(params);
+    const { top, height, closedX, openX, tip } = this.edges(params);
+    if (this.hairpin !== StaveHairpin.type.CRESC && this.hairpin !== StaveHairpin.type.DECRESC) return;
+    const middle = top + height / 2;
     ctx.beginPath();
-
-    switch (this.hairpin) {
-      case StaveHairpin.type.CRESC:
-        ctx.moveTo(right, top);
-        ctx.lineTo(left, top + height / 2);
-        ctx.lineTo(right, top + height);
-        break;
-      case StaveHairpin.type.DECRESC:
-        ctx.moveTo(left, top);
-        ctx.lineTo(right, top + height / 2);
-        ctx.lineTo(left, top + height);
-        break;
-      default:
-        // Default is NONE, so nothing to draw
-        break;
-    }
-
+    ctx.moveTo(openX, top);
+    ctx.lineTo(closedX, middle);
+    // At a circled tip use separate arms to keep a sharp miter out of the circle.
+    if (tip) ctx.moveTo(closedX, middle);
+    ctx.lineTo(openX, top + height);
     ctx.stroke();
     ctx.closePath();
+    if (tip) drawNienteTip(ctx, tip);
   }
 
   override draw(): void {

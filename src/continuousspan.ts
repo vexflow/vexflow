@@ -3,6 +3,7 @@ import type { Annotation } from './annotation';
 import { Bounds } from './boundingbox';
 import { Element } from './element';
 import { Glyphs } from './glyphs';
+import { drawNienteTip, NienteTip } from './hairpintip';
 import { Note } from './note';
 import { ribbonParts } from './phraseribbon';
 import { RenderContext } from './rendercontext';
@@ -24,6 +25,8 @@ export type ContinuousSpanKind =
   | 'palmMute';
 export interface ContinuousSpan {
   kind: ContinuousSpanKind;
+  /** Mark the closed musical endpoint of a crescendo or diminuendo with an open circle. */
+  niente?: boolean;
   /** One-based string of a tab tie. Defaults to the string of the selected chord position. */
   string?: number;
   /** Required for palmMute. String numbers are one-based. */
@@ -65,6 +68,8 @@ export interface SpanFragment {
   y2: number;
   /** Fraction of the drawn span used to interpolate the aperture across a system break. */
   progress: [number, number];
+  /** Present only on the fragment that owns the closed musical endpoint. */
+  nienteTip?: NienteTip;
   /** String numbers covered by a tab tie or palm-mute fragment. */
   strings?: readonly number[];
   /** Authored TAB endpoints appear on the fragments containing them. */
@@ -189,6 +194,7 @@ export function drawSpan(ctx: RenderContext, f: SpanFragment, label?: Element): 
       const [left, right] = f.progress.map((t) => space * 0.55 * (kind === 'crescendo' ? t : 1 - t));
       line(x1, y1 - left, x2, y2 - right);
       line(x1, y1 + left, x2, y2 + right);
+      if (f.nienteTip) drawNienteTip(ctx, f.nienteTip);
       return;
     }
     if (kind === 'tuplet') {

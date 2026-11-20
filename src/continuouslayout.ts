@@ -19,6 +19,7 @@ import { Element } from './element';
 import { measureEngraving } from './engravinggeometry';
 import { Fraction } from './fraction';
 import { Glyphs } from './glyphs';
+import { nienteTip } from './hairpintip';
 import { KeySignature } from './keysignature';
 import { MultiMeasureRest } from './multimeasurerest';
 import { Note } from './note';
@@ -866,6 +867,8 @@ export class ContinuousLayout {
       above,
       space,
     };
+    if (s.spec.niente && kind === 'crescendo' && starts) fragment.nienteTip = nienteTip(x1, y1, space, 'left');
+    if (s.spec.niente && kind === 'diminuendo' && ends) fragment.nienteTip = nienteTip(x2, y2, space, 'right');
     if (kind === 'tie' || kind === 'slur') {
       const events = units.flatMap((u) => {
         const staves = this.score.staves[u.first];

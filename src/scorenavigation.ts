@@ -1,9 +1,10 @@
 // A renderer-independent reading order and hit index for a formatted EasyScore composition.
 import { Accidental } from './accidental';
-import { Bounds } from './boundingbox';
+import { BoundingBox, Bounds } from './boundingbox';
 import type { EasyScoreComposition, EasyScoreStaveSpec } from './easyscore/composition';
 import { GeometryDiagnostic, measureEngraving } from './engravinggeometry';
 import { Fraction } from './fraction';
+import { nienteBounds } from './hairpintip';
 import { StaveNote } from './stavenote';
 import { Tables } from './tables';
 import { TabNote } from './tabnote';
@@ -189,16 +190,20 @@ export class ScoreNavigation {
       if (seen.has(fragment.id)) throw new RuntimeError('DuplicateID', 'Span shares a score event ID: ' + fragment.id);
       // A conservative target includes the curve and enough space to select a thin stroke.
       const pad = Math.max(fragment.space, Math.abs(fragment.rise ?? 0));
+      const bounds = new BoundingBox(
+        Math.min(fragment.x1, fragment.x2),
+        Math.min(fragment.y1, fragment.y2) - pad,
+        Math.abs(fragment.x2 - fragment.x1),
+        Math.abs(fragment.y2 - fragment.y1) + 2 * pad
+      );
+      if (fragment.nienteTip) bounds.mergeWith(nienteBounds(fragment.nienteTip, 0.5));
       regions.push({
         id: fragment.id,
         row: fragment.row,
         ...(fragment.strings && { strings: [...fragment.strings] }),
         source: sourceFor(fragment.id),
         kind: 'span',
-        x: Math.min(fragment.x1, fragment.x2),
-        y: Math.min(fragment.y1, fragment.y2) - pad,
-        w: Math.abs(fragment.x2 - fragment.x1),
-        h: Math.abs(fragment.y2 - fragment.y1) + 2 * pad,
+        ...bounds,
       });
     }
     this.events = events;

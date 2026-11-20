@@ -1977,6 +1977,7 @@
     "StaveHairpinRenderOptions": {
       "extends": [],
       "fields": [
+        "niente?: boolean;",
         "rightShiftTicks?: number;",
         "leftShiftTicks?: number;",
         "leftShiftPx: number;",
