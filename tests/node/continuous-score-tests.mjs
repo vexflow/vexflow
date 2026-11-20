@@ -4,7 +4,7 @@ import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 import puppeteer from 'puppeteer';
 import { createCanvas, registerFont } from 'canvas';
-import { makeContinuousStudy, tabEndingStudy } from '../engraving/continuous-studies.mjs';
+import { beamedSplitChordStudy, makeContinuousStudy, tabEndingStudy } from '../engraving/continuous-studies.mjs';
 const VF = await import(new URL('../../build/esm/entry/vexflow-core.js', import.meta.url));
 for (const family of ['Bravura', 'Academico']) {
   const name = family.toLowerCase();
@@ -371,6 +371,82 @@ test('the shared stem and arpeggio follow the two native heads at each width', (
   frame(160);
   assert.deepEqual(frame(375), wide);
 });
+
+/** Count rendered stems and heads, then check the joins independently against native geometry. */
+test('beamed split piano chords keep one stem and one beam attachment per attack at either staff distance', () => {
+  for (const direction of [VF.Stem.UP, VF.Stem.DOWN]) {
+    for (const beamStaff of ['upper', 'lower']) {
+      const { f, canvas, ctx } = factory();
+      const c = f.EasyScore().compose(beamedSplitChordStudy(VF, direction, 8, beamStaff));
+      const beam = c.getNote(beamStaff + '0').getBeam();
+      const phrase = c.systems[0].getPhraseLayout();
+      const stems = [];
+      const heads = [];
+      const render = f.getContext();
+      const openGroup = render.openGroup.bind(render);
+      render.openGroup = (name, ...args) => {
+        if (name === 'stem') stems.push(args[0]);
+        if (name === 'stavenote') heads.push(args[0]);
+        return openGroup(name, ...args);
+      };
+      const frame = (gap) => {
+        c.systems[0].setOptions({ factory: f, spaceBetweenStaves: gap });
+        stems.length = heads.length = 0;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        f.draw({ retain: true });
+        assert.deepEqual(phrase.diagnostics, []);
+        assert.equal(stems.length, 4);
+        assert.equal(heads.length, 8);
+        assert.deepEqual(c.sheet.getContinuousLayout().diagnostics, []);
+        assert.equal(beam.getNotes().length, 4);
+        for (let i = 0; i < 4; i++) {
+          const upper = c.getNote('upper' + i);
+          const lower = c.getNote('lower' + i);
+          const member = c.getNote(beamStaff + i);
+          const other = member === upper ? lower : upper;
+          assert.equal(beam.getNotes()[i], member);
+          assert.equal(other.getStemSegment(), undefined);
+          assert.equal(member.shouldDrawFlag() || other.shouldDrawFlag(), false);
+          assert.equal(upper.checkTickContext(), lower.checkTickContext());
+          assert.equal(upper.checkTickContext().getTickID(), (i * VF.VexFlow.RESOLUTION) / 8);
+          assert.equal(upper.getTicks().value(), VF.VexFlow.RESOLUTION / 8);
+          assert.equal(lower.getTicks().value(), VF.VexFlow.RESOLUTION / 8);
+          const { baseY, tipY, x } = member.getStemSegment();
+          assert.equal(x, other.getStemX());
+          const [near, far] = direction === VF.Stem.UP ? [upper, lower] : [lower, upper];
+          assert.equal(baseY, far.getYs()[0]);
+          assert.ok(direction * (near.getYs()[0] - tipY) > 0, 'the stem crosses both heads');
+          assert.ok(
+            beam.getStripBounds().some((b) => x >= b.x && x <= b.x + b.w && tipY >= b.y && tipY <= b.y + b.h),
+            'the visible tip meets the beam at its own x'
+          );
+        }
+        return { gap: c.staves[0][1].getY() - c.staves[0][0].getY(), pixels: canvas.toBuffer() };
+      };
+      const narrow = frame(8);
+      assert.ok(frame(18).gap > narrow.gap);
+      assert.deepEqual(frame(8), narrow);
+    }
+  }
+});
+
+test('a split eighth must have exactly one beam owner and a unique pair of notes', () => {
+  for (const beams of [false, true]) {
+    const source = beamedSplitChordStudy(VF, VF.Stem.UP, 8);
+    for (const staff of source.staves) staff.measures[0].voices[0].autoBeam = beams;
+    assert.throws(() => factory().f.EasyScore().compose(source).sheet.format(), /beam on exactly one/);
+  }
+  const f = factory().f;
+  const source = beamedSplitChordStudy(VF, VF.Stem.UP, 8);
+  source.staves[0].measures[0].voices[0].autoBeam = false;
+  const c = f.EasyScore().compose(source);
+  f.Beam({ notes: c.notes[0][0][0] });
+  c.sheet.format();
+  assert.equal(c.getNote('lower0').shouldDrawFlag(), false);
+  source.continuous.splitChords.push({ ...source.continuous.splitChords[0], id: 'again' });
+  assert.throws(() => factory().f.EasyScore().compose(source), /only one split chord/);
+});
+
 test('instrument changes survive hiding and reflow and the new full name reserves row-start width', () => {
   const s = spec(3, { boundaries: [{ measure: 2, breakBefore: 'force' }] });
   s.staves[0].name = 'Flute';
