@@ -1,4 +1,5 @@
 // Optional continuous-sheet layout for existing Systems. No music data model or pagination.
+import { reserveChordSpacing } from './chordspacing';
 import { ClefNote } from './clefnote';
 import type { ContinuousLayout } from './continuouslayout';
 import { Factory } from './factory';
@@ -106,13 +107,16 @@ export class Sheet {
       return this;
     }
     const widths = this.measureSystems();
-    this.rows = [];
-    let y = this.options.y;
-    for (const indices of this.packRows(widths)) {
-      const row = this.formatRow(indices, widths, y);
-      this.rows.push(row);
-      y += row.height + this.options.rowGap;
-    }
+    const padding = new Map<System, number>();
+    do {
+      this.rows = [];
+      let y = this.options.y;
+      for (const indices of this.packRows(widths, padding)) {
+        const row = this.formatRow(indices, widths, padding, y);
+        this.rows.push(row);
+        y += row.height + this.options.rowGap;
+      }
+    } while (reserveChordSpacing(this.rows, padding));
     return this;
   }
 
@@ -126,18 +130,18 @@ export class Sheet {
   }
 
   /** Greedy packing keeps measure order and gives oversized measures their own rows. */
-  private packRows(widths: number[]): number[][] {
+  private packRows(widths: number[], padding: Map<System, number>): number[][] {
     const groups: number[][] = [];
     let group: number[] = [];
     let used = 0;
     widths.forEach((width, index) => {
-      const gap = group.length ? this.options.measureGap : 0;
+      const gap = this.options.measureGap + (padding.get(this.systems[index - 1]) ?? 0);
       if (group.length && used + gap + width > this.options.width) {
         groups.push(group);
         group = [];
         used = 0;
       }
-      used += (group.length ? this.options.measureGap : 0) + width;
+      used += (group.length ? gap : 0) + width;
       group.push(index);
     });
     if (group.length) groups.push(group);
@@ -176,9 +180,12 @@ export class Sheet {
   }
 
   /** Justify a row horizontally, then place every measure on a shared baseline. */
-  private formatRow(indices: number[], widths: number[], y: number): SheetRow {
+  private formatRow(indices: number[], widths: number[], padding: Map<System, number>, y: number): SheetRow {
+    const last = indices[indices.length - 1];
+    const endPadding = (index: number) => (index === last ? 0 : (padding.get(this.systems[index]) ?? 0));
     const minimum =
-      indices.reduce((sum, index) => sum + widths[index], 0) + this.options.measureGap * (indices.length - 1);
+      indices.reduce((sum, index) => sum + widths[index] + endPadding(index), 0) +
+      this.options.measureGap * (indices.length - 1);
     const extra = this.options.justify ? Math.max(0, this.options.width - minimum) / indices.length : 0;
     let x = this.options.x;
     let top = 0;
@@ -189,17 +196,14 @@ export class Sheet {
       system
         .setX(x)
         .setY(0)
-        .setWidth(widths[index] + extra);
-      system.format();
+        .setWidth(widths[index] + extra + endPadding(index));
+      system.format({ endPadding: endPadding(index) });
       const bounds = this.verticalBounds(system);
       top = Math.min(top, bounds.top);
       bottom = Math.max(bottom, bounds.bottom);
       x += system.getWidth() + this.options.measureGap;
     });
-    for (const system of systems) {
-      system.setY(y - top);
-      system.format();
-    }
+    for (const index of indices) this.systems[index].setY(y - top).format({ endPadding: endPadding(index) });
     const width = x - this.options.x - this.options.measureGap;
     return {
       systems,

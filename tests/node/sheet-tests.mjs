@@ -178,3 +178,93 @@ test('responsive sheets and themes on Canvas and SVG', async (t) => {
     await browser.close();
   }
 });
+
+test('chord ink clears the next measure and stays attached through reflow', async () => {
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: process.env.CI ? ['--no-sandbox', '--disable-setuid-sandbox'] : [],
+  });
+  try {
+    const page = await browser.newPage();
+    await page.setContent('<div id="score"></div>');
+    await page.addScriptTag({ path: root + 'build/cjs/vexflow-debug.js' });
+    const results = await page.evaluate(async () => {
+      const V = VexFlow;
+      await V.loadFonts('Bravura', 'Academico');
+      await document.fonts.ready;
+
+      // Measure the actual SVG text and its distance from the owning beat on every draw.
+      function frames(
+        labels,
+        { continuous = false, literal = false, reportWidth = false, below = false, keep = false } = {}
+      ) {
+        const host = document.getElementById('score');
+        host.replaceChildren();
+        const f = new V.Factory({ renderer: { elementId: 'score', width: 860, height: 450 } });
+        const score = f.EasyScore();
+        const anchors = ['last', 'first'];
+        const music = score.compose({
+          sheet: { width: 800, measurePadding: 0 },
+          continuous: continuous ? { boundaries: keep ? [{ measure: 2, breakBefore: 'keep' }] : [] } : undefined,
+          staves: [
+            {
+              id: 'melody',
+              measures: ['C4/q, D4, E4, F4[id="last"]', 'C4/q[id="first"], D4, E4, F4'].map((notes, i) => ({
+                voices: [{ notes }],
+                // A literal chord on the incoming downbeat shares the native symbol's lane.
+                chords: literal && i === 1 ? [{ note: anchors[i], text: labels[i] }] : [],
+              })),
+            },
+          ],
+        });
+        const notes = anchors.map((id) => music.getNote(id));
+        const marks = notes.map((n, i) => {
+          if (literal && i === 1) return n.getModifiers().find((m) => m instanceof V.Annotation);
+          const c = new V.ChordSymbol().addText(labels[i]).setReportWidth(reportWidth);
+          if (below && i === 1) c.setVertical('below');
+          n.addModifier(c, 0);
+          return c;
+        });
+        return [800, 190, 800].map((width) => {
+          music.sheet.setWidth(width);
+          f.getContext().clear();
+          f.draw({ retain: true });
+          const boxes = marks.map((mark) => document.getElementById('vf-' + mark.getAttribute('id')).getBBox());
+          const positions = notes.map((n) => n.getModifierStartXY(V.Modifier.Position.ABOVE, 0).x);
+          return {
+            gap: boxes[1].x - boxes[0].x - boxes[0].width,
+            offsets: boxes.map((b, i) => b.x - positions[i]),
+            positions,
+            rows: music.sheet.getRows().map((r) => ({ count: r.systems.length, overflow: r.overflow })),
+          };
+        });
+      }
+      const long = ['C#maj13(#11,b9)/G', 'Dbmaj13(#11,b9)/Gb'];
+      const all = [];
+      for (const continuous of [false, true]) {
+        for (const literal of [false, true]) all.push(frames(long, { continuous, literal }));
+        all.push(frames(long, { continuous, reportWidth: true }));
+      }
+      const short = frames(['C', 'G']);
+      const separateLanes = frames(long, { below: true });
+      const kept = frames(long, { continuous: true, keep: true });
+      return { all, short, separateLanes, kept };
+    });
+    for (const [wide, narrow, restored] of results.all) {
+      assert.deepEqual(wide.rows, [{ count: 2, overflow: 0 }]);
+      assert.ok(wide.gap > 0, 'rendered labels clear the barline');
+      assert.ok(narrow.rows.length === 2, 'the narrow row breaks between measures');
+      for (let i = 0; i < 2; i++) assert.ok(Math.abs(wide.offsets[i] - narrow.offsets[i]) < 0.01);
+      assert.deepEqual(restored, wide, 'restoring the width restores the anchors and ink');
+    }
+    assert.deepEqual(
+      results.short[0].positions,
+      results.separateLanes[0].positions,
+      'short labels and labels on opposite sides of the staff consume no boundary space'
+    );
+    assert.ok(results.kept[1].rows[0].overflow > 0 && results.kept[1].rows[0].count === 2);
+    assert.ok(results.kept[1].gap > 0, 'an unbreakable group reports overflow and still clears the labels');
+  } finally {
+    await browser.close();
+  }
+});
