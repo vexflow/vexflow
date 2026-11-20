@@ -178,10 +178,10 @@ export class Clef extends StaveModifier {
 
   /** Baseline shared by drawing and hit testing. TAB fonts can have asymmetric ink. */
   getGlyphY(): number {
-    const y = this.checkStave().getYForLine(this.line);
-    if (this.code !== Glyphs.fourStringTabClef) return y;
+    const stave = this.checkStave();
+    if (this.code !== Glyphs.fourStringTabClef) return stave.getYForLine(this.line);
     const { actualBoundingBoxAscent, actualBoundingBoxDescent } = this.textMetrics;
-    return y + (actualBoundingBoxAscent - actualBoundingBoxDescent) / 2;
+    return stave.getYForDrawnLine(this.line) + (actualBoundingBoxAscent - actualBoundingBoxDescent) / 2;
   }
 
   /** Positioned glyph ink, including an octave annotation if present. */

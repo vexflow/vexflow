@@ -44,6 +44,9 @@ function fourStringClefs(options: TestOptions, contextBuilder: ContextBuilder): 
       .setContext(ctx)
       .addClef('tab')
       .addEndClef('tab', 'small');
+    // Exercise both the half-pixel alignment of a one-pixel stroke and the unshifted two-pixel stroke.
+    const lineWidth = index + 1;
+    stave.setStyle({ lineWidth });
     const sixStartX = stave.getNoteStartX();
     stave.setNumLines(4);
     const [start, end] = stave.getModifiers(undefined, Clef.CATEGORY) as Clef[];
@@ -55,10 +58,14 @@ function fourStringClefs(options: TestOptions, contextBuilder: ContextBuilder): 
       const ink = clef.getInkBounds();
       options.assert.ok(ink.h > 0 && ink.y >= stave.getYForLine(0) - 1, 'Ink clears the top string');
       options.assert.ok(ink.y + ink.h <= stave.getYForLine(3) + 1, 'Ink clears the bottom string');
-      options.assert.ok(Math.abs(ink.y + ink.h / 2 - stave.getYForLine(1.5)) < 0.01, 'Ink is centered');
+      const topString = stave.getYForLine(0) + (lineWidth === 1 ? 0.5 : 0);
+      const bottomString = topString + 3 * spacing;
+      const topGap = ink.y - topString;
+      const bottomGap = bottomString - (ink.y + ink.h);
+      options.assert.ok(Math.abs(topGap - bottomGap) < 0.01, 'Equal clearance from the drawn outer strings');
     }
     options.assert.ok(end.getInkBounds().h < full.h, 'Courtesy clef stays smaller');
-    stave.draw();
+    stave.drawWithStyle();
     options.assert.deepEqual(start.getInkBounds(), full, 'Drawing uses the formatted geometry');
     const inline = new ClefNote('tab').setStave(stave);
     options.assert.equal(inline.getClef().code, start.code, 'Inline TAB uses the stave glyph');

@@ -1901,6 +1901,7 @@
       "getBottomY(): number",
       "getBottomLineY(): number",
       "getYForLine(line: number): number",
+      "getYForDrawnLine(line: number): number",
       "getLineForY(y: number): number",
       "getYForTopText(line: number = 0): number",
       "getYForBottomText(line: number = 0): number",
