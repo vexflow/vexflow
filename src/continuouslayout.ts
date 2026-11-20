@@ -3,6 +3,7 @@ import { Accidental } from './accidental';
 import { Annotation } from './annotation';
 import { reserveChordSpacing } from './chordspacing';
 import { Clef } from './clef';
+import { beamMembers, ContinuousBeam } from './continuousbeam';
 import {
   continuationPitch,
   ContinuousSpan,
@@ -159,8 +160,8 @@ export class ContinuousLayout {
   private readonly spelledSpans = new Set<number>();
 
   private readonly options: ContinuousOptions;
-  /** A leading tab fret needs room for the incoming tie after the repeated clef. */
-  private readonly tabTiePadding = new Map<Stave, number>();
+  /** Keep incoming ties and beams clear of the repeated clef at a row start. */
+  private readonly continuationPadding = new Map<Stave, number>();
   private readonly arrivals = new Map<number, { note: Note; mark: Accidental; index: number }[]>();
 
   constructor(
@@ -285,7 +286,10 @@ export class ContinuousLayout {
       seen.add(chord.id);
       this.splitChords.push({ id: chord.id, measure: a.measure, upper: a.note, lower: b.note });
     }
+    const pendingBeams = new Map<ResolvedSpan, ReturnType<typeof beamMembers>>();
+    const claimedNotes = new Set<StaveNote>();
     const kinds = [
+      'beam',
       'tie',
       'slur',
       'crescendo',
@@ -334,7 +338,7 @@ export class ContinuousLayout {
           spec = resolveTabTie(span, first.note, last.note);
           if (first.measure !== last.measure && onset(last.note).numerator === 0) {
             const stave = last.note.checkStave();
-            this.tabTiePadding.set(stave, stave.space(1.5));
+            this.continuationPadding.set(stave, stave.space(1.5));
           }
         }
       } else {
@@ -374,8 +378,23 @@ export class ContinuousLayout {
         }
       }
       seen.add(span.id);
-      this.spans.push({ spec, first, last, label: spanLabel(spec) });
+      const resolved: ResolvedSpan = { spec, first, last, label: spanLabel(spec) };
+      if (span.kind === 'beam') {
+        const members = beamMembers(score, first, last);
+        for (const { note, measure } of members) {
+          if (note.getBeam() || claimedNotes.has(note)) invalid('A continuous beam member already belongs to a beam.');
+          claimedNotes.add(note);
+          if (measure > first.measure) {
+            const stave = note.checkStave();
+            this.continuationPadding.set(stave, stave.space(1.5));
+          }
+        }
+        pendingBeams.set(resolved, members);
+      }
+      this.spans.push(resolved);
     }
+    // Resolve every span before attaching beams to caller-owned notes.
+    for (const [span, members] of pendingBeams) span.beam = new ContinuousBeam(members);
   }
 
   /** Only undecorated, wholly resting measures can disappear into a numbered rest. */
@@ -424,7 +443,7 @@ export class ContinuousLayout {
         const marks = this.marks[i][j];
         s.setBoundaryModifiers(
           [...(start ? marks.start : []), ...(end ? marks.end : [])],
-          start ? this.tabTiePadding.get(s) : 0
+          start ? this.continuationPadding.get(s) : 0
         );
         const bar = s.getModifiers(Position.END, Barline.CATEGORY)[0] as Barline;
         return Math.max(s.getX() + s.getWidth() - s.getNoteEndX(), -(bar?.getLayoutMetrics()?.xMin ?? 0));
@@ -547,9 +566,11 @@ export class ContinuousLayout {
       if (!!upper.getBeam() === !!lower.getBeam() || upper.getStemDirection() !== lower.getStemDirection())
         invalid('A split eighth-note chord needs a beam on exactly one of its two notes and matching stem directions.');
     for (const { upper, lower } of eighths) linkSplitStem(upper, lower);
+    for (const span of this.spans) span.beam?.clearRows();
     const units = this.units(options.measurePadding);
     const padding = new Map<System, number>();
     do {
+      for (const span of this.spans) span.beam?.clearRows();
       this.hidden.clear();
       this.diagnostics.length = 0;
       this.fragments.length = 0;
@@ -581,8 +602,13 @@ export class ContinuousLayout {
       for (const f of parts) {
         f.progress = [prior / total, (prior + f.x2 - f.x1) / total];
         prior += f.x2 - f.x1;
-        this.drawing.push((ctx) => drawSpan(ctx, f, s.label));
+        if (!s.beam) this.drawing.push((ctx) => drawSpan(ctx, f, s.label));
       }
+    }
+    for (const { beam } of this.spans) {
+      if (!beam) continue;
+      beam.finishRows();
+      this.drawing.push((ctx) => beam.setContext(ctx).drawWithStyle());
     }
     return this.rows;
   }
@@ -619,13 +645,13 @@ export class ContinuousLayout {
             const shared = splitStemFor(n);
             const beam = shared ? shared.owner.getBeam() : n.getBeam();
             const tipStave = beam && beamStave(n);
-            const bridge = beam?.getNotes().some((p) => beamStave(p) !== tipStave);
+            const bridge = !(beam instanceof ContinuousBeam) && beam?.getNotes().some((p) => beamStave(p) !== tipStave);
             const parts = bridge && !shared ? n.getHeadInk() : measureEngraving(n).parts;
             parts.forEach((box, index) => {
               // The shared stem spans this very gap and must not increase it.
               if (shared?.owner !== n || index !== n.noteHeads.length) take(box.y, box.y + box.h);
             });
-            if (beam && !bridge && tipStave === stave) {
+            if (beam && !(beam instanceof ContinuousBeam) && !bridge && tipStave === stave) {
               const box = beam.getBoundingBox();
               take(box.y, box.y + box.h);
             }
@@ -694,12 +720,22 @@ export class ContinuousLayout {
       x += width + options.measureGap;
       return { u, sys, endPadding };
     });
+    const fitted = spans.flatMap((s) =>
+      s.beam ? [{ beam: s.beam.measureRow(first, last), staff: s.first.staff }] : []
+    );
     const ink = this.measureStaffInk(positions, visible);
+    for (const { beam, staff } of fitted) {
+      const bounds = beam.getBoundingBox();
+      const staveY = this.score.staves[first][staff].getY();
+      ink[staff].top = Math.min(ink[staff].top, bounds.y - staveY);
+      ink[staff].bottom = Math.max(ink[staff].bottom, bounds.y + bounds.h - staveY);
+      beam.resetLayout();
+    }
     const lanes = new Map<ResolvedSpan, number>();
     // Prefer the nearest free lane. Non-overlapping spans can reuse it.
     const laneEnds = new Map<string, number[]>();
     for (const s of spans) {
-      if (s.spec.kind === 'tie' || s.spec.kind === 'slur') continue;
+      if (s.beam || s.spec.kind === 'tie' || s.spec.kind === 'slur') continue;
       if (s.syllable) {
         // A continuation row may have no sung words of its own. Include the extender in that staff's envelope.
         const stave = this.score.staves[first][s.first.staff];
@@ -773,6 +809,10 @@ export class ContinuousLayout {
         });
     }
     for (const s of spans) {
+      if (s.beam) {
+        this.fragments.push(s.beam.placeRow(first, last, this.rows.length, s.spec.id));
+        continue;
+      }
       const staff = s.first.staff;
       const lane = lanes.get(s) ?? 0;
       const yBase =
@@ -820,7 +860,7 @@ export class ContinuousLayout {
       if (ends) x2 = s.last.note.getTieLeftX();
       if (s.spec.string !== undefined) {
         // Follow the same physical string at both row edges, with clearance for the fret numbers.
-        if (!starts) x1 -= this.tabTiePadding.get(startStaff) ?? 0;
+        if (!starts) x1 -= this.continuationPadding.get(startStaff) ?? 0;
         const line = s.spec.string - 1;
         const clearance = sign * space * 0.3;
         y1 = (starts ? s.first.note.checkStave() : startStaff).getYForLine(line) + clearance;

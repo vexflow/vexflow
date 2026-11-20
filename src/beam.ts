@@ -36,7 +36,7 @@ function getStemSlope(firstNote: StemmableNote, lastNote: StemmableNote) {
   const firstStemX = firstNote.getStemX();
   const lastStemTipY = lastNote.getStemExtents().topY;
   const lastStemX = lastNote.getStemX();
-  return (lastStemTipY - firstStemTipY) / (lastStemX - firstStemX);
+  return firstNote === lastNote ? 0 : (lastStemTipY - firstStemTipY) / (lastStemX - firstStemX);
 }
 
 export const BEAM_LEFT = 'L';
@@ -44,6 +44,12 @@ export const BEAM_RIGHT = 'R';
 export const BEAM_BOTH = 'B';
 
 export type PartialBeamDirection = typeof BEAM_LEFT | typeof BEAM_RIGHT | typeof BEAM_BOTH;
+
+/** Coordinates and number of beam levels which continue at a system boundary. */
+export interface BeamContinuation {
+  left?: { x: number; levels: number };
+  right?: { x: number; levels: number };
+}
 
 /** `Beams` span over a set of `StemmableNotes`. */
 export class Beam extends Element {
@@ -468,14 +474,22 @@ export class Beam extends Element {
     return beams;
   }
 
-  constructor(notes: StemmableNote[], autoStem: boolean = false) {
+  constructor(
+    notes: StemmableNote[],
+    autoStem: boolean = false,
+    private readonly continuation?: BeamContinuation
+  ) {
     super();
 
     if (!notes || notes.length === 0) {
       throw new RuntimeError('BadArguments', 'No notes provided for beam.');
     }
 
-    if (notes.length === 1) {
+    for (const edge of [continuation?.left, continuation?.right]) {
+      if (edge && (!Number.isFinite(edge.x) || !Number.isInteger(edge.levels) || edge.levels < 1))
+        throw new RuntimeError('BadArguments', 'A continuing beam requires a finite edge and a positive beam count.');
+    }
+    if (notes.length === 1 && !continuation?.left && !continuation?.right) {
       throw new RuntimeError('BadArguments', 'Too few notes for beam.');
     }
 
@@ -695,7 +709,7 @@ export class Beam extends Element {
     const peers = contexts
       .flatMap((c) => c.getTickables())
       .filter(isStaveNote)
-      .filter((n) => n.getBeam() !== this && n.getStave() === stave && !n.isRest());
+      .filter((n) => !this.notes.includes(n) && n.getStave() === stave && !n.isRest());
     if (!peers.length) return;
     const firstX = first.getStemX();
     const space = stave.getSpacingBetweenLines();
@@ -1025,6 +1039,26 @@ export class Beam extends Element {
     const lastBeam = beamLines[beamLines.length - 1];
     if (lastBeam && lastBeam.end === undefined) {
       lastBeam.end = lastBeam.start - partialBeamLength;
+    }
+    // Continue the levels shared with the next row. A lone endpoint replaces its ordinary partial hook.
+    const edge = this.continuation;
+    if (edge && beamLines.length) {
+      const level = 1 + Math.log2(Tables.durationToTicks('4') / tickOfDuration);
+      const first = this.notes[0],
+        last = this.notes[this.notes.length - 1];
+      const incoming = edge.left && edge.left.levels >= level && first.getIntrinsicTicks() < tickOfDuration;
+      if (incoming && edge.left) {
+        if (!(this.notes[1]?.getIntrinsicTicks() < tickOfDuration)) beamLines[0].end = first.getStemX();
+        beamLines[0].start = edge.left.x;
+      }
+      if (edge.right && edge.right.levels >= level && last.getIntrinsicTicks() < tickOfDuration) {
+        if (
+          !(this.notes.length === 1 && incoming) &&
+          !(this.notes[this.notes.length - 2]?.getIntrinsicTicks() < tickOfDuration)
+        )
+          lastBeam.start = last.getStemX() - Stem.WIDTH / 2;
+        lastBeam.end = edge.right.x;
+      }
     }
     return beamLines;
   }
