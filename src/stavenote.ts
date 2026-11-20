@@ -20,6 +20,7 @@ import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { KeyProps, Note, NoteStruct } from './note';
 import { NoteHead } from './notehead';
+import { splitStemFor } from './splitstem';
 import { Stave } from './stave';
 import { Stem, StemOptions } from './stem';
 import { StemmableNote } from './stemmablenote';
@@ -631,7 +632,10 @@ export class StaveNote extends StemmableNote {
     });
     const { yTop, yBottom } = this.getNoteHeadBounds();
 
-    if (!this.isRest() && this.hasStem()) {
+    if (splitStemFor(this)?.owner === this) {
+      const stem = this.checkStem().getBoundingBox();
+      boundingBox.mergeWith(stem.setX(this.getStemX() - stem.w / 2));
+    } else if (!this.isRest() && this.hasStem()) {
       const noteStemHeight = this.stem!.getHeight();
       const stemY =
         this.getStemDirection() === Stem.DOWN
@@ -687,11 +691,12 @@ export class StaveNote extends StemmableNote {
 
   // Determine if the `StaveNote` has a stem
   override hasStem(): boolean {
-    return this.glyphProps.stem;
+    const shared = splitStemFor(this);
+    return this.glyphProps.stem && (!shared || shared.owner === this);
   }
 
   override hasFlag(): boolean {
-    return super.hasFlag() && !this.isRest();
+    return super.hasFlag() && !splitStemFor(this);
   }
 
   /** Use explicit font metadata first, then the bundled anchors for Bravura rhythm slashes. */
@@ -758,6 +763,13 @@ export class StaveNote extends StemmableNote {
     if (this.stem) {
       const { yTop, yBottom } = this.getStemYBounds();
       this.stem.setYBounds(yTop, yBottom);
+      // The second staff assignment supplies the final pair of coordinates before the beam is fitted.
+      const shared = splitStemFor(this);
+      if (shared) {
+        const other = shared.upper === this ? shared.lower : shared.upper;
+        const otherBounds = other.getStemYBounds();
+        shared.owner.checkStem().setYBounds(Math.min(yTop, otherBounds.yTop), Math.max(yBottom, otherBounds.yBottom));
+      }
     }
 
     return this;
@@ -1168,10 +1180,7 @@ export class StaveNote extends StemmableNote {
   }
 
   shouldDrawFlag(): boolean {
-    const hasStem = this.stem !== undefined;
-    const hasFlag = this.glyphProps.codeFlagUp !== undefined;
-    const hasNoBeam = this.beam === undefined;
-    return hasStem && hasFlag && hasNoBeam && !this.isRest();
+    return this.stem !== undefined && this.hasFlag();
   }
 
   /** Share flag coordinates between measurement and drawing. */

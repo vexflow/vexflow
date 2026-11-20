@@ -15,6 +15,7 @@ import { Note } from './note';
 import { Ornament } from './ornament';
 import { PedalMarking } from './pedalmarking';
 import { RenderContext } from './rendercontext';
+import { beamStave, splitStemFor } from './splitstem';
 import { Stave } from './stave';
 import { Barline } from './stavebarline';
 import { StaveHairpin } from './stavehairpin';
@@ -205,7 +206,7 @@ export class PhraseLayout {
       }
       const geometry = measureEngraving(n, { extension: (e) => (e === n ? undefined : { parts: [], anchors: {} }) });
       if (geometry.diagnostics.length) this.report('UnsupportedGeometry', n);
-      const bridge = beam?.getNotes().some((x) => x.getStave() !== stave);
+      const bridge = splitStemFor(n)?.owner === n || beam?.getNotes().some((x) => beamStave(x) !== stave);
       geometry.parts.forEach((b, i) => this.addParts(n, stave, [b], bridge && i === n.noteHeads.length));
       for (const m of n.getModifiers()) {
         if (this.managed.has(m)) continue;
@@ -218,11 +219,11 @@ export class PhraseLayout {
       }
     }
     for (const beam of beams) {
-      const owners = beam.getNotes(),
-        stave = owners[0].checkStave(),
-        bridge = owners.some((n) => n.getStave() !== stave);
+      const owners = beam.getNotes();
+      const staves = new Set(owners.map(beamStave));
+      const bridge = staves.size > 1;
       const strips = beam.getStripBounds();
-      for (const s of new Set(owners.map((n) => n.checkStave()))) {
+      for (const s of staves) {
         this.addParts(beam, s, strips, bridge);
         if (bridge) {
           for (const peer of notes) {

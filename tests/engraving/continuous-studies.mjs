@@ -171,3 +171,29 @@ export function tabEndingStudy() {
     },
   };
 }
+
+/** Four aligned eighths across a grand staff. Either voice can own the single native beam. */
+export function beamedSplitChordStudy(VF, stemDirection, spaceBetweenStaves, beamStaff = 'upper') {
+  const staves = ['upper', 'lower'].map((id) => {
+    const octave = id === 'upper' ? 4 : 3;
+    const notes = ['e', 'f', 'g', 'a'].map((pitch, index) => ({
+      id: id + index,
+      note: { keys: [pitch + '/' + octave], duration: '8', stemDirection },
+    }));
+    return {
+      id,
+      clef: id === 'upper' ? 'treble' : 'bass',
+      time: '2/4',
+      measures: [{ voices: [{ notes, autoBeam: id === beamStaff && { groups: [new VF.Fraction(1, 2)] } }] }],
+    };
+  });
+  return {
+    sheet: { x: 12, y: 8, width: 280 },
+    system: { spaceBetweenStaves },
+    staves,
+    continuous: {
+      groups: [{ first: 'upper', last: 'lower', type: 'brace', barlines: true }],
+      splitChords: Array.from({ length: 4 }, (_, i) => ({ id: 'split' + i, upper: 'upper' + i, lower: 'lower' + i })),
+    },
+  };
+}

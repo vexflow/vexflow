@@ -23,6 +23,7 @@ import { MultiMeasureRest } from './multimeasurerest';
 import { Note } from './note';
 import { RenderContext } from './rendercontext';
 import type { SheetOptions, SheetRow } from './sheet';
+import { beamStave, linkSplitStem, splitStemFor } from './splitstem';
 import type { Stave } from './stave';
 import { Barline, BarlineType } from './stavebarline';
 import { StaveConnector } from './staveconnector';
@@ -56,7 +57,7 @@ export interface ContinuousOptions {
   compressRests?: boolean;
   measureNumbers?: boolean;
   courtesy?: boolean;
-  /** Unflagged heads on different staves sharing an onset, duration and stem direction. */
+  /** Aligned half or quarter notes, or eighth notes with a native beam on one of the two staves. */
   splitChords?: readonly { id: string; upper: string; lower: string }[];
   groups?: readonly { first: string; last: string; type: 'brace' | 'bracket'; barlines?: boolean }[];
 }
@@ -251,6 +252,7 @@ export class ContinuousLayout {
         to = sp.to && locations.get(score.getNote(sp.to));
       if (from && to) for (let i = from.measure; i <= to.measure; i++) this.spelledSpans.add(i);
     }
+    const beamedMembers = new Set<StaveNote>();
     for (const chord of this.options.splitChords ?? []) {
       const a = locations.get(score.getNote(chord.upper)),
         b = locations.get(score.getNote(chord.lower));
@@ -265,13 +267,19 @@ export class ContinuousLayout {
         !(b.note instanceof StaveNote) ||
         a.note.isRest() ||
         b.note.isRest() ||
-        !['h', 'q', '2', '4'].includes(a.note.getDuration()) ||
+        !['h', 'q', '2', '4', '8'].includes(a.note.getDuration()) ||
         a.note.getDuration() !== b.note.getDuration() ||
         a.note.getStemDirection() !== b.note.getStemDirection() ||
         !a.note.getTicks().equals(b.note.getTicks()) ||
         !onset(a.note).equals(onset(b.note))
       )
-        invalid('A split stem needs matching simultaneous half or quarter notes on ordered staves.');
+        invalid('A split stem needs matching simultaneous half, quarter or eighth notes on ordered staves.');
+      if (a.note.getDuration() === '8') {
+        if (beamedMembers.has(a.note) || beamedMembers.has(b.note))
+          invalid('A beamed note can belong to only one split chord.');
+        beamedMembers.add(a.note);
+        beamedMembers.add(b.note);
+      }
       seen.add(chord.id);
       this.splitChords.push({ id: chord.id, measure: a.measure, upper: a.note, lower: b.note });
     }
@@ -530,6 +538,12 @@ export class ContinuousLayout {
       if (matches.length !== 1) invalid('Expected one lyric annotation on the source note: ' + span.spec.syllableId);
       span.syllable = matches[0];
     }
+    // A caller may attach the native beam after composition. Validate every owner before modifying either voice.
+    const eighths = this.splitChords.filter(({ upper }) => upper.getDuration() === '8');
+    for (const { upper, lower } of eighths)
+      if (!!upper.getBeam() === !!lower.getBeam() || upper.getStemDirection() !== lower.getStemDirection())
+        invalid('A split eighth-note chord needs a beam on exactly one of its two notes and matching stem directions.');
+    for (const { upper, lower } of eighths) linkSplitStem(upper, lower);
     this.hidden.clear();
     this.diagnostics.length = 0;
     this.fragments.length = 0;
@@ -595,13 +609,17 @@ export class ContinuousLayout {
               take(Math.min(topY, baseY), Math.max(topY, baseY));
             }
             if (!(n instanceof StaveNote) || n.getStave() !== stave) continue;
-            const bridge = n
-              .getBeam()
-              ?.getNotes()
-              .some((p) => p.getStave() !== stave);
-            for (const box of bridge ? n.getHeadInk() : measureEngraving(n).parts) take(box.y, box.y + box.h);
-            if (n.getBeam() && !bridge) {
-              const box = n.getBeam()!.getBoundingBox();
+            const shared = splitStemFor(n);
+            const beam = shared ? shared.owner.getBeam() : n.getBeam();
+            const tipStave = beam && beamStave(n);
+            const bridge = beam?.getNotes().some((p) => beamStave(p) !== tipStave);
+            const parts = bridge && !shared ? n.getHeadInk() : measureEngraving(n).parts;
+            parts.forEach((box, index) => {
+              // The shared stem spans this very gap and must not increase it.
+              if (shared?.owner !== n || index !== n.noteHeads.length) take(box.y, box.y + box.h);
+            });
+            if (beam && !bridge && tipStave === stave) {
+              const box = beam.getBoundingBox();
               take(box.y, box.y + box.h);
             }
             for (const t of n.getTupletStack()) {
@@ -741,7 +759,7 @@ export class ContinuousLayout {
         bottom = Math.min(...b.getYs());
       if (Math.abs(x - b.getStemX()) > Stem.WIDTH)
         this.diagnostics.push({ code: 'SplitStemAlignment', measures: [chord.measure + 1], source: chord.id });
-      else
+      else if (!splitStemFor(a))
         this.drawing.push((ctx) => {
           ctx.fillRect(x - Stem.WIDTH / 2, top, Stem.WIDTH, bottom - top);
         });

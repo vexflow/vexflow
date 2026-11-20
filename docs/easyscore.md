@@ -510,6 +510,11 @@ Typed note wrappers can include `stave: 'other-staff-id'` for cross-staff placem
 Supply the appropriate native note `clef` when its target differs from its voice's staff.
 Assignments survive Sheet reflow. Key-aware accidentals follow the target stave.
 
+To share a stem across two piano staves, add one entry per attack to `continuous.splitChords`,
+such as `{ id: 'attack1', upper: 'rh1', lower: 'lh1' }`. Give both notes the same onset, duration and stem direction.
+Half and quarter notes can share a stem. For beamed eighths, create a beam in either voice with `autoBeam` or
+attach a native beam before formatting. The other voice supplies the second head at each attack.
+
 `withDefaults()` scopes imperative defaults to a synchronous construction callback. It restores them on success or failure.
 
 ```js
