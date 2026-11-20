@@ -10,7 +10,7 @@ node tools/improvements/build.mjs
 node tools/improvements/verify.mjs
 ```
 
-The generator builds the current declarations and browser bundle, Guide, Explorer, test gallery and commit-quality report. The quality report uses Puppeteer. Set `PUPPETEER_EXECUTABLE_PATH` to an installed Chrome if required. The notation comparisons use the pinned Playwright Chromium. The generator reuses the checked 5.2.0 control bundle or downloads its npm tarball and verifies the bundle hash. Run from a clean source checkout so the HEAD link describes the measured code. Generated files stay under `build/`. [Local setup](build.md#local-setup) · [Quality report details](quality-reports.md)
+The generator builds the current declarations and browser bundle, guide, test gallery and commit-quality report. The quality report uses Puppeteer. Set `PUPPETEER_EXECUTABLE_PATH` to an installed Chrome if required. The notation comparisons use the pinned Playwright Chromium. The generator reuses the checked 5.2.0 control bundle or downloads its npm tarball and verifies the bundle hash. Run from a clean source checkout so the HEAD link describes the measured code. Generated files stay under `build/`. [Local setup](build.md#local-setup) · [Quality report details](quality-reports.md)
 
 Open `build/improvements/index.html` directly, or serve it locally. Search the change summaries, open paired score images, or browse the complete commit and declaration inventories. The JSON files contain the underlying inventories and image provenance. To update editorial groupings, edit `tools/improvements/topics.mjs`. The release bundle, API comparison, figures and commit history are rebuilt from source on each run.
 

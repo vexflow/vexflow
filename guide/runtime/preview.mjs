@@ -1,7 +1,7 @@
 // Parent-side preview lifecycle. Keep the isolated runtime warm across edits.
 import { runPreview } from './runner.mjs';
 
-const channel = 'vexflow-explorer';
+const channel = 'vexflow-guide-preview';
 // Scale the display only. Inspection coordinates and exported SVG retain score units.
 const previewScale = 0.8;
 const defaultHeight = 245;

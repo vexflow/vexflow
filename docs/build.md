@@ -66,16 +66,6 @@ Choose the task for the output you are editing. Stop it with Ctrl+C.
 | `npx grunt build:esm:watch`    | Watch and rebuild native ES modules                                     |
 | `npx grunt watch:prod`         | Clean `build/`, then watch production bundles; slower than debug builds |
 
-### Explorer
-
-```sh
-npm run explorer
-```
-
-Open <http://127.0.0.1:5173/explorer/>. This builds the library and Explorer, then serves them locally. Code edits inside the Explorer render live. After changing repository source, restart the command to rebuild it.
-
-Use another port with `npm run explorer -- --port=8080`. See the [Explorer guide](explorer.md) for editing examples and inspecting notation.
-
 ### Interactive user guide
 
 ```sh
@@ -107,7 +97,7 @@ npm run guide:test
 ```
 
 - `npm test` builds debug and ESM outputs, runs Node integration checks, and runs QUnit in headless Chrome.
-- `explorer:test` checks examples, controls, editing, inspection, and upload behavior.
+- `explorer:test` checks that the retired URL publishes only its guide notice.
 - `tests:test` builds and checks the standalone test gallery and its upload behavior.
 - `test:easyscore-package` builds ESM, declarations, and CJS, then checks EasyScore package exports and types.
 - `guide:test` checks lesson routes, all editable examples, mobile layout, exports, and upload behavior.
@@ -283,15 +273,17 @@ The [Minuet print score](../demos/pdf/minuet.js) includes the pitches, fingering
 
 ## Upload static sites
 
-The guide, Explorer, test gallery, PDF library, and reports share the [website theme](../tools/site-theme.css). Each build includes its own copy for offline use.
+The guide, test gallery, PDF library, and reports share the [website theme](../tools/site-theme.css). Each build includes its own copy for offline use.
 
-The guide, Explorer, and visual test gallery are self-contained static sites. Their upload commands build current source and bundle the required scripts and fonts.
+The guide and visual test gallery are self-contained static sites. Their upload commands build current source and bundle the required scripts and fonts.
 
 | Site         | Build only               | Upload                    | Bucket prefix                | Public URL                      |
 | ------------ | ------------------------ | ------------------------- | ---------------------------- | ------------------------------- |
 | User guide   | `npm run guide:build`    | `npm run guide:upload`    | `gs://vexflow.com/guide/`    | <https://vexflow.com/guide/>    |
-| Explorer     | `npm run explorer:build` | `npm run explorer:upload` | `gs://vexflow.com/explorer/` | <https://vexflow.com/explorer/> |
+| Legacy notice | `npm run explorer:build` | `npm run explorer:upload` | `gs://vexflow.com/explorer/` | <https://vexflow.com/explorer/> |
 | Test gallery | `npm run tests:build`    | `npm run tests:upload`    | `gs://vexflow.com/tests/`    | <https://vexflow.com/tests/>    |
+
+The legacy Explorer upload publishes only a short HTML notice linking to the guide. Old bookmarks, including example and glyph fragments, open that page.
 
 For commit-by-commit repository metrics, see [code quality reports](quality-reports.md). Build with `npm run report` and publish with `npm run report:upload`.
 

@@ -1,4 +1,4 @@
-// Executable EasyScore family studies shared by the Explorer and rendering regressions.
+// Executable EasyScore family studies shared by the guide and rendering regressions.
 export function renderEasyScoreFamilies(VF, renderer, kind = 'modifiers', ink = '#24312c') {
   const score = VF.EasyScore.create({ renderer });
   score.setStyle({ fillStyle: ink, strokeStyle: ink });

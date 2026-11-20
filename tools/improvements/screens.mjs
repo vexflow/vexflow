@@ -1,9 +1,9 @@
-// Capture complete editable examples and the actual Guide, Explorer, gallery, reader and quality-report interfaces.
+// Capture complete editable examples and the actual guide, gallery, reader and quality-report interfaces.
 import { readFile, mkdir } from 'node:fs/promises';
 import { resolve, extname, join, sep } from 'node:path';
 import { createHash } from 'node:crypto';
 import { examples } from '../../guide/content.mjs';
-import { defaults } from '../explorer/catalog.mjs';
+import { defaults } from '../../guide/catalog.mjs';
 
 const probes = [
   {
@@ -103,8 +103,6 @@ export async function captureTools(browser, directory, revision) {
   const page = await browser.newPage({ viewport: { width: 1240, height: 840 } });
   const views = [
     ['guide', 'Interactive user guide', '/guide/index.html#lesson/tab/rasgueado-golpe', 'iframe'],
-    ['explorer', 'Notation Explorer', '/explorer/index.html#example/string-mute-bend', 'iframe'],
-    ['glyphs', 'Glyph atlas', '/explorer/index.html#glyphs', '#glyph-grid button'],
     ['gallery', 'Visual test gallery', '/tests-site/index.html', 'a[href*="all.html"]'],
     ['reader', 'Accessible score reader', '/demos/ui/score-reader.html', '#events option'],
     ['canvas-reader', 'Canvas selection at phone width', '/demos/ui/score-reader.html', '#events option'],
@@ -130,7 +128,7 @@ export async function captureTools(browser, directory, revision) {
       await page.setViewportSize({ width: id === 'canvas-reader' ? 390 : 1240, height: 840 });
       await page.goto('https://report.test' + url);
       await page.locator(selector).first().waitFor({ state: 'attached' });
-      if (id === 'explorer' || id === 'guide') {
+      if (id === 'guide') {
         await page.frameLocator('iframe').first().locator('#score svg text').first().waitFor({ state: 'attached' });
       }
       if (id === 'canvas-reader') {

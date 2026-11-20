@@ -1,7 +1,7 @@
 // Reuses an isolated VexFlow runtime, cleaning ordinary run effects between examples.
 export function runPreview() {
   'use strict';
-  const channel = 'vexflow-explorer';
+  const channel = 'vexflow-guide-preview';
   let token,
     svg,
     overlay,
@@ -183,7 +183,7 @@ export function runPreview() {
     if (!svg) return;
     overlay?.remove();
     overlay = document.createElementNS(svg.namespaceURI, 'g');
-    overlay.dataset.explorerOverlay = 'true';
+    overlay.dataset.guideOverlay = 'true';
     overlay.setAttribute('pointer-events', 'none');
     svg.appendChild(overlay);
     if (bounds) elements.filter((e) => e.rendered).forEach((e) => rect(e.rendered, '#7c9975'));
@@ -260,7 +260,7 @@ export function runPreview() {
         'height',
         'ink',
         'params',
-        `"use strict";\n${message.code}\n//# sourceURL=explorer-example.js`
+        `"use strict";\n${message.code}\n//# sourceURL=guide-example.js`
       )(VF, message.width, message.height, message.ink, message.params);
       await document.fonts.ready;
       svg = document.querySelector('#score svg');
@@ -294,7 +294,7 @@ export function runPreview() {
       grid = message.grid;
       paint();
     } catch (error) {
-      const match = String(error.stack).match(/explorer-example\.js:(\d+):(\d+)/);
+      const match = String(error.stack).match(/guide-example\.js:(\d+):(\d+)/);
       send(
         'error',
         {

@@ -1,6 +1,6 @@
 # VexFlow User Guide
 
-Interactive lessons, editable examples, and the complete Explorer example collection.
+Interactive lessons, editable examples, and the notation playground.
 
 ```sh
 npm ci

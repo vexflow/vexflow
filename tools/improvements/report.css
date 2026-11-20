@@ -51,10 +51,16 @@ a:hover {
   padding-left: 18px;
   font-size: 0.85rem;
 }
-.download {
+.mast nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
   margin-left: auto;
   font-size: 0.82rem;
   font-weight: 650;
+}
+.mast nav a {
+  white-space: nowrap;
 }
 .shell {
   display: grid;
@@ -468,10 +474,16 @@ dialog figcaption {
 }
 @media (max-width: 520px) {
   .mast {
-    gap: 8px;
+    height: auto;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding-block: 8px 12px;
   }
   .mast > span {
     display: none;
+  }
+  .mast nav {
+    width: 100%;
   }
   .shell {
     padding: 0 16px 42px;

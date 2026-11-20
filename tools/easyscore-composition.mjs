@@ -1,4 +1,4 @@
-// Grand-staff composition shared by the Explorer and responsive rendering checks.
+// Grand-staff composition shared by the guide and responsive rendering checks.
 export function renderEasyScoreComposition(VF, renderer, spacing = 'engraving', ink = '#24312c') {
   const score = VF.EasyScore.create({ renderer });
   score.setStyle({ fillStyle: ink, strokeStyle: ink });

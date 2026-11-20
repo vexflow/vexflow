@@ -1,4 +1,4 @@
-// Shared native-extension example for the Explorer and browser lifecycle regressions.
+// Shared native-extension example for the guide and browser lifecycle regressions.
 export function createEasyScoreReferencesExample(VF, renderer, ink = '#24312c') {
   const score = VF.EasyScore.create({ renderer });
   score.setStyle({ fillStyle: ink, strokeStyle: ink });

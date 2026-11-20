@@ -1,4 +1,4 @@
-/* Warm paper, green accents, and compact type echo vexflow.com and the Explorer. */
+/* Warm paper, green accents, and compact type echo vexflow.com. */
 * {
   box-sizing: border-box;
 }
@@ -495,11 +495,6 @@ details pre {
   font-size: 11px;
   padding: 0 22px 14px;
   margin: 10px 0 0;
-  display: flex;
-  gap: 18px;
-  flex-wrap: wrap;
-}
-#api-links {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;

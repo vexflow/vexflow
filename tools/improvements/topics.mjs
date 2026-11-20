@@ -372,9 +372,9 @@ export const topics = [
       ],
       [
         'Preview state and errors',
-        'Guide and Explorer reuse a warm runtime across edits and navigation. Async failures keep their error details, reset isolates prior execution, and scaled pointer coordinates resolve the intended target.',
-        'docs/explorer.md',
-        'tool-explorer',
+        'The guide reuses a warm runtime across edits and navigation. Async failures keep their error details, reset isolates prior execution, and scaled pointer coordinates resolve the intended target.',
+        'docs/guide.md',
+        'tool-guide',
       ],
     ],
   ],
@@ -410,8 +410,8 @@ export const topics = [
       [
         'Editable examples',
         'The host runs editable code inside a sandboxed preview iframe and handles its messages and errors. Standalone downloads and resets have regression checks for isolation.',
-        'tools/explorer/preview.mjs',
-        'tool-explorer',
+        'docs/guide.md',
+        'tool-guide',
       ],
     ],
   ],
@@ -460,18 +460,6 @@ export const topics = [
     'Tools and accessibility',
     'Interactive applications',
     [
-      [
-        'Notation Explorer',
-        'Edit and run a score, change font or controls, inspect glyphs and element bounds, and select the original notation. The standalone export preserves editable code alongside the local runtime.',
-        'docs/explorer.md',
-        'tool-explorer',
-      ],
-      [
-        'Glyph atlas',
-        'Search music glyphs by name or Unicode value and compare coverage in the selected music font. The inspector exposes the glyph identity and rendering code.',
-        'docs/explorer.md',
-        'tool-glyphs',
-      ],
       [
         'Canvas on mobile',
         'A host-owned list provides the same reading order as SVG. A tap or keyboard move selects the corresponding event even after resizing a high-density Canvas surface.',
@@ -552,7 +540,7 @@ export const topics = [
       ],
       [
         'Build and release instructions',
-        'Build, testing, package verification and deployment procedures are consolidated. The Guide, Explorer and gallery use versioned local assets; uploads validate files and publish assets before the HTML.',
+        'Build, testing, package verification and deployment procedures are consolidated. The guide and gallery use versioned local assets; uploads validate files and publish assets before the HTML.',
         'docs/build.md',
       ],
       [

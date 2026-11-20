@@ -114,7 +114,7 @@ export async function build() {
   return output;
 }
 
-/** The test site shares the Explorer's upload ordering, integrity checks, and cache policy. */
+/** The test site shares the guide’s upload ordering, integrity checks, and cache policy. */
 export function upload({ destination = 'gs://vexflow.com/tests/', directory = output, ...options } = {}) {
   return uploadSite({
     destination,

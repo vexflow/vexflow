@@ -1,4 +1,4 @@
-// Playable guitar examples shared by the Explorer and the Guide. Each snippet runs independently.
+// Playable guitar examples in the guide playground. Each snippet runs independently.
 const setup = `// Draw into the guide's score container at the available width.
 const score = VF.EasyScore.create({
   renderer: { elementId: 'score', width, height },

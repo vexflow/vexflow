@@ -1,4 +1,4 @@
-// Complete teaching examples. Each runs in the shared Explorer preview environment.
+// Complete teaching examples. Each runs in the guide preview environment.
 const setup = `// Draw into the guide's score container at the available width.
 const score = VF.EasyScore.create({
   renderer: { elementId: 'score', width, height },
@@ -13,7 +13,7 @@ score.system({ x: 20, y: 50, width: width - 40 })
 score.draw();`;
 }
 
-/** Use the same example shape as Explorer; controls are optional. */
+/** Use the playground example format; controls are optional. */
 function example(id, title, code, api = 'EasyScore System') {
   return { id, title, code, api: api.split(' '), controls: [], group: 'Guide examples', description: title, tips: '' };
 }
