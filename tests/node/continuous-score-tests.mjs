@@ -1,10 +1,13 @@
 // Contracts for single-source continuous scores, hard breaks and retained row-dependent notation.
 import assert from 'node:assert/strict';
-import test from 'node:test';
 import { readFile } from 'node:fs/promises';
-import puppeteer from 'puppeteer';
+import test from 'node:test';
+
 import { createCanvas, registerFont } from 'canvas';
+import puppeteer from 'puppeteer';
+
 import { makeContinuousStudy, tabEndingStudy } from '../engraving/continuous-studies.mjs';
+
 const VF = await import(new URL('../../build/esm/entry/vexflow-core.js', import.meta.url));
 for (const family of ['Bravura', 'Academico']) {
   const name = family.toLowerCase();
@@ -124,6 +127,101 @@ function spec(count, continuous, notes = (i) => [{ id: 'n' + i, note: { keys: ['
     continuous,
   };
 }
+/** Capture circles while the native Canvas context paints the wedges. */
+function paintedTips(ctx, draw) {
+  const circles = [];
+  const arc = ctx.arc;
+  ctx.arc = function (x, y, radius, ...angles) {
+    circles.push({ x, y, radius });
+    return arc.call(this, x, y, radius, ...angles);
+  };
+  try {
+    draw();
+    return circles;
+  } finally {
+    ctx.arc = arc;
+  }
+}
+
+test('native niente circles touch the wedge, have open centers and fit its measured stroke bounds', () => {
+  for (const space of [8, 12]) {
+    const { f, ctx } = factory();
+    const source = spec(2, {});
+    source.staves[0].options = { spacingBetweenLinesPx: space };
+    const c = f.EasyScore().compose(source);
+    c.sheet.setWidth(500).format();
+    const from = c.getNote('n0'),
+      to = c.getNote('n1');
+    for (const type of [VF.StaveHairpin.type.CRESC, VF.StaveHairpin.type.DECRESC]) {
+      const hairpin = f.StaveHairpin({ from, to, type, options: { height: 2 } }).setStyle({ lineWidth: 2 });
+      const render = () => paintedTips(f.getContext(), () => hairpin.drawWithStyle());
+      assert.deepEqual(render(), []);
+      const plain = hairpin.getBoundingBox();
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      hairpin.setRenderOptions({ ...hairpin.renderOptions, niente: true });
+      const circles = render();
+      assert.equal(circles.length, 1);
+      const [{ x, y, radius }] = circles;
+      assert.equal(radius, space * 0.35);
+      const grows = type === VF.StaveHairpin.type.CRESC;
+      const tip = (grows ? from : to).getModifierStartXY(VF.Modifier.Position.BELOW, 0);
+      assert.ok(Math.abs((grows ? x + radius : x - radius) - tip.x) < 1e-6);
+      const box = hairpin.getBoundingBox();
+      assert.ok(Math.abs(box.w - plain.w - 2 * radius) < 1e-6);
+      assert.ok(Math.abs(box.h - 2 * (radius + 1)) < 1e-6);
+      assert.equal(ctx.getImageData(Math.floor(x), Math.floor(y), 1, 1).data[3], 0);
+      assert.ok(ctx.getImageData(Math.floor(x), Math.floor(y - radius), 1, 1).data[3] > 0);
+      const shifted = paintedTips(f.getContext(), () =>
+        VF.StaveHairpin.FormatByTicksAndDraw(
+          f.getContext(),
+          { pixelsPerTick: 2 },
+          { firstNote: from, lastNote: to },
+          type,
+          VF.Modifier.Position.BELOW,
+          { ...hairpin.renderOptions, leftShiftTicks: 2, rightShiftTicks: -2 }
+        )
+      );
+      assert.deepEqual(shifted, [{ x: x + (grows ? 4 : -4), y, radius }]);
+    }
+  }
+});
+
+test('a wrapped niente circle belongs only to its closed musical endpoint and its hit region', () => {
+  for (const space of [8, 12]) {
+    const { f } = factory();
+    const spans = ['crescendo', 'diminuendo'].map((kind) => ({ id: kind, kind, from: 'n0', to: 'n4', niente: true }));
+    const source = spec(5, { spans: [...spans, { ...spans[0], id: 'plain', niente: false }] });
+    source.staves[0].options = { spacingBetweenLinesPx: space };
+    const c = f.EasyScore().compose(source);
+    for (const width of [600, 120, 600]) {
+      c.sheet.setWidth(width).format();
+      const layout = c.sheet.getContinuousLayout();
+      const marked = layout.fragments.filter((f) => f.nienteTip);
+      assert.deepEqual(
+        marked.map((f) => f.id),
+        ['crescendo', 'diminuendo']
+      );
+      assert.deepEqual(
+        marked.map((f) => f.part),
+        width === 120 ? ['first', 'last'] : ['single', 'single']
+      );
+      if (width === 120) assert.ok(layout.fragments.some((f) => f.part === 'middle'));
+      assert.deepEqual(
+        paintedTips(f.getContext(), () => layout.draw(f.getContext())),
+        marked.map((f) => f.nienteTip)
+      );
+      const nav = new VF.ScoreNavigation(c, source.staves);
+      for (const fragment of marked) {
+        const { x, y, radius } = fragment.nienteTip;
+        const side = fragment.kind === 'crescendo' ? -1 : 1;
+        const vertex = side < 0 ? fragment.x1 : fragment.x2;
+        assert.ok(Math.abs(x - side * radius - vertex) < 1e-6);
+        assert.equal(nav.hitTest(x + side * radius, y)?.id, fragment.id);
+      }
+    }
+  }
+});
+
 test('a lyric extender resolves a unique word on its source note during formatting', () => {
   const span = { id: 'hold', kind: 'lyric', from: 'n0', to: 'n1', syllableId: 'word' };
   const compose = (config) =>
