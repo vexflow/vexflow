@@ -536,6 +536,15 @@ const measure = {
 };
 ```
 
+Supply a `harmony` for a chord whose root and optional bass participate in transposition. Put the suffix, including extensions and alterations, in `quality`. Use `text` for a literal mark such as `N.C.`.
+
+```js
+const source = { root: 'G', quality: '7', bass: 'B' };
+const written = VexFlow.NotationSpelling.transposeChord(source, 2, 1);
+const chords = [{ note: 'downbeat', harmony: written }, { note: 'rest', text: 'N.C.' }];
+// The first label prints A7/C♯. Use the same +2 semitones and +1 letter step for the melody.
+```
+
 `showTimeSignature` carries forward on the staff. Set it to `true` to print the active meter again. The meter still governs voice timing and automatic beaming while hidden. Use `Barline.type.DOUBLE` for a double bar. The same descriptors drive screen reflow and the selected staff in a `Publication`.
 
 ### Accidental policy
