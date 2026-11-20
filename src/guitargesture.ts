@@ -23,17 +23,26 @@ export interface TimedStringBend {
   label?: string;
 }
 
+/** A string tie carries the target between two adjacent events. Rise belongs to the first event, and
+ * hold and release are measured from the start of the tied continuation.
+ */
+export interface TiedBend {
+  semitones: number;
+  rise: readonly [number, number];
+  hold: readonly [number, number];
+  release: readonly [number, number];
+  label?: string;
+}
+
 /** Normalize the written amount independently of the bend's horizontal length. */
-export function bendAmount(bend: TimedStringBend): string {
+export function bendAmount(bend: Pick<TimedStringBend, 'semitones' | 'label'>): string {
   return bend.label ?? (bend.semitones === 2 ? 'full' : bend.semitones === 1 ? '½' : String(bend.semitones) + ' st');
 }
 
-/** Validate the performed order before constructing a modifier or changing a note. */
-export function copyBend(bend: TimedStringBend): TimedStringBend {
-  if (!Number.isInteger(bend.string) || bend.string < 1 || !Number.isFinite(bend.semitones) || bend.semitones <= 0)
-    throw new RuntimeError('BadArguments', 'A timed bend needs a string and positive semitone amount.');
+/** Validate increasing fractions within one written event. */
+function checkPhases(ends: readonly (readonly [number, number])[]): void {
   let previous: readonly [number, number] = [0, 1];
-  for (const end of [bend.rise, ...(bend.hold ? [bend.hold] : []), ...(bend.release ? [bend.release] : [])]) {
+  for (const end of ends) {
     if (
       !Array.isArray(end) ||
       end.length !== 2 ||
@@ -46,6 +55,22 @@ export function copyBend(bend: TimedStringBend): TimedStringBend {
       throw new RuntimeError('BadArguments', 'Bend endpoints must increase within the written duration.');
     previous = end;
   }
+}
+
+/** Check the clocks of the initial attack and tied continuation independently. */
+export function copyTiedBend(bend: TiedBend): TiedBend {
+  if (!Number.isFinite(bend.semitones) || bend.semitones <= 0)
+    throw new RuntimeError('BadArguments', 'A tied bend needs a positive semitone amount.');
+  checkPhases([bend.rise]);
+  checkPhases([bend.hold, bend.release]);
+  return { ...bend, rise: [...bend.rise], hold: [...bend.hold], release: [...bend.release] };
+}
+
+/** Validate the performed order before constructing a modifier or changing a note. */
+export function copyBend(bend: TimedStringBend): TimedStringBend {
+  if (!Number.isInteger(bend.string) || bend.string < 1 || !Number.isFinite(bend.semitones) || bend.semitones <= 0)
+    throw new RuntimeError('BadArguments', 'A timed bend needs a string and positive semitone amount.');
+  checkPhases([bend.rise, ...(bend.hold ? [bend.hold] : []), ...(bend.release ? [bend.release] : [])]);
   return {
     ...bend,
     rise: [...bend.rise],
