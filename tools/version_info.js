@@ -1,10 +1,8 @@
-// Reads the version number in package.json
-// Reads the most recent git commit hash.
-// Returns the current timestamp.
+// Provide version, source revision and timestamp for package and reproducible website builds.
 
 const path = require('path');
 const fs = require('fs');
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 
 let VEXFLOW_VERSION;
 let GIT_COMMIT_ID;
@@ -12,8 +10,26 @@ let DATE;
 
 function updateInfo() {
   VEXFLOW_VERSION = JSON.parse(fs.readFileSync('package.json')).version;
-  GIT_COMMIT_ID = execSync('git rev-parse HEAD').toString().trim();
-  DATE = new Date().toISOString();
+  // Website bundles identify the last runtime change so editing a lesson does not invalidate the library.
+  if (process.env.VF_WEBSITE_BUILD === '1') {
+    const inputs = [
+      'src',
+      'entry',
+      'Gruntfile.js',
+      'tools/version_info.js',
+      'package.json',
+      'package-lock.json',
+      'tsconfig.json',
+    ];
+    const [commit, epoch] = execFileSync('git', ['log', '-1', '--format=%H %ct', '--', ...inputs], { encoding: 'utf8' })
+      .trim()
+      .split(' ');
+    GIT_COMMIT_ID = commit;
+    DATE = new Date(Number(epoch) * 1000).toISOString();
+  } else {
+    GIT_COMMIT_ID = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+    DATE = new Date().toISOString();
+  }
 }
 
 updateInfo();

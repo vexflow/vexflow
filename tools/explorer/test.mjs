@@ -1,4 +1,5 @@
 // End-to-end coverage for every example, the editor/inspector, and safe static publication.
+import { memoryStore } from '../site-storage.fixture.mjs';
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import { chmod, cp, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
@@ -490,12 +491,13 @@ throw new Error('Superseded error');`);
     const directory = await mkdtemp(join(tmpdir(), 'vexflow-upload-test-'));
     const log = join(directory, 'calls.jsonl');
     const command = join(directory, 'gcloud');
+    const store = memoryStore('gs://vexflow.com/explorer/');
     const script = `#!${process.execPath}\nimport fs from 'node:fs';\nconst args=process.argv.slice(2);fs.appendFileSync(${JSON.stringify(log)},JSON.stringify(args)+'\\n');\nif(args[1]==='rsync'&&fs.existsSync(${JSON.stringify(join(directory, 'fail'))}))process.exit(7);\nif(args[1]==='cp')fs.copyFileSync(args[2],${JSON.stringify(join(directory, 'published.html'))});\nif(args[1]==='cat')process.stdout.write(fs.readFileSync(${JSON.stringify(join(directory, 'published.html'))}));\n`;
     await writeFile(join(directory, 'package.json'), ' {"type":"module"} ');
     await writeFile(command, script);
     await chmod(command, 0o755);
     try {
-      await upload({ command });
+      await upload({ command, store });
       const calls = (await readFile(log, 'utf8')).trim().split('\n').map(JSON.parse);
       assert.deepEqual(
         calls.map((args) => args[1]),
@@ -507,7 +509,7 @@ throw new Error('Superseded error');`);
       assert.ok(calls[1].includes('--cache-control=public,max-age=60,must-revalidate'));
       await writeFile(log, '');
       await writeFile(join(directory, 'fail'), '');
-      await assert.rejects(upload({ command }), /gcloud failed/);
+      await assert.rejects(upload({ command, store }), /gcloud failed/);
       assert.equal((await readFile(log, 'utf8')).trim().split('\n').length, 1, 'HTML untouched after failed assets');
       await assert.rejects(upload({ destination: 'gs://vexflow.com/' }), /nonempty prefix/);
       const broken = join(directory, 'broken');

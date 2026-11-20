@@ -1,4 +1,5 @@
 // Verify the deployed test gallery loads only its bundled assets and publishes with the shared cache policy.
+import { memoryStore } from './site-storage.fixture.mjs';
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import { chmod, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
@@ -83,9 +84,17 @@ test('standalone gallery runs with local fonts/scripts and preserves QUnit filte
       });
     });
     assert.deepEqual(displayFonts, ['Tangerine', 'Academico']);
-    assert.deepEqual(
-      requests.filter((url) => !url.endsWith('/favicon.ico')).map((url) => new URL(url).pathname),
-      ['/tests/', `/tests/${(await validate(output)).assetPath}/demos/ballade.webp`]
+    const manifest = await validate(output);
+    const initial = requests.filter((url) => !url.endsWith('/favicon.ico')).map((url) => new URL(url).pathname);
+    const permitted = new Set([
+      '/tests/',
+      ...Object.entries(manifest.paths)
+        .filter(([name]) => name === 'demos/ballade.webp' || name === 'site-theme.css' || name.startsWith('typefaces/'))
+        .map(([, path]) => '/tests/' + path),
+    ]);
+    assert.ok(
+      initial.every((path) => permitted.has(path)),
+      initial.join(', ')
     );
     // Native buttons remain focused while slides change. Each score and its source
     // must be present in the deployed asset graph; the runner loads only on navigation.
@@ -314,12 +323,13 @@ test('test upload targets its own prefix and retains immutable assets and short-
     const log = join(directory, 'calls.jsonl');
     const published = join(directory, 'published.html');
     const command = join(directory, 'gcloud');
+    const store = memoryStore('gs://vexflow.com/tests/');
     await writeFile(
       command,
       `#!${process.execPath}\nconst fs=require('node:fs');const args=process.argv.slice(2);fs.appendFileSync(${JSON.stringify(log)},JSON.stringify(args)+'\\n');if(args[1]==='cp')fs.copyFileSync(args[2],${JSON.stringify(published)});if(args[1]==='cat')process.stdout.write(fs.readFileSync(${JSON.stringify(published)}));`
     );
     await chmod(command, 0o755);
-    await upload({ command });
+    await upload({ command, store });
     const calls = (await readFile(log, 'utf8')).trim().split('\n').map(JSON.parse);
     assert.deepEqual(
       calls.map((args) => args[1]),

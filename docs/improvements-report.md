@@ -29,11 +29,11 @@ npm run improvements:upload -- --dry-run   # Validate the bundle and print the u
 npm run improvements:upload -- --rebuild   # Generate, browser-check, and upload the current checkout.
 ```
 
-| Files                                                     | Public cache lifetime                                                        |
-| --------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Images, CSS, and JavaScript                               | One year, immutable. A change to the asset set produces a new directory URL. |
-| `changes.json`, `render-inventory.json`, and `index.html` | 60 seconds, then revalidate. These URLs stay stable across uploads.          |
+| Files                                                     | Public cache lifetime                                               |
+| --------------------------------------------------------- | ------------------------------------------------------------------- |
+| Images, fonts, CSS, and JavaScript                        | One year, immutable. Each file has its own content-based URL.       |
+| `changes.json`, `render-inventory.json`, and `index.html` | 60 seconds, then revalidate. These URLs stay stable across uploads. |
 
-The script stages a copy of the bundle, checks its manifest, uploads assets first, and verifies the JSON downloads against the bucket before publishing and verifying the HTML. Older assets stay available to readers with a cached page. If an upload fails, rerun the same command.
+The script stages a copy of the bundle, checks its manifest, uploads assets first, and verifies the JSON downloads against the bucket before publishing and verifying the HTML. Older assets stay available to readers with a cached page. If an upload fails, rerun the same command. To preview retired assets, run `npm run sites:clean -- reports/ai2026`. [Website retention policy](build.md#clean-up-retired-website-assets)
 
 The versioned engineering metrics archive uses its own publisher. [Quality report publication](quality-reports.md)

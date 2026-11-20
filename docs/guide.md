@@ -115,7 +115,7 @@ The default destination is `gs://vexflow.com/guide/`. Override it with
 
 The shared uploader validates hashes, freezes the manifest members, uploads immutable assets first,
 and uploads `index.html` last with a 60-second cache. It reads the HTML back to verify its hash.
-Old assets remain available for cached pages. The guide command does not change hosting configuration.
+A lesson edit preserves the URLs of unchanged fonts, styles and library code. Retired assets remain available for at least one year. The guide command does not change hosting configuration.
 See [deployment setup](build.md#upload-static-sites) for authentication and public ACL requirements.
 
 After publishing, open `/guide/`, a lesson fragment, and a playground fragment on desktop and mobile.

@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { externalFonts, linkAssets, writeAssets } from '../site-assets.mjs';
 import { upload } from '../static-site-upload.mjs';
 
 const jsonFiles = ['changes.json', 'render-inventory.json'];
@@ -65,20 +66,15 @@ export async function stageReport(source, staging) {
   const page = await readFile(join(source, 'index.html'), 'utf8');
   const assets = new Map();
   for (const path of reportAssets(data.figures, page)) assets.set(path, await readFile(join(source, path)));
-  const hashes = [...assets].map(([path, bytes]) => [path, digest(bytes)]);
-  const assetPath = 'assets/' + digest(JSON.stringify(hashes)).slice(0, 16);
+  const inputs = new Map([...assets].map(([path, bytes]) => [basename(path), bytes]));
+  inputs.set('report.css', Buffer.from(externalFonts(inputs.get('report.css').toString(), inputs)));
+  const graph = linkAssets(inputs);
+  const manifest = await writeAssets(staging, graph);
+  const files = manifest.files;
   const relocate = (path) => {
-    if (!assets.has(path)) throw new Error(`Unknown report asset: ${path}`);
-    return './' + assetPath + '/' + basename(path);
+    if (!assets.has(path)) throw new Error('Unknown report asset: ' + path);
+    return './' + graph.paths[basename(path)];
   };
-  await mkdir(join(staging, assetPath), { recursive: true });
-  const files = {};
-  for (const [path, hash] of hashes) {
-    const target = assetPath + '/' + basename(path);
-    await writeFile(join(staging, target), assets.get(path));
-    files[target] = hash;
-  }
-
   const html = publishHTML(page, relocate, data.figures);
   data.figures = publishedFigures(data.figures, relocate);
   const inventory = await readFile(join(source, 'render-inventory.json'));
@@ -91,15 +87,15 @@ export async function stageReport(source, staging) {
     await writeFile(join(staging, path), bytes);
     files[path] = digest(bytes);
   }
-  await writeFile(join(staging, 'manifest.json'), JSON.stringify({ assetPath, files }));
+  await writeFile(join(staging, 'manifest.json'), JSON.stringify(manifest));
 }
 
 /** Stage in isolation so a dry run or failed upload never modifies the offline bundle. */
-export async function publishReport(source, { dryRun = false, command = 'gcloud' } = {}) {
+export async function publishReport(source, { dryRun = false, command = 'gcloud', store } = {}) {
   const staging = await mkdtemp(join(tmpdir(), 'vexflow-improvements-'));
   try {
     await stageReport(source, staging);
-    await upload({ directory: staging, destination, publicURL, jsonFiles, dryRun, command });
+    await upload({ directory: staging, destination, publicURL, jsonFiles, dryRun, command, store });
   } finally {
     await rm(staging, { recursive: true, force: true });
   }

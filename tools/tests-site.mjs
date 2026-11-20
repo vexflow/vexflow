@@ -5,7 +5,8 @@ import { mkdir, mkdtemp, readFile, readdir, rename, rm, writeFile } from 'node:f
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { inlineSiteTheme } from './site-theme.mjs';
+import { siteTheme } from './site-theme.mjs';
+import { externalFonts, linkAssets, linkPage, writeAssets } from './site-assets.mjs';
 import { upload as uploadSite, validate } from './static-site-upload.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -41,13 +42,16 @@ async function bundleFonts(assets) {
 export async function build() {
   const result = spawnSync(process.execPath, [join(root, 'node_modules/.bin/grunt'), 'webpack:debug'], {
     cwd: root,
+    env: { ...process.env, VF_WEBSITE_BUILD: '1' },
     stdio: 'inherit',
   });
   if (result.error) throw result.error;
   if (result.status !== 0) throw new Error('VexFlow test bundle build failed.');
   const assets = new Map();
+  assets.set('site-theme.css', Buffer.from(externalFonts(siteTheme, assets)));
+  assets.set('vexflow-debug.js.map', await readFile(join(root, 'build/website-cjs/vexflow-debug.js.map')));
   for (const file of ['vexflow-debug-with-tests.js', 'vexflow-debug-with-tests.js.map'])
-    assets.set(file, await readFile(join(root, 'build/cjs', file)));
+    assets.set(file, await readFile(join(root, 'build/website-cjs', file)));
   for (const file of ['qunit.js', 'qunit.css'])
     assets.set(`qunit/${file}`, await readFile(join(root, 'tests/qunit', file)));
   assets.set('minuet.webp', await readFile(join(root, 'tests/minuet.webp')));
@@ -58,45 +62,44 @@ export async function build() {
       assets.set('demos/' + file.replace(/\.ts$/, '.txt'), await readFile(join(root, 'tests/demos', file)));
   }
   // The score reader uses the library bundle on demand. Its modules and previews are portable together.
-  assets.set('vexflow-debug.js', await readFile(join(root, 'build/cjs/vexflow-debug.js')));
+  assets.set('vexflow-debug.js', await readFile(join(root, 'build/website-cjs/vexflow-debug.js')));
   for (const file of await readdir(join(root, 'tests/scores'))) {
     let bytes = await readFile(join(root, 'tests/scores', file));
     if (file === 'index.html')
       bytes = Buffer.from(
-        inlineSiteTheme(bytes.toString())
+        bytes
+          .toString()
+          .replace('../../tools/site-theme.css', '../site-theme.css')
           .replace('../../build/cjs/vexflow-debug.js', '../vexflow-debug.js')
           .replace('../flow.html', '../../../index.html')
       );
     assets.set('scores/' + file, bytes);
   }
   await bundleFonts(assets);
-  const digest = hash(
-    Buffer.concat([...assets.entries()].sort().flatMap(([name, bytes]) => [Buffer.from(name), bytes]))
-  );
-  const assetPath = `assets/${digest.slice(0, 16)}`;
+  const graph = linkAssets(assets);
   const staging = await mkdtemp(join(root, 'build/tests-site-staging-'));
   try {
-    const manifest = { assetPath, files: {} };
-    for (const [name, bytes] of assets) {
-      const file = `${assetPath}/${name}`;
-      await mkdir(dirname(join(staging, file)), { recursive: true });
-      await writeFile(join(staging, file), bytes);
-      manifest.files[file] = hash(bytes);
-    }
-    const runner = inlineSiteTheme(await readFile(join(root, 'tests/all.html'), 'utf8'))
+    const manifest = await writeAssets(staging, graph);
+    const runner = (await readFile(join(root, 'tests/all.html'), 'utf8'))
+      .replace('../tools/site-theme.css', './' + graph.paths['site-theme.css'])
       .replace(
         '<head>',
-        `<head>\n    <meta name="vexflow-test-bundle" content="./${assetPath}/vexflow-debug-with-tests.js" />`
+        `<head>\n    <meta name="vexflow-test-bundle" content="./${graph.paths['vexflow-debug-with-tests.js']}" />`
       )
       .replace('href="flow.html"', 'href="index.html"')
-      .replace('href="fonts.css"', `href="./${assetPath}/fonts.css"`)
-      .replace('href="qunit/qunit.css"', `href="./${assetPath}/qunit/qunit.css"`)
-      .replace('src="qunit/qunit.js"', `src="./${assetPath}/qunit/qunit.js"`);
+      .replace('href="fonts.css"', `href="./${graph.paths['fonts.css']}"`)
+      .replace('href="qunit/qunit.css"', `href="./${graph.paths['qunit/qunit.css']}"`)
+      .replace('src="qunit/qunit.js"', `src="./${graph.paths['qunit/qunit.js']}"`);
     await writeFile(join(staging, 'all.html'), runner);
     manifest.files['all.html'] = hash(runner);
-    const html = inlineSiteTheme(await readFile(join(root, 'tests/flow.html'), 'utf8')).replace(
-      /(src|href)="(minuet\.webp|demo_petzold_tests\.ts|demos\/[a-z]+\.(?:webp|ts)|scores\/[a-z]+\.(?:html(?:\?piece=[a-z]+)?|js|webp))"/g,
-      (_, attr, file) => `${attr}="./${assetPath}/${file.replace(/\.ts$/, '.txt')}"`
+    const html = linkPage(
+      (await readFile(join(root, 'tests/flow.html'), 'utf8'))
+        .replace('../tools/site-theme.css', './assets/site-theme.css')
+        .replace(
+          /(src|href)="(minuet\.webp|demo_petzold_tests\.ts|demos\/[a-z]+\.(?:webp|ts)|scores\/[a-z]+\.(?:html(?:\?piece=[a-z]+)?|js|webp))"/g,
+          (_, attr, file) => `${attr}="./assets/${file.replace(/\.ts$/, '.txt')}"`
+        ),
+      graph.paths
     );
     await writeFile(join(staging, 'index.html'), html);
     manifest.files['index.html'] = hash(html);

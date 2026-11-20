@@ -1,5 +1,7 @@
 // Exercise report publication across two revisions and a failed download verification, using a local bucket.
+import { memoryStore } from '../site-storage.fixture.mjs';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -25,6 +27,8 @@ test('upload caches immutable assets, verifies stable downloads and switches the
   }
   const log = join(root, 'calls');
   const command = join(root, 'gcloud.cjs');
+  const store = memoryStore('gs://vexflow.com/reports/ai2026/');
+  store.bytes = (page) => readFileSync(join(bucket, page));
   await writeFile(
     command,
     `#!${process.execPath}
@@ -41,7 +45,7 @@ if (op === 'cat') process.stdout.write(fs.existsSync(${JSON.stringify(join(root,
 
   await publishReport(source, { command, dryRun: true });
   await assert.rejects(readFile(log), { code: 'ENOENT' });
-  await publishReport(source, { command });
+  await publishReport(source, { command, store });
   const calls = (await readFile(log, 'utf8')).trim().split('\n').map(JSON.parse);
   assert.deepEqual(
     calls.map((c) => c.op),
@@ -61,20 +65,30 @@ if (op === 'cat') process.stdout.write(fs.existsSync(${JSON.stringify(join(root,
   }
   const readGallery = async () => JSON.parse(await readFile(join(bucket, 'changes.json'))).figures[0];
   const first = await readGallery();
-  assert.match(first.left, /^\.\/assets\/[a-f0-9]{16}\/before\.png$/);
+  assert.match(first.left, /^\.\/assets\/[a-f0-9]{64}\/before\.png$/);
   const deployed = await readFile(join(bucket, 'index.html'), 'utf8');
   assert.ok(deployed.includes(`src="${first.left}"`));
   assert.ok(deployed.includes(JSON.stringify(first)));
   assert.equal(await readFile(join(source, 'index.html'), 'utf8'), html);
 
+  // A repeated publication compares immutable checksums and leaves all stable generations untouched.
+  await publishReport(source, { command, store });
+  const repeat = (await readFile(log, 'utf8')).trim().split('\n').map(JSON.parse).slice(calls.length);
+  assert.deepEqual(
+    repeat.map((call) => call.op),
+    ['rsync']
+  );
+  assert.ok(repeat[0].flags.includes('--checksums-only'));
+
   await writeFile(join(source, 'assets/after.png'), 'revised');
   await writeFile(join(root, 'corrupt'), '');
-  await assert.rejects(publishReport(source, { command }), /Uploaded file differs/);
+  await assert.rejects(publishReport(source, { command, store }), /Uploaded file differs/);
   assert.equal(await readFile(join(bucket, 'index.html'), 'utf8'), deployed);
   await rm(join(root, 'corrupt'));
-  await publishReport(source, { command });
+  await publishReport(source, { command, store });
   const second = await readGallery();
   assert.notEqual(first.right, second.right);
+  assert.equal(first.left, second.left);
   assert.equal(await readFile(join(bucket, first.right), 'utf8'), 'after.png');
   assert.equal(await readFile(join(bucket, second.right), 'utf8'), 'revised');
 });

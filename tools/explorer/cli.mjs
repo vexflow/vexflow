@@ -1,12 +1,13 @@
 // Build and serve a self-contained Explorer using Node's standard library and the repo toolchain.
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdir, readdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { mkdtemp, readdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { createRequire } from 'node:module';
 import { dirname, extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
+import { externalFonts, linkAssets, linkPage, writeAssets } from '../site-assets.mjs';
 import { siteTheme } from '../site-theme.mjs';
 import prettier from 'prettier';
 
@@ -28,33 +29,16 @@ async function filesIn(directory) {
   return result.sort();
 }
 
-/** Cache the library only when its sources and build configuration have not changed. */
+// Webpack checks its input graph, including uncommitted edits and loader configuration.
 async function buildLibrary() {
-  const inputs = [
-    ...(await filesIn(join(root, 'src'))),
-    ...(await filesIn(join(root, 'entry'))),
-    join(root, 'Gruntfile.js'),
-    join(root, 'package-lock.json'),
-  ];
-  const digest = hash(Buffer.concat(await Promise.all(inputs.map((p) => readFile(p)))));
-  const cache = join(root, 'build/explorer-library.sha256');
-  const library = join(root, 'build/cjs/vexflow-debug.js');
-  try {
-    if ((await readFile(cache, 'utf8')) === digest) {
-      await stat(library);
-      return library;
-    }
-  } catch {
-    /* Build on the first run or after npm test cleans build/. */
-  }
-  const result = spawnSync(process.execPath, [join(root, 'node_modules/.bin/grunt'), 'webpack:debug'], {
+  const result = spawnSync(process.execPath, [join(root, 'node_modules/.bin/grunt'), 'webpack:debugLibrary'], {
     cwd: root,
     stdio: 'inherit',
+    env: { ...process.env, VF_WEBSITE_BUILD: '1' },
   });
   if (result.error) throw result.error;
-  if (result.status !== 0) throw new Error('VexFlow build failed.');
-  await writeFile(cache, digest);
-  return library;
+  if (result.status !== 0) throw Error('VexFlow website build failed.');
+  return join(root, 'build/website-cjs/vexflow-debug.js');
 }
 
 /** Read the pinned Prism grammars locally, in dependency order, for an offline build. */
@@ -65,8 +49,8 @@ export async function bundlePrism(languages) {
   return Buffer.from('window.Prism = { manual: true };\n' + prism.join('\n'));
 }
 
-/** Fingerprint the whole module graph, so every relative import shares one immutable release. */
-export async function build() {
+/** Collect unlinked modules, generated examples, licenses and fonts for the Explorer and guide. */
+export async function collectAssets() {
   const library = await buildLibrary();
   const assets = new Map();
   for (const path of await filesIn(source)) {
@@ -75,7 +59,16 @@ export async function build() {
     const bytes = await readFile(path);
     assets.set(name, name === 'style.css' ? Buffer.from(siteTheme + bytes.toString()) : bytes);
   }
-  assets.set('vexflow.js', await readFile(library));
+  assets.set(
+    'vexflow.js',
+    Buffer.from(
+      (await readFile(library, 'utf8')).replace(
+        '//# sourceMappingURL=vexflow-debug.js.map',
+        '//# sourceMappingURL=vexflow.js.map'
+      )
+    )
+  );
+  assets.set('vexflow.js.map', await readFile(library + '.map'));
   assets.set('render-metrics.mjs', await readFile(join(root, 'tools/render-metrics.mjs')));
   // Ship only the editor and JavaScript grammar, with licenses. No runtime CDN or bundler.
   for (const [name, packagePath] of Object.entries({
@@ -126,28 +119,23 @@ export async function build() {
   }
   assets.set('font-data.json', Buffer.from(JSON.stringify(fonts)));
   assets.set('glyph-coverage.json', Buffer.from(JSON.stringify(coverage)));
-  const version = hash(
-    Buffer.concat([...assets.entries()].sort().flatMap(([name, bytes]) => [Buffer.from(name), bytes]))
-  ).slice(0, 16);
-  const assetPath = `assets/${version}`;
-  const staging = join(root, 'build/explorer-staging');
-  await rm(staging, { recursive: true, force: true });
-  await mkdir(staging, { recursive: true });
-  const manifest = { assetPath, files: {} };
-  for (const [name, bytes] of assets) {
-    const relative = `${assetPath}/${name}`;
-    const path = join(staging, relative);
-    await mkdir(dirname(path), { recursive: true });
-    await writeFile(path, bytes);
-    manifest.files[relative] = hash(bytes);
-  }
-  const html = (await readFile(join(source, 'index.html'), 'utf8')).replaceAll('./assets/', `./${assetPath}/`);
+  return assets;
+}
+
+/** Publish reviewed raw inputs under independently reusable addresses. */
+export async function build(inputs) {
+  const assets = new Map(inputs ?? (await collectAssets()));
+  assets.set('style.css', Buffer.from(externalFonts(assets.get('style.css').toString(), assets)));
+  const graph = linkAssets(assets);
+  const staging = await mkdtemp(join(root, 'build/explorer-staging-'));
+  const manifest = await writeAssets(staging, graph);
+  const html = linkPage(await readFile(join(source, 'index.html'), 'utf8'), graph.paths);
   await writeFile(join(staging, 'index.html'), html);
   manifest.files['index.html'] = hash(html);
   await writeFile(join(staging, 'manifest.json'), JSON.stringify(manifest, null, 2));
   await rm(output, { recursive: true, force: true });
   await rename(staging, output);
-  console.log(`Explorer built: ${output} (${version})`);
+  console.log(`Explorer built: ${output}`);
   return output;
 }
 
