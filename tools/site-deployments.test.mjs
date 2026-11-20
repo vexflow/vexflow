@@ -140,3 +140,13 @@ test('interrupted legacy deletion resumes only for original object generations',
   await clean(store, { legacy: version, apply: resumed.token });
   assert.ok(!store.objects.has(prefix + 'b.js'));
 });
+
+test('reject a missing stable entry point and refuse a damaged inventory', async () => {
+  const store = memoryStore(url);
+  await publishDeployment(store, { 'index.html': digest('index'), 'all.html': digest('runner') }, async () => {});
+  await assert.rejects(release(store, firstDay, 'changed'), /omits a previously published entry point/);
+  const { state, generation } = readJournal(store);
+  state.releases[0].assets.push(asset('unexpected'));
+  store.save(generation, state);
+  await assert.rejects(clean(store), /inventory checksum/);
+});

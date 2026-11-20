@@ -139,6 +139,12 @@ export async function publishDeployment(store, files, publish, now = Date.now) {
   const id = digest(JSON.stringify(ordered));
   return withLock(store, 'upload', async (state, checkpoint) => {
     const last = state.releases.find((r) => r.id === state.current);
+    // A stable URL from an older upload can still serve HTML even after the local build drops it.
+    for (const receipt of state.releases) {
+      for (const page of Object.keys(receipt.pages)) {
+        if (!Object.hasOwn(files, page)) throw Error('Build omits a previously published entry point: ' + page);
+      }
+    }
     const previousPages = state.incomplete ? {} : (last?.pages ?? {});
     let release = state.releases.find((r) => r.id === id);
     if (!release) {

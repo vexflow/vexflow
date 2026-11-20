@@ -269,8 +269,8 @@ function webpackConfigs() {
     // Turn on webpack's cache in DEVELOPMENT_MODE.
     const cache = mode === DEVELOPMENT_MODE ? { type: 'filesystem' } : false;
     if (cache && process.env.VF_WEBSITE_BUILD === '1') {
-      // The version loader embeds provenance. Never reuse output from an ordinary timestamped build.
-      cache.name = 'website-debug';
+      // ts-loader needs a separate cache for each entry set. Website bundles also embed stable provenance.
+      cache.name = Array.isArray(entryFiles) ? 'website-tests' : 'website-library';
       cache.version = versionInfo.ID + '/' + versionInfo.VERSION;
     }
 

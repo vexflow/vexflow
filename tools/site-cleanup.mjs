@@ -41,7 +41,8 @@ export function recover(store, id) {
   console.log('Lock cleared. Publish a complete release before cleanup.');
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+/** Limit the public CLI to the known managed roots; keep error output suitable for release operators. */
+async function main() {
   const [site, ...args] = process.argv.slice(2);
   if (
     !['guide', 'explorer', 'tests', 'reports/ai2026'].includes(site) ||
@@ -58,4 +59,11 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     if (args.length !== 1) throw Error('Recover a lock separately.');
     recover(store, opts.recover);
   } else await clean(store, opts);
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+  main().catch((error) => {
+    console.error(error.message);
+    process.exitCode = 1;
+  });
 }
