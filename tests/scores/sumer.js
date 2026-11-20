@@ -121,10 +121,15 @@
           note(23).addModifier(score.make.articulation({ type: 'a@a', position: 'above' }));
         }
         for (const { m, staff, syllables } of verses) {
-          c.systems[m].getPhraseLayout().addVerse(
-            c.staves[m][staff],
-            syllables.map(([id, text]) => ({ note: c.getNote(id), text }))
+          // Keep each singer’s line level through the lowest stems, including in the extracted part.
+          const stave = c.staves[m][staff];
+          const words = c.systems[m].getPhraseLayout().addVerse(
+            stave,
+            syllables.map(([id, text]) => ({ note: c.getNote(id), text })),
+            { baselineSpaces: 7.75 }
           );
+          // Give the short syllables on consecutive eighth notes room to read as separate words.
+          words.forEach((word) => word.setConnectorPadding(stave.space(0.2)));
         }
       },
     };

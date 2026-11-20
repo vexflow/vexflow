@@ -1,4 +1,6 @@
 // Publish a frozen, verified build to a bucket prefix: immutable assets first, HTML last.
+import { cloudStore, publishDeployment } from './site-deployments.mjs';
+import { isAsset } from './site-assets.mjs';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { copyFile, mkdir, mkdtemp, readFile, rm, stat } from 'node:fs/promises';
@@ -14,15 +16,10 @@ export async function validate(directory, jsonFiles = []) {
       throw new Error('Invalid JSON download name.');
   }
   const manifest = JSON.parse(await readFile(join(directory, 'manifest.json'), 'utf8'));
-  if (!/^assets\/[a-f0-9]{16}$/.test(manifest.assetPath) || !manifest.files['index.html'])
-    throw new Error('Invalid static-site manifest.');
+  if (!manifest.files['index.html']) throw new Error('Invalid static-site manifest.');
   for (const [file, digest] of Object.entries(manifest.files)) {
-    if (
-      file !== 'index.html' &&
-      file !== 'all.html' &&
-      !jsonFiles.includes(file) &&
-      (!file.startsWith(manifest.assetPath + '/') || file.split('/').includes('..'))
-    )
+    if (!/^[a-f0-9]{64}$/.test(digest)) throw Error('Invalid manifest digest.');
+    if (file !== 'index.html' && file !== 'all.html' && !jsonFiles.includes(file) && !isAsset(file, digest))
       throw new Error('Unsafe manifest path.');
     if (hash(await readFile(join(directory, file))) !== digest) throw new Error(`Build changed: ${file}`);
   }
@@ -41,6 +38,7 @@ export async function upload({
   command = 'gcloud',
   publicURL,
   jsonFiles = [],
+  store,
 } = {}) {
   if (!/^gs:\/\/[a-z0-9][a-z0-9._-]+\/(?:[a-zA-Z0-9_-]+\/)+$/.test(destination))
     throw new Error('Use a bucket and nonempty prefix, such as gs://vexflow.com/explorer/.');
@@ -67,31 +65,42 @@ export async function upload({
         throw new Error(`gcloud failed (${result.status ?? result.signal}). HTML publication stopped.`);
       return result.stdout;
     };
-    run([
-      'storage',
-      'rsync',
-      join(staging, 'assets/'),
-      `${destination}assets/`,
-      '--recursive',
-      '--checksums-only',
-      '--predefined-acl=publicRead',
-      '--cache-control=public,max-age=31536000,immutable',
-    ]);
-    for (const page of [...jsonFiles, 'all.html', 'index.html'].filter((name) => manifest.files[name])) {
+    const transfer = async (previousPages) => {
       run([
         'storage',
-        'cp',
-        join(staging, page),
-        destination + page,
+        'rsync',
+        join(staging, 'assets/'),
+        `${destination}assets/`,
+        '--recursive',
+        '--checksums-only',
         '--predefined-acl=publicRead',
-        '--cache-control=public,max-age=60,must-revalidate',
-        page.endsWith('.json') ? '--content-type=application/json' : '--content-type=text/html',
+        '--cache-control=public,max-age=31536000,immutable',
       ]);
-      if (!dryRun) {
+      for (const page of [...jsonFiles, 'all.html', 'index.html'].filter((name) => manifest.files[name])) {
         const size = (await stat(join(staging, page))).size;
-        if (hash(run(['storage', 'cat', destination + page], size + 1)) !== manifest.files[page])
-          throw new Error(`Uploaded file differs from the build (${page}). Check for a concurrent upload.`);
+        if (previousPages[page] === manifest.files[page]) {
+          const live = store.bytes(page, undefined, true);
+          if (live && hash(live) === manifest.files[page]) continue;
+        }
+        run([
+          'storage',
+          'cp',
+          join(staging, page),
+          destination + page,
+          '--predefined-acl=publicRead',
+          '--cache-control=public,max-age=60,must-revalidate',
+          page.endsWith('.json') ? '--content-type=application/json' : '--content-type=text/html',
+        ]);
+        if (!dryRun) {
+          if (hash(run(['storage', 'cat', destination + page], size + 1)) !== manifest.files[page])
+            throw new Error(`Uploaded file differs from the build (${page}). Check for a concurrent upload.`);
+        }
       }
+    };
+    if (dryRun) await transfer({});
+    else {
+      store ??= cloudStore(destination, command);
+      await publishDeployment(store, manifest.files, transfer);
     }
     console.log(
       dryRun ? 'Dry run complete. No files uploaded.' : `Published ${destination}${publicURL ? ` → ${publicURL}` : ''}`

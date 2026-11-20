@@ -140,7 +140,7 @@ const banner =
 // Output directories & files.
 const BASE_DIR = __dirname;
 const BUILD_DIR = path.join(BASE_DIR, 'build');
-const BUILD_CJS_DIR = path.join(BUILD_DIR, 'cjs');
+const BUILD_CJS_DIR = path.join(BUILD_DIR, process.env.VF_WEBSITE_BUILD === '1' ? 'website-cjs' : 'cjs');
 const BUILD_ESM_DIR = path.join(BUILD_DIR, 'esm');
 const BUILD_IMAGES_CURRENT_DIR = path.join(BUILD_DIR, 'images', 'current');
 const BUILD_IMAGES_REFERENCE_DIR = path.join(BUILD_DIR, 'images', 'reference');
@@ -268,6 +268,11 @@ function webpackConfigs() {
 
     // Turn on webpack's cache in DEVELOPMENT_MODE.
     const cache = mode === DEVELOPMENT_MODE ? { type: 'filesystem' } : false;
+    if (cache && process.env.VF_WEBSITE_BUILD === '1') {
+      // ts-loader needs a separate cache for each entry set. Website bundles also embed stable provenance.
+      cache.name = Array.isArray(entryFiles) ? 'website-tests' : 'website-library';
+      cache.version = versionInfo.ID + '/' + versionInfo.VERSION;
+    }
 
     return {
       mode,

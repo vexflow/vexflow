@@ -5,14 +5,21 @@
 
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
+import { Clef } from '../src/clef';
+import { ClefNote } from '../src/clefnote';
+import { Glyphs } from '../src/glyphs';
 import { ContextBuilder } from '../src/renderer';
 import { TabStave } from '../src/tabstave';
+import { TimeSignature } from '../src/timesignature';
 
 const TabStaveTests = {
   Start(): void {
     QUnit.module('TabStave');
     const run = VexFlowTests.runTests;
     run('TabStave Draw Test', draw);
+    run('Four-string TAB clefs', fourStringClefs);
+    run('TAB clef by string count', stringCounts);
+    run('Time signatures by string count', timeSignatures);
   },
 };
 
@@ -30,6 +37,113 @@ function draw(options: TestOptions, contextBuilder: ContextBuilder): void {
   options.assert.equal(stave.getYForLine(4), 114, 'getYForLine(4) - Bottom Line');
 
   options.assert.ok(true, 'all pass');
+}
+
+/** Compare full and courtesy clefs at two string spacings, with six strings as the control. */
+function fourStringClefs(options: TestOptions, contextBuilder: ContextBuilder): void {
+  const ctx = contextBuilder(options.elementId, 500, 160);
+  for (const [index, spacing] of [13, 9].entries()) {
+    const stave = new TabStave(10 + index * 160, 10, 145, { spacingBetweenLinesPx: spacing })
+      .setContext(ctx)
+      .setStyle({ lineWidth: index + 1 })
+      .addClef('tab')
+      .addEndClef('tab', 'small');
+    // Exercise both the half-pixel alignment of a one-pixel stroke and the unshifted two-pixel stroke.
+    const lineWidth = index + 1;
+    const sixStartX = stave.getNoteStartX();
+    stave.setNumLines(4);
+    const [start, end] = stave.getModifiers(undefined, Clef.CATEGORY) as Clef[];
+    const full = start.getInkBounds();
+    options.assert.equal(stave.getYForGlyphs(), stave.getYForLine(1.5), 'Four-string glyph anchor');
+    options.assert.ok(stave.getNoteStartX() < sixStartX, 'Formatter reserves the narrower TAB glyph');
+    for (const clef of [start, end]) {
+      options.assert.equal(clef.code, Glyphs.fourStringTabClef, 'Select four-string TAB before drawing');
+      const ink = clef.getInkBounds();
+      options.assert.ok(ink.h > 0, 'TAB glyph has visible ink');
+      const topString = stave.getYForLine(0) + (lineWidth === 1 ? 0.5 : 0);
+      const bottomString = topString + 3 * spacing;
+      const topGap = ink.y - (topString + lineWidth / 2);
+      const bottomGap = bottomString - lineWidth / 2 - (ink.y + ink.h);
+      // Allow for fractional font sizes and pixel rounding in the renderer.
+      const minimumGap = lineWidth + spacing / 8 - 0.5;
+      options.assert.ok(
+        topGap >= minimumGap && bottomGap >= minimumGap,
+        `TAB clears both inner stroke edges: gaps ${topGap}, ${bottomGap}, minimum ${minimumGap}`
+      );
+      options.assert.ok(Math.abs(topGap - bottomGap) < 0.01, 'Equal clearance from the drawn outer strings');
+    }
+    options.assert.ok(end.getInkBounds().h < full.h, 'Courtesy clef stays smaller');
+    stave.drawWithStyle();
+    options.assert.deepEqual(start.getInkBounds(), full, 'Drawing uses the formatted geometry');
+    const inline = new ClefNote('tab').setStave(stave);
+    options.assert.equal(inline.getClef().code, start.code, 'Inline TAB uses the stave glyph');
+    options.assert.equal(inline.getClef().getWidth(), start.getWidth(), 'Inline TAB has the same measured width');
+    stave.setNumLines(6);
+    options.assert.equal(start.code, Glyphs.sixStringTabClef, 'Restore the six-string glyph');
+    options.assert.equal(stave.getNoteStartX(), sixStartX, 'Restore the six-string formatting');
+  }
+  const six = new TabStave(330, 10, 150).setContext(ctx).addClef('tab');
+  six.draw();
+  const [clef] = six.getModifiers(undefined, Clef.CATEGORY) as Clef[];
+  options.assert.equal(clef.line, 2.5, 'Six-string TAB stays on its original line');
+}
+
+/** Show standard and courtesy clefs on the same string spacing for direct comparison. */
+function stringCounts(options: TestOptions, contextBuilder: ContextBuilder): void {
+  const ctx = contextBuilder(options.elementId, 470, 250);
+  for (const [index, strings] of [4, 5, 6, 7].entries()) {
+    const x = 12 + (index % 2) * 230;
+    const y = 25 + Math.floor(index / 2) * 115;
+    const stave = new TabStave(x, y, 210, { numLines: strings, spaceAboveStaffLn: 0 })
+      .setContext(ctx)
+      .addClef('tab')
+      .addEndClef('tab', 'small');
+    ctx.save();
+    ctx.setFont('Arial', 10);
+    ctx.fillText(`${strings} strings`, x, y - 9);
+    ctx.restore();
+    stave.draw();
+    for (const clef of stave.getModifiers(undefined, Clef.CATEGORY) as Clef[]) {
+      const ink = clef.getInkBounds();
+      const span = stave.space(strings - 1);
+      const top = stave.getYForDrawnLine(0) + 0.5;
+      const bottom = stave.getYForDrawnLine(strings - 1) - 0.5;
+      const above = ink.y - top;
+      const below = bottom - ink.y - ink.h;
+      options.assert.ok(Math.abs(above - below) < 0.01, `${strings} strings: equal clearance`);
+      options.assert.ok(above >= 1 + span / 24 - 0.5 && ink.h > 0, `${strings} strings: visible outer margins`);
+    }
+  }
+}
+
+/** Compare stacked, single-row, common and cut meters against the midpoint of the drawn strings. */
+function timeSignatures(options: TestOptions, contextBuilder: ContextBuilder): void {
+  const ctx = contextBuilder(options.elementId, 490, 250);
+  for (const [index, strings] of [4, 5, 6, 7].entries()) {
+    const x = 12 + (index % 2) * 245;
+    const y = 25 + Math.floor(index / 2) * 115;
+    const stave = new TabStave(x, y, 225, { numLines: strings, spaceAboveStaffLn: 0 })
+      .setContext(ctx)
+      .addClef('tab')
+      .addTimeSignature('4/4')
+      .addTimeSignature('6/8')
+      .addTimeSignature('3')
+      .addTimeSignature('C')
+      .addEndTimeSignature('C|');
+    ctx.save();
+    ctx.setFont('Arial', 10);
+    ctx.fillText(`${strings} strings`, x, y - 9);
+    ctx.restore();
+    stave.draw();
+    for (const meter of stave.getModifiers(undefined, TimeSignature.CATEGORY) as TimeSignature[]) {
+      const ink = meter.getInkBounds();
+      const center = stave.getYForDrawnLine((strings - 1) / 2);
+      options.assert.ok(
+        ink.h > 0 && Math.abs(ink.y + ink.h / 2 - center) < 0.01,
+        `${meter.getTimeSpec()} centered on ${strings} strings`
+      );
+    }
+  }
 }
 
 VexFlowTests.register(TabStaveTests);

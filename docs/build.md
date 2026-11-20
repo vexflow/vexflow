@@ -283,6 +283,8 @@ The [Minuet print score](../demos/pdf/minuet.js) includes the pitches, fingering
 
 ## Upload static sites
 
+The guide, Explorer, test gallery, PDF library, and reports share the [website theme](../tools/site-theme.css). Each build includes its own copy for offline use.
+
 The guide, Explorer, and visual test gallery are self-contained static sites. Their upload commands build current source and bundle the required scripts and fonts.
 
 | Site         | Build only               | Upload                    | Bucket prefix                | Public URL                      |
@@ -322,6 +324,24 @@ npm run tests:upload -- --destination=gs://another-bucket/tests/
 
 The destination must support the uploader's `publicRead` object ACLs. Custom hosting must map directory URLs to `index.html`; these scripts upload objects but do not configure domains or hosting.
 
-Assets use fingerprinted paths and a one-year immutable cache. They upload first. `index.html` uploads last with a 60-second cache and mandatory revalidation, then is read back for a hash check. Old assets remain available for cached pages; the scripts do not delete remote objects.
+Each script, stylesheet, image and font bundle has its own SHA-256 URL. An edit changes the URL of that file and anything that links to it. A guide text edit preserves the URLs of the runtime and fonts. Use a full Git checkout and the pinned toolchain for reproducible builds. Website bundles use the source revision’s timestamp.
+
+Uploads compare checksums and transfer changed assets first, with a one-year immutable cache. Stable entry points and JSON downloads revalidate after 60 seconds. The uploader verifies their bytes and publishes `index.html` last. An interrupted upload can be retried.
+
+### Clean up retired website assets
+
+Preview one site at a time. Supported names are `guide`, `explorer`, `tests`, and `reports/ai2026`. The first successful managed upload records the current inventory and starts the migration clock.
+
+```sh
+npm run sites:clean -- guide
+# Review the object names, generations and total size. Use the exact token from that preview.
+npm run sites:clean -- guide --apply=<plan-token>
+```
+
+Replace `<plan-token>` with the printed hash. Cleanup keeps the active deployment, the two most recently retired successful deployments, and anything retired within the last 365 days. Shared assets stay until every protected deployment has stopped using them. Unknown objects stay in place. The command verifies the live entry points, checks the plan again under the site lock, and deletes each reviewed object with a generation precondition. After a partial cleanup, preview again and use the new token.
+
+For versions published before inventories existed, wait one year after the first managed upload. Select one old 16-character directory explicitly, for example `npm run sites:clean -- guide --legacy=0123456789abcdef`. The command authenticates its contents against the original build fingerprint. Review the output and repeat the same command with `--apply=<plan-token>`. PDF editions and permanent engineering reports are outside the managed sites.
+
+Use the managed upload commands for future deployments and rollbacks. Each site records its inventory and writer lock in `.deploy/state.json`. If a process dies with the lock held, check the reported host and PID and confirm the original process has stopped. Run `npm run sites:clean -- guide --recover=<lock-id>` with the reported UUID, then rerun the upload. Cleanup requires a verified publication after recovery.
 
 Verify the public pages after uploading. For the guide, check `/guide/#lesson/notation` and `/guide/#playground/notes`, edit a note, and verify the source revision in the sidebar. The hosted test gallery starts at `/tests/`. Use `/tests/all.html?module=StaveNote` for one module or `/tests/all.html` for a full browser or headless run. Existing links such as `/tests/?module=StaveNote` forward to the runner. Hosted tests use their bundled VexFlow build, regardless of `ver` or `esm` query parameters.

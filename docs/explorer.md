@@ -79,7 +79,7 @@ See [upload commands and authentication](build.md#upload-static-sites).
 
 A destination must include a nonempty prefix. The uploader does not publish to a bucket root or delete existing objects.
 
-The build fingerprints the entire module graph into one asset directory. The uploader freezes and validates the build, uploads immutable assets first, then publishes `index.html` with a 60-second cache lifetime. It reads the HTML back from the bucket and checks its hash. Old assets remain available to cached pages.
+Each asset gets a URL based on its own contents, including the URLs of its dependencies. The uploader freezes and validates the build, uploads immutable assets first, then publishes `index.html` with a 60-second cache lifetime. It reads the HTML back from the bucket and checks its hash. Old assets remain available to cached pages.
 
 The default bucket path is `gs://vexflow.com/explorer/`; its public address is `https://vexflow.com/explorer/`. As with the other sites in this bucket, the host must map directory URLs to `index.html`. Both the local root and `/explorer/` mount are supported. There are no SPA path rewrites because navigation uses hash routes.
 

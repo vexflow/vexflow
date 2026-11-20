@@ -2,6 +2,7 @@
 import { Annotation } from './annotation';
 import { Bend } from './bend';
 import type { GuitarStroke } from './guitargesture';
+import { Metrics } from './metrics';
 import type { Note } from './note';
 import { Stroke } from './strokes';
 import { isTabNote } from './typeguard';
@@ -21,9 +22,9 @@ export function attachGuitarGestures(note: Note): void {
     if (stroke) {
       note.addModifier(new Stroke(printedStroke(stroke), { allVoices: false }), 0);
       note.addModifier(
-        new Annotation(stroke.finger + (stroke.golpe ? ' + golpe' : '')).setVerticalJustification(
-          Annotation.VerticalJustify.TOP
-        ),
+        new Annotation(stroke.finger + (stroke.golpe ? ' + golpe' : ''))
+          .setFont(Metrics.getFontInfo('Annotation.guitarStroke'))
+          .setVerticalJustification(Annotation.VerticalJustify.TOP),
         0
       );
     }

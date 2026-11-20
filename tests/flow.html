@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Visual test gallery · VexFlow</title>
+    <link rel="stylesheet" href="../tools/site-theme.css" />
     <script>
       // Preserve old runner links, including QUnit filters, sharded jobs, and score anchors.
       const runner = new URL('all.html', location.href);
@@ -20,11 +21,6 @@
       }
     </script>
     <style>
-      :root {
-        font-family: system-ui, sans-serif;
-        color: #172d3c;
-        background: white;
-      }
       * {
         box-sizing: border-box;
       }
@@ -42,17 +38,19 @@
       }
       header {
         padding: 1.3rem 0;
-        border-bottom: 1px solid #cbd4d7;
+        border-bottom: var(--mast-rule);
       }
       header strong {
-        font-size: 1.25rem;
+        font: var(--brand);
+        color: var(--green);
+        letter-spacing: -1.4px;
       }
       a {
-        color: #155875;
+        color: var(--green);
         text-underline-offset: 0.18em;
       }
       a:hover {
-        color: #863d22;
+        color: var(--accent);
       }
       a:focus-visible {
         outline: 2px solid currentColor;
@@ -67,9 +65,7 @@
         margin: 0;
       }
       h1 {
-        font:
-          500 clamp(2.3rem, 5vw, 4.5rem)/1.1 Georgia,
-          serif;
+        font: var(--title);
         letter-spacing: -0.035em;
       }
       main {
@@ -83,7 +79,7 @@
         align-items: center;
         gap: 0.5rem;
         padding: 0.8rem 0;
-        border-top: 2px solid #213b3e;
+        border-top: 2px solid var(--line);
       }
       .score-nav[hidden] {
         display: none;
@@ -103,8 +99,8 @@
       .score-nav button {
         white-space: nowrap;
         background: white;
-        color: #154857;
-        border: 1px solid #a2b4b4;
+        color: var(--green);
+        border: 1px solid var(--control-border);
         border-radius: 0.35rem;
         min-height: 44px;
         padding: 0.4rem 0.85rem;
@@ -112,33 +108,32 @@
         cursor: pointer;
       }
       .score-nav button:hover {
-        background: #edf3f2;
+        background: var(--soft);
       }
       .score-nav button:focus-visible {
-        outline: 2px solid #155875;
+        outline: 2px solid var(--green);
         outline-offset: 2px;
       }
       figure {
+        background: white;
         display: grid;
         grid-template-columns: minmax(15rem, 0.8fr) minmax(0, 2fr);
         margin: 0;
-        border: 1px solid #c9d3d0;
+        border: 1px solid var(--line);
         border-radius: 0.5rem;
         overflow: hidden;
       }
       figcaption {
-        background: #f3f4eb;
+        background: var(--soft);
         padding: clamp(1.2rem, 2.4vw, 2rem);
       }
       .instrument {
-        color: #80502f;
+        color: var(--muted);
         font-weight: 650;
         font-size: 0.85rem;
       }
       figcaption h2 {
-        font:
-          500 clamp(2rem, 3.6vw, 3.4rem)/1.02 Georgia,
-          serif;
+        font: 600 clamp(22px, 2.4vw, 32px)/1.2 var(--book);
         letter-spacing: -0.03em;
         margin: 0.6rem 0;
       }
@@ -151,7 +146,7 @@
         font-weight: 650;
       }
       .description {
-        line-height: 1.5;
+        font: 18px/1.65 var(--book);
       }
       .score-links {
         display: flex;
@@ -177,7 +172,7 @@
         margin-top: 2rem;
       }
       .module-heading {
-        border-top: 2px solid #233e49;
+        border-top: 2px solid var(--line);
         padding-top: 0.8rem;
         flex-wrap: wrap;
       }
@@ -192,7 +187,7 @@
       }
       li {
         break-inside: avoid;
-        border-bottom: 1px solid #e4eaec;
+        border-bottom: 1px solid var(--line);
       }
       li a {
         display: block;

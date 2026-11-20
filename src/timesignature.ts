@@ -1,9 +1,5 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
-//
-// ## Description
-// Implements time signatures glyphs for staffs
-// See tables.js for the internal time signatures
-// representation
+// Position and draw numeric and symbolic time signatures on notation and tablature staves.
 
 import { BoundingBox } from './boundingbox';
 import { Element } from './element';
@@ -11,7 +7,7 @@ import { Glyphs } from './glyphs';
 import { RenderContext } from './rendercontext';
 import { Stave } from './stave';
 import { StaveModifier, StaveModifierPosition } from './stavemodifier';
-import { Category } from './typeguard';
+import { Category, isCategory } from './typeguard';
 import { RuntimeError } from './util';
 
 export interface TimeSignatureInfo {
@@ -223,18 +219,19 @@ export class TimeSignature extends StaveModifier {
   drawAt(ctx: RenderContext, stave: Stave, x: number): void {
     this.setRendered();
 
+    const { top, bottom } = this.baselines(stave);
     if (this.isNumeric) {
       // render top text
       let startX = x + this.topStartX;
-      this.topRenderY = this.topBaseline(stave);
+      this.topRenderY = top;
       this.topText.renderText(ctx, startX, this.topRenderY);
 
       // render bottom text
       startX = x + this.botStartX;
-      this.botRenderY = stave.getYForLine(this.bottomLine + this.lineShift);
+      this.botRenderY = bottom;
       this.botText.renderText(ctx, startX, this.botRenderY);
     } else {
-      this.renderText(ctx, x - this.x, stave.getYForLine(this.line));
+      this.renderText(ctx, x - this.x, top);
     }
   }
 
@@ -245,16 +242,34 @@ export class TimeSignature extends StaveModifier {
       : (stave.getYForLine(this.topLine) + stave.getYForLine(this.bottomLine)) / 2;
   }
 
+  /** Center the visible meter between tab strings, preserving row spacing and explicit line placements. */
+  private baselines(stave: Stave): { top: number; bottom: number } {
+    const top = this.isNumeric ? this.topBaseline(stave) : stave.getYForLine(this.line);
+    const bottom = stave.getYForLine(this.bottomLine + this.lineShift);
+    const defaultLines = this.isNumeric ? this.topLine === 1 && this.bottomLine === 3 : this.line === 2;
+    if (!defaultLines || !isCategory(stave, Category.TabStave)) return { top, bottom };
+
+    const upper = this.isNumeric ? this.topText.textMetrics : this.textMetrics;
+    let inkTop = top - upper.actualBoundingBoxAscent;
+    let inkBottom = top + upper.actualBoundingBoxDescent;
+    if (this.isNumeric && this.botText.getText()) {
+      const lower = this.botText.textMetrics;
+      inkTop = Math.min(inkTop, bottom - lower.actualBoundingBoxAscent);
+      inkBottom = Math.max(inkBottom, bottom + lower.actualBoundingBoxDescent);
+    }
+    const offset = stave.getYForDrawnLine((stave.getNumLines() - 1) / 2) - (inkTop + inkBottom) / 2;
+    return { top: top + offset, bottom: bottom + offset };
+  }
+
   /** Positioned ink before drawing, including additive meters and cut time. */
   getInkBounds(): BoundingBox {
     const stave = this.checkStave();
-    if (!this.isNumeric) return this.getTextInk(this.x, stave.getYForLine(this.line));
-    const top = this.topText.getTextInk(this.x + this.topStartX, this.topBaseline(stave));
+    const { top, bottom } = this.baselines(stave);
+    if (!this.isNumeric) return this.getTextInk(this.x, top);
+    const ink = this.topText.getTextInk(this.x + this.topStartX, top);
     return this.botText.getText().length
-      ? top.mergeWith(
-          this.botText.getTextInk(this.x + this.botStartX, stave.getYForLine(this.bottomLine + this.lineShift))
-        )
-      : top;
+      ? ink.mergeWith(this.botText.getTextInk(this.x + this.botStartX, bottom))
+      : ink;
   }
 
   // gets combined bounding box of time sig
@@ -267,6 +282,7 @@ export class TimeSignature extends StaveModifier {
 
       // move boxes to offset positions to be inline with the rendered text from drawAt.
       topBoundingBox.move(this.x + this.topStartX, this.topRenderY);
+      if (!this.botText.getText()) return topBoundingBox;
       botBoundingBox.move(this.x + this.botStartX, this.botRenderY);
 
       // combine the two boxes
@@ -276,7 +292,7 @@ export class TimeSignature extends StaveModifier {
       // use element bounding box call when only simple text (like "C" or "C|")
       const stave = this.checkStave();
       const textBoundingBox = super.getBoundingBox();
-      textBoundingBox.move(0, stave.getYForLine(this.line));
+      textBoundingBox.move(0, this.baselines(stave).top);
       return textBoundingBox;
     }
   }

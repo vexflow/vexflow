@@ -8,20 +8,37 @@
       IMPORTANT: Always declare the character encoding as UTF-8. Otherwise VexFlow scores may show weird symbols instead of music symbols.
     -->
     <title>VexFlow Tests</title>
+    <link rel="stylesheet" href="../tools/site-theme.css" />
     <!-- fonts.css defines the music fonts via @font-face rules. -->
     <link rel="stylesheet" href="fonts.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="qunit/qunit.css" />
     <script src="qunit/qunit.js"></script>
     <style>
       body {
-        font-family: system-ui, sans-serif;
-        font-size: 12px;
-        color: #17283c;
-        background: #f4f6f9;
         margin: 0px;
-        padding: 0px;
-
+        padding: 0;
       }
+
+      nav {
+        padding: 1rem;
+        border-bottom: 1px solid var(--line);
+      }
+      a { color: var(--green); }
+      a:hover { color: var(--accent); }
+      #run-title { font: var(--title); letter-spacing: -1.2px; }
+      #qunit-tests, #qunit-header, #qunit-userAgent, #qunit-testrunner-toolbar, #qunit-filteredTest, #qunit-testresult {
+        font-family: var(--sans);
+      }
+      #qunit-header, #qunit-userAgent {
+        color: white;
+        background: var(--green);
+        text-shadow: none;
+      }
+      #qunit-testrunner-toolbar, #qunit-testresult, #qunit-tests > .pass {
+        background: var(--soft);
+        color: var(--ink);
+      }
+      #qunit-tests .pass .test-name { color: var(--green); }
 
       /* Keep QUnit in page flow so its full-screen panel cannot cover gallery navigation. */
       #qunit {
@@ -33,12 +50,12 @@
       }
 
       a.button {
-        color: #204e78;
-        background: #edf4fb;
+        color: var(--green);
+        background: var(--soft);
         text-decoration: none;
         padding: 5px;
         margin: 2px;
-        border: 1px solid #c8d8e8;
+        border: 1px solid var(--control-border);
         border-radius: 6px;
       }
 
@@ -52,9 +69,10 @@
 
       div.testcanvas {
         font-size: 18px;
-        color: #17283c;
+        line-height: normal;
+        color: var(--ink);
         background: white;
-        border: 1px solid #dce3ed;
+        border: 1px solid var(--line);
         border-radius: 8px;
         margin: 16px;
         padding: 16px;
@@ -67,7 +85,7 @@
 
       div.testcanvas .name {
         font-size: 18px;
-        color: #204e78;
+        color: var(--green);
       }
 
       p.vf-footer {
@@ -76,7 +94,7 @@
     </style>
   </head>
   <body>
-    <nav aria-label="Test gallery" style="padding: 1rem; background: white">
+    <nav aria-label="Test gallery">
       <a id="gallery-link" href="flow.html">← Module index</a>
     </nav>
     <h1 id="run-title" style="margin: 1rem">All visual tests</h1>

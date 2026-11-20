@@ -10,6 +10,12 @@ export function saints(options: TestOptions): void {
   const factory = VexFlowTests.makeFactory(options, 900, 540);
   const score = factory.EasyScore({ throwOnError: true });
   const lyricFont = Metrics.getFontInfo('Annotation.lyric');
+  // Use the same baseline throughout each row, below the pickup's low C.
+  const word = (text: string, rowY: number) =>
+    factory
+      .Annotation({ text, font: lyricFont, vJustify: 'bottom' })
+      .setTextBaseline(rowY + 116)
+      .setConnectorPadding(2);
   const bars = [
     ['G4/w', 'saints', 'C:6/9'],
     ['B4/q/r, C4/q, E4, F4', '|go|march-|ing', 'Am:7'],
@@ -31,32 +37,30 @@ export function saints(options: TestOptions): void {
   // The first system includes a short anacrusis before its four complete measures.
   const pickup = score.notes('C4/q, E4, F4');
   const pickupLabels = ['Oh', 'when', 'the'];
-  pickup.forEach((note, i) =>
-    note.addModifier(
-      factory.Annotation({ text: pickupLabels[i], font: lyricFont, vJustify: 'bottom' }).setTextBaseline(123)
-    )
-  );
+  pickup.forEach((note, i) => note.addModifier(word(pickupLabels[i], 16)));
+  const pickupWidth = 210;
   factory
-    .System({ x: 10, y: 16, width: 180 })
+    .System({ x: 10, y: 16, width: pickupWidth })
     .addStave({ voices: [score.voice(pickup, { time: '3/4' })] })
     .addClef('treble')
     .addTimeSignature('4/4');
 
+  // The first row shares space between the pickup, two single-word bars and two busier bars.
+  const openingWidths = [120, 212, 122, 212];
+  let x = 10 + pickupWidth;
   let sustained: StemmableNote | undefined;
   bars.forEach(([music, words, harmony], i) => {
     const row = Math.floor(i / 4);
     const column = i % 4;
     const y = 16 + row * 130;
-    const width = row === 0 ? 174 : 219;
+    if (column === 0 && row > 0) x = 10;
+    const width = row === 0 ? openingWidths[column] : 219;
     const notes = score.notes(music);
     // Carry the sustained D and the final tonic across the barline without repeating a syllable.
     if (i === 5 || i === 14) sustained = notes[0];
     if ((i === 6 || i === 15) && sustained) score.make.tie({ from: sustained, to: notes[0] });
     words.split('|').forEach((text, n) => {
-      if (text)
-        notes[n].addModifier(
-          factory.Annotation({ text, font: lyricFont, vJustify: 'bottom' }).setTextBaseline(y + 107)
-        );
+      if (text) notes[n].addModifier(word(text, y));
     });
     // Split the chord into root and extension so Petaluma supplies proper accidental glyphs.
     if (harmony) {
@@ -68,8 +72,9 @@ export function saints(options: TestOptions): void {
       notes[0].addModifier(chord);
     }
     const stave = factory
-      .System({ x: (row === 0 ? 190 : 10) + column * width, y, width })
+      .System({ x, y, width })
       .addStave({ voices: [score.voice(notes, { time: i === 15 ? '1/4' : '4/4' })] });
+    x += width;
     if (column === 0 && row > 0) stave.addClef('treble');
     if (i === bars.length - 1) stave.setEndBarType(BarlineType.END);
   });

@@ -1,4 +1,5 @@
 // Browser regressions for lessons, shared previews, local editing, exports, and static uploads.
+import { memoryStore } from '../tools/site-storage.fixture.mjs';
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import { chmod, copyFile, mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
@@ -160,7 +161,7 @@ try {
     const manifest = await validate(output);
     const packageDir = join(artifacts, 'node_modules/vexflow/build/cjs');
     await mkdir(packageDir, { recursive: true });
-    await copyFile(join(output, manifest.assetPath, 'explorer/vexflow.js'), join(packageDir, 'vexflow.js'));
+    await copyFile(join(output, manifest.paths['explorer/vexflow.js']), join(packageDir, 'vexflow.js'));
     const standalone = join(artifacts, 'setup.html');
     await writeFile(standalone, html);
     await page.goto(pathToFileURL(standalone).href);
@@ -506,13 +507,14 @@ try {
     assert.ok(Object.keys(manifest.files).some((file) => file.endsWith('explorer/editor.mjs')));
     const log = join(artifacts, 'upload.jsonl');
     const published = join(artifacts, 'published.html');
+    const store = memoryStore('gs://vexflow.com/guide/');
     const command = join(artifacts, 'gcloud');
     await writeFile(
       command,
       `#!${process.execPath}\nconst fs=require('node:fs');const args=process.argv.slice(2);fs.appendFileSync(${JSON.stringify(log)},JSON.stringify(args)+'\\n');if(args[1]==='cp')fs.copyFileSync(args[2],${JSON.stringify(published)});if(args[1]==='cat')process.stdout.write(fs.readFileSync(${JSON.stringify(published)}));`
     );
     await chmod(command, 0o755);
-    await upload({ command });
+    await upload({ command, store });
     const calls = (await readFile(log, 'utf8')).trim().split('\n').map(JSON.parse);
     assert.equal(calls[0][1], 'rsync');
     assert.ok(calls[0].includes('gs://vexflow.com/guide/assets/'));
@@ -524,11 +526,11 @@ try {
     await upload({ dryRun: true, command: '/missing/should-not-run' });
     await assert.rejects(upload({ destination: 'gs://vexflow.com/', command }), /nonempty prefix/);
     // A changed member must fail before a cloud command can run.
-    const asset = join(output, manifest.assetPath, 'style.css');
+    const asset = join(output, manifest.paths['style.css']);
     const original = await readFile(asset);
     try {
       await writeFile(asset, 'changed');
-      await assert.rejects(upload({ command }), /Build changed/);
+      await assert.rejects(upload({ command, store }), /Build changed/);
     } finally {
       await writeFile(asset, original);
     }

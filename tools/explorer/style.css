@@ -1,20 +1,7 @@
 /* Compact notation workbench, editor tokens, and responsive navigation. */
 :root {
-  --paper: #faf7ef;
-  --surface: #fffdf8;
-  --ink: #2c3029;
-  --muted: #666c60;
-  --rule: #dfdfd2;
-  --accent: #b74632;
-  --sage: #4e6855;
-  --code: #f4f1e8;
-  color-scheme: light;
-  font:
-    12px/1.5 system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    sans-serif;
+  --mast-height: 64px;
+  --code: var(--code-paper);
   font-synthesis: none;
 }
 * {
@@ -42,7 +29,7 @@ button {
   color: inherit;
 }
 a {
-  color: inherit;
+  color: var(--green);
   text-decoration: none;
 }
 a:hover {
@@ -55,8 +42,8 @@ button {
 input,
 select {
   color: inherit;
-  background: var(--surface);
-  border: 1px solid var(--rule);
+  background: white;
+  border: 1px solid var(--line);
   border-radius: 4px;
 }
 button:hover {
@@ -67,10 +54,10 @@ button:hover {
   outline-offset: 3px;
 }
 ::selection {
-  background: #e9d9b7;
+  background: var(--soft);
 }
 input[type='checkbox'] {
-  accent-color: var(--sage);
+  accent-color: var(--green);
 }
 [hidden] {
   display: none !important;
@@ -104,7 +91,7 @@ p {
   margin-top: 0;
 }
 .masthead {
-  height: 48px;
+  height: var(--mast-height);
   position: sticky;
   top: 0;
   z-index: 20;
@@ -113,28 +100,28 @@ p {
   gap: 16px;
   padding: 0 18px;
   background: var(--paper);
-  border-bottom: 1px solid var(--rule);
+  border-bottom: var(--mast-rule);
 }
 .brand {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 15px;
-  font-family: inherit;
+  font: var(--brand);
+  letter-spacing: -1.4px;
   white-space: nowrap;
-  font-weight: 600;
 }
 .brand em {
-  font: 12px system-ui;
+  letter-spacing: normal;
+  font: 12px var(--sans);
   color: var(--muted);
   font-style: normal;
-  border-left: 1px solid var(--rule);
+  border-left: 1px solid var(--line);
   padding-left: 9px;
   margin-left: 8px;
 }
 
 .repo-link {
-  font-size: 12px;
+  font-size: 13px;
   display: flex;
   gap: 6px;
   align-items: center;
@@ -146,23 +133,23 @@ p {
 }
 .sidebar {
   position: fixed;
-  top: 48px;
+  top: var(--mast-height);
   bottom: 0;
   width: 212px;
-  border-right: 1px solid var(--rule);
+  border-right: 1px solid var(--line);
   padding: 14px 12px;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: #d9d9cc transparent;
+  scrollbar-color: var(--line) transparent;
 }
 .search-field {
   display: flex;
   align-items: center;
   gap: 7px;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--line);
   border-radius: 5px;
   padding: 3px 7px;
-  background: #f0f0e6;
+  background: var(--soft);
 }
 .search-field input {
   border: 0;
@@ -179,7 +166,7 @@ p {
 }
 .search-field kbd {
   white-space: nowrap;
-  font: 10px system-ui;
+  font: 10px var(--sans);
   color: #96988a;
 }
 .nav-heading {
@@ -193,22 +180,23 @@ p {
   margin: 0 0 12px;
 }
 .nav-group h2 {
+  font-family: var(--sans);
   margin: 0 8px 4px;
   font-size: 11px;
   font-weight: 600;
-  color: var(--sage);
+  color: var(--green);
 }
 .nav-item {
   display: block;
-  padding: 3px 8px;
-  font-size: 11px;
+  padding: 4px 8px;
+  font-size: 12px;
   position: relative;
   border-radius: 3px;
-  color: #62685b;
+  color: var(--ink);
 }
 .nav-item.active {
-  background: #eeeade;
-  color: var(--accent);
+  background: var(--soft);
+  color: var(--green);
   font-weight: 600;
 }
 .nav-item.active:before {
@@ -218,10 +206,10 @@ p {
   top: 6px;
   bottom: 6px;
   width: 2px;
-  background: var(--accent);
+  background: var(--green);
 }
 .nav-item:hover {
-  background: #f1eee4;
+  background: var(--soft);
 }
 .no-results {
   padding: 12px;
@@ -230,7 +218,7 @@ p {
 }
 .glyph-nav {
   border-top: 0;
-  border-bottom: 1px solid var(--rule);
+  border-bottom: 1px solid var(--line);
   padding: 8px 5px;
   display: flex;
   align-items: center;
@@ -245,7 +233,7 @@ p {
 }
 .glyph-nav-icon {
   font-size: 20px;
-  color: var(--sage);
+  color: var(--green);
 }
 .sidebar-footer {
   font-size: 10px;
@@ -269,16 +257,14 @@ main {
   margin-bottom: 4px;
 }
 h1 {
-  font:
-    600 24px/1.25 system-ui,
-    sans-serif;
+  font: var(--title);
   letter-spacing: -0.025em;
   margin-bottom: 5px;
 }
 .intro p {
   max-width: 850px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 18px;
   line-height: 1.5;
   margin-bottom: 0;
 }
@@ -286,9 +272,9 @@ h1 {
 .render-card {
   min-width: 0;
   align-self: start;
-  border: 1px solid #d7d9cb;
+  border: 1px solid var(--line);
   border-radius: 5px;
-  background: var(--surface);
+  background: white;
   overflow: hidden;
   box-shadow: none;
 }
@@ -298,11 +284,11 @@ h1 {
   justify-content: space-between;
   gap: 8px;
   padding: 6px 10px;
-  border-bottom: 1px solid var(--rule);
-  background: #f7f7ef;
+  border-bottom: 1px solid var(--line);
+  background: #f1f4ed;
 }
 .live-label {
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0;
   white-space: nowrap;
   display: flex;
@@ -323,28 +309,28 @@ h1 {
   flex-wrap: wrap;
 }
 .font-control {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
   display: flex;
   align-items: center;
   gap: 7px;
 }
 .font-control select {
-  font-size: 11px;
+  font-size: 12px;
   padding: 4px 7px;
   border: 0;
   background: none;
 }
 .toggle {
-  font-size: 10px;
+  font-size: 12px;
   padding: 5px 8px;
   border: 1px solid transparent;
   border-radius: 4px;
 }
 .toggle[aria-pressed='true'] {
-  background: #e7ece2;
-  color: #415c47;
-  border-color: #d2dccb;
+  background: var(--soft);
+  color: var(--green);
+  border-color: var(--line);
 }
 .icon-button {
   padding: 4px 7px;
@@ -352,13 +338,13 @@ h1 {
   line-height: 1;
 }
 .text-button {
-  font-size: 11px;
+  font-size: 12px;
   white-space: nowrap;
   padding: 5px;
 }
 .preview {
   position: relative;
-  background: var(--surface);
+  background: white;
   transition: background 0.2s;
 }
 .preview.dark {
@@ -396,12 +382,12 @@ h1 {
     SFMono-Regular,
     Consolas,
     monospace;
-  border-top: 1px solid var(--rule);
+  border-top: 1px solid var(--line);
 }
 .controls {
   padding: 8px 10px;
-  background: #f8f7f0;
-  border-top: 1px solid var(--rule);
+  background: var(--paper);
+  border-top: 1px solid var(--line);
   display: flex;
   flex-wrap: wrap;
   align-items: end;
@@ -426,7 +412,7 @@ h1 {
 }
 .control input[type='range'] {
   padding: 0;
-  accent-color: var(--sage);
+  accent-color: var(--green);
   height: 25px;
 }
 .range-label {
@@ -434,7 +420,7 @@ h1 {
   justify-content: space-between;
 }
 .range-label output {
-  color: var(--sage);
+  color: var(--green);
   font-variant-numeric: tabular-nums;
 }
 .preview-workbench {
@@ -445,10 +431,10 @@ h1 {
 }
 .code-panel {
   min-width: 0;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--line);
   border-radius: 5px;
   overflow: hidden;
-  background: var(--surface);
+  background: white;
 }
 .panel-heading {
   display: flex;
@@ -459,9 +445,7 @@ h1 {
 }
 
 h2 {
-  font:
-    600 13px/1.4 system-ui,
-    sans-serif;
+  font: 600 16px/1.35 var(--book);
   margin: 0;
   letter-spacing: 0;
 }
@@ -471,11 +455,11 @@ h2 {
   align-items: center;
 }
 .primary-button {
-  background: var(--sage);
-  color: #fffdf5;
+  background: var(--green);
+  color: white;
   padding: 5px 10px;
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 13px;
 }
 .primary-button:hover {
   background: #354e3c;
@@ -490,8 +474,8 @@ h2 {
   display: flex;
   height: 320px;
   background: var(--code);
-  border-top: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   overflow: hidden;
   resize: vertical;
   min-height: 160px;
@@ -501,8 +485,8 @@ h2 {
   padding: 10px 8px;
   margin: 0;
   text-align: right;
-  color: #a6a799;
-  border-right: 1px solid #e4e2d6;
+  color: var(--muted);
+  border-right: 3px solid var(--code-edge);
   overflow: hidden;
   user-select: none;
   flex: 0 0 38px;
@@ -514,7 +498,7 @@ h2 {
   min-width: 0;
   background: transparent;
   border: 0;
-  color: #30382d;
+  color: var(--ink);
   padding: 10px;
   outline: 0;
   tab-size: 2;
@@ -526,7 +510,7 @@ h2 {
 #line-numbers,
 #editor {
   font:
-    11px/1.6 ui-monospace,
+    13px/1.7 ui-monospace,
     SFMono-Regular,
     Consolas,
     monospace;
@@ -553,7 +537,7 @@ h2 {
   margin-left: auto;
 }
 .environment {
-  border-top: 1px solid var(--rule);
+  border-top: 1px solid var(--line);
   padding: 7px 10px;
   font-size: 11px;
   color: var(--muted);
@@ -579,7 +563,7 @@ summary {
 }
 .detail-tabs {
   display: flex;
-  border-bottom: 1px solid var(--rule);
+  border-bottom: 1px solid var(--line);
   gap: 18px;
   margin-bottom: 10px;
 }
@@ -598,9 +582,7 @@ summary {
 }
 
 h3 {
-  font:
-    600 12px/1.5 system-ui,
-    sans-serif;
+  font: 600 12px/1.5 var(--sans);
   margin: 8px 0;
 }
 .detail-panel p {
@@ -625,7 +607,7 @@ h3 {
 .diagnostics {
   margin-top: 12px;
   padding-top: 10px;
-  border-top: 1px solid var(--rule);
+  border-top: 1px solid var(--line);
   font-size: 11px;
   color: var(--muted);
 }
@@ -639,7 +621,7 @@ h3 {
 }
 .inspection-title h3 {
   font-size: 13px;
-  color: var(--sage);
+  color: var(--green);
 }
 .inspection-id {
   font:
@@ -674,7 +656,7 @@ h3 {
 .related button,
 .api-link {
   display: inline-block;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--line);
   padding: 5px 8px;
   font:
     10px ui-monospace,
@@ -698,7 +680,7 @@ h3 {
   font-size: 10px;
 }
 .main-footer {
-  border-top: 1px solid var(--rule);
+  border-top: 1px solid var(--line);
   padding: 12px 0;
   display: flex;
   justify-content: space-between;
@@ -756,8 +738,8 @@ h3 {
 }
 .glyph-cell {
   min-height: 92px;
-  border: 1px solid var(--rule);
-  background: var(--surface);
+  border: 1px solid var(--line);
+  background: white;
   border-radius: 5px;
   padding: 7px;
   min-width: 0;
@@ -795,8 +777,8 @@ h3 {
   position: sticky;
   top: 62px;
   align-self: start;
-  background: var(--surface);
-  border: 1px solid var(--rule);
+  background: white;
+  border: 1px solid var(--line);
   border-radius: 5px;
   padding: 12px;
   overflow: hidden;
@@ -830,7 +812,7 @@ h3 {
 }
 .more-button {
   display: block;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--line);
   border-radius: 5px;
   padding: 7px 14px;
   margin: 16px auto;
@@ -881,7 +863,7 @@ h3 {
   .detail-panel {
     contain: none;
     max-height: 320px;
-    border: 1px solid var(--rule);
+    border: 1px solid var(--line);
     border-radius: 7px;
     padding: 0 18px 18px;
   }
@@ -922,13 +904,14 @@ h3 {
   }
 }
 @media (max-width: 640px) {
+  :root {
+    --mast-height: 56px;
+  }
   .masthead {
-    height: 48px;
     padding: 0 16px;
     gap: 10px;
   }
   .brand {
-    font-size: 14px;
     gap: 7px;
   }
   .brand img {
@@ -944,7 +927,6 @@ h3 {
     display: block;
   }
   .sidebar {
-    top: 48px;
     width: 260px;
     background: var(--paper);
     z-index: 30;
@@ -963,10 +945,7 @@ h3 {
     padding-bottom: 12px;
   }
   .intro p {
-    font-size: 13px;
-  }
-  h1 {
-    font-size: 23px;
+    font-size: 16px;
   }
   .render-toolbar {
     padding: 10px;
@@ -979,14 +958,14 @@ h3 {
     font-size: 0;
   }
   .font-control select {
-    font-size: 10px;
+    font-size: 12px;
   }
   .toggle {
-    font-size: 9px;
+    font-size: 12px;
     padding: 5px;
   }
   .live-label {
-    font-size: 8px;
+    font-size: 11px;
     letter-spacing: 0.05em;
   }
   .render-meta {

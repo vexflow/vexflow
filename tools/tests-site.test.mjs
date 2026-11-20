@@ -1,4 +1,5 @@
 // Verify the deployed test gallery loads only its bundled assets and publishes with the shared cache policy.
+import { memoryStore } from './site-storage.fixture.mjs';
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import { chmod, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
@@ -74,9 +75,26 @@ test('standalone gallery runs with local fonts/scripts and preserves QUnit filte
     // Opening the index needs only HTML and the featured score, even on a cold cache.
     await page.goto(`${origin}/tests/`);
     assert.ok(await page.$eval('figure img', (img) => img.complete && img.naturalWidth > 0));
-    assert.deepEqual(
-      requests.filter((url) => !url.endsWith('/favicon.ico')).map((url) => new URL(url).pathname),
-      ['/tests/', `/tests/${(await validate(output)).assetPath}/demos/ballade.webp`]
+    // The standalone gallery carries the same display fonts as the guide, even on a cold visit.
+    const displayFonts = await page.evaluate(async () => {
+      await document.fonts.ready;
+      return ['header strong', 'h1'].map((selector) => {
+        const family = getComputedStyle(document.querySelector(selector)).fontFamily.split(',')[0];
+        return [...document.fonts].find((face) => face.family === family && face.status === 'loaded')?.family;
+      });
+    });
+    assert.deepEqual(displayFonts, ['Tangerine', 'Academico']);
+    const manifest = await validate(output);
+    const initial = requests.filter((url) => !url.endsWith('/favicon.ico')).map((url) => new URL(url).pathname);
+    const permitted = new Set([
+      '/tests/',
+      ...Object.entries(manifest.paths)
+        .filter(([name]) => name === 'demos/ballade.webp' || name === 'site-theme.css' || name.startsWith('typefaces/'))
+        .map(([, path]) => '/tests/' + path),
+    ]);
+    assert.ok(
+      initial.every((path) => permitted.has(path)),
+      initial.join(', ')
     );
     // Native buttons remain focused while slides change. Each score and its source
     // must be present in the deployed asset graph; the runner loads only on navigation.
@@ -200,6 +218,14 @@ test('standalone gallery runs with local fonts/scripts and preserves QUnit filte
         assert.match(label, piece === 'drums' ? /Snare drum.*hi-hat/i : /string 3.*bend 2 semitones/i);
       } else if (piece === 'sumer') {
         await page.select('#edition', 'Full ensemble');
+        await page.select('#width', 'Page width');
+        // The opening two measures belong to one singer. Their different stems share one lyric baseline.
+        const baselines = await page.$$eval(
+          '#vf-part0-0-0 .vf-annotation text, #vf-part0-1-0 .vf-annotation text',
+          (els) => els.filter((el) => ['Su-', 'cum-'].includes(el.textContent)).map((el) => el.getAttribute('y'))
+        );
+        assert.equal(baselines.length, 2);
+        assert.equal(baselines[0], baselines[1]);
         const labels = await page.$$eval('#events option', (opts) => opts.map((o) => o.text).join(' '));
         for (const part of ['Singer 4', 'Pes 1', 'Pes 2']) assert.ok(labels.includes(part));
         await page.select('#edition', 'Singer 2');
@@ -297,12 +323,13 @@ test('test upload targets its own prefix and retains immutable assets and short-
     const log = join(directory, 'calls.jsonl');
     const published = join(directory, 'published.html');
     const command = join(directory, 'gcloud');
+    const store = memoryStore('gs://vexflow.com/tests/');
     await writeFile(
       command,
       `#!${process.execPath}\nconst fs=require('node:fs');const args=process.argv.slice(2);fs.appendFileSync(${JSON.stringify(log)},JSON.stringify(args)+'\\n');if(args[1]==='cp')fs.copyFileSync(args[2],${JSON.stringify(published)});if(args[1]==='cat')process.stdout.write(fs.readFileSync(${JSON.stringify(published)}));`
     );
     await chmod(command, 0o755);
-    await upload({ command });
+    await upload({ command, store });
     const calls = (await readFile(log, 'utf8')).trim().split('\n').map(JSON.parse);
     assert.deepEqual(
       calls.map((args) => args[1]),

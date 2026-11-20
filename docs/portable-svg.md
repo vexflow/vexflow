@@ -43,6 +43,7 @@ For an existing VexFlow SVG element, call `SVGContext.toSVG(svgElement, fonts)`.
 
 - Supply every music and text font used in the drawing. The export follows each text element's font-family order.
 - Supply separate faces for bold and italic text. For example: `{ family: 'Academico', weight: 'bold', font: boldFont }`.
+- For the tempo and altered chord in the [score lettering example](text-and-lyrics.md#combine-lettering-and-engraved-symbols), supply regular Bravura and both regular and bold Academico. The flat and beat unit use Bravura. The lyrics, chord letters, digits, and tempo name use Academico.
 - Export throws `MissingFont` if a face or glyph is missing. It does not silently save empty squares or substitute a different face.
 - Text in one font is shaped as a run. Kerning and ligatures use the supplied font library.
 - Fonts remain your application's responsibility. Check their licenses before distributing outlines.

@@ -43,8 +43,8 @@ const fan = guitar.rasgueado(
     roll: i === 6,
   }))
 );
-// Fit the entire one-bar fan, even on a phone.
-const logicalWidth = Math.max(width, 480);
+// Give the arrows, 11 pt finger labels, and chord grips room before scaling this single bar to a phone.
+const logicalWidth = Math.max(width, 520);
 const spec = {
   sheet: { width: logicalWidth - 32, x: 16, y: 35 },
   continuous: {},

@@ -1,14 +1,16 @@
 // Build, preview, and upload the guide with the Explorer's exact editor and runtime.
 import { createRequire } from 'node:module';
 import { createHash } from 'node:crypto';
-import { mkdir, mkdtemp, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { dirname, extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
+import { externalFonts, linkAssets, linkPage, writeAssets } from '../tools/site-assets.mjs';
+import { siteTheme } from '../tools/site-theme.mjs';
 import prettier from 'prettier';
 
-import { build as buildExplorer, bundlePrism } from '../tools/explorer/cli.mjs';
+import { build as buildExplorer, collectAssets, bundlePrism } from '../tools/explorer/cli.mjs';
 import { upload as uploadSite, validate } from '../tools/static-site-upload.mjs';
 import { examples, lessons, sections } from './content.mjs';
 
@@ -17,19 +19,19 @@ const root = resolve(source, '..');
 export const output = join(root, 'build/guide');
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
 
-/** Publish one immutable graph, including shared modules and the current source build. */
+/** Build a portable guide using independently fingerprinted modules, fonts and code examples. */
 export async function build() {
-  const explorer = await buildExplorer();
+  const raw = await collectAssets();
+  const explorer = await buildExplorer(raw);
   const shared = await validate(explorer);
   const assets = new Map();
-  for (const file of Object.keys(shared.files)) {
-    const name = file.slice(shared.assetPath.length + 1);
+  for (const [name, bytes] of raw) {
     if (
-      /^(editor.mjs|preview.mjs|source.mjs|runner.mjs|vexflow.js|font-data.json|catalog.mjs|catalog\/entries.mjs|vendor\/.*)$/.test(
+      /^(editor.mjs|preview.mjs|source.mjs|runner.mjs|vexflow.js|vexflow.js.map|font-data.json|catalog.mjs|catalog\/entries.mjs|vendor\/.*)$/.test(
         name
       )
     )
-      assets.set(`explorer/${name}`, await readFile(join(explorer, file)));
+      assets.set(`explorer/${name}`, bytes);
   }
   // Markup precedes JavaScript so HTML samples also highlight embedded scripts.
   assets.set(
@@ -44,7 +46,11 @@ export async function build() {
         assets.set(`licenses/${family}/${file}`, await readFile(join(directory, file)));
     }
   }
-  for (const file of ['app.mjs', 'style.css']) assets.set(file, await readFile(join(source, file)));
+  assets.set('app.mjs', await readFile(join(source, 'app.mjs')));
+  assets.set(
+    'style.css',
+    Buffer.from(externalFonts(siteTheme + (await readFile(join(source, 'style.css'), 'utf8')), assets))
+  );
   // Public class names occasionally differ from their source module names.
   const moduleNames = {
     Barline: 'stavebarline',
@@ -88,21 +94,14 @@ export async function build() {
   );
   // The cached Explorer bundle can predate a documentation-only commit.
   const { VERSION: version, ID: commit } = createRequire(import.meta.url)(
-    join(explorer, shared.assetPath, 'vexflow.js')
+    join(explorer, shared.paths['vexflow.js'])
   ).BUILD;
   assets.set('version.json', Buffer.from(JSON.stringify({ version, commit })));
-  const assetPath = `assets/${hash(Buffer.concat([...assets].sort().flatMap(([name, bytes]) => [Buffer.from(name), bytes]))).slice(0, 16)}`;
+  const graph = linkAssets(assets);
   const staging = await mkdtemp(join(root, 'build/guide-staging-'));
   try {
-    const manifest = { assetPath, files: {} };
-    for (const [name, bytes] of assets) {
-      const file = `${assetPath}/${name}`;
-      await mkdir(dirname(join(staging, file)), { recursive: true });
-      await writeFile(join(staging, file), bytes);
-      manifest.files[file] = hash(bytes);
-    }
-    const html = (await readFile(join(source, 'index.html'), 'utf8'))
-      .replaceAll('./assets/', `./${assetPath}/`)
+    const manifest = await writeAssets(staging, graph);
+    const html = linkPage(await readFile(join(source, 'index.html'), 'utf8'), graph.paths)
       .replaceAll('__GUIDE_VERSION__', version)
       .replaceAll('__GUIDE_COMMIT__', commit);
     await writeFile(join(staging, 'index.html'), html);

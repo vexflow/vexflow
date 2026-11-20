@@ -26,6 +26,22 @@ function renderStudy({ id, code, width, backend }) {
     const tab = composition.getNote('tab-0');
     result.arrow = tab.getModifiers().find((m) => m instanceof VexFlow.Stroke).type;
     result.stroke = tab.notation.find((n) => n.stroke).stroke;
+    // Read ink after drawing so both arrow conventions and both backends use the same clearance checks.
+    result.arrowGaps = Array.from({ length: 7 }, (_, i) => {
+      const note = composition.getNote('tab-' + i);
+      const bounds = note
+        .getModifiers()
+        .find((m) => m instanceof VexFlow.Stroke)
+        .getBoundingBox();
+      return note.getAbsoluteX() - note.getLeftDisplacedHeadPx() - (bounds.x + bounds.w);
+    });
+    result.golpe = ['staff', 'tab'].map((view) => {
+      const marks = composition.getNote(view + '-4').getModifiers();
+      const label = marks.find((m) => m instanceof VexFlow.Annotation && m.text === 'i + golpe');
+      const ink = label.getTextInk(label.computeX().x, label.computeY().y);
+      const accent = marks.find((m) => m instanceof VexFlow.Articulation).getInkBounds();
+      return { pt: VexFlow.Font.convertSizeToPointValue(label.fontInfo.size), gap: accent.y - (ink.y + ink.h) };
+    });
   }
   if (id === 'string-mute-bend') {
     const tab = composition.getNote('tab-1-0-4');
@@ -178,6 +194,16 @@ export async function guitarStudies(context) {
             assert.notEqual(flipped.arrow, result.arrow);
             assert.equal(flipped.stroke.direction, result.stroke.direction);
             assert.deepEqual(flipped.events, result.events);
+            for (const fan of [result, flipped]) {
+              assert.ok(
+                fan.arrowGaps.every((gap) => gap >= 3),
+                'Stroke arrows clear the frets'
+              );
+              assert.ok(
+                fan.golpe.every(({ pt, gap }) => pt === 11 && gap >= 3),
+                'The accent clears the 11 pt label'
+              );
+            }
           } else if (id === 'bossa-anticipation') {
             assert.equal(tab.find((e) => e.id === 'tab-0-1-0').duration, '1/2');
             assert.equal(tab.find((e) => e.id === 'tab-0-0-3').onset, '3/8');
@@ -186,8 +212,8 @@ export async function guitarStudies(context) {
           } else {
             assert.equal(result.bendString, 3);
             assert.ok(Math.abs(result.bendShape[0] - 0.5) < 1e-9);
-          assert.ok(Math.abs(result.bendShape[1] - 0.75) < 1e-9);
-          assert.deepEqual(result.bendShape.slice(2), [true, true, true]);
+            assert.ok(Math.abs(result.bendShape[1] - 0.75) < 1e-9);
+            assert.deepEqual(result.bendShape.slice(2), [true, true, true]);
             assert.equal(result.restored, true);
             assert.match(tab.find((e) => e.id === 'tab-0-1-0').label, /Begin palm mute on string 6/);
             assert.match(tab.find((e) => e.id === 'tab-1-1-0').label, /Last palm-muted attack on string 6/);

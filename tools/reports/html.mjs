@@ -1,6 +1,7 @@
 // Render standalone report and archive pages. All repository and Git metadata is untrusted text.
 import { readFileSync } from 'node:fs';
-const css = readFileSync(new URL('./report.css', import.meta.url), 'utf8');
+import { siteTheme } from '../site-theme.mjs';
+const css = siteTheme + readFileSync(new URL('./report.css', import.meta.url), 'utf8');
 const interactions = readFileSync(new URL('./interactions.js', import.meta.url), 'utf8');
 const repo = 'https://github.com/vexflow/vexflow';
 const escape = (value) =>

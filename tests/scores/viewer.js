@@ -2,6 +2,19 @@
 (() => {
   const el = (id) => document.getElementById(id);
   const pieces = ['saints', 'electric', 'kesh', 'falseta', 'sumer', 'prelude', 'drums', 'quartertones'];
+  // Resolve editions relative to this script, including in the fingerprinted static gallery.
+  const base = document.currentScript.src;
+  const sources = {
+    guitar: new URL('./guitar.js', base).href,
+    saints: new URL('./saints.js', base).href,
+    electric: new URL('./electric.js', base).href,
+    kesh: new URL('./kesh.js', base).href,
+    falseta: new URL('./falseta.js', base).href,
+    sumer: new URL('./sumer.js', base).href,
+    prelude: new URL('./prelude.js', base).href,
+    drums: new URL('./drums.js', base).href,
+    quartertones: new URL('./quartertones.js', base).href,
+  };
   let selected, navigation, edition, composition, score, spec, renderedWidth;
 
   function highlight() {
@@ -79,7 +92,7 @@
   function loadScript(name) {
     return new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = './' + name + '.js';
+      script.src = sources[name];
       script.onload = resolve;
       script.onerror = () => reject(Error('Unable to load ' + name + '.js'));
       document.head.append(script);
@@ -95,7 +108,7 @@
     edition = window.FeaturedScores[id];
     document.title = edition.title + ' · VexFlow';
     for (const key of ['title', 'credit', 'intro']) el(key).textContent = edition[key];
-    el('source').href = './' + id + '.js';
+    el('source').href = sources[id];
     el('source').hidden = false;
     const fonts = edition.fonts ?? ['Bravura', 'Academico'];
     VexFlow.setFonts(...fonts);

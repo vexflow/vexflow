@@ -10,6 +10,7 @@ import { Formatter } from '../src/formatter';
 import { GraceNoteGroup } from '../src/gracenotegroup';
 import { GraceTabNote } from '../src/gracetabnote';
 import { Metrics, MetricsDefaults } from '../src/metrics';
+import { ModifierPosition } from '../src/modifier';
 import { RenderContext } from '../src/rendercontext';
 import { ContextBuilder } from '../src/renderer';
 import { TabNote, TabNoteStruct } from '../src/tabnote';
@@ -23,6 +24,7 @@ const GraceTabNoteTests = {
     // TODO: Rename tests below since it is redundant with the module name.
     // Remove "Grace Tab Note "
     const run = VexFlowTests.runTests;
+    run('Grace frets beside a two-digit host', graceClearance, undefined, ['Bravura']);
     run('Grace Tab Note Simple', simple);
     run('Grace Tab Note Slurred', slurred);
   },
@@ -39,6 +41,21 @@ function setupContext(opts: TestOptions, ctxBuilder: ContextBuilder): { context:
   const context = ctxBuilder(opts.elementId, 350, 140);
   const stave = new TabStave(10, 10, 350).addTabGlyph().setContext(context).drawWithStyle();
   return { context, stave };
+}
+
+/** Both sides of a wide host must leave visible space around the smaller fret. */
+function graceClearance(options: TestOptions, contextBuilder: ContextBuilder): void {
+  const { context, stave } = setupContext(options, contextBuilder);
+  const positions = [{ str: 2, fret: 12 }];
+  const host = new TabNote({ positions, duration: 'w' });
+  const before = new GraceTabNote({ positions: [{ str: 2, fret: 2 }], duration: '8' });
+  const after = new GraceTabNote({ positions, duration: '8' });
+  host.addModifier(new GraceNoteGroup([before]));
+  host.addModifier(new GraceNoteGroup([after]).setPosition(ModifierPosition.RIGHT));
+  Formatter.FormatAndDraw(context, stave, [host]);
+  const hostHalfWidth = TabNote.tabToElement('12').getWidth() / 2;
+  options.assert.ok(before.getAbsoluteX() + before.getWidth() / 2 + 2 <= host.getAbsoluteX() - hostHalfWidth);
+  options.assert.ok(after.getAbsoluteX() - after.getWidth() / 2 - 2 >= host.getAbsoluteX() + hostHalfWidth);
 }
 
 function simple(options: TestOptions, contextBuilder: ContextBuilder): void {
@@ -144,13 +161,14 @@ function fretSizing(assert: Assert): void {
       }
     }
     note.setFontSize(7).setGhost(true);
-    assert.equal(Font.convertSizeToPointValue(note.getFrets()[0].fontInfo.size), 7);
+    assert.equal(note.getFrets()[0].fontSizeInPoints, 7);
     note.setGhost(false).setFontSize();
-    assert.equal(Font.convertSizeToPointValue(note.getFrets()[0].fontInfo.size), 6);
+    const normalSize = Font.convertSizeToPointValue(Metrics.getFontInfo('TabNote.text').size);
+    assert.ok(Math.abs(note.getFrets()[0].fontSizeInPoints - normalSize * scale) < 0.001);
     MetricsDefaults.GraceTabNote.fontScale = 1 / 3;
     Metrics.clear('GraceTabNote');
     const small = new InspectableGraceTabNote({ positions: [{ str: 2, fret: 12 }], duration: '8' });
-    assert.equal(Font.convertSizeToPointValue(small.getFrets()[0].fontInfo.size), 3);
+    assert.ok(Math.abs(small.getFrets()[0].fontSizeInPoints - normalSize / 3) < 0.001);
   } finally {
     MetricsDefaults.GraceTabNote.fontScale = scale;
     Metrics.clear('GraceTabNote');

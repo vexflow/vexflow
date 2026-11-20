@@ -1,6 +1,7 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 // Co-author: Benjamin W. Bohl
+// Select, position, and measure native clef glyphs against their attached stave.
 
 import { BoundingBox } from './boundingbox';
 import { Glyphs } from './glyphs';
@@ -138,6 +139,7 @@ export class Clef extends StaveModifier {
     this.text = this.code;
     this.fontInfo.size = Math.floor(Clef.getPoint(this.size));
 
+    if (this.stave && type === 'tab') this.setStave(this.stave);
     return this;
   }
 
@@ -149,13 +151,52 @@ export class Clef extends StaveModifier {
 
   /** Set associated stave. */
   override setStave(stave: Stave): this {
-    this.stave = stave;
+    super.setStave(stave);
+    if (this.type !== 'tab') return this;
+
+    const strings = stave.getNumLines();
+    this.text = this.code = strings === 4 ? Glyphs.fourStringTabClef : Glyphs.sixStringTabClef;
+    const spaces = Math.max(0, strings - 1);
+    this.line = spaces / 2;
+    this.setFontSize(Math.floor(Clef.getPoint(this.size)));
+    // A single string has a center but no vertical span to fit.
+    if (spaces === 0) return this;
+
+    // Measure the selected music face before fitting its ink between the outer strings.
+    const reference = Clef.getPoint('default');
+    this.fontInfo.size = reference;
+    const { actualBoundingBoxAscent, actualBoundingBoxDescent } = this.measureText();
+    const inkHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
+    if (inkHeight > 0) {
+      const lineWidth = stave.getStyle().lineWidth ?? 1;
+      const span = stave.space(spaces);
+      // Keep a stroke width plus 1/24 of the full span clear at each end.
+      const clearance = lineWidth + span / 24;
+      const height = Math.max(1, span - lineWidth - 2 * clearance);
+      const targetHeight = (height * Clef.getPoint(this.size)) / reference;
+      const points = (reference * targetHeight) / inkHeight;
+      this.setFontSize(points);
+      // Font hinting can round ink outwards at the fitted size. Allow one pixel for that rounding.
+      const fitted = this.getTextMetrics();
+      const fittedHeight = fitted.actualBoundingBoxAscent + fitted.actualBoundingBoxDescent;
+      if (fittedHeight > targetHeight + 0.5) {
+        this.setFontSize((points * Math.max(1, targetHeight - 1)) / fittedHeight);
+      }
+    }
     return this;
+  }
+
+  /** Baseline shared by drawing and hit testing. TAB fonts can have asymmetric ink. */
+  getGlyphY(): number {
+    const stave = this.checkStave();
+    if (this.type !== 'tab') return stave.getYForLine(this.line);
+    const { actualBoundingBoxAscent, actualBoundingBoxDescent } = this.textMetrics;
+    return stave.getYForDrawnLine(this.line) + (actualBoundingBoxAscent - actualBoundingBoxDescent) / 2;
   }
 
   /** Positioned glyph ink, including an octave annotation if present. */
   getInkBounds(): BoundingBox {
-    return this.getTextInk(this.getX(), this.checkStave().getYForLine(this.line));
+    return this.getTextInk(this.getX(), this.getGlyphY());
   }
 
   /** Render clef. */
@@ -167,7 +208,7 @@ export class Clef extends StaveModifier {
     const clsAttribute = this.getAttribute('class');
     ctx.openGroup('clef' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
 
-    this.y = stave.getYForLine(this.line);
+    this.y = this.getGlyphY();
     this.renderText(ctx, 0, 0);
     this.drawPointerRect();
     ctx.closeGroup();

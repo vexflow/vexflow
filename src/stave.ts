@@ -198,6 +198,8 @@ export class Stave extends Element {
   setNumLines(n: number): this {
     this.options.numLines = n;
     this.resetLines();
+    for (const modifier of this.getModifiers(undefined, Clef.CATEGORY)) modifier.setStave(this);
+    this.formatted = false;
     return this;
   }
 
@@ -348,8 +350,7 @@ export class Stave extends Element {
     return this.getYForLine(this.options.numLines);
   }
 
-  // This returns
-  /** @returns the y for the *center* of a staff line */
+  /** Logical line coordinate used by score layout. */
   getYForLine(line: number): number {
     const options = this.options;
     const spacing = options.spacingBetweenLinesPx;
@@ -358,6 +359,12 @@ export class Stave extends Element {
     const y = this.y + line * spacing + headroom * spacing;
 
     return y;
+  }
+
+  /** Center of a drawn line, including the stroke alignment. Fractional lines interpolate between strings. */
+  getYForDrawnLine(line: number): number {
+    const lineWidth = this.getStyle().lineWidth ?? 1;
+    return this.getYForLine(line) + (lineWidth % 2 === 0 ? 0 : 0.5);
   }
 
   getLineForY(y: number): number {
@@ -725,19 +732,13 @@ export class Stave extends Element {
     const numLines = this.options.numLines;
     const width = this.width;
     const x = this.x;
-    let y;
-
-    const lineWidth = this.getStyle().lineWidth ?? 1;
-    const lineWidthCorrection = lineWidth % 2 === 0 ? 0 : 0.5;
-
     // Render lines
     for (let line = 0; line < numLines; line++) {
-      y = this.getYForLine(line);
-
       if (this.options.lineConfig[line].visible) {
+        const y = this.getYForDrawnLine(line);
         ctx.beginPath();
-        ctx.moveTo(x, y + lineWidthCorrection);
-        ctx.lineTo(x + width, y + lineWidthCorrection);
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + width, y);
         ctx.stroke();
       }
     }
@@ -756,7 +757,7 @@ export class Stave extends Element {
     if (this.measure > 0) {
       ctx.setFont(this.fontInfo);
       const textWidth = ctx.measureText('' + this.measure).width;
-      y = this.getYForTopText(0) + 3;
+      const y = this.getYForTopText(0) + 3;
       ctx.fillText('' + this.measure, this.x - textWidth / 2, y);
     }
   }
