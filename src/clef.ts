@@ -154,35 +154,34 @@ export class Clef extends StaveModifier {
     super.setStave(stave);
     if (this.type !== 'tab') return this;
 
-    if (stave.getNumLines() === 4) {
-      this.text = this.code = Glyphs.fourStringTabClef;
-      this.line = 1.5;
-      // Music fonts have different TAB outlines. Measure the selected face at the
-      // normal point size before fitting it between the outer strings.
-      const reference = Clef.getPoint('default');
-      this.fontInfo.size = reference;
-      const { actualBoundingBoxAscent, actualBoundingBoxDescent } = this.measureText();
-      const inkHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
-      if (inkHeight > 0) {
-        const lineWidth = stave.getStyle().lineWidth ?? 1;
-        // Leave one stroke width plus an eighth of a space beyond each inner stroke edge.
-        const clearance = lineWidth + stave.space(1 / 8);
-        const height = Math.max(1, stave.space(3) - lineWidth - 2 * clearance);
-        const targetHeight = (height * Clef.getPoint(this.size)) / reference;
-        const points = (reference * targetHeight) / inkHeight;
-        this.setFontSize(points);
-        // Font hinting can round ink outwards at the fitted size. Allow one pixel for that rounding.
-        const fitted = this.getTextMetrics();
-        const fittedHeight = fitted.actualBoundingBoxAscent + fitted.actualBoundingBoxDescent;
-        if (fittedHeight > targetHeight + 0.5) {
-          this.setFontSize((points * Math.max(1, targetHeight - 1)) / fittedHeight);
-        }
+    const strings = stave.getNumLines();
+    this.text = this.code = strings === 4 ? Glyphs.fourStringTabClef : Glyphs.sixStringTabClef;
+    const spaces = Math.max(0, strings - 1);
+    this.line = spaces / 2;
+    this.setFontSize(Math.floor(Clef.getPoint(this.size)));
+    // A single string has a center but no vertical span to fit.
+    if (spaces === 0) return this;
+
+    // Measure the selected music face before fitting its ink between the outer strings.
+    const reference = Clef.getPoint('default');
+    this.fontInfo.size = reference;
+    const { actualBoundingBoxAscent, actualBoundingBoxDescent } = this.measureText();
+    const inkHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
+    if (inkHeight > 0) {
+      const lineWidth = stave.getStyle().lineWidth ?? 1;
+      const span = stave.space(spaces);
+      // Keep a stroke width plus 1/24 of the full span clear at each end.
+      const clearance = lineWidth + span / 24;
+      const height = Math.max(1, span - lineWidth - 2 * clearance);
+      const targetHeight = (height * Clef.getPoint(this.size)) / reference;
+      const points = (reference * targetHeight) / inkHeight;
+      this.setFontSize(points);
+      // Font hinting can round ink outwards at the fitted size. Allow one pixel for that rounding.
+      const fitted = this.getTextMetrics();
+      const fittedHeight = fitted.actualBoundingBoxAscent + fitted.actualBoundingBoxDescent;
+      if (fittedHeight > targetHeight + 0.5) {
+        this.setFontSize((points * Math.max(1, targetHeight - 1)) / fittedHeight);
       }
-    } else if (this.code === Glyphs.fourStringTabClef) {
-      // A modifier can be moved to another stave or survive a line-count change.
-      this.text = this.code = Clef.types.tab.code;
-      this.line = Clef.types.tab.line;
-      this.setFontSize(Math.floor(Clef.getPoint(this.size)));
     }
     return this;
   }
@@ -190,7 +189,7 @@ export class Clef extends StaveModifier {
   /** Baseline shared by drawing and hit testing. TAB fonts can have asymmetric ink. */
   getGlyphY(): number {
     const stave = this.checkStave();
-    if (this.code !== Glyphs.fourStringTabClef) return stave.getYForLine(this.line);
+    if (this.type !== 'tab') return stave.getYForLine(this.line);
     const { actualBoundingBoxAscent, actualBoundingBoxDescent } = this.textMetrics;
     return stave.getYForDrawnLine(this.line) + (actualBoundingBoxAscent - actualBoundingBoxDescent) / 2;
   }

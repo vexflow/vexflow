@@ -17,6 +17,7 @@ const TabStaveTests = {
     const run = VexFlowTests.runTests;
     run('TabStave Draw Test', draw);
     run('Four-string TAB clefs', fourStringClefs);
+    run('TAB clef by string count', stringCounts);
   },
 };
 
@@ -42,11 +43,11 @@ function fourStringClefs(options: TestOptions, contextBuilder: ContextBuilder): 
   for (const [index, spacing] of [13, 9].entries()) {
     const stave = new TabStave(10 + index * 160, 10, 145, { spacingBetweenLinesPx: spacing })
       .setContext(ctx)
+      .setStyle({ lineWidth: index + 1 })
       .addClef('tab')
       .addEndClef('tab', 'small');
     // Exercise both the half-pixel alignment of a one-pixel stroke and the unshifted two-pixel stroke.
     const lineWidth = index + 1;
-    stave.setStyle({ lineWidth });
     const sixStartX = stave.getNoteStartX();
     stave.setNumLines(4);
     const [start, end] = stave.getModifiers(undefined, Clef.CATEGORY) as Clef[];
@@ -83,6 +84,34 @@ function fourStringClefs(options: TestOptions, contextBuilder: ContextBuilder): 
   six.draw();
   const [clef] = six.getModifiers(undefined, Clef.CATEGORY) as Clef[];
   options.assert.equal(clef.line, 2.5, 'Six-string TAB stays on its original line');
+}
+
+/** Show standard and courtesy clefs on the same string spacing for direct comparison. */
+function stringCounts(options: TestOptions, contextBuilder: ContextBuilder): void {
+  const ctx = contextBuilder(options.elementId, 470, 250);
+  for (const [index, strings] of [4, 5, 6, 7].entries()) {
+    const x = 12 + (index % 2) * 230;
+    const y = 25 + Math.floor(index / 2) * 115;
+    const stave = new TabStave(x, y, 210, { numLines: strings, spaceAboveStaffLn: 0 })
+      .setContext(ctx)
+      .addClef('tab')
+      .addEndClef('tab', 'small');
+    ctx.save();
+    ctx.setFont('Arial', 10);
+    ctx.fillText(`${strings} strings`, x, y - 9);
+    ctx.restore();
+    stave.draw();
+    for (const clef of stave.getModifiers(undefined, Clef.CATEGORY) as Clef[]) {
+      const ink = clef.getInkBounds();
+      const span = stave.space(strings - 1);
+      const top = stave.getYForDrawnLine(0) + 0.5;
+      const bottom = stave.getYForDrawnLine(strings - 1) - 0.5;
+      const above = ink.y - top;
+      const below = bottom - ink.y - ink.h;
+      options.assert.ok(Math.abs(above - below) < 0.01, `${strings} strings: equal clearance`);
+      options.assert.ok(above >= 1 + span / 24 - 0.5 && ink.h > 0, `${strings} strings: visible outer margins`);
+    }
+  }
 }
 
 VexFlowTests.register(TabStaveTests);
