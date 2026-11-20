@@ -9,6 +9,7 @@ import puppeteer from 'puppeteer';
 import {
   beamedSplitChordStudy,
   continuousBeamStudy,
+  glissandoStudy,
   makeContinuousStudy,
   tabEndingStudy,
 } from '../engraving/continuous-studies.mjs';
@@ -817,4 +818,92 @@ test('a same-measure continuous beam matches native beam ink', () => {
     return canvas.toBuffer();
   }
   assert.deepEqual(render(true), render(false));
+});
+
+test('straight glissandi preserve direction and selected head clearance through a system break', () => {
+  for (const descending of [false, true]) {
+    const { f, ctx, canvas } = factory();
+    const score = f.EasyScore().compose(glissandoStudy(descending));
+    const from = score.getNote('from');
+    const to = score.getNote('to');
+    const layout = score.sheet.getContinuousLayout();
+    const render = (width, parts) => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      score.sheet.setWidth(width);
+      f.draw({ retain: true });
+      const segments = layout.fragments;
+      // This study has only glissando spans. Capture their actual Canvas paths independently of the note drawing.
+      const paths = [];
+      const drawing = f.getContext();
+      drawing.save();
+      try {
+        const recorder = Object.create(drawing);
+        recorder.moveTo = (x, y) => paths.push([x, y]);
+        recorder.lineTo = (x, y) => paths.at(-1).push(x, y);
+        recorder.stroke = () => {};
+        layout.draw(recorder);
+      } finally {
+        drawing.restore();
+      }
+      assert.deepEqual(
+        paths,
+        segments.map((s) => [s.x1, s.y1, s.x2, s.y2])
+      );
+      assert.deepEqual(
+        segments.map((s) => s.part),
+        parts
+      );
+      assert.deepEqual(layout.diagnostics, []);
+      const first = segments[0],
+        last = segments[segments.length - 1];
+      const a = from.getHeadInk()[1],
+        b = to.getHeadInk()[0];
+      assert.ok(first.x1 > a.x + a.w && last.x2 < b.x);
+      assert.equal(first.y1, from.getYs()[1]);
+      assert.equal(last.y2, to.getYs()[0]);
+      for (const s of segments) {
+        assert.ok(s.x2 > s.x1);
+        assert.equal(Math.sign(s.y2 - s.y1), descending ? 1 : -1);
+        const row = layout.rows[s.row];
+        assert.ok(Math.min(s.y1, s.y2) >= row.y && Math.max(s.y1, s.y2) < row.y + row.height);
+      }
+      assert.equal(score.getNote('from'), from);
+      assert.equal(score.getNote('to'), to);
+      return { segments: structuredClone(segments), pixels: canvas.toBuffer() };
+    };
+    const wide = render(430, ['single']);
+    const split = render(150, ['first', 'last']);
+    const [left, right] = split.segments;
+    assert.ok(
+      Math.abs((left.y2 - left.y1) / (left.x2 - left.x1) - (right.y2 - right.y1) / (right.x2 - right.x1)) < 0.00001
+    );
+    assert.deepEqual(render(430, ['single']), wide);
+
+    const forced = factory().f.EasyScore().compose(glissandoStudy(descending, true));
+    forced.sheet.setWidth(430).format();
+    assert.deepEqual(
+      forced.sheet.getContinuousLayout().fragments.map((s) => s.part),
+      ['first', 'last']
+    );
+  }
+});
+
+test('a glissando retains its pitch progression through an intermediate row and a repeated bass clef', () => {
+  const source = glissandoStudy();
+  source.staves[0].measures.splice(1, 0, {
+    clef: 'bass',
+    voices: [{ notes: [{ note: { keys: ['g/3'], duration: 'h' } }] }],
+  });
+  source.continuous.boundaries = [2, 3].map((measure) => ({ measure, breakBefore: 'force' }));
+  const { f } = factory();
+  const c = f.EasyScore().compose(source);
+  f.draw({ retain: true });
+  const { fragments } = c.sheet.getContinuousLayout();
+  assert.deepEqual(
+    fragments.map((f) => f.part),
+    ['first', 'middle', 'last']
+  );
+  assert.ok(fragments.every((f) => f.y2 < f.y1));
+  // On the last two rows the same clef projects the shared boundary pitch onto the same staff line.
+  assert.ok(Math.abs(fragments[1].y2 - c.staves[1][0].getY() - (fragments[2].y1 - c.staves[2][0].getY())) < 0.00001);
 });

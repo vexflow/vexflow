@@ -9,6 +9,7 @@ import {
   ContinuousSpan,
   drawSpan,
   fitSpan,
+  glissandoY,
   ResolvedSpan,
   spanAbove,
   SpanAnchor,
@@ -292,6 +293,7 @@ export class ContinuousLayout {
       'beam',
       'tie',
       'slur',
+      'glissando',
       'crescendo',
       'diminuendo',
       'pedal',
@@ -349,6 +351,20 @@ export class ContinuousLayout {
           [span.toHead ?? 0, last.note],
         ] as const)
           if (!Number.isInteger(head) || head < 0 || head >= n.keys.length) invalid('Invalid span head index.');
+      }
+      if (span.kind === 'glissando') {
+        if (
+          first.staff !== last.staff ||
+          first.note.isRest() ||
+          last.note.isRest() ||
+          (first.measure === last.measure && onset(first.note).equals(onset(last.note)))
+        )
+          invalid('A glissando needs two ordered pitched attacks on the same staff.');
+        // Reserve a visible lead-in after the clef when the arrival is the first attack on its row.
+        if (first.measure !== last.measure && onset(last.note).numerator === 0) {
+          const stave = last.note.checkStave();
+          this.continuationPadding.set(stave, stave.space(1.5));
+        }
       }
       if (first.measure === last.measure && onset(first.note).greaterThan(onset(last.note))) invalid('Reversed span.');
       if (
@@ -602,6 +618,13 @@ export class ContinuousLayout {
       for (const f of parts) {
         f.progress = [prior / total, (prior + f.x2 - f.x1) / total];
         prior += f.x2 - f.x1;
+        if (f.kind === 'glissando') {
+          const measures = this.rows[f.row].measures;
+          const firstStave = this.score.staves[measures[0] - 1][s.first.staff];
+          const lastStave = this.score.staves[measures[measures.length - 1] - 1][s.last.staff];
+          f.y1 = glissandoY(s, firstStave, f.progress[0]);
+          f.y2 = glissandoY(s, lastStave, f.progress[1]);
+        }
         if (!s.beam) this.drawing.push((ctx) => drawSpan(ctx, f, s.label));
       }
     }
@@ -735,7 +758,7 @@ export class ContinuousLayout {
     // Prefer the nearest free lane. Non-overlapping spans can reuse it.
     const laneEnds = new Map<string, number[]>();
     for (const s of spans) {
-      if (s.beam || s.spec.kind === 'tie' || s.spec.kind === 'slur') continue;
+      if (s.beam || s.spec.kind === 'tie' || s.spec.kind === 'slur' || s.spec.kind === 'glissando') continue;
       if (s.syllable) {
         // A continuation row may have no sung words of its own. Include the extender in that staff's envelope.
         const stave = this.score.staves[first][s.first.staff];
@@ -874,6 +897,18 @@ export class ContinuousLayout {
         y2 =
           (ends ? s.last.note.getYs()[s.spec.toHead ?? 0] : continuationPitch(s.last, endStaff, s.spec.toHead)) +
           sign * space * (ends ? 0.5 : 1.1);
+      }
+    }
+    if (kind === 'glissando') {
+      if (starts) {
+        const head = (s.first.note as StaveNote).getHeadInk()[s.spec.fromHead ?? 0];
+        x1 = head.x + head.w + space * 0.3;
+      } else {
+        x1 -= this.continuationPadding.get(startStaff) ?? 0;
+      }
+      if (ends) {
+        const head = (s.last.note as StaveNote).getHeadInk()[s.spec.toHead ?? 0];
+        x2 = head.x - endStaff.space(0.3);
       }
     }
     if (kind === 'volta') {
