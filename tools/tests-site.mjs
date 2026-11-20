@@ -5,6 +5,7 @@ import { mkdir, mkdtemp, readFile, readdir, rename, rm, writeFile } from 'node:f
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
+import { inlineSiteTheme } from './site-theme.mjs';
 import { upload as uploadSite, validate } from './static-site-upload.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -62,8 +63,7 @@ export async function build() {
     let bytes = await readFile(join(root, 'tests/scores', file));
     if (file === 'index.html')
       bytes = Buffer.from(
-        bytes
-          .toString()
+        inlineSiteTheme(bytes.toString())
           .replace('../../build/cjs/vexflow-debug.js', '../vexflow-debug.js')
           .replace('../flow.html', '../../../index.html')
       );
@@ -83,7 +83,7 @@ export async function build() {
       await writeFile(join(staging, file), bytes);
       manifest.files[file] = hash(bytes);
     }
-    const runner = (await readFile(join(root, 'tests/all.html'), 'utf8'))
+    const runner = inlineSiteTheme(await readFile(join(root, 'tests/all.html'), 'utf8'))
       .replace(
         '<head>',
         `<head>\n    <meta name="vexflow-test-bundle" content="./${assetPath}/vexflow-debug-with-tests.js" />`
@@ -94,7 +94,7 @@ export async function build() {
       .replace('src="qunit/qunit.js"', `src="./${assetPath}/qunit/qunit.js"`);
     await writeFile(join(staging, 'all.html'), runner);
     manifest.files['all.html'] = hash(runner);
-    const html = (await readFile(join(root, 'tests/flow.html'), 'utf8')).replace(
+    const html = inlineSiteTheme(await readFile(join(root, 'tests/flow.html'), 'utf8')).replace(
       /(src|href)="(minuet\.webp|demo_petzold_tests\.ts|demos\/[a-z]+\.(?:webp|ts)|scores\/[a-z]+\.(?:html(?:\?piece=[a-z]+)?|js|webp))"/g,
       (_, attr, file) => `${attr}="./${assetPath}/${file.replace(/\.ts$/, '.txt')}"`
     );

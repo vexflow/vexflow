@@ -20,7 +20,7 @@ test('upload caches immutable assets, verifies stable downloads and switches the
   await writeFile(join(source, 'index.html'), html);
   await writeFile(join(source, 'changes.json'), data);
   await writeFile(join(source, 'render-inventory.json'), '{}');
-  for (const asset of ['report.css', 'app.js', 'academico.woff2', 'font-license.txt', 'before.png', 'after.png']) {
+  for (const asset of ['report.css', 'app.js', 'before.png', 'after.png']) {
     await writeFile(join(source, 'assets', asset), asset);
   }
   const log = join(root, 'calls');

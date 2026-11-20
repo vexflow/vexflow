@@ -283,6 +283,8 @@ The [Minuet print score](../demos/pdf/minuet.js) includes the pitches, fingering
 
 ## Upload static sites
 
+The guide, Explorer, test gallery, PDF library, and reports share the [website theme](../tools/site-theme.css). Each build includes its own copy for offline use.
+
 The guide, Explorer, and visual test gallery are self-contained static sites. Their upload commands build current source and bundle the required scripts and fonts.
 
 | Site         | Build only               | Upload                    | Bucket prefix                | Public URL                      |

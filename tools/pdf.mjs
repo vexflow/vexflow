@@ -4,6 +4,7 @@ import { existsSync } from 'node:fs';
 import { copyFile, mkdir, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { inlineSiteTheme } from './site-theme.mjs';
 import puppeteer from 'puppeteer';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -98,7 +99,7 @@ const browser = await puppeteer.launch({
 try {
   const staging = await mkdtemp(join(output, '.print-'));
   try {
-    let index = await readFile(join(root, 'demos/pdf/index.html'), 'utf8');
+    let index = inlineSiteTheme(await readFile(join(root, 'demos/pdf/index.html'), 'utf8'));
     const files = [];
     for (const edition of editions) {
       const preview = await printEdition(browser, edition, staging);

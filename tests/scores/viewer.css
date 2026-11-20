@@ -1,9 +1,4 @@
 /* The reader shares a coordinate system with the SVG. Print only the selected physical pages. */
-:root {
-  font-family: system-ui, sans-serif;
-  color: #183530;
-  background: #f4f5f1;
-}
 * {
   box-sizing: border-box;
 }
@@ -24,24 +19,23 @@ header,
 }
 header {
   justify-content: space-between;
-  border-bottom: 1px solid #b8c8bf;
+  border-bottom: var(--mast-rule);
   padding-bottom: 0.8rem;
 }
 a {
-  color: #205b52;
+  color: var(--green);
 }
 h1 {
-  font:
-    500 clamp(2rem, 5vw, 3.8rem)/1.08 Georgia,
-    serif;
+  font: var(--title);
+  letter-spacing: -1.2px;
   margin: 1.4rem 0 0.4rem;
 }
 #credit {
   margin: 0;
-  color: #55625b;
+  color: var(--muted);
 }
 #intro {
-  line-height: 1.5;
+  font: 18px/1.65 var(--book);
   max-width: 68ch;
 }
 #tools {
@@ -51,7 +45,7 @@ button,
 select {
   font: inherit;
   padding: 0.48rem 0.65rem;
-  border: 1px solid #a1b3aa;
+  border: 1px solid var(--control-border);
   background: white;
   color: inherit;
   border-radius: 0.28rem;
@@ -67,9 +61,11 @@ select {
   font-weight: 400;
 }
 #page {
+  /* The reader's paragraph spacing must not flow into the engraved SVG text. */
+  line-height: normal;
   overflow: auto;
   background: white;
-  border: 1px solid #cbd4cd;
+  border: 1px solid var(--line);
 }
 #frame {
   position: relative;
@@ -94,7 +90,7 @@ select {
   height: auto;
   width: min(100%, 210mm);
   margin: auto;
-  border-bottom: 1px solid #b8c8bf;
+  border-bottom: 1px solid var(--line);
 }
 [hidden],
 #reading[hidden],

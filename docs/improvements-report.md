@@ -31,7 +31,7 @@ npm run improvements:upload -- --rebuild   # Generate, browser-check, and upload
 
 | Files                                                     | Public cache lifetime                                                        |
 | --------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Images, fonts, license, CSS, and JavaScript               | One year, immutable. A change to the asset set produces a new directory URL. |
+| Images, CSS, and JavaScript                               | One year, immutable. A change to the asset set produces a new directory URL. |
 | `changes.json`, `render-inventory.json`, and `index.html` | 60 seconds, then revalidate. These URLs stay stable across uploads.          |
 
 The script stages a copy of the bundle, checks its manifest, uploads assets first, and verifies the JSON downloads against the bucket before publishing and verifying the HTML. Older assets stay available to readers with a cached page. If an upload fails, rerun the same command.

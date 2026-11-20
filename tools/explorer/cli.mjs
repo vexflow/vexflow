@@ -7,6 +7,7 @@ import { createRequire } from 'node:module';
 import { dirname, extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
+import { siteTheme } from '../site-theme.mjs';
 import prettier from 'prettier';
 
 import { examples } from './catalog.mjs';
@@ -71,7 +72,8 @@ export async function build() {
   for (const path of await filesIn(source)) {
     const name = path.slice(source.length + 1);
     if (name === 'index.html' || /^(cli|upload|test)\.mjs$/.test(name) || name.endsWith('.md')) continue;
-    assets.set(name, await readFile(path));
+    const bytes = await readFile(path);
+    assets.set(name, name === 'style.css' ? Buffer.from(siteTheme + bytes.toString()) : bytes);
   }
   assets.set('vexflow.js', await readFile(library));
   assets.set('render-metrics.mjs', await readFile(join(root, 'tools/render-metrics.mjs')));

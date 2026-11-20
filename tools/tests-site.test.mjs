@@ -74,6 +74,15 @@ test('standalone gallery runs with local fonts/scripts and preserves QUnit filte
     // Opening the index needs only HTML and the featured score, even on a cold cache.
     await page.goto(`${origin}/tests/`);
     assert.ok(await page.$eval('figure img', (img) => img.complete && img.naturalWidth > 0));
+    // The standalone gallery carries the same display fonts as the guide, even on a cold visit.
+    const displayFonts = await page.evaluate(async () => {
+      await document.fonts.ready;
+      return ['header strong', 'h1'].map((selector) => {
+        const family = getComputedStyle(document.querySelector(selector)).fontFamily.split(',')[0];
+        return [...document.fonts].find((face) => face.family === family && face.status === 'loaded')?.family;
+      });
+    });
+    assert.deepEqual(displayFonts, ['Tangerine', 'Academico']);
     assert.deepEqual(
       requests.filter((url) => !url.endsWith('/favicon.ico')).map((url) => new URL(url).pathname),
       ['/tests/', `/tests/${(await validate(output)).assetPath}/demos/ballade.webp`]

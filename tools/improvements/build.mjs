@@ -6,6 +6,7 @@ import { access, copyFile, mkdir, mkdtemp, readFile, rename, rm, writeFile } fro
 import { basename, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import { siteTheme } from '../site-theme.mjs';
 import { captureScores } from './scores.mjs';
 import { captureExamples, captureTools } from './screens.mjs';
 import { apiChanges, base, git, history, repo } from './history.mjs';
@@ -227,10 +228,8 @@ try {
       if (figure) assert.ok(ids.has(figure), 'Missing figure for ' + title + ': ' + figure);
       if (!/^(commit|issues)\//.test(link)) await access(link);
     }
-  const font = 'node_modules/@vexflow-fonts/academico/';
-  await copyFile(font + 'academico.woff2', join(assets, 'academico.woff2'));
-  await copyFile(font + 'LICENSE.txt', join(assets, 'font-license.txt'));
-  for (const name of ['report.css', 'app.js']) await copyFile('tools/improvements/' + name, join(assets, name));
+  await writeFile(join(assets, 'report.css'), siteTheme + (await readFile('tools/improvements/report.css', 'utf8')));
+  await copyFile('tools/improvements/app.js', join(assets, 'app.js'));
   await writeFile(join(staging, 'changes.json'), JSON.stringify(data, null, 2));
   await writeFile(join(staging, 'index.html'), renderReport(data));
   // Only replace a directory previously produced by this generator.

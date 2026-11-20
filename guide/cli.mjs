@@ -6,6 +6,7 @@ import { createServer } from 'node:http';
 import { dirname, extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
+import { siteTheme } from '../tools/site-theme.mjs';
 import prettier from 'prettier';
 
 import { build as buildExplorer, bundlePrism } from '../tools/explorer/cli.mjs';
@@ -44,7 +45,8 @@ export async function build() {
         assets.set(`licenses/${family}/${file}`, await readFile(join(directory, file)));
     }
   }
-  for (const file of ['app.mjs', 'style.css']) assets.set(file, await readFile(join(source, file)));
+  assets.set('app.mjs', await readFile(join(source, 'app.mjs')));
+  assets.set('style.css', Buffer.from(siteTheme + (await readFile(join(source, 'style.css'), 'utf8'))));
   // Public class names occasionally differ from their source module names.
   const moduleNames = {
     Barline: 'stavebarline',

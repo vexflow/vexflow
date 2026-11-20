@@ -80,7 +80,8 @@ async function serveAssets(page, checkout, scripts) {
     const path = url.pathname;
     if (
       url.origin !== origin ||
-      !/^\/(?:tests\/|build\/esm\/|node_modules\/(?:@vexflow-fonts\/|structured-clone-es\/))/.test(path)
+      (path !== '/tools/site-theme.css' &&
+        !/^\/(?:tests\/|build\/esm\/|node_modules\/(?:@vexflow-fonts\/|structured-clone-es\/))/.test(path))
     )
       return request.abort();
     try {

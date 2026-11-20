@@ -1,21 +1,7 @@
 /* Shared, self-contained typography and charts for the quality report and its archive. */
 :root {
-  color-scheme: light;
-  --ink: #202e36;
-  --muted: #52616a;
-  --paper: #f8f8f3;
-  --line: #d3dbd5;
-  --green: #17614a;
-  --light: #dfebe2;
   --blue: #4c7491;
   --gold: #926526;
-  font:
-    16px/1.55 'Inter',
-    'Helvetica Neue',
-    Arial,
-    sans-serif;
-  color: var(--ink);
-  background: var(--paper);
 }
 * {
   box-sizing: border-box;
@@ -31,12 +17,11 @@ a:focus-visible,
 button:focus-visible,
 summary:focus-visible,
 input:focus-visible {
-  outline: 3px solid #2777a0;
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 header {
-  background: #183a33;
-  color: #fff;
+  border-bottom: var(--mast-rule);
 }
 header > div,
 main,
@@ -51,11 +36,12 @@ header > div {
   padding: 1rem 0;
 }
 header b {
-  font-size: 1.4rem;
-  letter-spacing: -0.06em;
+  font: var(--brand);
+  color: var(--green);
+  letter-spacing: -1.4px;
 }
 header a {
-  color: #d4e8de;
+  color: var(--green);
   font-size: 0.9rem;
 }
 main {
@@ -69,16 +55,15 @@ p {
 }
 h1,
 h2 {
-  font-family: 'Spectral', Georgia, serif;
-  font-weight: 500;
+  font-weight: 650;
   line-height: 1.15;
 }
 h1 {
-  font-size: clamp(2.6rem, 7vw, 4.2rem);
-  letter-spacing: -0.045em;
+  font: var(--title);
+  letter-spacing: -1.2px;
 }
 h2 {
-  font-size: 2.1rem;
+  font-size: 22px;
   margin-bottom: 0.35rem;
 }
 h3 {
@@ -142,7 +127,7 @@ footer {
 .track {
   display: block;
   height: 0.48rem;
-  background: var(--light);
+  background: var(--soft);
   margin: 0.65rem 0 0.35rem;
   overflow: hidden;
   border-radius: 2px;
@@ -190,8 +175,8 @@ th {
 th {
   position: sticky;
   top: 0;
-  background: #e6ede6;
-  color: #30443c;
+  background: var(--soft);
+  color: var(--ink);
   white-space: nowrap;
   font-weight: 600;
 }

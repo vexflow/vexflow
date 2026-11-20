@@ -5,14 +5,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Score library · VexFlow</title>
+    <link rel="stylesheet" href="../../tools/site-theme.css" />
     <style>
-      :root {
-        color-scheme: light;
-        --ink: #243027;
-        --muted: #515e53;
-        --line: #c8cbbd;
-        --paper: #f8f7f0;
-      }
       * {
         box-sizing: border-box;
       }
@@ -20,9 +14,6 @@
         margin: 0;
         background: var(--paper);
         color: var(--ink);
-        font:
-          1rem/1.55 system-ui,
-          sans-serif;
       }
       header,
       main {
@@ -36,12 +27,11 @@
         align-items: baseline;
         gap: 1rem;
         padding-block: 1.25rem;
-        border-bottom: 1px solid var(--line);
+        border-bottom: var(--mast-rule);
       }
       header > a {
-        font:
-          bold 1.5rem Georgia,
-          serif;
+        font: var(--brand);
+        letter-spacing: -1.4px;
         text-decoration: none;
       }
       nav,
@@ -52,11 +42,11 @@
         align-items: baseline;
       }
       a {
-        color: #2d503e;
+        color: var(--green);
         text-underline-offset: 0.22em;
       }
       a:hover {
-        color: #743820;
+        color: var(--accent);
       }
       a:focus-visible {
         outline: 2px solid currentColor;
@@ -64,15 +54,14 @@
       }
       h1,
       h2 {
-        font-family: 'Iowan Old Style', Georgia, serif;
-        font-weight: normal;
-        line-height: 1.06;
+        font-weight: 650;
+        line-height: 1.2;
         text-wrap: balance;
       }
       h1 {
-        font-size: clamp(3rem, 7vw, 5.7rem);
+        font: var(--title);
         margin: 0 0 1rem;
-        letter-spacing: -0.04em;
+        letter-spacing: -1.2px;
       }
       main {
         padding-block: clamp(2.4rem, 6vw, 5.25rem);
@@ -81,7 +70,7 @@
         color: var(--muted);
         max-width: 56ch;
         margin: 0 0 2.6rem;
-        font-size: 1.1rem;
+        font: 18px/1.65 var(--book);
       }
       .shelf {
         display: grid;
@@ -116,7 +105,7 @@
         color: var(--muted);
       }
       h2 {
-        font-size: clamp(2rem, 3.5vw, 2.7rem);
+        font-size: 22px;
         margin: 0;
       }
       .spec {
@@ -127,7 +116,7 @@
         font-size: 0.91rem;
       }
       .open {
-        background: var(--ink);
+        background: var(--green);
         border-radius: 0.2rem;
         color: white;
         text-decoration: none;
@@ -135,7 +124,7 @@
       }
       .open:hover {
         color: white;
-        background: #40543e;
+        background: #254c38;
       }
       @media (max-width: 32rem) {
         header {
