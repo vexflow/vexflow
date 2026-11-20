@@ -1,6 +1,7 @@
 // Row-dependent notation for a responsive EasyScore composition. Source measures and notes keep their identity.
 import { Accidental } from './accidental';
 import { Annotation } from './annotation';
+import { reserveChordSpacing } from './chordspacing';
 import { Clef } from './clef';
 import {
   continuationPitch,
@@ -457,6 +458,7 @@ export class ContinuousLayout {
         ),
         start: Math.max(0, prefix),
         end: tail,
+        after: 0,
         breakBefore: this.boundaries.get(i)?.breakBefore,
       });
       i = last;
@@ -530,29 +532,33 @@ export class ContinuousLayout {
       if (matches.length !== 1) invalid('Expected one lyric annotation on the source note: ' + span.spec.syllableId);
       span.syllable = matches[0];
     }
-    this.hidden.clear();
-    this.diagnostics.length = 0;
-    this.fragments.length = 0;
-    this.rows.length = 0;
-    this.drawing = [];
     const units = this.units(options.measurePadding);
-    const groups = chooseSystemBreaks(
-      units,
-      options.width,
-      options.measureGap,
-      (i) => this.indent(units[i].first),
-      this.options.mode ?? 'balanced'
-    );
-    let y = options.y;
-    for (const indices of groups) {
-      const row = this.layoutRow(
-        indices.map((i) => units[i]),
-        options,
-        y
+    const padding = new Map<System, number>();
+    do {
+      this.hidden.clear();
+      this.diagnostics.length = 0;
+      this.fragments.length = 0;
+      this.rows.length = 0;
+      this.drawing = [];
+      for (const u of units) u.after = padding.get(this.score.systems[u.first]) ?? 0;
+      const groups = chooseSystemBreaks(
+        units,
+        options.width,
+        options.measureGap,
+        (i) => this.indent(units[i].first),
+        this.options.mode ?? 'balanced'
       );
-      this.rows.push(row);
-      y += row.height + options.rowGap;
-    }
+      let y = options.y;
+      for (const indices of groups) {
+        const row = this.layoutRow(
+          indices.map((i) => units[i]),
+          options,
+          y
+        );
+        this.rows.push(row);
+        y += row.height + options.rowGap;
+      }
+    } while (reserveChordSpacing(this.rows, padding));
     for (const s of this.spans) {
       const parts = this.fragments.filter((f) => f.id === s.spec.id);
       const total = parts.reduce((a, f) => a + f.x2 - f.x1, 0);
@@ -643,7 +649,7 @@ export class ContinuousLayout {
     const indent = this.indent(first);
     const minimum =
       indent +
-      units.reduce((sum, u) => sum + u.width, 0) +
+      units.reduce((sum, u, i) => sum + u.width + (i + 1 < units.length ? u.after : 0), 0) +
       units[0].start +
       units[units.length - 1].end +
       (units.length - 1) * options.measureGap;
@@ -655,8 +661,9 @@ export class ContinuousLayout {
         end = k === units.length - 1;
       const sys = this.score.systems[u.first];
       sys.setX(x).setY(0);
-      const endPadding = this.install(u.first, u.last, begin, end);
-      const width = u.width + extra + (begin ? u.start : 0) + (end ? u.end : 0);
+      const chordPadding = end ? 0 : u.after;
+      const endPadding = this.install(u.first, u.last, begin, end) + chordPadding;
+      const width = u.width + extra + chordPadding + (begin ? u.start : 0) + (end ? u.end : 0);
       sys.setWidth(width).format({ endPadding });
       for (let j = 1; j < visible.length; j++) {
         const staves = sys.getStaves(),

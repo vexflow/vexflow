@@ -472,6 +472,32 @@ export class ChordSymbol extends Modifier {
     return this.horizontal;
   }
 
+  /** Use the same note anchor for drawing and for spacing chords before a draw. */
+  private originX(note: StemmableNote): number {
+    const start = note.getModifierStartXY(Modifier.Position.ABOVE, this.index);
+    if (this.horizontal === ChordSymbolHorizontalJustify.LEFT) return start.x;
+    if (this.horizontal === ChordSymbolHorizontalJustify.RIGHT)
+      return this.kernedRuns ? start.x - this.getWidth() : start.x + this.getWidth();
+    const center = this.horizontal === ChordSymbolHorizontalJustify.CENTER ? start.x : note.getStemX();
+    return center - this.getWidth() / 2;
+  }
+
+  /** Horizontal ink of the formatted symbol at its current attachment, including italic overhangs. */
+  getHorizontalInk(): { left: number; right: number } {
+    const x = this.originX(this.checkAttachedNote() as StemmableNote);
+    const parts = this.kernedRuns
+      ? this.kernedRuns.map((run) => ({ offset: run.x, metrics: run.metrics }))
+      : this.symbolBlocks.map((block) => ({ offset: block.getXShift(), metrics: block.getTextMetrics() }));
+    let left = Infinity;
+    let right = -Infinity;
+    for (const { offset, metrics } of parts) {
+      if (metrics.actualBoundingBoxLeft + metrics.actualBoundingBoxRight <= 0) continue;
+      left = Math.min(left, x + offset - metrics.actualBoundingBoxLeft);
+      right = Math.max(right, x + offset + metrics.actualBoundingBoxRight);
+    }
+    return right > left ? { left, right } : { left: x, right: x };
+  }
+
   /** Render text and glyphs above/below the note. */
   override draw(): void {
     const ctx = this.checkContext();
@@ -481,7 +507,6 @@ export class ChordSymbol extends Modifier {
     const clsAttribute = this.getAttribute('class');
     ctx.openGroup('chordsymbol' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
 
-    const start = note.getModifierStartXY(Modifier.Position.ABOVE, this.index);
     ctx.setFont(this.fontInfo);
 
     let y: number;
@@ -511,17 +536,7 @@ export class ChordSymbol extends Modifier {
       }
     }
 
-    let x = start.x;
-    if (this.horizontal === ChordSymbolHorizontalJustify.LEFT) {
-      x = start.x;
-    } else if (this.horizontal === ChordSymbolHorizontalJustify.RIGHT) {
-      x = this.kernedRuns ? start.x - this.getWidth() : start.x + this.getWidth();
-    } else if (this.horizontal === ChordSymbolHorizontalJustify.CENTER) {
-      x = start.x - this.getWidth() / 2;
-    } else {
-      // HorizontalJustify.CENTER_STEM
-      x = note.getStemX() - this.getWidth() / 2;
-    }
+    const x = this.originX(note);
     L('Rendering ChordSymbol: ', x, y);
 
     if (this.kernedRuns) {

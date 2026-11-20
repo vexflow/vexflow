@@ -5,6 +5,8 @@ export interface BreakUnit {
   width: number;
   start: number;
   end: number;
+  /** Space reserved for a chord across the following barline on the same row. */
+  after: number;
   breakBefore?: 'force' | 'keep';
 }
 
@@ -27,7 +29,7 @@ export function chooseSystemBreaks(
     let found = false;
     for (let j = i; j < n; j++) {
       if (j > i && units[j].breakBefore === 'force') break;
-      body += units[j].width + (j > i ? gap : 0);
+      body += units[j].width + (j > i ? gap + units[j - 1].after : 0);
       if (units[j + 1]?.breakBefore === 'keep') continue;
       const spare = width - body - units[j].end;
       if (spare < 0 && found) {
