@@ -3,213 +3,34 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#faf7ef" />
-    <meta name="description" content="Explore notation, edit examples, inspect geometry, and discover music glyphs." />
-    <title>VexFlow Explorer</title>
-    <link rel="icon" href="./assets/mark.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="./assets/style.css" />
-    <script src="./assets/vexflow.js" defer></script>
-    <script src="./assets/vendor/prism.js" defer></script>
-    <script type="module" src="./assets/app.mjs"></script>
+    <title>VexFlow Explorer is deprecated</title>
+    <style>
+      body {
+        margin: 12vh auto;
+        max-width: 36rem;
+        padding: 0 1.5rem;
+        font:
+          1.125rem/1.6 system-ui,
+          sans-serif;
+        color: #24382d;
+      }
+      h1 {
+        font-size: 2rem;
+        line-height: 1.2;
+      }
+      a {
+        color: #245d42;
+        text-underline-offset: 0.15em;
+      }
+    </style>
   </head>
   <body>
-    <a href="#main" class="skip">Skip to example</a>
-    <header class="masthead">
-      <button id="menu" class="icon-button mobile-only" aria-label="Toggle navigation" aria-expanded="false">☰</button>
-      <a class="brand" href="#example/notes"
-        ><img src="./assets/mark.svg" alt="" width="24" height="24" /><span>VexFlow <em>Explorer</em></span></a
-      >
-      <a class="repo-link" href="https://github.com/vexflow/vexflow" target="_blank" rel="noopener noreferrer"
-        >GitHub <span aria-hidden="true">↗</span></a
-      >
-    </header>
-    <aside class="sidebar" id="sidebar">
-      <label class="search-field"
-        ><span aria-hidden="true">⌕</span
-        ><input id="search" type="search" placeholder="Search examples…" aria-label="Search notation" /><kbd
-          >⌘ K</kbd
-        ></label
-      >
-      <a class="glyph-nav" href="#glyphs"
-        ><span class="glyph-nav-icon" aria-hidden="true">♮</span><span>Glyph atlas</span
-        ><span aria-hidden="true">↗</span></a
-      >
-      <div class="nav-heading"><span>Examples</span><span id="example-count"></span></div>
-      <nav id="navigation" aria-label="Notation examples"></nav>
-
-      <footer class="sidebar-footer">
-        <a href="https://github.com/vexflow/vexflow/tree/main/tools/explorer" target="_blank" rel="noopener noreferrer"
-          >Explorer source ↗</a
-        >
-      </footer>
-    </aside>
-    <main id="main" tabindex="-1">
-      <section id="example-view">
-        <div class="intro">
-          <div class="eyebrow" id="category"></div>
-          <h1 id="title"></h1>
-          <p id="description"></p>
-        </div>
-        <div class="preview-workbench">
-          <section class="render-card" aria-label="Interactive score">
-            <div class="render-toolbar">
-              <span class="live-label"><i></i> Preview</span>
-              <div class="toolbar-actions">
-                <label class="font-control"
-                  >Font
-                  <select id="font" aria-label="Music font">
-                    <option>Bravura</option>
-                    <option>Petaluma</option>
-                    <option>Gonville</option>
-                  </select></label
-                >
-                <button id="inspect-toggle" class="toggle" aria-pressed="true">Inspect</button
-                ><button id="bounds-toggle" class="toggle" aria-pressed="false">Bounds</button
-                ><button id="grid-toggle" class="toggle" aria-pressed="false">Grid</button>
-                <button
-                  id="paper-toggle"
-                  class="icon-button"
-                  aria-label="Switch to dark paper"
-                  title="Switch paper color"
-                >
-                  ◐
-                </button>
-                <button id="download" class="text-button" title="Download SVG with embedded fonts">SVG ↓</button>
-              </div>
-            </div>
-            <div id="preview" class="preview">
-              <div id="frame-host"></div>
-              <div id="render-pending" class="render-pending" hidden>Rendering…</div>
-            </div>
-            <div id="render-error" class="error-panel" role="alert" hidden>
-              <strong>Render error</strong>
-              <pre id="error-message"></pre>
-              <button id="recover" class="text-button">Restore example ↺</button>
-            </div>
-            <div class="render-meta">
-              <span id="render-status" role="status">Loading…</span
-              ><span id="pointer-position">Hover to inspect · click to pin</span>
-            </div>
-            <form id="controls" class="controls" aria-label="Example controls"></form>
-          </section>
-          <aside class="detail-panel">
-            <div class="detail-tabs" role="tablist" aria-label="Example details">
-              <button id="inspect-tab" role="tab" aria-selected="true" aria-controls="inspect-panel">Inspector</button
-              ><button id="api-tab" role="tab" aria-selected="false" aria-controls="api-panel">API notes</button>
-            </div>
-            <section id="inspect-panel" role="tabpanel" aria-labelledby="inspect-tab">
-              <div class="inspector-hint">
-                <p>Hover to inspect an element. Click to pin it.</p>
-              </div>
-              <div id="inspection" hidden></div>
-              <label class="element-picker"
-                >Element<select id="elements">
-                  <option value="">Select an element…</option>
-                </select></label
-              >
-              <details class="diagnostics">
-                <summary id="diagnostic-summary">Layout checks</summary>
-                <div id="diagnostic-body"></div>
-              </details>
-            </section>
-            <section id="api-panel" role="tabpanel" aria-labelledby="api-tab" hidden>
-              <h3>API reference</h3>
-              <p id="api-tips"></p>
-              <div id="api-links"></div>
-              <p class="subtle">
-                Open a class to read its source and API comments. The code is a complete example with the values shown
-                below it.
-              </p>
-            </section>
-          </aside>
-        </div>
-        <section class="code-panel" aria-label="Editable JavaScript">
-          <div class="panel-heading">
-            <div>
-              <h2>JavaScript</h2>
-            </div>
-            <div class="code-actions">
-              <button id="copy-code" class="text-button">Copy</button
-              ><button id="reset" class="text-button">Reset ↺</button
-              ><button id="run" class="primary-button">Run <span>⌘ ↵</span></button>
-            </div>
-          </div>
-          <div class="editor-shell">
-            <pre id="line-numbers" aria-hidden="true"></pre>
-            <div
-              id="editor"
-              aria-label="JavaScript example code"
-              spellcheck="false"
-              autocapitalize="off"
-              autocomplete="off"
-              role="textbox"
-              aria-multiline="true"
-              title="Tab to indent. Escape then Tab to leave the editor."
-            ></div>
-          </div>
-          <div class="editor-footer">
-            <label><input id="auto-run" type="checkbox" checked /> Live updates</label
-            ><span id="draft-state">Original example</span
-            ><button
-              id="reset-runtime"
-              class="text-button"
-              title="Reload VexFlow and clear global changes. Keep your code."
-            >
-              Reset runtime
-            </button>
-          </div>
-          <details class="environment">
-            <summary>Available values</summary>
-            <p>
-              <code>VF</code> is VexFlow. <code>width</code>, <code>height</code>, <code>ink</code>, and
-              <code>params</code> follow the controls above. The container has ID <code>score</code>.
-            </p>
-            <pre><code id="params-code"></code></pre>
-          </details>
-        </section>
-        <nav class="example-pagination" aria-label="Adjacent examples">
-          <a id="previous"></a><span id="example-index"></span><a id="next"></a>
-        </nav>
-      </section>
-      <section id="glyph-view" hidden>
-        <div class="intro">
-          <h1>Glyph atlas</h1>
-          <p>Search glyph names or Unicode code points. Inspect font coverage and rendering code.</p>
-        </div>
-        <div class="glyph-tools">
-          <input
-            id="glyph-search"
-            type="search"
-            placeholder="Search gClef, accidental, U+E050…"
-            aria-label="Search glyphs"
-          /><select id="glyph-group" aria-label="Glyph family">
-            <option value="common">Common symbols</option>
-            <option value="all">All glyphs</option>
-            <option value="clef">Clefs</option>
-            <option value="notehead">Noteheads</option>
-            <option value="accidental">Accidentals</option>
-            <option value="rest">Rests</option>
-            <option value="dynamic">Dynamics</option>
-            <option value="ornament">Ornaments</option></select
-          ><select id="glyph-font" aria-label="Glyph font">
-            <option>Bravura</option>
-            <option>Petaluma</option>
-            <option>Gonville</option></select
-          ><label><input id="available-only" type="checkbox" checked /> In this font</label
-          ><span id="glyph-count" role="status"></span>
-        </div>
-        <div class="glyph-layout">
-          <div>
-            <div id="glyph-grid" class="glyph-grid"></div>
-            <button id="more-glyphs" class="more-button">Show more symbols ↓</button>
-          </div>
-          <aside id="glyph-detail" class="glyph-detail"><p>Select a glyph to inspect it.</p></aside>
-        </div>
-      </section>
-      <footer class="main-footer">
-        <span>VexFlow <span id="version"></span></span>
-      </footer>
+    <main>
+      <h1>VexFlow Explorer is deprecated</h1>
+      <p>
+        Visit the <a href="https://vexflow.com/guide/">VexFlow User Guide</a> for interactive lessons and editable
+        notation examples.
+      </p>
     </main>
-    <div id="toast" role="status" hidden></div>
   </body>
 </html>

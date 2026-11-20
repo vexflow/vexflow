@@ -7,7 +7,7 @@ npm ci
 npm run audit:ci
 npm run lint
 npm test
-npm run explorer:test
+npm run guide:test
 ```
 
 CI checks all dependency severities, including development dependencies. See [SECURITY.md](../SECURITY.md) for temporary exceptions. Run `npm audit` for the unfiltered result.
@@ -24,7 +24,7 @@ Keep overrides scoped to the package that needs them. Remove each override when 
 
 `basic-ftp` 6 blocks separate transfer hosts by default. Keep that protection enabled. See the [upstream migration note](https://github.com/patrickjuchli/basic-ftp/releases/tag/v6.0.0).
 
-QUnit 11 shares Puppeteer 25 with the Explorer. This removes the older browser downloader and its vulnerable ZIP extractor. Release-it 21 uses current networking dependencies; no global `undici` override is needed.
+QUnit 11 shares Puppeteer 25 with the guide browser tests. This removes the older browser downloader and its vulnerable ZIP extractor. Release-it 21 uses current networking dependencies; no global `undici` override is needed.
 
 Webpack uses ts-loader's full type checking, including watch builds. The separate forked checker was removed because it brought in vulnerable `deepmerge`.
 

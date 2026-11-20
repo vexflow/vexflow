@@ -1,4 +1,4 @@
-// Shared first-score example for the user guide, Explorer, and rendering checks.
+// Shared first-score example for the user guide and rendering checks.
 export function createEasyScoreExample(VF, renderer, ink = '#24312c') {
   const score = VF.EasyScore.create({ renderer });
   score.setStyle({ fillStyle: ink, strokeStyle: ink });

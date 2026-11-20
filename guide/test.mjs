@@ -9,6 +9,8 @@ import test from 'node:test';
 import { pathToFileURL } from 'node:url';
 
 import puppeteer from 'puppeteer';
+import Prism from 'prismjs';
+import { findNotationRange } from './runtime/source.mjs';
 
 import { validate } from '../tools/static-site-upload.mjs';
 import { build, output, serve, upload } from './cli.mjs';
@@ -77,6 +79,29 @@ async function edit(code) {
 }
 
 try {
+  await test('notation source matching excludes ambiguous, escaped, and non-literal input', () => {
+    const input = 'C4/q, D4';
+    const source = { input, start: 6, end: 8 };
+    for (const quote of ["'", '"', '`']) {
+      const code = `const melody = ${quote}${input}${quote};`;
+      const range = findNotationRange(code, source, Prism);
+      assert.equal(code.slice(range.start, range.end), 'D4');
+    }
+    for (const code of [
+      `// '${input}'`,
+      `/* "${input}" */`,
+      `const a = '${input}', b = '${input}';`,
+      "const a = 'C4/q, ' + 'D4';",
+      'const a = `C4/q, ${pitch}`;',
+      "const a = /'C4\\/q, D4'/;",
+    ])
+      assert.equal(findNotationRange(code, source, Prism), undefined, code);
+    assert.equal(
+      findNotationRange('const a = "C4/q,\\n D4";', { input: 'C4/q,\n D4', start: 7, end: 9 }, Prism),
+      undefined
+    );
+  });
+
   await test('lesson and playground navigation reuse the runtime without asset requests', async () => {
     // Disable HTTP caching so this also protects remotely served guides with a cold cache.
     await page.setCacheEnabled(false);
@@ -140,6 +165,63 @@ try {
     );
   });
 
+  await test('a new run clears previous effects and uses the latest queued edit', async () => {
+    const notes = examples.find((e) => e.id === 'notes');
+    await visit('playground/' + notes.id);
+    const frame = page.frames().find((f) => f.url() === 'about:srcdoc');
+    await edit(`${notes.code}
+window.effectCount = 0;
+setTimeout(() => { window.effectCount++; }, 1000);
+setInterval(() => { window.effectCount++; }, 1000);
+function animate() { window.effectCount++; requestAnimationFrame(animate); }
+requestAnimationFrame(animate);
+window.addEventListener('probe', () => { window.effectCount++; });
+document.addEventListener('probe', () => { window.effectCount++; });`);
+    await rendered('effects registered');
+    await edit(notes.code);
+    await rendered('effects removed');
+    const count = await frame.evaluate(() => window.effectCount);
+    await frame.evaluate(async () => {
+      window.dispatchEvent(new Event('probe'));
+      document.dispatchEvent(new Event('probe'));
+      await new Promise((resolve) => setTimeout(resolve, 1100));
+    });
+    assert.equal(
+      await frame.evaluate(() => window.effectCount),
+      count,
+      'old timers, animation frames, and listeners stop'
+    );
+    assert.equal(await frame.evaluate(() => VexFlow.Registry.getDefaultRegistry()), undefined);
+
+    await edit(`window.executionOrder = ['slow'];
+await new Promise(resolve => { window.releaseProbe = resolve; });
+throw new Error('Superseded error');`);
+    await frame.waitForFunction(() => typeof window.releaseProbe === 'function');
+    await edit("window.executionOrder.push('intermediate'); throw new Error('Skipped edit');");
+    await edit(`${notes.code}\nwindow.executionOrder.push('latest');`);
+    await frame.evaluate(() => window.releaseProbe());
+    await rendered('latest queued edit');
+    assert.deepEqual(await frame.evaluate(() => window.executionOrder), ['slow', 'latest']);
+    assert.equal(
+      page.frames().find((f) => f.url() === 'about:srcdoc'),
+      frame
+    );
+  });
+
+  await test('a stalled async run is discarded before the latest queued edit executes', async () => {
+    const notes = examples.find((e) => e.id === 'notes');
+    await visit('playground/' + notes.id);
+    const frame = page.frames().find((f) => f.url() === 'about:srcdoc');
+    await edit('window.stalled = true; await new Promise(() => {});');
+    await frame.waitForFunction(() => window.stalled);
+    await edit(notes.code);
+    await rendered('queued edit after watchdog');
+    assert.notEqual(
+      page.frames().find((f) => f.url() === 'about:srcdoc'),
+      frame
+    );
+  });
+
   await test('setup highlights copyable source and its standalone HTML draws the first note', async () => {
     await visit('lesson/setup');
     const frame = page.frames().find((frame) => frame.url() === 'about:srcdoc');
@@ -161,7 +243,7 @@ try {
     const manifest = await validate(output);
     const packageDir = join(artifacts, 'node_modules/vexflow/build/cjs');
     await mkdir(packageDir, { recursive: true });
-    await copyFile(join(output, manifest.paths['explorer/vexflow.js']), join(packageDir, 'vexflow.js'));
+    await copyFile(join(output, manifest.paths['runtime/vexflow.js']), join(packageDir, 'vexflow.js'));
     const standalone = join(artifacts, 'setup.html');
     await writeFile(standalone, html);
     await page.goto(pathToFileURL(standalone).href);
@@ -213,9 +295,23 @@ try {
     assert.deepEqual(failures, []);
   });
 
-  await test('every teaching and Explorer example renders with all three bundled music fonts', async () => {
+  await test('every teaching and playground example renders with all three bundled music fonts', async () => {
     for (const example of examples) {
       await visit(`playground/${example.id}`);
+      for (const control of example.controls) {
+        const variants = control.choices ?? (control.min === undefined ? [] : [control.min, control.max]);
+        for (const value of new Set([...variants, control.value])) {
+          await page.$eval(
+            '#control-' + control.key,
+            (input, value) => {
+              input.value = String(value);
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+            },
+            value
+          );
+          await rendered(example.id + ': ' + control.key + '=' + value);
+        }
+      }
       for (const font of ['Bravura', 'Petaluma', 'Gonville']) {
         await page.select('#font', font);
         await rendered(`${example.id}: ${font}`);
@@ -504,7 +600,7 @@ try {
 
   await test('upload validates bytes and uses the guide prefix with assets before HTML', async () => {
     const manifest = await validate(output);
-    assert.ok(Object.keys(manifest.files).some((file) => file.endsWith('explorer/editor.mjs')));
+    assert.ok(Object.keys(manifest.files).some((file) => file.endsWith('runtime/editor.mjs')));
     const log = join(artifacts, 'upload.jsonl');
     const published = join(artifacts, 'published.html');
     const store = memoryStore('gs://vexflow.com/guide/');

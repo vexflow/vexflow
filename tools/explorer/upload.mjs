@@ -1,4 +1,4 @@
-// Build and publish the Explorer using the shared immutable static-site uploader.
+// Publish the deprecation notice at the existing Explorer URL.
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 

@@ -30,7 +30,7 @@ system
 score.draw({ retain: true });
 ```
 
-The [shared example](../tools/easyscore-example.mjs) runs in the Explorer as **EasyScore: first score**.
+The [shared example](../tools/easyscore-example.mjs) runs in the guide playground as **EasyScore: first score**.
 Tests compare it against independently constructed native notation on SVG and Canvas, with Bravura and Petaluma.
 
 `EasyScore.create()` owns a Factory. Existing `factory.EasyScore()` calls still work.
@@ -130,7 +130,7 @@ A child cannot belong to two groups, be adopted as a standalone drawable, or be 
 Failed managed batches restore the prior standalone queue, voice assignment, and ignored-tick state.
 Native group setters and grace-beam controls remain available. Legacy direct Factory group constructors retain their existing behavior; strict ownership is enforced by the EasyScore helpers.
 
-The **EasyScore: notes & modifiers** Explorer example covers modifiers, accidentals, text, grace groups, percussion, and mixed sequences.
+The **EasyScore: notes & modifiers** playground example covers modifiers, accidentals, text, grace groups, percussion, and mixed sequences.
 The executable studies are in [easyscore-families.mjs](../tools/easyscore-families.mjs).
 
 ## Articulations
@@ -244,7 +244,7 @@ Ties, curves, and vibrato brackets support explicit partial endpoints at stave b
 Hairpins, lines, and text brackets need complete endpoints. Sheet does not split these automatically; create explicit per-row segments or keep the measure group on one row.
 A native hairpin constructor accepts a partial definition, but its renderer cannot draw it. EasyScore rejects that request early.
 
-The **EasyScore: rhythm & relationships** Explorer study covers two voices in 7/8, nested tuplets, every span helper, partial spans, and timed dynamics.
+The **EasyScore: rhythm & relationships** playground study covers two voices in 7/8, nested tuplets, every span helper, partial spans, and timed dynamics.
 
 ## Local references and source
 
@@ -275,7 +275,7 @@ The instance method returns source only for that score's members.
 Source and lookup survive drawing. `score.reset()` releases both, including ID-change subscriptions.
 Strict construction failures also remove the newly created references and provenance.
 
-In the Explorer, click a parsed note to select its notation in the code editor.
+In the guide playground, click a parsed note to select its notation in the code editor.
 Hover only inspects. The inspector also displays the notation source.
 Selection requires one matching, unescaped string literal in the current code.
 Repeated literals, escaped strings, and computed input remain inspectable without guessing an editor location.
@@ -307,7 +307,7 @@ Adoption does not infer layout, attach modifiers, or inspect arbitrary custom-ob
 Factory ownership survives drawing and reset. To reuse a reset score's native objects, explicitly adopt them again and rebuild their voices/layout.
 Reset does not transfer ownership to another Factory.
 
-The [extension example](../tools/easyscore-references-example.mjs) runs as **EasyScore: references & extensions** in the Explorer.
+The [extension example](../tools/easyscore-references-example.mjs) runs as **EasyScore: references & extensions** in the guide playground.
 It combines named notes, a tie, a custom Modifier subclass, an adopted native note, and an adopted Curve.
 Tests compare its SVG/Canvas output against native construction with Bravura and Petaluma, then check retained redraw.
 
@@ -455,7 +455,7 @@ Supply the new clef to subsequent `notes()` calls and the actual meter to `voice
 `make.multiMeasureRest()` returns a standalone rest; pass `{ numberOfMeasures: 8 }`, for example. Call `.setStave(stave)` before drawing.
 `make.repeatNote()` and `make.glyphNote()` create timed notes. Their native duration and alignment options remain available.
 
-The Explorer's **EasyScore: tablature & staff structure** example covers these paths on both backends.
+The guide’s **EasyScore: tablature & staff structure** example covers these paths on both backends.
 
 ## Structured composition
 
@@ -596,7 +596,7 @@ A tab ending uses `{ id: 'ending', kind: 'volta', from: 'a', to: 'b', text: '1.'
 
 See the [continuous score guide](vf6/m4.md) for break constraints, rest grouping, staff names and span conventions.
 
-The Explorer's **EasyScore: responsive composition** example covers a grand staff, pickup, multiple voices, tuplets, changing meter, inline state, and both spacing modes.
+The guide’s **EasyScore: responsive composition** example covers a grand staff, pickup, multiple voices, tuplets, changing meter, inline state, and both spacing modes.
 
 ### Print a score and its parts
 
@@ -667,7 +667,7 @@ Run from the checkout:
 
 ```sh
 npm test
-npm run explorer:test
+npm run guide:test
 npm run test:easyscore-package
 ```
 

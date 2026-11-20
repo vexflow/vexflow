@@ -1,10 +1,10 @@
 // Higher-level formatting, invisible timing, and unusual rhythmic glyphs.
-import { renderEasyScoreComposition } from '../../easyscore-composition.mjs';
-import { createEasyScoreExample } from '../../easyscore-example.mjs';
-import { renderEasyScoreFamilies } from '../../easyscore-families.mjs';
-import { createEasyScoreReferencesExample } from '../../easyscore-references-example.mjs';
-import { renderEasyScoreStructure } from '../../easyscore-structure.mjs';
-import { renderEasyScoreRhythm } from '../../easyscore-rhythm.mjs';
+import { renderEasyScoreComposition } from '../../tools/easyscore-composition.mjs';
+import { createEasyScoreExample } from '../../tools/easyscore-example.mjs';
+import { renderEasyScoreFamilies } from '../../tools/easyscore-families.mjs';
+import { createEasyScoreReferencesExample } from '../../tools/easyscore-references-example.mjs';
+import { renderEasyScoreStructure } from '../../tools/easyscore-structure.mjs';
+import { renderEasyScoreRhythm } from '../../tools/easyscore-rhythm.mjs';
 import { example as e, number, select, setup, staff, text } from './helpers.mjs';
 
 const group = 'Layout & composition';

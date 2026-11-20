@@ -254,7 +254,7 @@ test('public modules and implemented contracts have coverage entries', async () 
   const testSources = ['easyscore-tests.mjs', 'easyscore-rendering-tests.mjs']
     .map((file) => readFileSync(new URL(file, import.meta.url), 'utf8'))
     .join('\n');
-  const { examples } = await import('../../tools/explorer/catalog.mjs');
+  const { examples } = await import('../../guide/catalog.mjs');
   const { nativeSurface } = await import('../../tools/easyscore-api-audit.mjs');
   const helpers = nativeSurface()
     ['easyscore/elements'].EasyScoreElements.filter((signature) => !signature.startsWith('constructor('))

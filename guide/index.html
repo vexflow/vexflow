@@ -9,7 +9,7 @@
     />
     <title>VexFlow User Guide</title>
     <link rel="stylesheet" href="./assets/style.css" />
-    <script src="./assets/explorer/vendor/prism.js" defer></script>
+    <script src="./assets/runtime/vendor/prism.js" defer></script>
     <script type="module" src="./assets/app.mjs"></script>
   </head>
   <body>
@@ -25,8 +25,7 @@
         >
       </div>
       <nav aria-label="VexFlow">
-        <a href="#lesson/welcome" aria-current="page">Guide</a><a href="https://vexflow.com/explorer/">Explorer ↗</a
-        ><a href="https://github.com/vexflow/vexflow">GitHub ↗</a>
+        <a href="#lesson/welcome" aria-current="page">Guide</a><a href="https://github.com/vexflow/vexflow">GitHub ↗</a>
       </nav>
     </header>
     <div class="layout">
@@ -86,7 +85,7 @@
           <pre id="render-error" role="alert" hidden></pre>
           <details id="inspector">
             <summary>Inspect notation</summary>
-            <p>Hover over a note or click to pin it. The preview uses Explorer’s native element inspector.</p>
+            <p>Hover over a note or click to pin it. The inspector shows the selected notation element.</p>
             <pre id="inspection">No element selected.</pre>
           </details>
           <div id="controls" class="controls"></div>
@@ -121,10 +120,7 @@
             <pre><code id="params-code" class="language-javascript"></code></pre>
             <pre id="logs" aria-label="Console output"></pre>
           </details>
-          <p class="example-links">
-            <a id="explorer-link" href="https://vexflow.com/explorer/">Explore notation ↗</a
-            ><span id="api-links"></span>
-          </p>
+          <p class="example-links" id="api-links"></p>
         </section>
         <aside class="exercise">
           <p class="eyebrow">One small experiment</p>

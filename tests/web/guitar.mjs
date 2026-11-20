@@ -1,6 +1,6 @@
 // Exercise the three playable guide scores on both renderers and verify their musical identities.
 import assert from 'node:assert/strict';
-import { guitar } from '../../tools/explorer/catalog/guitar.mjs';
+import { guitar } from '../../guide/catalog/guitar.mjs';
 
 const studies = ['rasgueado-golpe', 'bossa-anticipation', 'string-mute-bend'];
 

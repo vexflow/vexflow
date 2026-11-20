@@ -1,4 +1,4 @@
-// Build, preview, and upload the guide with the Explorer's exact editor and runtime.
+// Build, preview, and upload the guide with its editable examples and local notation runtime.
 import { createRequire } from 'node:module';
 import { createHash } from 'node:crypto';
 import { mkdtemp, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
@@ -10,7 +10,7 @@ import { externalFonts, linkAssets, linkPage, writeAssets } from '../tools/site-
 import { siteTheme } from '../tools/site-theme.mjs';
 import prettier from 'prettier';
 
-import { build as buildExplorer, collectAssets, bundlePrism } from '../tools/explorer/cli.mjs';
+import { collectRuntime } from './runtime-assets.mjs';
 import { upload as uploadSite, validate } from '../tools/static-site-upload.mjs';
 import { examples, lessons, sections } from './content.mjs';
 
@@ -21,23 +21,7 @@ const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
 
 /** Build a portable guide using independently fingerprinted modules, fonts and code examples. */
 export async function build() {
-  const raw = await collectAssets();
-  const explorer = await buildExplorer(raw);
-  const shared = await validate(explorer);
-  const assets = new Map();
-  for (const [name, bytes] of raw) {
-    if (
-      /^(editor.mjs|preview.mjs|source.mjs|runner.mjs|vexflow.js|vexflow.js.map|font-data.json|catalog.mjs|catalog\/entries.mjs|vendor\/.*)$/.test(
-        name
-      )
-    )
-      assets.set(`explorer/${name}`, bytes);
-  }
-  // Markup precedes JavaScript so HTML samples also highlight embedded scripts.
-  assets.set(
-    'explorer/vendor/prism.js',
-    await bundlePrism(['core', 'markup', 'clike', 'javascript', 'bash', 'typescript'])
-  );
+  const { assets, library } = await collectRuntime();
   // Retain font licenses alongside the embedded OTF data.
   for (const family of ['bravura', 'petaluma', 'gonville', 'academico', 'petalumascript']) {
     const directory = join(root, 'node_modules/@vexflow-fonts', family);
@@ -63,7 +47,7 @@ export async function build() {
     examples.map(async (example) => {
       const apiFiles = {};
       for (const api of example.api) {
-        // Explorer also tags methods. Link those to the example's primary class.
+        // Some examples also tag methods. Link those to the example's primary class.
         const owner = /^[a-z]/.test(api) ? example.api[0] : api;
         const file = `src/${moduleNames[owner] ?? owner.toLowerCase()}.ts`;
         await stat(join(root, file));
@@ -92,10 +76,7 @@ export async function build() {
       `// Generated from guide/content.mjs.\nexport const sections = ${JSON.stringify(sections)};\nexport const lessons = ${JSON.stringify(lessons)};\nexport const examples = ${JSON.stringify(formatted)};\n`
     )
   );
-  // The cached Explorer bundle can predate a documentation-only commit.
-  const { VERSION: version, ID: commit } = createRequire(import.meta.url)(
-    join(explorer, shared.paths['vexflow.js'])
-  ).BUILD;
+  const { VERSION: version, ID: commit } = createRequire(import.meta.url)(library).BUILD;
   assets.set('version.json', Buffer.from(JSON.stringify({ version, commit })));
   const graph = linkAssets(assets);
   const staging = await mkdtemp(join(root, 'build/guide-staging-'));
@@ -154,7 +135,7 @@ export function serve({ port = 5174, host = '127.0.0.1' } = {}) {
   return server;
 }
 
-/** Use the same integrity checks and assets-before-HTML publication as Explorer. */
+/** Verify the guide and publish its immutable assets before the entry page. */
 export function upload({ destination = 'gs://vexflow.com/guide/', directory = output, ...options } = {}) {
   return uploadSite({
     destination,

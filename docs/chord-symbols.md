@@ -10,7 +10,7 @@ const chord = new ChordSymbol().setKerning('auto').addText('A').addGlyph('dimini
 note.addModifier(chord, 0);
 ```
 
-`setKerning('none')` restores the default layout. The Explorer's **Chord kerning** example compares both modes and can show each chord's bounds.
+`setKerning('none')` restores the default layout. The guide’s [Chord kerning example](https://vexflow.com/guide/#playground/chord-kerning) compares both modes and can show each chord's bounds.
 
 ## Font profiles
 

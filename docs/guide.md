@@ -50,18 +50,16 @@ Use `repo:docs/example.md` source links for files in the same revision as the bu
 The header displays the version and links to the commit recorded inside the bundled library. Uncommitted library changes are included in builds,
 but the commit link cannot describe those edits; commit before publishing.
 
-Each teaching example follows Explorer's metadata shape: `id`, `title`, `group`, `description`,
+Each teaching example uses the same metadata: `id`, `title`, `group`, `description`,
 `code`, `api`, `controls`, and `tips`. Snippets receive `VF`, `width`, `height`, `ink`, and `params`.
 They render SVG into `div#score`. The runtime loads fonts before drawing.
 Keep beginner examples in strict voice mode. Explain any deliberate soft-mode example.
 
-The playground includes the Explorer catalog directly. Add general notation examples there when both tools
-should show them. Keep tutorial-specific examples in `guide/examples.mjs`.
+Add general notation examples to [the playground catalog](../guide/catalog/). Keep tutorial-specific examples in `guide/examples.mjs`.
 
 ## Shared components and EasyScore updates
 
-The build first invokes the existing Explorer builder. It copies the same CodeJar/Prism editor,
-Preview class, sandbox runtime, font data, and current-source VexFlow bundle into the guide's asset graph.
+The guide builds VexFlow from source and bundles its CodeJar/Prism editor, sandbox, and font data for offline use.
 It does not use an npm VexFlow release or a runtime CDN. No new runtime dependency is required.
 
 The guide teaches the EasyScore API merged in [#354](https://github.com/vexflow/vexflow/issues/354).
@@ -70,8 +68,7 @@ ownership, batch construction, tablature, and structured composition with explic
 The native API section explains direct construction and formatting.
 
 When EasyScore changes, update the [API reference](easyscore.md), teaching examples, and lesson prose together.
-Run `npm run guide:test` against the combined source. The guide imports the current Explorer catalog;
-its tests render every example in three fonts and exercise the EasyScore family controls.
+Run `npm run guide:test` against the combined source. The tests render every example in three fonts and exercise the EasyScore family controls.
 
 ## Editing and export behavior
 
@@ -88,8 +85,8 @@ its tests render every example in three fonts and exercise the EasyScore family 
 - Save HTML includes the current library, selected fonts, code, and controls in a standalone page.
 - Save SVG embeds the selected music and text fonts. It does not convert glyphs to paths.
   See [portable SVG](portable-svg.md) for path-only export and font-license requirements.
-- User code runs inside Explorer's `sandbox="allow-scripts"` iframe with network access disabled.
-  As with Explorer, arbitrary synchronous infinite loops are outside the timeout's guarantees.
+- User code runs inside the guide’s `sandbox="allow-scripts"` iframe with network access disabled.
+  Arbitrary synchronous infinite loops are outside the timeout's guarantees.
 
 ## Validate and publish
 
@@ -97,7 +94,7 @@ its tests render every example in three fonts and exercise the EasyScore family 
 
 - All lesson routes, related links, and repository source paths.
 - Warm lesson and playground navigation with no asset requests and unchanged library/font objects.
-- Every teaching and Explorer example with Bravura, Petaluma, and Gonville.
+- Every teaching and playground example with Bravura, Petaluma, and Gonville.
 - Editing, literal source text, keyboard access, drafts, reset, and errors.
 - Mobile layout, navigation, disabled storage, and sandbox attributes.
 - Standalone HTML/SVG/JS exports and bundled-only page requests.
@@ -128,7 +125,7 @@ The lessons synthesize and update these project-owned references:
 - [Original VexFlow tutorial](https://vexflow.github.io/vexflow-examples/guides/tutorial/).
 - [Original EasyScore wiki](https://github.com/0xfe/vexflow/wiki/Using-EasyScore).
 - [Current EasyScore documentation](easyscore.md) and [coverage manifest](easyscore-coverage.json).
-- [Explorer](explorer.md), [score layout](score-layout.md), [sheets and themes](sheets-and-themes.md),
+- [Score layout](score-layout.md), [sheets and themes](sheets-and-themes.md),
   [proportional spacing](proportional-spacing.md), [text and lyrics](text-and-lyrics.md),
   [chord symbols](chord-symbols.md), [portable SVG](portable-svg.md), and [Node setup](jsdom.md).
 
@@ -136,4 +133,4 @@ Each lesson links its relevant sources. Current source and executable examples t
 
 ## Contemporary guitar studies
 
-The tablature lesson and Explorer’s **Strings & tablature** category share three editable scores. Compare the physical rasgueado directions, the tied bossa nova anticipation and the string-specific Drop D mute. The metal study wraps at narrow widths. [Playing instructions and API contracts](vf6/m8-guitar.md)
+The tablature lesson and the playground’s **Strings & tablature** category share three editable scores. Compare the physical rasgueado directions, the tied bossa nova anticipation and the string-specific Drop D mute. The metal study wraps at narrow widths. [Playing instructions and API contracts](vf6/m8-guitar.md)

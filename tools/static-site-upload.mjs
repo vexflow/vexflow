@@ -41,7 +41,7 @@ export async function upload({
   store,
 } = {}) {
   if (!/^gs:\/\/[a-z0-9][a-z0-9._-]+\/(?:[a-zA-Z0-9_-]+\/)+$/.test(destination))
-    throw new Error('Use a bucket and nonempty prefix, such as gs://vexflow.com/explorer/.');
+    throw new Error('Use a bucket and nonempty prefix, such as gs://vexflow.com/guide/.');
   const original = await validate(directory, jsonFiles);
   const staging = await mkdtemp(join(tmpdir(), 'vexflow-static-upload-'));
   try {
@@ -66,16 +66,18 @@ export async function upload({
       return result.stdout;
     };
     const transfer = async (previousPages) => {
-      run([
-        'storage',
-        'rsync',
-        join(staging, 'assets/'),
-        `${destination}assets/`,
-        '--recursive',
-        '--checksums-only',
-        '--predefined-acl=publicRead',
-        '--cache-control=public,max-age=31536000,immutable',
-      ]);
+      if (Object.keys(manifest.files).some((file) => isAsset(file))) {
+        run([
+          'storage',
+          'rsync',
+          join(staging, 'assets/'),
+          `${destination}assets/`,
+          '--recursive',
+          '--checksums-only',
+          '--predefined-acl=publicRead',
+          '--cache-control=public,max-age=31536000,immutable',
+        ]);
+      }
       for (const page of [...jsonFiles, 'all.html', 'index.html'].filter((name) => manifest.files[name])) {
         const size = (await stat(join(staging, page))).size;
         if (previousPages[page] === manifest.files[page]) {

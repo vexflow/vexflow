@@ -1,12 +1,12 @@
-// Lesson navigation, shared Explorer widgets, local drafts, and downloadable examples.
+// Lesson navigation, playground widgets, local drafts, and downloadable examples.
 import { examples, lessons, sections } from './content.mjs';
-import { createEditor, highlightCode } from './explorer/editor.mjs';
-import { Preview } from './explorer/preview.mjs';
-import { findNotationRange } from './explorer/source.mjs';
+import { createEditor, highlightCode } from './runtime/editor.mjs';
+import { Preview } from './runtime/preview.mjs';
+import { findNotationRange } from './runtime/source.mjs';
 
 const $ = (id) => document.getElementById(id);
 const draftsKey = 'vexflow-guide-drafts-v1';
-const fonts = await fetch(new URL('./explorer/font-data.json', import.meta.url)).then((response) => response.json());
+const fonts = await fetch(new URL('./runtime/font-data.json', import.meta.url)).then((response) => response.json());
 const version = await fetch(new URL('./version.json', import.meta.url)).then((response) => response.json());
 const sourceRoot = `https://github.com/vexflow/vexflow/blob/${version.commit}/`;
 let currentLesson,
@@ -167,7 +167,7 @@ function showLesson(lesson) {
   navigation();
 }
 
-/** Build parameter controls from the unchanged Explorer catalog metadata. */
+/** Build parameter controls from the example metadata. */
 function renderControls() {
   $('controls').replaceChildren();
   for (const control of currentExample.controls) {
@@ -222,10 +222,6 @@ function showExample(example) {
   $('example-description').textContent = example.description;
   $('example-select').value = example.id;
   $('open-playground').href = `#playground/${example.id}`;
-  $('explorer-link').href =
-    example.group === 'Guide examples'
-      ? 'https://vexflow.com/explorer/'
-      : `https://vexflow.com/explorer/#example/${example.id}`;
   $('api-links').replaceChildren();
   for (const api of example.api) $('api-links').append(link(api, sourceRoot + example.apiFiles[api]));
   renderControls();
@@ -372,7 +368,7 @@ $('save-js').onclick = () =>
 $('save-html').onclick = async () => {
   $('save-html').disabled = true;
   try {
-    const library = await fetch(new URL('./explorer/vexflow.js', import.meta.url)).then((response) => {
+    const library = await fetch(new URL('./runtime/vexflow.js', import.meta.url)).then((response) => {
       if (!response.ok) throw new Error('Library download failed');
       return response.text();
     });

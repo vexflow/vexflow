@@ -66,4 +66,4 @@ The formatter does not move individual rhythmic anchors to avoid collisions. It 
 - Voices must have matching declared durations and tick resolutions. Independent meters and barlines are outside this mode's scope.
 - `getTickContexts().list` and `.map` contain musical anchors. In this mode, `.array` also contains the separately positioned zero-time contexts.
 
-See **Proportional spacing** in the Explorer and **Strict proportional spacing** in the Formatter test gallery.
+See [Proportional spacing](https://vexflow.com/guide/#playground/proportional-spacing) in the guide and **Strict proportional spacing** in the Formatter test gallery.
