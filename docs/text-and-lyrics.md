@@ -73,6 +73,20 @@ factory.draw();
 
 Use `TextDynamics` for engraved dynamics such as *p* and *mf*. To share a standalone SVG, supply the music face and each text weight used on the page to the outline exporter. [Portable SVG export](portable-svg.md#font-faces-and-fallback)
 
+## Two syllables on one note
+
+Use `elideWith` to join two syllables on one attack. Each verse entry stays centered on its note. A single annotation measures both syllables and the music font’s undertie at the lyric size. The same entry works in `PhraseLayout.addVerse()` with a native note in place of its ID.
+
+```js
+// Two verses for a three-note measure in EasyScore.compose().
+const verses = [
+  [{ note: 'first', text: 'la', elideWith: 'mi' }, { note: 'second', text: 'fa' }, { note: 'third', text: 'sol' }],
+  [{ note: 'first', text: 'do' }, { note: 'second', text: 're' }, { note: 'third', text: 'mi' }],
+];
+```
+
+A group can use `hyphenAfter` or `extendTo`. The connector begins after the complete group. Keep the active SMuFL music face in the lyric font stack when selecting a custom text font.
+
 ## Shared lyric baselines
 
 Annotations can use an absolute baseline in the renderer's coordinates. Give all lyrics in a row the same baseline:

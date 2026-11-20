@@ -1642,6 +1642,7 @@
       "fields": [
         "note: StaveNote;",
         "text: string;",
+        "elideWith?: string;",
         "hyphenAfter?: boolean;",
         "extendTo?: StaveNote;"
       ]
