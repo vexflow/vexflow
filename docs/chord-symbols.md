@@ -12,6 +12,18 @@ note.addModifier(chord, 0);
 
 `setKerning('none')` restores the default layout. The guide’s [Chord kerning example](https://vexflow.com/guide/#playground/chord-kerning) compares both modes and can show each chord's bounds.
 
+## Transposing harmony
+
+Describe a harmony with a spelled `root`, optional `bass`, and an optional literal `quality`. Write pitch names without an octave. Single and double sharps and flats are accepted in ASCII or as ♯ and ♭ signs. Transposition returns a new harmony with uppercase letters and ASCII accidentals. Both the chromatic interval and the diatonic interval determine its spelling.
+
+```ts
+const harmony = { root: 'G', quality: '7', bass: 'B' };
+const written = NotationSpelling.transposeChord(harmony, 2, 1);
+const chord = new ChordSymbol().addText(NotationSpelling.chordText(written)); // A7/C♯
+```
+
+`chordText()` prints the root and bass with musical accidentals and copies the suffix as authored. EasyScore's measure-level `chords` accepts the same harmony object. [Lead sheets and extracted parts](easyscore.md#lead-sheets-and-extracted-parts)
+
 ## Font profiles
 
 Built-in profiles support these regular faces:

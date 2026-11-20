@@ -197,3 +197,22 @@ export function beamedSplitChordStudy(VF, stemDirection, spaceBetweenStaves, bea
     },
   };
 }
+
+/** Four eighths straddling the barline. The two neighboring quarters stay outside the beam. */
+export function continuousBeamStudy(boundaries = []) {
+  const event = (id, pitch, duration) => ({ id, note: { keys: [pitch], duration, stemDirection: -1 } });
+  return {
+    sheet: { width: 450, measurePadding: 12, rowGap: 22 },
+    staves: [
+      {
+        id: 'melody',
+        time: '2/4',
+        measures: [
+          { voices: [{ notes: [event('g', 'g/4', 'q'), event('b', 'b/4', '8'), event('c', 'c/5', '8')] }] },
+          { voices: [{ notes: [event('d', 'd/5', '8'), event('e', 'e/5', '8'), event('f', 'f/5', 'q')] }] },
+        ],
+      },
+    ],
+    continuous: { boundaries, spans: [{ id: 'phrase-beam', kind: 'beam', from: 'b', to: 'e' }] },
+  };
+}
