@@ -15,6 +15,7 @@ export type ContinuousSpanKind =
   | 'beam'
   | 'tie'
   | 'slur'
+  | 'glissando'
   | 'crescendo'
   | 'diminuendo'
   | 'pedal'
@@ -115,6 +116,15 @@ export function continuationPitch(anchor: SpanAnchor, stave: Stave, index = 0): 
   return stave.getYForLine(0) + stave.space(offset + clefShift);
 }
 
+/** Interpolate the two written heads on this staff, so a broken slide keeps its direction across rows. */
+export function glissandoY(span: ResolvedSpan, stave: Stave, progress: number): number {
+  if (progress === 0) return span.first.note.getYs()[span.spec.fromHead ?? 0];
+  if (progress === 1) return span.last.note.getYs()[span.spec.toHead ?? 0];
+  const from = continuationPitch(span.first, stave, span.spec.fromHead);
+  const to = continuationPitch(span.last, stave, span.spec.toHead);
+  return from + progress * (to - from);
+}
+
 /** Share control geometry between the clearance search and the renderer. */
 function controls(f: SpanFragment) {
   const lift =
@@ -176,6 +186,10 @@ export function drawSpan(ctx: RenderContext, f: SpanFragment, label?: Element): 
   };
   ctx.save();
   try {
+    if (kind === 'glissando') {
+      line(x1, y1, x2, y2);
+      return;
+    }
     if (kind === 'slur' || kind === 'tie') {
       const { dx, a, b } = controls(f);
       ctx.beginPath();

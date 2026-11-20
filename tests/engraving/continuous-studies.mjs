@@ -216,3 +216,23 @@ export function continuousBeamStudy(boundaries = []) {
     continuous: { boundaries, spans: [{ id: 'phrase-beam', kind: 'beam', from: 'b', to: 'e' }] },
   };
 }
+
+/** Two chord attacks joined by a straight slide, with a quarter note on either side. */
+export function glissandoStudy(descending = false, forceBreak = false) {
+  const low = ['a/4', 'b/4'];
+  const high = ['e/5', 'f/5'];
+  const event = (id, keys) => ({ id, note: { keys, duration: 'q', stemDirection: 1 } });
+  return {
+    sheet: { width: 430 },
+    staves: [{
+      id: 'violin', time: '2/4', measures: [
+        { voices: [{ notes: [event('lead', ['g/4']), event('from', descending ? high : low)] }] },
+        { voices: [{ notes: [event('to', descending ? low : high), event('end', ['a/4'])] }] },
+      ],
+    }],
+    continuous: {
+      boundaries: forceBreak ? [{ measure: 2, breakBefore: 'force' }] : [],
+      spans: [{ id: 'slide', kind: 'glissando', from: 'from', fromHead: 1, to: 'to', toHead: 0 }],
+    },
+  };
+}
