@@ -1,3 +1,9 @@
+# 5.6.1
+
+- TAB clefs now fit between the outer strings and center on the actual tablature stave. Four-string instruments use the four-string clef glyph. Numeric, common, and cut time signatures also center on the strings.
+- The [user guide](https://vexflow.com/guide/), [Explorer](https://vexflow.com/explorer/), and [test gallery](https://vexflow.com/tests/) share the VexTab guide’s typography and colors. Their deployments reuse unchanged assets so browsers can keep them cached between releases.
+- Browse the [PDF score library](https://vexflow.com/pdfs/), see the tablature changes in the [illustrated AI 2026 report](https://vexflow.com/reports/ai2026/), or inspect the [5.6.1 code quality report](https://vexflow.com/reports/5.6.1/).
+
 # 5.6.0
 
 - Chord roots use 14 pt Academico, lyrics use 12 pt, and tab frets use 11 pt. Grace frets, stroke arrows, and technique labels have room around two-digit frets. See both arrow conventions in [Patio al alba](https://github.com/vexflow/vexflow/blob/5.6.0/tests/scores/falseta.js).

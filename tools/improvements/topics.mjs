@@ -3,6 +3,24 @@
 export const topics = [
   [
     'Features',
+    'New in 5.6.1',
+    [
+      [
+        'TAB clefs fit the strings',
+        'The clef sits halfway between the outer strings with clearance above and below its ink. Four-string instruments use a dedicated glyph. The examples show how the same placement adapts to different string counts.',
+        'src/clef.ts',
+        'case-45ef8c114f64c882',
+      ],
+      [
+        'Time signatures on tablature',
+        'Numeric meters and the common and cut time symbols center on the tablature stave. The examples compare their positions as the number of strings changes.',
+        'src/timesignature.ts',
+        'case-cf1a0c107fbbea55',
+      ],
+    ],
+  ],
+  [
+    'Features',
     'New in 5.6.0',
     [
       [
