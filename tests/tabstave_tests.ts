@@ -63,7 +63,10 @@ function fourStringClefs(options: TestOptions, contextBuilder: ContextBuilder): 
       const bottomGap = bottomString - lineWidth / 2 - (ink.y + ink.h);
       // Allow for fractional font sizes and pixel rounding in the renderer.
       const minimumGap = lineWidth + spacing / 8 - 0.5;
-      options.assert.ok(topGap >= minimumGap && bottomGap >= minimumGap, 'TAB clears both inner stroke edges');
+      options.assert.ok(
+        topGap >= minimumGap && bottomGap >= minimumGap,
+        `TAB clears both inner stroke edges: gaps ${topGap}, ${bottomGap}, minimum ${minimumGap}`
+      );
       options.assert.ok(Math.abs(topGap - bottomGap) < 0.01, 'Equal clearance from the drawn outer strings');
     }
     options.assert.ok(end.getInkBounds().h < full.h, 'Courtesy clef stays smaller');

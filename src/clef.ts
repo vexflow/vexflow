@@ -168,7 +168,15 @@ export class Clef extends StaveModifier {
         // Leave one stroke width plus an eighth of a space beyond each inner stroke edge.
         const clearance = lineWidth + stave.space(1 / 8);
         const height = Math.max(1, stave.space(3) - lineWidth - 2 * clearance);
-        this.setFontSize((Clef.getPoint(this.size) * height) / inkHeight);
+        const targetHeight = (height * Clef.getPoint(this.size)) / reference;
+        const points = (reference * targetHeight) / inkHeight;
+        this.setFontSize(points);
+        // Font hinting can round ink outwards at the fitted size. Allow one pixel for that rounding.
+        const fitted = this.getTextMetrics();
+        const fittedHeight = fitted.actualBoundingBoxAscent + fitted.actualBoundingBoxDescent;
+        if (fittedHeight > targetHeight + 0.5) {
+          this.setFontSize((points * Math.max(1, targetHeight - 1)) / fittedHeight);
+        }
       }
     } else if (this.code === Glyphs.fourStringTabClef) {
       // A modifier can be moved to another stave or survive a line-count change.
