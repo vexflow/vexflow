@@ -198,6 +198,8 @@ export class Stave extends Element {
   setNumLines(n: number): this {
     this.options.numLines = n;
     this.resetLines();
+    for (const modifier of this.getModifiers(undefined, Clef.CATEGORY)) modifier.setStave(this);
+    this.formatted = false;
     return this;
   }
 

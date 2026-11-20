@@ -1,6 +1,7 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 // Co-author: Benjamin W. Bohl
+// Select, position, and measure native clef glyphs against their attached stave.
 
 import { BoundingBox } from './boundingbox';
 import { Glyphs } from './glyphs';
@@ -138,6 +139,7 @@ export class Clef extends StaveModifier {
     this.text = this.code;
     this.fontInfo.size = Math.floor(Clef.getPoint(this.size));
 
+    if (this.stave && type === 'tab') this.setStave(this.stave);
     return this;
   }
 
@@ -149,13 +151,42 @@ export class Clef extends StaveModifier {
 
   /** Set associated stave. */
   override setStave(stave: Stave): this {
-    this.stave = stave;
+    super.setStave(stave);
+    if (this.type !== 'tab') return this;
+
+    if (stave.getNumLines() === 4) {
+      this.text = this.code = Glyphs.fourStringTabClef;
+      this.line = 1.5;
+      // Music fonts have different TAB outlines. Measure the selected face at the
+      // normal point size, leaving clearance for each of the three string spaces.
+      const reference = Clef.getPoint('default');
+      this.fontInfo.size = reference;
+      const { actualBoundingBoxAscent, actualBoundingBoxDescent } = this.measureText();
+      const inkHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
+      if (inkHeight > 0) {
+        const height = Math.max(1, stave.space(3) - 3 * (stave.getStyle().lineWidth ?? 1));
+        this.setFontSize((Clef.getPoint(this.size) * height) / inkHeight);
+      }
+    } else if (this.code === Glyphs.fourStringTabClef) {
+      // A modifier can be moved to another stave or survive a line-count change.
+      this.text = this.code = Clef.types.tab.code;
+      this.line = Clef.types.tab.line;
+      this.setFontSize(Math.floor(Clef.getPoint(this.size)));
+    }
     return this;
+  }
+
+  /** Baseline shared by drawing and hit testing. TAB fonts can have asymmetric ink. */
+  getGlyphY(): number {
+    const y = this.checkStave().getYForLine(this.line);
+    if (this.code !== Glyphs.fourStringTabClef) return y;
+    const { actualBoundingBoxAscent, actualBoundingBoxDescent } = this.textMetrics;
+    return y + (actualBoundingBoxAscent - actualBoundingBoxDescent) / 2;
   }
 
   /** Positioned glyph ink, including an octave annotation if present. */
   getInkBounds(): BoundingBox {
-    return this.getTextInk(this.getX(), this.checkStave().getYForLine(this.line));
+    return this.getTextInk(this.getX(), this.getGlyphY());
   }
 
   /** Render clef. */
@@ -167,7 +198,7 @@ export class Clef extends StaveModifier {
     const clsAttribute = this.getAttribute('class');
     ctx.openGroup('clef' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
 
-    this.y = stave.getYForLine(this.line);
+    this.y = this.getGlyphY();
     this.renderText(ctx, 0, 0);
     this.drawPointerRect();
     ctx.closeGroup();
