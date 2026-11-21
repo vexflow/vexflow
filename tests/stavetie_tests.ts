@@ -16,6 +16,7 @@ const StaveTieTests = {
     QUnit.module('StaveTie');
     const run = VexFlowTests.runTests;
     run('Simple StaveTie', simple);
+    run('Dashed ties on selected heads', dashedPitchTies);
     run('Chord StaveTie', chord);
     run('Stem Up StaveTie', stemUp);
     run('No End Note With Clef', noEndNote1);
@@ -163,6 +164,33 @@ function tieAlgorithms(options: TestOptions): void {
   n1.setStemDirection(Stem.DOWN);
   options.assert.equal(tie1.getDirection(), Stem.DOWN);
   options.assert.equal(tie2.getDirection(), Stem.DOWN);
+}
+
+/** The editorial tie and its solid control both belong to the lower note of each dyad. */
+function dashedPitchTies(options: TestOptions): void {
+  const f = VexFlowTests.makeFactory(options, 510, 155);
+  for (const [bar, key] of ['e/4', 'g/4'].entries()) {
+    const stave = f.Stave({ x: 10 + bar * 240, y: 15, width: 240 }).addClef('treble');
+    const dyad = () => f.StaveNote({ keys: [key, 'b/4'], duration: 'h', stemDirection: 1 });
+    const first = dyad(),
+      last = dyad();
+    const voice = f.Voice().addTickables([first, last]);
+    f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+    const tie = f.StaveTie({ from: first, to: last, firstIndexes: [0], lastIndexes: [0] }).setDirection(1);
+    if (bar === 0) tie.setStyle({ lineDash: '4 3' });
+    stave.draw();
+    voice.draw(f.getContext(), stave);
+    tie.drawWithStyle();
+    options.assert.deepEqual(tie.getNotes().firstIndexes, [0], 'only the lower head starts a tie');
+    options.assert.equal(voice.getTickables().length, 2);
+    options.assert.ok(voice.isComplete());
+    const path = tie.getSVGElement()?.querySelector('path');
+    if (path) {
+      const d = path.getAttribute('d') ?? '';
+      options.assert.equal((d.match(/Q/g) ?? []).length, bar === 0 ? 1 : 2, 'open dashed arc or closed solid ribbon');
+      if (bar === 0) options.assert.ok(getComputedStyle(path).strokeDasharray.includes('4'), 'stroke has visible gaps');
+    }
+  }
 }
 
 VexFlowTests.register(StaveTieTests);

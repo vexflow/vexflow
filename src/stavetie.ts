@@ -1,7 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 //
-// This class implements varies types of ties between contiguous notes. The
-// ties include: regular ties, hammer ons, pull offs, and slides.
+// Measures and draws indexed pitch ties, including partial ties and dashed editorial arcs.
 
 import { BoundingBox } from './boundingbox';
 import { Element } from './element';
@@ -213,7 +212,8 @@ export class StaveTie extends Element {
       parts.push(
         ...ribbonParts(
           [start, { x: r.cpX, y: r.topControlPointY }, end],
-          [start, { x: r.cpX, y: r.bottomControlPointY }, end]
+          [start, { x: r.cpX, y: this.style?.lineDash ? r.topControlPointY : r.bottomControlPointY }, end],
+          this.style?.lineDash ? (this.style.lineWidth ?? 1) / 2 : 0
         )
       );
     }
@@ -232,9 +232,11 @@ export class StaveTie extends Element {
     });
     let box: BoundingBox | undefined;
     for (const { x1, x2, firstY, lastY, topControlPointY, bottomControlPointY } of curves) {
-      const top = Math.min(firstY, lastY, topControlPointY, bottomControlPointY);
-      const bottom = Math.max(firstY, lastY, topControlPointY, bottomControlPointY);
-      const part = new BoundingBox(Math.min(x1, x2), top, Math.abs(x2 - x1), bottom - top);
+      const edge = this.style?.lineDash ? topControlPointY : bottomControlPointY;
+      const padding = this.style?.lineDash ? (this.style.lineWidth ?? 1) / 2 : 0;
+      const top = Math.min(firstY, lastY, topControlPointY, edge) - padding;
+      const bottom = Math.max(firstY, lastY, topControlPointY, edge) + padding;
+      const part = new BoundingBox(Math.min(x1, x2) - padding, top, Math.abs(x2 - x1) + 2 * padding, bottom - top);
       box = box ? box.mergeWith(part) : part;
     }
     return box ?? new BoundingBox(this.getFirstX(), this.getFirstYs()[0], 0, 0);
@@ -248,6 +250,13 @@ export class StaveTie extends Element {
       ctx.beginPath();
       ctx.moveTo(x1, firstY);
       ctx.quadraticCurveTo(cpX, topControlPointY, x2, lastY);
+      if (this.style?.lineDash) {
+        ctx.save();
+        this.applyStyle(ctx);
+        ctx.stroke();
+        ctx.restore();
+        continue;
+      }
       ctx.quadraticCurveTo(cpX, bottomControlPointY, x1, firstY);
       ctx.closePath();
       ctx.fill();
