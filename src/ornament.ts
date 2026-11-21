@@ -348,6 +348,7 @@ export class Ornament extends Modifier {
     const top = stave.getYForLine(0);
     const bottom = stave.getYForLine(stave.getNumLines() - 1);
     const step = stave.getSpacingBetweenLines();
+    if (!(step > 0) || !Number.isFinite(y)) return [];
     const lines: BoundingBox[] = [];
     const left = x + this.auxiliary.headOffset - 1;
     const width = this.auxiliary.headWidth + 2;
