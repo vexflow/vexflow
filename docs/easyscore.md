@@ -450,6 +450,7 @@ They draw through their stave, never through a second queue.
 
 `make.barNote()`, `make.clefNote()`, `make.keySigNote()`, and `make.timeSigNote()` create inline changes for `sequence()`.
 They consume no musical time. Imperative clef/key/time markings change the display only.
+For a double-octave treble or bass clef, use `stave.addClef('treble', 'default', '15ma')` or `new ClefNote('bass', 'small', '15mb')`. Both clefs accept either annotation. The “15” indicates the sounding octave while the noteheads retain their written staff positions.
 Supply the new clef to subsequent `notes()` calls and the actual meter to `voice()`.
 
 `make.multiMeasureRest()` returns a standalone rest; pass `{ numberOfMeasures: 8 }`, for example. Call `.setStave(stave)` before drawing.
@@ -561,6 +562,8 @@ The opt-in policy:
 - Shows both signs for conflicting simultaneous spellings. The next occurrence also gets a sign.
 
 Grace-note accidentals retain their explicit native notation. The policy does not rewrite grace groups.
+For an editorial sharp, attach `new Accidental('#').setAsCautionary('brackets')` to the selected chord-head index with `note.addModifier(sign, index)`. The sign keeps its accidental type for pitch handling. Calling `setAsCautionary()` uses round parentheses.
+
 The native `Accidental.applyAccidentals()` API remains unchanged.
 
 ### Reflow and spans

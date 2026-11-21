@@ -8,7 +8,7 @@
       "applyAccidentals(voices: Voice[], keySignature: string): void",
       "constructor(type: string)",
       "setNote(note: Note): this",
-      "setAsCautionary(): this",
+      "setAsCautionary(enclosure: 'parentheses' | 'brackets' = 'parentheses'): this",
       "isCautionary(): boolean",
       "getInkBounds()",
       "draw(): void"
@@ -308,6 +308,7 @@
       "setStave(stave: Stave): this",
       "getGlyphY(): number",
       "getInkBounds(): BoundingBox",
+      "getBoundingBox(): BoundingBox",
       "draw(): void"
     ]
   },
@@ -1957,7 +1958,7 @@
     ]
   },
   "stavebarline": {
-    "BarlineType": "export enum BarlineType { SINGLE = 1, DOUBLE = 2, END = 3, REPEAT_BEGIN = 4, REPEAT_END = 5, REPEAT_BOTH = 6, NONE = 7, }",
+    "BarlineType": "export enum BarlineType { SINGLE = 1, DOUBLE = 2, END = 3, REPEAT_BEGIN = 4, REPEAT_END = 5, REPEAT_BOTH = 6, NONE = 7, DASHED = 8, DOTTED = 9, DOUBLE_HEAVY = 10, }",
     "RepeatBracketType": "export enum RepeatBracketType { NONE = 0, STRAIGHT = 1, CURVED = 2, }",
     "Barline": [
       "CATEGORY(): string",

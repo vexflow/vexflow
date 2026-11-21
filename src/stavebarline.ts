@@ -16,6 +16,9 @@ export enum BarlineType {
   REPEAT_END = 5,
   REPEAT_BOTH = 6,
   NONE = 7,
+  DASHED = 8,
+  DOTTED = 9,
+  DOUBLE_HEAVY = 10,
 }
 export enum RepeatBracketType {
   NONE = 0,
@@ -48,6 +51,9 @@ export class Barline extends StaveModifier {
       repeatEnd: BarlineType.REPEAT_END,
       repeatBoth: BarlineType.REPEAT_BOTH,
       none: BarlineType.NONE,
+      dashed: BarlineType.DASHED,
+      dotted: BarlineType.DOTTED,
+      doubleHeavy: BarlineType.DOUBLE_HEAVY,
     };
   }
 
@@ -64,6 +70,9 @@ export class Barline extends StaveModifier {
     this.widths[TYPE.REPEAT_END] = 5;
     this.widths[TYPE.REPEAT_BOTH] = 5;
     this.widths[TYPE.NONE] = 5;
+    this.widths[TYPE.DASHED] = 5;
+    this.widths[TYPE.DOTTED] = 5;
+    this.widths[TYPE.DOUBLE_HEAVY] = 8;
 
     this.paddings = {};
     this.paddings[TYPE.SINGLE] = 0;
@@ -73,6 +82,9 @@ export class Barline extends StaveModifier {
     this.paddings[TYPE.REPEAT_END] = 15;
     this.paddings[TYPE.REPEAT_BOTH] = 15;
     this.paddings[TYPE.NONE] = 0;
+    this.paddings[TYPE.DASHED] = 0;
+    this.paddings[TYPE.DOTTED] = 0;
+    this.paddings[TYPE.DOUBLE_HEAVY] = 0;
 
     this.layoutMetricsMap = {};
     this.layoutMetricsMap[TYPE.SINGLE] = {
@@ -111,6 +123,9 @@ export class Barline extends StaveModifier {
       paddingLeft: 5,
       paddingRight: 5,
     };
+    this.layoutMetricsMap[TYPE.DASHED] = this.layoutMetricsMap[TYPE.SINGLE];
+    this.layoutMetricsMap[TYPE.DOTTED] = { xMin: -0.5, xMax: 1.5, paddingLeft: 5, paddingRight: 5 };
+    this.layoutMetricsMap[TYPE.DOUBLE_HEAVY] = { xMin: -7, xMax: 1, paddingLeft: 5, paddingRight: 5 };
     this.layoutMetricsMap[TYPE.NONE] = {
       xMin: 0,
       xMax: 0,
@@ -154,6 +169,13 @@ export class Barline extends StaveModifier {
       case BarlineType.DOUBLE:
         this.drawVerticalBar(stave, this.x, true);
         break;
+      case BarlineType.DASHED:
+      case BarlineType.DOTTED:
+        this.drawBrokenBar(stave, this.x);
+        break;
+      case BarlineType.DOUBLE_HEAVY:
+        this.drawDoubleHeavyBar(stave, this.x);
+        break;
       case BarlineType.END:
         this.drawVerticalEndBar(stave, this.x);
         break;
@@ -188,6 +210,36 @@ export class Barline extends StaveModifier {
       staveCtx.fillRect(x - 3, topY, 1, botY - topY);
     }
     staveCtx.fillRect(x, topY, 1, botY - topY);
+  }
+
+  /** Fit complete marks symmetrically inside the configured staff span. */
+  private drawBrokenBar(stave: Stave, x: number): void {
+    const ctx = stave.checkContext();
+    const { topY, botY } = stave.getBarlineBounds();
+    const height = botY - topY;
+    const dotted = this.type === BarlineType.DOTTED;
+    const mark = Math.min(height, dotted ? 2 : 4);
+    const count = Math.max(1, Math.round(height / (dotted ? 4 : 7)));
+    const step = count > 1 ? (height - mark) / (count - 1) : 0;
+    const firstY = count === 1 ? topY + (height - mark) / 2 : topY;
+    for (let i = 0; i < count; i++) {
+      const y = firstY + i * step;
+      if (dotted) {
+        ctx.beginPath();
+        ctx.arc(x + 0.5, y + mark / 2, mark / 2, 0, 2 * Math.PI, false);
+        ctx.fill();
+      } else {
+        ctx.fillRect(x, y, 1, mark);
+      }
+    }
+  }
+
+  /** Use the final bar’s heavy stroke on both sides of a two-pixel gap. */
+  private drawDoubleHeavyBar(stave: Stave, x: number): void {
+    const ctx = stave.checkContext();
+    const { topY, botY } = stave.getBarlineBounds();
+    ctx.fillRect(x - 7, topY, 3, botY - topY);
+    ctx.fillRect(x - 2, topY, 3, botY - topY);
   }
 
   drawVerticalEndBar(stave: Stave, x: number): void {

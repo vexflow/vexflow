@@ -31,6 +31,10 @@ factory.draw({ retain: true });
 
 Empty measures and invalid notation throw. Write an explicit rest for a silent measure. Use the voice time option for meters other than 4/4.
 
+## Measure boundaries
+
+Use `stave.setEndBarType(BarlineType.DASHED)`, `BarlineType.DOTTED`, or `BarlineType.DOUBLE_HEAVY` for a measure boundary. Set `barlineSpan: { top: 1, bottom: 3 }` in the stave options to shorten it to the middle three lines of a five-line stave. To place the same marks inside a voice, use `new BarNote('dashed')`, `new BarNote('dotted')`, or `new BarNote('doubleHeavy')`. An inline boundary reserves space and consumes zero beats.
+
 ## Reflow and redraw
 
 ```js

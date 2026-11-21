@@ -38,7 +38,8 @@ test('jsdom registers fonts, renders PNGs, and exports portable SVG', () => {
   run(['-e', script]);
   run(['tools/generate_images_jsdom.js', 'build', directory, '--fonts=bravura', '--module=Clef']);
   const pngs = readdirSync(directory).filter((file) => file.endsWith('.png'));
-  assert.equal(pngs.length, 7);
+  assert.equal(pngs.length, 8);
+  assert.ok(pngs.includes('Clef.Double_octave_clefs.Bravura.jsdom.png'));
   for (const file of pngs) assert.equal(readFileSync(join(directory, file)).subarray(1, 4).toString(), 'PNG');
 });
 

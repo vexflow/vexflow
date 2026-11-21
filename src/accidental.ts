@@ -5,6 +5,7 @@
 // Defines accidental modifiers, their layout, and automatic placement across voices.
 
 import { Fraction } from './fraction';
+import { Glyphs } from './glyphs';
 import { Metrics } from './metrics';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
@@ -52,6 +53,8 @@ export class Accidental extends Modifier {
   /** To enable logging for this class. Set `VexFlow.Accidental.DEBUG` to `true`. */
   static DEBUG: boolean = false;
   protected cautionary: boolean;
+  /** Select the pair of glyphs around a cautionary or editorial accidental. */
+  private enclosure: 'parentheses' | 'brackets' = 'parentheses';
 
   /** Accidentals category string. */
   static override get CATEGORY(): string {
@@ -520,7 +523,7 @@ export class Accidental extends Modifier {
     this.type = type;
     this.position = Modifier.Position.LEFT;
 
-    // Cautionary accidentals have parentheses around them
+    // Accidentals start without an enclosure.
     this.cautionary = false;
 
     this.reset();
@@ -533,9 +536,9 @@ export class Accidental extends Modifier {
       this.text += Tables.accidentalCodes(this.type);
       this.fontInfo.size = Metrics.get('Accidental.fontSize');
     } else {
-      this.text += Tables.accidentalCodes('{');
+      this.text += this.enclosure === 'brackets' ? Glyphs.accidentalBracketLeft : Glyphs.accidentalParensLeft;
       this.text += Tables.accidentalCodes(this.type);
-      this.text += Tables.accidentalCodes('}');
+      this.text += this.enclosure === 'brackets' ? Glyphs.accidentalBracketRight : Glyphs.accidentalParensRight;
       this.fontInfo.size = Metrics.get('Accidental.cautionary.fontSize');
     }
     // Accidentals attached to grace notes are rendered smaller.
@@ -553,8 +556,9 @@ export class Accidental extends Modifier {
     return this;
   }
 
-  /** If called, draws parenthesis around accidental. */
-  setAsCautionary(): this {
+  /** Enclose the sign in round parentheses or square editorial brackets without changing its pitch spelling. */
+  setAsCautionary(enclosure: 'parentheses' | 'brackets' = 'parentheses'): this {
+    this.enclosure = enclosure;
     this.cautionary = true;
     this.reset();
     return this;

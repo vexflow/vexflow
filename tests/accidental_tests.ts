@@ -30,6 +30,7 @@ const AccidentalTests = {
     QUnit.test('Automatic Accidentals - Voice Order', autoAccidentalVoiceOrder);
     QUnit.test('Automatic Accidentals - Simultaneous Notes', autoAccidentalSimultaneousNotes);
     const run = VexFlowTests.runTests;
+    run('Square editorial enclosures', editorialEnclosures);
     run('Bounding Box', basic, { drawBoundingBox: true });
     run('Accidental Padding', formatAccidentalSpaces);
     run('Basic', basic, { drawBoundingBox: false });
@@ -53,6 +54,54 @@ const AccidentalTests = {
     run('Factory API', factoryAPI);
   },
 };
+
+/** The two signs on the final chord must clear each other and the heads at both score widths. */
+function editorialEnclosures(options: TestOptions): void {
+  const f = VexFlowTests.makeFactory(options, 520, 250);
+  for (const [row, width] of [475, 275].entries()) {
+    const stave = f.Stave({ x: 10, y: 5 + 110 * row, width }).addClef('treble');
+    const sharp = () => f.Accidental({ type: '#' });
+    const plain = sharp();
+    const round = sharp().setAsCautionary();
+    const square = sharp().setAsCautionary('brackets');
+    const natural = f.Accidental({ type: 'n' }).setAsCautionary('brackets');
+    const flat = f.Accidental({ type: 'b' }).setAsCautionary('brackets');
+    const note = (keys: string[]) => f.StaveNote({ keys, duration: 'q' });
+    const chord = note(['g/4', 'b/4']).addModifier(plain, 0).addModifier(natural, 1);
+    const notes = [
+      note(['f/4']).addModifier(round, 0),
+      note(['f/4']).addModifier(square, 0),
+      note(['b/4']).addModifier(flat, 0),
+      chord,
+    ];
+    const voice = f.Voice().addTickables(notes);
+    f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+    // Set the stave explicitly so the positioned glyphs can be measured before the final draw.
+    voice.setStave(stave);
+    notes.forEach((entry) => entry.setStave(stave));
+    options.assert.equal(
+      round.getText(),
+      Glyphs.accidentalParensLeft + Glyphs.accidentalSharp + Glyphs.accidentalParensRight
+    );
+    for (const [sign, glyph] of [
+      [square, Glyphs.accidentalSharp],
+      [flat, Glyphs.accidentalFlat],
+      [natural, Glyphs.accidentalNatural],
+    ] as const) {
+      options.assert.equal(sign.getText(), Glyphs.accidentalBracketLeft + glyph + Glyphs.accidentalBracketRight);
+    }
+    options.assert.equal(natural.type, 'n', 'preserves the accidental type');
+    options.assert.equal(notes[0].getYs()[0], notes[1].getYs()[0], 'enclosure preserves staff position');
+    const left = plain.getInkBounds();
+    const right = natural.getInkBounds();
+    options.assert.ok(left.x + left.w < right.x || right.x + right.w < left.x, 'the two chord signs have a gap');
+    options.assert.ok(
+      Math.max(left.x + left.w, right.x + right.w) < chord.getNoteHeadBeginX(),
+      'both signs clear the heads'
+    );
+  }
+  f.draw();
+}
 
 // Check that at least one of the note's modifiers is an Accidental.
 function hasAccidental(note: StaveNote) {
