@@ -843,6 +843,7 @@
       "Beam(params: { notes: StemmableNote[]; options?: { autoStem?: boolean; feathered?: FeatheredBeamDirection; secondaryBeamBreaks?: number[]; partialBeamDirections?: { [noteIndex: number]: PartialBeamDirection; }; }; }): Beam",
       "Curve(params: { from: Note | undefined; to: Note | undefined; options: CurveOptions }): Curve",
       "StaveTie(params: { from?: Note | null; to?: Note | null; firstIndexes?: number[]; lastIndexes?: number[]; text?: string; options?: { direction?: number; laissezVibrer?: number }; }): StaveTie",
+      "FiguredBass(spec: FiguredBassSpec): FiguredBass",
       "StaveLine(params: { from: StaveNote; to: StaveNote; firstIndexes: number[]; lastIndexes: number[]; options?: { text?: string; font?: FontInfo }; }): StaveLine",
       "VibratoBracket(params: { from: Note | null; to: Note | null; options: { code?: number; line?: number; }; }): VibratoBracket",
       "TextBracket(params: { from: Note; to: Note; text: string; options: { superscript: string; position: string; line?: number; font?: FontInfo; }; }): TextBracket",
@@ -859,6 +860,29 @@
       "Crescendo(...args: ConstructorParameters<typeof Crescendo>): Crescendo",
       "StaveHairpin(params: { from: Note; to: Note; type: number; options?: Partial<StaveHairpinRenderOptions>; }): StaveHairpin",
       "draw(options: { retain?: boolean } = {}): void"
+    ]
+  },
+  "figuredbass": {
+    "FiguredBassFigure": {
+      "extends": [],
+      "fields": [
+        "note: StaveNote;",
+        "figure: string;",
+        "extendTo?: StaveNote;"
+      ]
+    },
+    "FiguredBassSpec": {
+      "extends": [],
+      "fields": [
+        "rows: readonly (readonly FiguredBassFigure[])[];"
+      ]
+    },
+    "FiguredBass": [
+      "CATEGORY(): string",
+      "constructor({ rows }: FiguredBassSpec)",
+      "getInkParts(): BoundingBox[]",
+      "getBoundingBox(): BoundingBox",
+      "draw(): void"
     ]
   },
   "font": {
@@ -895,6 +919,7 @@
       "extends": [],
       "fields": [
         "frets: readonly (number | 'x')[];",
+        "fingerings?: readonly (number | null | undefined)[];",
         "firstFret?: number;",
         "rows?: number;",
         "barre?: { fret: number; from: number; to: number };"
@@ -903,6 +928,7 @@
     "FretDiagram": [
       "CATEGORY(): string",
       "constructor(spec: FretDiagramSpec)",
+      "setFingerings(fingerings: NonNullable<FretDiagramSpec['fingerings']> = []): this",
       "getBoundingBox(): BoundingBox",
       "draw(): void"
     ]
@@ -1658,6 +1684,14 @@
         "baselineSpaces?: number;"
       ]
     },
+    "PhraseVerseOptions": {
+      "extends": [
+        "extends PhraseLaneOptions"
+      ],
+      "fields": [
+        "stanza?: string;"
+      ]
+    },
     "PhraseDiagnostic": {
       "extends": [],
       "fields": [
@@ -1675,7 +1709,8 @@
       "setPassLimit(limit: number): this",
       "route(span: Route): this",
       "addLane(stave: Stave, marks: PhraseMark[], options: PhraseLaneOptions = {}): this",
-      "addVerse(stave: Stave, syllables: PhraseSyllable[], options: PhraseLaneOptions = {}): Annotation[]",
+      "addVerse(stave: Stave, syllables: PhraseSyllable[], options: PhraseVerseOptions = {}): Annotation[]",
+      "getStanzaColumnWidth(stave: Stave): number",
       "resetPlacement(): void",
       "format(staves: Stave[], voices: Voice[]): void",
       "getLyricConnectors(): BoundingBox[]",
@@ -1852,6 +1887,7 @@
       ]
     },
     "Sheet": [
+      "alignToMeasures(widths: readonly number[]): this",
       "setContinuousLayout(layout: ContinuousLayout): this",
       "getContinuousLayout(): ContinuousLayout | undefined",
       "constructor(options: SheetOptions)",
@@ -2897,7 +2933,7 @@
     "isStaveNote": "inferred",
     "isStemmableNote": "inferred",
     "isTabNote": "inferred",
-    "Category": "export const enum Category { Accidental = 'Accidental', Annotation = 'Annotation', Articulation = 'Articulation', Barline = 'Barline', BarNote = 'BarNote', Beam = 'Beam', Bend = 'Bend', ChordSymbol = 'ChordSymbol', Clef = 'Clef', ClefNote = 'ClefNote', Crescendo = 'Crescendo', Curve = 'Curve', Dot = 'Dot', Element = 'Element', Flag = 'Flag', Fraction = 'Fraction', FretDiagram = 'FretDiagram', FretHandFinger = 'FretHandFinger', GhostNote = 'GhostNote', Glyph = 'Glyph', GlyphNote = 'GlyphNote', GraceNote = 'GraceNote', GraceNoteGroup = 'GraceNoteGroup', GraceTabNote = 'GraceTabNote', KeySignature = 'KeySignature', KeySigNote = 'KeySigNote', Modifier = 'Modifier', MultiMeasureRest = 'MultiMeasureRest', Note = 'Note', NoteHead = 'NoteHead', NoteSubGroup = 'NoteSubGroup', Ornament = 'Ornament', Parenthesis = 'Parenthesis', PedalMarking = 'PedalMarking', RenderContext = 'RenderContext', RepeatNote = 'RepeatNote', Repetition = 'Repetition', Stave = 'Stave', StaveConnector = 'StaveConnector', StaveHairpin = 'StaveHairpin', StaveLine = 'StaveLine', StaveModifier = 'StaveModifier', StaveNote = 'StaveNote', StaveSection = 'StaveSection', StaveTempo = 'StaveTempo', StaveText = 'StaveText', StaveTie = 'StaveTie', Stem = 'Stem', StemmableNote = 'StemmableNote', StringNumber = 'StringNumber', Stroke = 'Stroke', System = 'System', TabNote = 'TabNote', TabSlide = 'TabSlide', TabStave = 'TabStave', TabTie = 'TabTie', TextBracket = 'TextBracket', TextDynamics = 'TextDynamics', TextNote = 'TextNote', Tickable = 'Tickable', TimeSignature = 'TimeSignature', TimeSigNote = 'TimeSigNote', Tremolo = 'Tremolo', Tuplet = 'Tuplet', Vibrato = 'Vibrato', VibratoBracket = 'VibratoBracket', Voice = 'Voice', Volta = 'Volta', }"
+    "Category": "export const enum Category { Accidental = 'Accidental', Annotation = 'Annotation', Articulation = 'Articulation', Barline = 'Barline', BarNote = 'BarNote', Beam = 'Beam', Bend = 'Bend', ChordSymbol = 'ChordSymbol', Clef = 'Clef', ClefNote = 'ClefNote', Crescendo = 'Crescendo', Curve = 'Curve', Dot = 'Dot', Element = 'Element', FiguredBass = 'FiguredBass', Flag = 'Flag', Fraction = 'Fraction', FretDiagram = 'FretDiagram', FretHandFinger = 'FretHandFinger', GhostNote = 'GhostNote', Glyph = 'Glyph', GlyphNote = 'GlyphNote', GraceNote = 'GraceNote', GraceNoteGroup = 'GraceNoteGroup', GraceTabNote = 'GraceTabNote', KeySignature = 'KeySignature', KeySigNote = 'KeySigNote', Modifier = 'Modifier', MultiMeasureRest = 'MultiMeasureRest', Note = 'Note', NoteHead = 'NoteHead', NoteSubGroup = 'NoteSubGroup', Ornament = 'Ornament', Parenthesis = 'Parenthesis', PedalMarking = 'PedalMarking', RenderContext = 'RenderContext', RepeatNote = 'RepeatNote', Repetition = 'Repetition', Stave = 'Stave', StaveConnector = 'StaveConnector', StaveHairpin = 'StaveHairpin', StaveLine = 'StaveLine', StaveModifier = 'StaveModifier', StaveNote = 'StaveNote', StaveSection = 'StaveSection', StaveTempo = 'StaveTempo', StaveText = 'StaveText', StaveTie = 'StaveTie', Stem = 'Stem', StemmableNote = 'StemmableNote', StringNumber = 'StringNumber', Stroke = 'Stroke', System = 'System', TabNote = 'TabNote', TabSlide = 'TabSlide', TabStave = 'TabStave', TabTie = 'TabTie', TextBracket = 'TextBracket', TextDynamics = 'TextDynamics', TextNote = 'TextNote', Tickable = 'Tickable', TimeSignature = 'TimeSignature', TimeSigNote = 'TimeSigNote', Tremolo = 'Tremolo', Tuplet = 'Tuplet', Vibrato = 'Vibrato', VibratoBracket = 'VibratoBracket', Voice = 'Voice', Volta = 'Volta', }"
   },
   "util": {
     "RuntimeError": [
@@ -3079,6 +3115,7 @@
       "Sheet",
       "FrettedInstrument",
       "PercussionMap",
+      "FiguredBass",
       "FretDiagram",
       "AlternatingTremolo",
       "WrittenAccidentalState",
@@ -3338,7 +3375,7 @@
         "span?: VoiceTime | string;",
         "endBarline?: BarlineType;",
         "chords?: readonly (LeadMark | { note: string; harmony: ChordHarmony })[];",
-        "verses?: readonly (readonly LyricMark[])[];"
+        "verses?: readonly (readonly LyricMark[] | { stanza?: string; syllables: readonly LyricMark[] })[];"
       ]
     },
     "EasyScoreStaveSpec": {
