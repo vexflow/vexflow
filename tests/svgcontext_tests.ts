@@ -20,7 +20,7 @@ function rejectsExecutableAttributes(assert: Assert): void {
   context.rect(1, 2, 3, 4, {
     fill: 'red',
     'pointer-events': 'all',
-    oNcLiCk: 'alert(1)',
+    oNcLiCk: 'ignored',
   });
   const rectangle = context.svg.querySelector('rect') as SVGRectElement;
 
@@ -28,22 +28,23 @@ function rejectsExecutableAttributes(assert: Assert): void {
   assert.equal(rectangle.getAttribute('fill'), 'red', 'ordinary presentation attributes remain');
   assert.equal(rectangle.getAttribute('pointer-events'), 'all', 'pointer rectangles remain interactive');
 
-  context.beginPath().moveTo(0, 0).lineTo(1, 1).fill({ fill: 'green', oNlOaD: 'alert(2)' });
+  context.beginPath().moveTo(0, 0).lineTo(1, 1).fill({ fill: 'green', oNlOaD: 'ignored' });
   const filledPath = context.svg.querySelector('path') as SVGPathElement;
   assert.notOk(filledPath.hasAttribute('oNlOaD'), 'path event attributes are rejected');
   assert.equal(filledPath.getAttribute('fill'), 'green', 'safe path attributes remain');
 
   const path = context.create('path');
-  const inheritedAttributes = Object.create({ onfocus: 'alert(3)' });
+  const inheritedAttributes = Object.create({ onfocus: 'ignored', opacity: 0.5 });
   Object.assign(inheritedAttributes, {
-    style: 'filter: url(javascript:alert(4))',
-    href: 'javascript:alert(5)',
-    'xlink:href': 'javascript:alert(6)',
+    style: 'opacity: 0.5',
+    href: '#unused',
+    'xlink:href': '#unused',
     stroke: 'blue',
   });
   context.applyAttributes(path, inheritedAttributes);
 
   assert.notOk(path.hasAttribute('onfocus'), 'inherited event attributes are rejected');
+  assert.notOk(path.hasAttribute('opacity'), 'inherited presentation attributes are ignored');
   assert.notOk(path.hasAttribute('style'), 'caller-supplied raw styles are rejected');
   assert.notOk(path.hasAttribute('href'), 'unqualified links are rejected');
   assert.notOk(path.hasAttribute('xlink:href'), 'namespaced links are rejected');
@@ -67,7 +68,11 @@ function preservesPresentationAttributes(assert: Assert): void {
 
   assert.equal(path.getAttribute('d'), 'M0 0L2 2', 'path geometry remains');
   assert.equal(path.getAttribute('fill'), 'purple', 'path presentation remains');
-  assert.equal(path.style.filter, 'drop-shadow(0 0 2px green)', 'trusted shadows remain');
+  // Browsers can serialize the color first and give zero lengths a unit.
+  const expected = document.createElement('div').style;
+  expected.filter = 'drop-shadow(0 0 2px green)';
+  assert.ok(expected.filter, 'the browser supports a CSS drop shadow');
+  assert.equal(path.style.filter, expected.filter, 'trusted shadows retain their color, offset, and blur');
 }
 
 VexFlowTests.register(SVGContextTests);
