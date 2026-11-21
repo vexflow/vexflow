@@ -5,7 +5,15 @@ import { Factory } from './factory';
 import { Metrics } from './metrics';
 import { Note } from './note';
 import { paginate } from './pagebreaks';
-import { checkView, insetStaff, invalidPage, projectScore, PublicationView, restingMeasure } from './publicationview';
+import {
+  checkView,
+  insetStaff,
+  invalidPage,
+  projectScore,
+  PublicationRegion,
+  PublicationView,
+  restingMeasure,
+} from './publicationview';
 import { Registry } from './registry';
 import { SVGContext } from './svgcontext';
 import type { SVGFont } from './svgexport';
@@ -100,6 +108,7 @@ interface RowDrawing {
     kind: 'cue' | 'ossia';
     staff: string;
     measure: number;
+    endMeasure?: number;
     label: string;
     events: ReturnType<typeof semanticEvents>;
   }[];
@@ -253,7 +262,76 @@ function furniture(host: SVGElement, size: Size, o: PublicationOptions, number: 
   return { group, top: y, height: end - y, overflow };
 }
 
-/** A cue or ossia gets its own native rendering at the anchor bar's width and written clef. */
+/** Engrave the portion of a reference staff that fits above one performing system. */
+function addInsetFragment(
+  host: HTMLElement,
+  spec: EasyScoreCompositionSpec,
+  hooks: readonly CommitHook[] | undefined,
+  score: EasyScoreComposition,
+  row: RowDrawing,
+  region: PublicationRegion,
+  measures: number[],
+  diagnostics: PublicationDiagnostic[]
+) {
+  const first = measures[0];
+  const last = measures[measures.length - 1];
+  const scale = region.scale ?? 0.7;
+  const hosts = measures.map((m) => score.staves[m - 1][0]);
+  const lastHost = hosts[hosts.length - 1];
+  const width = lastHost.getX() + lastHost.getWidth() - hosts[0].getX();
+  const gap = hosts.length > 1 ? hosts[1].getX() - hosts[0].getX() - hosts[0].getWidth() : 0;
+  const insetSpec: EasyScoreCompositionSpec = {
+    staves: [
+      insetStaff(
+        spec.staves.find((s) => s.id === region.staff)!,
+        first,
+        last
+      ),
+    ],
+    accidentals: spec.accidentals,
+    graceAccidentals: spec.graceAccidentals,
+    sheet: { x: 0, y: 0, width: width / scale, measurePadding: 4, measureGap: Math.max(0, gap) / scale },
+    // Keep the existing single-bar signature and spacing policy. A longer fragment shares one signature prefix.
+    ...(hosts.length === 1 ? { continuous: {} } : {}),
+  };
+  const inset = compose(host, insetSpec, hooks);
+  if (hosts.length > 1) inset.score.sheet.alignToMeasures(hosts.map((s) => s.getWidth() / scale));
+  inset.factory.draw();
+  row.references.push({
+    ...region,
+    measure: first,
+    ...(region.endMeasure !== undefined && { endMeasure: last }),
+    events: measures.flatMap((measure, i) =>
+      semanticEvents(inset.score, insetSpec, i + 1).map((event) => ({ ...event, measure }))
+    ),
+  });
+
+  const music = musicGroup(inset.ctx.svg);
+  while (inset.ctx.svg.firstChild) music.append(inset.ctx.svg.firstChild);
+  inset.ctx.svg.append(music);
+  const ink = inkBox(music, document.createElement('canvas').getContext('2d')!)!;
+  const wrap = node('g', { 'data-region': region.kind, 'data-source-staff': region.staff, 'data-measure': first });
+  if (region.endMeasure !== undefined) wrap.setAttribute('data-end-measure', String(last));
+  wrap.setAttribute('transform', `translate(${hosts[0].getX()},${row.insetHeight})`);
+  let captionHeight = 0;
+  let right = ink.right * scale;
+  if (first === region.measure) {
+    const caption = label(inset.ctx.svg, region.label, 12);
+    caption.el.setAttribute('y', String(-caption.box.y));
+    wrap.append(caption.el);
+    captionHeight = caption.box.height + 2;
+    right = Math.max(right, caption.box.width);
+  }
+  music.setAttribute('transform', `translate(0,${captionHeight - ink.y * scale}) scale(${scale})`);
+  if (right > width + 1 || inset.score.sheet.getRows().some((r) => r.overflow * scale > 1))
+    diagnostics.push({ code: 'SystemOverflow', measures, detail: region.kind + ' exceeds its measure width.' });
+  wrap.append(music);
+  row.insets.append(wrap);
+  row.insetHeight += captionHeight + ink.height * scale + 6;
+  inset.ctx.svg.remove();
+}
+
+/** Split each region at the host system boundaries before measuring the page's vertical space. */
 function addInsets(
   host: HTMLElement,
   spec: EasyScoreCompositionSpec,
@@ -262,47 +340,12 @@ function addInsets(
   rows: RowDrawing[],
   diagnostics: PublicationDiagnostic[]
 ) {
-  for (const r of o.regions ?? []) {
-    const row = rows.find((p) => p.measures.includes(r.measure))!;
-    const stave = score.staves[r.measure - 1][0],
-      scale = r.scale ?? 0.7;
-    const staff = insetStaff(
-      spec.staves.find((s) => s.id === r.staff)!,
-      r.measure
-    );
-    const insetSpec: EasyScoreCompositionSpec = {
-      staves: [staff],
-      accidentals: spec.accidentals,
-      graceAccidentals: spec.graceAccidentals,
-      sheet: { x: 0, y: 0, width: stave.getWidth() / scale, measurePadding: 4 },
-      continuous: {},
-    };
-    const inset = compose(host, insetSpec, o.noteHooks);
-    inset.factory.draw();
-    row.references.push({
-      ...r,
-      events: semanticEvents(inset.score, insetSpec, 1).map((e) => ({ ...e, measure: r.measure })),
-    });
-    const g = musicGroup(inset.ctx.svg);
-    while (inset.ctx.svg.firstChild) g.append(inset.ctx.svg.firstChild);
-    inset.ctx.svg.append(g);
-    const ink = inkBox(g, document.createElement('canvas').getContext('2d')!)!;
-    const caption = label(inset.ctx.svg, r.label, 12);
-    const wrap = node('g', { 'data-region': r.kind, 'data-source-staff': r.staff, 'data-measure': r.measure });
-    wrap.setAttribute('transform', `translate(${stave.getX()},${row.insetHeight})`);
-    caption.el.setAttribute('y', String(-caption.box.y));
-    g.setAttribute('transform', `translate(0,${caption.box.height + 2 - ink.y * scale}) scale(${scale})`);
-    const right = Math.max(ink.width * scale, caption.box.width);
-    if (right > stave.getWidth() + 1)
-      diagnostics.push({
-        code: 'SystemOverflow',
-        measures: [r.measure],
-        detail: r.kind + ' exceeds its measure width.',
-      });
-    wrap.append(caption.el, g);
-    row.insets.append(wrap);
-    row.insetHeight += caption.box.height + ink.height * scale + 8;
-    inset.ctx.svg.remove();
+  for (const region of o.regions ?? []) {
+    const end = region.endMeasure ?? region.measure;
+    for (const row of rows) {
+      const measures = row.measures.filter((m) => m >= region.measure && m <= end);
+      if (measures.length) addInsetFragment(host, spec, o.noteHooks, score, row, region, measures, diagnostics);
+    }
   }
 }
 

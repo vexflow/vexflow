@@ -35,6 +35,15 @@ export interface SheetRow {
 export class Sheet {
   private options: Required<SheetOptions>;
   private continuous?: ContinuousLayout;
+  private alignedWidths?: readonly number[];
+
+  /** @internal Fit a single reference system to the already formatted measures of a publication. */
+  alignToMeasures(widths: readonly number[]): this {
+    if (widths.length !== this.systems.length || widths.some((w) => !Number.isFinite(w) || w <= 0))
+      throw new RuntimeError('BadArgument', 'Expected a positive width for each reference measure.');
+    this.alignedWidths = widths.slice();
+    return this;
+  }
 
   /** Composition installs a score-aware layout while retaining the native sheet resize and draw API. */
   setContinuousLayout(layout: ContinuousLayout): this {
@@ -108,6 +117,19 @@ export class Sheet {
     }
     const widths = this.measureSystems();
     const padding = new Map<System, number>();
+    const fixed = this.alignedWidths;
+    if (fixed) {
+      const indices = this.systems.map((_, i) => i);
+      const row = this.formatRow(indices, fixed, padding, this.options.y);
+      // An overfull ossia keeps its barlines aligned and reports the tightest measure to the publication.
+      reserveChordSpacing([row], padding);
+      row.overflow = Math.max(
+        0,
+        ...widths.map((minimum, i) => minimum + (padding.get(this.systems[i]) ?? 0) - fixed[i])
+      );
+      this.rows = [row];
+      return this;
+    }
     do {
       this.rows = [];
       let y = this.options.y;
@@ -180,7 +202,7 @@ export class Sheet {
   }
 
   /** Justify a row horizontally, then place every measure on a shared baseline. */
-  private formatRow(indices: number[], widths: number[], padding: Map<System, number>, y: number): SheetRow {
+  private formatRow(indices: number[], widths: readonly number[], padding: Map<System, number>, y: number): SheetRow {
     const last = indices[indices.length - 1];
     const endPadding = (index: number) => (index === last ? 0 : (padding.get(this.systems[index]) ?? 0));
     const minimum =
