@@ -5,11 +5,13 @@ import { Note } from './note';
 import { Tickable } from './tickable';
 import { RuntimeError } from './util';
 
-/** A small written-pitch reference staff over one source measure. Cues do not change the player's rest. */
+/** A small written-pitch reference staff over source measures. Cues do not change the player's rest. */
 export interface PublicationRegion {
   kind: 'cue' | 'ossia';
   staff: string;
   measure: number;
+  /** Last source measure of an ossia, inclusive. Defaults to the starting measure. */
+  endMeasure?: number;
   label: string;
   scale?: number;
 }
@@ -47,6 +49,8 @@ export function checkView(source: EasyScoreCompositionSpec, view: PublicationVie
     const scale = region.scale ?? 0.7;
     if (
       !validMeasure(region.measure) ||
+      (region.endMeasure !== undefined &&
+        (region.kind !== 'ossia' || !validMeasure(region.endMeasure) || region.endMeasure < region.measure)) ||
       !staffIds.has(region.staff) ||
       !region.label.trim() ||
       !['cue', 'ossia'].includes(region.kind) ||
@@ -104,7 +108,8 @@ export function projectScore(
   }
   for (const n of [...(view.systemBreaks ?? []), ...(view.pageBreaks ?? [])]) boundary(n).breakBefore = 'force';
   // Cued rests must remain individually addressable even when their neighbours form a multi-measure rest.
-  for (const region of view.regions ?? []) boundary(region.measure).keepRest = true;
+  for (const region of view.regions ?? [])
+    for (let m = region.measure; m <= (region.endMeasure ?? region.measure); m++) boundary(m).keepRest = true;
   return {
     ...source,
     staves,
@@ -152,8 +157,8 @@ function homeStaff(staff: EasyScoreStaveSpec, selected: ReadonlySet<string>): Ea
   };
 }
 
-/** Carry written clef, key and meter into a one-measure inset, including preceding inline changes. */
-export function insetStaff(staff: EasyScoreStaveSpec, measure: number): EasyScoreStaveSpec {
+/** Carry written clef, key and meter into a reference fragment, including preceding inline changes. */
+export function insetStaff(staff: EasyScoreStaveSpec, measure: number, endMeasure = measure): EasyScoreStaveSpec {
   const state = { clef: staff.clef, key: staff.key, time: staff.time, showTimeSignature: staff.showTimeSignature };
   for (const m of staff.measures.slice(0, measure - 1)) {
     state.clef = m.clef ?? state.clef;
@@ -165,7 +170,13 @@ export function insetStaff(staff: EasyScoreStaveSpec, measure: number): EasyScor
         for (const item of v.notes) if (typeof item === 'object' && 'change' in item) Object.assign(state, item.change);
   }
   return homeStaff(
-    { ...staff, ...state, name: undefined, shortName: undefined, measures: [staff.measures[measure - 1]] },
+    {
+      ...staff,
+      ...state,
+      name: undefined,
+      shortName: undefined,
+      measures: staff.measures.slice(measure - 1, endMeasure),
+    },
     new Set([staff.id])
   );
 }

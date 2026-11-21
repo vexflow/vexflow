@@ -2,9 +2,11 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
+
 import puppeteer from 'puppeteer';
+
 import { tabEndingStudy } from '../engraving/continuous-studies.mjs';
-import { leadSheetStudy, publicationStudy } from '../engraving/publication-studies.mjs';
+import { leadSheetStudy, ossiaRangeStudy, publicationStudy } from '../engraving/publication-studies.mjs';
 
 test('publication views, pagination and portable printing', async (t) => {
   const browser = await puppeteer.launch({ headless: true, args: process.env.CI ? ['--no-sandbox'] : [] });
@@ -118,6 +120,105 @@ test('publication views, pagination and portable printing', async (t) => {
           }
         });
       }
+    await t.test(
+      'a ranged ossia aligns each bar, continues on the next system and restores its original layout',
+      async () => {
+        await page.addScriptTag({ content: 'window.ossiaStudy=' + ossiaRangeStudy });
+        const result = await page.evaluate(() => {
+          const { source, options } = ossiaStudy();
+          const book = new VexFlow.Publication(source);
+          const target = document.querySelector('main');
+          function render(view) {
+            const result = book.render(target, view);
+            const sections = result.pages.flatMap((p) => [...p.svg.querySelectorAll('[data-region]')]);
+            const metadata = result.pages.map((p) => JSON.parse(p.svg.querySelector('metadata').textContent));
+            const serialized = result.pages.map((p) =>
+              new DOMParser().parseFromString(result.toSVG(p.number, faces), 'image/svg+xml')
+            );
+            const offsets = sections.flatMap((section) => {
+              const system = section.closest('[data-system]');
+              const hostStaves = system.lastElementChild.querySelectorAll('.vf-stave');
+              const index = Number(section.dataset.measure) - Number(system.dataset.system);
+              return [...section.querySelectorAll('.vf-stave')].map((staff, i) => {
+                const inset = staff.getBoundingClientRect();
+                const host = hostStaves[index + i].getBoundingClientRect();
+                return [inset.left - host.left, inset.right - host.right];
+              });
+            });
+            return {
+              diagnostics: result.diagnostics,
+              aligned: offsets.every((ends) => ends.every((d) => Math.abs(d) < 0.01)),
+              widths: sections.flatMap((el) =>
+                [...el.querySelectorAll('.vf-stave')].map((s) => s.getBoundingClientRect().width)
+              ),
+              exported: serialized.every(
+                (svg, i) =>
+                  svg.querySelector('metadata').textContent === JSON.stringify(metadata[i]) &&
+                  svg.querySelectorAll('[data-region] .vf-notehead').length ===
+                    result.pages[i].svg.querySelectorAll('[data-region] .vf-notehead').length
+              ),
+              ranges: sections.map((el) => [Number(el.dataset.measure), Number(el.dataset.endMeasure)]),
+              noteCounts: sections.map((el) => el.querySelectorAll('.vf-stavenote').length),
+              labels: sections.flatMap((el) => [...el.querySelectorAll(':scope > text')].map((t) => t.textContent)),
+              main: metadata.flatMap((m) => m.events).map((e) => [e.id, e.keys, e.ticks]),
+              alternate: metadata.flatMap((m) => m.regions).flatMap((r) => r.events.map((e) => [e.measure, e.id])),
+              x: sections.flatMap((el) =>
+                [...el.querySelectorAll('.vf-notehead')].map((n) => n.getBoundingClientRect().x)
+              ),
+            };
+          }
+          const control = render({ ...options, regions: [] });
+          const wide = render(options);
+          const split = render({ ...options, paper: { width: 150, height: 130 }, systemBreaks: [3] });
+          const pages = render({ ...options, pageBreaks: [3] });
+          const restored = render(options);
+          const invalid = [1, 2.5, 5].map((endMeasure) => {
+            const before = target.firstChild;
+            try {
+              book.render(target, { ...options, regions: [{ ...options.regions[0], endMeasure }] });
+            } catch {
+              return target.firstChild === before;
+            }
+            return false;
+          });
+          // Unequal intrinsic widths prevent an equal division of the inset from passing the alignment check.
+          source.staves[0].measures[2] = { voices: [{ notes: 'F4/8, G4/8, F4/8, E4/8, D4/8, C4/8' }] };
+          const uneven = render(options);
+          // Rests under an alternate line still need individually aligned measures.
+          source.continuous = { compressRests: true };
+          const rests = { voices: [{ notes: ['hr', 'qr'].map((duration) => ({ keys: ['b/4'], duration })) }] };
+          source.staves[0].measures = [rests, rests, rests, rests];
+          const resting = render(options);
+          return { control, wide, split, pages, restored, invalid, uneven, resting };
+        });
+        const { control, wide, split, pages, restored } = result;
+        assert.deepEqual(wide.ranges, [[2, 3]]);
+        assert.deepEqual(wide.noteCounts, [12]);
+        assert.deepEqual(split.ranges, [
+          [2, 2],
+          [3, 3],
+        ]);
+        assert.deepEqual(split.noteCounts, [6, 6]);
+        assert.deepEqual(pages.ranges, split.ranges);
+        assert.deepEqual(pages.noteCounts, split.noteCounts);
+        assert.deepEqual(wide, restored);
+        assert.ok(result.uneven.aligned && Math.abs(result.uneven.widths[0] - result.uneven.widths[1]) > 1);
+        assert.ok(result.resting.aligned && result.resting.exported);
+        assert.deepEqual(result.resting.alternate, wide.alternate);
+        assert.deepEqual(result.resting.noteCounts, [12]);
+        for (const view of [wide, split, pages]) {
+          assert.ok(view.aligned && view.exported);
+          assert.deepEqual(view.diagnostics, []);
+          assert.deepEqual(view.labels, ['Ossia']);
+          assert.deepEqual(view.main, control.main);
+          assert.deepEqual(
+            view.alternate,
+            [2, 3].flatMap((m) => Array.from({ length: 6 }, (_, i) => [m, 'alternate-' + m + '-' + (i + 1)]))
+          );
+        }
+        assert.deepEqual(result.invalid, [true, true, true]);
+      }
+    );
     await t.test('structured chords and rhythmic tab retain written dots in independent parts', async () => {
       const samples = await page.evaluate(() => {
         const keys = ['c/4', 'e/4'];

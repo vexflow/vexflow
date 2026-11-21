@@ -33,6 +33,7 @@ export * from './demo_petzold_tests';
 export * from './dot_tests';
 export * from './easyscore_tests';
 export * from './factory_tests';
+export * from './figuredbass_tests';
 export * from './font_tests';
 export * from './formatter_tests';
 export * from './fraction_tests';

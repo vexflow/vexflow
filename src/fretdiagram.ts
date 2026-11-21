@@ -1,12 +1,15 @@
 // A standalone chord frame. Strings run from the lowest (left) to the highest (right).
 import { BoundingBox } from './boundingbox';
 import { Element } from './element';
+import { RenderContext } from './rendercontext';
 import { Category } from './typeguard';
 import { RuntimeError } from './util';
 
 /** Frets are absolute; 0 = open, 'x' = muted. A barre names one-based string numbers. */
 export interface FretDiagramSpec {
   frets: readonly (number | 'x')[];
+  /** Left-hand fingers 1–4, low string first. Null or an omitted entry leaves the dot plain. */
+  fingerings?: readonly (number | null | undefined)[];
   firstFret?: number;
   rows?: number;
   barre?: { fret: number; from: number; to: number };
@@ -19,6 +22,7 @@ export class FretDiagram extends Element {
   }
 
   private readonly frets: readonly (number | 'x')[];
+  private fingerings: NonNullable<FretDiagramSpec['fingerings']> = [];
   private readonly first: number;
   private readonly rows: number;
   private readonly barre?: FretDiagramSpec['barre'];
@@ -48,11 +52,37 @@ export class FretDiagram extends Element {
       )
         throw new RuntimeError('BadArguments', 'Barre outside chord frame.');
     }
+    this.setFingerings(spec.fingerings);
+  }
+
+  /** Replace the finger assignments for this chord. Passing no assignments clears all labels. */
+  setFingerings(fingerings: NonNullable<FretDiagramSpec['fingerings']> = []): this {
+    if (
+      fingerings.length > this.frets.length ||
+      fingerings.some((finger, i) => {
+        if (finger == null) return false;
+        return !Number.isInteger(finger) || finger < 1 || finger > 4 || this.frets[i] === 0 || this.frets[i] === 'x';
+      })
+    )
+      throw new RuntimeError('BadArguments', 'Assign fingers 1–4 to stopped strings only.');
+    this.fingerings = [...fingerings];
+    return this;
   }
 
   /** The top-left position includes the open-string marks and starting fret label. */
   override getBoundingBox(): BoundingBox {
     return new BoundingBox(this.getX(), this.getY(), 28 + (this.frets.length - 1) * 9, 17 + this.rows * 11);
+  }
+
+  /** Paint the digit over the dot and any barre that passes through it. */
+  private drawFinger(ctx: RenderContext, finger: number, x: number, y: number): void {
+    ctx.save();
+    ctx.setFont(this.fontInfo.family, '7.5px', 'bold');
+    ctx.setFillStyle('white');
+    const text = String(finger);
+    // A digit's cap height is about five pixels at this fixed marker size.
+    ctx.fillText(text, x - ctx.measureText(text).width / 2, y + 2.5);
+    ctx.restore();
   }
 
   override draw(): void {
@@ -69,9 +99,12 @@ export class FretDiagram extends Element {
     };
     ctx.save();
     const group = ctx.openGroup('fret-diagram', this.getAttribute('id'));
+    const strings = this.frets.map((fret, i) =>
+      this.fingerings[i] ? `${fret} (finger ${this.fingerings[i]})` : String(fret)
+    );
     group?.setAttribute(
       'aria-label',
-      'Chord frame, low to high: ' + this.frets.join(', ') + (this.barre ? ', barre at fret ' + this.barre.fret : '')
+      'Chord frame, low to high: ' + strings.join(', ') + (this.barre ? ', barre at fret ' + this.barre.fret : '')
     );
     if (this.first > 1) {
       ctx.setFont(this.fontInfo);
@@ -89,7 +122,8 @@ export class FretDiagram extends Element {
         line(x + 2.5, top - 8, x - 2.5, top - 3);
       } else {
         ctx.beginPath();
-        ctx.arc(x, fret ? fretY(fret) : top - 5.5, fret ? 3 : 2.5, 0, 2 * Math.PI, false);
+        const radius = this.fingerings[i] ? 4 : 3;
+        ctx.arc(x, fret ? fretY(fret) : top - 5.5, fret ? radius : 2.5, 0, 2 * Math.PI, false);
         if (fret) ctx.fill();
         else ctx.stroke();
       }
@@ -99,6 +133,10 @@ export class FretDiagram extends Element {
       ctx.setLineWidth(5);
       line(right - (from - 1) * 9, fretY(fret), right - (to - 1) * 9, fretY(fret));
     }
+    this.fingerings.forEach((finger, i) => {
+      const fret = this.frets[i];
+      if (finger && typeof fret === 'number') this.drawFinger(ctx, finger, left + i * 9, fretY(fret));
+    });
     ctx.closeGroup();
     ctx.restore();
     this.setRendered();

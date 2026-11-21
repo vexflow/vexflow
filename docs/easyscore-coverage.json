@@ -35,6 +35,7 @@
     ],
     "relationships": [
       "curve",
+      "figuredbass",
       "pedalmarking",
       "stavehairpin",
       "staveline",
