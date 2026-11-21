@@ -203,6 +203,11 @@ test('standalone gallery runs with local fonts/scripts and preserves QUnit filte
         assert.equal(await page.$eval('#events', (s) => s.value), 'v6-0');
       } else if (piece === 'electric' || piece === 'drums') {
         if (piece === 'electric') {
+          // The selected bend lists several techniques in the event menu.
+          const viewport = page.viewport();
+          await page.setViewport({ ...viewport, width: 390 });
+          assert.ok(await page.$eval('#events', (menu) => menu.getBoundingClientRect().right <= window.innerWidth));
+          await page.setViewport(viewport);
           const marks = await page.$$eval('#score text', (texts) =>
             texts
               .filter((el) => ['T', 'full'].includes(el.textContent))

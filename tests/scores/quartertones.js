@@ -3,7 +3,7 @@
   const title = 'Narrow Steps';
   const credit = 'Example piece · Solo viola in 24 equal divisions of the octave';
   const intro =
-    'Read the motif twice. In the second phrase the signature raises D and lowers E by a quarter tone. The natural cancels the raised D. Parentheses remind the player of the lowered E.';
+    'Swell from silence at the circled tip of the opening hairpin. In the second phrase the signature raises D and lowers E by a quarter tone. The natural cancels the raised D. A bracketed quarter-flat reminds the player to keep E lowered.';
   const focus = 'viola-3-2';
   const action = 'Find the cancellation';
   const motif = [
@@ -52,7 +52,10 @@
     return {
       spec: {
         staves: [{ id: 'Viola', clef: 'alto', time: '5/8', measures }],
-        continuous: { boundaries: [{ measure: 4, breakBefore: 'force' }] },
+        continuous: {
+          boundaries: [{ measure: 4, breakBefore: 'force' }],
+          spans: [{ id: 'opening-swell', kind: 'crescendo', from: 'viola-0-0', to: 'viola-0-3', niente: true }],
+        },
       },
       decorate(c) {
         for (let m = 0; m < 6; m++) {
@@ -63,7 +66,7 @@
             const printed = state.sign(key, sign, courtesy);
             if (printed) {
               const mark = score.make.accidental({ type: printed });
-              c.getNote('viola-' + m + '-' + i).addModifier(courtesy ? mark.setAsCautionary() : mark);
+              c.getNote('viola-' + m + '-' + i).addModifier(courtesy ? mark.setAsCautionary('brackets') : mark);
             }
           });
           // Repeat the two-sign signature at each signed bar so it survives any mobile line break.
