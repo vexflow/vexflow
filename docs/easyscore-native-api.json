@@ -10,7 +10,8 @@
       "setNote(note: Note): this",
       "setAsCautionary(enclosure: 'parentheses' | 'brackets' = 'parentheses'): this",
       "isCautionary(): boolean",
-      "getInkBounds()",
+      "getInkBounds(): BoundingBox",
+      "getBoundingBox(): BoundingBox",
       "draw(): void"
     ]
   },

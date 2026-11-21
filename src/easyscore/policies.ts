@@ -1,5 +1,6 @@
 // Opt-in accidental generation preserves written pitches and explicit native decorations.
 import { Accidental } from '../accidental';
+import { automaticAccidentals } from '../automaticaccidentals';
 import type { EasyScore } from '../easyscore';
 import { Fraction } from '../fraction';
 import { GraceNoteGroup } from '../gracenotegroup';
@@ -105,6 +106,7 @@ export function applyCompositionAccidentals(
         }
         if (!explicit.length && (previous !== pitch || (simultaneous.get(id)?.size ?? 0) > 1)) {
           const mark = score.make.accidental({ type: accidental });
+          automaticAccidentals.add(mark);
           score.attach(note, mark, index);
           placed?.add(mark);
         }

@@ -561,7 +561,7 @@ Attach `score.make.ornament('tr', { auxiliaryPitch: 'bb/4' })` to the principal 
 ### Accidental policy
 
 The default is `literal`: existing EasyScore accidental behavior stays unchanged.
-`key-aware` compares literal written pitches against the staff key. `F4` is always F natural; a G signature does not turn it into F sharp.
+`key-aware` compares literal written pitches against the staff key. `F4` is always F natural; a G signature does not turn it into F sharp. At a simultaneous unison, two voices sharing the same head print one automatic sign. A separated head keeps its own sign, and a separately rendered voice retains its written accidental.
 
 The opt-in policy:
 
