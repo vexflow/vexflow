@@ -9,6 +9,7 @@ import { Curve } from './curve';
 import { Dot } from './dot';
 import { Element } from './element';
 import { FiguredBass } from './figuredbass';
+import { FluteFingering } from './flutefingering';
 import { GraceNote } from './gracenote';
 import { GraceNoteGroup } from './gracenotegroup';
 import { HarpPedalDiagram } from './harppedaldiagram';
@@ -137,7 +138,12 @@ export function measureEngraving(element: Element, options: GeometryOptions = {}
         const curve = owner as Curve;
         shape.parts.push(inflate(curve.getBoundingBox(), (curve.getStyle().lineWidth ?? 1) / 2));
         shape.anchors = curve.getAnchors();
-      } else if (kind === Annotation || kind === AccordionRegister || kind === HarpPedalDiagram) {
+      } else if (
+        kind === FluteFingering ||
+        kind === Annotation ||
+        kind === AccordionRegister ||
+        kind === HarpPedalDiagram
+      ) {
         const mark = owner as Annotation;
         const { x } = mark.computeX();
         const { y } = mark.computeY();
