@@ -2,7 +2,9 @@
 // MIT License
 // Public notation, rendering, and layout exports.
 
+// Public notation classes, score construction, and renderer APIs.
 export * from './accidental';
+export * from './accordionregister';
 export * from './alternatingtremolo';
 export * from './annotation';
 export * from './articulation';
