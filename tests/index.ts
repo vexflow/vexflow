@@ -68,6 +68,7 @@ export * from './stavetie_tests';
 export * from './stringnumber_tests';
 export * from './strokes_tests';
 export * from './style_tests';
+export * from './svgcontext_tests';
 export * from './tabnote_tests';
 export * from './tabslide_tests';
 export * from './tabstave_tests';

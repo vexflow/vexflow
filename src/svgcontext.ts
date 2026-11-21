@@ -46,6 +46,17 @@ const ATTRIBUTES_TO_IGNORE: Record<string /* element type */, Record<string, boo
   },
 };
 
+/** Return true for attribute names that can install script or raw CSS on a live SVG element. */
+function isUnsafeAttributeName(attributeName: string): boolean {
+  const normalizedName = attributeName.toLowerCase();
+  return (
+    normalizedName.startsWith('on') ||
+    normalizedName === 'style' ||
+    normalizedName === 'href' ||
+    normalizedName.endsWith(':href')
+  );
+}
+
 /** Create the SVG in the SVG namespace. */
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -330,10 +341,11 @@ export class SVGContext extends RenderContext {
 
   // ### Drawing helper methods:
 
+  /** Apply owned presentation attributes while excluding script-capable names. */
   applyAttributes(element: SVGElement, attributes: Attributes): SVGElement {
     const attrNamesToIgnore = ATTRIBUTES_TO_IGNORE[element.nodeName];
-    for (const attrName in attributes) {
-      if (attrNamesToIgnore && attrNamesToIgnore[attrName]) {
+    for (const attrName of Object.keys(attributes)) {
+      if (isUnsafeAttributeName(attrName) || (attrNamesToIgnore && attrNamesToIgnore[attrName])) {
         continue;
       }
       if (
@@ -521,7 +533,7 @@ export class SVGContext extends RenderContext {
     // A CSS drop-shadow filter blur looks different than a canvas shadowBlur
     // of the same radius, so we scale the drop-shadow radius here to make it
     // look close to the canvas shadow.
-    return `filter: drop-shadow(0 0 ${(this.attributes.shadowBlur as number) / 1.5}px ${this.attributes.shadowColor})`;
+    return `drop-shadow(0 0 ${(this.attributes.shadowBlur as number) / 1.5}px ${this.attributes.shadowColor})`;
   }
 
   fill(attributes?: Attributes): this {
@@ -532,7 +544,7 @@ export class SVGContext extends RenderContext {
 
     attributes.d = this.path;
     if ((this.attributes.shadowBlur as number) > 0) {
-      attributes.style = this.getShadowStyle();
+      path.style.filter = this.getShadowStyle();
     }
 
     this.applyAttributes(path, attributes);
@@ -548,7 +560,7 @@ export class SVGContext extends RenderContext {
       d: this.path,
     };
     if ((this.attributes.shadowBlur as number) > 0) {
-      attributes.style = this.getShadowStyle();
+      path.style.filter = this.getShadowStyle();
     }
 
     this.applyAttributes(path, attributes);
