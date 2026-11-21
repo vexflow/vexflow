@@ -21,6 +21,7 @@ export * from './element';
 export * from './engravinggeometry';
 export * from './engravingprofile';
 export * from './factory';
+export * from './figuredbass';
 export * from './font';
 export * from './fretdiagram';
 export * from './instrumentprofile';

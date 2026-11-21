@@ -7,6 +7,7 @@ import { BoundingBox, Bounds } from './boundingbox';
 import { Curve } from './curve';
 import { Dot } from './dot';
 import { Element } from './element';
+import { FiguredBass } from './figuredbass';
 import { GraceNote } from './gracenote';
 import { GraceNoteGroup } from './gracenotegroup';
 import { Ornament } from './ornament';
@@ -108,6 +109,8 @@ export function measureEngraving(element: Element, options: GeometryOptions = {}
         const note = owner as StaveNote;
         Object.assign(shape, noteShape(note));
         if (note.renderOptions.draw !== false) children(note.getModifiers());
+      } else if (kind === FiguredBass) {
+        shape.parts.push(...(owner as FiguredBass).getInkParts());
       } else if (kind === GraceNoteGroup) children((owner as GraceNoteGroup).getLayoutElements());
       else if (kind === Articulation) {
         const box = (owner as Articulation).getInkBounds();
