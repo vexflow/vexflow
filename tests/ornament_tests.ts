@@ -13,6 +13,7 @@ import { Beam } from '../src/beam';
 import { Dot } from '../src/dot';
 import { Element } from '../src/element';
 import { Factory } from '../src/factory';
+import { FluteFingering, FluteTrillKey } from '../src/flutefingering';
 import { Formatter } from '../src/formatter';
 import { Glyphs } from '../src/glyphs';
 import { Ornament } from '../src/ornament';
@@ -26,6 +27,7 @@ const OrnamentTests = {
     QUnit.module('Ornament');
     const run = VexFlowTests.runTests;
     run('Parenthesized editorial turn', editorialTurn);
+    run('Moving flute trill key', fluteTrillKey);
     run('Pitched trill partners', pitchedTrills);
     run('Changing a pitched trill partner', changeTrillPartner);
     run('Ornaments', drawOrnaments);
@@ -38,6 +40,45 @@ const OrnamentTests = {
     run('Jazz Ornaments', jazzOrnaments);
   },
 };
+
+/** Check the two directions of key movement and the same attached diagram with the overlay removed. */
+function fluteTrillKey(options: TestOptions): void {
+  const { assert } = options;
+  const factory = VexFlowTests.makeFactory(options, 400, 215);
+  const stave = factory.Stave({ x: 10, y: 94, width: 380 }).addClef('treble');
+  const pattern = { L1: 'closed', L2: 'closed', R1: 'closed' } as const;
+  const notes = [1, 0.75].map((scale) => {
+    const note = factory.StaveNote({ keys: ['e/4'], duration: 'h' });
+    note.addModifier(new FluteFingering(pattern, { scale }), 0);
+    return note;
+  });
+  const voice = factory.Voice({ time: '4/4' }).addTickables(notes);
+  factory.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+  for (const note of notes) {
+    const diagram = note.getModifiers()[0] as FluteFingering;
+    const base = diagram.getKeyStates();
+    const box = diagram.getBoundingBox();
+    const description = diagram.getDescription();
+    const moving = { key: 'R2', start: 'open', alternate: 'closed' } as const;
+    diagram.setTrillKey(moving);
+    assert.deepEqual(diagram.getTrillKey(), moving, 'Alternating key and both states retained');
+    assert.strictEqual(diagram.getKeyStates(), base, 'All six base positions retained');
+    assert.deepEqual(diagram.getBoundingBox(), box, 'Hatching fits in the key outline');
+    assert.strictEqual(diagram.getNote(), note, 'The original score anchor is retained');
+    assert.ok(diagram.getDescription().includes('Hatched R2 trills from open to closed and back.'));
+    assert.throws(() => diagram.setTrillKey({ ...moving, key: 'R4' } as unknown as FluteTrillKey), /Unknown flute key/);
+    assert.throws(() => diagram.setTrillKey({ ...moving, key: 'L1' }), /must start closed/);
+    assert.throws(() => diagram.setTrillKey({ ...moving, alternate: 'open' }), /must alternate to closed/);
+    assert.deepEqual(diagram.getTrillKey(), moving, 'Invalid requests preserve the prior overlay');
+    diagram.setTrillKey({ key: 'L1', start: 'closed', alternate: 'open' });
+    assert.ok(diagram.getDescription().includes('Hatched L1 trills from closed to open and back.'));
+    diagram.clearTrillKey();
+    assert.strictEqual(diagram.getTrillKey(), undefined);
+    assert.equal(diagram.getDescription(), description, 'Clearing restores the base fingering');
+    diagram.setTrillKey(moving);
+  }
+  factory.draw();
+}
 
 function drawOrnaments(options: TestOptions, contextBuilder: ContextBuilder): void {
   options.assert.expect(0);

@@ -104,3 +104,18 @@ Nested tuplets and detach operations are included.
 A strict voice still rejects too many ticks at insertion time.
 It cannot infer a tuplet that has not been created yet.
 Reformat after editing durations.
+
+## Moving flute trill keys
+
+Attach a six-key fingering to the trill entrance. Mark the moving key with its starting and alternate states.
+
+```js
+const fingering = new FluteFingering({ L1: 'closed', L2: 'closed', R1: 'closed' });
+entrance.addModifier(fingering, 0);
+fingering.setTrillKey({ key: 'R2', start: 'open', alternate: 'closed' });
+```
+
+Two horizontal strokes inside R2 show that the key alternates. The other five keep their base symbols.
+The starting state must match the base fingering. A closed key can also trill to open.
+Call `clearTrillKey()` to restore the base diagram. SVG exposes the convention in the diagram’s accessible label.
+Canvas applications can use the same wording from `getDescription()`.

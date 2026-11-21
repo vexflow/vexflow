@@ -82,7 +82,7 @@ export class Annotation extends Modifier {
     for (let i = 0; i < annotations.length; ++i) {
       const annotation = annotations[i];
       // Text height is expressed in fractional stave spaces.
-      const textLines = (2 + Font.convertSizeToPixelValue(annotation.fontInfo.size)) / Tables.STAVE_LINE_DISTANCE;
+      const textLines = (2 + annotation.getLayoutHeight()) / Tables.STAVE_LINE_DISTANCE;
       let verticalSpaceNeeded = textLines;
 
       const note = annotation.checkAttachedNote();
@@ -273,9 +273,14 @@ export class Annotation extends Modifier {
     return { x, textWidth };
   }
 
+  /** Vertical space reserved for this annotation, in renderer pixels. */
+  protected getLayoutHeight(): number {
+    return Font.convertSizeToPixelValue(this.fontInfo.size);
+  }
+
   /** Compute the text baseline after formatting. Subclasses may override just this axis. */
   computeY(): { y: number; textHeight: number } {
-    const textHeight = Font.convertSizeToPixelValue(this.fontInfo.size);
+    const textHeight = this.getLayoutHeight();
     const baseline = this.textBaseline ?? this.layoutBaseline;
     if (baseline !== undefined) return { y: baseline, textHeight };
     const note = this.checkAttachedNote();
