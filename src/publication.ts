@@ -5,6 +5,7 @@ import { Factory } from './factory';
 import { Metrics } from './metrics';
 import { Note } from './note';
 import { paginate } from './pagebreaks';
+import { CueBuilder, CueTransposition, writtenCue } from './publicationcue';
 import {
   checkView,
   insetStaff,
@@ -19,6 +20,7 @@ import { SVGContext } from './svgcontext';
 import type { SVGFont } from './svgexport';
 import { Tables } from './tables';
 
+export type { CueTransposition } from './publicationcue';
 export type { PublicationRegion, PublicationView } from './publicationview';
 
 /** Paper, staff height (four spaces), margins, and inter-system gaps are measured in millimeters. */
@@ -85,10 +87,15 @@ function dimensions(o: PublicationOptions) {
 type Size = ReturnType<typeof dimensions>;
 
 /** The staging SVG must participate in browser font measurement, including for detached destinations. */
-function compose(host: HTMLElement, spec: EasyScoreCompositionSpec, hooks: readonly CommitHook[] = []) {
+function compose(
+  host: HTMLElement,
+  spec: EasyScoreCompositionSpec,
+  hooks: readonly CommitHook[] = [],
+  transpose?: CueTransposition
+) {
   const ctx = new SVGContext(host);
   const factory = new Factory({ renderer: { elementId: null, width: 1, height: 1 } }).setContext(ctx);
-  const easyScore = factory.EasyScore();
+  const easyScore = factory.EasyScore(transpose ? { builder: new CueBuilder(factory, transpose) } : {});
   for (const hook of hooks) easyScore.addCommitHook(hook);
   const score = easyScore.compose(spec);
   return { ctx, factory, score };
@@ -280,21 +287,20 @@ function addInsetFragment(
   const lastHost = hosts[hosts.length - 1];
   const width = lastHost.getX() + lastHost.getWidth() - hosts[0].getX();
   const gap = hosts.length > 1 ? hosts[1].getX() - hosts[0].getX() - hosts[0].getWidth() : 0;
+  const quoted = insetStaff(
+    spec.staves.find((s) => s.id === region.staff)!,
+    first,
+    last
+  );
   const insetSpec: EasyScoreCompositionSpec = {
-    staves: [
-      insetStaff(
-        spec.staves.find((s) => s.id === region.staff)!,
-        first,
-        last
-      ),
-    ],
-    accidentals: spec.accidentals,
-    graceAccidentals: spec.graceAccidentals,
+    staves: [region.transpose ? writtenCue(quoted, region.transpose) : quoted],
+    accidentals: region.transpose ? 'key-aware' : spec.accidentals,
+    graceAccidentals: region.transpose ? 'ordered' : spec.graceAccidentals,
     sheet: { x: 0, y: 0, width: width / scale, measurePadding: 4, measureGap: Math.max(0, gap) / scale },
     // Keep the existing single-bar signature and spacing policy. A longer fragment shares one signature prefix.
     ...(hosts.length === 1 ? { continuous: {} } : {}),
   };
-  const inset = compose(host, insetSpec, hooks);
+  const inset = compose(host, insetSpec, hooks, region.transpose);
   if (hosts.length > 1) inset.score.sheet.alignToMeasures(hosts.map((s) => s.getWidth() / scale));
   inset.factory.draw();
   row.references.push({
