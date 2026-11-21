@@ -3,6 +3,8 @@
 The guide lives in [`guide/`](../guide/) and publishes to <https://vexflow.com/guide/>.
 It includes Quickstart, EasyScore, native API lessons, and an interactive playground.
 
+Explore the [5.7 engraving lesson](https://vexflow.com/guide/#lesson/engraving-570) and edit its measured feathered beam. The [release highlights](../changelog/CHANGELOG.md#570) link to the API guides for all ten notation changes.
+
 ## Develop
 
 ```sh

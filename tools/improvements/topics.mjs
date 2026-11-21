@@ -3,6 +3,28 @@
 export const topics = [
   [
     'Features',
+    'New in 5.7.0',
+    [
+      [
+        'Lead sheets and divided piano chords',
+        'Long harmony labels reserve room across barlines. A transposed slash chord preserves the written interval of its root and bass. Beamed piano chords can share one stem between staves.',
+        'docs/chord-symbols.md',
+      ],
+      [
+        'Beams, tremolos and slides',
+        'Ordinary beams and straight glissandi can span a system break. Feathered groups retain their written rhythm as the beam spacing opens. Alternating tremolos can join written whole notes or span two piano staves.',
+        'docs/vf6/m6.md',
+        'example-feathered-group',
+      ],
+      [
+        'Expression for voice and guitar',
+        'A niente circle follows the closed end of its wedge. Two syllables on one note share an undertie. A bent guitar string can hold across a tie and release on a later attack. The cycle tracker links the reviewed score comparisons.',
+        'issues/374',
+      ],
+    ],
+  ],
+  [
+    'Features',
     'New in 5.6.1',
     [
       [
