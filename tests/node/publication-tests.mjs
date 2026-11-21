@@ -7,6 +7,7 @@ import puppeteer from 'puppeteer';
 
 import { tabEndingStudy } from '../engraving/continuous-studies.mjs';
 import {
+  condensedFlutesStudy,
   leadSheetStudy,
   ossiaRangeStudy,
   publicationStudy,
@@ -36,6 +37,89 @@ test('publication views, pagination and portable printing', async (t) => {
       );
     }
     await page.evaluate(() => VexFlow.setFonts('Bravura', 'Academico'));
+    await t.test('two flute players retain their individual attacks in a condensed conductor passage', async () => {
+      await page.addScriptTag({ content: 'window.flutesStudy=' + condensedFlutesStudy });
+      const views = await page.evaluate(() => {
+        const { source, condense } = flutesStudy();
+        const book = new VexFlow.Publication(source);
+        const target = document.querySelector('main');
+        const render = (options) => {
+          const { pages, diagnostics } = book.render(target, options);
+          const roots = pages.map((p) => p.svg);
+          const metadata = roots.map((s) => JSON.parse(s.querySelector('metadata').textContent));
+          return {
+            notes: roots.flatMap((s) =>
+              [...s.querySelectorAll('.vf-stavenote')].map((n) => ({
+                id: n.dataset.vfId,
+                heads: n.querySelectorAll('.vf-notehead').length,
+                stem: n.querySelector('.vf-stem path')?.getAttribute('d'),
+              }))
+            ),
+            labels: roots.flatMap((s) =>
+              [...s.querySelectorAll('text')].map((n) => n.textContent).filter((s) => ['1.', '2.', 'a2'].includes(s))
+            ),
+            events: metadata.flatMap((m) => m.events),
+            measures: metadata.flatMap((m) => m.measures),
+            systems: pages.flatMap((p) => p.systems.map((s) => s.measures)),
+            staves: metadata[0].staves,
+            diagnostics,
+          };
+        };
+        return {
+          wide: render({ condense }),
+          narrow: render({ condense, paper: { width: 77, height: 190 } }),
+          passage: render({ condense: { ...condense, measures: [2, 3] } }),
+          first: render({ staves: ['fl1'] }),
+          second: render({ staves: ['fl2'] }),
+          restored: render({ condense }),
+        };
+      });
+      const { wide, narrow, passage, first, second, restored } = views;
+      assert.deepEqual(wide, restored);
+      assert.deepEqual(wide.staves, ['fl1']);
+      assert.deepEqual(wide.systems, [[1, 2, 3]]);
+      assert.ok(narrow.systems.length > 1);
+      for (const view of [wide, narrow]) {
+        assert.deepEqual(view.diagnostics, []);
+        assert.deepEqual(view.labels, ['1.', 'a2']);
+        assert.deepEqual(
+          view.events.filter((e) => e.staff === 'fl1'),
+          first.events
+        );
+        assert.deepEqual(
+          view.events.filter((e) => e.staff === 'fl2'),
+          second.events
+        );
+        assert.deepEqual(
+          view.notes.map((n) => n.id).sort(),
+          [
+            'vf-f1m1n1',
+            'vf-f1m1n2',
+            'vf-f1m2n1',
+            'vf-f1m2n2',
+            'vf-f1m3n1',
+            'vf-f1m3n2',
+            'vf-f2m3n1',
+            'vf-f2m3n2',
+          ].sort()
+        );
+        assert.ok(view.notes.every((n) => n.heads === 1 && n.stem));
+        for (const note of view.notes.filter((n) => n.id.includes('m3'))) {
+          const coords = note.stem.match(/-?[\d.]+/g).map(Number);
+          assert.equal(Math.sign(coords[3] - coords[1]), note.id.includes('f1m') ? -1 : 1);
+        }
+      }
+      assert.deepEqual(
+        second.events.filter((e) => e.measure === 1).map((e) => e.rest),
+        [true]
+      );
+      assert.deepEqual(passage.measures, [2, 3]);
+      assert.deepEqual(passage.labels, ['a2']);
+      assert.deepEqual(
+        passage.events,
+        wide.events.filter((e) => e.measure >= 2)
+      );
+    });
     for (const paper of ['A4', 'Letter'])
       for (const part of [false, true]) {
         await t.test((part ? 'cello' : 'score') + ' on ' + paper, async () => {

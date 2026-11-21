@@ -196,3 +196,25 @@ export function transposedCueStudy() {
     },
   };
 }
+
+/** Two flute desks pass from solo to unison and then divide over the same three bars. */
+export function condensedFlutesStudy() {
+  const pitches = [
+    [['g/4', 'a/4'], ['b/4', 'c/5'], ['d/5', 'c/5']],
+    [[], ['b/4', 'c/5'], ['b/4', 'a/4']],
+  ];
+  const staves = pitches.map((bars, player) => ({
+    id: 'fl' + (player + 1),
+    name: 'Flute ' + (player + 1),
+    time: '2/4',
+    measures: bars.map((keys, bar) => ({
+      voices: [{
+        notes: (keys.length ? keys : ['b/4']).map((key, attack) => ({
+          id: 'f' + (player + 1) + 'm' + (bar + 1) + 'n' + (attack + 1),
+          note: { keys: [key], duration: keys.length ? 'q' : 'hr' },
+        })),
+      }],
+    })),
+  }));
+  return { source: { staves }, condense: { players: ['fl1', 'fl2'], name: 'Flutes' } };
+}
