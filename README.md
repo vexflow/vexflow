@@ -2,7 +2,7 @@
 
 VexFlow is an open-source library for rendering sheet music. It is written in TypeScript, and outputs scores to HTML Canvas and SVG. It works in browsers and in Node.js projects (e.g., a command line script to save a score as a PDF).
 
-Try a [feathered beam in the guide](https://vexflow.com/guide/#playground/feathered-group) or read the [5.7.0 release highlights](changelog/CHANGELOG.md#570).
+Try a [feathered beam in the guide](https://vexflow.com/guide/#playground/feathered-group) or read the [5.8.0 release highlights](changelog/CHANGELOG.md#580).
 
 ## Quick Start
 
@@ -23,7 +23,7 @@ For more informa
   </head>
   <body>
     <div id="output"></div>
-    <script src="https://cdn.jsdelivr.net/npm/vexflow@5.7.0/build/cjs/vexflow.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vexflow@5.8.0/build/cjs/vexflow.js"></script>
     <script>
       // YOUR CODE GOES HERE
     </script>

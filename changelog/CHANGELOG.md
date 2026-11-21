@@ -1,3 +1,11 @@
+# 5.8.0
+
+- **Rhythm and parts.** Staves can follow independent meters across the same musical span. Tuplets can cross measure boundaries. Conductor scores can condense two players onto one stave, and quoted cues can transpose into the receiving instrument’s written key. Ossias can span several measures. [Continuous scores](../docs/vf6/m4.md) · [Parts and publication](../docs/vf6/m5.md)
+- **Expression.** Engrave half-dashed slurs, wavy glissandi, French-style beams, flared hairpins, timed niente markings, parenthesized turns and pitched trills. Dashed ties and laissez vibrer ties attach to individual chord heads. [EasyScore](../docs/easyscore.md)
+- **Notation.** Add dashed, dotted and double-heavy barlines, double-octave clefs, bracketed editorial accidentals, and shared accidentals at coincident unisons. Align stanza numbers and give figured-bass rows independent continuation lines. Guitar chord frames can show left-hand fingering, and tablature can place fingering and string numbers beside the fret. [Text and lyrics](../docs/text-and-lyrics.md)
+- **Rendering safeguards.** SVG rendering filters script-capable attributes. Dashed-line drawing and beam slope fitting validate their inputs and bound the work they perform. [SVG attributes](https://github.com/vexflow/vexflow/pull/405) · [Dashed lines](https://github.com/vexflow/vexflow/pull/440) · [Beam slopes](https://github.com/vexflow/vexflow/pull/441)
+- Explore the [user guide](https://vexflow.com/guide/), [test gallery with five refreshed demos](https://vexflow.com/tests/) and [PDF editions](https://vexflow.com/pdfs/). See the [5.8.0 quality report](https://vexflow.com/reports/5.8.0/) and [illustrated project history](https://vexflow.com/reports/ai2026/).
+
 # 5.7.0
 
 - **Lead sheets and piano.** Chord symbols reserve space across barlines. Structured harmony transposes both the root and slash bass while preserving the quality. A beamed piano chord can split its heads between staves and share a single stem. [Harmony](../docs/chord-symbols.md#transposing-harmony) · [Sheet layout](../docs/sheets-and-themes.md)
