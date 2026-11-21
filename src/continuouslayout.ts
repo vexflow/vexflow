@@ -58,6 +58,14 @@ export interface ContinuousBoundary {
 export interface ContinuousOptions {
   mode?: 'balanced' | 'greedy';
   boundaries?: readonly ContinuousBoundary[];
+  /** Ordered event IDs share one native duration ratio and a bracket that follows them across systems. */
+  tuplets?: readonly {
+    id: string;
+    members: readonly string[];
+    numNotes: number;
+    notesOccupied: number;
+    side?: 'above' | 'below';
+  }[];
   spans?: readonly ContinuousSpan[];
   hideEmptyStaves?: boolean;
   compressRests?: boolean;
@@ -322,7 +330,15 @@ export class ContinuousLayout {
       'tuplet',
       'palmMute',
     ];
-    for (const span of this.options.spans ?? []) {
+    const tuplets: ContinuousSpan[] = (this.options.tuplets ?? []).map(({ id, members, numNotes, side }) => ({
+      id,
+      kind: 'tuplet',
+      from: members[0],
+      to: members[members.length - 1],
+      text: String(numNotes),
+      side,
+    }));
+    for (const span of [...(this.options.spans ?? []), ...tuplets]) {
       const first = locations.get(score.getNote(span.from)),
         last = locations.get(score.getNote(span.to));
       if (

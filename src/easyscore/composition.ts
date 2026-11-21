@@ -21,7 +21,7 @@ import { StemmableNote } from '../stemmablenote';
 import { System, SystemOptions } from '../system';
 import { TabNoteStruct } from '../tabnote';
 import { Tickable } from '../tickable';
-import { TupletOptions } from '../tuplet';
+import { Tuplet, TupletOptions } from '../tuplet';
 import { RuntimeError } from '../util';
 import { Voice, VoiceTime } from '../voice';
 import { applyCompositionAccidentals, KeyChange } from './policies';
@@ -197,7 +197,8 @@ function buildVoice(
   score: EasyScore,
   spec: EasyScoreVoiceSpec,
   initial: Required<EasyScoreStaffState>,
-  display: boolean
+  display: boolean,
+  deferBeam = false
 ): BuiltVoice {
   return score.withDefaults({ clef: initial.clef, time: initial.time, stem: spec.stem ?? 'auto' }, () => {
     let state = { ...initial };
@@ -266,14 +267,68 @@ function buildVoice(
       if (!members.every((note): note is Note => note instanceof Note)) invalid('Tuplets require native notes.');
       score.make.tuplet({ notes: members, options: group.options });
     }
-    if (spec.autoBeam) {
-      if (!timed.every((note): note is StemmableNote => note instanceof StemmableNote))
-        invalid('Automatic beams require stemmable notes.');
-      score.set({ time: initial.time });
-      score.autoBeam(timed, typeof spec.autoBeam === 'boolean' ? {} : spec.autoBeam);
-    }
+    if (!deferBeam) autoBeamVoice(score, spec, timed, initial.time);
     return { notes, state, changes, assignments, generated };
   });
+}
+
+/** Beam the timed members after both measure-local and cross-measure ratios have been applied. */
+function autoBeamVoice(score: EasyScore, spec: EasyScoreVoiceSpec, timed: Tickable[], time: string): void {
+  if (!spec.autoBeam) return;
+  if (!timed.every((note): note is StemmableNote => note instanceof StemmableNote))
+    invalid('Automatic beams require stemmable notes.');
+  const options = typeof spec.autoBeam === 'boolean' ? {} : spec.autoBeam;
+  score.withDefaults({ time }, () => score.autoBeam(timed, options));
+}
+
+/** Build the unvoiced members of cross-measure tuplets before any strict measure counts its ticks. */
+function prepareTupletVoices(
+  score: EasyScore,
+  spec: EasyScoreCompositionSpec,
+  initial: Required<EasyScoreStaffState>[]
+) {
+  const groups = spec.continuous?.tuplets;
+  if (!groups?.length) return;
+  const locations = new Map<Tickable, { lane: Tickable[]; index: number; measure: number }>();
+  const prepared = spec.staves.map((staff, j) => {
+    let state = initial[j];
+    const lanes: Tickable[][] = [];
+    return staff.measures.map((measure, m) => {
+      if (!measure.voices.length) invalid('Every stave measure needs at least one voice.');
+      const start = measureState(measure, state);
+      const voices = measure.voices.map((voice, v) => {
+        const built = buildVoice(score, voice, start, v === 0, true);
+        const lane = (lanes[v] ??= []);
+        for (const tick of built.notes) {
+          if (tick.shouldIgnoreTicks()) continue;
+          locations.set(tick, { lane, index: lane.length, measure: m });
+          lane.push(tick);
+        }
+        return built;
+      });
+      state = voices[0].state;
+      return voices;
+    });
+  });
+  for (const { members, numNotes, notesOccupied } of groups) {
+    if (!members.length || ![numNotes, notesOccupied].every((n) => Number.isSafeInteger(n) && n > 0))
+      invalid('A continuous tuplet needs members and a positive integer ratio.');
+    const notes = members.map((id) => score.getNote(id));
+    let previous: ReturnType<typeof locations.get>;
+    for (const note of notes) {
+      const at = locations.get(note);
+      if (
+        !at ||
+        (previous &&
+          (at.lane !== previous.lane || at.index !== previous.index + 1 || at.measure > previous.measure + 1))
+      )
+        invalid('Continuous tuplet members must be consecutive timed notes in one voice, in score order.');
+      previous = at;
+    }
+    // The notes own the native timing group. ContinuousLayout draws its bracket once per visible fragment.
+    new Tuplet(notes, { numNotes, notesOccupied });
+  }
+  return prepared;
 }
 
 /** Inline changes must describe the same staff state at the same exact onset in every voice. */
@@ -391,7 +446,8 @@ function buildStaffMeasure(
   staff: EasyScoreStaveSpec,
   index: number,
   previous: Required<EasyScoreStaffState>,
-  tracking: { seen: Set<Tickable>; noteMeasures: Map<Note, number> }
+  tracking: { seen: Set<Tickable>; noteMeasures: Map<Note, number> },
+  prepared?: BuiltVoice[]
 ) {
   const assignments = new Map<Note, string>();
   const measure = staff.measures[index];
@@ -399,7 +455,18 @@ function buildStaffMeasure(
   const state = measureState(measure, previous);
   const span = measure.span ?? state.time;
   const ticks = ticksFor(span);
-  const built = measure.voices.map((voice, voiceIndex) => buildVoice(score, voice, state, voiceIndex === 0));
+  const built =
+    prepared ?? measure.voices.map((voice, voiceIndex) => buildVoice(score, voice, state, voiceIndex === 0));
+  if (prepared) {
+    prepared.forEach((voice, i) =>
+      autoBeamVoice(
+        score,
+        measure.voices[i],
+        voice.notes.filter((n) => !n.shouldIgnoreTicks()),
+        state.time
+      )
+    );
+  }
   const changes = stateChanges(built[0]);
   const signature = (items: ReturnType<typeof stateChanges>) =>
     JSON.stringify(items.map(({ at, state }) => [at.clone().simplify().toString(), state]));
@@ -486,6 +553,7 @@ export function compose(score: EasyScore, spec: EasyScoreCompositionSpec): EasyS
   if (
     nativeInputs.length &&
     (spec.accidentals === 'key-aware' ||
+      spec.continuous?.tuplets?.length ||
       spec.staves.some((stave) =>
         stave.measures.some((measure) => measure.voices.some((voice) => voice.autoBeam || voice.tuplets?.length))
       ))
@@ -525,12 +593,21 @@ export function compose(score: EasyScore, spec: EasyScoreCompositionSpec): EasyS
         ends: Required<EasyScoreStaffState>[][] = [];
       const placed = spec.continuous ? new Set<Accidental>() : undefined;
       const noteMeasures = new Map<Note, number>();
+      const prepared = prepareTupletVoices(score, spec, states);
       for (let index = 0; index < count; index++) {
         starts.push(spec.staves.map((staff, j) => measureState(staff.measures[index], states[j])));
         const system = result.sheet.addSystem(spec.system);
         result.systems.push(system);
         const parts = spec.staves.map((staff, staffIndex) => {
-          const part = buildStaffMeasure(score, spec, staff, index, states[staffIndex], { seen, noteMeasures });
+          const part = buildStaffMeasure(
+            score,
+            spec,
+            staff,
+            index,
+            states[staffIndex],
+            { seen, noteMeasures },
+            prepared?.[staffIndex][index]
+          );
           states[staffIndex] = part.state;
           system.addStave({
             stave: part.stave,

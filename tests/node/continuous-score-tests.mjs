@@ -1109,7 +1109,11 @@ test('a dashed lower-head tie keeps its stroke, pitch and endpoints when the sco
   const score = f.EasyScore().compose({
     sheet: { width: 430 },
     staves: [{ id: 'staff', time: '2/4', measures }],
-    continuous: { spans: [{ id: 'editorial', kind: 'tie', from: 'from', to: 'to', fromHead: 0, toHead: 0, side: 'below', dashed: true }] },
+    continuous: {
+      spans: [
+        { id: 'editorial', kind: 'tie', from: 'from', to: 'to', fromHead: 0, toHead: 0, side: 'below', dashed: true },
+      ],
+    },
   });
   const frame = (width, parts) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1117,8 +1121,11 @@ test('a dashed lower-head tie keeps its stroke, pitch and endpoints when the sco
     f.draw({ retain: true });
     const layout = score.sheet.getContinuousLayout();
     const segments = layout.fragments;
-    assert.deepEqual(segments.map(s => s.part), parts);
-    assert.ok(segments.every(s => s.dashed));
+    assert.deepEqual(
+      segments.map((s) => s.part),
+      parts
+    );
+    assert.ok(segments.every((s) => s.dashed));
     assert.equal(segments[0].y1, score.getNote('from').getYs()[0] + segments[0].space / 2);
     assert.equal(segments.at(-1).y2, score.getNote('to').getYs()[0] + segments.at(-1).space / 2);
     const strokes = [];
@@ -1126,10 +1133,110 @@ test('a dashed lower-head tie keeps its stroke, pitch and endpoints when the sco
     recorder.stroke = () => strokes.push(ctx.getLineDash());
     recorder.fill = () => assert.fail('a dashed arc must have open gaps');
     layout.draw(recorder);
-    assert.deepEqual(strokes, parts.map(() => [4, 3]));
+    assert.deepEqual(
+      strokes,
+      parts.map(() => [4, 3])
+    );
     return canvas.toBuffer();
   };
   const wide = frame(430, ['single']);
   frame(125, ['first', 'last']);
   assert.deepEqual(frame(430, ['single']), wide);
+});
+
+/** Six written eighths on beat four and the following downbeat. */
+function sextupletStudy() {
+  const member = (i) => ({
+    id: 't' + i,
+    note: { keys: [['g/4', 'a/4', 'b/4', 'c/5', 'b/4', 'a/4'][i]], duration: '8' },
+  });
+  return {
+    sheet: { width: 530, rowGap: 18 },
+    staves: [
+      {
+        id: 'flute',
+        time: '4/4',
+        measures: [
+          { voices: [{ notes: ['G4/q, A4/q, B4/q', ...[0, 1, 2].map(member)] }] },
+          {
+            voices: [
+              {
+                notes: [...[3, 4, 5].map(member), { id: 'next', note: { keys: ['g/4'], duration: 'q' } }, 'F4/q, G4/q'],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    continuous: {
+      tuplets: [{ id: 'six', members: [0, 1, 2, 3, 4, 5].map((i) => 't' + i), numNotes: 6, notesOccupied: 4 }],
+    },
+  };
+}
+
+test('one rhythmic sextuplet times both measures and reflows its own bracket', () => {
+  const source = sextupletStudy();
+  const { f, canvas, ctx } = factory();
+  const score = f.EasyScore().compose(source);
+  const layout = score.sheet.getContinuousLayout();
+  const notes = source.continuous.tuplets[0].members.map((id) => score.getNote(id));
+  const group = notes[0].getTuplet();
+  const quarter = VF.VexFlow.RESOLUTION / 4;
+  function draw(width, parts) {
+    const labels = [];
+    const drawing = f.getContext();
+    const text = drawing.fillText;
+    drawing.fillText = function (s, ...args) {
+      if (s === '6') labels.push(s);
+      return text.call(this, s, ...args);
+    };
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    try {
+      score.sheet.setWidth(width);
+      f.draw({ retain: true });
+    } finally {
+      drawing.fillText = text;
+    }
+    assert.deepEqual(labels, ['6']);
+    assert.deepEqual(
+      layout.fragments.map((f) => [f.id, f.part]),
+      parts.map((p) => ['six', p])
+    );
+    assert.deepEqual(layout.diagnostics, []);
+    assert.deepEqual(group.getNotes(), notes);
+    assert.ok(notes.every((n) => n.getTuplet() === group && n.getDuration() === '8'));
+    assert.ok(notes.every((n) => n.getTicks().equals(new VF.Fraction(quarter, 3))));
+    assert.ok(notes.reduce((sum, n) => sum.add(n.getTicks()), new VF.Fraction(0, 1)).equals(quarter * 2));
+    for (const [m, measures] of score.notes.entries()) {
+      const at = new VF.Fraction(0, 1);
+      for (const n of measures[0][0]) {
+        const i = notes.indexOf(n);
+        if (i >= 0) assert.ok(at.equals(new VF.Fraction((m === 0 ? 9 + i : i - 3) * quarter, 3)));
+        if (n === score.getNote('next')) assert.ok(at.equals(quarter));
+        at.add(n.getTicks());
+      }
+      assert.ok(at.equals(4 * quarter));
+    }
+    assert.equal(layout.fragments[0].x1, notes[0].getAbsoluteX());
+    assert.equal(layout.fragments.at(-1).x2, notes[5].getAbsoluteX() + notes[5].getGlyphWidth());
+    return { spans: structuredClone(layout.fragments), pixels: canvas.toBuffer() };
+  }
+  const wide = draw(530, ['single']);
+  draw(290, ['first', 'last']);
+  assert.deepEqual(draw(530, ['single']), wide);
+});
+
+test('rhythmic tuplet membership rejects gaps, reversed events, duplicate members and invalid ratios', () => {
+  for (const overrides of [
+    { members: ['t0', 't2'] },
+    { members: ['t3', 't2'] },
+    { members: ['t0', 't0'] },
+    { members: [] },
+    { notesOccupied: 0 },
+    { numNotes: 2.5 },
+  ]) {
+    const source = sextupletStudy();
+    Object.assign(source.continuous.tuplets[0], overrides);
+    assert.throws(() => factory().f.EasyScore().compose(source), /continuous tuplet/i);
+  }
 });

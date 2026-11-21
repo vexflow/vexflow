@@ -2972,6 +2972,7 @@
       "fields": [
         "mode?: 'balanced' | 'greedy';",
         "boundaries?: readonly ContinuousBoundary[];",
+        "tuplets?: readonly { id: string; members: readonly string[]; numNotes: number; notesOccupied: number; side?: 'above' | 'below'; }[];",
         "spans?: readonly ContinuousSpan[];",
         "hideEmptyStaves?: boolean;",
         "compressRests?: boolean;",
