@@ -4,7 +4,7 @@
 import { Element } from './element';
 import { ModifierContext } from './modifiercontext';
 import { Note } from './note';
-import { Category } from './typeguard';
+import { Category, isTabNote } from './typeguard';
 import { defined, RuntimeError } from './util';
 
 export enum ModifierPosition {
@@ -107,6 +107,20 @@ export class Modifier extends Element {
   /** Get note index, which is a specific note in a chord. */
   getIndex(): number | undefined {
     return this.index;
+  }
+
+  /** Vertical sort key for a selected pitched head or TAB fret. Higher positions sort first. */
+  protected getAttachedLine(): number {
+    const note = this.checkAttachedNote();
+    const index = this.checkIndex();
+    if (isTabNote(note)) {
+      const position = note.getPositions()[index];
+      if (!position) throw new RuntimeError('BadArguments', 'TAB modifier index must select a fret position.');
+      return -position.str;
+    }
+    const head = note.getKeyProps()[index];
+    if (!head) throw new RuntimeError('BadArguments', 'Modifier index must select a notehead.');
+    return head.line;
   }
 
   /** Check and get note index, which is a specific note in a chord. */

@@ -106,7 +106,7 @@ These named helpers preserve their Factory/native argument types and return the 
 | `make.dot()`, `make.parenthesis()`                  | Dot displacement and left/right parentheses.                                         |
 | `make.tremolo()`, `make.stroke()`, `make.vibrato()` | Stroke counts, roll direction, widths, and native render options.                    |
 | `make.annotation()`, `make.chordSymbol()`           | Lyrics/text, fonts, alignment, baselines, harmony blocks, and kerning.               |
-| `make.fingering()`, `make.stringNumber()`           | Number, position, circle, and extension-line setters.                                |
+| `make.fingering()`, `make.stringNumber()`           | Finger or string label on a pitched head or TAB fret. Set `drawCircle: true` on a fingering. String numbers also support extension lines.                                |
 | `make.ghostNote()`, `make.textNote()`               | Native timed-note structs and text layout options.                                   |
 
 Attach modifiers with `score.attach(note, modifier, chordIndex)`.
@@ -419,6 +419,8 @@ Resizing a context alone does not reflow a score. See [sheets and themes](sheets
 `make.tabNote()` accepts every native TabNote field. Its optional second argument enables stems.
 `make.graceTabNote()` joins `make.graceNoteGroup()` like pitched grace notes.
 `make.bend()`, `make.tabTie()`, and `make.tabSlide()` return native handles.
+
+In a continuous score, a TAB tie clears the measured fret text from every voice on its staff. An automatic tie uses one side across all systems. Set `side: 'above'` or `'below'` to keep the tie on that side. The layout reports `CurveCollision` if the available space is too small.
 Tab spans use native `firstNote`, `lastNote`, `firstIndexes`, and `lastIndexes` fields.
 Partial slides require an explicit direction (`1` or `-1`).
 
@@ -561,7 +563,7 @@ Attach `score.make.ornament('tr', { auxiliaryPitch: 'bb/4' })` to the principal 
 ### Accidental policy
 
 The default is `literal`: existing EasyScore accidental behavior stays unchanged.
-`key-aware` compares literal written pitches against the staff key. `F4` is always F natural; a G signature does not turn it into F sharp.
+`key-aware` compares literal written pitches against the staff key. `F4` is always F natural; a G signature does not turn it into F sharp. At a simultaneous unison, two voices sharing the same head print one automatic sign. A separated head keeps its own sign, and a separately rendered voice retains its written accidental.
 
 The opt-in policy:
 

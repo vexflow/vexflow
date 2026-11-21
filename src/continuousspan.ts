@@ -128,7 +128,9 @@ export function spanLabel(spec: ContinuousSpan): Element | undefined {
 }
 
 export function spanAbove(span: ContinuousSpan): boolean {
-  return span.side ? span.side === 'above' : ['slur', 'volta', 'ottava', 'trill', 'tuplet'].includes(span.kind);
+  if (span.side) return span.side === 'above';
+  if (span.kind === 'tie' && span.string !== undefined) return !span.bend;
+  return ['slur', 'volta', 'ottava', 'trill', 'tuplet'].includes(span.kind);
 }
 
 /** Retain the written pitch through a clef change at a continuation edge. */

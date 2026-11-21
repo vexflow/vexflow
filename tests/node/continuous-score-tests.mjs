@@ -11,6 +11,7 @@ import {
   continuousBeamStudy,
   glissandoStudy,
   makeContinuousStudy,
+  sextupletStudy,
   tabEndingStudy,
 } from '../engraving/continuous-studies.mjs';
 
@@ -473,6 +474,87 @@ test('tab ties stay on the selected string through reflow and leave a visible in
   }
 });
 
+// Two simultaneous TAB voices reproduce a string-five tie crossing a string-four fret.
+function tieStudy(side, split = false, crowded = false) {
+  const event = (id, str, fret, duration) => ({ id, tab: { positions: [{ str, fret }], duration } });
+  const measures = [0, 1].map((m) => ({
+    voices: [
+      { notes: [event('bassHalf' + m, 5, 2, 'h'), event('bassQuarter' + m, 5, 2, 'q')] },
+      { notes: [2, 2, 4, 2, 2, 2].map((str, i) => event('upper' + m + i, str, 3, '8')) },
+    ],
+  }));
+  if (split) {
+    measures[0].voices[0].notes[1].tab.positions[0].str = 2;
+    measures[1].voices[0].notes[0].tab.positions[0].str = 2;
+  }
+  if (crowded)
+    for (const m of measures)
+      for (const e of m.voices[1].notes) e.tab.positions = [1, 2, 3, 4, 5, 6].map((str) => ({ str, fret: 38 }));
+  return {
+    staves: [{ id: 'guitar', kind: 'tab', time: '3/4', measures }],
+    sheet: { width: 480, rowGap: 0 },
+    continuous: {
+      spans: [
+        {
+          id: 'hold',
+          kind: 'tie',
+          from: 'bassHalf0',
+          to: split ? 'bassQuarter1' : 'bassQuarter0',
+          ...(side ? { side } : {}),
+        },
+      ],
+    },
+  };
+}
+test('TAB ties measure other voices’ fret ink and keep one side across a system break', () => {
+  function draw(side, split = false, crowded = false) {
+    const { f } = factory(),
+      c = f.EasyScore().compose(tieStudy(side, split, crowded)),
+      layout = c.sheet.getContinuousLayout();
+    const frame = (width) => {
+      c.sheet.setWidth(width);
+      f.draw({ retain: true });
+      return { parts: structuredClone(layout.fragments), errors: structuredClone(layout.diagnostics) };
+    };
+    return { c, frame };
+  }
+  for (const side of [undefined, 'above', 'below']) {
+    const { c, frame } = draw(side);
+    const {
+      parts: [f],
+      errors,
+    } = frame(480);
+    assert.deepEqual(errors, []);
+    assert.equal(f.above, side === 'above');
+    assert.deepEqual(f.strings, [5]);
+    const sign = f.above ? -1 : 1;
+    const obstacle = c.getNote('upper02').getFretInk()[0];
+    // Sample the visible quadratic ribbon through the fret box, independently of the fitter's bounds.
+    for (let x = obstacle.x; x <= obstacle.x + obstacle.w; x += 0.2) {
+      const t = (x - f.x1) / (f.x2 - f.x1),
+        base = (1 - t) * f.y1 + t * f.y2;
+      for (const edge of [0, f.space * 0.22]) {
+        const y = base + sign * 2 * t * (1 - t) * (f.rise + edge);
+        assert.ok(y < obstacle.y || y > obstacle.y + obstacle.h);
+      }
+    }
+  }
+  const split = draw(undefined, true);
+  const wide = split.frame(480);
+  const narrow = split.frame(245);
+  assert.deepEqual(narrow.errors, []);
+  assert.deepEqual(
+    narrow.parts.map((f) => [f.part, f.above, f.strings]),
+    [
+      ['first', false, [5]],
+      ['last', false, [5]],
+    ]
+  );
+  assert.deepEqual(split.frame(480), wide);
+  const crowded = draw('above', false, true).frame(480);
+  assert.ok(crowded.parts[0].above);
+  assert.ok(crowded.errors.some((d) => d.code === 'CurveCollision' && d.source === 'hold'));
+});
 test('tab ties reject unmatched strings, frets and invalid chord positions before drawing', () => {
   for (const selectors of [{ string: 7 }, { string: 3 }, { fromHead: -1 }, { toHead: 2 }, { fromHead: 1, toHead: 1 }]) {
     const source = tabEndingStudy();
@@ -1109,7 +1191,11 @@ test('a dashed lower-head tie keeps its stroke, pitch and endpoints when the sco
   const score = f.EasyScore().compose({
     sheet: { width: 430 },
     staves: [{ id: 'staff', time: '2/4', measures }],
-    continuous: { spans: [{ id: 'editorial', kind: 'tie', from: 'from', to: 'to', fromHead: 0, toHead: 0, side: 'below', dashed: true }] },
+    continuous: {
+      spans: [
+        { id: 'editorial', kind: 'tie', from: 'from', to: 'to', fromHead: 0, toHead: 0, side: 'below', dashed: true },
+      ],
+    },
   });
   const frame = (width, parts) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1117,8 +1203,11 @@ test('a dashed lower-head tie keeps its stroke, pitch and endpoints when the sco
     f.draw({ retain: true });
     const layout = score.sheet.getContinuousLayout();
     const segments = layout.fragments;
-    assert.deepEqual(segments.map(s => s.part), parts);
-    assert.ok(segments.every(s => s.dashed));
+    assert.deepEqual(
+      segments.map((s) => s.part),
+      parts
+    );
+    assert.ok(segments.every((s) => s.dashed));
     assert.equal(segments[0].y1, score.getNote('from').getYs()[0] + segments[0].space / 2);
     assert.equal(segments.at(-1).y2, score.getNote('to').getYs()[0] + segments.at(-1).space / 2);
     const strokes = [];
@@ -1126,10 +1215,199 @@ test('a dashed lower-head tie keeps its stroke, pitch and endpoints when the sco
     recorder.stroke = () => strokes.push(ctx.getLineDash());
     recorder.fill = () => assert.fail('a dashed arc must have open gaps');
     layout.draw(recorder);
-    assert.deepEqual(strokes, parts.map(() => [4, 3]));
+    assert.deepEqual(
+      strokes,
+      parts.map(() => [4, 3])
+    );
     return canvas.toBuffer();
   };
   const wide = frame(430, ['single']);
   frame(125, ['first', 'last']);
   assert.deepEqual(frame(430, ['single']), wide);
+});
+
+test('one rhythmic sextuplet times both measures and reflows its own bracket', () => {
+  const source = sextupletStudy();
+  const { f, canvas, ctx } = factory();
+  const score = f.EasyScore().compose(source);
+  const layout = score.sheet.getContinuousLayout();
+  const notes = source.continuous.tuplets[0].members.map((id) => score.getNote(id));
+  const group = notes[0].getTuplet();
+  const quarter = VF.VexFlow.RESOLUTION / 4;
+  function draw(width, parts) {
+    const labels = [];
+    const drawing = f.getContext();
+    const text = drawing.fillText;
+    drawing.fillText = function (s, ...args) {
+      if (s === '6') labels.push(s);
+      return text.call(this, s, ...args);
+    };
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    try {
+      score.sheet.setWidth(width);
+      f.draw({ retain: true });
+    } finally {
+      drawing.fillText = text;
+    }
+    assert.deepEqual(labels, ['6']);
+    assert.deepEqual(
+      layout.fragments.map((f) => [f.id, f.part]),
+      parts.map((p) => ['six', p])
+    );
+    assert.deepEqual(layout.diagnostics, []);
+    assert.deepEqual(group.getNotes(), notes);
+    assert.ok(notes.every((n) => n.getTuplet() === group && n.getDuration() === '8'));
+    assert.ok(notes.every((n) => n.getTicks().equals(new VF.Fraction(quarter, 3))));
+    assert.ok(notes.reduce((sum, n) => sum.add(n.getTicks()), new VF.Fraction(0, 1)).equals(quarter * 2));
+    for (const [m, measures] of score.notes.entries()) {
+      const at = new VF.Fraction(0, 1);
+      for (const n of measures[0][0]) {
+        const i = notes.indexOf(n);
+        if (i >= 0) assert.ok(at.equals(new VF.Fraction((m === 0 ? 9 + i : i - 3) * quarter, 3)));
+        if (n === score.getNote('next')) assert.ok(at.equals(quarter));
+        at.add(n.getTicks());
+      }
+      assert.ok(at.equals(4 * quarter));
+    }
+    assert.equal(layout.fragments[0].x1, notes[0].getAbsoluteX());
+    assert.equal(layout.fragments.at(-1).x2, notes[5].getAbsoluteX() + notes[5].getGlyphWidth());
+    return { spans: structuredClone(layout.fragments), pixels: canvas.toBuffer() };
+  }
+  const wide = draw(530, ['single']);
+  draw(290, ['first', 'last']);
+  assert.deepEqual(draw(530, ['single']), wide);
+});
+
+test('rhythmic tuplet membership rejects gaps, reversed events, duplicate members and invalid ratios', () => {
+  for (const overrides of [
+    { members: ['t0', 't2'] },
+    { members: ['t3', 't2'] },
+    { members: ['t0', 't0'] },
+    { members: [] },
+    { notesOccupied: 0 },
+    { numNotes: 2.5 },
+  ]) {
+    const source = sextupletStudy();
+    Object.assign(source.continuous.tuplets[0], overrides);
+    assert.throws(() => factory().f.EasyScore().compose(source), /continuous tuplet/i);
+  }
+});
+
+test('independent meters keep each staff’s pulse, local bars and source positions through a wrap', () => {
+  const { f, ctx, canvas } = factory();
+  const staves = [3, 4].map((beats, s) => ({
+    id: 'part' + s,
+    time: beats + '/4',
+    measures: Array.from({ length: 12 / beats }, (_, m) => ({
+      voices: [
+        {
+          notes: Array.from({ length: beats }, (_, i) => ({
+            id: s + '-' + (beats * m + i),
+            note: { keys: [['g/4', 'a/4', 'b/4'][i % 3]], duration: 'q' },
+          })),
+        },
+      ],
+    })),
+  }));
+  const score = f.EasyScore().compose({ staves, continuous: { independentMeters: true } });
+  const notes = staves.map((_, s) => Array.from({ length: 12 }, (_, i) => score.getNote(s + '-' + i)));
+  const quarter = VF.VexFlow.RESOLUTION / 4;
+  function render(width) {
+    score.sheet.setWidth(width);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    f.draw({ retain: true });
+    const bars = [[], []];
+    let pulses = 0;
+    score.notes.forEach((parts, i) => {
+      pulses += parts[0][0].length;
+      for (let s = 0; s < 2; s++) {
+        const bar = score.staves[i][s].getModifiers(VF.StaveModifier.Position.END, VF.Barline.CATEGORY)[0];
+        if (bar.getType() !== VF.Barline.type.NONE) bars[s].push(pulses);
+      }
+    });
+    assert.deepEqual(bars, [
+      [3, 6, 9, 12],
+      [4, 8, 12],
+    ]);
+    for (const [i, top] of notes[0].entries()) {
+      assert.equal(top.getAbsoluteX(), notes[1][i].getAbsoluteX());
+      for (const [s, group] of notes.entries()) {
+        const n = group[i],
+          beats = 3 + s,
+          pos = score.meterPositions.get(n);
+        assert.equal(score.getNote(s + '-' + i), n);
+        assert.equal(n.getTicks().value(), quarter);
+        assert.deepEqual(
+          [pos.staff, pos.measure, pos.event, pos.onset.value()],
+          ['part' + s, 1 + Math.floor(i / beats), i % beats, (i % beats) * quarter]
+        );
+      }
+    }
+    return canvas.toBuffer();
+  }
+  const wide = render(900);
+  assert.equal(score.sheet.getRows().length, 1);
+  assert.notDeepEqual(render(330), wide);
+  assert.equal(score.sheet.getRows().length, 2);
+  assert.notEqual(notes[0][5].getStave().getY(), notes[0][6].getStave().getY());
+  assert.deepEqual(render(900), wide);
+  assert.throws(() => factory().f.EasyScore().compose({ staves, continuous: {} }), /same number of measures/);
+  assert.throws(
+    () =>
+      factory()
+        .f.EasyScore()
+        .compose({
+          staves: [staves[0], { ...staves[1], measures: staves[1].measures.slice(1) }],
+          continuous: { independentMeters: true },
+        }),
+    /same total duration/
+  );
+});
+
+test('a held note survives a local barline on another staff', () => {
+  const { f } = factory();
+  const score = f.EasyScore().compose({
+    continuous: { independentMeters: true },
+    staves: [
+      { id: 'upper', time: '2/4', measures: [{ voices: [{ notes: 'C5/h' }] }, { voices: [{ notes: 'D5/h' }] }] },
+      {
+        id: 'lower',
+        time: '4/4',
+        measures: [{ voices: [{ notes: [{ id: 'held', note: { keys: ['g/4'], duration: 'w' } }] }] }],
+      },
+    ],
+  });
+  f.draw({ retain: true });
+  assert.equal(score.systems.length, 1);
+  assert.equal(score.getNote('held').getTicks().value(), VF.VexFlow.RESOLUTION);
+  assert.equal(score.meterPositions.get(score.notes[0][0][0][1]).measure, 2);
+});
+
+test('cross-bar tuplet timing precedes alignment to an independently metered staff', () => {
+  const source = sextupletStudy();
+  source.continuous.independentMeters = true;
+  source.staves.push({
+    id: 'pulse',
+    time: '2/4',
+    measures: Array.from({ length: 4 }, () => ({
+      voices: [{ notes: 'G4/q, G4/q' }],
+    })),
+  });
+  const { f } = factory();
+  const score = f.EasyScore().compose(source);
+  const written = source.continuous.tuplets[0].members.map((id) => score.getNote(id));
+  for (const width of [530, 290, 530]) {
+    score.sheet.setWidth(width);
+    f.draw({ retain: true });
+    assert.deepEqual(
+      written.map((n) => n.getTupletStack().length),
+      Array(6).fill(1)
+    );
+    assert.deepEqual(
+      written.map((n) => score.meterPositions.get(n).measure),
+      [1, 1, 1, 2, 2, 2]
+    );
+    assert.ok(written.every((n) => n.getTicks().equals(new VF.Fraction(VF.VexFlow.RESOLUTION / 4, 3))));
+    assert.ok(score.meterPositions.get(score.getNote('next')).onset.equals(VF.VexFlow.RESOLUTION / 4));
+  }
 });

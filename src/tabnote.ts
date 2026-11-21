@@ -420,6 +420,13 @@ export class TabNote extends StemmableNote {
     }
   }
 
+  /** The visible fret text for each string, including ghost parentheses, font sizing and baseline shifts. */
+  getFretInk() {
+    return this.fretElement.map((el, i) =>
+      el.getTextInk(this.getAbsoluteX() - el.getWidth() / 2, this.ys[i] + this.renderOptions.yShift)
+    );
+  }
+
   // Render the fret positions onto the context
   drawPositions(): void {
     const ctx = this.checkContext();

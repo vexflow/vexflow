@@ -4,6 +4,8 @@
 // @author Greg Ristow (modifications)
 // Defines accidental modifiers, their layout, and automatic placement across voices.
 
+import { automaticAccidentals } from './automaticaccidentals';
+import type { BoundingBox } from './boundingbox';
 import { Fraction } from './fraction';
 import { Glyphs } from './glyphs';
 import { Metrics } from './metrics';
@@ -53,6 +55,8 @@ export class Accidental extends Modifier {
   /** To enable logging for this class. Set `VexFlow.Accidental.DEBUG` to `true`. */
   static DEBUG: boolean = false;
   protected cautionary: boolean;
+  /** The printed sign at this same head, recomputed whenever the modifier group is formatted. */
+  private sharedWith?: Accidental;
   /** Select the pair of glyphs around a cautionary or editorial accidental. */
   private enclosure: 'parentheses' | 'brackets' = 'parentheses';
 
@@ -61,11 +65,60 @@ export class Accidental extends Modifier {
     return Category.Accidental;
   }
 
+  /** At one onset, compare the actual heads after StaveNote.format has separated colliding voices. */
+  private static shareUnisonSigns(signs: Accidental[]): Accidental[] {
+    if (!signs.some((mark) => automaticAccidentals.has(mark))) return signs;
+    const automatic = (mark: Accidental) => automaticAccidentals.has(mark) && !mark.isCautionary();
+    for (const mark of signs) mark.sharedWith = undefined;
+    if (signs.length < 2) return signs;
+
+    // Prefer an explicit matching sign, even if its voice was supplied last.
+    const visible: Accidental[] = signs.filter((mark) => !automatic(mark));
+    for (const mark of signs) {
+      if (!automatic(mark)) continue;
+      mark.sharedWith = visible.find((peer) => mark.sharesHeadWith(peer));
+      if (!mark.sharedWith) visible.push(mark);
+    }
+    return signs.filter((mark) => !mark.sharedWith);
+  }
+
+  /** A displaced chord head or a separate unison column needs its own sign. */
+  private sharesHeadWith(other: Accidental): boolean {
+    if (other.type !== this.type) return false;
+    const a = this.getNote(),
+      b = other.getNote();
+    if (
+      a === b ||
+      !isStaveNote(a) ||
+      !isStaveNote(b) ||
+      !a.getStave() ||
+      a.getStave() !== b.getStave() ||
+      a.renderOptions.draw === false ||
+      b.renderOptions.draw === false ||
+      a.isCenterAligned() !== b.isCenterAligned() ||
+      a.getCenterXShift() !== b.getCenterXShift()
+    )
+      return false;
+    const i = this.checkIndex(),
+      j = other.checkIndex();
+    if (a.keys[i].toLowerCase() !== b.keys[j].toLowerCase()) return false;
+    const h = a.noteHeads[i],
+      k = b.noteHeads[j];
+    return (
+      h.getLine() === k.getLine() &&
+      h.getText() === k.getText() &&
+      h.getFont() === k.getFont() &&
+      h.getYShift() === k.getYShift() &&
+      a.getXShift() + h.getDisplacementX() + h.getXShift() === b.getXShift() + k.getDisplacementX() + k.getXShift()
+    );
+  }
+
   /** Arrange accidentals inside a ModifierContext. */
   static format(accidentals: Accidental[], state: ModifierContextState): void {
     // If there are no accidentals, no need to format their positions.
     if (!accidentals || accidentals.length === 0) return;
 
+    accidentals = this.shareUnisonSigns(accidentals);
     const noteheadAccidentalPadding = Metrics.get('Accidental.noteheadAccidentalPadding');
     const leftShift = state.leftShift + noteheadAccidentalPadding;
     const accidentalSpacing = Metrics.get('Accidental.accidentalSpacing');
@@ -584,15 +637,24 @@ export class Accidental extends Modifier {
   }
 
   /** Visible glyph after formatting, including cautionary or authored shifts. */
-  getInkBounds() {
+  getInkBounds(): BoundingBox {
+    if (this.sharedWith) return this.sharedWith.getInkBounds();
     this.positionGlyph();
     return this.getTextInk(this.x, this.y);
   }
 
+  /** Both voices report the published bounds of their shared sign. */
+  override getBoundingBox(): BoundingBox {
+    return this.sharedWith?.getBoundingBox() ?? super.getBoundingBox();
+  }
+
+  /** The representative accidental draws the glyph for every voice sharing this head. */
   override draw(): void {
-    const ctx = this.checkContext();
-    this.positionGlyph();
+    if (!this.sharedWith) {
+      const ctx = this.checkContext();
+      this.positionGlyph();
+      this.renderText(ctx, 0, 0);
+    }
     this.setRendered();
-    this.renderText(ctx, 0, 0);
   }
 }

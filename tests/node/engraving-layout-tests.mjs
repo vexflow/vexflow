@@ -776,3 +776,71 @@ test('the two sides of a broken feathered beam share the same secondary spacing'
   }
   assert.deepEqual(new Set(spreads(undefined)), new Set([7.5]));
 });
+
+test('key-aware accidentals share one sign only at the same printed unison head', () => {
+  const voice = (id, key = 'e#/5') => ({
+    notes: [{ id, note: { keys: [key], duration: 'q', stemDirection: id === 'upper' ? 1 : -1 } }],
+  });
+  function render(parts, prepare = () => {}) {
+    const { f } = factory();
+    const source = {
+      accidentals: 'key-aware',
+      continuous: {},
+      staves: parts.map((voices, i) => ({ id: 'staff' + i, time: '1/4', key: 'Bm', measures: [{ voices }] })),
+    };
+    const score = f.EasyScore().compose(source);
+    const notes = score.notes[0].flat(2);
+    const marks = notes.flatMap((n) => n.getModifiers().filter((m) => m instanceof VF.Accidental));
+    prepare(notes, marks);
+    // Count actual glyph emissions, including a deliberate enclosure, without counting the key signature.
+    const drawn = [];
+    for (const mark of marks) {
+      const render = mark.renderText;
+      mark.renderText = function (...args) {
+        drawn.push(this);
+        return render.apply(this, args);
+      };
+    }
+    let last;
+    for (const width of [350, 180, 350]) {
+      f.getContext().clear();
+      drawn.length = 0;
+      score.sheet.setWidth(width);
+      f.draw({ retain: true });
+      if (last) assert.deepEqual(drawn, last);
+      last = drawn.slice();
+    }
+    return { drawn, notes, marks };
+  }
+  const both = [voice('upper'), voice('lower')];
+  const shared = render([both]);
+  assert.equal(shared.drawn.length, 1);
+  assert.deepEqual(
+    shared.marks.map((m) => m.getInkBounds()),
+    [shared.drawn[0].getInkBounds(), shared.drawn[0].getInkBounds()]
+  );
+  assert.deepEqual(
+    shared.notes.map((n) => [n.getKeys(), n.getStemDirection(), n.getTicks().value()]),
+    [
+      [['e#/5'], 1, VF.VexFlow.RESOLUTION / 4],
+      [['e#/5'], -1, VF.VexFlow.RESOLUTION / 4],
+    ]
+  );
+  for (const v of both) assert.equal(render([[v]]).drawn.length, 1);
+  assert.equal(render([[voice('upper'), voice('lower', 'eb/5')]]).drawn.length, 2);
+  assert.equal(render(both.map((v) => [v])).drawn.length, 2);
+  assert.equal(render([both], (notes) => notes[1].noteHeads[0].setXShift(12)).drawn.length, 2);
+  const caution = render([both], (_, marks) => marks[1].setAsCautionary());
+  assert.deepEqual(caution.drawn, [caution.marks[1]]);
+  assert.equal(caution.drawn[0].isCautionary(), true);
+  assert.equal(render([both], (_, marks) => marks.forEach((m) => m.setAsCautionary())).drawn.length, 2);
+  const unison = VF.VexFlow.UNISON;
+  try {
+    VF.VexFlow.UNISON = false;
+    const separate = render([both]);
+    assert.notEqual(separate.notes[0].getNoteHeadBeginX(), separate.notes[1].getNoteHeadBeginX());
+    assert.equal(separate.drawn.length, 2);
+  } finally {
+    VF.VexFlow.UNISON = unison;
+  }
+});

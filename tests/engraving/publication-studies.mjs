@@ -162,3 +162,59 @@ export function ossiaRangeStudy() {
   };
   return { source, options };
 }
+
+/** A clarinet quotes a flute in its written key while the performing voice retains its whole rest. */
+export function transposedCueStudy() {
+  const source = {
+    accidentals: 'key-aware',
+    staves: [
+      { id: 'fl', key: 'C', measures: [{ voices: [{ notes: 'E4/q, F4, G4, A4' }] }] },
+      {
+        id: 'cl',
+        key: 'D',
+        measures: [{ voices: [{ notes: [{ id: 'silence', note: { keys: ['b/4'], duration: 'wr' } }] }] }],
+      },
+    ],
+  };
+  const region = {
+    kind: 'cue',
+    staff: 'fl',
+    measure: 1,
+    label: 'Flute',
+    scale: 0.7,
+    transpose: { steps: 1, semitones: 2 },
+  };
+  return {
+    source,
+    region,
+    options: {
+      staves: ['cl'],
+      regions: [region],
+      paper: { width: 120, height: 65 },
+      margins: { top: 5, bottom: 4, left: 4, right: 4 },
+      pageNumbers: false,
+    },
+  };
+}
+
+/** Two flute desks pass from solo to unison and then divide over the same three bars. */
+export function condensedFlutesStudy() {
+  const pitches = [
+    [['g/4', 'a/4'], ['b/4', 'c/5'], ['d/5', 'c/5']],
+    [[], ['b/4', 'c/5'], ['b/4', 'a/4']],
+  ];
+  const staves = pitches.map((bars, player) => ({
+    id: 'fl' + (player + 1),
+    name: 'Flute ' + (player + 1),
+    time: '2/4',
+    measures: bars.map((keys, bar) => ({
+      voices: [{
+        notes: (keys.length ? keys : ['b/4']).map((key, attack) => ({
+          id: 'f' + (player + 1) + 'm' + (bar + 1) + 'n' + (attack + 1),
+          note: { keys: [key], duration: keys.length ? 'q' : 'hr' },
+        })),
+      }],
+    })),
+  }));
+  return { source: { staves }, condense: { players: ['fl1', 'fl2'], name: 'Flutes' } };
+}

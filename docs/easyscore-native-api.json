@@ -10,7 +10,8 @@
       "setNote(note: Note): this",
       "setAsCautionary(enclosure: 'parentheses' | 'brackets' = 'parentheses'): this",
       "isCautionary(): boolean",
-      "getInkBounds()",
+      "getInkBounds(): BoundingBox",
+      "getBoundingBox(): BoundingBox",
       "draw(): void"
     ]
   },
@@ -832,7 +833,7 @@
       "Articulation(params?: { betweenLines?: boolean; type?: string; position?: string | number }): Articulation",
       "Ornament(type: string, params?: { position?: string | number; upperAccidental?: string; lowerAccidental?: string; auxiliaryPitch?: string; parenthesized?: boolean; delayed?: boolean; })",
       "TextDynamics(params?: Partial<TextNoteStruct>): TextDynamics",
-      "Fingering(params: { number?: string; position?: string }): FretHandFinger",
+      "Fingering(params: { number?: string; position?: string; drawCircle?: boolean }): FretHandFinger",
       "StringNumber(params: { number: string; position: string }, drawCircle = true): StringNumber",
       "TickContext(): TickContext",
       "ModifierContext(): ModifierContext",
@@ -1095,6 +1096,8 @@
       "format(nums: FretHandFinger[], state: ModifierContextState): boolean",
       "easyScoreHook({ fingerings }: { fingerings?: string } = {}, note: StemmableNote, builder: Builder): void",
       "constructor(finger: string)",
+      "setDrawCircle(drawCircle: boolean): this",
+      "getWidth(): number",
       "setFretHandFinger(finger: string): this",
       "getFretHandFinger(): string",
       "setOffsetX(x: number): this",
@@ -2617,6 +2620,7 @@
       "drawFlag(): void",
       "drawModifiers(): void",
       "drawStemThrough(): void",
+      "getFretInk()",
       "drawPositions(): void",
       "draw(): void"
     ]
@@ -2970,8 +2974,10 @@
     "ContinuousOptions": {
       "extends": [],
       "fields": [
+        "independentMeters?: boolean;",
         "mode?: 'balanced' | 'greedy';",
         "boundaries?: readonly ContinuousBoundary[];",
+        "tuplets?: readonly { id: string; members: readonly string[]; numNotes: number; notesOccupied: number; side?: 'above' | 'below'; }[];",
         "spans?: readonly ContinuousSpan[];",
         "hideEmptyStaves?: boolean;",
         "compressRests?: boolean;",
@@ -2996,7 +3002,7 @@
       "diagnostics: { code: 'RowOverflow' | 'CurveCollision' | 'SplitStemAlignment' | 'SpanOverflow' | 'StaffSpacingLimit'; measures: number[]; source?: string; }[]",
       "fragments: SpanFragment[]",
       "rows: ContinuousRow[]",
-      "constructor(private readonly score: EasyScoreComposition, private readonly spec: EasyScoreCompositionSpec, starts: State[][], ends: State[][], placed?: Set<Accidental>)",
+      "constructor(private readonly score: EasyScoreComposition, private readonly spec: EasyScoreCompositionSpec, starts: State[][], ends: State[][], placed?: Set<Accidental>, private readonly interiorBars: InteriorBar[] = [])",
       "format(options: Required<SheetOptions>): ContinuousRow[]",
       "draw(context: RenderContext): void"
     ]
@@ -3429,6 +3435,7 @@
         "notes: Tickable[][][][];",
         "spans: Element[];",
         "diagnostics: EasyScoreCompositionDiagnostic[];",
+        "meterPositions?: ReadonlyMap<Tickable, MeterPosition>;",
         "getElement: (id: string) => Element | undefined;",
         "getNote: (id: string) => Note;"
       ]

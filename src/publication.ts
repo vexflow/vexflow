@@ -5,6 +5,8 @@ import { Factory } from './factory';
 import { Metrics } from './metrics';
 import { Note } from './note';
 import { paginate } from './pagebreaks';
+import { markCondensedPlayers, PublicationCondense } from './publicationcondense';
+import { CueBuilder, CueTransposition, writtenCue } from './publicationcue';
 import {
   checkView,
   insetStaff,
@@ -19,6 +21,8 @@ import { SVGContext } from './svgcontext';
 import type { SVGFont } from './svgexport';
 import { Tables } from './tables';
 
+export type { PublicationCondense } from './publicationcondense';
+export type { CueTransposition } from './publicationcue';
 export type { PublicationRegion, PublicationView } from './publicationview';
 
 /** Paper, staff height (four spaces), margins, and inter-system gaps are measured in millimeters. */
@@ -85,10 +89,15 @@ function dimensions(o: PublicationOptions) {
 type Size = ReturnType<typeof dimensions>;
 
 /** The staging SVG must participate in browser font measurement, including for detached destinations. */
-function compose(host: HTMLElement, spec: EasyScoreCompositionSpec, hooks: readonly CommitHook[] = []) {
+function compose(
+  host: HTMLElement,
+  spec: EasyScoreCompositionSpec,
+  hooks: readonly CommitHook[] = [],
+  transpose?: CueTransposition
+) {
   const ctx = new SVGContext(host);
   const factory = new Factory({ renderer: { elementId: null, width: 1, height: 1 } }).setContext(ctx);
-  const easyScore = factory.EasyScore();
+  const easyScore = factory.EasyScore(transpose ? { builder: new CueBuilder(factory, transpose) } : {});
   for (const hook of hooks) easyScore.addCommitHook(hook);
   const score = easyScore.compose(spec);
   return { ctx, factory, score };
@@ -280,21 +289,20 @@ function addInsetFragment(
   const lastHost = hosts[hosts.length - 1];
   const width = lastHost.getX() + lastHost.getWidth() - hosts[0].getX();
   const gap = hosts.length > 1 ? hosts[1].getX() - hosts[0].getX() - hosts[0].getWidth() : 0;
+  const quoted = insetStaff(
+    spec.staves.find((s) => s.id === region.staff)!,
+    first,
+    last
+  );
   const insetSpec: EasyScoreCompositionSpec = {
-    staves: [
-      insetStaff(
-        spec.staves.find((s) => s.id === region.staff)!,
-        first,
-        last
-      ),
-    ],
-    accidentals: spec.accidentals,
-    graceAccidentals: spec.graceAccidentals,
+    staves: [region.transpose ? writtenCue(quoted, region.transpose) : quoted],
+    accidentals: region.transpose ? 'key-aware' : spec.accidentals,
+    graceAccidentals: region.transpose ? 'ordered' : spec.graceAccidentals,
     sheet: { x: 0, y: 0, width: width / scale, measurePadding: 4, measureGap: Math.max(0, gap) / scale },
     // Keep the existing single-bar signature and spacing policy. A longer fragment shares one signature prefix.
     ...(hosts.length === 1 ? { continuous: {} } : {}),
   };
-  const inset = compose(host, insetSpec, hooks);
+  const inset = compose(host, insetSpec, hooks, region.transpose);
   if (hosts.length > 1) inset.score.sheet.alignToMeasures(hosts.map((s) => s.getWidth() / scale));
   inset.factory.draw();
   row.references.push({
@@ -391,7 +399,12 @@ export class PublicationResult {
 }
 
 /** Staff, source measure, voice and timed event position survive independent part projection. */
-function semanticEvents(score: EasyScoreComposition, spec: EasyScoreCompositionSpec, measure: number) {
+function semanticEvents(
+  score: EasyScoreComposition,
+  spec: EasyScoreCompositionSpec,
+  measure: number,
+  condense?: PublicationCondense
+) {
   return score.notes[measure - 1].flatMap((voices, j) =>
     voices.flatMap((ticks, voice) =>
       ticks
@@ -401,10 +414,11 @@ function semanticEvents(score: EasyScoreComposition, spec: EasyScoreCompositionS
             ? [
                 {
                   id: n.getAttribute('id'),
-                  measure,
-                  staff: spec.staves[j].id,
-                  voice,
-                  event,
+                  measure: score.meterPositions?.get(n)?.measure ?? measure,
+                  staff: condense?.players[0] === spec.staves[j].id ? condense.players[voice] : spec.staves[j].id,
+                  voice: condense?.players[0] === spec.staves[j].id ? 0 : voice,
+                  event: score.meterPositions?.get(n)?.event ?? event,
+                  ...(score.meterPositions && { onset: score.meterPositions.get(n)?.onset.toString() }),
                   keys: n.getKeys(),
                   ...(n.notation.length && { notation: n.notation }),
                   ticks: n.getTicks().toString(),
@@ -470,6 +484,7 @@ function buildPages(
       return { measures: r.measures, x, y, width: (r.right - r.left) * size.scale, height: r.height };
     });
     const measures = systems.flatMap((s) => s.measures);
+    const systemStarts = new Set(systems.map((s) => s.measures[0]));
     if (f.overflow)
       diagnostics.push({
         code: 'TextOverflow',
@@ -496,11 +511,11 @@ function buildPages(
       page: number,
       measures,
       staves: spec.staves.map((s) => s.id),
-      events: measures.flatMap((m) => semanticEvents(score, spec, m)),
+      events: measures.flatMap((m) => semanticEvents(score, spec, m, options.condense)),
       regions: measured.slice(b.first, b.end).flatMap((row) => row.references),
       spans: score.sheet
         .getContinuousLayout()!
-        .fragments.filter((f) => f.row >= b.first && f.row < b.end)
+        .fragments.filter((f) => systemStarts.has(score.sheet.getContinuousLayout()!.rows[f.row].measures[0]))
         .map((f) => ({
           id: f.id,
           kind: f.kind,
@@ -532,9 +547,10 @@ export class Publication {
     try {
       const diagnostics: PublicationDiagnostic[] = [];
       const ref =
-        options.staves &&
+        (options.staves || options.condense) &&
         (this.source.spans?.length ||
           this.source.continuous?.spans?.length ||
+          this.source.continuous?.tuplets?.length ||
           this.source.continuous?.splitChords?.length)
           ? compose(host, this.source, options.noteHooks).score
           : undefined;
@@ -544,6 +560,12 @@ export class Publication {
         diagnostics.push({ code: 'ExcludedAnchor', measures, detail: id })
       );
       const { ctx, factory, score } = compose(host, spec, options.noteHooks);
+      if (options.condense)
+        markCondensedPlayers(
+          score,
+          spec.staves.findIndex((s) => s.id === options.condense!.players[0]),
+          options.condense
+        );
       factory.draw();
       const layout = score.sheet.getContinuousLayout()!;
       for (const d of layout.diagnostics)
@@ -552,7 +574,10 @@ export class Publication {
           measures: d.measures,
           detail: d.source ? d.code + ' ' + d.source : d.code,
         });
-      const rows = splitRows(ctx.svg, layout.rows, score);
+      const passage = options.condense?.measures;
+      const rows = splitRows(ctx.svg, layout.rows, score).filter(
+        (row) => !passage || (row.measures[0] >= passage[0] && row.measures[0] <= passage[1])
+      );
       addInsets(host, this.source, options, score, rows, diagnostics);
       const measured = rows.map((r) => ({ ...r, height: (r.bottom - r.top + r.insetHeight) * size.scale }));
       const surface = pageSurface(host, size);

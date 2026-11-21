@@ -17,6 +17,7 @@ import {
   spanLabel,
 } from './continuousspan';
 import type { EasyScoreComposition, EasyScoreCompositionSpec, EasyScoreStaffState } from './easyscore/composition';
+import type { InteriorBar } from './easyscore/independentmeter';
 import { Element } from './element';
 import { measureEngraving } from './engravinggeometry';
 import { Fraction } from './fraction';
@@ -38,6 +39,7 @@ import { Stem } from './stem';
 import type { System } from './system';
 import { BreakUnit, chooseSystemBreaks } from './systembreaks';
 import { TabNote } from './tabnote';
+import { fitTabTie } from './tabtiefit';
 import { layoutTiedBend } from './tiedbend';
 import { TimeSignature } from './timesignature';
 import { RuntimeError } from './util';
@@ -56,8 +58,18 @@ export interface ContinuousBoundary {
   keepRest?: boolean;
 }
 export interface ContinuousOptions {
+  /** Reflow staff-local measure grids on a common rhythmic timeline. */
+  independentMeters?: boolean;
   mode?: 'balanced' | 'greedy';
   boundaries?: readonly ContinuousBoundary[];
+  /** Ordered event IDs share one native duration ratio and a bracket that follows them across systems. */
+  tuplets?: readonly {
+    id: string;
+    members: readonly string[];
+    numNotes: number;
+    notesOccupied: number;
+    side?: 'above' | 'below';
+  }[];
   spans?: readonly ContinuousSpan[];
   hideEmptyStaves?: boolean;
   compressRests?: boolean;
@@ -103,7 +115,7 @@ function resolveTabTie(span: ContinuousSpan, first: TabNote, last: TabNote): Con
   if (!from || !to || from.str !== string || to.str !== string || String(from.fret) !== String(to.fret))
     invalid('Tab tie endpoints must play the same string and fret.');
   if (span.bend && !Number.isFinite(Number(from.fret))) invalid('A tied bend needs a pitched fret.');
-  return { ...span, fromHead, toHead, string, side: span.side ?? (span.bend ? 'below' : 'above') };
+  return { ...span, fromHead, toHead, string };
 }
 
 /** A string sustains into the immediately following event of the same rhythmic voice. */
@@ -187,7 +199,8 @@ export class ContinuousLayout {
     private readonly spec: EasyScoreCompositionSpec,
     starts: State[][],
     ends: State[][],
-    placed?: Set<Accidental>
+    placed?: Set<Accidental>,
+    private readonly interiorBars: InteriorBar[] = []
   ) {
     this.options = spec.continuous ?? {};
     for (const voice of score.voices.flat(2)) voice.preserveStaveAssignments = true;
@@ -322,7 +335,15 @@ export class ContinuousLayout {
       'tuplet',
       'palmMute',
     ];
-    for (const span of this.options.spans ?? []) {
+    const tuplets: ContinuousSpan[] = (this.options.tuplets ?? []).map(({ id, members, numNotes, side }) => ({
+      id,
+      kind: 'tuplet',
+      from: members[0],
+      to: members[members.length - 1],
+      text: String(numNotes),
+      side,
+    }));
+    for (const span of [...(this.options.spans ?? []), ...tuplets]) {
       const first = locations.get(score.getNote(span.from)),
         last = locations.get(score.getNote(span.to));
       if (
@@ -490,6 +511,11 @@ export class ContinuousLayout {
     return Math.max(
       ...staves.map((s, j) => {
         const marks = this.marks[i][j];
+        if (this.options.independentMeters && !this.boundaries.get(i)?.repeatStart) {
+          s.setBegBarType(
+            start && this.spec.staves[j].options?.leftBar !== false ? BarlineType.SINGLE : BarlineType.NONE
+          );
+        }
         s.setBoundaryModifiers(
           [...(start ? marks.start : []), ...(end ? marks.end : [])],
           start ? this.continuationPadding.get(s) : 0
@@ -646,6 +672,7 @@ export class ContinuousLayout {
     } while (reserveChordSpacing(this.rows, padding));
     for (const s of this.spans) {
       const parts = this.fragments.filter((f) => f.id === s.spec.id);
+      if (s.spec.kind === 'tie' && s.spec.string !== undefined) this.fitTabTieRows(s, parts);
       const total = parts.reduce((a, f) => a + f.x2 - f.x1, 0);
       let prior = 0;
       for (const f of parts) {
@@ -667,6 +694,23 @@ export class ContinuousLayout {
       this.drawing.push((ctx) => beam.setContext(ctx).drawWithStyle());
     }
     return this.rows;
+  }
+
+  /** A TAB tie chooses its side once, after all row-local fret coordinates have settled. */
+  private fitTabTieRows(span: ResolvedSpan, parts: SpanFragment[]): void {
+    const ink = parts.map((f) =>
+      this.rows[f.row].measures.flatMap((m) => {
+        const stave = this.score.staves[m - 1][span.first.staff];
+        return this.score.notes[m - 1].flat(2).flatMap((n) => {
+          if (!(n instanceof TabNote) || n.getStave() !== stave || n === span.first.note || n === span.last.note)
+            return [];
+          return n.getFretInk().filter((b) => b.x + b.w >= f.x1 - f.space && b.x <= f.x2 + f.space);
+        });
+      })
+    );
+    for (const f of fitTabTie(parts, ink, span.spec.side === undefined && !span.spec.bend)) {
+      this.diagnostics.push({ code: 'CurveCollision', measures: this.rows[f.row].measures, source: span.spec.id });
+    }
   }
 
   /** Measure native ink once the horizontal positions and beam fits for this row are known. */
@@ -754,7 +798,11 @@ export class ContinuousLayout {
       units[0].start +
       units[units.length - 1].end +
       (units.length - 1) * options.measureGap;
-    const extra = options.justify ? Math.max(0, options.width - minimum) / units.length : 0;
+    // A one-beat polymetric window gets less justification than a three-beat window at the same pulse.
+    const weights = units.map((u) =>
+      this.options.independentMeters ? this.score.voices[u.first][0][0].getTotalTicks().value() : 1
+    );
+    const extra = options.justify ? Math.max(0, options.width - minimum) / weights.reduce((sum, w) => sum + w, 0) : 0;
     let x = options.x + indent;
     const offsets = this.spec.staves.map(() => 0);
     const positions = units.map((u, k) => {
@@ -764,7 +812,7 @@ export class ContinuousLayout {
       sys.setX(x).setY(0);
       const chordPadding = end ? 0 : u.after;
       const endPadding = this.install(u.first, u.last, begin, end) + chordPadding;
-      const width = u.width + extra + chordPadding + (begin ? u.start : 0) + (end ? u.end : 0);
+      const width = u.width + extra * weights[k] + chordPadding + (begin ? u.start : 0) + (end ? u.end : 0);
       sys.setWidth(width).format({ endPadding });
       for (let j = 1; j < visible.length; j++) {
         const staves = sys.getStaves(),
@@ -995,7 +1043,7 @@ export class ContinuousLayout {
     }
     if (s.spec.niente && kind === 'crescendo' && starts) fragment.nienteTip = nienteTip(x1, y1, space, 'left');
     if (s.spec.niente && kind === 'diminuendo' && ends) fragment.nienteTip = nienteTip(x2, y2, space, 'right');
-    if (kind === 'tie' || kind === 'slur') {
+    if (kind === 'slur' || (kind === 'tie' && s.spec.string === undefined)) {
       const events = units.flatMap((u) => {
         const staves = this.score.staves[u.first];
         return this.score.notes[u.first]
@@ -1054,6 +1102,14 @@ export class ContinuousLayout {
       if (g.barlines)
         for (const u of units) {
           const staves = this.score.staves[u.first];
+          if (
+            this.options.independentMeters &&
+            members.some(
+              (j) =>
+                (staves[j].getModifiers(Position.END, Barline.CATEGORY)[0] as Barline).getType() === BarlineType.NONE
+            )
+          )
+            continue;
           const line = new StaveConnector(staves[top], staves[bottom]).setType('singleRight');
           this.drawing.push((ctx) => line.setContext(ctx).drawWithStyle());
         }
@@ -1085,5 +1141,12 @@ export class ContinuousLayout {
 
   draw(context: RenderContext): void {
     for (const draw of this.drawing) draw(context);
+    // A sustained note in a different voice can keep this local boundary inside a formatting window.
+    for (const { next, bar } of this.interiorBars) {
+      const stave = next.checkStave();
+      if (this.hidden.has(stave)) continue;
+      bar.setStave(stave).setX(next.getTieLeftX() - stave.space(0.5));
+      bar.draw();
+    }
   }
 }
