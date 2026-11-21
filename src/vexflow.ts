@@ -1,5 +1,6 @@
 // Public VexFlow facade, renderer configuration, and font selection.
 import { Accidental } from './accidental';
+import { AccordionRegister } from './accordionregister';
 import { AlternatingTremolo } from './alternatingtremolo';
 import { Annotation, AnnotationHorizontalJustify, AnnotationVerticalJustify } from './annotation';
 import { Articulation } from './articulation';
@@ -111,6 +112,7 @@ export class VexFlow {
   static PhraseLayout = PhraseLayout;
   static EngravingProfile = EngravingProfile;
   static Accidental = Accidental;
+  static AccordionRegister = AccordionRegister;
   static Annotation = Annotation;
   static Articulation = Articulation;
   static Barline = Barline;

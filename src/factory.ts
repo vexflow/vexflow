@@ -5,6 +5,7 @@
 // MIT License
 
 import { Accidental } from './accidental';
+import { AccordionRanks, AccordionRegister } from './accordionregister';
 import { Annotation, AnnotationHorizontalJustify, AnnotationVerticalJustify } from './annotation';
 import { Articulation } from './articulation';
 import { BarNote } from './barnote';
@@ -527,6 +528,11 @@ export class Factory {
     const accid = this.musicGlyph(new Accidental(params.type));
     accid.setContext(this.context);
     return this.own(accid);
+  }
+
+  /** Create a note-attached register mark using this score's music font. */
+  AccordionRegister(ranks: AccordionRanks): AccordionRegister {
+    return this.own(this.musicGlyph(new AccordionRegister(ranks)).setContext(this.context));
   }
 
   Annotation(params?: {
