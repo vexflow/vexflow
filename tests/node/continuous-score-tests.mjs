@@ -1411,3 +1411,24 @@ test('cross-bar tuplet timing precedes alignment to an independently metered sta
     assert.ok(score.meterPositions.get(score.getNote('next')).onset.equals(VF.VexFlow.RESOLUTION / 4));
   }
 });
+
+test('continuous score breaks retain centered drum hands and enclose the sticking in each row', () => {
+  const { f } = factory();
+  const source = spec(3, { boundaries: [{ measure: 3, breakBefore: 'force' }] });
+  source.sheet = { width: 600, rowGap: 0 };
+  const c = f.EasyScore().compose(source);
+  const notes = [0, 1, 2].map((i) => c.getNote('n' + i));
+  notes[0].addModifier(f.Articulation({ type: 'a>', position: 'below' }));
+  const marks = c.sheet.addStickingLine(notes.map((note, i) => ({ note, hand: i === 1 ? 'L' : 'R' })));
+  c.sheet.format();
+  const [first, second] = c.sheet.getRows();
+  assert.equal(first.systems.length, 2);
+  assert.equal(second.systems.length, 1);
+  assert.equal(marks[0].computeY().y, marks[1].computeY().y);
+  for (const [i, mark] of marks.entries()) {
+    const row = i < 2 ? first : second;
+    assert.equal(mark.getNote(), notes[i]);
+    const ink = VF.measureEngraving(mark).ink;
+    assert.ok(ink.y >= row.y && ink.y + ink.h <= row.y + row.height);
+  }
+});
