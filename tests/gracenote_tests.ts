@@ -23,6 +23,7 @@ const GraceNoteTests = {
     QUnit.module('Grace Notes');
     QUnit.test('boundsBeforeDrawing', boundsBeforeDrawing);
     const run = VexFlowTests.runTests;
+    run('Named Highland grip and taorluath', highlandEmbellishments);
     run('Grace Note Basic', basic);
     run('With Articulation and Annotation on Parent Note', graceNoteModifiers);
     run('Grace Note Basic with Slurs', basicSlurred);
@@ -52,6 +53,51 @@ const GraceNoteTests = {
     run('Grace Note Group Bounding Box', boundingBox);
   },
 };
+
+/** Named movements precede their own low A without consuming any metered ticks. */
+function highlandEmbellishments(options: TestOptions): void {
+  const { assert } = options;
+  const factory = VexFlowTests.makeFactory(options, 420, 155);
+  const stave = factory.Stave({ x: 10, y: 35, width: 390 }).addClef('treble');
+  const grip = GraceNoteGroup.highland('grip');
+  const taorluath = GraceNoteGroup.highland('taorluath');
+  const groups = [grip, taorluath];
+  const notes = groups.map((group) => factory.StaveNote({ keys: ['a/4'], duration: 'h' }).addModifier(group, 0));
+  const voice = factory.Voice().addTickables(notes);
+  factory.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+  factory.draw();
+
+  const keys = (group: GraceNoteGroup) => group.getGraceNotes().map((n) => n.getKeys()[0]);
+  assert.deepEqual(keys(grip), ['g/4', 'd/5', 'g/4']);
+  assert.deepEqual(keys(taorluath), ['g/4', 'd/5', 'g/4', 'e/5']);
+  assert.deepEqual(
+    groups.map((group) => group.getHighlandName()),
+    ['grip', 'taorluath']
+  );
+  assert.ok(taorluath.getWidth() > grip.getWidth(), 'The extra E reserves horizontal room');
+  assert.deepEqual(voice.getTickables(), notes, 'Only the two landing notes occupy the main voice');
+  assert.deepEqual(
+    notes.map((n) => n.getTicks().value()),
+    [VexFlow.RESOLUTION / 2, VexFlow.RESOLUTION / 2]
+  );
+  assert.deepEqual(
+    notes.map((n) => n.getTickContext().getTickID()),
+    [0, VexFlow.RESOLUTION / 2]
+  );
+  groups.forEach((group, i) => {
+    const beam = group.getLayoutElements().find((e) => e instanceof Beam) as Beam;
+    assert.ok(beam, 'Grace notes are beamed together');
+    assert.deepEqual(beam.notes, group.getGraceNotes(), 'Every grace belongs to the same beam');
+    assert.ok(group.getGraceNotes().every((note) => note.getAbsoluteX() < notes[i].getAbsoluteX()));
+  });
+
+  assert.deepEqual(keys(GraceNoteGroup.highland('grip', ['b/4', 'g/4'])), ['b/4', 'g/4'], 'Exact variant');
+  const explicit = new GraceNoteGroup([new GraceNote({ keys: ['e/5'], duration: '16' })]);
+  assert.deepEqual(keys(explicit), ['e/5']);
+  assert.strictEqual(explicit.getHighlandName(), undefined);
+  assert.throws(() => GraceNoteGroup.highland('unknown' as 'grip'), /Unknown Highland/);
+  assert.throws(() => GraceNoteGroup.highland('grip', []), /nonempty/);
+}
 
 function boundingBox(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, 300, 130);
