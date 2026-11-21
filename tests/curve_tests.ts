@@ -15,6 +15,7 @@ const CurveTests = {
     QUnit.module('Curve');
     const run = VexFlowTests.runTests;
     run('Simple Curve', simple);
+    run('Half-dashed slur at two widths', halfDashedSlur);
     run('Opening Direction - up', openingDirUp);
     run('Opening Direction - down', openingDirDown);
     run('Rounded Curve', rounded);
@@ -57,6 +58,46 @@ function createTest(
     check?.(options.assert);
     options.assert.ok(true, 'Curve renders');
   };
+}
+
+/** An editorial opening and its solid ending share the apex above the middle B. */
+function halfDashedSlur(options: TestOptions): void {
+  const f = VexFlowTests.makeFactory(options, 420, 300);
+  const score = f.EasyScore();
+  for (const [i, width] of [395, 240].entries()) {
+    const stave = f.Stave({ x: 10, y: 15 + 120 * i, width }).addClef('treble');
+    const notes = score.notes('g4/q, a4, b4, a4, g4', { stem: 'down' });
+    const voice = score.voice(notes, { time: '5/4' }).setStave(stave);
+    f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+    const slur = f.Curve({ from: notes[0], to: notes[4], options: { halfDashed: true, openingDirection: 'down' } });
+    const { start, end } = slur.getAnchors();
+    const center = notes[2].getAbsoluteX() + notes[2].getGlyphWidth() / 2;
+    options.assert.ok(Math.abs((start.x + end.x) / 2 - center) < 1, 'midpoint is above the third attack');
+  }
+  const ctx = f.getContext();
+  const setDash = ctx.setLineDash;
+  const patterns: number[][] = [];
+  ctx.setLineDash = (dash) => {
+    patterns.push(dash);
+    return setDash.call(ctx, dash);
+  };
+  try {
+    f.draw();
+  } finally {
+    ctx.setLineDash = setDash;
+  }
+  const openings = patterns.filter((pattern) => pattern.length > 0);
+  options.assert.deepEqual(
+    openings,
+    [
+      [4, 3],
+      [4, 3],
+    ],
+    'one dashed opening at each width'
+  );
+  for (const pattern of openings) {
+    options.assert.deepEqual(patterns[patterns.indexOf(pattern) + 1], [], 'the ending has continuous ink');
+  }
 }
 
 const simple = createTest(

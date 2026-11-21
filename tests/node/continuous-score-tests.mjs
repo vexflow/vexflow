@@ -319,6 +319,49 @@ test('a lyric extender resolves a unique word on its source note during formatti
   assert.throws(format, /Expected one lyric annotation/);
 });
 
+test('half-dashed slurs change stroke once at the midpoint of the entire fitted phrase', () => {
+  const { f, ctx } = factory();
+  const span = { id: 'editorial', kind: 'slur', from: 'n0', to: 'n4', halfDashed: true };
+  const score = f.EasyScore().compose(spec(5, { spans: [span] }));
+  const layout = score.sheet.getContinuousLayout();
+  for (const width of [600, 120, 600]) {
+    score.sheet.setWidth(width).format();
+    assert.equal(layout.fragments.length === 1, width === 600);
+    // Capture the cubics and dash arrays from the same Canvas context that paints them.
+    const drawing = Object.create(f.getContext());
+    const paths = [];
+    let start;
+    drawing.moveTo = (x, y) => {
+      start = [x, y];
+      return f.getContext().moveTo(x, y);
+    };
+    drawing.bezierCurveTo = (cx1, cy1, cx2, cy2, x, y) => {
+      paths.push({ start, left: [cx1, cy1], right: [cx2, cy2], end: [x, y], dash: ctx.getLineDash() });
+      return f.getContext().bezierCurveTo(cx1, cy1, cx2, cy2, x, y);
+    };
+    layout.draw(drawing);
+    for (const frag of layout.fragments) {
+      const [a, b] = frag.progress;
+      if (a < 0.5 && b > 0.5) {
+        const [opening, ending] = paths.splice(0, 2);
+        assert.deepEqual(opening.dash, [4, 3]);
+        assert.deepEqual(ending.dash, []);
+        assert.deepEqual(opening.end, ending.start);
+        const [x, y] = ending.start;
+        const expectedX = frag.x1 + ((frag.x2 - frag.x1) * (0.5 - a)) / (b - a);
+        assert.ok(Math.abs(x - expectedX) < 1e-7);
+        const slopeIn = (y - opening.right[1]) / (x - opening.right[0]);
+        const slopeOut = (ending.left[1] - y) / (ending.left[0] - x);
+        assert.ok(Math.abs(slopeIn - slopeOut) < 1e-7, 'the tangent is continuous at the join');
+      } else {
+        assert.deepEqual(paths.shift().dash, b <= 0.5 ? [4, 3] : []);
+      }
+    }
+    assert.equal(paths.length, 0);
+    assert.deepEqual(ctx.getLineDash(), [], 'the slur restores the drawing style');
+  }
+});
+
 test('hard keeps overflow together and forced breaks win over spare space', () => {
   const { f } = factory();
   const c = f.EasyScore().compose(

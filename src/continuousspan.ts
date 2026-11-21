@@ -8,7 +8,7 @@ import { Glyphs } from './glyphs';
 import type { TiedBend } from './guitargesture';
 import { drawNienteTip, NienteTip } from './hairpintip';
 import { Note } from './note';
-import { ribbonParts } from './phraseribbon';
+import { drawHalfDashedSlur, ribbonParts } from './phraseribbon';
 import { RenderContext } from './rendercontext';
 import { Stave } from './stave';
 import { Tables } from './tables';
@@ -35,6 +35,8 @@ export interface ContinuousSpan {
   flared?: boolean;
   /** Draw this pitched glissando with waves perpendicular to its slope. */
   wavy?: boolean;
+  /** Stroke the first half of the logical slur with dashes, even across a break. */
+  halfDashed?: boolean;
   /** Draw this pitch tie as a dashed arc, including its continuation fragments. */
   dashed?: boolean;
   /** Mark the closed musical endpoint of a crescendo or diminuendo with an open circle. */
@@ -80,6 +82,8 @@ export interface SpanFragment {
   flared?: boolean;
   /** Draw this pitched glissando with waves perpendicular to its slope. */
   wavy?: boolean;
+  /** Stroke the first half of the logical slur with dashes, even across a break. */
+  halfDashed?: boolean;
   /** Draw this pitch tie as a dashed arc, including its continuation fragments. */
   dashed?: boolean;
   row: number;
@@ -241,6 +245,19 @@ export function drawSpan(ctx: RenderContext, f: SpanFragment, label?: Element, b
     if (f.bend && bendLabel) drawTiedBend(ctx, f.bend, f.space, bendLabel);
     if (kind === 'slur' || kind === 'tie') {
       const { dx, a, b } = controls(f);
+      if (kind === 'slur' && f.halfDashed) {
+        drawHalfDashedSlur(
+          ctx,
+          [
+            { x: x1, y: y1 },
+            { x: x1 + dx, y: a },
+            { x: x2 - dx, y: b },
+            { x: x2, y: y2 },
+          ],
+          f.progress
+        );
+        return;
+      }
       ctx.beginPath();
       ctx.moveTo(x1, y1);
       if (kind === 'tie') {

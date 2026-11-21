@@ -338,6 +338,7 @@ export class ContinuousLayout {
       if (span.wavy && span.kind !== 'glissando') invalid('A wavy slide needs a glissando span.');
       if (span.flared && span.kind !== 'crescendo' && span.kind !== 'diminuendo')
         invalid('A flared profile needs a crescendo or diminuendo span.');
+      if (span.halfDashed && span.kind !== 'slur') invalid('A half-dashed curve needs a slur span.');
       if (span.dashed && span.kind !== 'tie') invalid('A dashed tie needs a tie span.');
       if (
         span.bend !== undefined &&
@@ -969,6 +970,7 @@ export class ContinuousLayout {
       progress: [0, 1],
       ...(s.spec.wavy && { wavy: true }),
       ...(s.spec.flared && { flared: true }),
+      ...(s.spec.halfDashed && { halfDashed: true }),
       ...(s.spec.dashed && { dashed: true }),
       ...((kind === 'palmMute' || s.spec.string !== undefined) && {
         strings: s.spec.string !== undefined ? [s.spec.string] : s.spec.strings,

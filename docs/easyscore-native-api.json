@@ -350,6 +350,7 @@
     "CurveOptions": {
       "extends": [],
       "fields": [
+        "halfDashed?: boolean;",
         "cps?: { x: number; y: number }[];",
         "thickness?: number;",
         "xShift?: number;",
