@@ -2620,6 +2620,7 @@
       "drawFlag(): void",
       "drawModifiers(): void",
       "drawStemThrough(): void",
+      "getFretInk()",
       "drawPositions(): void",
       "draw(): void"
     ]

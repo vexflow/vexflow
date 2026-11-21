@@ -419,6 +419,8 @@ Resizing a context alone does not reflow a score. See [sheets and themes](sheets
 `make.tabNote()` accepts every native TabNote field. Its optional second argument enables stems.
 `make.graceTabNote()` joins `make.graceNoteGroup()` like pitched grace notes.
 `make.bend()`, `make.tabTie()`, and `make.tabSlide()` return native handles.
+
+In a continuous score, a TAB tie clears the measured fret text from every voice on its staff. An automatic tie uses one side across all systems. Set `side: 'above'` or `'below'` to keep the tie on that side. The layout reports `CurveCollision` if the available space is too small.
 Tab spans use native `firstNote`, `lastNote`, `firstIndexes`, and `lastIndexes` fields.
 Partial slides require an explicit direction (`1` or `-1`).
 

@@ -474,6 +474,87 @@ test('tab ties stay on the selected string through reflow and leave a visible in
   }
 });
 
+// Two simultaneous TAB voices reproduce a string-five tie crossing a string-four fret.
+function tieStudy(side, split = false, crowded = false) {
+  const event = (id, str, fret, duration) => ({ id, tab: { positions: [{ str, fret }], duration } });
+  const measures = [0, 1].map((m) => ({
+    voices: [
+      { notes: [event('bassHalf' + m, 5, 2, 'h'), event('bassQuarter' + m, 5, 2, 'q')] },
+      { notes: [2, 2, 4, 2, 2, 2].map((str, i) => event('upper' + m + i, str, 3, '8')) },
+    ],
+  }));
+  if (split) {
+    measures[0].voices[0].notes[1].tab.positions[0].str = 2;
+    measures[1].voices[0].notes[0].tab.positions[0].str = 2;
+  }
+  if (crowded)
+    for (const m of measures)
+      for (const e of m.voices[1].notes) e.tab.positions = [1, 2, 3, 4, 5, 6].map((str) => ({ str, fret: 38 }));
+  return {
+    staves: [{ id: 'guitar', kind: 'tab', time: '3/4', measures }],
+    sheet: { width: 480, rowGap: 0 },
+    continuous: {
+      spans: [
+        {
+          id: 'hold',
+          kind: 'tie',
+          from: 'bassHalf0',
+          to: split ? 'bassQuarter1' : 'bassQuarter0',
+          ...(side ? { side } : {}),
+        },
+      ],
+    },
+  };
+}
+test('TAB ties measure other voices’ fret ink and keep one side across a system break', () => {
+  function draw(side, split = false, crowded = false) {
+    const { f } = factory(),
+      c = f.EasyScore().compose(tieStudy(side, split, crowded)),
+      layout = c.sheet.getContinuousLayout();
+    const frame = (width) => {
+      c.sheet.setWidth(width);
+      f.draw({ retain: true });
+      return { parts: structuredClone(layout.fragments), errors: structuredClone(layout.diagnostics) };
+    };
+    return { c, frame };
+  }
+  for (const side of [undefined, 'above', 'below']) {
+    const { c, frame } = draw(side);
+    const {
+      parts: [f],
+      errors,
+    } = frame(480);
+    assert.deepEqual(errors, []);
+    assert.equal(f.above, side === 'above');
+    assert.deepEqual(f.strings, [5]);
+    const sign = f.above ? -1 : 1;
+    const obstacle = c.getNote('upper02').getFretInk()[0];
+    // Sample the visible quadratic ribbon through the fret box, independently of the fitter's bounds.
+    for (let x = obstacle.x; x <= obstacle.x + obstacle.w; x += 0.2) {
+      const t = (x - f.x1) / (f.x2 - f.x1),
+        base = (1 - t) * f.y1 + t * f.y2;
+      for (const edge of [0, f.space * 0.22]) {
+        const y = base + sign * 2 * t * (1 - t) * (f.rise + edge);
+        assert.ok(y < obstacle.y || y > obstacle.y + obstacle.h);
+      }
+    }
+  }
+  const split = draw(undefined, true);
+  const wide = split.frame(480);
+  const narrow = split.frame(245);
+  assert.deepEqual(narrow.errors, []);
+  assert.deepEqual(
+    narrow.parts.map((f) => [f.part, f.above, f.strings]),
+    [
+      ['first', false, [5]],
+      ['last', false, [5]],
+    ]
+  );
+  assert.deepEqual(split.frame(480), wide);
+  const crowded = draw('above', false, true).frame(480);
+  assert.ok(crowded.parts[0].above);
+  assert.ok(crowded.errors.some((d) => d.code === 'CurveCollision' && d.source === 'hold'));
+});
 test('tab ties reject unmatched strings, frets and invalid chord positions before drawing', () => {
   for (const selectors of [{ string: 7 }, { string: 3 }, { fromHead: -1 }, { toHead: 2 }, { fromHead: 1, toHead: 1 }]) {
     const source = tabEndingStudy();
