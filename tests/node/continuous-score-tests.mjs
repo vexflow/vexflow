@@ -907,3 +907,38 @@ test('a glissando retains its pitch progression through an intermediate row and 
   // On the last two rows the same clef projects the shared boundary pitch onto the same staff line.
   assert.ok(Math.abs(fragments[1].y2 - c.staves[1][0].getY() - (fragments[2].y1 - c.staves[2][0].getY())) < 0.00001);
 });
+
+test('a dashed lower-head tie keeps its stroke, pitch and endpoints when the score wraps and rejoins', () => {
+  const { f, ctx, canvas } = factory();
+  const event = (id, keys) => ({ id, note: { keys, duration: 'q', stemDirection: 1 } });
+  const measures = [
+    { voices: [{ notes: [event('lead', ['g/4']), event('from', ['e/4', 'b/4'])] }] },
+    { voices: [{ notes: [event('to', ['e/4', 'b/4']), event('end', ['g/4'])] }] },
+  ];
+  const score = f.EasyScore().compose({
+    sheet: { width: 430 },
+    staves: [{ id: 'staff', time: '2/4', measures }],
+    continuous: { spans: [{ id: 'editorial', kind: 'tie', from: 'from', to: 'to', fromHead: 0, toHead: 0, side: 'below', dashed: true }] },
+  });
+  const frame = (width, parts) => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    score.sheet.setWidth(width);
+    f.draw({ retain: true });
+    const layout = score.sheet.getContinuousLayout();
+    const segments = layout.fragments;
+    assert.deepEqual(segments.map(s => s.part), parts);
+    assert.ok(segments.every(s => s.dashed));
+    assert.equal(segments[0].y1, score.getNote('from').getYs()[0] + segments[0].space / 2);
+    assert.equal(segments.at(-1).y2, score.getNote('to').getYs()[0] + segments.at(-1).space / 2);
+    const strokes = [];
+    const recorder = Object.create(f.getContext());
+    recorder.stroke = () => strokes.push(ctx.getLineDash());
+    recorder.fill = () => assert.fail('a dashed arc must have open gaps');
+    layout.draw(recorder);
+    assert.deepEqual(strokes, parts.map(() => [4, 3]));
+    return canvas.toBuffer();
+  };
+  const wide = frame(430, ['single']);
+  frame(125, ['first', 'last']);
+  assert.deepEqual(frame(430, ['single']), wide);
+});

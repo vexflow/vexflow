@@ -587,7 +587,13 @@ export class Factory {
 
   Ornament(
     type: string,
-    params?: { position?: string | number; upperAccidental?: string; lowerAccidental?: string; delayed?: boolean }
+    params?: {
+      position?: string | number;
+      upperAccidental?: string;
+      lowerAccidental?: string;
+      auxiliaryPitch?: string;
+      delayed?: boolean;
+    }
   ) {
     const options = {
       type,
@@ -598,6 +604,7 @@ export class Factory {
     if (params?.position !== undefined) {
       ornament.setPosition(params.position);
     }
+    if (options.auxiliaryPitch !== undefined) ornament.setAuxiliaryPitch(options.auxiliaryPitch);
     if (options.upperAccidental) {
       ornament.setUpperAccidental(options.upperAccidental);
     }
@@ -725,7 +732,7 @@ export class Factory {
     firstIndexes?: number[];
     lastIndexes?: number[];
     text?: string;
-    options?: { direction?: number };
+    options?: { direction?: number; laissezVibrer?: number };
   }): StaveTie {
     const tie = new StaveTie(
       {
@@ -733,6 +740,7 @@ export class Factory {
         lastNote: params.to,
         firstIndexes: params.firstIndexes,
         lastIndexes: params.lastIndexes,
+        laissezVibrer: params.options?.laissezVibrer,
       },
       params.text
     );

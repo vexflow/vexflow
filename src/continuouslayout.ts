@@ -335,6 +335,7 @@ export class ContinuousLayout {
       )
         invalid('Expected a unique span ID and ordered composition anchors.');
       let spec = { ...span };
+      if (span.dashed && span.kind !== 'tie') invalid('A dashed tie needs a tie span.');
       if (
         span.bend !== undefined &&
         !(span.kind === 'tie' && first.note instanceof TabNote && last.note instanceof TabNote)
@@ -963,6 +964,7 @@ export class ContinuousLayout {
       y1,
       y2,
       progress: [0, 1],
+      ...(s.spec.dashed && { dashed: true }),
       ...((kind === 'palmMute' || s.spec.string !== undefined) && {
         strings: s.spec.string !== undefined ? [s.spec.string] : s.spec.strings,
         ...(starts && { from: s.spec.from }),

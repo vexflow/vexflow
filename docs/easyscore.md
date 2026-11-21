@@ -548,6 +548,10 @@ const chords = [{ note: 'downbeat', harmony: written }, { note: 'rest', text: 'N
 
 `showTimeSignature` carries forward on the staff. Set it to `true` to print the active meter again. The meter still governs voice timing and automatic beaming while hidden. Use `Barline.type.DOUBLE` for a double bar. The same descriptors drive screen reflow and the selected staff in a `Publication`.
 
+### Written trill partners
+
+Attach `score.make.ornament('tr', { auxiliaryPitch: 'bb/4' })` to the principal note with `addModifier(ornament, 0)`. The small parenthesized head shows the written partner and adds no time to the voice. Use `'a/4'` for A or `'an/4'` to print an explicit natural. A native `Ornament('tr')` accepts `setAuxiliaryPitch(pitch)`. Call it without an argument to remove the cue. For just an accidental above the trill sign, use `setUpperAccidental()` with its accidental code.
+
 ### Accidental policy
 
 The default is `literal`: existing EasyScore accidental behavior stays unchanged.
@@ -601,6 +605,8 @@ console.log(layout.rows, layout.fragments, layout.diagnostics);
 ```
 
 For a beam that crosses a barline, add `{ id: 'phrase-beam', kind: 'beam', from: 'beat-two', to: 'next-beat-one' }` to `continuous.spans`. The endpoint IDs and the intervening pitched attacks belong to one voice on the same staff. Use this span as their beam owner. Each note's `getBeam().getNotes()` returns the full group at every width. A break fits the stems on each row and continues the shared beam levels at the row edge.
+
+To let one string or chord member ring, use `score.make.tie({ from: chord, firstIndexes: [0], options: { laissezVibrer: 18, direction: 1 } })`. The reach is in pixels from the selected head. Use direction `1` below or `-1` above. An ordinary outgoing tie still reaches the edge of its system.
 
 For a hairpin that grows from silence, pass `{ id: 'swell', kind: 'crescendo', from: 'a', to: 'b', niente: true }` in `continuous.spans`. A crescendo carries the circle on its opening fragment. A diminuendo carries it on its final fragment.
 
