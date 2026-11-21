@@ -31,6 +31,7 @@ export * from './instrumentprofile';
 export * from './notationspelling';
 // Do not export './fonts/*' because they are used by the entry/* files.
 export * from './flag';
+export * from './flutefingering';
 export * from './formatter';
 export * from './fraction';
 export * from './frethandfinger';

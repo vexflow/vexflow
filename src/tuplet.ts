@@ -349,11 +349,8 @@ export class Tuplet extends Element {
           mark.checkAttachedNote().getStave() !== note.getStave()
         )
           continue;
-        const baseline = mark.computeY().y + mark.getYShift();
-        const ink = mark.getTextMetrics();
-        yPosition = above
-          ? Math.min(yPosition, baseline - ink.actualBoundingBoxAscent - padding)
-          : Math.max(yPosition, baseline + ink.actualBoundingBoxDescent + padding);
+        const ink = mark.getTextInk(0, mark.computeY().y);
+        yPosition = above ? Math.min(yPosition, ink.y - padding) : Math.max(yPosition, ink.y + ink.h + padding);
       }
     }
 

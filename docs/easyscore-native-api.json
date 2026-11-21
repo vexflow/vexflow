@@ -1017,6 +1017,32 @@
       "draw(): void"
     ]
   },
+  "flutefingering": {
+    "FluteKey": "export type FluteKey = (typeof keys)[number];",
+    "FluteKeyState": "export type FluteKeyState = 'open' | 'closed';",
+    "FluteTrillKey": {
+      "extends": [],
+      "fields": [
+        "readonly key: FluteKey;",
+        "readonly start: FluteKeyState;",
+        "readonly alternate: FluteKeyState;"
+      ]
+    },
+    "FluteFingering": [
+      "constructor(states: Partial<Record<FluteKey, FluteKeyState>>, { scale = 1 }: { scale?: number } = {})",
+      "getKeyStates(): Readonly<Record<FluteKey, FluteKeyState>>",
+      "setTrillKey({ key, start, alternate }: FluteTrillKey): this",
+      "getTrillKey(): FluteTrillKey | undefined",
+      "clearTrillKey(): this",
+      "getDescription(): string",
+      "getWidth(): number",
+      "getHeight(): number",
+      "getTextInk(x: number, y: number): BoundingBox",
+      "getBoundingBox(): BoundingBox",
+      "getKeyCenter(key: FluteKey): { x: number; y: number }",
+      "draw(): void"
+    ]
+  },
   "formatter": {
     "FormatterOptions": {
       "extends": [],
@@ -1173,9 +1199,12 @@
     ]
   },
   "gracenotegroup": {
+    "HighlandEmbellishment": "export type HighlandEmbellishment = keyof typeof highlandPitches;",
     "GraceNoteGroup": [
       "DEBUG: boolean",
       "CATEGORY(): string",
+      "highland(name: HighlandEmbellishment, pitches?: readonly string[]): GraceNoteGroup",
+      "getHighlandName(): HighlandEmbellishment | undefined",
       "renderOptions: { slurYShift: number }",
       "format(groups: GraceNoteGroup[], state: ModifierContextState): boolean",
       "constructor(graceNotes: StemmableNote[], showSlur?: boolean)",
@@ -1922,6 +1951,13 @@
         "justify?: boolean;"
       ]
     },
+    "StickingAssignment": {
+      "extends": [],
+      "fields": [
+        "note: StaveNote;",
+        "hand?: 'R' | 'L';"
+      ]
+    },
     "SheetRow": {
       "extends": [],
       "fields": [
@@ -1939,6 +1975,8 @@
       "getContinuousLayout(): ContinuousLayout | undefined",
       "constructor(options: SheetOptions)",
       "addSystem(options: Omit<SystemOptions, 'factory' | 'width' | 'autoWidth' | 'noJustification'> = {}): System",
+      "addStickingLine(assignments: readonly StickingAssignment[]): Annotation[]",
+      "alignSticking(row: SheetRow): void",
       "setWidth(width: number): this",
       "getSystems(): System[]",
       "getRows(): SheetRow[]",
@@ -3121,6 +3159,7 @@
       "EasyScoreError",
       "Element",
       "Factory",
+      "FluteFingering",
       "Font",
       "Formatter",
       "Fraction",

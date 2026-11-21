@@ -8,12 +8,14 @@
 import { Beam } from './beam';
 import { BoundingBox } from './boundingbox';
 import { Formatter } from './formatter';
+import { GraceNote } from './gracenote';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { Note } from './note';
 import { RenderContext } from './rendercontext';
 import { StaveNote } from './stavenote';
 import { StaveTie } from './stavetie';
+import { Stem } from './stem';
 import { StemmableNote } from './stemmablenote';
 import { Tables } from './tables';
 import { TabTie } from './tabtie';
@@ -27,12 +29,40 @@ function L(...args: any) {
   if (GraceNoteGroup.DEBUG) log('VexFlow.GraceNoteGroup', args);
 }
 
+/** Named movements in the Highland light-music vocabulary. Pitches use written treble notation. */
+const highlandPitches = {
+  grip: ['g/4', 'd/5', 'g/4'],
+  taorluath: ['g/4', 'd/5', 'g/4', 'e/5'],
+} as const;
+
+/** A named Highland movement retains its identity even when the author supplies a variant. */
+export type HighlandEmbellishment = keyof typeof highlandPitches;
+
 /** GraceNoteGroup is used to format and render grace notes. */
 export class GraceNoteGroup extends Modifier {
   static DEBUG: boolean = false;
 
   static override get CATEGORY(): string {
     return Category.GraceNoteGroup;
+  }
+
+  private highlandName?: HighlandEmbellishment;
+
+  /** Make a beamed before-grace group. A variant supplies every written pitch in score order. */
+  static highland(name: HighlandEmbellishment, pitches?: readonly string[]): GraceNoteGroup {
+    if (!Object.prototype.hasOwnProperty.call(highlandPitches, name))
+      throw new RangeError('Unknown Highland embellishment.');
+    const sequence = pitches ?? highlandPitches[name];
+    if (!Array.isArray(sequence) || !sequence.length) throw new RangeError('Expected a nonempty grace sequence.');
+    const notes = sequence.map((key) => new GraceNote({ keys: [key], duration: '32', stemDirection: Stem.UP }));
+    const group = new GraceNoteGroup(notes).beamNotes();
+    group.highlandName = name;
+    return group;
+  }
+
+  /** Identify a named movement. An explicitly constructed grace group has no assigned name. */
+  getHighlandName(): HighlandEmbellishment | undefined {
+    return this.highlandName;
   }
 
   protected readonly voice: Voice;

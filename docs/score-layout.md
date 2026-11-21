@@ -23,6 +23,33 @@ It uses the annotations' computed positions, so drawing order does not matter.
 - Explicit annotation baselines and vertical shifts are respected.
 - This is not a general collision solver for every modifier or unrelated voice.
 
+## Flute fingering diagrams
+
+Attach a six-key flute fingering to each note in the exercise. An outlined key is open. A filled key is closed. Read L1 through L3 from the top, then R1 through R3 in the offset group.
+
+```js
+const base = { L1: 'closed', L2: 'closed', R1: 'closed' };
+first.addModifier(new FluteFingering(base), 0);
+second.addModifier(new FluteFingering({ ...base, L3: 'closed' }), 0);
+```
+
+Omitted keys are open. The author supplies the finger positions independently of pitch. Set `{ scale: 0.8 }` in the second constructor argument for a smaller diagram. After formatting, `getBoundingBox()` measures the chart and `getKeyCenter('L3')` locates the third left-hand key. The SVG exposes the six positions in its accessible label. Canvas applications can read the same text from `getDescription()`.
+
+### Moving trill keys
+
+Attach a six-key fingering to the trill entrance. Mark the moving key with its starting and alternate states.
+
+```js
+const fingering = new FluteFingering({ L1: 'closed', L2: 'closed', R1: 'closed' });
+entrance.addModifier(fingering, 0);
+fingering.setTrillKey({ key: 'R2', start: 'open', alternate: 'closed' });
+```
+
+Two horizontal strokes inside R2 show that the key alternates. The other five keep their base symbols.
+The starting state must match the base fingering. A closed key can also trill to open.
+Call `clearTrillKey()` to restore the base diagram. SVG exposes the convention in the diagram’s accessible label.
+Canvas applications can use the same wording from `getDescription()`.
+
 ## Concert harp pedals
 
 Attach a complete setting to the note or rest where the player needs it.

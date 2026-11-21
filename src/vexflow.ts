@@ -21,6 +21,7 @@ import { measureEngraving } from './engravinggeometry';
 import { EngravingProfile } from './engravingprofile';
 import { Factory } from './factory';
 import { FiguredBass } from './figuredbass';
+import { FluteFingering } from './flutefingering';
 import { Font, FontStyle, FontWeight } from './font';
 import { Formatter } from './formatter';
 import { Fraction } from './fraction';
@@ -133,6 +134,7 @@ export class VexFlow {
   static EasyScoreError = EasyScoreError;
   static Element = Element;
   static Factory = Factory;
+  static FluteFingering = FluteFingering;
   static Font = Font;
   static Formatter = Formatter;
   static Fraction = Fraction;

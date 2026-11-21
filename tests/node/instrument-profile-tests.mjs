@@ -28,6 +28,79 @@ test('instrument studies and score construction', async (t) => {
       };
     });
 
+    await t.test('six flute keys keep their hand groups and only L3 changes at the next entrance', async () => {
+      const result = await page.evaluate(() => {
+        const V = VexFlow;
+        const authored = { L1: 'closed', L2: 'closed', L3: 'open', R1: 'closed' };
+        const charts = [new V.FluteFingering(authored), new V.FluteFingering({ ...authored, L3: 'closed' })];
+        authored.L1 = 'open';
+        const invalid = [{ R4: 'closed' }, { L2: 'half' }];
+        const rejects = invalid.map((s) => {
+          try {
+            new V.FluteFingering(s);
+            return false;
+          } catch (err) {
+            return err instanceof RangeError;
+          }
+        });
+        const host = document.createElement('div');
+        const ctx = new V.SVGContext(host);
+        const stave = new V.Stave(12, 105, 350).setContext(ctx);
+        const notes = charts.map((d) =>
+          new V.StaveNote({ keys: ['b/4'], duration: 'h' }).setStave(stave).addModifier(d, 0)
+        );
+        const voice = new V.Voice('4/4').addTickables(notes);
+        function layout(width) {
+          stave.setWidth(width);
+          new V.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+          return charts.map((d, i) => {
+            const box = d.getBoundingBox();
+            const state = notes[i].checkModifierContext().getState();
+            const halfHead = notes[i].getGlyphWidth() / 2;
+            const anchor = notes[i].getModifierStartXY(V.Modifier.Position.ABOVE, 0);
+            return {
+              center: box.x + box.w / 2,
+              anchor: anchor.x,
+              above: box.y + box.h < stave.getYForLine(0),
+              reserved:
+                state.leftShift + halfHead >= box.w / 2 &&
+                state.rightShift + halfHead >= box.w / 2 &&
+                state.topTextLine * 10 >= box.h,
+              geometry: V.measureEngraving(d).ink,
+              box,
+              centers: Object.keys(d.getKeyStates()).map((key) => {
+                const point = d.getKeyCenter(key);
+                return [point.x - box.x, point.y - box.y];
+              }),
+            };
+          });
+        }
+        const widths = [layout(240), layout(410)];
+        voice.draw(ctx, stave);
+        const labels = [...host.querySelectorAll('.vf-flute-fingering')].map((group) =>
+          group.getAttribute('aria-label')
+        );
+        return { widths, labels, states: charts.map((d) => d.getKeyStates()), rejects };
+      });
+      assert.ok(result.rejects.every(Boolean));
+      const [first, second] = result.states;
+      assert.deepEqual(first, { L1: 'closed', L2: 'closed', L3: 'open', R1: 'closed', R2: 'open', R3: 'open' });
+      assert.deepEqual(second, { ...first, L3: 'closed' });
+      assert.match(result.labels[0], /L3 open/);
+      assert.match(result.labels[1], /L3 closed/);
+      assert.ok(result.widths[1][1].center > result.widths[0][1].center);
+      for (const [a, b] of result.widths) {
+        assert.deepEqual(a.centers, b.centers);
+        assert.ok(a.centers[3][0] > a.centers[0][0], 'Right hand sits to the right of the left hand');
+        assert.ok(a.centers[3][1] - a.centers[2][1] > a.centers[1][1] - a.centers[0][1], 'Gap between the hands');
+        for (const chart of [a, b]) {
+          assert.deepEqual(chart.geometry, chart.box);
+          assert.equal(chart.center, chart.anchor);
+          assert.ok(chart.above && chart.reserved);
+        }
+      }
+    });
+
     await t.test('seven harp pedals share one rail and preserve the note anchor at two scales', async () => {
       const results = await page.evaluate(() => {
         const V = VexFlow;
