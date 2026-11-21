@@ -91,3 +91,27 @@ export function elisionStudy(width) {
   });
   return { staves: [{ id: 'voice', time: '3/4', measures }], sheet: { width, x: 10, y: 8 }, continuous: {} };
 }
+
+/** Two hymn verses begin in the first bar and continue as ordinary syllable lists in the second. */
+export function stanzaStudy(stanza = '1.') {
+  const words = [
+    ['Bright', 'stars', 'are', 'still', 'be', 'yond', 'the', 'hill'],
+    ['The', 'dawn', 'draws', 'near', 'a', 'cross', 'the', 'field'],
+  ];
+  const measures = [
+    ['g/4', 'a/4', 'b/4', 'a/4'],
+    ['g/4', 'e/4', 'd/4', 'c/4'],
+  ].map((keys, bar) => {
+    const notes = keys.map((key, beat) => ({ id: 'g' + (bar * 4 + beat), note: { keys: [key], duration: 'q' } }));
+    const verses = words.map((row, i) => {
+      const syllables = notes.map(({ id }, beat) => ({
+        note: id,
+        text: row[bar * 4 + beat],
+        hyphenAfter: bar === 1 && beat === 0,
+      }));
+      return bar === 0 ? { stanza: i === 0 ? stanza : '12.', syllables } : syllables;
+    });
+    return { voices: [{ notes }], verses };
+  });
+  return { staves: [{ id: 'voice', time: '4/4', measures }], sheet: { width: 620, x: 10, y: 8 }, continuous: {} };
+}

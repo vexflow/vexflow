@@ -272,6 +272,7 @@ export class System extends Element {
 
     let y = this.options.y;
     let startX = 0;
+    let stanzaStartX = 0;
     const debugNoteMetricsYs: { y: number; stave: Stave }[] = [];
 
     this.partStaves.forEach((part, index) => {
@@ -284,7 +285,9 @@ export class System extends Element {
         debugNoteMetricsYs.push({ y, stave: part });
         y += 15;
       }
-      startX = Math.max(startX, part.getNoteStartX());
+      const column = this.phrase?.getStanzaColumnWidth(part);
+      if (column) stanzaStartX = Math.max(stanzaStartX, part.getX() + column);
+      startX = Math.max(startX, part.getNoteStartX(), stanzaStartX);
     });
 
     // Re-assign Stave to update y position
@@ -305,6 +308,8 @@ export class System extends Element {
       this.options.width = justifyWidth + Stave.rightPadding + (startX - this.options.x) + (row?.endPadding ?? 0);
       this.partStaves.forEach((part) => {
         part.setWidth(this.options.width);
+        // Resizing invalidates the native prefix. Preserve any space reserved for stanza labels.
+        if (stanzaStartX) part.setNoteStartX(startX);
       });
     } else {
       justifyWidth = this.options.noPadding
