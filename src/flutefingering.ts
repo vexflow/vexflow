@@ -8,10 +8,18 @@ const keys = ['L1', 'L2', 'L3', 'R1', 'R2', 'R3'] as const;
 export type FluteKey = (typeof keys)[number];
 export type FluteKeyState = 'open' | 'closed';
 
+/** One key alternates from its base state to the opposite state and back. */
+export interface FluteTrillKey {
+  readonly key: FluteKey;
+  readonly start: FluteKeyState;
+  readonly alternate: FluteKeyState;
+}
+
 /** A six-key diagram entered as physical finger positions. Omitted keys are open. */
 export class FluteFingering extends Annotation {
   private readonly states: Readonly<Record<FluteKey, FluteKeyState>>;
   private readonly scale: number;
+  private trillKey?: FluteTrillKey;
 
   constructor(states: Partial<Record<FluteKey, FluteKeyState>>, { scale = 1 }: { scale?: number } = {}) {
     super('');
@@ -38,9 +46,33 @@ export class FluteFingering extends Annotation {
     return this.states;
   }
 
+  /** Mark a moving key while preserving the six underlying finger positions. */
+  setTrillKey({ key, start, alternate }: FluteTrillKey): this {
+    if (!keys.includes(key)) throw new RangeError(`Unknown flute key: ${key}.`);
+    if (start !== this.states[key]) throw new RangeError(`Trill on ${key} must start ${this.states[key]}.`);
+    const opposite = start === 'open' ? 'closed' : 'open';
+    if (alternate !== opposite) throw new RangeError(`Trill on ${key} must alternate to ${opposite}.`);
+    this.trillKey = Object.freeze({ key, start, alternate });
+    return this;
+  }
+
+  /** Read the moving key and the direction of its first movement. */
+  getTrillKey(): FluteTrillKey | undefined {
+    return this.trillKey;
+  }
+
+  /** Restore all six base symbols on the attached diagram. */
+  clearTrillKey(): this {
+    this.trillKey = undefined;
+    return this;
+  }
+
   /** Describe the visible chart to screen readers and Canvas applications. */
   getDescription(): string {
-    return 'Flute fingering. ' + keys.map((key) => `${key} ${this.states[key]}`).join(', ') + '.';
+    const base = 'Flute fingering. ' + keys.map((key) => `${key} ${this.states[key]}`).join(', ') + '.';
+    if (!this.trillKey) return base;
+    const { key, start, alternate } = this.trillKey;
+    return `${base} Hatched ${key} trills from ${start} to ${alternate} and back.`;
   }
 
   /** Include the left-hand labels and the offset right-hand circles in note spacing. */
@@ -80,8 +112,20 @@ export class FluteFingering extends Annotation {
   protected drawKey(ctx: RenderContext, key: FluteKey, x: number, y: number, radius: number): void {
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
-    if (this.states[key] === 'closed') ctx.fill();
+    const moving = this.trillKey?.key === key;
+    if (!moving && this.states[key] === 'closed') ctx.fill();
     ctx.stroke();
+
+    if (moving) {
+      // Two chords inside the circular outline leave a light gap at the center, including at reduced scale.
+      ctx.beginPath();
+      for (const offset of [-radius / 3, radius / 3]) {
+        const halfChord = Math.sqrt(radius * radius - offset * offset);
+        ctx.moveTo(x - halfChord, y + offset);
+        ctx.lineTo(x + halfChord, y + offset);
+      }
+      ctx.stroke();
+    }
   }
 
   /** Draw the six labeled keys using the same geometry measured by the score. */
