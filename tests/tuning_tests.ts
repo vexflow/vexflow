@@ -5,6 +5,7 @@
 
 import { VexFlowTests } from './vexflow_test_helpers';
 
+import { FrettedInstrument } from '../src/instrumentprofile';
 import { Tuning } from '../src/tuning';
 
 const TuningTests = {
@@ -12,6 +13,7 @@ const TuningTests = {
     QUnit.module('Tuning');
     QUnit.test('Standard Tuning', standard);
     QUnit.test('Standard Banjo Tuning', banjo);
+    QUnit.test('Short fifth string and paired banjo TAB', shortFifthString);
     QUnit.test('Return note for fret', noteForFret);
   },
 };
@@ -66,6 +68,35 @@ function banjo(assert: Assert): void {
   const tuning = new Tuning();
   tuning.setTuning('standardBanjo');
   checkStandardBanjo(assert, tuning);
+}
+
+/** A short fifth string uses neck fret numbers, including when another string has a capo. */
+function shortFifthString(assert: Assert): void {
+  const tuning = new Tuning('standardBanjo');
+  assert.equal(tuning.getNoteForFret(0, 5), 'G/5');
+  assert.equal(tuning.getNoteForFret(7, 5), 'A/5');
+  assert.equal(tuning.getNoteForFret(7, 1), 'A/5');
+  assert.throws(() => tuning.getNoteForFret(2, 5), /below the nut/);
+  assert.equal(tuning.getNoteForFret(0, 5, 2), 'G/5');
+  assert.equal(tuning.getNoteForFret(0, 5, 7), 'A/5');
+  assert.equal(tuning.getNoteForFret(5, 5, 2), 'A/5');
+
+  const banjo = new FrettedInstrument('standardBanjo');
+  const positions = [
+    { str: 5, fret: 7 },
+    { str: 2, fret: 0 },
+  ];
+  const played = banjo.attack(positions, 'q');
+  assert.deepEqual(played.note.keys, ['A/5', 'B/4']);
+  assert.deepEqual(played.tab.positions, positions);
+  assert.equal(played.tab.duration, played.note.duration);
+  assert.throws(() => banjo.attack([{ str: 5, fret: 2 }], 'q'), /below the nut/);
+
+  tuning.setTuning(Tuning.names.standardBanjo);
+  assert.equal(tuning.getNoteForFret(7, 5), 'D/6', 'Custom pitches default to full-length strings');
+  tuning.setTuning('D/5,G/5', [0, 5]);
+  assert.throws(() => tuning.setTuning('D/5,G/5', [5]), /nut fret for each string/);
+  assert.equal(tuning.getNoteForFret(7, 2), 'A/5', 'A failed update preserves the prior tuning');
 }
 
 function noteForFret(assert: Assert): void {
