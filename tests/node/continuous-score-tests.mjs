@@ -579,14 +579,14 @@ function renderSaints({ backend, space }) {
   const drawText = ctx.fillText.bind(ctx);
   let painted = [];
   ctx.fillText = (text, x, y) => {
-    if (text === 'in') painted.push(y);
+    if (text === 'in' || text === 'sky') painted.push([text, y]);
     return drawText(text, x, y);
   };
   return [1000, 356, 1000].map((width) => {
     music.sheet.setWidth(width).format();
     const { rows, fragments, diagnostics } = music.sheet.getContinuousLayout();
     const words = music.notes.flat(3).flatMap((n) => n.getModifiers().filter((a) => a.phraseManaged));
-    const expected = words.filter((a) => a.text === 'in').map((a) => a.computeY().y);
+    const expected = words.filter((a) => a.text === 'in' || a.text === 'sky').map((a) => [a.text, a.computeY().y]);
     const baselines = words.map((a) => a.computeY().y - a.checkAttachedNote().checkStave().getYForLine(0));
     const extenders = fragments
       .filter((f) => f.kind === 'lyric')
@@ -598,7 +598,13 @@ function renderSaints({ backend, space }) {
           .find((a) => a.getAttribute('id') === spec.syllableId);
         const ink = word.getTextInk(word.computeX().x, word.computeY().y);
         const staff = music.staves[rows[f.row].measures[0] - 1][0];
-        return { part: f.part, y: f.y1 - staff.getYForLine(0), gap: f.x1 - (ink.x + ink.w), length: f.x2 - f.x1 };
+        return {
+          word: word.text,
+          part: f.part,
+          y: f.y1 - staff.getYForLine(0),
+          gap: f.x1 - (ink.x + ink.w),
+          length: f.x2 - f.x1,
+        };
       });
     ctx.clear();
     painted = [];
@@ -648,11 +654,12 @@ test('Saints, choir, piano and ensemble reflow in browser SVG and Canvas with tw
         );
         for (const frame of frames) {
           assert.deepEqual(frame.diagnostics, []);
-          assert.equal(frame.expected.length, 4);
+          assert.equal(frame.expected.filter(([text]) => text === 'in').length, 5);
+          assert.equal(frame.expected.filter(([text]) => text === 'sky').length, 3);
           assert.deepEqual(frame.painted, frame.expected, 'each syllable is drawn once at its measured baseline');
-          for (const y of frame.baselines) assert.ok(Math.abs(y - 7.5 * space) < 0.01);
+          for (const y of frame.baselines) assert.ok([7.5, 9.5].some((line) => Math.abs(y - line * space) < 0.01));
           for (const line of frame.extenders) {
-            assert.ok(Math.abs(line.y - 7.5 * space) < 0.01);
+            assert.ok(Math.abs(line.y - (line.word === 'sky' ? 9.5 : 7.5) * space) < 0.01);
             assert.ok(line.length > 0);
             if (line.part === 'first' || line.part === 'single') assert.ok(Math.abs(line.gap - 0.35 * space) < 0.01);
           }

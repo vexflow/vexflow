@@ -154,7 +154,8 @@
     };
     el('tools').hidden = false;
     el('status').textContent = '';
-    new ResizeObserver(reflow).observe(el('page'));
+    // Reflow changes the page height. Let the browser finish delivering resize notifications first.
+    new ResizeObserver(() => requestAnimationFrame(reflow)).observe(el('page'));
   }
   open().catch((error) => {
     el('status').textContent = error.message;

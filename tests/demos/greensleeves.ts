@@ -1,7 +1,7 @@
 // The opening of Greensleeves in standard guitar tuning. Both staves share each pitch and duration.
 import { TestOptions, VexFlowTests } from '../vexflow_test_helpers';
 
-import { BarlineType, Stroke } from '../../src/index';
+import { BarlineType, FretDiagram, StemmableNote, Stroke } from '../../src/index';
 
 /** Written guitar pitches sound an octave lower. Each pair is [string, fret], counting from high E. */
 const positions: Record<string, [number, number]> = {
@@ -26,7 +26,7 @@ const positions: Record<string, [number, number]> = {
 
 /** Pair the melody with first-position chord voicings under the same rhythmic columns. */
 export function greensleeves(options: TestOptions): void {
-  const f = VexFlowTests.makeFactory(options, 900, 486);
+  const f = VexFlowTests.makeFactory(options, 900, 550);
   const score = f.EasyScore({ throwOnError: true });
   const bars = [
     ['', 'A4/q'],
@@ -39,11 +39,19 @@ export function greensleeves(options: TestOptions): void {
     ['E', 'E3+E4+B4/h G#4/q'],
     ['E5', 'E3+B3+E4/h'],
   ];
+  // Finger just the strings that sound in the opening four voicings. The tab supplies their frets.
+  const fingers: Record<string, (number | null)[]> = {
+    Am: [null, null, 2, 3, 1, null],
+    C: [null, 3, null, null, 1, null],
+    G: [2, null, null, null, 3, null],
+    Em: [null, 2, null, null, null, null],
+  };
+  const frames: { diagram: FretDiagram; anchor: StemmableNote }[] = [];
   bars.forEach(([chordName, bar], i) => {
     const row = i >= 5 ? 1 : 0;
     const width = row ? 218 : i === 0 ? 112 : 190;
     const x = row ? 12 + (i - 5) * width : i === 0 ? 12 : 124 + (i - 1) * width;
-    const y = 28 + row * 230;
+    const y = 92 + row * 230;
     // Read each voicing low to high so chord indexes agree on the staff and tab.
     const events = bar.split(' ').map((token) => {
       const [chord, duration] = token.split('/');
@@ -65,6 +73,11 @@ export function greensleeves(options: TestOptions): void {
         dots: duration.includes('.') ? 1 : 0,
       })
     );
+    if (row === 0 && chordName) {
+      const frets = Array<number | 'x'>(6).fill('x');
+      for (const { str, fret } of tab[0].getPositions()) frets[6 - str] = Number(fret);
+      frames.push({ diagram: new FretDiagram({ frets, rows: 3, fingerings: fingers[chordName] }), anchor: notes[0] });
+    }
     if (i === 1 || i === 5) {
       notes[0].addModifier(score.make.fingering({ number: '1', position: 'left' }), 3);
       notes[0].addModifier(score.make.fingering({ number: '2', position: 'left' }), 1);
@@ -91,5 +104,12 @@ export function greensleeves(options: TestOptions): void {
     }
   });
   f.draw();
-  options.assert.ok(true, 'Chord melody and tab share the same rhythmic grid');
+  // Center each five-space frame on the chord that the formatter placed below it.
+  for (const { diagram, anchor } of frames)
+    diagram
+      .setContext(f.getContext())
+      .setX(anchor.getAbsoluteX() - 44.5)
+      .setY(10)
+      .draw();
+  options.assert.equal(frames.length, 4, 'Each opening chord has its own fingering diagram');
 }
