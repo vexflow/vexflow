@@ -198,6 +198,65 @@ test('instrument studies and score construction', async (t) => {
       assert.ok(result.invalid.every(Boolean));
     });
 
+    await t.test('guitar voicings retain the requested tuning, chord tones and slash bass', async () => {
+      const result = await page.evaluate(() => {
+        const { FretDiagram, Tuning } = VexFlow;
+        const tuning = new Tuning('standard');
+        const c = { root: 'C' };
+        const lookup = FretDiagram.lookupVoicing;
+        const open = lookup(c, 'standard');
+        const inversion = lookup({ root: 'c', quality: 'major', bass: 'e' }, 'standard');
+        const barre = lookup(c, 'standard', 'third-position');
+        const original = structuredClone(barre);
+        // A consumer can edit a returned frame without affecting the catalog.
+        barre.frets[1] = 0;
+        barre.barre.from = 6;
+        const pitches = (frame) =>
+          frame.frets.flatMap((fret, i) =>
+            fret === 'x' ? [] : [tuning.getValueForFret(fret, frame.frets.length - i)]
+          );
+        const sounded = [
+          open,
+          inversion,
+          original,
+          lookup({ root: 'D' }, 'standard'),
+          lookup({ root: 'G' }, 'standard'),
+        ].map(pitches);
+        return {
+          open,
+          inversion,
+          original,
+          pitches: sounded.map((chord) => chord.map((note) => note % 12)),
+          basses: sounded.map((chord) => Math.min(...chord) % 12),
+          repeat: lookup(c, Tuning.names.standard, 'third-position'),
+          named: lookup(c, 'standard', 'open'),
+          unknown: [
+            lookup(c, 'dropd'),
+            lookup(c, Tuning.names.dropd),
+            lookup(c, 'standardBanjo'),
+            lookup({ root: 'C', quality: 'm' }, 'standard'),
+            lookup({ root: 'C', bass: 'G' }, 'standard'),
+            lookup({ root: 'C', quality: '/E' }, 'standard'),
+            lookup(c, 'standard', 'missing'),
+          ].every((shape) => shape === undefined),
+        };
+      });
+      assert.deepEqual(result.open.frets, ['x', 3, 2, 0, 1, 0]);
+      assert.deepEqual(result.inversion.frets, [0, 3, 2, 0, 1, 0]);
+      assert.deepEqual(result.original.frets, ['x', 3, 5, 5, 5, 3]);
+      assert.deepEqual(result.pitches, [
+        [0, 4, 7, 0, 4],
+        [4, 0, 4, 7, 0, 4],
+        [0, 7, 0, 4, 7],
+        [2, 9, 2, 6],
+        [7, 11, 2, 7, 11, 7],
+      ]);
+      assert.deepEqual(result.basses, [0, 4, 0, 2, 7]);
+      assert.deepEqual(result.repeat, result.original);
+      assert.deepEqual(result.named, result.open);
+      assert.ok(result.unknown);
+    });
+
     await t.test('chord-frame fingerings follow stopped strings on SVG and Canvas', async () => {
       const result = await page.evaluate(() => {
         const VF = VexFlow;

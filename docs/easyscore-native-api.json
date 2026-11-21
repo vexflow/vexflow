@@ -929,6 +929,7 @@
     },
     "FretDiagram": [
       "CATEGORY(): string",
+      "lookupVoicing(harmony: ChordHarmony, tuning: string, name?: string): FretDiagramSpec | undefined",
       "constructor(spec: FretDiagramSpec)",
       "setFingerings(fingerings: NonNullable<FretDiagramSpec['fingerings']> = []): this",
       "getBoundingBox(): BoundingBox",

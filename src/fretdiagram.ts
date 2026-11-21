@@ -1,7 +1,9 @@
-// A standalone chord frame. Strings run from the lowest (left) to the highest (right).
+// Standalone chord frames, including standard-guitar voicings in low-to-high string order.
 import { BoundingBox } from './boundingbox';
 import { Element } from './element';
+import { ChordHarmony, NotationSpelling } from './notationspelling';
 import { RenderContext } from './rendercontext';
+import { Tuning } from './tuning';
 import { Category } from './typeguard';
 import { RuntimeError } from './util';
 
@@ -15,10 +17,46 @@ export interface FretDiagramSpec {
   barre?: { fret: number; from: number; to: number };
 }
 
+/** Standard-tuned major chords in preference order. Slash basses have their own entries. */
+const standardMajorVoicings: readonly {
+  root: string;
+  bass?: string;
+  name: string;
+  frame: FretDiagramSpec;
+}[] = [
+  { root: 'C', name: 'open', frame: { frets: ['x', 3, 2, 0, 1, 0] } },
+  {
+    root: 'C',
+    name: 'third-position',
+    frame: { frets: ['x', 3, 5, 5, 5, 3], firstFret: 3, barre: { fret: 3, from: 5, to: 1 } },
+  },
+  { root: 'C', bass: 'E', name: 'open', frame: { frets: [0, 3, 2, 0, 1, 0] } },
+  { root: 'D', name: 'open', frame: { frets: ['x', 'x', 0, 2, 3, 2] } },
+  { root: 'G', name: 'open', frame: { frets: [3, 2, 0, 0, 0, 3] } },
+];
+
 export class FretDiagram extends Element {
   /** The registry and font metrics both use the diagram category. */
   static override get CATEGORY(): string {
     return Category.FretDiagram;
+  }
+
+  /** Return a fresh frame for this harmony and tuning. Omitting the name selects the first registered shape. */
+  static lookupVoicing(harmony: ChordHarmony, tuning: string, name?: string): FretDiagramSpec | undefined {
+    const pitches = tuning
+      .split(',')
+      .map((key) => key.trim().toUpperCase())
+      .join(',');
+    if (tuning !== 'standard' && pitches !== Tuning.names.standard) return undefined;
+    if (!['', 'maj', 'major', 'M'].includes(harmony.quality ?? '')) return undefined;
+    const root = NotationSpelling.chordText({ root: harmony.root });
+    const bass = harmony.bass === undefined ? undefined : NotationSpelling.chordText({ root: harmony.bass });
+    const match = standardMajorVoicings.find(
+      (v) => v.root === root && v.bass === bass && (name === undefined || v.name === name)
+    );
+    if (!match) return undefined;
+    const frame = match.frame;
+    return { ...frame, frets: [...frame.frets], ...(frame.barre && { barre: { ...frame.barre } }) };
   }
 
   private readonly frets: readonly (number | 'x')[];
