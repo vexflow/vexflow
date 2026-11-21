@@ -11,6 +11,28 @@ import { StaveModifier, StaveModifierPosition } from './stavemodifier';
 import { Category } from './typeguard';
 import { log } from './util';
 
+/** Octave annotations share the G- or F-clef anchor, including clefs on nonstandard lines. */
+const octaveGlyphs = new Map<string, Map<string, string>>([
+  [
+    Glyphs.gClef,
+    new Map([
+      ['8va', Glyphs.gClef8va],
+      ['8vb', Glyphs.gClef8vb],
+      ['15ma', Glyphs.gClef15ma],
+      ['15mb', Glyphs.gClef15mb],
+    ]),
+  ],
+  [
+    Glyphs.fClef,
+    new Map([
+      ['8va', Glyphs.fClef8va],
+      ['8vb', Glyphs.fClef8vb],
+      ['15ma', Glyphs.fClef15ma],
+      ['15mb', Glyphs.fClef15mb],
+    ]),
+  ],
+]);
+
 // eslint-disable-next-line
 function L(...args: any[]) {
   if (Clef.DEBUG) log('VexFlow.Clef', args);
@@ -119,22 +141,9 @@ export class Clef extends StaveModifier {
     this.line = Clef.types[type].line;
     this.size = size ?? 'default';
 
-    // If an annotation, such as 8va, is specified, add it to the Clef object.
-    if (annotation === '8va') {
-      if (this.code === Glyphs.gClef) {
-        this.code = Glyphs.gClef8va;
-      }
-      if (this.code === Glyphs.fClef) {
-        this.code = Glyphs.fClef8va;
-      }
-    }
-    if (annotation === '8vb') {
-      if (this.code === Glyphs.gClef) {
-        this.code = Glyphs.gClef8vb;
-      }
-      if (this.code === Glyphs.fClef) {
-        this.code = Glyphs.fClef8vb;
-      }
+    // Octave clefs use complete SMuFL glyphs at the ordinary written-pitch anchor.
+    if (annotation) {
+      this.code = octaveGlyphs.get(this.code)?.get(annotation) ?? this.code;
     }
     this.text = this.code;
     this.fontInfo.size = Math.floor(Clef.getPoint(this.size));
