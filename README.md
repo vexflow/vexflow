@@ -12,6 +12,8 @@ Save the page as UTF-8 and put `<meta charset="utf-8">` at the start of `<head>`
 
 See this example: [https://jsfiddle.net/ck6erLhm/](https://jsfiddle.net/ck6erLhm/)
 
+For more informa
+
 ```html
 <!doctype html>
 <html>
@@ -31,93 +33,32 @@ See this example: [https://jsfiddle.net/ck6erLhm/](https://jsfiddle.net/ck6erLhm
 
 The URL above includes a version number <code>vexflow@x.y.z</code>. Specifying a version prevents a future update from breaking your deployment.
 
-If your project uses a bundler, you can install VexFlow from npm:
+See more about this in the [VexFlow Guide](https://vexflow.com/guide/index.html#lesson/setup).
 
-```sh
-npm install vexflow
-```
+## Learn Vexflow
 
-[Read the interactive user guide](https://vexflow.com/guide/) for Quickstart, EasyScore, the native API, and an editable playground. [Run or build the guide locally](guide/README.md).
+The simplest way to use VexFlow is with the [EasyScore API](https://vexflow.com/guide/#lesson/notation).
 
-## Factory and EasyScore
+To get down into the guts and really customize your notation, you can use the [Native VexFlow API](https://vexflow.com/guide/#lesson/native-lifecycle).
 
-Factory and EasyScore are VexFlow's high-level API for creating staves, voices, and notes. On a web page containing a `<div id="output"></div>`, the following code displays a score:
+Note that these APIs are complementary, so you can use EasyScore for most of your implementation, and use the native API only where you need it.
 
-```javascript
-const factory = new VexFlow.Factory({
-  renderer: { elementId: 'output', width: 500, height: 200 },
-});
+### Consider VexTab
 
-const score = factory.EasyScore();
-const system = factory.System();
+If you really want to keep things simple -- consider [VexTab](https://vexflow.com/vextab), which takes care of a ton of the plumbing for you, and
+has things like an online audio player, a serialization format, native web controls, etc.
 
-system
-  .addStave({
-    voices: [
-      score.voice(score.notes('C#5/q, B4, A4, G#4', { stem: 'up' })),
-      score.voice(score.notes('C#4/h, C#4', { stem: 'down' })),
-    ],
-  })
-  .addClef('treble')
-  .addTimeSignature('4/4');
 
-factory.draw();
-```
-
-[See it running here.](https://vexflow.github.io/vexflow-examples/guides/getting-started/)
-
-[Read the EasyScore guide.](docs/easyscore.md)
-
-## Native API
-
-You can use the low-level VexFlow API if you need more control. Below, we render a stave using SVG. [See a running example of the low-level API here.](https://vexflow.github.io/vexflow-examples/guides/getting-started/)
-
-```javascript
-const { Renderer, Stave } = VexFlow;
-
-// Create an SVG renderer and attach it to the DIV element with id="output".
-const div = document.getElementById('output');
-const renderer = new Renderer(div, Renderer.Backends.SVG);
-
-// Configure the rendering context.
-renderer.resize(500, 500);
-const context = renderer.getContext();
-
-// Create a stave of width 400 at position 10, 40.
-const stave = new Stave(10, 40, 400);
-
-// Add a clef and time signature.
-stave.addClef('treble').addTimeSignature('4/4');
-
-// Connect it to the rendering context and draw!
-stave.setContext(context).draw();
-```
-
-## Examples
-
-To save SVGs that display without installed fonts, see [portable SVG export](docs/portable-svg.md).
-
-A good way to learn the API is to look at our examples & unit tests:
-
-- [Examples](https://vexflow.github.io/vexflow-examples)
-
-- [Unit Tests](https://github.com/vexflow/vexflow/tree/main/tests)
-
-## More Resources
+## Other Resources
 
 - [Building, testing, releasing, and uploading static sites](docs/build.md).
-- Publish the illustrated changes report since 5.0.0 with `npm run improvements:upload`. [Build and upload instructions](docs/improvements-report.md).
 - [Code quality reports and commit archive](docs/quality-reports.md).
-
 - [Text fonts and lyric layout](docs/text-and-lyrics.md), [jsdom rendering](docs/jsdom.md), and [score benchmarks](docs/benchmarks.md).
 - [Chord symbol kerning](docs/chord-symbols.md).
 - [Score layout](docs/score-layout.md), [proportional spacing](docs/proportional-spacing.md), and [responsive sheets and themes](docs/sheets-and-themes.md).
 - [Rendering tests and visual comparisons](docs/testing.md).
-- [Interactive user guide](guide/README.md): learn with editable examples.
 
 - If you need help, start a [GitHub discussion](https://github.com/vexflow/vexflow/discussions).
-
-- Learn more on the [VexFlow wiki](https://github.com/vexflow/vexflow/wiki).
 
 - [VexFlow](https://vexflow.com) was created by [Mohit Muthanna Cheppudira](https://muthanna.com) in 2010. It is currently maintained by [Ron Yeh](https://github.com/ronyeh) and [Rodrigo Vilar](https://github.com/rvilarl). Many others have contributed with code, documentation, bug reports, and feature requests. See the [list of contributors](https://github.com/0xfe/vexflow/graphs/contributors).
 
