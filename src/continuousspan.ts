@@ -8,7 +8,7 @@ import { Glyphs } from './glyphs';
 import type { TiedBend } from './guitargesture';
 import { drawNienteTip, NienteTip } from './hairpintip';
 import { Note } from './note';
-import { ribbonParts } from './phraseribbon';
+import { drawHalfDashedSlur, ribbonParts } from './phraseribbon';
 import { RenderContext } from './rendercontext';
 import { Stave } from './stave';
 import { Tables } from './tables';
@@ -33,6 +33,10 @@ export interface ContinuousSpan {
   kind: ContinuousSpanKind;
   /** Apply a flared aperture along the whole crescendo or diminuendo. */
   flared?: boolean;
+  /** Draw this pitched glissando with waves perpendicular to its slope. */
+  wavy?: boolean;
+  /** Stroke the first half of the logical slur with dashes, even across a break. */
+  halfDashed?: boolean;
   /** Draw this pitch tie as a dashed arc, including its continuation fragments. */
   dashed?: boolean;
   /** Mark the closed musical endpoint of a crescendo or diminuendo with an open circle. */
@@ -76,6 +80,10 @@ export interface SpanFragment {
   kind: ContinuousSpanKind;
   /** Apply a flared aperture along the whole crescendo or diminuendo. */
   flared?: boolean;
+  /** Draw this pitched glissando with waves perpendicular to its slope. */
+  wavy?: boolean;
+  /** Stroke the first half of the logical slur with dashes, even across a break. */
+  halfDashed?: boolean;
   /** Draw this pitch tie as a dashed arc, including its continuation fragments. */
   dashed?: boolean;
   row: number;
@@ -188,6 +196,33 @@ export function fitSpan(f: SpanFragment, obstacles: Bounds[]): boolean {
   return cost === 0;
 }
 
+/** Fit whole waves to the pitch line so both tips meet their anchors. */
+function drawWavyGlissando(ctx: RenderContext, f: SpanFragment): void {
+  const dx = f.x2 - f.x1;
+  const dy = f.y2 - f.y1;
+  const length = Math.hypot(dx, dy);
+  const cycles = Math.max(1, Math.round(length / (f.space * 0.85)));
+  const halves = 2 * cycles;
+  // A quadratic reaches half its control-point offset at its crest.
+  const offset = 2 * Math.min(f.space * 0.18, length / (cycles * 4));
+  const normalX = (-dy / length) * offset;
+  const normalY = (dx / length) * offset;
+  ctx.beginPath();
+  ctx.moveTo(f.x1, f.y1);
+  for (let i = 0; i < halves; i++) {
+    const mid = (i + 0.5) / halves;
+    const end = (i + 1) / halves;
+    const side = i % 2 === 0 ? -1 : 1;
+    ctx.quadraticCurveTo(
+      f.x1 + dx * mid + side * normalX,
+      f.y1 + dy * mid + side * normalY,
+      f.x1 + dx * end,
+      f.y1 + dy * end
+    );
+  }
+  ctx.stroke();
+}
+
 /** Draw only the hooks, labels and wedge apertures belonging to this particular segment. */
 export function drawSpan(ctx: RenderContext, f: SpanFragment, label?: Element, bendLabel?: Element): void {
   const { kind, space, x1, x2, y1, y2, above } = f;
@@ -203,12 +238,26 @@ export function drawSpan(ctx: RenderContext, f: SpanFragment, label?: Element, b
   ctx.save();
   try {
     if (kind === 'glissando') {
-      line(x1, y1, x2, y2);
+      if (f.wavy) drawWavyGlissando(ctx, f);
+      else line(x1, y1, x2, y2);
       return;
     }
     if (f.bend && bendLabel) drawTiedBend(ctx, f.bend, f.space, bendLabel);
     if (kind === 'slur' || kind === 'tie') {
       const { dx, a, b } = controls(f);
+      if (kind === 'slur' && f.halfDashed) {
+        drawHalfDashedSlur(
+          ctx,
+          [
+            { x: x1, y: y1 },
+            { x: x1 + dx, y: a },
+            { x: x2 - dx, y: b },
+            { x: x2, y: y2 },
+          ],
+          f.progress
+        );
+        return;
+      }
       ctx.beginPath();
       ctx.moveTo(x1, y1);
       if (kind === 'tie') {

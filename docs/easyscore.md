@@ -179,6 +179,8 @@ const beams = score.autoBeam(notes, {
 });
 ```
 
+Pass `{ frenchBeams: true }` to `score.beam(notes, options)` or `score.autoBeam(notes, options)` for French-style beaming. Interior stems stop at the beam nearest the heads. Stems at the ends of a strip still connect it to the outer beam. The same option is available on `factory.Beam({ notes, options })` and native `beam.renderOptions`.
+
 Without explicit groups, the native meter defaults apply. Use explicit groups to express asymmetric beats.
 Beam grouping never changes note durations. Rests, middle-only rests, stemlets, flat beams, secondary breaks, and native stem-direction options remain available.
 
@@ -611,6 +613,8 @@ console.log(layout.rows, layout.fragments, layout.diagnostics);
 For a beam that crosses a barline, add `{ id: 'phrase-beam', kind: 'beam', from: 'beat-two', to: 'next-beat-one' }` to `continuous.spans`. The endpoint IDs and the intervening pitched attacks belong to one voice on the same staff. Use this span as their beam owner. Each note's `getBeam().getNotes()` returns the full group at every width. A break fits the stems on each row and continues the shared beam levels at the row edge.
 
 To let one string or chord member ring, use `score.make.tie({ from: chord, firstIndexes: [0], options: { laissezVibrer: 18, direction: 1 } })`. The reach is in pixels from the selected head. Use direction `1` below or `-1` above. An ordinary outgoing tie still reaches the edge of its system.
+
+To mark an editorial slur opening, use `halfDashed: true` in the options for `factory.Curve()` or on a continuous `slur` span. The dashes and solid stroke follow one curve. When the span crosses a system break, it changes style only once, halfway through its total drawn width.
 
 To flare a crescendo or diminuendo, set `options: { flared: true }` on `score.make.hairpin()`, or set `flared: true` on the entry in `continuous.spans`. The arms stay narrow near the closed tip and widen toward the loud end. A continuous hairpin keeps that profile across system breaks.
 

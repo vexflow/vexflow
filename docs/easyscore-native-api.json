@@ -102,14 +102,14 @@
     },
     "Beam": [
       "CATEGORY(): string",
-      "renderOptions: { /** Fan the secondary beams toward this end. The primary beam and written timing stay fixed. */ feathered?: FeatheredBeamDirection; flatBeamOffset?: number; flatBeams: boolean; secondaryBreakTicks?: number; showStemlets: boolean; beamWidth: number; maxSlope: number; minSlope: number; /** Keep automatic slope in the endpoint contour and align level in-staff beams to a half-space. */ contourSlope?: boolean; slopeIterations: number; slopeCost: number; stemletExtension: number; partialBeamLength: number; minFlatBeamOffset: number; }",
+      "renderOptions: { /** Fan the secondary beams toward this end. The primary beam and written timing stay fixed. */ feathered?: FeatheredBeamDirection; /** Stop interior stems at the innermost beam that continues through the note. */ frenchBeams?: boolean; flatBeamOffset?: number; flatBeams: boolean; secondaryBreakTicks?: number; showStemlets: boolean; beamWidth: number; maxSlope: number; minSlope: number; /** Keep automatic slope in the endpoint contour and align level in-staff beams to a half-space. */ contourSlope?: boolean; slopeIterations: number; slopeCost: number; stemletExtension: number; partialBeamLength: number; minFlatBeamOffset: number; }",
       "notes: StemmableNote[]",
       "postFormatted: boolean",
       "slope: number",
       "getStemDirection(): number",
       "getDefaultBeamGroups(timeSig: string): Fraction[]",
       "applyAndGetBeams(voice: Voice, stemDirection?: number, groups?: Fraction[]): Beam[]",
-      "generateBeams(notes: StemmableNote[], config: { feathered?: FeatheredBeamDirection; flatBeamOffset?: number; flatBeams?: boolean; secondaryBreaks?: string; showStemlets?: boolean; maintainStemDirections?: boolean; /** Optional facade policy. Omitted preserves the native generator's historical behavior. */ stemPolicy?: 'auto' | 'explicit' | 'preserve'; beamMiddleOnly?: boolean; beamRests?: boolean; groups?: Fraction[]; stemDirection?: number; } = {}): Beam[]",
+      "generateBeams(notes: StemmableNote[], config: { feathered?: FeatheredBeamDirection; frenchBeams?: boolean; flatBeamOffset?: number; flatBeams?: boolean; secondaryBreaks?: string; showStemlets?: boolean; maintainStemDirections?: boolean; /** Optional facade policy. Omitted preserves the native generator's historical behavior. */ stemPolicy?: 'auto' | 'explicit' | 'preserve'; beamMiddleOnly?: boolean; beamRests?: boolean; groups?: Fraction[]; stemDirection?: number; } = {}): Beam[]",
       "constructor(notes: StemmableNote[], autoStem: boolean = false, private readonly continuation?: BeamContinuation)",
       "getNotes(): StemmableNote[]",
       "getBeamCount(): number",
@@ -350,6 +350,7 @@
     "CurveOptions": {
       "extends": [],
       "fields": [
+        "halfDashed?: boolean;",
         "cps?: { x: number; y: number }[];",
         "thickness?: number;",
         "xShift?: number;",
@@ -840,7 +841,7 @@
       "StaveConnector(params: { topStave: Stave; bottomStave: Stave; type: StaveConnectorType }): StaveConnector",
       "Formatter(options?: FormatterOptions): Formatter",
       "Tuplet(params?: { notes?: Note[]; options?: TupletOptions }): Tuplet",
-      "Beam(params: { notes: StemmableNote[]; options?: { autoStem?: boolean; feathered?: FeatheredBeamDirection; secondaryBeamBreaks?: number[]; partialBeamDirections?: { [noteIndex: number]: PartialBeamDirection; }; }; }): Beam",
+      "Beam(params: { notes: StemmableNote[]; options?: { autoStem?: boolean; feathered?: FeatheredBeamDirection; frenchBeams?: boolean; secondaryBeamBreaks?: number[]; partialBeamDirections?: { [noteIndex: number]: PartialBeamDirection; }; }; }): Beam",
       "Curve(params: { from: Note | undefined; to: Note | undefined; options: CurveOptions }): Curve",
       "StaveTie(params: { from?: Note | null; to?: Note | null; firstIndexes?: number[]; lastIndexes?: number[]; text?: string; options?: { direction?: number; laissezVibrer?: number }; }): StaveTie",
       "FiguredBass(spec: FiguredBassSpec): FiguredBass",
@@ -2357,7 +2358,7 @@
       "setVisibility(isVisible: boolean): this",
       "setStemlet(isStemlet: boolean, stemletHeight: number): this",
       "adjustHeightForFlag(): void",
-      "adjustHeightForBeam(): void",
+      "adjustHeightForBeam(inset = 0): void",
       "getSegment(x?: number, adjustment = this.renderHeightAdjustment): { x: number; baseY: number; tipY: number }",
       "getBoundingBox(): BoundingBox",
       "draw(): void"
