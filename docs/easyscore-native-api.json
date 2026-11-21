@@ -920,6 +920,7 @@
     "FretDiagramSpec": {
       "extends": [],
       "fields": [
+        "orientation?: 'vertical' | 'horizontal';",
         "frets: readonly (number | 'x')[];",
         "fingerings?: readonly (number | null | undefined)[];",
         "firstFret?: number;",

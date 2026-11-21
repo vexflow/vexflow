@@ -262,6 +262,89 @@ test('instrument studies and score construction', async (t) => {
       assert.ok(svg.invalid.every(Boolean));
     });
 
+    await t.test(
+      'horizontal chord frames keep string assignments, barre endpoints and labels inside their bounds',
+      async () => {
+        const results = await page.evaluate(() =>
+          ['svg', 'canvas'].map((backend) => {
+            const VF = VexFlow;
+            const canvas = document.createElement('canvas');
+            canvas.width = 360;
+            canvas.height = 180;
+            const pixels = canvas.getContext('2d');
+            const ctx =
+              backend === 'svg' ? new VF.SVGContext(document.createElement('div')) : new VF.CanvasContext(pixels);
+            const arcs = [];
+            const segments = [];
+            let point;
+            const arc = ctx.arc.bind(ctx),
+              move = ctx.moveTo.bind(ctx),
+              line = ctx.lineTo.bind(ctx);
+            ctx.arc = (x, y, ...args) => {
+              arcs.push([x, y]);
+              return arc(x, y, ...args);
+            };
+            ctx.moveTo = (x, y) => {
+              point = [x, y];
+              return move(x, y);
+            };
+            ctx.lineTo = (x, y) => {
+              segments.push([...point, x, y]);
+              return line(x, y);
+            };
+            const frets = ['x', 'x', 0, 2, 3, 2];
+            const frame = new VF.FretDiagram({ orientation: 'horizontal', frets }).setContext(ctx);
+            frame.draw();
+            const positions = arcs.slice();
+            const crosses = segments.filter((s) => Math.abs(s[2] - s[0]) === 5 && Math.abs(s[3] - s[1]) === 5);
+            pixels.clearRect(0, 0, canvas.width, canvas.height);
+            const bar = new VF.FretDiagram({
+              orientation: 'horizontal',
+              frets: ['x', 0, 7, 5, 5, 5],
+              firstFret: 5,
+              rows: 7,
+              barre: { fret: 5, from: 1, to: 3 },
+            })
+              .setX(12)
+              .setY(8)
+              .setContext(ctx);
+            bar.draw();
+            const lastSegment = segments.at(-1);
+            const { x, y, w, h } = bar.getBoundingBox();
+            // Two frames can abut at their allocated edges. Count actual ink escaping the first box.
+            const rgba = pixels.getImageData(0, 0, canvas.width, canvas.height).data;
+            let ink = 0,
+              outside = 0;
+            for (let j = 0; j < canvas.height; j++)
+              for (let i = 0; i < canvas.width; i++)
+                if (rgba[(j * canvas.width + i) * 4 + 3]) {
+                  ink++;
+                  if (i + 1 <= x || i >= x + w || j + 1 <= y || j >= y + h) outside++;
+                }
+            frame
+              .setX(x + w)
+              .setY(y)
+              .draw();
+            return { positions, crosses, lastSegment, ink, outside, neighbor: frame.getBoundingBox().x, right: x + w };
+          })
+        );
+        for (const result of results) {
+          assert.deepEqual(result.positions, [
+            [8.5, 33],
+            [30.5, 24],
+            [41.5, 15],
+            [30.5, 6],
+          ]);
+          assert.equal(result.crosses.length, 4);
+          assert.ok(result.crosses.every(([x1, , x2]) => Math.max(x1, x2) < 14));
+          assert.deepEqual(result.lastSegment, [31.5, 14, 31.5, 32]);
+          assert.equal(result.right, result.neighbor);
+        }
+        assert.ok(results[1].ink > 200);
+        assert.equal(results[1].outside, 0);
+      }
+    );
+
     await t.test('fret position labels follow score and diagram fonts on SVG and Canvas', async () => {
       const labels = await page.evaluate(() => {
         const VF = VexFlow;
