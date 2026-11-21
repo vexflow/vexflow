@@ -6,13 +6,15 @@ import { BoundingBox } from './boundingbox';
 import { Element } from './element';
 import { Note } from './note';
 import { ribbonParts } from './phraseribbon';
-import { Category } from './typeguard';
+import { Category, isStaveNote } from './typeguard';
 import { RuntimeError } from './util';
 
 // For backwards compatibility with 3.0.9, firstNote and/or lastNote can be undefined or null.
 // We prefer undefined instead of null.
 // However, some of our test cases used to pass in null, so maybe there is client code relying on it.
 export interface TieNotes {
+  /** Local reach in pixels for a laissez vibrer tie on one outgoing pitched head. */
+  laissezVibrer?: number;
   firstNote?: Note | null;
   lastNote?: Note | null;
   firstIndexes?: number[];
@@ -101,6 +103,27 @@ export class StaveTie extends Element {
   setNotes(notes: TieNotes): this {
     if (!notes.firstNote && !notes.lastNote) {
       throw new RuntimeError('BadArguments', 'Tie needs to have either firstNote or lastNote set.');
+    }
+
+    if (notes.laissezVibrer !== undefined) {
+      const index = notes.firstIndexes?.[0] ?? 0;
+      if (
+        !Number.isFinite(notes.laissezVibrer) ||
+        notes.laissezVibrer <= 0 ||
+        !notes.firstNote ||
+        !isStaveNote(notes.firstNote) ||
+        notes.firstNote.isRest() ||
+        notes.lastNote ||
+        (notes.firstIndexes && notes.firstIndexes.length !== 1) ||
+        !Number.isInteger(index) ||
+        index < 0 ||
+        index >= notes.firstNote.getKeys().length
+      ) {
+        throw new RuntimeError(
+          'BadArguments',
+          'A laissez vibrer tie needs one outgoing pitched head and a positive reach.'
+        );
+      }
     }
 
     if (!notes.firstIndexes) {
@@ -293,6 +316,11 @@ export class StaveTie extends Element {
    * ideally from the firstNote, alternatively from the lastNote, or 0 if all else fails.
    */
   getFirstX(): number {
+    const note = this.notes.firstNote;
+    if (this.notes.laissezVibrer !== undefined && note && isStaveNote(note)) {
+      const head = note.getHeadInk()[this.notes.firstIndexes![0]];
+      return head.x + head.w + this.renderOptions.tieSpacing;
+    }
     if (this.notes.firstNote) {
       return this.notes.firstNote.getTieRightX() + this.renderOptions.tieSpacing;
     } else if (this.notes.lastNote) {
@@ -307,6 +335,7 @@ export class StaveTie extends Element {
    * ideally from the firstNote, alternatively from the lastNote, or 0 if all else fails.
    */
   getLastX(): number {
+    if (this.notes.laissezVibrer !== undefined) return this.getFirstX() + this.notes.laissezVibrer;
     if (this.notes.lastNote) {
       return this.notes.lastNote.getTieLeftX() + this.renderOptions.tieSpacing;
     } else if (this.notes.firstNote) {
@@ -363,6 +392,12 @@ export class StaveTie extends Element {
       // this.notes.lastNote defined, but not firstNote
       this.notes.firstIndexes = this.notes.lastIndexes;
     }
+  }
+
+  /** A let-ring tie occupies only the local curve leaving its selected head. */
+  override getBoundingBox(): BoundingBox {
+    if (this.notes.laissezVibrer === undefined) return super.getBoundingBox();
+    return this.getRouteParts().reduce((box, part) => box.mergeWith(part));
   }
 
   override draw(): boolean {

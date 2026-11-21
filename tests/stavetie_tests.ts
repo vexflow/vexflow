@@ -20,6 +20,7 @@ const StaveTieTests = {
     run('Chord StaveTie', chord);
     run('Stem Up StaveTie', stemUp);
     run('No End Note With Clef', noEndNote1);
+    run('Laissez vibrer on one chord head', localTies);
     run('No End Note', noEndNote2);
     run('No Start Note With Clef', noStartNote1);
     run('No Start Note', noStartNote2);
@@ -190,6 +191,39 @@ function dashedPitchTies(options: TestOptions): void {
       options.assert.equal((d.match(/Q/g) ?? []).length, bar === 0 ? 1 : 2, 'open dashed arc or closed solid ribbon');
       if (bar === 0) options.assert.ok(getComputedStyle(path).strokeDasharray.includes('4'), 'stroke has visible gaps');
     }
+  }
+}
+
+/** Keep the open end next to the chosen chord head, including after a width change. */
+function localTies(options: TestOptions): void {
+  const f = VexFlowTests.makeFactory(options, 600, 240);
+  for (const [row, width] of [540, 290].entries()) {
+    const stave = f.Stave({ x: 12, y: 12 + row * 110, width }).addClef('treble');
+    const chord = () => f.StaveNote({ keys: ['d/4', 'a/4'], duration: 'q', stemDirection: 1 });
+    const lower = chord(),
+      rest = f.StaveNote({ keys: ['b/4'], duration: 'qr' }),
+      upper = chord();
+    const voice = f.Voice().addTickables([lower, rest, upper, f.StaveNote({ keys: ['b/4'], duration: 'qr' })]);
+    f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+    const down = f.StaveTie({ from: lower, firstIndexes: [0], options: { laissezVibrer: 18, direction: 1 } });
+    const up = f.StaveTie({ from: upper, firstIndexes: [1], options: { laissezVibrer: 22, direction: -1 } });
+    stave.draw();
+    voice.draw(f.getContext(), stave);
+    for (const [index, tie] of [down, up].entries()) {
+      tie.drawWithStyle();
+      const head = (index === 0 ? lower : upper).getHeadInk()[index];
+      options.assert.equal(tie.getFirstX(), head.x + head.w, 'attached to the selected head');
+      options.assert.equal(tie.getLastX() - tie.getFirstX(), index === 0 ? 18 : 22, 'free endpoint is local');
+      options.assert.equal(tie.getBoundingBox().w, tie.getLastX() - tie.getFirstX(), 'layout bounds follow the arc');
+      options.assert.deepEqual(tie.getNotes().lastIndexes, [index]);
+    }
+    options.assert.ok(down.getLastX() < rest.getNoteHeadBeginX(), 'rest on beat two clears the local tie');
+    options.assert.ok(voice.isComplete());
+    options.assert.equal(
+      f.StaveTie({ from: lower }).getLastX(),
+      stave.getTieEndX(),
+      'ordinary partial tie reaches the edge'
+    );
   }
 }
 

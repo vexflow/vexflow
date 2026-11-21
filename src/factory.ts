@@ -725,7 +725,7 @@ export class Factory {
     firstIndexes?: number[];
     lastIndexes?: number[];
     text?: string;
-    options?: { direction?: number };
+    options?: { direction?: number; laissezVibrer?: number };
   }): StaveTie {
     const tie = new StaveTie(
       {
@@ -733,6 +733,7 @@ export class Factory {
         lastNote: params.to,
         firstIndexes: params.firstIndexes,
         lastIndexes: params.lastIndexes,
+        laissezVibrer: params.options?.laissezVibrer,
       },
       params.text
     );
