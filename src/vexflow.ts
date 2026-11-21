@@ -31,6 +31,7 @@ import { Glyphs } from './glyphs';
 import { GraceNote } from './gracenote';
 import { GraceNoteGroup } from './gracenotegroup';
 import { GraceTabNote } from './gracetabnote';
+import { HarpPedalDiagram } from './harppedaldiagram';
 import { FrettedInstrument, PercussionMap } from './instrumentprofile';
 import { KeyManager } from './keymanager';
 import { KeySignature } from './keysignature';
@@ -177,6 +178,7 @@ export class VexFlow {
   static PercussionMap = PercussionMap;
   static FiguredBass = FiguredBass;
   static FretDiagram = FretDiagram;
+  static HarpPedalDiagram = HarpPedalDiagram;
   static AlternatingTremolo = AlternatingTremolo;
   static WrittenAccidentalState = WrittenAccidentalState;
   static NotationSpelling = NotationSpelling;

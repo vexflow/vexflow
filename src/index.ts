@@ -1,5 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
+// Public VexFlow exports for score construction, layout, and rendering.
 
 export * from './accidental';
 export * from './alternatingtremolo';
@@ -36,6 +37,8 @@ export * from './glyphnote';
 export * from './gracenote';
 export * from './gracenotegroup';
 export * from './gracetabnote';
+export * from './harppedaldiagram';
+export * from './harppedals';
 export * from './keymanager';
 export * from './keysignature';
 export * from './keysignote';
