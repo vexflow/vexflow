@@ -5,6 +5,7 @@ import { Factory } from './factory';
 import { Metrics } from './metrics';
 import { Note } from './note';
 import { paginate } from './pagebreaks';
+import { markCondensedPlayers, PublicationCondense } from './publicationcondense';
 import {
   checkView,
   insetStaff,
@@ -19,6 +20,7 @@ import { SVGContext } from './svgcontext';
 import type { SVGFont } from './svgexport';
 import { Tables } from './tables';
 
+export type { PublicationCondense } from './publicationcondense';
 export type { PublicationRegion, PublicationView } from './publicationview';
 
 /** Paper, staff height (four spaces), margins, and inter-system gaps are measured in millimeters. */
@@ -391,7 +393,12 @@ export class PublicationResult {
 }
 
 /** Staff, source measure, voice and timed event position survive independent part projection. */
-function semanticEvents(score: EasyScoreComposition, spec: EasyScoreCompositionSpec, measure: number) {
+function semanticEvents(
+  score: EasyScoreComposition,
+  spec: EasyScoreCompositionSpec,
+  measure: number,
+  condense?: PublicationCondense
+) {
   return score.notes[measure - 1].flatMap((voices, j) =>
     voices.flatMap((ticks, voice) =>
       ticks
@@ -402,8 +409,8 @@ function semanticEvents(score: EasyScoreComposition, spec: EasyScoreCompositionS
                 {
                   id: n.getAttribute('id'),
                   measure,
-                  staff: spec.staves[j].id,
-                  voice,
+                  staff: condense?.players[0] === spec.staves[j].id ? condense.players[voice] : spec.staves[j].id,
+                  voice: condense?.players[0] === spec.staves[j].id ? 0 : voice,
                   event,
                   keys: n.getKeys(),
                   ...(n.notation.length && { notation: n.notation }),
@@ -470,6 +477,7 @@ function buildPages(
       return { measures: r.measures, x, y, width: (r.right - r.left) * size.scale, height: r.height };
     });
     const measures = systems.flatMap((s) => s.measures);
+    const systemStarts = new Set(systems.map((s) => s.measures[0]));
     if (f.overflow)
       diagnostics.push({
         code: 'TextOverflow',
@@ -496,11 +504,11 @@ function buildPages(
       page: number,
       measures,
       staves: spec.staves.map((s) => s.id),
-      events: measures.flatMap((m) => semanticEvents(score, spec, m)),
+      events: measures.flatMap((m) => semanticEvents(score, spec, m, options.condense)),
       regions: measured.slice(b.first, b.end).flatMap((row) => row.references),
       spans: score.sheet
         .getContinuousLayout()!
-        .fragments.filter((f) => f.row >= b.first && f.row < b.end)
+        .fragments.filter((f) => systemStarts.has(score.sheet.getContinuousLayout()!.rows[f.row].measures[0]))
         .map((f) => ({
           id: f.id,
           kind: f.kind,
@@ -532,7 +540,7 @@ export class Publication {
     try {
       const diagnostics: PublicationDiagnostic[] = [];
       const ref =
-        options.staves &&
+        (options.staves || options.condense) &&
         (this.source.spans?.length ||
           this.source.continuous?.spans?.length ||
           this.source.continuous?.splitChords?.length)
@@ -544,6 +552,12 @@ export class Publication {
         diagnostics.push({ code: 'ExcludedAnchor', measures, detail: id })
       );
       const { ctx, factory, score } = compose(host, spec, options.noteHooks);
+      if (options.condense)
+        markCondensedPlayers(
+          score,
+          spec.staves.findIndex((s) => s.id === options.condense!.players[0]),
+          options.condense
+        );
       factory.draw();
       const layout = score.sheet.getContinuousLayout()!;
       for (const d of layout.diagnostics)
@@ -552,7 +566,10 @@ export class Publication {
           measures: d.measures,
           detail: d.source ? d.code + ' ' + d.source : d.code,
         });
-      const rows = splitRows(ctx.svg, layout.rows, score);
+      const passage = options.condense?.measures;
+      const rows = splitRows(ctx.svg, layout.rows, score).filter(
+        (row) => !passage || (row.measures[0] >= passage[0] && row.measures[0] <= passage[1])
+      );
       addInsets(host, this.source, options, score, rows, diagnostics);
       const measured = rows.map((r) => ({ ...r, height: (r.bottom - r.top + r.insetHeight) * size.scale }));
       const surface = pageSurface(host, size);

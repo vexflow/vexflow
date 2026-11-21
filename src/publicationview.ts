@@ -2,6 +2,7 @@
 import type { ContinuousBoundary } from './continuouslayout';
 import type { EasyScoreComposition, EasyScoreCompositionSpec, EasyScoreStaveSpec } from './easyscore';
 import { Note } from './note';
+import { condenseStaves, PublicationCondense } from './publicationcondense';
 import { Tickable } from './tickable';
 import { RuntimeError } from './util';
 
@@ -19,6 +20,8 @@ export interface PublicationRegion {
 /** All measure references are one-based. A page turn follows its named measure. */
 export interface PublicationView {
   staves?: readonly string[];
+  /** Engrave two source players on one conductor staff. */
+  condense?: PublicationCondense;
   systemBreaks?: readonly number[];
   pageBreaks?: readonly number[];
   preferredTurns?: readonly number[];
@@ -36,6 +39,10 @@ export function checkView(source: EasyScoreCompositionSpec, view: PublicationVie
   const count = source.staves[0]?.measures.length ?? 0;
   if (!count) invalidPage('Expected at least one measure.');
   const validMeasure = (n: number) => Number.isInteger(n) && n >= 1 && n <= count;
+  if (view.condense?.measures) {
+    const [first, last] = view.condense.measures;
+    if (!validMeasure(first) || !validMeasure(last) || last < first) invalidPage('Invalid condensed passage.');
+  }
   for (const values of [view.systemBreaks, view.pageBreaks, view.preferredTurns, view.forbiddenTurns])
     if (values?.some((n) => !validMeasure(n))) invalidPage('Break or turn outside the score.');
   if (
@@ -75,8 +82,12 @@ export function projectScore(
   reference?: EasyScoreComposition,
   omitted?: (id: string, measures: number[]) => void
 ): EasyScoreCompositionSpec {
-  const selected = new Set(view.staves ?? source.staves.map((s) => s.id));
-  const staves = source.staves.filter((s) => selected.has(s.id)).map((s) => (view.staves ? homeStaff(s, selected) : s));
+  const selected = new Set(view.staves ?? view.condense?.players ?? source.staves.map((s) => s.id));
+  const staves = source.staves
+    .filter((s) => selected.has(s.id))
+    .map((s) => (view.staves || view.condense ? homeStaff(s, selected) : s));
+  const printedStaves = view.condense ? condenseStaves(staves, view.condense) : staves;
+  const printedIds = new Set(printedStaves.map((s) => s.id));
   // Follow rhythmic ownership when a note is displayed on a different staff.
   const owners = new Map<Tickable, { staff: string; measure: number }>();
   reference?.notes.forEach((parts, m) =>
@@ -107,12 +118,17 @@ export function projectScore(
     return b;
   }
   for (const n of [...(view.systemBreaks ?? []), ...(view.pageBreaks ?? [])]) boundary(n).breakBefore = 'force';
+  if (view.condense?.measures) {
+    const [first, last] = view.condense.measures;
+    boundary(first).breakBefore = 'force';
+    if (last < source.staves[0].measures.length) boundary(last + 1).breakBefore = 'force';
+  }
   // Cued rests must remain individually addressable even when their neighbours form a multi-measure rest.
   for (const region of view.regions ?? [])
     for (let m = region.measure; m <= (region.endMeasure ?? region.measure); m++) boundary(m).keepRest = true;
   return {
     ...source,
-    staves,
+    staves: printedStaves,
     sheet: { ...source.sheet, x: 0, y: 0, rowGap: 150, width },
     spans: source.spans?.filter((s) => keep(s.from, s.to)),
     continuous: {
@@ -120,14 +136,15 @@ export function projectScore(
       boundaries: [...boundaries.values()],
       spans: original.spans?.filter((s) => keep(s.from, s.to, s.id)),
       splitChords: original.splitChords?.filter((c) => keep(c.upper, c.lower, c.id)),
-      groups: !view.staves
-        ? original.groups
-        : original.groups?.flatMap((g) => {
-            const start = source.staves.findIndex((s) => s.id === g.first),
-              end = source.staves.findIndex((s) => s.id === g.last);
-            const members = source.staves.slice(start, end + 1).filter((s) => selected.has(s.id));
-            return members.length >= 2 ? [{ ...g, first: members[0].id, last: members[members.length - 1].id }] : [];
-          }),
+      groups:
+        !view.staves && !view.condense
+          ? original.groups
+          : original.groups?.flatMap((g) => {
+              const start = source.staves.findIndex((s) => s.id === g.first),
+                end = source.staves.findIndex((s) => s.id === g.last);
+              const members = source.staves.slice(start, end + 1).filter((s) => printedIds.has(s.id));
+              return members.length >= 2 ? [{ ...g, first: members[0].id, last: members[members.length - 1].id }] : [];
+            }),
     },
   };
 }
