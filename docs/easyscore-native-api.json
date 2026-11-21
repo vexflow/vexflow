@@ -15,6 +15,23 @@
       "draw(): void"
     ]
   },
+  "accordionregister": {
+    "AccordionRanks": {
+      "extends": [],
+      "fields": [
+        "high?: boolean;",
+        "middle?: number;",
+        "low?: boolean;"
+      ]
+    },
+    "AccordionRegister": [
+      "constructor({ high = false, middle = 0, low = false }: AccordionRanks)",
+      "getRanks(): Readonly<Required<AccordionRanks>>",
+      "getWidth(): number",
+      "computeX(): { x: number; textWidth: number }",
+      "getBoundingBox(): BoundingBox"
+    ]
+  },
   "alternatingtremolo": {
     "AlternatingTremolo": [
       "constructor(readonly first: StaveNote, readonly last: StaveNote, readonly strokes: number)",
@@ -828,6 +845,7 @@
       "GraceNote(noteStruct: GraceNoteStruct): GraceNote",
       "GraceNoteGroup(params: { notes: StemmableNote[]; slur?: boolean }): GraceNoteGroup",
       "Accidental(params: { type: string }): Accidental",
+      "AccordionRegister(ranks: AccordionRanks): AccordionRegister",
       "Annotation(params?: { text?: string; hJustify?: string | AnnotationHorizontalJustify; vJustify?: string | AnnotationVerticalJustify; font?: FontInfo; }): Annotation",
       "ChordSymbol(params?: { vJustify?: string; hJustify?: string; fontFamily?: string; fontSize?: number; fontWeight?: string; }): ChordSymbol",
       "Articulation(params?: { betweenLines?: boolean; type?: string; position?: string | number }): Articulation",
@@ -1176,6 +1194,27 @@
       "CATEGORY(): string",
       "constructor(noteStruct: TabNoteStruct)"
     ]
+  },
+  "harppedalchanges": {
+    "HarpPedalChanges": [
+      "constructor(initial: HarpPedalSettings)",
+      "getSettings(): HarpPedalSettings",
+      "apply(note: Note, target: Partial<HarpPedalSettings>): Annotation | undefined"
+    ]
+  },
+  "harppedaldiagram": {
+    "HarpPedalDiagram": [
+      "settings: HarpPedalSettings",
+      "constructor(settings: HarpPedalSettings, { scale = 1 }: { scale?: number } = {})",
+      "getBoundingBox(): BoundingBox"
+    ]
+  },
+  "harppedals": {
+    "HARP_PEDAL_ORDER": "inferred",
+    "HarpPedalName": "export type HarpPedalName = (typeof HARP_PEDAL_ORDER)[number];",
+    "HarpPedalPosition": "export type HarpPedalPosition = 'flat' | 'natural' | 'sharp';",
+    "HarpPedalSettings": "export type HarpPedalSettings = Readonly<Record<HarpPedalName, HarpPedalPosition>>;",
+    "validateHarpPedals": "(settings: HarpPedalSettings): HarpPedalSettings"
   },
   "keymanager": {
     "KeyManager": [
@@ -3063,6 +3102,7 @@
       "PhraseLayout",
       "EngravingProfile",
       "Accidental",
+      "AccordionRegister",
       "Annotation",
       "Articulation",
       "Barline",
@@ -3090,6 +3130,7 @@
       "GraceNote",
       "GraceNoteGroup",
       "GraceTabNote",
+      "HarpPedalChanges",
       "KeyManager",
       "KeySignature",
       "KeySigNote",
@@ -3129,6 +3170,7 @@
       "PercussionMap",
       "FiguredBass",
       "FretDiagram",
+      "HarpPedalDiagram",
       "AlternatingTremolo",
       "WrittenAccidentalState",
       "NotationSpelling",
