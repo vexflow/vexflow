@@ -15,6 +15,32 @@ import { Category, isStaveNote, isTabNote } from './typeguard';
 import { RuntimeError } from './util';
 import { Voice } from './voice';
 
+/** Cap synchronous fitting work per note while allowing finer sampling than the default 20 intervals. */
+const MAX_SLOPE_ITERATIONS = 1000;
+
+/** Sample the requested range with exact endpoints and at most one candidate per interior division. */
+function* beamSlopes(minSlope: number, maxSlope: number, intervals: number): Generator<number> {
+  yield minSlope;
+  if (minSlope === maxSlope) return;
+
+  const increment = (maxSlope - minSlope) / intervals;
+  let slope = minSlope;
+  for (let index = 1; index < intervals; index++) {
+    // Preserve the original rounding of interior candidates because it breaks ties between equally good fits.
+    const nextSlope = slope + increment;
+    if (nextSlope > slope && nextSlope < maxSlope) {
+      slope = nextSlope;
+    } else {
+      // Interpolate when a narrow range rounds away the step or a wide range overflows it.
+      const fraction = index / intervals;
+      const interpolated = (1 - fraction) * minSlope + fraction * maxSlope;
+      slope = Math.max(slope, Math.min(maxSlope, interpolated));
+    }
+    yield slope;
+  }
+  yield maxSlope;
+}
+
 function calculateStemDirection(notes: StemmableNote[]) {
   let lineSum = 0;
   notes.forEach((note) => {
@@ -627,26 +653,35 @@ export class Beam extends Element {
     return firstY + (x - firstX) * slope;
   }
 
-  /** Calculate the best possible slope for the provided notes. */
+  /**
+   * Fit the beam between two finite, ordered slope bounds. Equal bounds select one fixed slope.
+   * slopeIterations sets the number of intervals between the bounds (integer from 1 to 1000, default 20).
+   */
   calculateSlope(): void {
     const {
       notes,
       renderOptions: { maxSlope, minSlope, slopeIterations, slopeCost },
     } = this;
 
+    if (!Number.isSafeInteger(slopeIterations) || slopeIterations < 1 || slopeIterations > MAX_SLOPE_ITERATIONS) {
+      throw new RuntimeError('BadArguments', `slopeIterations must be an integer from 1 to ${MAX_SLOPE_ITERATIONS}.`);
+    }
+    if (!Number.isFinite(minSlope) || !Number.isFinite(maxSlope) || minSlope > maxSlope) {
+      throw new RuntimeError('BadArguments', 'Beam slope bounds must be finite with minSlope <= maxSlope.');
+    }
+
     const stemDirection = this._stemDirection;
 
     const firstNote = notes[0];
     const initialSlope = getStemSlope(firstNote, notes[notes.length - 1]);
-    const increment = (maxSlope - minSlope) / slopeIterations;
-    let minCost = Number.MAX_VALUE;
-    let bestSlope = 0;
+    let minCost = Infinity;
+    // Even a degenerate note span must honor a requested fixed or one-sided slope.
+    let bestSlope = Math.max(minSlope, Math.min(0, maxSlope));
     let yShift = 0;
 
     // Explicit slope bounds take precedence when they exclude the horizontal candidate.
     const followContour = this.renderOptions.contourSlope && minSlope <= 0 && maxSlope >= 0;
-    // iterate through slope values to find best weighted fit
-    for (let slope = minSlope; slope <= maxSlope; slope += increment) {
+    for (const slope of beamSlopes(minSlope, maxSlope, slopeIterations)) {
       if (followContour && Math.abs(slope) > 1e-8 && slope * initialSlope <= 0) continue;
       let totalStemExtension = 0;
       let yShiftTemp = 0;

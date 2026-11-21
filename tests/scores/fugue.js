@@ -8,7 +8,7 @@ var BachFugue = (() => {
     ['B4/8/r, D4/8[dynamic="mp"], E4/8, F4/8, G4/8, E4/8', null],
     // Bar 2
     [
-      'F4/16[id="r2-0-0"], D4/16, C#4/16, D4/16[id="r2-3-0"], Bb4/q[id="r2-4-0",articulations="staccatissimo.above"], G4/q[ornament="tr.above"]',
+      'F4/16[id="r2-0-0"], D4/16, C#4/16, D4/16[id="r2-3-0"], Bb4/q[id="r2-4-0",articulations="staccatissimo.above"], G4/q[ornament="tr.above.a/4"]',
       null,
     ],
     // Bar 3
@@ -46,7 +46,7 @@ var BachFugue = (() => {
         'A4/q, G4/h[id="r7-4-0"]',
         'C4/8/r, F4/8[id="r7-2-1"], F4/16[id="r7-4-1"], E4/16, D4/16, E4/16, E4/16, D4/16, C#4/16, D4/16',
       ],
-      'F3/16, D3/16, C#3/16, D3/16, Bb3/q[articulations="staccatissimo.above"], G3/q[ornament="tr.above"]',
+      'F3/16, D3/16, C#3/16, D3/16, Bb3/q[articulations="staccatissimo.above"], G3/q[ornament="tr.above.a/3"]',
     ],
     // Bar 8
     [
@@ -345,8 +345,9 @@ var BachFugue = (() => {
         );
       }
       if (ornament) {
-        const [type, position] = ornament.split('.');
-        note.addModifier(builder.getFactory().Ornament(type, { position }));
+        // The subject's G–A trill is spelled out on its first treble and bass statements.
+        const [type, position, auxiliaryPitch] = ornament.split('.');
+        note.addModifier(builder.getFactory().Ornament(type, { position, auxiliaryPitch }));
       }
       if (spacer) note.setStyle({ fillStyle: 'transparent', strokeStyle: 'transparent' });
     };

@@ -80,6 +80,8 @@ select {
 }
 #reading {
   display: grid;
+  /* A long note description must fit the reader even on a phone. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.35rem;
   margin: 1rem 0;
 }

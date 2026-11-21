@@ -1,7 +1,9 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
+// Canvas and SVG renderer setup and shared path drawing.
 // MIT License
 
 import { CanvasContext } from './canvascontext';
+import { dashStops } from './dashpattern';
 import { RenderContext } from './rendercontext';
 import { SVGContext } from './svgcontext';
 import { isRenderContext } from './typeguard';
@@ -62,9 +64,10 @@ export class Renderer {
     return Renderer.buildContext(elementId, Renderer.Backends.SVG, width, height, background);
   }
 
-  // Draw a dashed line (horizontal, vertical or diagonal
-  // dashPattern = [3,3] draws a 3 pixel dash followed by a three pixel space.
-  // setting the second number to 0 draws a solid line.
+  /**
+   * Draw alternating dashes and gaps in any direction. [3, 0] draws a continuous line.
+   * Reject nonfinite geometry and patterns that would require more than 16,384 dash or gap segments.
+   */
   static drawDashedLine(
     context: RenderContext,
     fromX: number,
@@ -73,30 +76,23 @@ export class Renderer {
     toY: number,
     dashPattern: number[]
   ): void {
-    context.beginPath();
-
     const dx = toX - fromX;
     const dy = toY - fromY;
-    const angle = Math.atan2(dy, dx);
-    let x = fromX;
-    let y = fromY;
-    context.moveTo(fromX, fromY);
-    let idx = 0;
-    let draw = true;
-    while (!((dx < 0 ? x <= toX : x >= toX) && (dy < 0 ? y <= toY : y >= toY))) {
-      const dashLength = dashPattern[idx++ % dashPattern.length];
-      const nx = x + Math.cos(angle) * dashLength;
-      x = dx < 0 ? Math.max(toX, nx) : Math.min(toX, nx);
-      const ny = y + Math.sin(angle) * dashLength;
-      y = dy < 0 ? Math.max(toY, ny) : Math.min(toY, ny);
-      if (draw) {
-        context.lineTo(x, y);
-      } else {
-        context.moveTo(x, y);
-      }
-      draw = !draw;
+    const length = Math.hypot(dx, dy);
+    if (!Number.isFinite(length)) {
+      throw new RuntimeError('BadDashLine', 'Dashed lines require finite endpoints and a finite length.');
     }
+    const stops = dashStops(length, dashPattern);
 
+    context.beginPath();
+    context.moveTo(fromX, fromY);
+    for (const [index, distance] of stops.entries()) {
+      // Measure from the original point so rounding in a small step cannot stall the path.
+      const x = distance === length ? toX : fromX + (dx / length) * distance;
+      const y = distance === length ? toY : fromY + (dy / length) * distance;
+      if (index % 2 === 0) context.lineTo(x, y);
+      else context.moveTo(x, y);
+    }
     context.closePath();
     context.stroke();
   }

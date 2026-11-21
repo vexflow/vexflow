@@ -43,6 +43,10 @@ export interface PhraseLaneOptions {
   /** Pin the common baseline in staff spaces from the top line, positive downward. */
   baselineSpaces?: number;
 }
+/** Print the supplied stanza text once at the left margin of this verse. */
+export interface PhraseVerseOptions extends PhraseLaneOptions {
+  stanza?: string;
+}
 export interface PhraseDiagnostic {
   code:
     | 'PinnedCollision'
@@ -60,6 +64,7 @@ interface Lane {
   marks: PhraseMark[];
   options: PhraseLaneOptions;
   syllables?: PhraseSyllable[];
+  stanzaLabel?: Annotation;
 }
 interface Obstacle extends Bounds {
   owner: Element;
@@ -93,6 +98,7 @@ export class PhraseLayout {
   private restLines = new Map<StaveNote, { before: number; after: number }>();
   private obstacles: Obstacle[] = [];
   private connectors: BoundingBox[] = [];
+  private stanzaLabels: Annotation[] = [];
   private messages = new Set<string>();
   private iterationLimit = 4;
   private lockedStaves = new Set<Stave>();
@@ -141,7 +147,7 @@ export class PhraseLayout {
   }
 
   /** Each whole syllable uses native text shaping and participates in ModifierContext horizontal spacing. */
-  addVerse(stave: Stave, syllables: PhraseSyllable[], options: PhraseLaneOptions = {}): Annotation[] {
+  addVerse(stave: Stave, syllables: PhraseSyllable[], options: PhraseVerseOptions = {}): Annotation[] {
     if (
       !syllables.length ||
       syllables.some((s, i) => !s.text || (s.hyphenAfter && (s.extendTo || i === syllables.length - 1)))
@@ -151,6 +157,8 @@ export class PhraseLayout {
       throw new RangeError('An elision needs a second syllable.');
     if (syllables.some((s) => s.note.getStave() && s.note.getStave() !== stave))
       throw new RangeError('A syllable must belong to the requested stave.');
+    if (options.stanza !== undefined && (typeof options.stanza !== 'string' || !options.stanza.trim()))
+      throw new RangeError('A stanza label needs text.');
     const marks = syllables.map((s, i) =>
       // Shape and reserve the entire group together. The lyric font stack includes the active music face.
       new Annotation(s.elideWith === undefined ? s.text : s.text + Glyphs.lyricsElision + s.elideWith)
@@ -158,10 +166,34 @@ export class PhraseLayout {
         .setVerticalJustification(options.side === 'above' ? 'top' : 'bottom')
         .setConnectorPadding(s.hyphenAfter || syllables[i - 1]?.hyphenAfter ? stave.space(0.4) : 0)
     );
-    this.addLane(stave, marks, options);
-    this.lanes[this.lanes.length - 1].syllables = syllables.map((s) => ({ ...s }));
+    // The label shares the lane solver and its first note's baseline. Only sung text enters the note formatter.
+    const label =
+      options.stanza === undefined
+        ? undefined
+        : new Annotation(options.stanza)
+            .setFont({ ...marks[0].fontInfo, weight: 'bold' })
+            .setJustification('left')
+            .setPosition(options.side === 'above' ? Modifier.Position.ABOVE : Modifier.Position.BELOW)
+            .setNote(syllables[0].note)
+            .setIndex(0);
+    this.addLane(stave, label ? [...marks, label] : marks, options);
+    const lane = this.lanes[this.lanes.length - 1];
+    lane.syllables = syllables.map((s) => ({ ...s }));
+    lane.stanzaLabel = label;
     marks.forEach((mark, i) => syllables[i].note.addModifier(mark, 0));
     return marks;
+  }
+
+  /** Width of the shared stanza column, including its side margins in staff spaces. */
+  getStanzaColumnWidth(stave: Stave): number {
+    let column = 0;
+    for (const lane of this.lanes) {
+      if (lane.stave === stave && lane.stanzaLabel) {
+        const width = lane.stanzaLabel.getTextInk(0, 0).w;
+        column = Math.max(column, stave.space(1.2) + width);
+      }
+    }
+    return column;
   }
 
   /** Restore derived rest positions before native formatting; preserve subsequent authored edits. */
@@ -443,6 +475,13 @@ export class PhraseLayout {
     const { stave, marks, options } = lane,
       above = options.side === 'above',
       gap = stave.space(0.35);
+    if (lane.stanzaLabel) {
+      const label = lane.stanzaLabel;
+      // Align the visible left edges even when the digits have different side bearings.
+      const margin = stave.getNoteStartX() - this.getStanzaColumnWidth(stave) + stave.space(0.4);
+      label.setXShift(margin - label.computeX().x + label.textMetrics.actualBoundingBoxLeft);
+      this.stanzaLabels.push(label);
+    }
     const authored = marks.filter((m): m is Annotation => m instanceof Annotation && m.getTextBaseline() !== undefined);
     const pinned = options.baselineSpaces !== undefined || authored.length > 0;
     let y =
@@ -510,6 +549,7 @@ export class PhraseLayout {
       this.passes = pass;
       this.obstacles = [];
       this.connectors = [];
+      this.stanzaLabels = [];
       this.diagnostics.length = 0;
       this.messages.clear();
       this.collect(
@@ -584,8 +624,9 @@ export class PhraseLayout {
     return this.connectors.map((box) => BoundingBox.copy(box));
   }
 
-  /** Draw only lyric connectors; notes and registered marks retain their native rendering ownership. */
+  /** Draw stanza labels and connectors. Syllables are drawn by their notes. */
   draw(context: RenderContext): void {
+    for (const label of this.stanzaLabels) label.setContext(context).drawWithStyle();
     for (const b of this.connectors) context.fillRect(b.x, b.y, b.w, b.h);
   }
 }

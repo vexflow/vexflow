@@ -25,6 +25,8 @@ const OrnamentTests = {
   Start(): void {
     QUnit.module('Ornament');
     const run = VexFlowTests.runTests;
+    run('Pitched trill partners', pitchedTrills);
+    run('Changing a pitched trill partner', changeTrillPartner);
     run('Ornaments', drawOrnaments);
     run('Ornaments Vertically Shifted', drawOrnamentsDisplaced);
     run('Ornaments - Delayed turns', drawOrnamentsDelayed);
@@ -434,6 +436,73 @@ function jazzOrnaments(options: TestOptions): void {
     f.Ornament('doit'),
   ];
   draw(mods, ['e/4'], curX, width, curY);
+}
+
+/** A cue changes staff position and spelling without adding a tickable to the 3/4 voice. */
+function pitchedTrills(options: TestOptions): void {
+  const f = VexFlowTests.makeFactory(options, 620, 280);
+  for (const [row, width] of [290, 170].entries()) {
+    for (const [i, pitch] of ['bb/4', 'a/4'].entries()) {
+      const stave = f.Stave({ x: 12 + i * width, y: 20 + row * 130, width }).addClef('treble');
+      const principal = f.StaveNote({ keys: ['g/4'], duration: 'h', stemDirection: -1 });
+      const trill = f.Ornament('tr', { auxiliaryPitch: pitch });
+      principal.addModifier(trill, 0);
+      const next = f.StaveNote({ keys: ['a/4'], duration: 'q' });
+      const voice = f.Voice({ time: '3/4' }).addTickables([principal, next]);
+      f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+      stave.draw();
+      voice.draw(f.getContext(), stave);
+      options.assert.ok(voice.isComplete() && voice.getTickables().length === 2, 'the cue occupies no beat');
+      const box = trill.getBoundingBox();
+      options.assert.ok(box.x + box.w < next.getNoteHeadBeginX(), 'cue clears the next attack');
+      const cue = trill.getSVGElement()?.querySelectorAll('text')[1];
+      if (cue) {
+        const originY = Number(cue.getAttribute('y'));
+        options.assert.equal(
+          originY,
+          principal.getYs()[0] - stave.getSpacingBetweenLines() * (i === 0 ? 1 : 0.5),
+          'written cue staff position'
+        );
+        options.assert.ok(
+          (cue.textContent ?? '').includes(Glyphs.accidentalFlat) === (i === 0),
+          'accidental follows written pitch'
+        );
+        options.assert.ok(
+          cue.textContent?.startsWith(Glyphs.accidentalParensLeft) &&
+            cue.textContent.endsWith(Glyphs.accidentalParensRight)
+        );
+        options.assert.ok(cue.getBBox().x > principal.getNoteHeadEndX(), 'cue clears the principal head');
+      }
+    }
+  }
+}
+
+/** Reformat one retained principal as its partner changes spelling, octave, or presence. */
+function changeTrillPartner(options: TestOptions): void {
+  const f = VexFlowTests.makeFactory(options, 300, 220);
+  const stave = f.Stave({ y: 65 }).addClef('treble');
+  const principal = f.StaveNote({ keys: ['g/4'], duration: 'h' });
+  const trill = f.Ornament('tr');
+  principal.addModifier(trill, 0);
+  const next = f.StaveNote({ keys: ['a/4'], duration: 'q' });
+  const voice = f.Voice({ time: '3/4' }).addTickables([principal, next]);
+  for (const pitch of [undefined, 'bb/4', 'a/4', 'd/6']) {
+    trill.setAuxiliaryPitch(pitch);
+    f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+    f.getContext().clear();
+    stave.draw();
+    voice.draw(f.getContext(), stave);
+    const group = trill.getSVGElement();
+    if (group) {
+      options.assert.equal(group.querySelectorAll('text').length, pitch ? 2 : 1);
+      options.assert.equal(
+        group.querySelectorAll('rect:not([opacity="0"])').length,
+        pitch === 'd/6' ? 2 : 0,
+        'only the high partner needs ledger lines'
+      );
+    }
+    options.assert.ok(voice.isComplete() && voice.getTickables()[0] === principal);
+  }
 }
 
 VexFlowTests.register(OrnamentTests);

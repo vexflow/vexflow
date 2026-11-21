@@ -19,6 +19,7 @@ import { Dot } from './dot';
 import { EasyScore, EasyScoreOptions } from './easyscore';
 import { Element } from './element';
 import { EngravingProfile } from './engravingprofile';
+import { FiguredBass, FiguredBassSpec } from './figuredbass';
 import { FontInfo } from './font';
 import { Formatter, FormatterOptions } from './formatter';
 import { FretHandFinger } from './frethandfinger';
@@ -587,7 +588,13 @@ export class Factory {
 
   Ornament(
     type: string,
-    params?: { position?: string | number; upperAccidental?: string; lowerAccidental?: string; delayed?: boolean }
+    params?: {
+      position?: string | number;
+      upperAccidental?: string;
+      lowerAccidental?: string;
+      auxiliaryPitch?: string;
+      delayed?: boolean;
+    }
   ) {
     const options = {
       type,
@@ -598,6 +605,7 @@ export class Factory {
     if (params?.position !== undefined) {
       ornament.setPosition(params.position);
     }
+    if (options.auxiliaryPitch !== undefined) ornament.setAuxiliaryPitch(options.auxiliaryPitch);
     if (options.upperAccidental) {
       ornament.setUpperAccidental(options.upperAccidental);
     }
@@ -725,7 +733,7 @@ export class Factory {
     firstIndexes?: number[];
     lastIndexes?: number[];
     text?: string;
-    options?: { direction?: number };
+    options?: { direction?: number; laissezVibrer?: number };
   }): StaveTie {
     const tie = new StaveTie(
       {
@@ -733,6 +741,7 @@ export class Factory {
         lastNote: params.to,
         firstIndexes: params.firstIndexes,
         lastIndexes: params.lastIndexes,
+        laissezVibrer: params.options?.laissezVibrer,
       },
       params.text
     );
@@ -741,6 +750,11 @@ export class Factory {
     tie.setContext(this.context);
     this.renderQ.push(tie);
     return this.own(tie);
+  }
+
+  /** Queue independent figured-bass rows beneath their bass notes. */
+  FiguredBass(spec: FiguredBassSpec): FiguredBass {
+    return this.adopt(this.musicGlyph(new FiguredBass(spec)).setContext(this.context), 'drawable');
   }
 
   StaveLine(params: {

@@ -450,6 +450,7 @@ They draw through their stave, never through a second queue.
 
 `make.barNote()`, `make.clefNote()`, `make.keySigNote()`, and `make.timeSigNote()` create inline changes for `sequence()`.
 They consume no musical time. Imperative clef/key/time markings change the display only.
+For a double-octave treble or bass clef, use `stave.addClef('treble', 'default', '15ma')` or `new ClefNote('bass', 'small', '15mb')`. Both clefs accept either annotation. The “15” indicates the sounding octave while the noteheads retain their written staff positions.
 Supply the new clef to subsequent `notes()` calls and the actual meter to `voice()`.
 
 `make.multiMeasureRest()` returns a standalone rest; pass `{ numberOfMeasures: 8 }`, for example. Call `.setStave(stave)` before drawing.
@@ -547,6 +548,10 @@ const chords = [{ note: 'downbeat', harmony: written }, { note: 'rest', text: 'N
 
 `showTimeSignature` carries forward on the staff. Set it to `true` to print the active meter again. The meter still governs voice timing and automatic beaming while hidden. Use `Barline.type.DOUBLE` for a double bar. The same descriptors drive screen reflow and the selected staff in a `Publication`.
 
+### Written trill partners
+
+Attach `score.make.ornament('tr', { auxiliaryPitch: 'bb/4' })` to the principal note with `addModifier(ornament, 0)`. The small parenthesized head shows the written partner and adds no time to the voice. Use `'a/4'` for A or `'an/4'` to print an explicit natural. A native `Ornament('tr')` accepts `setAuxiliaryPitch(pitch)`. Call it without an argument to remove the cue. For just an accidental above the trill sign, use `setUpperAccidental()` with its accidental code.
+
 ### Accidental policy
 
 The default is `literal`: existing EasyScore accidental behavior stays unchanged.
@@ -561,6 +566,8 @@ The opt-in policy:
 - Shows both signs for conflicting simultaneous spellings. The next occurrence also gets a sign.
 
 Grace-note accidentals retain their explicit native notation. The policy does not rewrite grace groups.
+For an editorial sharp, attach `new Accidental('#').setAsCautionary('brackets')` to the selected chord-head index with `note.addModifier(sign, index)`. The sign keeps its accidental type for pitch handling. Calling `setAsCautionary()` uses round parentheses.
+
 The native `Accidental.applyAccidentals()` API remains unchanged.
 
 ### Reflow and spans
@@ -598,6 +605,8 @@ console.log(layout.rows, layout.fragments, layout.diagnostics);
 ```
 
 For a beam that crosses a barline, add `{ id: 'phrase-beam', kind: 'beam', from: 'beat-two', to: 'next-beat-one' }` to `continuous.spans`. The endpoint IDs and the intervening pitched attacks belong to one voice on the same staff. Use this span as their beam owner. Each note's `getBeam().getNotes()` returns the full group at every width. A break fits the stems on each row and continues the shared beam levels at the row edge.
+
+To let one string or chord member ring, use `score.make.tie({ from: chord, firstIndexes: [0], options: { laissezVibrer: 18, direction: 1 } })`. The reach is in pixels from the selected head. Use direction `1` below or `-1` above. An ordinary outgoing tie still reaches the edge of its system.
 
 For a hairpin that grows from silence, pass `{ id: 'swell', kind: 'crescendo', from: 'a', to: 'b', niente: true }` in `continuous.spans`. A crescendo carries the circle on its opening fragment. A diminuendo carries it on its final fragment.
 

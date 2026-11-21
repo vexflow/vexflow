@@ -1,10 +1,13 @@
 // M3 placement contracts on native voices, curves, staff groups and retained systems.
 import assert from 'node:assert/strict';
-import test from 'node:test';
-import { createCanvas, registerFont } from 'canvas';
 import { readFile } from 'node:fs/promises';
+import test from 'node:test';
+
+import { createCanvas, registerFont } from 'canvas';
 import puppeteer from 'puppeteer';
-import { elisionStudy, makePhraseStudy } from '../engraving/phrase-studies.mjs';
+
+import { elisionStudy, makePhraseStudy, stanzaStudy } from '../engraving/phrase-studies.mjs';
+
 const VF = await import(new URL('../../build/esm/entry/vexflow-core.js', import.meta.url));
 
 for (const family of ['Bravura', 'Academico']) {
@@ -437,6 +440,106 @@ test('two elided syllables share one centered anchor and clear both lyric connec
         assert.ok(frame.undertieInk && frame.reserved && frame.hyphenClear, backend + JSON.stringify(frame));
         assert.equal(frame.extenderEnd, frame.lastHead);
         assert.deepEqual(frame.diagnostics, []);
+      }
+    }
+  } finally {
+    await browser.close();
+  }
+});
+
+test('a stanza column fits inside an unsigned staff at fixed and intrinsic widths', () => {
+  const { f, layout, staff, system, notes } = score();
+  const label = '112.';
+  const words = layout.addVerse(staff, [{ note: notes[0], text: 'Light' }], { stanza: label });
+  // Rejecting an empty label must leave the existing syllable and lane intact.
+  assert.throws(() => layout.addVerse(staff, [{ note: notes[0], text: 'word' }], { stanza: ' ' }), /stanza/);
+  const ctx = f.getContext();
+  const drawText = ctx.fillText.bind(ctx);
+  const labelMetrics = new VF.Annotation(label).setFont({ ...words[0].fontInfo, weight: 'bold' });
+  let ink;
+  ctx.fillText = (text, x, y) => {
+    if (text === label) ink = labelMetrics.getTextInk(x, y);
+    return drawText(text, x, y);
+  };
+  for (const width of [undefined, 420, undefined]) {
+    system.setWidth(width);
+    f.draw({ retain: true });
+    const word = measured(words[0]).ink;
+    assert.ok(ink.x >= staff.getX() && ink.x + ink.w + 3 < word.x);
+    assert.deepEqual(layout.diagnostics, []);
+  }
+});
+
+// Read the painted origins on each backend so a missing or repeated label fails even when layout is correct.
+test('stanza numbers share a left margin and stay on their word baselines through a system break', async () => {
+  const browser = await puppeteer.launch({ headless: true, args: process.env.CI ? ['--no-sandbox'] : [] });
+  try {
+    const page = await browser.newPage();
+    await page.setContent('<body></body>');
+    await page.addScriptTag({ path: new URL('../../build/cjs/vexflow-debug.js', import.meta.url).pathname });
+    await page.evaluate(async () => {
+      await VexFlow.loadFonts('Bravura', 'Academico');
+      await document.fonts.ready;
+    });
+    for (const backend of ['SVG', 'Canvas']) {
+      for (const stanza of ['1.', '10.']) {
+        const frames = await page.evaluate(
+          ({ backend, stanza, spec }) => {
+            const VF = VexFlow;
+            const host = document.createElement(backend === 'SVG' ? 'div' : 'canvas');
+            host.id = 'hymn';
+            document.body.replaceChildren(host);
+            const f = new VF.Factory({ renderer: { elementId: host.id, width: 680, height: 480 } });
+            const music = f.EasyScore().compose(spec);
+            const ctx = f.getContext();
+            const fill = ctx.fillText.bind(ctx);
+            const metrics = document.createElement('canvas').getContext('2d');
+            let painted = [];
+            ctx.fillText = (text, x, y) => {
+              if ([stanza, '12.', 'Bright', 'The'].includes(text)) {
+                const font = music.getNote('g0').getModifiers()[0].fontInfo;
+                metrics.font = VF.Font.toCSSString({ ...font, weight: text.endsWith('.') ? 'bold' : font.weight });
+                const ink = metrics.measureText(text);
+                painted.push({ text, left: x - ink.actualBoundingBoxLeft, right: x + ink.actualBoundingBoxRight, y });
+              }
+              return fill(text, x, y);
+            };
+            return [620, 350, 620].map((width) => {
+              music.sheet.setWidth(width);
+              ctx.clear();
+              painted = [];
+              f.draw({ retain: true });
+              const first = music.getNote('g0');
+              return {
+                painted,
+                bars: music.sheet.getRows().map((row) => row.systems.length),
+                wordCenters: first.getModifiers().map((mark) => mark.computeX().x + mark.getWidth() / 2),
+                anchor: first.getModifierStartXY(VF.Modifier.Position.ABOVE, 0).x,
+                staffLeft: first.checkStave().getX(),
+                diagnostics: music.systems.flatMap((system) => system.getPhraseLayout().diagnostics),
+              };
+            });
+          },
+          { backend, stanza, spec: stanzaStudy(stanza) }
+        );
+        assert.deepEqual(frames[0], frames[2]);
+        assert.deepEqual(
+          frames.map((f) => f.bars),
+          [[2], [1, 1], [2]]
+        );
+        for (const frame of frames) {
+          assert.deepEqual(frame.diagnostics, []);
+          assert.deepEqual(frame.wordCenters, [frame.anchor, frame.anchor]);
+          assert.equal(frame.painted.length, 4);
+          const [upper, lower, bright, the] = [stanza, '12.', 'Bright', 'The'].map((text) =>
+            frame.painted.find((mark) => mark.text === text)
+          );
+          assert.ok(Math.abs(upper.left - lower.left) < 0.01 && upper.left >= frame.staffLeft);
+          assert.ok(Math.max(upper.right, lower.right) + 3 < Math.min(bright.left, the.left));
+          assert.equal(upper.y, bright.y);
+          assert.equal(lower.y, the.y);
+          assert.ok(upper.y < lower.y);
+        }
       }
     }
   } finally {

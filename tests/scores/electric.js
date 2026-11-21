@@ -4,7 +4,7 @@
   const title = 'High Wire';
   const credit = 'Example piece · Electric guitar in Drop D';
   const intro =
-    'Mute only string six. In the final bar, bend the D on string three to meet the stationary E on string two. Reach unison halfway through the quarter, hold, then release.';
+    'The short ties let the treble dyads ring over the muted sixth string. In the final bar, bend the D on string three to meet the stationary E on string two. Reach unison halfway through the quarter, hold, then release.';
   const focus = 'tab-7-0-4';
   const action = 'Inspect the bend';
 
@@ -60,11 +60,21 @@
           const note = (m, v, i) => c.getNote([view, m, v, i].join('-'));
           for (const m of [0, 1, 2, 4, 5, 6]) for (const i of [0, 2]) score.beam([note(m, 1, i), note(m, 1, i + 1)]);
           for (const m of [5, 7]) score.beam([0, 1, 2, 3].map((i) => note(m, 0, i)));
-          note(0, 0, 0).addModifier(score.make.annotation({ text: 'let ring', vJustify: 'top' }));
+          if (view === 'tab') note(0, 0, 0).addModifier(score.make.annotation({ text: 'let ring', vJustify: 'top' }));
         }
         // Pick the fifths down and the answering lines up. Slurs mark the unpicked notes.
         const upper = (bar, index = 0) => c.getNote('staff-' + bar + '-0-' + index);
-        for (const m of [0, 2, 4, 6]) upper(m).addModifier(score.make.articulation({ type: 'am', position: 'above' }));
+        for (const m of [0, 2, 4, 6]) {
+          const dyad = upper(m);
+          dyad.addModifier(score.make.articulation({ type: 'am', position: 'above' }));
+          // The two written heads ring independently of the palm-muted bass.
+          for (const head of [0, 1])
+            score.make.tie({
+              from: dyad,
+              firstIndexes: [head],
+              options: { direction: head === 0 ? 1 : -1, laissezVibrer: 14 },
+            });
+        }
         for (const m of [1, 3, 7]) upper(m).addModifier(score.make.articulation({ type: 'a|', position: 'above' }));
         for (const [m, i, number] of [
           [1, 0, '1'],

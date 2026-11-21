@@ -112,8 +112,8 @@ export interface EasyScoreMeasureSpec extends EasyScoreStaffState {
   endBarline?: BarlineType;
   /** Literal labels or spelled harmonies sharing a lane above their notes. */
   chords?: readonly (LeadMark | { note: string; harmony: ChordHarmony })[];
-  /** Each ordered list of syllables forms a separate lyric lane. */
-  verses?: readonly (readonly LyricMark[])[];
+  /** A verse can supply a printed stanza label on the measure where it begins. */
+  verses?: readonly (readonly LyricMark[] | { stanza?: string; syllables: readonly LyricMark[] })[];
 }
 
 /** Staves have aligned measure arrays. Missing or uneven measures are errors. */
@@ -360,15 +360,17 @@ function addLeadMarks(score: EasyScore, system: System, measure: EasyScoreMeasur
     return note;
   };
   for (const verse of measure.verses ?? []) {
-    if (!verse.length) invalid('A verse needs at least one syllable.');
-    const syllables = verse.map(({ note, text, elideWith, hyphenAfter, extendTo }) => ({
+    const entries = 'syllables' in verse ? verse.syllables : verse;
+    const stanza = 'syllables' in verse ? verse.stanza : undefined;
+    if (!entries.length) invalid('A verse needs at least one syllable.');
+    const syllables = entries.map(({ note, text, elideWith, hyphenAfter, extendTo }) => ({
       note: lyricAnchor(note),
       text,
       elideWith,
       hyphenAfter,
       extendTo: extendTo === undefined ? undefined : lyricAnchor(extendTo),
     }));
-    system.getPhraseLayout().addVerse(syllables[0].note.checkStave(), syllables);
+    system.getPhraseLayout().addVerse(syllables[0].note.checkStave(), syllables, { stanza });
   }
 }
 

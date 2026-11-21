@@ -87,6 +87,19 @@ const verses = [
 
 A group can use `hyphenAfter` or `extendTo`. The connector begins after the complete group. Keep the active SMuFL music face in the lyric font stack when selecting a custom text font.
 
+## Stanza numbers
+
+In the measure where a verse starts, pass its printed number as `stanza`. Include the punctuation you want to see. Both numbers share a column just to the left of the lyrics. The first syllable of each verse stays centered on its note.
+
+```js
+const verses = [
+  { stanza: '1.', syllables: [{ note: 'first', text: 'Bright' }, { note: 'second', text: 'stars' }] },
+  { stanza: '12.', syllables: [{ note: 'first', text: 'The' }, { note: 'second', text: 'dawn' }] },
+];
+```
+
+Continue each verse in later measures with an ordinary syllable list. A system break preserves the label at its original measure. With native notes, use `layout.addVerse(stave, syllables, { stanza: '1.' })`.
+
 ## Shared lyric baselines
 
 Annotations can use an absolute baseline in the renderer's coordinates. Give all lyrics in a row the same baseline:

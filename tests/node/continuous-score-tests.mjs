@@ -579,14 +579,14 @@ function renderSaints({ backend, space }) {
   const drawText = ctx.fillText.bind(ctx);
   let painted = [];
   ctx.fillText = (text, x, y) => {
-    if (text === 'in') painted.push(y);
+    if (text === 'in' || text === 'sky') painted.push([text, y]);
     return drawText(text, x, y);
   };
   return [1000, 356, 1000].map((width) => {
     music.sheet.setWidth(width).format();
     const { rows, fragments, diagnostics } = music.sheet.getContinuousLayout();
     const words = music.notes.flat(3).flatMap((n) => n.getModifiers().filter((a) => a.phraseManaged));
-    const expected = words.filter((a) => a.text === 'in').map((a) => a.computeY().y);
+    const expected = words.filter((a) => a.text === 'in' || a.text === 'sky').map((a) => [a.text, a.computeY().y]);
     const baselines = words.map((a) => a.computeY().y - a.checkAttachedNote().checkStave().getYForLine(0));
     const extenders = fragments
       .filter((f) => f.kind === 'lyric')
@@ -598,7 +598,13 @@ function renderSaints({ backend, space }) {
           .find((a) => a.getAttribute('id') === spec.syllableId);
         const ink = word.getTextInk(word.computeX().x, word.computeY().y);
         const staff = music.staves[rows[f.row].measures[0] - 1][0];
-        return { part: f.part, y: f.y1 - staff.getYForLine(0), gap: f.x1 - (ink.x + ink.w), length: f.x2 - f.x1 };
+        return {
+          word: word.text,
+          part: f.part,
+          y: f.y1 - staff.getYForLine(0),
+          gap: f.x1 - (ink.x + ink.w),
+          length: f.x2 - f.x1,
+        };
       });
     ctx.clear();
     painted = [];
@@ -648,11 +654,12 @@ test('Saints, choir, piano and ensemble reflow in browser SVG and Canvas with tw
         );
         for (const frame of frames) {
           assert.deepEqual(frame.diagnostics, []);
-          assert.equal(frame.expected.length, 4);
+          assert.equal(frame.expected.filter(([text]) => text === 'in').length, 5);
+          assert.equal(frame.expected.filter(([text]) => text === 'sky').length, 3);
           assert.deepEqual(frame.painted, frame.expected, 'each syllable is drawn once at its measured baseline');
-          for (const y of frame.baselines) assert.ok(Math.abs(y - 7.5 * space) < 0.01);
+          for (const y of frame.baselines) assert.ok([7.5, 9.5].some((line) => Math.abs(y - line * space) < 0.01));
           for (const line of frame.extenders) {
-            assert.ok(Math.abs(line.y - 7.5 * space) < 0.01);
+            assert.ok(Math.abs(line.y - (line.word === 'sky' ? 9.5 : 7.5) * space) < 0.01);
             assert.ok(line.length > 0);
             if (line.part === 'first' || line.part === 'single') assert.ok(Math.abs(line.gap - 0.35 * space) < 0.01);
           }
@@ -906,4 +913,39 @@ test('a glissando retains its pitch progression through an intermediate row and 
   assert.ok(fragments.every((f) => f.y2 < f.y1));
   // On the last two rows the same clef projects the shared boundary pitch onto the same staff line.
   assert.ok(Math.abs(fragments[1].y2 - c.staves[1][0].getY() - (fragments[2].y1 - c.staves[2][0].getY())) < 0.00001);
+});
+
+test('a dashed lower-head tie keeps its stroke, pitch and endpoints when the score wraps and rejoins', () => {
+  const { f, ctx, canvas } = factory();
+  const event = (id, keys) => ({ id, note: { keys, duration: 'q', stemDirection: 1 } });
+  const measures = [
+    { voices: [{ notes: [event('lead', ['g/4']), event('from', ['e/4', 'b/4'])] }] },
+    { voices: [{ notes: [event('to', ['e/4', 'b/4']), event('end', ['g/4'])] }] },
+  ];
+  const score = f.EasyScore().compose({
+    sheet: { width: 430 },
+    staves: [{ id: 'staff', time: '2/4', measures }],
+    continuous: { spans: [{ id: 'editorial', kind: 'tie', from: 'from', to: 'to', fromHead: 0, toHead: 0, side: 'below', dashed: true }] },
+  });
+  const frame = (width, parts) => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    score.sheet.setWidth(width);
+    f.draw({ retain: true });
+    const layout = score.sheet.getContinuousLayout();
+    const segments = layout.fragments;
+    assert.deepEqual(segments.map(s => s.part), parts);
+    assert.ok(segments.every(s => s.dashed));
+    assert.equal(segments[0].y1, score.getNote('from').getYs()[0] + segments[0].space / 2);
+    assert.equal(segments.at(-1).y2, score.getNote('to').getYs()[0] + segments.at(-1).space / 2);
+    const strokes = [];
+    const recorder = Object.create(f.getContext());
+    recorder.stroke = () => strokes.push(ctx.getLineDash());
+    recorder.fill = () => assert.fail('a dashed arc must have open gaps');
+    layout.draw(recorder);
+    assert.deepEqual(strokes, parts.map(() => [4, 3]));
+    return canvas.toBuffer();
+  };
+  const wide = frame(430, ['single']);
+  frame(125, ['first', 'last']);
+  assert.deepEqual(frame(430, ['single']), wide);
 });

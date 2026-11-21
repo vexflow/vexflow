@@ -171,6 +171,19 @@ const notes = score.notes('(C4 E4 G4)/q., D4/8, B4/q/r, C5/q');`
     ['repo:docs/easyscore.md', 'https://github.com/0xfe/vexflow/wiki/Using-EasyScore']
   ),
   lesson(
+    'engraving-570',
+    'easyscore',
+    'Engraving in VexFlow 5.7',
+    'Read a measured beam and explore the new notation in a full score.',
+    'feathered-group',
+    `<p>Four sixteenth notes occupy the first beat. Follow the space between their two beams as it opens to the right. The three quarter notes complete the bar.</p>
+<h2>Across the barline</h2><p>In a continuous score, an ordinary beam or straight glissando can continue onto the next system. A niente circle stays at the closed end of its hairpin. In a guitar part, a bend can hold on one string across a tie.</p>
+<h2>Writing for an ensemble</h2><p>Lead sheets can transpose a chord root and slash bass together. Piano chords can share a stem between staves under a beam. Alternating tremolos divide the pair’s performed duration between two written attacks. A singer can read two syllables at one attack joined by an undertie.</p>`,
+    'Change right to left and run the example again. Which end of the beam opens? Count the beats after the change.',
+    ['notation'],
+    ['https://github.com/vexflow/vexflow/blob/5.7.0/changelog/CHANGELOG.md#570']
+  ),
+  lesson(
     'meter',
     'easyscore',
     'Voices and meter',

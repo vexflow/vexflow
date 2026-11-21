@@ -34,7 +34,8 @@ export function quartertones(options: TestOptions): void {
         from: notes[0],
         to: notes[3],
         type: i === 0 ? StaveHairpin.type.CRESC : StaveHairpin.type.DECRESC,
-        options: { height: 7, yShift: -4 },
+        // The opening phrase emerges from silence; the second swell releases into the final bar.
+        options: { height: 7, yShift: -4, niente: i === 0 },
       });
     const stave = f
       .System({ x: 16 + (i % 3) * 288, y: 24 + Math.floor(i / 3) * 154, width: 288 })

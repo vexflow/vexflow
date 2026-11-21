@@ -63,6 +63,14 @@ export const teachingExamples = [
     )
   ),
   example(
+    'feathered-group',
+    'Fan a measured beam',
+    stave(`// Four sixteenths fill the first beat. The fan changes only the beam spacing.
+const notes = score.notes('C5/16, D5, E5, F5, G5/q, E5, C5');
+score.beam(notes.slice(0, 4), { feathered: 'right' });`),
+    'EasyScore Beam'
+  ),
+  example(
     'beam-groups',
     'Beams on each beat',
     stave(`const notes = score.notes('C5/8, D5, E5, F5, G5, A5, G5, E5');

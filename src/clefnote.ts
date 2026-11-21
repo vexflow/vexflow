@@ -27,7 +27,12 @@ export class ClefNote extends Note {
   setType(type: string, size: string, annotation?: string): this {
     this.clef = new Clef(type, size, annotation);
     if (this.stave) this.clef.setStave(this.stave);
-    this.setWidth(this.clef.getWidth());
+    // A double-octave F clef can fill its entire advance. Keep ink clear of the next head.
+    let width = this.clef.getWidth();
+    if ((annotation === '15ma' || annotation === '15mb') && this.clef.code !== Clef.types[type].code) {
+      width = Math.max(width, this.clef.getTextMetrics().actualBoundingBoxRight + 2);
+    }
+    this.setWidth(width);
 
     return this;
   }

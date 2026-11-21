@@ -1,5 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
+// Inline barlines reserve horizontal space without advancing the voice.
 
 import { ModifierContext } from './modifiercontext';
 import { Note } from './note';
@@ -47,6 +48,9 @@ export class BarNote extends Note {
       [TYPE.REPEAT_END]: 14,
       [TYPE.REPEAT_BOTH]: 18,
       [TYPE.NONE]: 0,
+      [TYPE.DASHED]: 8,
+      [TYPE.DOTTED]: 9,
+      [TYPE.DOUBLE_HEAVY]: 17,
     };
 
     // Tell the formatter that bar notes have no duration.

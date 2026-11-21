@@ -1,3 +1,11 @@
+# 5.7.0
+
+- **Lead sheets and piano.** Chord symbols reserve space across barlines. Structured harmony transposes both the root and slash bass while preserving the quality. A beamed piano chord can split its heads between staves and share a single stem. [Harmony](../docs/chord-symbols.md#transposing-harmony) · [Sheet layout](../docs/sheets-and-themes.md)
+- **Beams and tremolos.** Ordinary beams can cross a barline and split when the score wraps. Measured feathered beams fan left or right and retain the written rhythm. Alternating tremolos support one to four strokes between matching written quarter, half or whole notes. [Continuous scores](../docs/vf6/m4.md) · [Feathered beams](../docs/vf6/m8.md) · [Alternating tremolos](../docs/vf6/m6.md)
+- **Expression and lyrics.** Niente hairpins carry a circle at the closed musical endpoint. A straight glissando can join selected chord heads across systems. Two syllables on one attack can share an undertie. [Continuous spans](../docs/vf6/m4.md) · [Lyric elision](../docs/text-and-lyrics.md#two-syllables-on-one-note)
+- **Guitar.** A bend can rise on one string, hold through a tie and release on a later attack. [Guitar notation](../docs/vf6/m8-guitar.md)
+- Try the [editable feathered beam](https://vexflow.com/guide/#playground/feathered-group). The [user guide](https://vexflow.com/guide/) now houses the former Explorer examples. Browse the [visual comparisons](https://github.com/vexflow/vexflow/issues/374) and [5.7.0 quality report](https://vexflow.com/reports/5.7.0/).
+
 # 5.6.1
 
 - TAB clefs now fit between the outer strings and center on the actual tablature stave. Four-string instruments use the four-string clef glyph. Numeric, common, and cut time signatures also center on the strings.
