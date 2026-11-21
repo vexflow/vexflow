@@ -548,6 +548,10 @@ const chords = [{ note: 'downbeat', harmony: written }, { note: 'rest', text: 'N
 
 `showTimeSignature` carries forward on the staff. Set it to `true` to print the active meter again. The meter still governs voice timing and automatic beaming while hidden. Use `Barline.type.DOUBLE` for a double bar. The same descriptors drive screen reflow and the selected staff in a `Publication`.
 
+### Editorial turns
+
+Attach `score.make.ornament('turn', { parenthesized: true })` to the written note to show a turn supplied by the editor. The parentheses enclose the turn sign above the staff. A native `new Ornament('turn').setParenthesized()` gives the same engraving. Pass `false` to the setter to restore the bare turn.
+
 ### Written trill partners
 
 Attach `score.make.ornament('tr', { auxiliaryPitch: 'bb/4' })` to the principal note with `addModifier(ornament, 0)`. The small parenthesized head shows the written partner and adds no time to the voice. Use `'a/4'` for A or `'an/4'` to print an explicit natural. A native `Ornament('tr')` accepts `setAuxiliaryPitch(pitch)`. Call it without an argument to remove the cue. For just an accidental above the trill sign, use `setUpperAccidental()` with its accidental code.
