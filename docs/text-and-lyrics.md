@@ -73,6 +73,22 @@ factory.draw();
 
 Use `TextDynamics` for engraved dynamics such as *p*, *mf*, and *n* (niente). For example, `factory.TextDynamics({ text: 'n', duration: 'q', line: 10 })` places the niente letter on the same baseline as other dynamics with `line: 10`. To share a standalone SVG, supply the music face and each text weight used on the page to the outline exporter. [Portable SVG export](portable-svg.md#font-faces-and-fallback)
 
+## Harp pedal changes
+
+Start one `HarpPedalChanges` sequence per harp part. Supply all seven initial positions, then apply each target to its rest or entrance before formatting the voice. You can supply a complete target or just the pedals that move.
+
+```js
+const pedals = new VexFlow.HarpPedalChanges({
+  D: 'natural', C: 'natural', B: 'natural', E: 'natural',
+  F: 'natural', G: 'natural', A: 'natural',
+});
+pedals.apply(rest, { F: 'sharp', B: 'flat' });      // B♭  F♯, in pedal order
+pedals.apply(nextBeat, { B: 'flat', F: 'sharp' });  // Unchanged, so the beat stays clear.
+pedals.apply(entrance, { F: 'natural' });           // F♮. B remains flat.
+```
+
+The returned `Annotation` is centered below its note and participates in note spacing. You can set its font or vertical justification before formatting. An unchanged setting returns `undefined`. Use `getSettings()` to read the current seven positions.
+
 ## Two syllables on one note
 
 Use `elideWith` to join two syllables on one attack. Each verse entry stays centered on its note. A single annotation measures both syllables and the music font’s undertie at the lyric size. The same entry works in `PhraseLayout.addVerse()` with a native note in place of its ID.

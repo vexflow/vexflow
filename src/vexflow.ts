@@ -31,6 +31,7 @@ import { Glyphs } from './glyphs';
 import { GraceNote } from './gracenote';
 import { GraceNoteGroup } from './gracenotegroup';
 import { GraceTabNote } from './gracetabnote';
+import { HarpPedalChanges } from './harppedalchanges';
 import { FrettedInstrument, PercussionMap } from './instrumentprofile';
 import { KeyManager } from './keymanager';
 import { KeySignature } from './keysignature';
@@ -138,6 +139,7 @@ export class VexFlow {
   static GraceNote = GraceNote;
   static GraceNoteGroup = GraceNoteGroup;
   static GraceTabNote = GraceTabNote;
+  static HarpPedalChanges = HarpPedalChanges;
   static KeyManager = KeyManager;
   static KeySignature = KeySignature;
   static KeySigNote = KeySigNote;
