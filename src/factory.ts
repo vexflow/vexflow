@@ -705,6 +705,7 @@ export class Factory {
     options?: {
       autoStem?: boolean;
       feathered?: FeatheredBeamDirection;
+      frenchBeams?: boolean;
       secondaryBeamBreaks?: number[];
       partialBeamDirections?: {
         [noteIndex: number]: PartialBeamDirection;
@@ -712,6 +713,7 @@ export class Factory {
     };
   }): Beam {
     const beam = new Beam(params.notes, params.options?.autoStem).setContext(this.context);
+    if (params.options?.frenchBeams) beam.renderOptions.frenchBeams = true;
     if (params.options?.feathered) beam.renderOptions.feathered = params.options.feathered;
     beam.breakSecondaryAt(params.options?.secondaryBeamBreaks ?? []);
     if (params.options?.partialBeamDirections) {

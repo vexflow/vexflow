@@ -89,6 +89,8 @@ export class Beam extends Element {
   public renderOptions: {
     /** Fan the secondary beams toward this end. The primary beam and written timing stay fixed. */
     feathered?: FeatheredBeamDirection;
+    /** Stop interior stems at the innermost beam that continues through the note. */
+    frenchBeams?: boolean;
     flatBeamOffset?: number;
     flatBeams: boolean;
     secondaryBreakTicks?: number;
@@ -231,6 +233,7 @@ export class Beam extends Element {
     notes: StemmableNote[],
     config: {
       feathered?: FeatheredBeamDirection;
+      frenchBeams?: boolean;
       flatBeamOffset?: number;
       flatBeams?: boolean;
       secondaryBreaks?: string;
@@ -471,6 +474,7 @@ export class Beam extends Element {
     beamedNoteGroups.forEach((group) => {
       const beam = new Beam(group);
 
+      if (config.frenchBeams) beam.renderOptions.frenchBeams = true;
       if (config.feathered) beam.renderOptions.feathered = config.feathered;
       if (config.showStemlets) {
         beam.renderOptions.showStemlets = true;
@@ -895,6 +899,39 @@ export class Beam extends Element {
     return beamY;
   }
 
+  /** Measure the French stem inset from the primary beam to each unbroken secondary strip. */
+  private getFrenchBeamInsets(primaryY: number): number[] {
+    const insets = this.notes.map(() => 0);
+    const firstX = this.notes[0].getStemX();
+    let previousDuration = '';
+    let index = 0;
+    for (const { duration, x1, x2, y1, y2 } of this.getStrips(primaryY)) {
+      if (duration === '4') continue; // The primary strip is the reference for all stem tips.
+      if (previousDuration !== duration) {
+        previousDuration = duration;
+        index = 0;
+      }
+      // Strip endpoints include drawing overhang. Compare the original anchor positions
+      // so stems at either end of a strip still connect it to the primary beam.
+      const end = x2 - 1;
+      if (end <= x1) continue;
+      while (index < this.notes.length) {
+        const note = this.notes[index];
+        const x = note.getStemX() - Stem.WIDTH / 2;
+        // A lone note at the end of an incoming strip is anchored at the stem center.
+        if (end - x <= Stem.WIDTH / 2) break;
+        if (x > x1 && !note.isRest() && note.getStemDirection() === this._stemDirection) {
+          // Interpolating the actual strip also follows the spread of a feathered group.
+          const secondaryY = y1 + ((x - x1) / (end - x1)) * (y2 - y1);
+          const primaryAtX = this.getSlopeY(x, firstX, primaryY, this.slope);
+          insets[index] = Math.abs(secondaryY - primaryAtX);
+        }
+        index++;
+      }
+    }
+    return insets;
+  }
+
   /**
    * Create new stems for the notes in the beam, so that each stem
    * extends into the beams.
@@ -912,6 +949,7 @@ export class Beam extends Element {
     const firstNote = notes[0];
     const firstStemTipY = this.getBeamYToDraw();
     const firstStemX = firstNote.getStemX();
+    const insets = this.renderOptions.frenchBeams ? this.getFrenchBeamInsets(firstStemTipY + yShift) : undefined;
 
     for (let i = 0; i < notes.length; ++i) {
       const note = notes[i];
@@ -941,7 +979,7 @@ export class Beam extends Element {
         const after = preBeamExtension + beamExtension + crossStemExtension;
         this.fittedStems.push({ stem, before: preBeamExtension, after });
         stem.setExtension(after);
-        stem.adjustHeightForBeam();
+        stem.adjustHeightForBeam(insets?.[i]);
 
         if (note.isRest() && showStemlets) {
           const totalBeamWidth = (beamCount - 1) * beamWidth * 1.5 + beamWidth;
@@ -1149,6 +1187,7 @@ export class Beam extends Element {
       for (const { start, end } of this.getBeamLines(duration)) {
         if (end === undefined) throw new RuntimeError('NoLastBeamX', 'lastBeamX undefined.');
         yield {
+          duration,
           x1: start,
           x2: end + 1,
           y1: this.getSlopeY(start, firstX, originAt(start), this.slope),
