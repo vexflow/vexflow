@@ -192,6 +192,77 @@ test('native niente circles touch the wedge, have open centers and fit its measu
   }
 });
 
+/** Record the actual quadratic arms while the Canvas context paints them. */
+function paintedArms(ctx, draw) {
+  const arms = [];
+  let start;
+  const recorder = Object.create(ctx);
+  recorder.moveTo = (x, y) => {
+    start = [x, y];
+    return ctx.moveTo(x, y);
+  };
+  recorder.quadraticCurveTo = (cx, cy, x, y) => {
+    arms.push([start, [cx, cy], [x, y]]);
+    return ctx.quadraticCurveTo(cx, cy, x, y);
+  };
+  draw(recorder);
+  return arms;
+}
+
+test('flared hairpins keep the native bounds and mirror their quarter-opening at the midpoint', () => {
+  const { f } = factory();
+  const source = spec(1, {}, () =>
+    ['g/4', 'a/4', 'b/4', 'g/4'].map((key, i) => ({ id: 'a' + i, note: { keys: [key], duration: 'q' } }))
+  );
+  const score = f.EasyScore().compose(source);
+  const from = score.getNote('a0');
+  const to = score.getNote('a3');
+  for (const width of [360, 210]) {
+    score.sheet.setWidth(width).format();
+    for (const type of [VF.StaveHairpin.type.CRESC, VF.StaveHairpin.type.DECRESC]) {
+      const mark = f.StaveHairpin({ from, to, type, options: { height: 16, niente: true } });
+      const paint = () => paintedArms(f.getContext(), (ctx) => mark.setContext(ctx).draw());
+      const bounds = mark.getBoundingBox();
+      assert.deepEqual(paint(), []);
+      mark.setRenderOptions({ ...mark.renderOptions, flared: true });
+      const [top, bottom] = paint();
+      assert.deepEqual(top[0], bottom[0], 'one closed tip');
+      const grows = type === VF.StaveHairpin.type.CRESC;
+      const x = (note) => note.getModifierStartXY(VF.Modifier.Position.BELOW, 0).x;
+      assert.equal(top[0][0], x(grows ? from : to));
+      assert.equal(top[2][0], x(grows ? to : from));
+      assert.equal(bottom[2][1] - top[2][1], 16);
+      const midpointY = ([[, y0], [, cy], [, y1]]) => (y0 + 2 * cy + y1) / 4;
+      assert.equal(midpointY(bottom) - midpointY(top), 4);
+      assert.deepEqual(mark.getBoundingBox(), bounds);
+    }
+  }
+});
+
+test('flared hairpin fragments draw matching apertures and slopes at a system break', () => {
+  const { f } = factory();
+  for (const kind of ['crescendo', 'diminuendo']) {
+    const span = { id: 'flare', kind, from: 'n0', to: 'n4', flared: true, niente: true };
+    const score = f.EasyScore().compose(spec(5, { spans: [span] }));
+    const layout = score.sheet.getContinuousLayout();
+    for (const width of [600, 120, 600]) {
+      score.sheet.setWidth(width).format();
+      const arms = paintedArms(f.getContext(), (ctx) => layout.draw(ctx));
+      assert.equal(arms.length, 2 * layout.fragments.length);
+      assert.equal(layout.fragments.filter((f) => f.nienteTip).length, 1);
+      assert.equal(layout.fragments.length === 1, width === 600);
+      layout.fragments.forEach((fragment, i) => {
+        const [a, b] = fragment.progress.map((p) => (kind === 'crescendo' ? p : 1 - p));
+        const [top, bottom] = arms.slice(2 * i, 2 * i + 2);
+        // The end ordinates are the aperture at each break. The control ordinate preserves the tangent there.
+        for (const [j, ratio] of [a * a, a * b, b * b].entries())
+          assert.ok(Math.abs(bottom[j][1] - top[j][1] - fragment.space * 1.1 * ratio) < 1e-8);
+        assert.ok(Math.abs(top[1][0] - (fragment.x1 + fragment.x2) / 2) < 1e-8);
+      });
+    }
+  }
+});
+
 test('a wrapped niente circle belongs only to its closed musical endpoint and its hit region', () => {
   for (const space of [8, 12]) {
     const { f } = factory();

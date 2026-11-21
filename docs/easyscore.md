@@ -608,6 +608,8 @@ For a beam that crosses a barline, add `{ id: 'phrase-beam', kind: 'beam', from:
 
 To let one string or chord member ring, use `score.make.tie({ from: chord, firstIndexes: [0], options: { laissezVibrer: 18, direction: 1 } })`. The reach is in pixels from the selected head. Use direction `1` below or `-1` above. An ordinary outgoing tie still reaches the edge of its system.
 
+To flare a crescendo or diminuendo, set `options: { flared: true }` on `score.make.hairpin()`, or set `flared: true` on the entry in `continuous.spans`. The arms stay narrow near the closed tip and widen toward the loud end. A continuous hairpin keeps that profile across system breaks.
+
 For a hairpin that grows from silence, pass `{ id: 'swell', kind: 'crescendo', from: 'a', to: 'b', niente: true }` in `continuous.spans`. A crescendo carries the circle on its opening fragment. A diminuendo carries it on its final fragment.
 
 For tab, use `{ id: 'hold', kind: 'tie', from: 'a', to: 'b', string: 2 }` to sustain a fret on the second string of the same staff. Both chords must play that fret on that string, in any position order. You can also select a position with a zero-based `fromHead` or `toHead`. With no selector, the tie starts at the first position of the opening chord.
