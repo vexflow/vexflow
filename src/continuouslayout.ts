@@ -17,6 +17,7 @@ import {
   spanLabel,
 } from './continuousspan';
 import type { EasyScoreComposition, EasyScoreCompositionSpec, EasyScoreStaffState } from './easyscore/composition';
+import type { InteriorBar } from './easyscore/independentmeter';
 import { Element } from './element';
 import { measureEngraving } from './engravinggeometry';
 import { Fraction } from './fraction';
@@ -56,6 +57,8 @@ export interface ContinuousBoundary {
   keepRest?: boolean;
 }
 export interface ContinuousOptions {
+  /** Reflow staff-local measure grids on a common rhythmic timeline. */
+  independentMeters?: boolean;
   mode?: 'balanced' | 'greedy';
   boundaries?: readonly ContinuousBoundary[];
   spans?: readonly ContinuousSpan[];
@@ -187,7 +190,8 @@ export class ContinuousLayout {
     private readonly spec: EasyScoreCompositionSpec,
     starts: State[][],
     ends: State[][],
-    placed?: Set<Accidental>
+    placed?: Set<Accidental>,
+    private readonly interiorBars: InteriorBar[] = []
   ) {
     this.options = spec.continuous ?? {};
     for (const voice of score.voices.flat(2)) voice.preserveStaveAssignments = true;
@@ -490,6 +494,11 @@ export class ContinuousLayout {
     return Math.max(
       ...staves.map((s, j) => {
         const marks = this.marks[i][j];
+        if (this.options.independentMeters && !this.boundaries.get(i)?.repeatStart) {
+          s.setBegBarType(
+            start && this.spec.staves[j].options?.leftBar !== false ? BarlineType.SINGLE : BarlineType.NONE
+          );
+        }
         s.setBoundaryModifiers(
           [...(start ? marks.start : []), ...(end ? marks.end : [])],
           start ? this.continuationPadding.get(s) : 0
@@ -754,7 +763,11 @@ export class ContinuousLayout {
       units[0].start +
       units[units.length - 1].end +
       (units.length - 1) * options.measureGap;
-    const extra = options.justify ? Math.max(0, options.width - minimum) / units.length : 0;
+    // A one-beat polymetric window gets less justification than a three-beat window at the same pulse.
+    const weights = units.map((u) =>
+      this.options.independentMeters ? this.score.voices[u.first][0][0].getTotalTicks().value() : 1
+    );
+    const extra = options.justify ? Math.max(0, options.width - minimum) / weights.reduce((sum, w) => sum + w, 0) : 0;
     let x = options.x + indent;
     const offsets = this.spec.staves.map(() => 0);
     const positions = units.map((u, k) => {
@@ -764,7 +777,7 @@ export class ContinuousLayout {
       sys.setX(x).setY(0);
       const chordPadding = end ? 0 : u.after;
       const endPadding = this.install(u.first, u.last, begin, end) + chordPadding;
-      const width = u.width + extra + chordPadding + (begin ? u.start : 0) + (end ? u.end : 0);
+      const width = u.width + extra * weights[k] + chordPadding + (begin ? u.start : 0) + (end ? u.end : 0);
       sys.setWidth(width).format({ endPadding });
       for (let j = 1; j < visible.length; j++) {
         const staves = sys.getStaves(),
@@ -1054,6 +1067,14 @@ export class ContinuousLayout {
       if (g.barlines)
         for (const u of units) {
           const staves = this.score.staves[u.first];
+          if (
+            this.options.independentMeters &&
+            members.some(
+              (j) =>
+                (staves[j].getModifiers(Position.END, Barline.CATEGORY)[0] as Barline).getType() === BarlineType.NONE
+            )
+          )
+            continue;
           const line = new StaveConnector(staves[top], staves[bottom]).setType('singleRight');
           this.drawing.push((ctx) => line.setContext(ctx).drawWithStyle());
         }
@@ -1085,5 +1106,12 @@ export class ContinuousLayout {
 
   draw(context: RenderContext): void {
     for (const draw of this.drawing) draw(context);
+    // A sustained note in a different voice can keep this local boundary inside a formatting window.
+    for (const { next, bar } of this.interiorBars) {
+      const stave = next.checkStave();
+      if (this.hidden.has(stave)) continue;
+      bar.setStave(stave).setX(next.getTieLeftX() - stave.space(0.5));
+      bar.draw();
+    }
   }
 }

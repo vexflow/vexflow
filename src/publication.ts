@@ -401,10 +401,11 @@ function semanticEvents(score: EasyScoreComposition, spec: EasyScoreCompositionS
             ? [
                 {
                   id: n.getAttribute('id'),
-                  measure,
+                  measure: score.meterPositions?.get(n)?.measure ?? measure,
                   staff: spec.staves[j].id,
                   voice,
-                  event,
+                  event: score.meterPositions?.get(n)?.event ?? event,
+                  ...(score.meterPositions && { onset: score.meterPositions.get(n)?.onset.toString() }),
                   keys: n.getKeys(),
                   ...(n.notation.length && { notation: n.notation }),
                   ticks: n.getTicks().toString(),

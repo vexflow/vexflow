@@ -7,7 +7,7 @@ import { Modifier } from '../modifier';
 import { Music } from '../music';
 import { Stave } from '../stave';
 import { StaveNote } from '../stavenote';
-import { Voice } from '../voice';
+import { Tickable } from '../tickable';
 
 /** Inline signature changes use exact tick onsets shared by all voices on a stave. */
 export interface KeyChange {
@@ -39,11 +39,11 @@ function orderedAttacks(hosts: StaveNote[], includeGrace: boolean): StaveNote[][
 /** Each onset is evaluated against one prior state, so voice ordering cannot change accidental output. */
 export function applyCompositionAccidentals(
   score: EasyScore,
-  voices: Voice[],
+  voices: Tickable[][],
   key: string,
   changes: KeyChange[],
   generated: Set<Accidental>,
-  stave: Stave,
+  stave: Stave | undefined,
   includeGrace = false,
   placed?: Set<Accidental>
 ): void {
@@ -53,11 +53,11 @@ export function applyCompositionAccidentals(
   const positions = new Map<string, { at: Fraction; notes: StaveNote[] }>();
   for (const voice of voices) {
     const at = new Fraction(0, 1);
-    for (const note of voice.getTickables()) {
+    for (const note of voice) {
       if (note.shouldIgnoreTicks()) continue;
       const id = at.clone().simplify().toString();
       const group = positions.get(id) ?? { at: at.clone(), notes: [] };
-      if (note instanceof StaveNote && note.getStave() === stave) group.notes.push(note);
+      if (note instanceof StaveNote && (!stave || note.getStave() === stave)) group.notes.push(note);
       positions.set(id, group);
       at.add(note.getTicks());
     }

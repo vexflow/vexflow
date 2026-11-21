@@ -2970,6 +2970,7 @@
     "ContinuousOptions": {
       "extends": [],
       "fields": [
+        "independentMeters?: boolean;",
         "mode?: 'balanced' | 'greedy';",
         "boundaries?: readonly ContinuousBoundary[];",
         "spans?: readonly ContinuousSpan[];",
@@ -2996,7 +2997,7 @@
       "diagnostics: { code: 'RowOverflow' | 'CurveCollision' | 'SplitStemAlignment' | 'SpanOverflow' | 'StaffSpacingLimit'; measures: number[]; source?: string; }[]",
       "fragments: SpanFragment[]",
       "rows: ContinuousRow[]",
-      "constructor(private readonly score: EasyScoreComposition, private readonly spec: EasyScoreCompositionSpec, starts: State[][], ends: State[][], placed?: Set<Accidental>)",
+      "constructor(private readonly score: EasyScoreComposition, private readonly spec: EasyScoreCompositionSpec, starts: State[][], ends: State[][], placed?: Set<Accidental>, private readonly interiorBars: InteriorBar[] = [])",
       "format(options: Required<SheetOptions>): ContinuousRow[]",
       "draw(context: RenderContext): void"
     ]
@@ -3429,6 +3430,7 @@
         "notes: Tickable[][][][];",
         "spans: Element[];",
         "diagnostics: EasyScoreCompositionDiagnostic[];",
+        "meterPositions?: ReadonlyMap<Tickable, MeterPosition>;",
         "getElement: (id: string) => Element | undefined;",
         "getNote: (id: string) => Note;"
       ]
