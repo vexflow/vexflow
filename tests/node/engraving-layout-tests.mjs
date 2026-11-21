@@ -427,6 +427,66 @@ test('browser SVG keeps one rehearsal mark, the dynamic and the pedal through re
   }
 });
 
+test('beam slope options are validated before reading note geometry', () => {
+  const { f } = factory();
+  const beam = f.Beam({ notes: f.EasyScore().notes('C4/8, E4', { stem: 'up' }) });
+  const defaults = { ...beam.renderOptions };
+  for (const settings of [
+    ...[0, -1, 1.5, NaN, Infinity, 1001, Number.MAX_SAFE_INTEGER + 1].map((slopeIterations) => ({ slopeIterations })),
+    { minSlope: NaN },
+    { minSlope: -Infinity },
+    { maxSlope: Infinity },
+    { minSlope: 0.2, maxSlope: 0.1 },
+  ]) {
+    Object.assign(beam.renderOptions, defaults, settings);
+    assert.throws(() => beam.calculateSlope(), { code: 'BadArguments' });
+  }
+});
+
+test('beam fitting includes both endpoints, honors fixed slopes, and preserves the default fit', () => {
+  const ascending = 'C4/8, F4, D5, G5';
+  const descending = 'D6/8, F5, D4, G3';
+  function fit(pitches, settings = {}) {
+    const { f } = factory();
+    const score = f.EasyScore();
+    const notes = score.notes(pitches, { stem: 'up' });
+    const beam = f.Beam({ notes });
+    Object.assign(beam.renderOptions, settings);
+    const system = f.System({ width: 350, y: 60 });
+    system.addStave({ voices: [score.voice(notes, { mode: 'soft' })] }).addClef('treble');
+    system.format();
+    beam.postFormat();
+    return beam.slope;
+  }
+
+  // These two steep contours favored opposite endpoints of the original default range.
+  assert.equal(fit(ascending), -0.25);
+  assert.equal(fit(descending), 0.25);
+  for (const slopeIterations of [1, 3, 1000]) {
+    const bounds = { minSlope: -0.1, maxSlope: 0.2, slopeIterations };
+    assert.equal(fit(ascending, bounds), bounds.minSlope);
+    assert.equal(fit(descending, bounds), bounds.maxSlope);
+  }
+  assert.equal(fit(ascending, { minSlope: 0.125, maxSlope: 0.125 }), 0.125);
+});
+
+test('default slope fitting preserves the chosen angle when several candidates have the same cost', () => {
+  const { f } = factory();
+  const notes = f.EasyScore().notes('G4/8, F4, E4, C4', { stem: 'up' });
+  const beam = f.Beam({ notes });
+  const stave = f.Stave({ y: 65 });
+  // Four equally spaced attacks put neighboring slopes on the same cost plateau.
+  notes.forEach((note, index) => {
+    note.setStave(stave);
+    new VF.TickContext()
+      .addTickable(note)
+      .preFormat()
+      .setX(30 + 30 * index);
+  });
+  beam.calculateSlope();
+  assert.ok(Math.abs(beam.slope - 0.15) < 1e-12);
+});
+
 test('contour beams preserve membership, minimum stems, beamlet overrides and endpoints across widths', () => {
   for (const width of [190, 340, 790]) {
     for (const stem of ['up', 'down']) {
