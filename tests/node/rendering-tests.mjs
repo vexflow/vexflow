@@ -1,4 +1,4 @@
-// Integration checks for server rendering and the score benchmark fixtures.
+// Check server rendering, score benchmark fixtures and shared dashed-line geometry.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, readdirSync, readFileSync } from 'node:fs';
@@ -73,4 +73,65 @@ test('score benchmark fixtures render', async () => {
   } finally {
     await browser.close();
   }
+});
+
+/** Reject invalid geometry and patterns before a drawing backend receives any path commands. */
+test('dashed lines reject invalid or excessive paths before drawing', async () => {
+  const { Renderer } = await import('../../build/esm/entry/vexflow-core.js');
+  const untouched = { beginPath: () => assert.fail('invalid line started a path') };
+  for (const pattern of [[], [0, 0], [-1, 2], [NaN], [1, Infinity], [3, , 1], [0.00001]]) {
+    assert.throws(() => Renderer.drawDashedLine(untouched, 0, 0, 10, 0, pattern), { code: 'BadDashPattern' });
+  }
+  for (const endpoints of [
+    [NaN, 0, 1, 1],
+    [0, 0, 1, Infinity],
+    [-Number.MAX_VALUE, 0, Number.MAX_VALUE, 0],
+  ]) {
+    assert.throws(() => Renderer.drawDashedLine(untouched, ...endpoints, [3]), { code: 'BadDashLine' });
+  }
+});
+
+/** Check real path coordinates for gaps of zero, odd-length patterns and reversed diagonal strokes. */
+test('dashed lines preserve alternating segments and finish exactly on the endpoint', async () => {
+  const { Renderer } = await import('../../build/esm/entry/vexflow-core.js');
+  const path = [];
+  const context = {
+    beginPath() {
+      path.length = 0;
+    },
+    moveTo(x, y) {
+      path.push(['M', x, y]);
+    },
+    lineTo(x, y) {
+      path.push(['L', x, y]);
+    },
+    closePath() {
+      path.push(['Z']);
+    },
+    stroke() {
+      path.push(['stroke']);
+    },
+  };
+  Renderer.drawDashedLine(context, 0, 4, 5, 4, [3, 0]);
+  assert.deepEqual(path, [['M', 0, 4], ['L', 3, 4], ['M', 3, 4], ['L', 5, 4], ['Z'], ['stroke']]);
+  Renderer.drawDashedLine(context, 9, 12, 0, 0, [5]);
+  assert.deepEqual(path, [['M', 9, 12], ['L', 6, 8], ['M', 3, 4], ['L', 0, 0], ['Z'], ['stroke']]);
+  Renderer.drawDashedLine(context, 5, 7, 5, 7, [3]);
+  assert.deepEqual(path, [['M', 5, 7], ['Z'], ['stroke']]);
+});
+
+/** Validate bracket styles atomically and keep their value independent of the caller's array. */
+test('text brackets retain their validated dash pattern', async () => {
+  const { TextBracket, StaveNote } = await import('../../build/esm/entry/vexflow-core.js');
+  const note = new StaveNote({ keys: ['c/4'], duration: 'q' });
+  const bracket = new TextBracket({ start: note, stop: note });
+  const pattern = [3, 0];
+  bracket.setDashed(true, pattern);
+  pattern[0] = 0;
+  assert.deepEqual(bracket.renderOptions.dash, [3, 0]);
+  assert.throws(() => bracket.setDashed(false, [0]), { code: 'BadDashPattern' });
+  assert.equal(bracket.renderOptions.dashed, true);
+  bracket.setDashed(false);
+  assert.equal(bracket.renderOptions.dashed, false);
+  assert.deepEqual(bracket.renderOptions.dash, [3, 0]);
 });
