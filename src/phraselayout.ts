@@ -8,6 +8,7 @@ import { Curve } from './curve';
 import { Element } from './element';
 import { measureEngraving } from './engravinggeometry';
 import { GhostNote } from './ghostnote';
+import { Glyphs } from './glyphs';
 import { KeySignature } from './keysignature';
 import { Metrics } from './metrics';
 import { Modifier } from './modifier';
@@ -31,6 +32,8 @@ import { Voice } from './voice';
 export interface PhraseSyllable {
   note: StaveNote;
   text: string;
+  /** A second syllable sung on this attack, joined to the first by an engraved undertie. */
+  elideWith?: string;
   hyphenAfter?: boolean;
   extendTo?: StaveNote;
 }
@@ -144,10 +147,13 @@ export class PhraseLayout {
       syllables.some((s, i) => !s.text || (s.hyphenAfter && (s.extendTo || i === syllables.length - 1)))
     )
       throw new RangeError('Expected syllables with a following syllable for each hyphen.');
+    if (syllables.some((s) => s.elideWith !== undefined && (typeof s.elideWith !== 'string' || !s.elideWith.trim())))
+      throw new RangeError('An elision needs a second syllable.');
     if (syllables.some((s) => s.note.getStave() && s.note.getStave() !== stave))
       throw new RangeError('A syllable must belong to the requested stave.');
     const marks = syllables.map((s, i) =>
-      new Annotation(s.text)
+      // Shape and reserve the entire group together. The lyric font stack includes the active music face.
+      new Annotation(s.elideWith === undefined ? s.text : s.text + Glyphs.lyricsElision + s.elideWith)
         .setFont(Metrics.getFontInfo('Annotation.lyric'))
         .setVerticalJustification(options.side === 'above' ? 'top' : 'bottom')
         .setConnectorPadding(s.hyphenAfter || syllables[i - 1]?.hyphenAfter ? stave.space(0.4) : 0)
@@ -413,7 +419,8 @@ export class PhraseLayout {
       const text = ink[i].owner as Annotation,
         origin = text.computeY().y + text.getYShift(),
         b = ink[i].box;
-      if (!supportedText.test(s.text)) this.report('UnsupportedScript', text);
+      if (!supportedText.test(s.text) || (s.elideWith !== undefined && !supportedText.test(s.elideWith)))
+        this.report('UnsupportedScript', text);
       if (!s.extendTo && !s.hyphenAfter) return;
       const left = b.x + b.w + gap / 2;
       const right = s.extendTo

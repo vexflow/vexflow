@@ -4,7 +4,7 @@ import { test } from 'node:test';
 
 import puppeteer from 'puppeteer';
 
-import { makeInstrumentStudy, makeTremoloStudy } from '../engraving/instrument-studies.mjs';
+import { makeInstrumentStudy, makeTremoloStudy, tiedBendStudy } from '../engraving/instrument-studies.mjs';
 
 test('instrument studies and score construction', async (t) => {
   const browser = await puppeteer.launch({ headless: true, args: process.env.CI ? ['--no-sandbox'] : [] });
@@ -14,6 +14,7 @@ test('instrument studies and score construction', async (t) => {
     await page.addScriptTag({ path: 'build/cjs/vexflow-debug.js' });
     await page.addScriptTag({ content: 'window.makeStudy=' + makeInstrumentStudy });
     await page.addScriptTag({ content: 'window.makeTremoloStudy=' + makeTremoloStudy });
+    await page.addScriptTag({ content: 'window.tiedBendStudy=' + tiedBendStudy });
     await page.evaluate(async () => {
       const VF = window.VexFlow;
       await VF.loadFonts('Bravura', 'Academico');
@@ -25,6 +26,121 @@ test('instrument studies and score construction', async (t) => {
         });
         return makeStudy(VF, f, kind);
       };
+    });
+
+    await t.test('a tied TAB bend rises once and releases on its own string after reflow', async () => {
+      const result = await page.evaluate(() => {
+        const V = VexFlow,
+          source = tiedBendStudy(V);
+        const host = document.querySelector('main');
+        host.replaceChildren();
+        const factory = new V.Factory({ renderer: { elementId: 'music', width: 600, height: 720 } });
+        const score = factory.EasyScore().compose(source),
+          layout = score.sheet.getContinuousLayout();
+        const frame = (width) => {
+          factory.getContext().clear();
+          score.sheet.setWidth(width);
+          factory.draw({ retain: true });
+          const nav = new V.ScoreNavigation(score, source.staves);
+          const fragments = layout.fragments.filter((f) => f.id === 'tied-bend');
+          const tabs = ['tabrise', 'tabrelease'].map((id) => score.getNote(id));
+          const [first, last] = tabs,
+            space = first.checkStave().space(1);
+          const peak = fragments[0].bend.peakX;
+          const release = fragments.at(-1).bend;
+          return {
+            parts: fragments.map((f) => f.part),
+            phases: fragments.map((f) => [f.bend.peakX !== undefined, f.bend.releaseX !== undefined]),
+            strings: fragments.map((f) => f.strings),
+            stringYs: fragments.every(
+              (f) => f.bend.stringY === score.staves[layout.rows[f.row].measures[0] - 1][1].getYForLine(2)
+            ),
+            phaseRatios: [
+              (peak - fragments[0].bend.left) /
+                (first.checkStave().getNoteEndX() - space * 0.35 - fragments[0].bend.left),
+              (release.releaseX - last.getTieRightX()) / (release.right - last.getTieRightX()),
+            ],
+            positions: tabs.map((n) => n.getPositions()),
+            keys: ['noterise', 'noterelease'].map((id) => score.getNote(id).getKeys()),
+            events: nav.events.filter((e) => /tab(rise|release)/.test(e.id)),
+            fullLabels: [...host.querySelectorAll('.vf-tied-bend text')].map((t) => t.textContent),
+            paths: [...host.querySelectorAll('.vf-tied-bend')].map((g) =>
+              [...g.querySelectorAll('path')].map((p) => p.getAttribute('d'))
+            ),
+            modifiers: tabs.map((n) => n.getModifiers().filter((m) => m instanceof V.Bend).length),
+            diagnostics: layout.diagnostics,
+          };
+        };
+        const wide = frame(520),
+          narrow = frame(155),
+          restored = frame(520);
+        host.replaceChildren();
+        const book = new V.Publication(source).render(host, { staves: ['tab'], systemBreaks: [2] });
+        const metadata = book.pages.flatMap((p) => JSON.parse(p.svg.querySelector('metadata').textContent).spans);
+        const invalid = [];
+        for (const change of [
+          (s) => (s.continuous.spans[1].bend.hold = [0, 1]),
+          (s) => (s.continuous.spans[1].bend.release = [1, 3]),
+          (s) => (s.continuous.spans[1].to = 'tablead'),
+          (s) => {
+            s.continuous.spans[1].to = 'tablast';
+            s.staves[1].measures[1].voices[0].notes[1].tab = s.staves[1].measures[1].voices[0].notes[0].tab;
+          },
+          (s) => (s.continuous.spans[1].from = 'noterise'),
+        ]) {
+          const s = tiedBendStudy(V);
+          change(s);
+          try {
+            new V.Factory({ renderer: { elementId: null } }).EasyScore().compose(s);
+          } catch (err) {
+            invalid.push(err.code);
+          }
+        }
+        return { wide, narrow, restored, metadata, invalid };
+      });
+      const { wide, narrow, restored, metadata, invalid } = result;
+      assert.deepEqual(restored, wide);
+      assert.deepEqual(wide.parts, ['single']);
+      assert.deepEqual(narrow.parts, ['first', 'last']);
+      assert.deepEqual(wide.phases, [[true, true]]);
+      assert.deepEqual(narrow.phases, [
+        [true, false],
+        [false, true],
+      ]);
+      for (const f of [wide, narrow]) {
+        assert.ok(f.stringYs);
+        assert.ok(f.strings.every((strings) => strings.join(',') === '3'));
+        assert.ok(f.phaseRatios.every((r) => Math.abs(r - 0.5) < 1e-9));
+        assert.deepEqual(f.fullLabels, ['full']);
+        assert.deepEqual(f.modifiers, [0, 0]);
+        assert.deepEqual(f.diagnostics, []);
+        assert.deepEqual(f.positions[0], [...f.positions[1]].reverse());
+        assert.deepEqual(f.keys[0], [...f.keys[1]].reverse());
+        assert.deepEqual(
+          f.events.map((e) => [e.id, e.onset, e.duration]),
+          [
+            ['tabrise', '1/4', '1/4'],
+            ['tabrelease', '0/1', '1/4'],
+          ]
+        );
+        assert.match(f.events[0].label, /Bend 2 semitones on string 3/);
+        assert.match(f.events[1].label, /Sustain and release tied string 3/);
+      }
+      assert.deepEqual(narrow.events, wide.events);
+      assert.deepEqual(
+        metadata.map((f) => [f.id, f.part, f.strings, f.bend.semitones]),
+        [
+          ['tied-bend', 'first', [3], 2],
+          ['tied-bend', 'last', [3], 2],
+        ]
+      );
+      assert.deepEqual(invalid, [
+        'BadArguments',
+        'BadArguments',
+        'BadContinuousScore',
+        'BadContinuousScore',
+        'BadContinuousScore',
+      ]);
     });
 
     await t.test('written harmonies transpose independently spelled roots and basses with the melody', async () => {

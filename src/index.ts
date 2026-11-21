@@ -97,7 +97,7 @@ export * from './util';
 // Do not export './version'. It is accessible via VexFlow.BUILD.
 export * from './continuouslayout';
 export type { ContinuousSpan, ContinuousSpanKind, SpanFragment } from './continuousspan';
-export type { GuitarStroke, TimedStringBend } from './guitargesture';
+export type { GuitarStroke, TiedBend, TimedStringBend } from './guitargesture';
 export * from './publication';
 export * from './vexflow';
 export * from './vibrato';

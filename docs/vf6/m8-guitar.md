@@ -19,7 +19,18 @@ Run `npm run guide` and open a study below. Each page has an editable score. Aft
 - A continuous `palmMute` span names its first and last TAB attacks and a list of one-based strings. Both anchors must play a targeted string on the same staff. Reading order announces the endpoints. Wrapped segments retain one span ID and string list in hit testing and printed SVG metadata.
 - `FrettedInstrument.bentAttack` takes a physical string, a positive amount in semitones and phase endpoints as fractions of the host attack. For a quarter note, `rise: [1, 2], hold: [3, 4], release: [1, 1]` reaches pitch an eighth after onset, holds for a sixteenth and releases over a sixteenth. The TAB modifier draws that envelope on its own string. Both views retain the underlying starting pitches and bend data. The native `Bend.timed` modifier accepts the same envelope for direct TAB engraving.
 
-The envelope covers one rise within one written attack, with optional hold and full release. Prebends and longer bend phrases can use the existing native bend API. Playback, retargeting a bend across tied notes, and selecting the golpe separately from its host remain VF6 design questions. A samba pattern and seven-string choro bass study need their own repertoire and player review. [Specialist requirements](requirements/specialist-notation.md)
+For a bend sustained into another written event, add a `bend` to the string’s TAB tie. Build both paired events with `FrettedInstrument.attack`. They keep their base frets, written pitches and durations. The tie identifies the sustained string even when the dyad changes order.
+
+```js
+const span = {
+  id: 'bend-and-release', kind: 'tie', string: 3, from: 'tab-rise', to: 'tab-release',
+  bend: { semitones: 2, rise: [1, 2], hold: [1, 2], release: [1, 1] },
+};
+```
+
+The bend reaches its target halfway through the first event. It carries that pitch across the tie, holds for half of the second event, and returns to the base pitch by its end. The two events must be adjacent in one TAB voice and play the same fret on the selected string. The rise and label appear once, including when the tie crosses systems. Supply an ordinary staff tie on the corresponding pitched heads when printing both views.
+
+Prebends and longer bend phrases can use the existing native bend API. Playback and selecting the golpe separately from its host remain VF6 design questions. A samba pattern and seven-string choro bass study need their own repertoire and player review. [Specialist requirements](requirements/specialist-notation.md)
 
 ## Evidence and review record
 

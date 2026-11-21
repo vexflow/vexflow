@@ -45,10 +45,13 @@ export const BEAM_BOTH = 'B';
 
 export type PartialBeamDirection = typeof BEAM_LEFT | typeof BEAM_RIGHT | typeof BEAM_BOTH;
 
+/** End of a feathered group where secondary beams have their full separation. */
+export type FeatheredBeamDirection = 'left' | 'right';
+
 /** Coordinates and number of beam levels which continue at a system boundary. */
 export interface BeamContinuation {
-  left?: { x: number; levels: number };
-  right?: { x: number; levels: number };
+  left?: { x: number; levels: number; progress?: number };
+  right?: { x: number; levels: number; progress?: number };
 }
 
 /** `Beams` span over a set of `StemmableNotes`. */
@@ -58,6 +61,8 @@ export class Beam extends Element {
   }
 
   public renderOptions: {
+    /** Fan the secondary beams toward this end. The primary beam and written timing stay fixed. */
+    feathered?: FeatheredBeamDirection;
     flatBeamOffset?: number;
     flatBeams: boolean;
     secondaryBreakTicks?: number;
@@ -199,6 +204,7 @@ export class Beam extends Element {
   static generateBeams(
     notes: StemmableNote[],
     config: {
+      feathered?: FeatheredBeamDirection;
       flatBeamOffset?: number;
       flatBeams?: boolean;
       secondaryBreaks?: string;
@@ -439,6 +445,7 @@ export class Beam extends Element {
     beamedNoteGroups.forEach((group) => {
       const beam = new Beam(group);
 
+      if (config.feathered) beam.renderOptions.feathered = config.feathered;
       if (config.showStemlets) {
         beam.renderOptions.showStemlets = true;
       }
@@ -486,6 +493,8 @@ export class Beam extends Element {
     }
 
     for (const edge of [continuation?.left, continuation?.right]) {
+      if (edge?.progress !== undefined && !(edge.progress >= 0 && edge.progress <= 1))
+        throw new RuntimeError('BadArguments', 'A continuing beam needs progress between zero and one.');
       if (edge && (!Number.isFinite(edge.x) || !Number.isInteger(edge.levels) || edge.levels < 1))
         throw new RuntimeError('BadArguments', 'A continuing beam requires a finite edge and a positive beam count.');
     }
@@ -742,9 +751,17 @@ export class Beam extends Element {
           const left = Math.max(Math.min(strip.x1, strip.x2), box.x);
           const right = Math.min(Math.max(strip.x1, strip.x2), box.x + box.w);
           if (right <= left) continue;
-          const offset = (strip.y1 - origin - (strip.x1 - firstX) * this.slope) * -direction;
-          outer = Math.max(outer, Math.max(tip(left), tip(right)) + offset);
-          inner = Math.min(inner, Math.min(tip(left), tip(right)) + offset - width);
+          if (this.renderOptions.feathered) {
+            // A feathered secondary has its own slope. Sample its actual edge over the peer head.
+            const slope = (strip.y2 - strip.y1) / (strip.x2 - strip.x1);
+            const at = (x: number) => (strip.y1 + (x - strip.x1) * slope) * -direction;
+            outer = Math.max(outer, at(left), at(right));
+            inner = Math.min(inner, at(left) - width, at(right) - width);
+          } else {
+            const offset = (strip.y1 - origin - (strip.x1 - firstX) * this.slope) * -direction;
+            outer = Math.max(outer, Math.max(tip(left), tip(right)) + offset);
+            inner = Math.min(inner, Math.min(tip(left), tip(right)) + offset - width);
+          }
         }
         if (outer === -Infinity) continue;
         const a = box.y * -direction;
@@ -1079,14 +1096,28 @@ export class Beam extends Element {
   private *getStrips(beamY = this.getBeamYToDraw()) {
     const firstX = this.notes[0].getStemX();
     const thickness = this.renderOptions.beamWidth * this._stemDirection;
+    const primaryY = beamY;
+    const direction = this.renderOptions.feathered;
+    // Use the whole strip extent so a broken secondary or partial hook follows the same fan.
+    const left = this.continuation?.left?.x ?? firstX - Stem.WIDTH / 2;
+    const right = this.continuation?.right?.x ?? this.notes[this.notes.length - 1].getStemX() - Stem.WIDTH / 2;
+    const originAt = (x: number): number => {
+      if (!direction || right <= left || beamY === primaryY) return beamY;
+      const local = Math.max(0, Math.min(1, (x - left) / (right - left)));
+      const start = this.continuation?.left?.progress ?? 0;
+      const end = this.continuation?.right?.progress ?? 1;
+      const progress = start + local * (end - start);
+      const spread = direction === 'right' ? progress : 1 - progress;
+      return primaryY + (beamY - primaryY) * spread;
+    };
     for (const duration of ['4', '8', '16', '32', '64', '128', '256', '512', '1024']) {
       for (const { start, end } of this.getBeamLines(duration)) {
         if (end === undefined) throw new RuntimeError('NoLastBeamX', 'lastBeamX undefined.');
         yield {
           x1: start,
           x2: end + 1,
-          y1: this.getSlopeY(start, firstX, beamY, this.slope),
-          y2: this.getSlopeY(end, firstX, beamY, this.slope),
+          y1: this.getSlopeY(start, firstX, originAt(start), this.slope),
+          y2: this.getSlopeY(end, firstX, originAt(end), this.slope),
           thickness,
         };
       }

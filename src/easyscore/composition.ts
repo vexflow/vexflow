@@ -97,6 +97,8 @@ interface LeadMark {
 
 /** A lyric connector stays within its verse and measure. */
 interface LyricMark extends LeadMark {
+  /** A second syllable sharing this attack and its verse baseline. */
+  elideWith?: string;
   hyphenAfter?: boolean;
   extendTo?: string;
 }
@@ -359,9 +361,10 @@ function addLeadMarks(score: EasyScore, system: System, measure: EasyScoreMeasur
   };
   for (const verse of measure.verses ?? []) {
     if (!verse.length) invalid('A verse needs at least one syllable.');
-    const syllables = verse.map(({ note, text, hyphenAfter, extendTo }) => ({
+    const syllables = verse.map(({ note, text, elideWith, hyphenAfter, extendTo }) => ({
       note: lyricAnchor(note),
       text,
+      elideWith,
       hyphenAfter,
       extendTo: extendTo === undefined ? undefined : lyricAnchor(extendTo),
     }));

@@ -124,15 +124,21 @@ export class ScoreNavigation {
     const sourceFor = (id: string) => (Object.prototype.hasOwnProperty.call(sources, id) ? sources[id] : undefined);
     const seen = new Set<string>();
     const layout = score.sheet.getContinuousLayout();
-    const muteLabels = new Map<string, string[]>();
+    const techniqueLabels = new Map<string, string[]>();
     for (const fragment of layout?.fragments ?? []) {
       if (!fragment.strings) continue;
       const strings = (fragment.strings.length === 1 ? 'string ' : 'strings ') + fragment.strings.join(', ');
+      if (fragment.kind !== 'palmMute' && !fragment.bend) continue;
+      const amount = fragment.bend?.envelope.semitones;
+      const labels =
+        amount !== undefined
+          ? [`Bend ${amount} semitone${amount === 1 ? '' : 's'} on `, 'Sustain and release tied ']
+          : ['Begin palm mute on ', 'Last palm-muted attack on '];
       for (const [id, text] of [
-        [fragment.from, 'Begin palm mute on '],
-        [fragment.to, 'Last palm-muted attack on '],
+        [fragment.from, labels[0]],
+        [fragment.to, labels[1]],
       ]) {
-        if (id) muteLabels.set(id, [...(muteLabels.get(id) ?? []), text + strings]);
+        if (id) techniqueLabels.set(id, [...(techniqueLabels.get(id) ?? []), text + strings]);
       }
     }
     for (const [measure, staffNotes] of score.notes.entries()) {
@@ -160,7 +166,7 @@ export class ScoreNavigation {
               `voice ${voice + 1}`,
               describe(note),
               length + (note.isRest() ? ' rest' : ' note'),
-              ...(muteLabels.get(id) ?? []),
+              ...(techniqueLabels.get(id) ?? []),
             ]
               .filter(Boolean)
               .join(', ');
@@ -196,6 +202,7 @@ export class ScoreNavigation {
         Math.abs(fragment.x2 - fragment.x1),
         Math.abs(fragment.y2 - fragment.y1) + 2 * pad
       );
+      if (fragment.bend) bounds.mergeWith(fragment.bend.bounds);
       if (fragment.nienteTip) bounds.mergeWith(nienteBounds(fragment.nienteTip, 0.5));
       regions.push({
         id: fragment.id,

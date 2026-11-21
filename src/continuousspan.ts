@@ -4,17 +4,20 @@ import { Bounds } from './boundingbox';
 import type { ContinuousBeam } from './continuousbeam';
 import { Element } from './element';
 import { Glyphs } from './glyphs';
+import type { TiedBend } from './guitargesture';
 import { drawNienteTip, NienteTip } from './hairpintip';
 import { Note } from './note';
 import { ribbonParts } from './phraseribbon';
 import { RenderContext } from './rendercontext';
 import { Stave } from './stave';
 import { Tables } from './tables';
+import { drawTiedBend, TiedBendDrawing } from './tiedbend';
 
 export type ContinuousSpanKind =
   | 'beam'
   | 'tie'
   | 'slur'
+  | 'glissando'
   | 'crescendo'
   | 'diminuendo'
   | 'pedal'
@@ -29,6 +32,8 @@ export interface ContinuousSpan {
   kind: ContinuousSpanKind;
   /** Mark the closed musical endpoint of a crescendo or diminuendo with an open circle. */
   niente?: boolean;
+  /** Bend one TAB string through this tie, with rise on the first event and release on the second. */
+  bend?: TiedBend;
   /** One-based string of a tab tie. Defaults to the string of the selected chord position. */
   string?: number;
   /** Required for palmMute. String numbers are one-based. */
@@ -59,6 +64,7 @@ export interface ResolvedSpan {
   label?: Element;
   syllable?: Annotation;
   beam?: ContinuousBeam;
+  bendLabel?: Element;
 }
 export interface SpanFragment {
   id: string;
@@ -73,6 +79,8 @@ export interface SpanFragment {
   progress: [number, number];
   /** Present only on the fragment that owns the closed musical endpoint. */
   nienteTip?: NienteTip;
+  /** Row-local geometry and authored envelope of a tied string bend. */
+  bend?: TiedBendDrawing;
   /** String numbers covered by a tab tie or palm-mute fragment. */
   strings?: readonly number[];
   /** Authored TAB endpoints appear on the fragments containing them. */
@@ -113,6 +121,15 @@ export function continuationPitch(anchor: SpanAnchor, stave: Stave, index = 0): 
   const offset = (anchor.note.getYs()[index] - source.getYForLine(0)) / source.space(1);
   const clefShift = Tables.keyProperties(key, source.getClef()).line - Tables.keyProperties(key, stave.getClef()).line;
   return stave.getYForLine(0) + stave.space(offset + clefShift);
+}
+
+/** Interpolate the two written heads on this staff, so a broken slide keeps its direction across rows. */
+export function glissandoY(span: ResolvedSpan, stave: Stave, progress: number): number {
+  if (progress === 0) return span.first.note.getYs()[span.spec.fromHead ?? 0];
+  if (progress === 1) return span.last.note.getYs()[span.spec.toHead ?? 0];
+  const from = continuationPitch(span.first, stave, span.spec.fromHead);
+  const to = continuationPitch(span.last, stave, span.spec.toHead);
+  return from + progress * (to - from);
 }
 
 /** Share control geometry between the clearance search and the renderer. */
@@ -163,7 +180,7 @@ export function fitSpan(f: SpanFragment, obstacles: Bounds[]): boolean {
 }
 
 /** Draw only the hooks, labels and wedge apertures belonging to this particular segment. */
-export function drawSpan(ctx: RenderContext, f: SpanFragment, label?: Element): void {
+export function drawSpan(ctx: RenderContext, f: SpanFragment, label?: Element, bendLabel?: Element): void {
   const { kind, space, x1, x2, y1, y2, above } = f;
   const start = f.part === 'single' || f.part === 'first',
     end = f.part === 'single' || f.part === 'last';
@@ -176,6 +193,11 @@ export function drawSpan(ctx: RenderContext, f: SpanFragment, label?: Element): 
   };
   ctx.save();
   try {
+    if (kind === 'glissando') {
+      line(x1, y1, x2, y2);
+      return;
+    }
+    if (f.bend && bendLabel) drawTiedBend(ctx, f.bend, f.space, bendLabel);
     if (kind === 'slur' || kind === 'tie') {
       const { dx, a, b } = controls(f);
       ctx.beginPath();
