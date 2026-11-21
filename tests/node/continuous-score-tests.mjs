@@ -11,6 +11,7 @@ import {
   continuousBeamStudy,
   glissandoStudy,
   makeContinuousStudy,
+  sextupletStudy,
   tabEndingStudy,
 } from '../engraving/continuous-studies.mjs';
 
@@ -1143,36 +1144,6 @@ test('a dashed lower-head tie keeps its stroke, pitch and endpoints when the sco
   frame(125, ['first', 'last']);
   assert.deepEqual(frame(430, ['single']), wide);
 });
-
-/** Six written eighths on beat four and the following downbeat. */
-function sextupletStudy() {
-  const member = (i) => ({
-    id: 't' + i,
-    note: { keys: [['g/4', 'a/4', 'b/4', 'c/5', 'b/4', 'a/4'][i]], duration: '8' },
-  });
-  return {
-    sheet: { width: 530, rowGap: 18 },
-    staves: [
-      {
-        id: 'flute',
-        time: '4/4',
-        measures: [
-          { voices: [{ notes: ['G4/q, A4/q, B4/q', ...[0, 1, 2].map(member)] }] },
-          {
-            voices: [
-              {
-                notes: [...[3, 4, 5].map(member), { id: 'next', note: { keys: ['g/4'], duration: 'q' } }, 'F4/q, G4/q'],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-    continuous: {
-      tuplets: [{ id: 'six', members: [0, 1, 2, 3, 4, 5].map((i) => 't' + i), numNotes: 6, notesOccupied: 4 }],
-    },
-  };
-}
 
 test('one rhythmic sextuplet times both measures and reflows its own bracket', () => {
   const source = sextupletStudy();

@@ -236,3 +236,33 @@ export function glissandoStudy(descending = false, forceBreak = false) {
     },
   };
 }
+
+/** Six written eighths on beat four and the following downbeat. */
+export function sextupletStudy() {
+  const member = (i) => ({
+    id: 't' + i,
+    note: { keys: [['g/4', 'a/4', 'b/4', 'c/5', 'b/4', 'a/4'][i]], duration: '8' },
+  });
+  return {
+    sheet: { width: 530, rowGap: 18 },
+    staves: [
+      {
+        id: 'flute',
+        time: '4/4',
+        measures: [
+          { voices: [{ notes: ['G4/q, A4/q, B4/q', ...[0, 1, 2].map(member)] }] },
+          {
+            voices: [
+              {
+                notes: [...[3, 4, 5].map(member), { id: 'next', note: { keys: ['g/4'], duration: 'q' } }, 'F4/q, G4/q'],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    continuous: {
+      tuplets: [{ id: 'six', members: [0, 1, 2, 3, 4, 5].map((i) => 't' + i), numNotes: 6, notesOccupied: 4 }],
+    },
+  };
+}

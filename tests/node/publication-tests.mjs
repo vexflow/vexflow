@@ -5,7 +5,7 @@ import { test } from 'node:test';
 
 import puppeteer from 'puppeteer';
 
-import { tabEndingStudy } from '../engraving/continuous-studies.mjs';
+import { sextupletStudy, tabEndingStudy } from '../engraving/continuous-studies.mjs';
 import {
   condensedFlutesStudy,
   leadSheetStudy,
@@ -209,6 +209,26 @@ test('publication views, pagination and portable printing', async (t) => {
           }
         });
       }
+    await t.test('extracted parts retain only the rhythmic tuplets belonging to their staff', async () => {
+      await page.addScriptTag({ content: 'window.sextupletStudy=' + sextupletStudy });
+      const frames = await page.evaluate(() => {
+        const source = sextupletStudy();
+        source.staves.push({ id: 'bass', measures: [1, 2].map(() => ({ voices: [{ notes: 'C3/w' }] })) });
+        const book = new VexFlow.Publication(source);
+        return ['flute', 'bass'].map((staff) => {
+          const printed = book.render(document.querySelector('main'), { staves: [staff], systemBreaks: [2] });
+          return printed.pages.flatMap((p) => JSON.parse(p.svg.querySelector('metadata').textContent).spans);
+        });
+      });
+      assert.deepEqual(
+        frames[0].map((s) => [s.id, s.part]),
+        [
+          ['six', 'first'],
+          ['six', 'last'],
+        ]
+      );
+      assert.deepEqual(frames[1], []);
+    });
     await t.test('a transposed flute cue follows the clarinet signature and regenerates from source', async () => {
       await page.addScriptTag({ content: 'window.cueStudy=' + transposedCueStudy });
       const result = await page.evaluate(() => {
