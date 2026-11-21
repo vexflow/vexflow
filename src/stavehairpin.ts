@@ -4,10 +4,11 @@
 // @author Raffaele Viglianti, 2012 http://itisnotsound.wordpress.com/
 //
 // This class implements hairpins between notes.
-// Hairpins can be either crescendo or decrescendo, with an optional circled niente tip.
+// A crescendo or decrescendo can have straight or flared arms and a circled niente tip.
 
 import { BoundingBox } from './boundingbox';
 import { Element } from './element';
+import { drawFlaredHairpin } from './flaredhairpin';
 import { drawNienteTip, nienteBounds, nienteTip } from './hairpintip';
 import { Modifier } from './modifier';
 import { Note } from './note';
@@ -17,6 +18,8 @@ import { Category } from './typeguard';
 import { RuntimeError } from './util';
 
 export interface StaveHairpinRenderOptions {
+  /** Widen the arms gradually near the closed tip, then more rapidly toward the open end. */
+  flared?: boolean;
   /** Draw an open niente circle at the closed end of the wedge. */
   niente?: boolean;
   rightShiftTicks?: number;
@@ -232,14 +235,18 @@ export class StaveHairpin extends Element {
     const { top, height, closedX, openX, tip } = this.edges(params);
     if (this.hairpin !== StaveHairpin.type.CRESC && this.hairpin !== StaveHairpin.type.DECRESC) return;
     const middle = top + height / 2;
-    ctx.beginPath();
-    ctx.moveTo(openX, top);
-    ctx.lineTo(closedX, middle);
-    // At a circled tip use separate arms to keep a sharp miter out of the circle.
-    if (tip) ctx.moveTo(closedX, middle);
-    ctx.lineTo(openX, top + height);
-    ctx.stroke();
-    ctx.closePath();
+    if (this.renderOptions.flared) {
+      drawFlaredHairpin(ctx, { x: closedX, y: middle, progress: 0 }, { x: openX, y: middle, progress: 1 }, height / 2);
+    } else {
+      ctx.beginPath();
+      ctx.moveTo(openX, top);
+      ctx.lineTo(closedX, middle);
+      // At a circled tip use separate arms to keep a sharp miter out of the circle.
+      if (tip) ctx.moveTo(closedX, middle);
+      ctx.lineTo(openX, top + height);
+      ctx.stroke();
+      ctx.closePath();
+    }
     if (tip) drawNienteTip(ctx, tip);
   }
 
