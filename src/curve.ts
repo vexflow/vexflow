@@ -5,11 +5,13 @@
 import { BoundingBox } from './boundingbox';
 import { Element } from './element';
 import { Note } from './note';
-import { ribbonParts } from './phraseribbon';
+import { drawHalfDashedSlur, ribbonParts } from './phraseribbon';
 import { Category } from './typeguard';
 import { RuntimeError } from './util';
 
 export interface CurveOptions {
+  /** Stroke the first half of the fitted slur with dashes and the second half solid. */
+  halfDashed?: boolean;
   /** Two control points for the bezier curves. */
   cps?: { x: number; y: number }[];
   thickness?: number;
@@ -97,6 +99,7 @@ export class Curve extends Element {
 
     this.renderOptions = {
       thickness: 2,
+      halfDashed: false,
       xShift: 0,
       yShift: 10,
       position: 'auto',
@@ -136,7 +139,7 @@ export class Curve extends Element {
     const outer = [first, ...cps, last];
     return ribbonParts(
       outer,
-      this.style?.lineDash ? outer : [first, ...thicknessCps.reverse(), last],
+      this.renderOptions.halfDashed || this.style?.lineDash ? outer : [first, ...thicknessCps.reverse(), last],
       (this.getStyle().lineWidth ?? 1) / 2
     );
   }
@@ -205,6 +208,12 @@ export class Curve extends Element {
 
     const { first, last, cps, thicknessCps } = this.getBezierPoints(params);
 
+    if (this.renderOptions.halfDashed) {
+      const dash = this.style?.lineDash ? this.style.lineDash.split(' ').map(Number) : undefined;
+      drawHalfDashedSlur(ctx, [first, ...cps, last], undefined, dash);
+      return;
+    }
+
     ctx.beginPath();
     ctx.moveTo(first.x, first.y);
     ctx.bezierCurveTo(cps[0].x, cps[0].y, cps[1].x, cps[1].y, last.x, last.y);
@@ -257,7 +266,7 @@ export class Curve extends Element {
     const { first, last, cps, thicknessCps } = this.getBezierPoints(this.getRenderParams());
     const xs = bezierExtrema(first.x, cps[0].x, cps[1].x, last.x);
     const ys = bezierExtrema(first.y, cps[0].y, cps[1].y, last.y);
-    if (!this.style?.lineDash) {
+    if (!this.renderOptions.halfDashed && !this.style?.lineDash) {
       xs.push(...bezierExtrema(last.x, thicknessCps[0].x, thicknessCps[1].x, first.x));
       ys.push(...bezierExtrema(last.y, thicknessCps[0].y, thicknessCps[1].y, first.y));
     }
