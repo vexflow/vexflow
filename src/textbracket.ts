@@ -7,6 +7,7 @@
 // using this class.
 
 import { BoundingBox } from './boundingbox';
+import { validateDashPattern } from './dashpattern';
 import { Element } from './element';
 import { Font } from './font';
 import { Note } from './note';
@@ -124,11 +125,13 @@ export class TextBracket extends Element {
     return super.applyStyle(ctx);
   }
 
-  // Set whether the bracket line should be `dashed`. You can also
-  // optionally set the `dash` pattern by passing in an array of numbers
+  /** Optionally store a private copy of the new pattern when changing the bracket style. */
   setDashed(dashed: boolean, dash?: number[]): this {
+    if (dash !== undefined) {
+      validateDashPattern(dash);
+      this.renderOptions.dash = dash.slice();
+    }
     this.renderOptions.dashed = dashed;
-    if (dash) this.renderOptions.dash = dash;
     return this;
   }
 
