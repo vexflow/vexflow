@@ -1,6 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // @author Larry Kuhns 2013
-// Class to draws string numbers into the notation.
+// Left-hand fingerings on pitched notes and TAB frets, with optional enclosing circles.
 
 import { Builder } from './easyscore';
 import { Metrics } from './metrics';
@@ -8,7 +8,7 @@ import { Modifier, ModifierPosition } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { StemmableNote } from './stemmablenote';
 import { Tables } from './tables';
-import { Category } from './typeguard';
+import { Category, isTabNote } from './typeguard';
 import { RuntimeError } from './util';
 
 export class FretHandFinger extends Modifier {
@@ -32,8 +32,7 @@ export class FretHandFinger extends Modifier {
       const num = nums[i];
       const note = num.getNote();
       const pos = num.getPosition();
-      const index = num.checkIndex();
-      const props = note.getKeyProps()[index];
+      const line = num.getAttachedLine();
       const textHeight = Metrics.get('FretHandFinger.fontSize');
       if (num.position === ModifierPosition.ABOVE) {
         state.topTextLine += textHeight / Tables.STAVE_LINE_DISTANCE + 0.5;
@@ -58,7 +57,7 @@ export class FretHandFinger extends Modifier {
         note,
         num,
         pos,
-        line: props.line,
+        line,
         shiftL: shiftLeft,
         shiftR: shiftRight,
       });
@@ -116,6 +115,7 @@ export class FretHandFinger extends Modifier {
       .map((fingering: Modifier, index: number) => note.addModifier(fingering, index));
   }
 
+  private drawCircle = false;
   protected xOffset: number;
   protected yOffset: number;
 
@@ -126,6 +126,17 @@ export class FretHandFinger extends Modifier {
     this.position = Modifier.Position.LEFT; // Default position above stem or note head
     this.xOffset = 0; // Horizontal offset from default
     this.yOffset = 0; // Vertical offset from default
+  }
+
+  /** Enclose the fingering in a circle without changing the authored finger label. */
+  setDrawCircle(drawCircle: boolean): this {
+    this.drawCircle = drawCircle;
+    return this;
+  }
+
+  /** Reserve enough room for the complete enclosure at the current font size. */
+  override getWidth(): number {
+    return this.drawCircle ? Math.max(this.width, this.height) + 5 : this.width;
   }
 
   setFretHandFinger(finger: string): this {
@@ -175,6 +186,35 @@ export class FretHandFinger extends Modifier {
         throw new RuntimeError('InvalidPosition', `The position ${this.position} does not exist`);
     }
 
-    this.renderText(ctx, dotX, dotY);
+    const tab = isTabNote(note);
+    if (!tab && !this.drawCircle) {
+      this.renderText(ctx, dotX, dotY);
+      return;
+    }
+    // Place the actual ink on the selected string. Leave the fret number and the finger independent.
+    const side = this.position === Modifier.Position.LEFT || this.position === Modifier.Position.RIGHT;
+    const width = this.getWidth();
+    const centerX =
+      this.position === Modifier.Position.LEFT
+        ? start.x + this.xOffset - width / 2
+        : this.position === Modifier.Position.RIGHT
+          ? start.x + this.xOffset + width / 2 + 1
+          : start.x + this.xOffset;
+    const centerY = side ? start.y + this.yOffset : dotY - 5;
+    const metrics = this.getTextMetrics();
+    if (tab && side) ctx.clearRect(centerX + this.xShift - width / 2 - 1, centerY + this.yShift - 2, width + 2, 4);
+    if (this.drawCircle) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(centerX + this.xShift, centerY + this.yShift, width / 2 - 0.5, 0, 2 * Math.PI, false);
+      ctx.setLineWidth(1);
+      ctx.stroke();
+      ctx.restore();
+    }
+    this.renderText(
+      ctx,
+      centerX - this.width / 2,
+      centerY + (metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent) / 2
+    );
   }
 }

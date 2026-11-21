@@ -13,7 +13,7 @@ import { Renderer } from './renderer';
 import { Stem } from './stem';
 import { StemmableNote } from './stemmablenote';
 import { Tables } from './tables';
-import { Category, isStaveNote, isStemmableNote } from './typeguard';
+import { Category, isStaveNote, isStemmableNote, isTabNote } from './typeguard';
 import { RuntimeError } from './util';
 
 export class StringNumber extends Modifier {
@@ -40,17 +40,15 @@ export class StringNumber extends Modifier {
     let prevNote = null;
     let extraXSpaceForDisplacedNotehead = 0;
     let shiftRight = 0;
-    const modLines = 0;
 
     for (let i = 0; i < nums.length; ++i) {
       const num = nums[i];
       const note = num.getNote();
       const pos = num.getPosition();
-      if (!isStaveNote(note)) {
-        throw new RuntimeError('NoStaveNote');
+      if (!isStaveNote(note) && !isTabNote(note)) {
+        throw new RuntimeError('NoStaveNote', 'String numbers require a pitched note or TAB fret.');
       }
-      const index = num.checkIndex();
-      const props = note.getKeyProps()[index];
+      const line = num.getAttachedLine();
       const mc = note.getModifierContext();
       const verticalSpaceNeeded = (num.radius * 2) / Tables.STAVE_LINE_DISTANCE + 0.5;
 
@@ -76,13 +74,11 @@ export class StringNumber extends Modifier {
         prevNote = note;
       }
 
-      const glyphLine = modLines === 0 ? props.line : modLines;
-
       numsList.push({
         pos,
         note,
         num,
-        line: glyphLine,
+        line,
         shiftL: extraXSpaceForDisplacedNotehead,
         shiftR: shiftRight,
       });
@@ -240,6 +236,9 @@ export class StringNumber extends Modifier {
         throw new RuntimeError('InvalidPosition', `The position ${this.position} is invalid`);
     }
 
+    if (isTabNote(note) && (this.position === Modifier.Position.LEFT || this.position === Modifier.Position.RIGHT)) {
+      ctx.clearRect(dotX - this.radius, dotY - 2, 2 * this.radius, 4);
+    }
     if (this.drawCircle) {
       ctx.beginPath();
       ctx.arc(dotX, dotY, this.radius, 0, Math.PI * 2, false);

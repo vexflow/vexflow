@@ -1,7 +1,7 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
-// StringNumber Tests
+// Regression scores for string numbers and left-hand fingerings on pitched and TAB staves.
 
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
@@ -17,6 +17,7 @@ const StringNumberTests = {
     QUnit.module('StringNumber');
 
     const run = VexFlowTests.runTests;
+    run('TAB fingerings follow selected fret positions', tabFingerings);
     run('String Number In Notation', drawMultipleMeasures);
     run('String Number In Notation - no circle', drawMultipleMeasures, { drawCircle: false });
     run('Fret Hand Finger In Notation', drawFretHandFingers);
@@ -25,6 +26,56 @@ const StringNumberTests = {
     run('Shifted Notehead, Multiple Modifiers', shiftedNoteheadMultipleModifiers);
   },
 };
+
+/* Verify placement and reserved space using the text actually drawn on both backends. */
+function tabFingerings(options: TestOptions): void {
+  const f = VexFlowTests.makeFactory(options, 470, 150);
+  const stave = f.TabStave({ x: 5, y: 0, width: 450 }).addTabGlyph();
+  const positions = [
+    [{ str: 2, fret: 3 }],
+    [{ str: 4, fret: 0 }],
+    [
+      { str: 1, fret: 7 },
+      { str: 3, fret: 10 },
+    ],
+  ];
+  const notes = positions.map((p) => f.TabNote({ positions: p, duration: 'q' }));
+  const finger = f.Fingering({ number: '2', drawCircle: true });
+  const open = f.Fingering({ number: '0', position: 'right' });
+  const thumb = f.Fingering({ number: 'T', position: 'left' });
+  const string = f.StringNumber({ number: '3', position: 'right' });
+  notes[0].addModifier(finger, 0);
+  notes[1].addModifier(open, 0);
+  notes[2].addModifier(thumb, 1).addModifier(string, 1);
+  const voice = f.EasyScore().voice(notes, { time: '3/4' }).setStave(stave);
+  f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+  const ctx = f.getContext();
+  const text: { label: string; x: number; y: number }[] = [];
+  const fillText = ctx.fillText;
+  ctx.fillText = (label, x, y) => {
+    text.push({ label, x, y });
+    return fillText.call(ctx, label, x, y);
+  };
+  try {
+    f.draw();
+  } finally {
+    ctx.fillText = fillText;
+  }
+  options.assert.equal(finger.getFretHandFinger(), '2', 'enclosure retains the authored finger');
+  options.assert.ok(finger.getWidth() > finger.width, 'circle extends beyond the text');
+  options.assert.ok(notes[0].checkModifierContext().getLeftShift() >= finger.getWidth(), 'reserves circle width');
+  const at = (label: string, note: number, index: number, left: boolean) =>
+    text.some(
+      (t) =>
+        t.label === label &&
+        Math.abs(t.y - notes[note].getYs()[index]) < 7 &&
+        (left ? t.x < notes[note].getTieLeftX() : t.x >= notes[note].getTieRightX())
+    );
+  options.assert.ok(at('2', 0, 0, true), 'enclosed finger 2 beside fret 3 on string 2');
+  options.assert.ok(at('0', 1, 0, false), 'open-string fingering beside the open fret');
+  options.assert.ok(at('T', 2, 1, true), 'thumb beside second chord position');
+  options.assert.ok(at('3', 2, 1, false), 'string number independently labels the same fret');
+}
 
 function drawMultipleMeasures(options: TestOptions): void {
   const f = VexFlowTests.makeFactory(options, 775, 200);

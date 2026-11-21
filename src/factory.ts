@@ -630,14 +630,14 @@ export class Factory {
     return this.own(text);
   }
 
-  Fingering(params: { number?: string; position?: string }): FretHandFinger {
+  Fingering(params: { number?: string; position?: string; drawCircle?: boolean }): FretHandFinger {
     const p = {
       number: '0',
       position: 'left',
       ...params,
     };
 
-    const fingering = new FretHandFinger(p.number);
+    const fingering = new FretHandFinger(p.number).setDrawCircle(p.drawCircle ?? false);
     fingering.setPosition(p.position);
     fingering.setContext(this.context);
     return this.own(fingering);

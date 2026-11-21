@@ -106,7 +106,7 @@ These named helpers preserve their Factory/native argument types and return the 
 | `make.dot()`, `make.parenthesis()`                  | Dot displacement and left/right parentheses.                                         |
 | `make.tremolo()`, `make.stroke()`, `make.vibrato()` | Stroke counts, roll direction, widths, and native render options.                    |
 | `make.annotation()`, `make.chordSymbol()`           | Lyrics/text, fonts, alignment, baselines, harmony blocks, and kerning.               |
-| `make.fingering()`, `make.stringNumber()`           | Number, position, circle, and extension-line setters.                                |
+| `make.fingering()`, `make.stringNumber()`           | Finger or string label on a pitched head or TAB fret. Set `drawCircle: true` on a fingering. String numbers also support extension lines.                                |
 | `make.ghostNote()`, `make.textNote()`               | Native timed-note structs and text layout options.                                   |
 
 Attach modifiers with `score.attach(note, modifier, chordIndex)`.
