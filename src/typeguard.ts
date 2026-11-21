@@ -81,6 +81,7 @@ export const enum Category {
   Curve = 'Curve',
   Dot = 'Dot',
   Element = 'Element',
+  FiguredBass = 'FiguredBass',
   Flag = 'Flag',
   Fraction = 'Fraction',
   FretDiagram = 'FretDiagram',

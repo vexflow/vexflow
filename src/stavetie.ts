@@ -1,19 +1,20 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 //
-// This class implements varies types of ties between contiguous notes. The
-// ties include: regular ties, hammer ons, pull offs, and slides.
+// Measures and draws indexed pitch ties, including partial ties and dashed editorial arcs.
 
 import { BoundingBox } from './boundingbox';
 import { Element } from './element';
 import { Note } from './note';
 import { ribbonParts } from './phraseribbon';
-import { Category } from './typeguard';
+import { Category, isStaveNote } from './typeguard';
 import { RuntimeError } from './util';
 
 // For backwards compatibility with 3.0.9, firstNote and/or lastNote can be undefined or null.
 // We prefer undefined instead of null.
 // However, some of our test cases used to pass in null, so maybe there is client code relying on it.
 export interface TieNotes {
+  /** Local reach in pixels for a laissez vibrer tie on one outgoing pitched head. */
+  laissezVibrer?: number;
   firstNote?: Note | null;
   lastNote?: Note | null;
   firstIndexes?: number[];
@@ -102,6 +103,27 @@ export class StaveTie extends Element {
   setNotes(notes: TieNotes): this {
     if (!notes.firstNote && !notes.lastNote) {
       throw new RuntimeError('BadArguments', 'Tie needs to have either firstNote or lastNote set.');
+    }
+
+    if (notes.laissezVibrer !== undefined) {
+      const index = notes.firstIndexes?.[0] ?? 0;
+      if (
+        !Number.isFinite(notes.laissezVibrer) ||
+        notes.laissezVibrer <= 0 ||
+        !notes.firstNote ||
+        !isStaveNote(notes.firstNote) ||
+        notes.firstNote.isRest() ||
+        notes.lastNote ||
+        (notes.firstIndexes && notes.firstIndexes.length !== 1) ||
+        !Number.isInteger(index) ||
+        index < 0 ||
+        index >= notes.firstNote.getKeys().length
+      ) {
+        throw new RuntimeError(
+          'BadArguments',
+          'A laissez vibrer tie needs one outgoing pitched head and a positive reach.'
+        );
+      }
     }
 
     if (!notes.firstIndexes) {
@@ -213,7 +235,8 @@ export class StaveTie extends Element {
       parts.push(
         ...ribbonParts(
           [start, { x: r.cpX, y: r.topControlPointY }, end],
-          [start, { x: r.cpX, y: r.bottomControlPointY }, end]
+          [start, { x: r.cpX, y: this.style?.lineDash ? r.topControlPointY : r.bottomControlPointY }, end],
+          this.style?.lineDash ? (this.style.lineWidth ?? 1) / 2 : 0
         )
       );
     }
@@ -232,9 +255,11 @@ export class StaveTie extends Element {
     });
     let box: BoundingBox | undefined;
     for (const { x1, x2, firstY, lastY, topControlPointY, bottomControlPointY } of curves) {
-      const top = Math.min(firstY, lastY, topControlPointY, bottomControlPointY);
-      const bottom = Math.max(firstY, lastY, topControlPointY, bottomControlPointY);
-      const part = new BoundingBox(Math.min(x1, x2), top, Math.abs(x2 - x1), bottom - top);
+      const edge = this.style?.lineDash ? topControlPointY : bottomControlPointY;
+      const padding = this.style?.lineDash ? (this.style.lineWidth ?? 1) / 2 : 0;
+      const top = Math.min(firstY, lastY, topControlPointY, edge) - padding;
+      const bottom = Math.max(firstY, lastY, topControlPointY, edge) + padding;
+      const part = new BoundingBox(Math.min(x1, x2) - padding, top, Math.abs(x2 - x1) + 2 * padding, bottom - top);
       box = box ? box.mergeWith(part) : part;
     }
     return box ?? new BoundingBox(this.getFirstX(), this.getFirstYs()[0], 0, 0);
@@ -248,6 +273,13 @@ export class StaveTie extends Element {
       ctx.beginPath();
       ctx.moveTo(x1, firstY);
       ctx.quadraticCurveTo(cpX, topControlPointY, x2, lastY);
+      if (this.style?.lineDash) {
+        ctx.save();
+        this.applyStyle(ctx);
+        ctx.stroke();
+        ctx.restore();
+        continue;
+      }
       ctx.quadraticCurveTo(cpX, bottomControlPointY, x1, firstY);
       ctx.closePath();
       ctx.fill();
@@ -284,6 +316,11 @@ export class StaveTie extends Element {
    * ideally from the firstNote, alternatively from the lastNote, or 0 if all else fails.
    */
   getFirstX(): number {
+    const note = this.notes.firstNote;
+    if (this.notes.laissezVibrer !== undefined && note && isStaveNote(note)) {
+      const head = note.getHeadInk()[this.notes.firstIndexes![0]];
+      return head.x + head.w + this.renderOptions.tieSpacing;
+    }
     if (this.notes.firstNote) {
       return this.notes.firstNote.getTieRightX() + this.renderOptions.tieSpacing;
     } else if (this.notes.lastNote) {
@@ -298,6 +335,7 @@ export class StaveTie extends Element {
    * ideally from the firstNote, alternatively from the lastNote, or 0 if all else fails.
    */
   getLastX(): number {
+    if (this.notes.laissezVibrer !== undefined) return this.getFirstX() + this.notes.laissezVibrer;
     if (this.notes.lastNote) {
       return this.notes.lastNote.getTieLeftX() + this.renderOptions.tieSpacing;
     } else if (this.notes.firstNote) {
@@ -354,6 +392,12 @@ export class StaveTie extends Element {
       // this.notes.lastNote defined, but not firstNote
       this.notes.firstIndexes = this.notes.lastIndexes;
     }
+  }
+
+  /** A let-ring tie occupies only the local curve leaving its selected head. */
+  override getBoundingBox(): BoundingBox {
+    if (this.notes.laissezVibrer === undefined) return super.getBoundingBox();
+    return this.getRouteParts().reduce((box, part) => box.mergeWith(part));
   }
 
   override draw(): boolean {

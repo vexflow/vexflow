@@ -19,6 +19,7 @@ import { Element } from './element';
 import { measureEngraving } from './engravinggeometry';
 import { EngravingProfile } from './engravingprofile';
 import { Factory } from './factory';
+import { FiguredBass } from './figuredbass';
 import { Font, FontStyle, FontWeight } from './font';
 import { Formatter } from './formatter';
 import { Fraction } from './fraction';
@@ -174,6 +175,7 @@ export class VexFlow {
   static Sheet = Sheet;
   static FrettedInstrument = FrettedInstrument;
   static PercussionMap = PercussionMap;
+  static FiguredBass = FiguredBass;
   static FretDiagram = FretDiagram;
   static AlternatingTremolo = AlternatingTremolo;
   static WrittenAccidentalState = WrittenAccidentalState;

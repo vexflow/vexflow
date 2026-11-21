@@ -198,6 +198,70 @@ test('instrument studies and score construction', async (t) => {
       assert.ok(result.invalid.every(Boolean));
     });
 
+    await t.test('chord-frame fingerings follow stopped strings on SVG and Canvas', async () => {
+      const result = await page.evaluate(() => {
+        const VF = VexFlow;
+        const frames = [];
+        for (const backend of ['svg', 'canvas']) {
+          const host = document.createElement('div');
+          const ctx =
+            backend === 'svg'
+              ? new VF.SVGContext(host)
+              : new VF.CanvasContext(document.createElement('canvas').getContext('2d'));
+          let digits = [];
+          const fillText = ctx.fillText.bind(ctx);
+          ctx.fillText = (text, x, y) => {
+            digits.push([text, x + ctx.measureText(text).width / 2, y]);
+            return fillText(text, x, y);
+          };
+          const render = (frame) => {
+            digits = [];
+            frame.setContext(ctx).draw();
+            return digits;
+          };
+          const fingers = [null, null, null, 1, 3, 2];
+          const d = new VF.FretDiagram({ frets: ['x', 'x', 0, 2, 3, 2], fingerings: fingers });
+          fingers[3] = null;
+          const c = new VF.FretDiagram({ frets: ['x', 3, 2, 0, 1, 0], fingerings: [null, 3, 2, null, 1] });
+          const full = render(d);
+          const cleared = render(d.setFingerings(fingers));
+          const invalid = [[1], [null, null, 1], [null, null, null, 5], Array(7).fill(null)].map((values) => {
+            try {
+              d.setFingerings(values);
+              return false;
+            } catch (error) {
+              return error.code === 'BadArguments';
+            }
+          });
+          frames.push({
+            full,
+            cleared,
+            afterError: render(d),
+            plain: render(d.setFingerings()),
+            c: render(c),
+            invalid,
+          });
+        }
+        return frames;
+      });
+      const [svg, canvas] = result;
+      assert.deepEqual(svg, canvas);
+      assert.deepEqual(svg.full, [
+        ['1', 49, 33],
+        ['3', 58, 44],
+        ['2', 67, 33],
+      ]);
+      assert.deepEqual(svg.c, [
+        ['3', 31, 44],
+        ['2', 40, 33],
+        ['1', 58, 22],
+      ]);
+      assert.deepEqual(svg.cleared, svg.full.slice(1));
+      assert.deepEqual(svg.afterError, svg.cleared);
+      assert.deepEqual(svg.plain, []);
+      assert.ok(svg.invalid.every(Boolean));
+    });
+
     await t.test('fret position labels follow score and diagram fonts on SVG and Canvas', async () => {
       const labels = await page.evaluate(() => {
         const VF = VexFlow;

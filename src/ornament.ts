@@ -1,10 +1,12 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // @author Cyril Silverman
 // MIT License
+// Places ornaments, accidental signs and written trill partners on their principal notes.
 
 import { getBottomY, getInitialOffset, getTopY } from './articulation';
 import { BoundingBox } from './boundingbox';
 import { Element } from './element';
+import { Glyphs } from './glyphs';
 import { Metrics } from './metrics';
 import { Modifier, ModifierPosition } from './modifier';
 import { ModifierContextState } from './modifiercontext';
@@ -12,8 +14,8 @@ import { Note } from './note';
 import { Stem } from './stem';
 import { StemmableNote } from './stemmablenote';
 import { Tables } from './tables';
-import { Category } from './typeguard';
-import { log } from './util';
+import { Category, isStaveNote } from './typeguard';
+import { log, RuntimeError } from './util';
 
 // eslint-disable-next-line
 function L(...args: any[]) {
@@ -43,6 +45,9 @@ export class Ornament extends Modifier {
   protected type: string;
 
   protected delayed: boolean;
+  /** A written, untimed trill partner. Its column follows earlier right-hand modifiers. */
+  private auxiliary?: { pitch: string; glyph: Element; headOffset: number; headWidth: number };
+  private auxiliaryOffset = 0;
   /** Side spacing is recomputed per format and is independent of authored shifts. */
   private sideOffset = 0;
   protected adjustForStemDirection: boolean;
@@ -67,6 +72,10 @@ export class Ornament extends Modifier {
       const increment = 2;
 
       ornament.sideOffset = 0;
+      if (ornament.auxiliary) {
+        ornament.auxiliaryOffset = rightShift;
+        rightShift += ornament.auxiliary.glyph.getWidth() + Ornament.minPadding + 2;
+      }
       if (ornament.position === ModifierPosition.RIGHT) {
         ornament.sideOffset = rightShift + 2;
         rightShift += ornament.width + Ornament.minPadding;
@@ -221,6 +230,26 @@ export class Ornament extends Modifier {
     return this;
   }
 
+  /** Show a parenthesized cue beside the trill's written principal, e.g. bb/4, an/4 or a/4. */
+  setAuxiliaryPitch(pitch?: string): this {
+    if (pitch === undefined) {
+      this.auxiliary = undefined;
+      return this;
+    }
+    const spelling = /^([a-g])(bb|##|b|#|n)?\/(-?\d)$/i.exec(pitch);
+    if (this.type !== 'tr' || !spelling) {
+      throw new RuntimeError('BadArguments', 'A pitched trill needs a written pitch such as bb/4.');
+    }
+    const accidental = spelling[2] ? Tables.accidentalCodes(spelling[2].toLowerCase()) : '';
+    const glyph = new Element().setFont(this.fontInfo).setFontSize(this.fontSizeInPoints * 0.65);
+    const prefix = Glyphs.accidentalParensLeft + accidental;
+    const headOffset = glyph.setText(prefix).getWidth();
+    const headWidth = glyph.setText(Glyphs.noteheadBlack).getWidth();
+    glyph.setText(prefix + Glyphs.noteheadBlack + Glyphs.accidentalParensRight);
+    this.auxiliary = { pitch: pitch.toLowerCase(), glyph, headOffset, headWidth };
+    return this;
+  }
+
   private layoutShiftY = 0;
   /** Move the whole ornament and its auxiliary signs together. */
   setLayoutShiftY(y: number): void {
@@ -296,14 +325,44 @@ export class Ornament extends Modifier {
           this.accidentalUpper.getTextMetrics().actualBoundingBoxDescent,
       });
     }
+    if (this.auxiliary) {
+      if (!isStaveNote(note) || note.isRest())
+        throw new RuntimeError('BadArguments', 'A trill partner needs a pitched staff note.');
+      // Measure the diatonic interval from the written key. The principal's actual line
+      // also accounts for octave clefs and authored staff placement.
+      const index = this.checkIndex();
+      const principal = Tables.keyProperties(note.getKeys()[index], 'treble');
+      const partner = Tables.keyProperties(this.auxiliary.pitch, 'treble');
+      const y = note.getYs()[index] - (partner.line - principal.line) * staffSpace;
+      const right = note.getModifierStartXY(ModifierPosition.RIGHT, index, { forceFlagRight: true });
+      const headEdge = Math.max(...note.getHeadInk().map((box) => box.x + box.w));
+      parts.push({ element: this.auxiliary.glyph, x: Math.max(right.x, headEdge + 2) + this.auxiliaryOffset, y });
+    }
     return parts;
   }
 
-  /** Include both auxiliary signs in the measured ornament. */
+  /** Outside the staff, ledger lines belong to the cue head alone. */
+  private cueLedgers(element: Element, x: number, y: number): BoundingBox[] {
+    if (!this.auxiliary || element !== this.auxiliary.glyph) return [];
+    const stave = this.checkAttachedNote().checkStave();
+    const top = stave.getYForLine(0);
+    const bottom = stave.getYForLine(stave.getNumLines() - 1);
+    const step = stave.getSpacingBetweenLines();
+    if (!(step > 0) || !Number.isFinite(y)) return [];
+    const lines: BoundingBox[] = [];
+    const left = x + this.auxiliary.headOffset - 1;
+    const width = this.auxiliary.headWidth + 2;
+    for (let line = top - step; line >= y; line -= step) lines.push(new BoundingBox(left, line, width, 1));
+    for (let line = bottom + step; line <= y; line += step) lines.push(new BoundingBox(left, line, width, 1));
+    return lines;
+  }
+
+  /** Include the trill sign, its accidentals and the complete pitched cue in layout. */
   override getBoundingBox(): BoundingBox {
-    const boxes = this.positionElements().map(({ element, x, y }) =>
-      element.getTextInk(x + element.getX(), y + element.getY())
-    );
+    const boxes = this.positionElements().flatMap(({ element, x, y }) => [
+      element.getTextInk(x + element.getX(), y + element.getY()),
+      ...this.cueLedgers(element, x, y),
+    ]);
     return boxes.reduce((bounds, box) => bounds.mergeWith(box));
   }
 
@@ -312,7 +371,10 @@ export class Ornament extends Modifier {
     this.setRendered();
     const clsAttribute = this.getAttribute('class');
     ctx.openGroup('ornament' + (clsAttribute ? ' ' + clsAttribute : ''), this.getAttribute('id'));
-    for (const { element, x, y } of this.positionElements()) element.renderText(ctx, x, y);
+    for (const { element, x, y } of this.positionElements()) {
+      for (const line of this.cueLedgers(element, x, y)) ctx.fillRect(line.x, line.y, line.w, line.h);
+      element.renderText(ctx, x, y);
+    }
     this.drawPointerRect();
     ctx.closeGroup();
   }

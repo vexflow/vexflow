@@ -65,3 +65,19 @@ chord.setFont('Academico,Bravura', 16).setKerningProfile({
 Use `weight` and `style` on a profile to target other font styles. Call `setKerningProfile()` without an argument to restore the built-in tables. Profiles are copied, so editing the caller's table does not alter an existing chord.
 
 Canvas and SVG draw the same positioned runs. Bounding-box overlap can be intentional when kerning around sloping letters; inspect the ink before treating overlap as a collision.
+
+## Figured bass
+
+Use `factory.FiguredBass({ rows })` to place numeric intervals beneath bass notes on one system. The first row is the highest. Within each row, list each new figure at the note where it starts. Set `extendTo` to the last note that holds it.
+
+```javascript
+const [one, two, three, four] = bassNotes;
+factory.FiguredBass({
+  rows: [
+    [{ note: one, figure: '6', extendTo: three }, { note: four, figure: '5' }],
+    [{ note: one, figure: '4' }, { note: two, figure: '3', extendTo: four }],
+  ],
+});
+```
+
+The example prints a 6 above a 4 under the first note. The lower row resolves to 3 on beat two while the 6 continues through beat three. Reformatting the notes moves both line endings. A native `new FiguredBass({ rows })` can also be drawn after the voice.

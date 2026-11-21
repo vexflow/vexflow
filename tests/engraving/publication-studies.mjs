@@ -127,3 +127,38 @@ export function leadSheetStudy() {
   };
   return { staves: [lead, bass], continuous: {} };
 }
+
+/** An independent source supplies two bars of eighth notes above the printed quarter-note melody. */
+export function ossiaRangeStudy() {
+  function staff(id, bars) {
+    return {
+      id,
+      time: '3/4',
+      measures: bars.map((keys, m) => ({
+        voices: [
+          {
+            autoBeam: true,
+            notes: keys.split(' ').map((key, i, notes) => ({
+              id: id + '-' + (m + 1) + '-' + (i + 1),
+              note: { keys: [key + '/4'], duration: notes.length === 6 ? '8' : 'q' },
+            })),
+          },
+        ],
+      })),
+    };
+  }
+  const source = {
+    staves: [
+      staff('melody', ['c d e', 'a g e', 'f e d', 'c e c']),
+      staff('alternate', ['c d e', 'a b a g f e', 'f g f e d c', 'c e c']),
+    ],
+  };
+  const options = {
+    staves: ['melody'],
+    paper: { width: 195, height: 130 },
+    margins: { top: 7, left: 7, right: 7, bottom: 7 },
+    pageNumbers: false,
+    regions: [{ kind: 'ossia', staff: 'alternate', measure: 2, endMeasure: 3, label: 'Ossia' }],
+  };
+  return { source, options };
+}

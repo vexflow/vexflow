@@ -30,6 +30,8 @@ export type ContinuousSpanKind =
   | 'palmMute';
 export interface ContinuousSpan {
   kind: ContinuousSpanKind;
+  /** Draw this pitch tie as a dashed arc, including its continuation fragments. */
+  dashed?: boolean;
   /** Mark the closed musical endpoint of a crescendo or diminuendo with an open circle. */
   niente?: boolean;
   /** Bend one TAB string through this tie, with rise on the first event and release on the second. */
@@ -69,6 +71,8 @@ export interface ResolvedSpan {
 export interface SpanFragment {
   id: string;
   kind: ContinuousSpanKind;
+  /** Draw this pitch tie as a dashed arc, including its continuation fragments. */
+  dashed?: boolean;
   row: number;
   part: 'single' | 'first' | 'middle' | 'last';
   x1: number;
@@ -206,6 +210,11 @@ export function drawSpan(ctx: RenderContext, f: SpanFragment, label?: Element, b
         const x = (x1 + x2) / 2,
           y = (a + b) / 2;
         ctx.quadraticCurveTo(x, y, x2, y2);
+        if (f.dashed) {
+          ctx.setLineDash([4, 3]);
+          ctx.stroke();
+          return;
+        }
         ctx.quadraticCurveTo(x, y + sign * space * 0.22, x1, y1);
       } else {
         ctx.bezierCurveTo(x1 + dx, a, x2 - dx, b, x2, y2);
