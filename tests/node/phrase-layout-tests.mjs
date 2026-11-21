@@ -7,6 +7,7 @@ import { createCanvas, registerFont } from 'canvas';
 import puppeteer from 'puppeteer';
 
 import { elisionStudy, makePhraseStudy, stanzaStudy } from '../engraving/phrase-studies.mjs';
+import { makeStickingStudy } from '../engraving/sticking-study.mjs';
 
 const VF = await import(new URL('../../build/esm/entry/vexflow-core.js', import.meta.url));
 
@@ -545,4 +546,77 @@ test('stanza numbers share a left margin and stay on their word baselines throug
   } finally {
     await browser.close();
   }
+});
+
+test('a paradiddle shares one sticking baseline per printed row through an accent, break and rejoin', () => {
+  const f = factory();
+  const { sheet, notes, rest, marks, hands } = makeStickingStudy(VF, f, true, 0);
+  const baselines = () => marks.map((mark) => mark.computeY().y);
+  const checkAnchors = () => {
+    assert.deepEqual(
+      marks.map((mark) => mark.getText()),
+      hands
+    );
+    marks.forEach((mark, i) => {
+      assert.equal(mark.checkAttachedNote(), notes[i]);
+      const { x, textWidth } = mark.computeX();
+      assert.equal(x + textWidth / 2, notes[i].getModifierStartXY(VF.Modifier.Position.BELOW, 0).x);
+    });
+    assert.equal(rest.getModifiers().length, 0);
+  };
+  sheet.format();
+  assert.equal(sheet.getRows().length, 1);
+  const plain = baselines()[0];
+  assert.deepEqual(baselines(), Array(8).fill(plain));
+  const checkRows = () => {
+    for (const row of sheet.getRows()) {
+      const members = row.systems.flatMap((system) => system.getStaves());
+      for (const mark of marks.filter((m) => members.includes(m.checkAttachedNote().checkStave()))) {
+        const ink = measured(mark).ink;
+        assert.ok(ink.y >= row.y && ink.y + ink.h <= row.y + row.height, 'The row contains the sticking ink');
+      }
+    }
+  };
+  const originalX = marks.map((mark) => mark.computeX().x);
+  sheet.setWidth(145).format();
+  checkRows();
+  sheet.setWidth(460).format();
+  assert.deepEqual(
+    marks.map((mark) => mark.computeX().x),
+    originalX
+  );
+  assert.deepEqual(baselines(), Array(8).fill(plain));
+
+  const accent = f.Articulation({ type: 'a>', position: 'below' });
+  notes[2].addModifier(accent);
+  sheet.format();
+  const accented = baselines()[0];
+  assert.ok(accented > plain);
+  assert.deepEqual(baselines(), Array(8).fill(accented));
+  assert.ok(measured(accent).ink.y + measured(accent).ink.h < measured(marks[2]).ink.y);
+  checkAnchors();
+
+  sheet.setWidth(145).format();
+  assert.equal(sheet.getRows().length, 2);
+  checkRows();
+  const [upper, lower] = sheet.getRows();
+  assert.equal(upper.y + upper.height, lower.y);
+  const split = baselines();
+  assert.deepEqual(split.slice(0, 4), Array(4).fill(split[0]));
+  assert.deepEqual(split.slice(4), Array(4).fill(split[4]));
+  const relative = (i) => split[i] - notes[i].checkStave().getYForLine(0);
+  assert.ok(relative(4) < relative(0), 'The second row no longer needs space for the first row’s accent');
+  checkAnchors();
+  sheet.setWidth(460).format();
+  assert.equal(sheet.getRows().length, 1);
+  assert.deepEqual(baselines(), Array(8).fill(accented));
+  checkAnchors();
+
+  // Malformed later entries cannot leave an earlier label attached.
+  const count = notes[0].getModifiers().length;
+  const first = { note: notes[0], hand: 'R' };
+  assert.throws(() => sheet.addStickingLine([first, first]), /distinct/);
+  assert.throws(() => sheet.addStickingLine([first, { note: notes[1], hand: 'X' }]), /hand/);
+  assert.throws(() => sheet.addStickingLine([first, { note: f.StaveNote({ keys: ['c/4'], duration: 'q' }) }]), /sheet/);
+  assert.equal(notes[0].getModifiers().length, count);
 });

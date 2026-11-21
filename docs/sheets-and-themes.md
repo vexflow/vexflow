@@ -64,6 +64,18 @@ A measure wider than the available width occupies its own row. It keeps its mini
 
 Sheet does not add clefs or key signatures, split measures, paginate, or split spanning ties and beams at row breaks. The example repeats clefs explicitly. Keep connected marks within a measure, or manage their row breaks yourself. Use consistent stave spacing across measures. Note bounds and staff envelopes determine row heights; increase `rowGap` for extra lyrics or spanning annotations.
 
+## Percussion sticking
+
+Attach a sticking line after adding the voices to the sheet. Each assignment names its own note and hand. Rests stay silent, and an omitted hand leaves an attack unmarked.
+
+```js
+const hands = ['R', 'L', 'R', 'R', 'L', 'R', 'L', 'L'];
+const labels = sheet.addStickingLine(snareNotes.map((note, i) => ({ note, hand: hands[i] })));
+sheet.format();
+```
+
+Each returned annotation stays centered beneath its note. A below-staff accent moves the line down for the entire printed row. Calling `sheet.setWidth(width).format()` recalculates the baselines when measures split or rejoin.
+
 ## Theme a score
 
 ```js

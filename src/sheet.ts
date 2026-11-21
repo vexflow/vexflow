@@ -1,4 +1,5 @@
 // Optional continuous-sheet layout for existing Systems. No music data model or pagination.
+import type { Annotation } from './annotation';
 import { reserveChordSpacing } from './chordspacing';
 import { ClefNote } from './clefnote';
 import type { ContinuousLayout } from './continuouslayout';
@@ -21,6 +22,12 @@ export interface SheetOptions {
   justify?: boolean;
 }
 
+/** A drum hand at a native attack. Rests and entries without a hand remain unmarked. */
+export interface StickingAssignment {
+  note: StaveNote;
+  hand?: 'R' | 'L';
+}
+
 /** Layout result. Oversized measures occupy their own row and remain readable. */
 export interface SheetRow {
   systems: System[];
@@ -35,6 +42,8 @@ export interface SheetRow {
 export class Sheet {
   private options: Required<SheetOptions>;
   private continuous?: ContinuousLayout;
+  /** Note-owned marks, grouped by measure so a line can follow any set of row breaks. */
+  private stickingLines: Map<System, Annotation[]>[] = [];
   private alignedWidths?: readonly number[];
 
   /** @internal Fit a single reference system to the already formatted measures of a publication. */
@@ -82,6 +91,64 @@ export class Sheet {
     const system = this.options.factory.System({ ...options, autoWidth: true, noJustification: false });
     this.systems.push(system);
     return system;
+  }
+
+  /** Attach a percussion sticking line after the passage's voices have been added to the sheet. */
+  addStickingLine(assignments: readonly StickingAssignment[]): Annotation[] {
+    const owners = new Map<StaveNote, System>();
+    for (const system of this.systems) {
+      for (const voice of system.getVoices()) {
+        for (const note of voice.getTickables()) if (note instanceof StaveNote) owners.set(note, system);
+      }
+    }
+
+    // Validate the complete passage before attaching any marks to caller-owned notes.
+    const seen = new Set<StaveNote>();
+    let staffIndex: number | undefined;
+    for (const { note, hand } of assignments) {
+      const system = owners.get(note);
+      if (!system || seen.has(note)) throw new RangeError('Sticking assignments need distinct notes on this sheet.');
+      seen.add(note);
+      if (hand !== undefined && hand !== 'R' && hand !== 'L') throw new RangeError('Expected a right or left hand.');
+      const index = system.getStaves().indexOf(note.checkStave());
+      if (index < 0 || (staffIndex !== undefined && index !== staffIndex))
+        throw new RangeError('A sticking line follows one staff across measures.');
+      staffIndex = index;
+    }
+
+    const line = new Map<System, Annotation[]>();
+    const marks: Annotation[] = [];
+    for (const { note, hand } of assignments) {
+      if (note.isRest() || hand === undefined) continue;
+      const mark = this.options.factory.Annotation({ text: hand, vJustify: 'bottom' });
+      note.addModifier(mark);
+      marks.push(mark);
+      const system = owners.get(note)!;
+      const group = line.get(system);
+      if (group) group.push(mark);
+      else line.set(system, [mark]);
+    }
+    for (const [system, group] of line) {
+      system.getPhraseLayout().addLane(group[0].checkAttachedNote().checkStave(), group, { side: 'below' });
+    }
+    if (line.size) this.stickingLines.push(line);
+    return marks;
+  }
+
+  /** @internal Carry the lowest solved sticking baseline across the row before placing the next row. */
+  alignSticking(row: SheetRow): void {
+    for (const line of this.stickingLines) {
+      const marks = row.systems
+        .flatMap((system) => line.get(system) ?? [])
+        .filter((mark) => !this.continuous?.hidden.has(mark.checkAttachedNote()));
+      if (!marks.length) continue;
+      const baseline = Math.max(...marks.map((mark) => mark.computeY().y));
+      for (const mark of marks) {
+        mark.setLayoutBaseline(baseline);
+        const ink = mark.getTextInk(mark.computeX().x, baseline);
+        row.height = Math.max(row.height, ink.y + ink.h - row.y);
+      }
+    }
   }
 
   /** Update the available row width. Call format() or Factory.draw() to reflow. */
@@ -227,7 +294,7 @@ export class Sheet {
     });
     for (const index of indices) this.systems[index].setY(y - top).format({ endPadding: endPadding(index) });
     const width = x - this.options.x - this.options.measureGap;
-    return {
+    const row = {
       systems,
       x: this.options.x,
       y,
@@ -235,5 +302,7 @@ export class Sheet {
       height: bottom - top,
       overflow: Math.max(0, width - this.options.width),
     };
+    this.alignSticking(row);
+    return row;
   }
 }

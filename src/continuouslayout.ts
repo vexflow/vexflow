@@ -666,6 +666,7 @@ export class ContinuousLayout {
           options,
           y
         );
+        this.score.sheet.alignSticking(row);
         this.rows.push(row);
         y += row.height + options.rowGap;
       }
