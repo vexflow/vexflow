@@ -2,6 +2,7 @@
 import type { ContinuousBoundary } from './continuouslayout';
 import type { EasyScoreComposition, EasyScoreCompositionSpec, EasyScoreStaveSpec } from './easyscore';
 import { Note } from './note';
+import type { CueTransposition } from './publicationcue';
 import { Tickable } from './tickable';
 import { RuntimeError } from './util';
 
@@ -14,6 +15,8 @@ export interface PublicationRegion {
   endMeasure?: number;
   label: string;
   scale?: number;
+  /** Written interval applied to the quoted pitches and their key signature. */
+  transpose?: CueTransposition;
 }
 
 /** All measure references are one-based. A page turn follows its named measure. */
@@ -46,6 +49,13 @@ export function checkView(source: EasyScoreCompositionSpec, view: PublicationVie
   )
     invalidPage('Expected distinct source staff IDs.');
   for (const region of view.regions ?? []) {
+    if (
+      region.transpose !== undefined &&
+      (region.kind !== 'cue' ||
+        !Number.isSafeInteger(region.transpose?.semitones) ||
+        !Number.isSafeInteger(region.transpose?.steps))
+    )
+      invalidPage('A transposed cue needs integer semitones and diatonic steps.');
     const scale = region.scale ?? 0.7;
     if (
       !validMeasure(region.measure) ||

@@ -6,7 +6,12 @@ import { test } from 'node:test';
 import puppeteer from 'puppeteer';
 
 import { tabEndingStudy } from '../engraving/continuous-studies.mjs';
-import { leadSheetStudy, ossiaRangeStudy, publicationStudy } from '../engraving/publication-studies.mjs';
+import {
+  leadSheetStudy,
+  ossiaRangeStudy,
+  publicationStudy,
+  transposedCueStudy,
+} from '../engraving/publication-studies.mjs';
 
 test('publication views, pagination and portable printing', async (t) => {
   const browser = await puppeteer.launch({ headless: true, args: process.env.CI ? ['--no-sandbox'] : [] });
@@ -120,6 +125,55 @@ test('publication views, pagination and portable printing', async (t) => {
           }
         });
       }
+    await t.test('a transposed flute cue follows the clarinet signature and regenerates from source', async () => {
+      await page.addScriptTag({ content: 'window.cueStudy=' + transposedCueStudy });
+      const result = await page.evaluate(() => {
+        const { source, options } = cueStudy();
+        const book = new VexFlow.Publication(source);
+        const target = document.querySelector('main');
+        function quote() {
+          const { pages, diagnostics } = book.render(target, options);
+          const svg = pages[0].svg;
+          const group = svg.querySelector('[data-region="cue"]');
+          const meta = JSON.parse(svg.querySelector('metadata').textContent);
+          return {
+            keys: meta.regions[0].events.map((e) => e.keys[0].toLowerCase()),
+            ticks: meta.regions[0].events.map((e) => e.ticks),
+            rest: meta.events[0].rest,
+            label: group.querySelector(':scope > text').textContent,
+            transform: group.querySelector('g[transform]').getAttribute('transform'),
+            sharps: [...group.textContent].filter((c) => c === VexFlow.Glyphs.accidentalSharp).length,
+            naturals: [...group.textContent].filter((c) => c === VexFlow.Glyphs.accidentalNatural).length,
+            diagnostics,
+          };
+        }
+        const original = quote();
+        source.staves[0].measures[0].voices[0].notes = ['e/4', 'f/4', 'g/4', 'bb/4'].map((key) => ({
+          keys: [key],
+          duration: 'q',
+        }));
+        const edited = quote();
+        const concert = book.render(target, { staves: ['fl'] }).pages[0].svg;
+        return {
+          original,
+          edited,
+          concert: JSON.parse(concert.querySelector('metadata').textContent).events.map((e) => e.keys[0]),
+        };
+      });
+      assert.deepEqual(result.original.keys, ['f#/4', 'g/4', 'a/4', 'b/4']);
+      assert.deepEqual(result.edited.keys, ['f#/4', 'g/4', 'a/4', 'c/5']);
+      assert.deepEqual(result.concert, ['e/4', 'f/4', 'g/4', 'bb/4']);
+      for (const quote of [result.original, result.edited]) {
+        assert.deepEqual(quote.diagnostics, []);
+        assert.equal(quote.rest, true);
+        assert.equal(quote.label, 'Flute');
+        assert.match(quote.transform, /scale\(0\.7\)/);
+        assert.deepEqual(quote.ticks, Array(4).fill('4096/1'));
+        assert.equal(quote.sharps, 2);
+      }
+      assert.equal(result.original.naturals, 0);
+      assert.equal(result.edited.naturals, 1);
+    });
     await t.test(
       'a ranged ossia aligns each bar, continues on the next system and restores its original layout',
       async () => {
