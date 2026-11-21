@@ -1,5 +1,6 @@
 // Pre-draw geometry of formatted VF5 notation. All coordinates are unscaled renderer pixels.
 import { Accidental } from './accidental';
+import { AccordionRegister } from './accordionregister';
 import { Annotation } from './annotation';
 import { Articulation } from './articulation';
 import { Beam } from './beam';
@@ -10,6 +11,7 @@ import { Element } from './element';
 import { FiguredBass } from './figuredbass';
 import { GraceNote } from './gracenote';
 import { GraceNoteGroup } from './gracenotegroup';
+import { HarpPedalDiagram } from './harppedaldiagram';
 import { Ornament } from './ornament';
 import { PedalMarking } from './pedalmarking';
 import { StaveHairpin } from './stavehairpin';
@@ -135,7 +137,7 @@ export function measureEngraving(element: Element, options: GeometryOptions = {}
         const curve = owner as Curve;
         shape.parts.push(inflate(curve.getBoundingBox(), (curve.getStyle().lineWidth ?? 1) / 2));
         shape.anchors = curve.getAnchors();
-      } else if (kind === Annotation) {
+      } else if (kind === Annotation || kind === AccordionRegister || kind === HarpPedalDiagram) {
         const mark = owner as Annotation;
         const { x } = mark.computeX();
         const { y } = mark.computeY();

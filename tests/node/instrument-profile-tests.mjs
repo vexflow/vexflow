@@ -28,6 +28,84 @@ test('instrument studies and score construction', async (t) => {
       };
     });
 
+    await t.test('seven harp pedals share one rail and preserve the note anchor at two scales', async () => {
+      const results = await page.evaluate(() => {
+        const V = VexFlow;
+        const settings = { A: 'flat', B: 'flat', C: 'sharp', D: 'natural', E: 'natural', F: 'sharp', G: 'natural' };
+        const bad = [{ ...settings, F: 'double-sharp' }, { ...settings, H: 'flat' }, { A: 'flat' }];
+        const rejected = bad.map((s) => {
+          try {
+            new V.HarpPedalDiagram(s);
+            return false;
+          } catch (err) {
+            return err instanceof RangeError;
+          }
+        });
+        const panels = [];
+        for (const backend of ['svg', 'canvas']) {
+          const ctx =
+            backend === 'svg'
+              ? new V.SVGContext(document.createElement('div'))
+              : new V.CanvasContext(document.createElement('canvas').getContext('2d'));
+          for (const scale of [1, 1.5]) {
+            const stave = new V.Stave(10, 80, 380).setContext(ctx);
+            const notes = ['d/4', 'd/4'].map((key) => new V.StaveNote({ keys: [key], duration: 'h' }).setStave(stave));
+            const changed = { ...settings, F: 'natural' };
+            const diagrams = [settings, changed].map((s, i) => {
+              const diagram = new V.HarpPedalDiagram(s, { scale });
+              notes[i].addModifier(diagram, 0);
+              return diagram;
+            });
+            changed.F = 'flat';
+            const voice = new V.Voice('4/4').addTickables(notes);
+            new V.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+            const before = diagrams.map((diagram) => diagram.getBoundingBox());
+            const glyphs = [];
+            const fill = ctx.fillText.bind(ctx);
+            ctx.fillText = (text, x, y) => {
+              if (text.includes('\uE683')) glyphs.push(text);
+              return fill(text, x, y);
+            };
+            voice.draw(ctx, stave);
+            ctx.fillText = fill;
+            const after = diagrams.map((diagram) => diagram.getBoundingBox());
+            panels.push({
+              glyphs,
+              settingF: diagrams[1].settings.F,
+              stable: before.every((b, i) => b.x === after[i].x && b.y === after[i].y),
+              reserved: before.every((b, i) => {
+                const state = notes[i].checkModifierContext().getState();
+                const halfHead = notes[i].getGlyphWidth() / 2;
+                return (
+                  state.leftShift + halfHead >= b.w / 2 - 1 &&
+                  state.rightShift + halfHead >= b.w / 2 - 1 &&
+                  state.topTextLine * 10 >= b.h
+                );
+              }),
+              width: before[0].w,
+              height: before[0].h,
+              clear: before[0].x + before[0].w < before[1].x,
+              geometry: diagrams.every((diagram) => V.measureEngraving(diagram).diagnostics.length === 0),
+            });
+          }
+        }
+        return { panels, rejected };
+      });
+      assert.ok(results.rejected.every(Boolean));
+      const [small, large, canvasSmall, canvasLarge] = results.panels;
+      assert.deepEqual([small, large], [canvasSmall, canvasLarge]);
+      for (const panel of [small, large]) {
+        assert.deepEqual(panel.glyphs, [
+          '\uE681\uE682\uE680\uE683\uE681\uE682\uE681\uE680',
+          '\uE681\uE682\uE680\uE683\uE681\uE681\uE681\uE680',
+        ]);
+        assert.equal(panel.settingF, 'natural');
+        assert.ok(panel.stable && panel.reserved && panel.clear && panel.geometry);
+      }
+      assert.ok(Math.abs(large.width / small.width - 1.5) < 0.05);
+      assert.ok(Math.abs(large.height / small.height - 1.5) < 0.1);
+    });
+
     await t.test('a tied TAB bend rises once and releases on its own string after reflow', async () => {
       const result = await page.evaluate(() => {
         const V = VexFlow,

@@ -1,12 +1,13 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
-// PedalMarking Tests
+// Sustain pedal marks and concert harp pedal-change instructions.
 // TODO: Fix Error => Type 'Tickable' is not assignable to type 'StaveNote'.
 import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Factory } from '../src/factory';
+import { HarpPedalSettings } from '../src/harppedals';
 import { StaveNote } from '../src/stavenote';
 import { Tickable } from '../src/tickable';
 
@@ -16,6 +17,7 @@ const PedalMarkingTests = {
     QUnit.test('annotationClearance', annotationClearance);
 
     const run = VexFlowTests.runTests;
+    run('Harp pedal changes at a rest and entrance', harpPedalChanges);
     run('Simple Pedal 1', simple1);
     run('Simple Pedal 1b', simple1b);
     run('Simple Pedal 2', simple2);
@@ -30,6 +32,62 @@ const PedalMarkingTests = {
     run('Custom Text 2', customTest2);
   },
 };
+
+/** Check ordered changes, retained settings and modifier space on the same notes after reflow. */
+function harpPedalChanges(options: TestOptions): void {
+  const assert = options.assert;
+  const f = VexFlowTests.makeFactory(options, 420, 155);
+  const initial: HarpPedalSettings = {
+    D: 'natural',
+    C: 'natural',
+    B: 'natural',
+    E: 'natural',
+    F: 'natural',
+    G: 'natural',
+    A: 'natural',
+  };
+  const pedals = new VexFlow.HarpPedalChanges(initial);
+  const notes = [
+    f.StaveNote({ keys: ['c/4'], duration: 'q' }),
+    f.StaveNote({ keys: ['b/4'], duration: 'qr' }),
+    f.StaveNote({ keys: ['g/4'], duration: 'q' }),
+    f.StaveNote({ keys: ['f/4'], duration: 'q' }),
+  ];
+  const first = pedals.apply(notes[1], { F: 'sharp', B: 'flat' });
+  assert.equal(first?.getText(), 'B♭\u2002F♯', 'Changed names follow pedal order');
+  assert.deepEqual(pedals.getSettings(), { ...initial, B: 'flat', F: 'sharp' }, 'Other pedals stay natural');
+  assert.equal(pedals.apply(notes[2], pedals.getSettings()), undefined, 'Repeated full setting is silent');
+  assert.equal(notes[2].getModifiers().length, 0, 'No space reserved for an empty change');
+  assert.throws(() => pedals.apply(notes[2], { F: 'invalid' } as unknown as Partial<HarpPedalSettings>), /pedal F/);
+  const last = pedals.apply(notes[3], { F: 'natural' });
+  assert.equal(last?.getText(), 'F♮');
+  assert.deepEqual(pedals.getSettings(), { ...initial, B: 'flat' }, 'B remains flat after resetting F');
+  if (!first || !last) return;
+
+  const dynamic = f.TextDynamics({ text: 'mf', duration: 'q', line: 10 });
+  const dynamics = [f.GhostNote('q'), f.GhostNote('q'), dynamic, f.GhostNote('q')];
+  const system = f.System({ x: 12, y: 10, width: 400 });
+  system.addStave({ voices: [f.Voice().addTickables(notes), f.Voice().addTickables(dynamics)] }).addClef('treble');
+  const restXs = [];
+  for (const width of [400, 260]) {
+    system.setWidth(width);
+    f.getContext().clear();
+    f.draw({ retain: true });
+    for (const label of [first, last]) {
+      const box = label.getBoundingBox();
+      const note = label.checkAttachedNote();
+      const anchor = note.getModifierStartXY(VexFlow.Modifier.Position.BELOW, 0);
+      assert.ok(Math.abs(box.x + box.w / 2 - anchor.x) < 0.01, 'Instruction stays centered at the anchor');
+      const space = note.getModifierContext()!.getState();
+      assert.ok(space.leftShift + note.getGlyphWidth() + space.rightShift >= box.w, 'The full label has space');
+    }
+    const rest = first.getBoundingBox();
+    const mf = dynamic.getBoundingBox();
+    assert.ok(rest.x + rest.w < mf.x && mf.x + mf.w < last.getBoundingBox().x, 'Both labels clear the dynamic');
+    restXs.push(rest.x);
+  }
+  assert.ok(restXs[1] < restXs[0], 'The rest and its label moved when the system narrowed');
+}
 
 /**
  * Tests below uses this to set up the score and two staves with one voice.

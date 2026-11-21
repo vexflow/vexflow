@@ -1,5 +1,6 @@
 // Public VexFlow facade, renderer configuration, and font selection.
 import { Accidental } from './accidental';
+import { AccordionRegister } from './accordionregister';
 import { AlternatingTremolo } from './alternatingtremolo';
 import { Annotation, AnnotationHorizontalJustify, AnnotationVerticalJustify } from './annotation';
 import { Articulation } from './articulation';
@@ -31,6 +32,8 @@ import { Glyphs } from './glyphs';
 import { GraceNote } from './gracenote';
 import { GraceNoteGroup } from './gracenotegroup';
 import { GraceTabNote } from './gracetabnote';
+import { HarpPedalChanges } from './harppedalchanges';
+import { HarpPedalDiagram } from './harppedaldiagram';
 import { FrettedInstrument, PercussionMap } from './instrumentprofile';
 import { KeyManager } from './keymanager';
 import { KeySignature } from './keysignature';
@@ -111,6 +114,7 @@ export class VexFlow {
   static PhraseLayout = PhraseLayout;
   static EngravingProfile = EngravingProfile;
   static Accidental = Accidental;
+  static AccordionRegister = AccordionRegister;
   static Annotation = Annotation;
   static Articulation = Articulation;
   static Barline = Barline;
@@ -138,6 +142,7 @@ export class VexFlow {
   static GraceNote = GraceNote;
   static GraceNoteGroup = GraceNoteGroup;
   static GraceTabNote = GraceTabNote;
+  static HarpPedalChanges = HarpPedalChanges;
   static KeyManager = KeyManager;
   static KeySignature = KeySignature;
   static KeySigNote = KeySigNote;
@@ -177,6 +182,7 @@ export class VexFlow {
   static PercussionMap = PercussionMap;
   static FiguredBass = FiguredBass;
   static FretDiagram = FretDiagram;
+  static HarpPedalDiagram = HarpPedalDiagram;
   static AlternatingTremolo = AlternatingTremolo;
   static WrittenAccidentalState = WrittenAccidentalState;
   static NotationSpelling = NotationSpelling;

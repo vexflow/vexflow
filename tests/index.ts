@@ -18,6 +18,7 @@
 import './demo_repertoire_tests';
 
 export * from './accidental_tests';
+export * from './accordionregister_tests';
 export * from './annotation_tests';
 export * from './articulation_tests';
 export * from './auto_beam_formatting_tests';
