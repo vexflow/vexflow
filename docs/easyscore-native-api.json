@@ -920,6 +920,7 @@
     "FretDiagramSpec": {
       "extends": [],
       "fields": [
+        "orientation?: 'vertical' | 'horizontal';",
         "frets: readonly (number | 'x')[];",
         "fingerings?: readonly (number | null | undefined)[];",
         "firstFret?: number;",
@@ -929,6 +930,7 @@
     },
     "FretDiagram": [
       "CATEGORY(): string",
+      "lookupVoicing(harmony: ChordHarmony, tuning: string, name?: string): FretDiagramSpec | undefined",
       "constructor(spec: FretDiagramSpec)",
       "setFingerings(fingerings: NonNullable<FretDiagramSpec['fingerings']> = []): this",
       "getBoundingBox(): BoundingBox",
@@ -2881,12 +2883,12 @@
   "tuning": {
     "Tuning": [
       "names(): Record<string, string>",
-      "constructor(tuningString = 'E/5,B/4,G/4,D/4,A/3,E/3,B/2,E/2')",
+      "constructor(tuningString = 'E/5,B/4,G/4,D/4,A/3,E/3,B/2,E/2', nutFrets?: readonly number[])",
       "noteToInteger(noteString: string): number",
-      "setTuning(tuningString: string): void",
+      "setTuning(tuningString: string, nutFrets?: readonly number[]): void",
       "getValueForString(stringNum: string | number): number",
-      "getValueForFret(fretNum: string | number, stringNum: string | number): number",
-      "getNoteForFret(fretNum: string | number, stringNum: string | number): string"
+      "getValueForFret(fretNum: string | number, stringNum: string | number, capo = 0): number",
+      "getNoteForFret(fretNum: string | number, stringNum: string | number, capo = 0): string"
     ]
   },
   "tuplet": {

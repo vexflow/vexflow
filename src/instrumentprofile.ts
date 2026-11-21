@@ -126,7 +126,7 @@ export class FrettedInstrument {
       }
       if (!Number.isSafeInteger(str) || !Number.isSafeInteger(fret) || fret < 0)
         throw new RuntimeError('BadArguments', 'Invalid string or fret.');
-      return this.tuning.getNoteForFret(fret + this.capo, str);
+      return this.tuning.getNoteForFret(fret, str, this.capo);
     });
     const notation: NotationIdentity[] = positions.map(({ str, fret }, index) => ({
       kind: fret === 'X' ? 'unpitched' : 'tuning',

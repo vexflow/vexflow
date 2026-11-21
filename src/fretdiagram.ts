@@ -1,12 +1,20 @@
-// A standalone chord frame. Strings run from the lowest (left) to the highest (right).
+// Vertical and horizontal chord frames with tuning-specific guitar voicings.
 import { BoundingBox } from './boundingbox';
 import { Element } from './element';
+import { ChordHarmony, NotationSpelling } from './notationspelling';
 import { RenderContext } from './rendercontext';
+import { Tuning } from './tuning';
 import { Category } from './typeguard';
 import { RuntimeError } from './util';
 
+/** Grid spacing in renderer pixels, measured across the strings and along the neck. */
+const STRING_SPACING = 9;
+const FRET_SPACING = 11;
+
 /** Frets are absolute; 0 = open, 'x' = muted. A barre names one-based string numbers. */
 export interface FretDiagramSpec {
+  /** In a horizontal frame the nut is at the left and the highest string is on top. */
+  orientation?: 'vertical' | 'horizontal';
   frets: readonly (number | 'x')[];
   /** Left-hand fingers 1–4, low string first. Null or an omitted entry leaves the dot plain. */
   fingerings?: readonly (number | null | undefined)[];
@@ -15,12 +23,49 @@ export interface FretDiagramSpec {
   barre?: { fret: number; from: number; to: number };
 }
 
+/** Standard-tuned major chords in preference order. Slash basses have their own entries. */
+const standardMajorVoicings: readonly {
+  root: string;
+  bass?: string;
+  name: string;
+  frame: FretDiagramSpec;
+}[] = [
+  { root: 'C', name: 'open', frame: { frets: ['x', 3, 2, 0, 1, 0] } },
+  {
+    root: 'C',
+    name: 'third-position',
+    frame: { frets: ['x', 3, 5, 5, 5, 3], firstFret: 3, barre: { fret: 3, from: 5, to: 1 } },
+  },
+  { root: 'C', bass: 'E', name: 'open', frame: { frets: [0, 3, 2, 0, 1, 0] } },
+  { root: 'D', name: 'open', frame: { frets: ['x', 'x', 0, 2, 3, 2] } },
+  { root: 'G', name: 'open', frame: { frets: [3, 2, 0, 0, 0, 3] } },
+];
+
 export class FretDiagram extends Element {
   /** The registry and font metrics both use the diagram category. */
   static override get CATEGORY(): string {
     return Category.FretDiagram;
   }
 
+  /** Return a fresh frame for this harmony and tuning. Omitting the name selects the first registered shape. */
+  static lookupVoicing(harmony: ChordHarmony, tuning: string, name?: string): FretDiagramSpec | undefined {
+    const pitches = tuning
+      .split(',')
+      .map((key) => key.trim().toUpperCase())
+      .join(',');
+    if (tuning !== 'standard' && pitches !== Tuning.names.standard) return undefined;
+    if (!['', 'maj', 'major', 'M'].includes(harmony.quality ?? '')) return undefined;
+    const root = NotationSpelling.chordText({ root: harmony.root });
+    const bass = harmony.bass === undefined ? undefined : NotationSpelling.chordText({ root: harmony.bass });
+    const match = standardMajorVoicings.find(
+      (v) => v.root === root && v.bass === bass && (name === undefined || v.name === name)
+    );
+    if (!match) return undefined;
+    const frame = match.frame;
+    return { ...frame, frets: [...frame.frets], ...(frame.barre && { barre: { ...frame.barre } }) };
+  }
+
+  private readonly orientation: NonNullable<FretDiagramSpec['orientation']>;
   private readonly frets: readonly (number | 'x')[];
   private fingerings: NonNullable<FretDiagramSpec['fingerings']> = [];
   private readonly first: number;
@@ -29,6 +74,9 @@ export class FretDiagram extends Element {
 
   constructor(spec: FretDiagramSpec) {
     super();
+    this.orientation = spec.orientation ?? 'vertical';
+    if (this.orientation !== 'vertical' && this.orientation !== 'horizontal')
+      throw new RuntimeError('BadArguments', 'Unknown chord frame orientation.');
     this.frets = [...spec.frets];
     this.first = spec.firstFret ?? 1;
     this.rows = spec.rows ?? 4;
@@ -52,6 +100,7 @@ export class FretDiagram extends Element {
       )
         throw new RuntimeError('BadArguments', 'Barre outside chord frame.');
     }
+    if (this.first > 1) this.setText(String(this.first));
     this.setFingerings(spec.fingerings);
   }
 
@@ -69,9 +118,26 @@ export class FretDiagram extends Element {
     return this;
   }
 
-  /** The top-left position includes the open-string marks and starting fret label. */
+  /** Grid coordinates run across strings (low to high) and along the neck (nut to bridge). */
+  private gridPoint(across: number, along: number): [number, number] {
+    if (this.orientation === 'horizontal')
+      return [this.getX() + 14 + along, this.getY() + 6 + (this.frets.length - 1) * STRING_SPACING - across];
+    return [this.getX() + 22 + across, this.getY() + 14 + along];
+  }
+
+  /** The top-left position includes the open-string marks and the upright starting-fret label. */
   override getBoundingBox(): BoundingBox {
-    return new BoundingBox(this.getX(), this.getY(), 28 + (this.frets.length - 1) * 9, 17 + this.rows * 11);
+    const across = (this.frets.length - 1) * STRING_SPACING;
+    const along = this.rows * FRET_SPACING;
+    if (this.orientation === 'vertical') return new BoundingBox(this.getX(), this.getY(), 28 + across, 17 + along);
+    let width = 16 + along;
+    let height = 12 + across;
+    if (this.first > 1) {
+      const metrics = this.textMetrics;
+      width = Math.max(width, 15 + metrics.actualBoundingBoxLeft + metrics.actualBoundingBoxRight);
+      height += metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent + 1;
+    }
+    return new BoundingBox(this.getX(), this.getY(), width, height);
   }
 
   /** Paint the digit over the dot and any barre that passes through it. */
@@ -87,14 +153,12 @@ export class FretDiagram extends Element {
 
   override draw(): void {
     const ctx = this.checkContext();
-    const left = this.getX() + 22,
-      top = this.getY() + 14;
-    const right = left + (this.frets.length - 1) * 9;
-    const fretY = (fret: number) => top + (fret - this.first + 0.5) * 11;
-    const line = (x1: number, y1: number, x2: number, y2: number) => {
+    const across = (this.frets.length - 1) * STRING_SPACING;
+    const fretCenter = (fret: number) => (fret - this.first + 0.5) * FRET_SPACING;
+    const line = (across1: number, along1: number, across2: number, along2: number) => {
       ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
+      ctx.moveTo(...this.gridPoint(across1, along1));
+      ctx.lineTo(...this.gridPoint(across2, along2));
       ctx.stroke();
     };
     ctx.save();
@@ -108,22 +172,29 @@ export class FretDiagram extends Element {
     );
     if (this.first > 1) {
       ctx.setFont(this.fontInfo);
-      ctx.fillText(String(this.first), this.getX() + 2, top + 9);
+      if (this.orientation === 'horizontal') {
+        // Leave room below the lowest string for its stopped dot or partial barre.
+        const [left, bottom] = this.gridPoint(0, 0);
+        const metrics = this.textMetrics;
+        ctx.fillText(this.text, left + metrics.actualBoundingBoxLeft, bottom + 6 + metrics.actualBoundingBoxAscent);
+      } else {
+        ctx.fillText(this.text, this.getX() + 2, this.getY() + 23);
+      }
     }
     for (let row = 0; row <= this.rows; row++) {
       ctx.setLineWidth(row === 0 && this.first === 1 ? 2.5 : 1);
-      line(left, top + row * 11, right, top + row * 11);
+      line(0, row * FRET_SPACING, across, row * FRET_SPACING);
     }
     this.frets.forEach((fret, i) => {
-      const x = left + i * 9;
-      line(x, top, x, top + this.rows * 11);
+      const string = i * STRING_SPACING;
+      line(string, 0, string, this.rows * FRET_SPACING);
       if (fret === 'x') {
-        line(x - 2.5, top - 8, x + 2.5, top - 3);
-        line(x + 2.5, top - 8, x - 2.5, top - 3);
+        line(string - 2.5, -8, string + 2.5, -3);
+        line(string + 2.5, -8, string - 2.5, -3);
       } else {
         ctx.beginPath();
         const radius = this.fingerings[i] ? 4 : 3;
-        ctx.arc(x, fret ? fretY(fret) : top - 5.5, fret ? radius : 2.5, 0, 2 * Math.PI, false);
+        ctx.arc(...this.gridPoint(string, fret ? fretCenter(fret) : -5.5), fret ? radius : 2.5, 0, 2 * Math.PI, false);
         if (fret) ctx.fill();
         else ctx.stroke();
       }
@@ -131,11 +202,17 @@ export class FretDiagram extends Element {
     if (this.barre) {
       const { from, to, fret } = this.barre;
       ctx.setLineWidth(5);
-      line(right - (from - 1) * 9, fretY(fret), right - (to - 1) * 9, fretY(fret));
+      line(
+        across - (from - 1) * STRING_SPACING,
+        fretCenter(fret),
+        across - (to - 1) * STRING_SPACING,
+        fretCenter(fret)
+      );
     }
     this.fingerings.forEach((finger, i) => {
       const fret = this.frets[i];
-      if (finger && typeof fret === 'number') this.drawFinger(ctx, finger, left + i * 9, fretY(fret));
+      if (finger && typeof fret === 'number')
+        this.drawFinger(ctx, finger, ...this.gridPoint(i * STRING_SPACING, fretCenter(fret)));
     });
     ctx.closeGroup();
     ctx.restore();
