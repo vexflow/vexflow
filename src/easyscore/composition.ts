@@ -24,6 +24,7 @@ import { Tickable } from '../tickable';
 import { Tuplet, TupletOptions } from '../tuplet';
 import { RuntimeError } from '../util';
 import { Voice, VoiceTime } from '../voice';
+import { independentMeterGrid, InteriorBar, MeterPosition } from './independentmeter';
 import { applyCompositionAccidentals, KeyChange } from './policies';
 import { EasyScoreAutoBeamOptions } from './rhythm';
 
@@ -169,6 +170,8 @@ export interface EasyScoreComposition {
   notes: Tickable[][][][];
   spans: Element[];
   diagnostics: EasyScoreCompositionDiagnostic[];
+  /** Staff-local measure and tick offset of each attack in an independently metered score. */
+  meterPositions?: ReadonlyMap<Tickable, MeterPosition>;
   getElement: (id: string) => Element | undefined;
   getNote: (id: string) => Note;
 }
@@ -526,8 +529,8 @@ function buildStaffMeasure(
   };
 }
 
-/** Compose aligned measure arrays atomically. Formatting and drawing remain explicit native operations. */
-export function compose(score: EasyScore, spec: EasyScoreCompositionSpec): EasyScoreComposition {
+/** Check source policies before any staff-local or shared-window construction mutates native inputs. */
+function validateComposition(spec: EasyScoreCompositionSpec): Note[] {
   const count = spec.staves[0]?.measures.length ?? 0;
   if (!count || !spec.staves.length) invalid('A composition needs staves and measures.');
   if (
@@ -535,7 +538,7 @@ export function compose(score: EasyScore, spec: EasyScoreCompositionSpec): EasyS
     spec.staves.some((stave) => !stave.id)
   )
     invalid('Staff IDs must be unique and nonempty.');
-  if (spec.staves.some((stave) => stave.measures.length !== count))
+  if (!spec.continuous?.independentMeters && spec.staves.some((stave) => stave.measures.length !== count))
     invalid('All staves need the same number of measures.');
   if (spec.accidentals && !['literal', 'key-aware'].includes(spec.accidentals)) invalid('Unknown accidental policy.');
   if (spec.graceAccidentals && !['explicit', 'ordered'].includes(spec.graceAccidentals))
@@ -559,6 +562,55 @@ export function compose(score: EasyScore, spec: EasyScoreCompositionSpec): EasyS
       ))
   )
     invalid('Apply rhythm and accidental policies before adopting native inputs, or use typed note descriptions.');
+  return nativeInputs;
+}
+
+/** Compose aligned measure arrays atomically. Formatting and drawing remain explicit native operations. */
+export function compose(score: EasyScore, spec: EasyScoreCompositionSpec): EasyScoreComposition {
+  const nativeInputs = validateComposition(spec);
+  if (!spec.continuous?.independentMeters) return composeAligned(score, spec, nativeInputs);
+  return score.build(() => {
+    const assignments = new Map<Note, string>();
+    const placed = new Set<Accidental>();
+    const grid = independentMeterGrid(spec, (bar, initial) => {
+      if (!bar.voices.length) invalid('Every stave measure needs at least one voice.');
+      const built = bar.voices.map((v, i) => buildVoice(score, v, initial, i === 0));
+      const voices = built.map((v) => v.notes);
+      for (const v of built) v.assignments.forEach((staff, note) => assignments.set(note, staff));
+      if (spec.accidentals === 'key-aware') {
+        let key = initial.key;
+        const changes = stateChanges(built[0]).flatMap(({ at, state }) => {
+          if (state.key === key) return [];
+          key = state.key;
+          return [{ at, key }];
+        });
+        applyCompositionAccidentals(
+          score,
+          voices,
+          initial.key,
+          changes,
+          new Set(built.flatMap((v) => [...v.generated])),
+          undefined,
+          spec.graceAccidentals === 'ordered',
+          placed
+        );
+      }
+      return { voices, end: built[0].state };
+    });
+    const result = composeAligned(score, grid.spec, nativeInputs, { assignments, interior: grid.interior, placed });
+    result.meterPositions = grid.positions;
+    return result;
+  });
+}
+
+/** Construct one shared System per formatting window, retaining the original note objects. */
+function composeAligned(
+  score: EasyScore,
+  spec: EasyScoreCompositionSpec,
+  nativeInputs: Note[],
+  grid?: { assignments: Map<Note, string>; interior: InteriorBar[]; placed: Set<Accidental> }
+): EasyScoreComposition {
+  const count = spec.staves[0].measures.length;
   const priorNative = new Map(
     nativeInputs.map((note) => [note, { stave: note.getStave(), modifiers: note.getModifiers().length }])
   );
@@ -591,7 +643,7 @@ export function compose(score: EasyScore, spec: EasyScoreCompositionSpec): EasyS
       }));
       const starts: Required<EasyScoreStaffState>[][] = [],
         ends: Required<EasyScoreStaffState>[][] = [];
-      const placed = spec.continuous ? new Set<Accidental>() : undefined;
+      const placed = grid?.placed ?? (spec.continuous ? new Set<Accidental>() : undefined);
       const noteMeasures = new Map<Note, number>();
       const prepared = prepareTupletVoices(score, spec, states);
       for (let index = 0; index < count; index++) {
@@ -624,6 +676,11 @@ export function compose(score: EasyScore, spec: EasyScoreCompositionSpec): EasyS
         const notes = parts.map((part) => part.notes);
         const policies = parts.map((part) => part.policy);
         const assignments = new Map(parts.flatMap((part) => [...part.assignments]));
+        if (grid)
+          for (const note of notes.flat(2)) {
+            const target = note instanceof Note && grid?.assignments.get(note);
+            if (target && note instanceof Note) assignments.set(note, target);
+          }
         assignments.forEach((id, note) => {
           const target = spec.staves.findIndex((staff) => staff.id === id);
           if (target < 0) invalid(`Unknown cross-staff target: ${id}`);
@@ -634,7 +691,7 @@ export function compose(score: EasyScore, spec: EasyScoreCompositionSpec): EasyS
           policies.forEach((policy, staffIndex) =>
             applyCompositionAccidentals(
               score,
-              voices.flat(),
+              voices.flat().map((voice) => voice.getTickables()),
               policy.key,
               policy.changes,
               generated,
@@ -651,7 +708,8 @@ export function compose(score: EasyScore, spec: EasyScoreCompositionSpec): EasyS
         result.notes.push(notes);
       }
       result.spans = buildSpans(score, spec, noteMeasures, result.diagnostics);
-      if (spec.continuous) result.sheet.setContinuousLayout(new ContinuousLayout(result, spec, starts, ends, placed));
+      if (spec.continuous)
+        result.sheet.setContinuousLayout(new ContinuousLayout(result, spec, starts, ends, placed, grid?.interior));
       return result;
     });
   } catch (error) {

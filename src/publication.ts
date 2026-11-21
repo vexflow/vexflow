@@ -414,10 +414,11 @@ function semanticEvents(
             ? [
                 {
                   id: n.getAttribute('id'),
-                  measure,
+                  measure: score.meterPositions?.get(n)?.measure ?? measure,
                   staff: condense?.players[0] === spec.staves[j].id ? condense.players[voice] : spec.staves[j].id,
                   voice: condense?.players[0] === spec.staves[j].id ? 0 : voice,
-                  event,
+                  event: score.meterPositions?.get(n)?.event ?? event,
+                  ...(score.meterPositions && { onset: score.meterPositions.get(n)?.onset.toString() }),
                   keys: n.getKeys(),
                   ...(n.notation.length && { notation: n.notation }),
                   ticks: n.getTicks().toString(),

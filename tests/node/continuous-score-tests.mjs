@@ -1240,3 +1240,93 @@ test('rhythmic tuplet membership rejects gaps, reversed events, duplicate member
     assert.throws(() => factory().f.EasyScore().compose(source), /continuous tuplet/i);
   }
 });
+
+test('independent meters keep each staff’s pulse, local bars and source positions through a wrap', () => {
+  const { f, ctx, canvas } = factory();
+  const staves = [3, 4].map((beats, s) => ({
+    id: 'part' + s,
+    time: beats + '/4',
+    measures: Array.from({ length: 12 / beats }, (_, m) => ({
+      voices: [
+        {
+          notes: Array.from({ length: beats }, (_, i) => ({
+            id: s + '-' + (beats * m + i),
+            note: { keys: [['g/4', 'a/4', 'b/4'][i % 3]], duration: 'q' },
+          })),
+        },
+      ],
+    })),
+  }));
+  const score = f.EasyScore().compose({ staves, continuous: { independentMeters: true } });
+  const notes = staves.map((_, s) => Array.from({ length: 12 }, (_, i) => score.getNote(s + '-' + i)));
+  const quarter = VF.VexFlow.RESOLUTION / 4;
+  function render(width) {
+    score.sheet.setWidth(width);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    f.draw({ retain: true });
+    const bars = [[], []];
+    let pulses = 0;
+    score.notes.forEach((parts, i) => {
+      pulses += parts[0][0].length;
+      for (let s = 0; s < 2; s++) {
+        const bar = score.staves[i][s].getModifiers(VF.StaveModifier.Position.END, VF.Barline.CATEGORY)[0];
+        if (bar.getType() !== VF.Barline.type.NONE) bars[s].push(pulses);
+      }
+    });
+    assert.deepEqual(bars, [
+      [3, 6, 9, 12],
+      [4, 8, 12],
+    ]);
+    for (const [i, top] of notes[0].entries()) {
+      assert.equal(top.getAbsoluteX(), notes[1][i].getAbsoluteX());
+      for (const [s, group] of notes.entries()) {
+        const n = group[i],
+          beats = 3 + s,
+          pos = score.meterPositions.get(n);
+        assert.equal(score.getNote(s + '-' + i), n);
+        assert.equal(n.getTicks().value(), quarter);
+        assert.deepEqual(
+          [pos.staff, pos.measure, pos.event, pos.onset.value()],
+          ['part' + s, 1 + Math.floor(i / beats), i % beats, (i % beats) * quarter]
+        );
+      }
+    }
+    return canvas.toBuffer();
+  }
+  const wide = render(900);
+  assert.equal(score.sheet.getRows().length, 1);
+  assert.notDeepEqual(render(330), wide);
+  assert.equal(score.sheet.getRows().length, 2);
+  assert.notEqual(notes[0][5].getStave().getY(), notes[0][6].getStave().getY());
+  assert.deepEqual(render(900), wide);
+  assert.throws(() => factory().f.EasyScore().compose({ staves, continuous: {} }), /same number of measures/);
+  assert.throws(
+    () =>
+      factory()
+        .f.EasyScore()
+        .compose({
+          staves: [staves[0], { ...staves[1], measures: staves[1].measures.slice(1) }],
+          continuous: { independentMeters: true },
+        }),
+    /same total duration/
+  );
+});
+
+test('a held note survives a local barline on another staff', () => {
+  const { f } = factory();
+  const score = f.EasyScore().compose({
+    continuous: { independentMeters: true },
+    staves: [
+      { id: 'upper', time: '2/4', measures: [{ voices: [{ notes: 'C5/h' }] }, { voices: [{ notes: 'D5/h' }] }] },
+      {
+        id: 'lower',
+        time: '4/4',
+        measures: [{ voices: [{ notes: [{ id: 'held', note: { keys: ['g/4'], duration: 'w' } }] }] }],
+      },
+    ],
+  });
+  f.draw({ retain: true });
+  assert.equal(score.systems.length, 1);
+  assert.equal(score.getNote('held').getTicks().value(), VF.VexFlow.RESOLUTION);
+  assert.equal(score.meterPositions.get(score.notes[0][0][0][1]).measure, 2);
+});
