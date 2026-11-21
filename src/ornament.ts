@@ -1,7 +1,7 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // @author Cyril Silverman
 // MIT License
-// Places ornaments, accidental signs and written trill partners on their principal notes.
+// Places ornaments, editorial parentheses, accidentals and written trill partners on their principal notes.
 
 import { getBottomY, getInitialOffset, getTopY } from './articulation';
 import { BoundingBox } from './boundingbox';
@@ -45,6 +45,8 @@ export class Ornament extends Modifier {
   protected type: string;
 
   protected delayed: boolean;
+  /** Separate glyphs preserve the identity and alignment of the enclosed ornament. */
+  private parentheses?: [Element, Element];
   /** A written, untimed trill partner. Its column follows earlier right-hand modifiers. */
   private auxiliary?: { pitch: string; glyph: Element; headOffset: number; headWidth: number };
   private auxiliaryOffset = 0;
@@ -76,14 +78,16 @@ export class Ornament extends Modifier {
         ornament.auxiliaryOffset = rightShift;
         rightShift += ornament.auxiliary.glyph.getWidth() + Ornament.minPadding + 2;
       }
+      const markWidth = ornament.getWidth();
+      const sidePadding = (markWidth - ornament.width) / 2;
       if (ornament.position === ModifierPosition.RIGHT) {
-        ornament.sideOffset = rightShift + 2;
-        rightShift += ornament.width + Ornament.minPadding;
+        ornament.sideOffset = rightShift + sidePadding + 2;
+        rightShift += markWidth + Ornament.minPadding;
       } else if (ornament.position === ModifierPosition.LEFT) {
-        ornament.sideOffset = -(leftShift + ornament.width + 2);
-        leftShift += ornament.width + Ornament.minPadding;
+        ornament.sideOffset = -(leftShift + markWidth - sidePadding + 2);
+        leftShift += markWidth + Ornament.minPadding;
       } else if (ornament.position === ModifierPosition.ABOVE) {
-        width = Math.max(ornament.getWidth(), width);
+        width = Math.max(markWidth, width);
         const note = ornament.getNote() as StemmableNote;
         let curTop = note.getLineNumber(true) + state.topTextLine;
         const stem = note.getStem();
@@ -96,7 +100,7 @@ export class Ornament extends Modifier {
         ornament.setTextLine(state.topTextLine);
         state.topTextLine += increment;
       } else {
-        width = Math.max(ornament.getWidth(), width);
+        width = Math.max(markWidth, width);
         ornament.setTextLine(state.textLine);
         state.textLine += increment;
       }
@@ -216,6 +220,33 @@ export class Ornament extends Modifier {
     return this;
   }
 
+  /** Enclose an editorial ornament in round parentheses. Pass false to remove them. */
+  setParenthesized(parenthesized = true): this {
+    if (parenthesized) {
+      this.parentheses ??= [
+        new Element().setText(Glyphs.noteheadParenthesisLeft),
+        new Element().setText(Glyphs.noteheadParenthesisRight),
+      ];
+    } else {
+      this.parentheses = undefined;
+    }
+    return this;
+  }
+
+  /** Leave ink clearance on each side, scaled to the active music font. */
+  private get parenthesisGap(): number {
+    return this.fontSizeInPixels / 24;
+  }
+
+  /** Reserve symmetric space so that the ornament itself stays centered on its note. */
+  override getWidth(): number {
+    if (!this.parentheses) return this.width;
+    const [left, right] = this.parentheses.map((sign) => sign.setFont(this.fontInfo).getTextInk(0, 0).w);
+    const ink = this.getTextInk(-this.xShift, -this.yShift);
+    const margin = Math.max(left - ink.x, ink.x + ink.w - this.width + right) + this.parenthesisGap;
+    return this.width + 2 * Math.max(0, margin);
+  }
+
   /** Set the upper accidental for the ornament. */
   setUpperAccidental(accid: string): this {
     this.accidentalUpper = new Element();
@@ -313,6 +344,15 @@ export class Ornament extends Modifier {
       (this.position === ModifierPosition.ABOVE || this.position === ModifierPosition.BELOW ? this.width / 2 : 0);
     this.y = glyphY + offset;
     parts.push({ element: this, x: 0, y: 0 });
+    if (this.parentheses) {
+      const ink = this.getTextInk(this.x, this.y);
+      // Center the signs on the ornament's ink, even when their glyph baselines differ.
+      this.parentheses.forEach((element, side) => {
+        const sign = element.setFont(this.fontInfo).getTextInk(0, 0);
+        const edge = side === 0 ? ink.x - this.parenthesisGap - sign.w : ink.x + ink.w + this.parenthesisGap;
+        parts.push({ element, x: edge - sign.x, y: ink.y + (ink.h - sign.h) / 2 - sign.y });
+      });
+    }
     if (this.accidentalUpper) {
       parts.push({
         element: this.accidentalUpper,
@@ -357,7 +397,7 @@ export class Ornament extends Modifier {
     return lines;
   }
 
-  /** Include the trill sign, its accidentals and the complete pitched cue in layout. */
+  /** Measure the ornament and all of its visible signs together. */
   override getBoundingBox(): BoundingBox {
     const boxes = this.positionElements().flatMap(({ element, x, y }) => [
       element.getTextInk(x + element.getX(), y + element.getY()),

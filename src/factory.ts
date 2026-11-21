@@ -593,6 +593,7 @@ export class Factory {
       upperAccidental?: string;
       lowerAccidental?: string;
       auxiliaryPitch?: string;
+      parenthesized?: boolean;
       delayed?: boolean;
     }
   ) {
@@ -605,6 +606,7 @@ export class Factory {
     if (params?.position !== undefined) {
       ornament.setPosition(params.position);
     }
+    if (options.parenthesized) ornament.setParenthesized();
     if (options.auxiliaryPitch !== undefined) ornament.setAuxiliaryPitch(options.auxiliaryPitch);
     if (options.upperAccidental) {
       ornament.setUpperAccidental(options.upperAccidental);
