@@ -829,7 +829,7 @@
       "Annotation(params?: { text?: string; hJustify?: string | AnnotationHorizontalJustify; vJustify?: string | AnnotationVerticalJustify; font?: FontInfo; }): Annotation",
       "ChordSymbol(params?: { vJustify?: string; hJustify?: string; fontFamily?: string; fontSize?: number; fontWeight?: string; }): ChordSymbol",
       "Articulation(params?: { betweenLines?: boolean; type?: string; position?: string | number }): Articulation",
-      "Ornament(type: string, params?: { position?: string | number; upperAccidental?: string; lowerAccidental?: string; auxiliaryPitch?: string; delayed?: boolean; })",
+      "Ornament(type: string, params?: { position?: string | number; upperAccidental?: string; lowerAccidental?: string; auxiliaryPitch?: string; parenthesized?: boolean; delayed?: boolean; })",
       "TextDynamics(params?: Partial<TextNoteStruct>): TextDynamics",
       "Fingering(params: { number?: string; position?: string }): FretHandFinger",
       "StringNumber(params: { number: string; position: string }, drawCircle = true): StringNumber",
@@ -1572,6 +1572,8 @@
       "constructor(type: string)",
       "setNote(note: Note): this",
       "setDelayed(delayed: boolean): this",
+      "setParenthesized(parenthesized = true): this",
+      "getWidth(): number",
       "setUpperAccidental(accid: string): this",
       "setLowerAccidental(accid: string): this",
       "setAuxiliaryPitch(pitch?: string): this",
@@ -2034,6 +2036,7 @@
     "StaveHairpinRenderOptions": {
       "extends": [],
       "fields": [
+        "flared?: boolean;",
         "niente?: boolean;",
         "rightShiftTicks?: number;",
         "leftShiftTicks?: number;",

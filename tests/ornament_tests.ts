@@ -25,6 +25,7 @@ const OrnamentTests = {
   Start(): void {
     QUnit.module('Ornament');
     const run = VexFlowTests.runTests;
+    run('Parenthesized editorial turn', editorialTurn);
     run('Pitched trill partners', pitchedTrills);
     run('Changing a pitched trill partner', changeTrillPartner);
     run('Ornaments', drawOrnaments);
@@ -436,6 +437,60 @@ function jazzOrnaments(options: TestOptions): void {
     f.Ornament('doit'),
   ];
   draw(mods, ['e/4'], curX, width, curY);
+}
+
+/** Engrave two written Gs and measure the actual glyph calls on each backend. */
+function editorialTurn(options: TestOptions): void {
+  const f = VexFlowTests.makeFactory(options, 300, 155);
+  const ctx = f.getContext();
+  const stave = f.Stave({ x: 10, y: 30, width: 280 }).addClef('treble');
+  const notes = [0, 1].map(() => f.StaveNote({ keys: ['g/4'], duration: 'q', stemDirection: -1 }));
+  const bare = new Ornament('turn');
+  const marked = f.Ornament('turn', { parenthesized: true });
+  notes[0].addModifier(bare);
+  notes[1].addModifier(marked);
+  const voice = f.Voice({ time: '2/4' }).addTickables(notes);
+  f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+
+  const draw = () => {
+    const glyphs: { text: string; x: number; y: number }[] = [];
+    const fillText = ctx.fillText;
+    ctx.fillText = function (text, x, y) {
+      if (
+        [Glyphs.ornamentTurn, Glyphs.noteheadParenthesisLeft, Glyphs.noteheadParenthesisRight].includes(text as Glyphs)
+      )
+        glyphs.push({ text, x, y });
+      return fillText.call(this, text, x, y);
+    };
+    try {
+      ctx.clear();
+      stave.draw();
+      voice.draw(ctx, stave);
+    } finally {
+      ctx.fillText = fillText;
+    }
+    return glyphs;
+  };
+  const glyphs = draw();
+  options.assert.deepEqual(
+    glyphs.map((g) => g.text),
+    [Glyphs.ornamentTurn, Glyphs.ornamentTurn, Glyphs.noteheadParenthesisLeft, Glyphs.noteheadParenthesisRight],
+    'one bare turn and one enclosed turn'
+  );
+  const [turn, left, right] = glyphs
+    .slice(1)
+    .map(({ text, x, y }) => new Element().setFont(marked.fontInfo).setText(text).getTextInk(x, y));
+  const box = marked.getBoundingBox();
+  options.assert.ok(left.x + left.w < turn.x && turn.x + turn.w < right.x, 'both parentheses clear the turn');
+  options.assert.ok(box.y + box.h < notes[1].getYs()[0], 'enclosure stays above the written G');
+  options.assert.deepEqual(box, turn.mergeWith(left).mergeWith(right), 'bounds match the three painted signs');
+  options.assert.ok(marked.getWidth() > bare.getWidth(), 'formatting reserves room for the pair');
+  options.assert.strictEqual(marked.getNote(), notes[1], 'the editorial turn remains attached to its principal');
+  options.assert.deepEqual(draw(), glyphs, 'redrawing preserves every glyph position');
+  marked.setParenthesized(false);
+  options.assert.equal(draw().length, 2, 'removing the pair leaves the two turn glyphs');
+  marked.setParenthesized().setParenthesized();
+  options.assert.deepEqual(draw(), glyphs, 'the native setter restores exactly one pair');
 }
 
 /** A cue changes staff position and spelling without adding a tickable to the 3/4 voice. */

@@ -208,8 +208,9 @@ test('standalone gallery runs with local fonts/scripts and preserves QUnit filte
           await page.setViewport({ ...viewport, width: 390 });
           assert.ok(await page.$eval('#events', (menu) => menu.getBoundingClientRect().right <= window.innerWidth));
           await page.setViewport(viewport);
-          const marks = await page.$$eval('#score text', (texts) =>
-            texts
+          // Reflow can replace the SVG after a resize. Read styles while the selected nodes are still attached.
+          const marks = await page.evaluate(() =>
+            Array.from(document.querySelectorAll('#score text'))
               .filter((el) => ['T', 'full'].includes(el.textContent))
               .map((el) => [el.textContent, getComputedStyle(el).fontFamily.split(',')[0]])
           );

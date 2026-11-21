@@ -3,6 +3,7 @@ import type { Annotation } from './annotation';
 import { Bounds } from './boundingbox';
 import type { ContinuousBeam } from './continuousbeam';
 import { Element } from './element';
+import { drawFlaredHairpin } from './flaredhairpin';
 import { Glyphs } from './glyphs';
 import type { TiedBend } from './guitargesture';
 import { drawNienteTip, NienteTip } from './hairpintip';
@@ -30,6 +31,8 @@ export type ContinuousSpanKind =
   | 'palmMute';
 export interface ContinuousSpan {
   kind: ContinuousSpanKind;
+  /** Apply a flared aperture along the whole crescendo or diminuendo. */
+  flared?: boolean;
   /** Draw this pitch tie as a dashed arc, including its continuation fragments. */
   dashed?: boolean;
   /** Mark the closed musical endpoint of a crescendo or diminuendo with an open circle. */
@@ -71,6 +74,8 @@ export interface ResolvedSpan {
 export interface SpanFragment {
   id: string;
   kind: ContinuousSpanKind;
+  /** Apply a flared aperture along the whole crescendo or diminuendo. */
+  flared?: boolean;
   /** Draw this pitch tie as a dashed arc, including its continuation fragments. */
   dashed?: boolean;
   row: number;
@@ -225,9 +230,14 @@ export function drawSpan(ctx: RenderContext, f: SpanFragment, label?: Element, b
       return;
     }
     if (kind === 'crescendo' || kind === 'diminuendo') {
-      const [left, right] = f.progress.map((t) => space * 0.55 * (kind === 'crescendo' ? t : 1 - t));
-      line(x1, y1 - left, x2, y2 - right);
-      line(x1, y1 + left, x2, y2 + right);
+      const [start, end] = f.progress.map((t) => (kind === 'crescendo' ? t : 1 - t));
+      const halfHeight = space * 0.55;
+      if (f.flared) {
+        drawFlaredHairpin(ctx, { x: x1, y: y1, progress: start }, { x: x2, y: y2, progress: end }, halfHeight);
+      } else {
+        line(x1, y1 - halfHeight * start, x2, y2 - halfHeight * end);
+        line(x1, y1 + halfHeight * start, x2, y2 + halfHeight * end);
+      }
       if (f.nienteTip) drawNienteTip(ctx, f.nienteTip);
       return;
     }

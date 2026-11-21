@@ -1,12 +1,13 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
-// Text Note Tests
+// Exercise timed text, dynamics, and their alignment with staff notes.
 
 import { VexFlow } from '../src/vexflow';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
 import { Crescendo } from '../src/crescendo';
+import { Glyphs } from '../src/glyphs';
 import { Note } from '../src/note';
 import { Stave } from '../src/stave';
 import { TextNote } from '../src/textnote';
@@ -22,6 +23,7 @@ const TextNoteTests = {
     run('TextNote Formatting With Glyphs 1', formatTextGlyphs1);
     run('Crescendo', crescendo);
     run('Text Dynamics', textDynamics);
+    run('Timed piano and niente', timedNiente);
   },
 };
 
@@ -274,7 +276,60 @@ function textDynamics(options: TestOptions): void {
   const stave = f.Stave({ y: 40, width: width + Stave.defaultPadding });
   stave.drawWithStyle();
   voice.draw(f.getContext(), stave);
-  options.assert.ok(true);
+  options.assert.equal(
+    voice.getTickables()[0].getText(),
+    Glyphs.dynamicSforzando + Glyphs.dynamicForte + Glyphs.dynamicZ,
+    'A compound marking retains its three letters through measurement and formatting'
+  );
+}
+
+/** Reformat the same two voices and check the glyphs at the first and last attacks. */
+function timedNiente(options: TestOptions): void {
+  const { assert } = options;
+  const f = VexFlowTests.makeFactory(options, 500, 160);
+  const stave = f.Stave({ x: 10, y: 5, width: 460 }).addClef('treble').addTimeSignature('4/4');
+  const score = f.EasyScore();
+  const notes = score.notes('G4/q, A4, B4, G4');
+  const melody = score.voice(notes);
+  const piano = f.TextDynamics({ text: 'p', duration: 'q', line: 10 });
+  const niente = f.TextDynamics({ text: 'n', duration: 'q', line: 10 });
+  const dynamics = score.voice([piano, f.GhostNote({ duration: 'h' }), niente]);
+  const ctx = f.getContext();
+
+  function draw(width: number): number {
+    stave.setWidth(width);
+    const voices = [melody, dynamics];
+    f.Formatter().joinVoices(voices).formatToStave(voices, stave);
+    ctx.clear();
+    stave.drawWithStyle();
+    melody.draw(ctx, stave);
+
+    const letters: [string, number, number][] = [];
+    const fillText = ctx.fillText;
+    ctx.fillText = function (text, x, y) {
+      letters.push([text, x, y]);
+      return fillText.call(this, text, x, y);
+    };
+    try {
+      dynamics.draw(ctx, stave);
+    } finally {
+      ctx.fillText = fillText;
+    }
+    const baseline = stave.getYForLine(7);
+    assert.deepEqual(
+      letters,
+      [
+        [Glyphs.dynamicPiano, notes[0].getAbsoluteX(), baseline],
+        [Glyphs.dynamicNiente, notes[3].getAbsoluteX(), baseline],
+      ],
+      'Exactly one piano and one niente glyph on the same baseline at their notes'
+    );
+    return niente.getAbsoluteX();
+  }
+
+  const wide = draw(460);
+  assert.ok(draw(260) < wide, 'The final dynamic follows the final G as the stave narrows');
+  assert.equal(draw(460), wide, 'Restoring the width restores the niente position');
 }
 
 VexFlowTests.register(TextNoteTests);

@@ -71,7 +71,7 @@ system.getPhraseLayout().addVerse(stave, [
 factory.draw();
 ```
 
-Use `TextDynamics` for engraved dynamics such as *p* and *mf*. To share a standalone SVG, supply the music face and each text weight used on the page to the outline exporter. [Portable SVG export](portable-svg.md#font-faces-and-fallback)
+Use `TextDynamics` for engraved dynamics such as *p*, *mf*, and *n* (niente). For example, `factory.TextDynamics({ text: 'n', duration: 'q', line: 10 })` places the niente letter on the same baseline as other dynamics with `line: 10`. To share a standalone SVG, supply the music face and each text weight used on the page to the outline exporter. [Portable SVG export](portable-svg.md#font-faces-and-fallback)
 
 ## Two syllables on one note
 
