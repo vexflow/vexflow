@@ -487,6 +487,43 @@ test('default slope fitting preserves the chosen angle when several candidates h
   assert.ok(Math.abs(beam.slope - 0.15) < 1e-12);
 });
 
+test('French beaming leaves the gap open only at interior stems on uninterrupted strips', () => {
+  function fit(stem, pitches, options, automatic = false) {
+    const { f } = factory();
+    const es = f.EasyScore();
+    const notes = es.notes(pitches, { stem });
+    const beam = automatic ? es.autoBeam(notes, options)[0] : f.Beam({ notes, options });
+    const voice = es.voice(notes, { mode: 'soft' });
+    const system = f.System({ width: 360, y: 65 });
+    system.addStave({ voices: [voice] });
+    system.format();
+    beam.postFormat();
+    // The logical primary fit stays in place. Compare the actual drawn tip against that edge.
+    const insets = notes.map((note) => {
+      const { topY } = note.getStemExtents();
+      const inset = (note.getStemSegment().tipY - topY) * note.getStemDirection() - VF.Stem.WIDTH / 2;
+      return Math.round(inset * 1000) / 1000;
+    });
+    return { insets, width: beam.renderOptions.beamWidth, ticks: voice.getTicksUsed().value() };
+  }
+
+  for (const direction of ['up', 'down']) {
+    const pitches = 'G4/16, A4, B4, C5';
+    const { width, ticks, insets } = fit(direction, pitches, { frenchBeams: true }, true);
+    assert.equal(ticks, VF.VexFlow.RESOLUTION / 4);
+    assert.deepEqual(insets, [0, 1.5 * width, 1.5 * width, 0]);
+    assert.deepEqual(fit(direction, pitches, {}).insets, [0, 0, 0, 0]);
+    assert.deepEqual(fit(direction, 'G4/8, A4, B4, C5', { frenchBeams: true }).insets, [0, 0, 0, 0]);
+    assert.deepEqual(fit(direction, pitches, { frenchBeams: true, secondaryBeamBreaks: [1] }).insets, [0, 0, 0, 0]);
+
+    // A hook still hangs from its stem, even when the next strip runs through the note.
+    const mixed = fit(direction, 'G4/16, A4/32, B4/16, C5/8', { frenchBeams: true });
+    assert.deepEqual(mixed.insets, [0, 1.5 * width, 0, 0]);
+    const fan = fit(direction, pitches, { frenchBeams: true, feathered: 'right' });
+    assert.ok(fan.insets[1] > 0 && fan.insets[1] < fan.insets[2] && fan.insets[2] < 1.5 * width);
+  }
+});
+
 test('contour beams preserve membership, minimum stems, beamlet overrides and endpoints across widths', () => {
   for (const width of [190, 340, 790]) {
     for (const stem of ['up', 'down']) {

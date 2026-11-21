@@ -179,6 +179,8 @@ const beams = score.autoBeam(notes, {
 });
 ```
 
+Pass `{ frenchBeams: true }` to `score.beam(notes, options)` or `score.autoBeam(notes, options)` for French-style beaming. Interior stems stop at the beam nearest the heads. Stems at the ends of a strip still connect it to the outer beam. The same option is available on `factory.Beam({ notes, options })` and native `beam.renderOptions`.
+
 Without explicit groups, the native meter defaults apply. Use explicit groups to express asymmetric beats.
 Beam grouping never changes note durations. Rests, middle-only rests, stemlets, flat beams, secondary breaks, and native stem-direction options remain available.
 

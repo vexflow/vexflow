@@ -104,7 +104,7 @@ export class ContinuousBeam extends Beam {
     }
     if (piece.edges.left) piece.edges.left.x = left.getStemX() - left.checkStave().space(1.25);
     if (piece.edges.right) piece.edges.right.x = right.checkStave().getNoteEndX() - 2;
-    Object.assign(piece.beam.renderOptions, { feathered: undefined }, this.renderOptions);
+    Object.assign(piece.beam.renderOptions, { feathered: undefined, frenchBeams: undefined }, this.renderOptions);
     piece.beam.postFormat();
     return piece;
   }

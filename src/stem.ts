@@ -176,8 +176,9 @@ export class Stem extends Element {
     this.renderHeightAdjustment = Metrics.get('Stem.heightAdjustmentForFlag', -3);
   }
 
-  adjustHeightForBeam(): void {
-    this.renderHeightAdjustment = -Stem.WIDTH / 2;
+  /** Inset the drawn tip into the chosen beam strip while retaining the primary beam fit. */
+  adjustHeightForBeam(inset = 0): void {
+    this.renderHeightAdjustment = -Stem.WIDTH / 2 - inset;
   }
 
   /** Endpoints of the visible segment, including stemlets and flag shortening. */
