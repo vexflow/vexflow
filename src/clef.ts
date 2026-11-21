@@ -33,6 +33,9 @@ const octaveGlyphs = new Map<string, Map<string, string>>([
   ],
 ]);
 
+/** These composite glyphs can have annotation ink outside their advance. */
+const doubleOctaveGlyphs = new Set<string>([Glyphs.gClef15ma, Glyphs.gClef15mb, Glyphs.fClef15ma, Glyphs.fClef15mb]);
+
 // eslint-disable-next-line
 function L(...args: any[]) {
   if (Clef.DEBUG) log('VexFlow.Clef', args);
@@ -206,6 +209,14 @@ export class Clef extends StaveModifier {
   /** Positioned glyph ink, including an octave annotation if present. */
   getInkBounds(): BoundingBox {
     return this.getTextInk(this.getX(), this.getGlyphY());
+  }
+
+  /** The “15” can extend beyond the advance width in some fonts. Include its actual ink in hit testing. */
+  override getBoundingBox(): BoundingBox {
+    if (this.stave && doubleOctaveGlyphs.has(this.code)) {
+      return this.getInkBounds();
+    }
+    return super.getBoundingBox();
   }
 
   /** Render clef. */

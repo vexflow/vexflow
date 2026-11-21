@@ -47,7 +47,7 @@ function measureBoundaries(options: TestOptions): void {
         x: 12 + index * width,
         y: 6 + row * 108,
         width,
-        options: row ? { barlineSpan: { top: 1, bottom: 3 } } : {},
+        options: { leftBar: index === 0, barlineSpan: row ? { top: 1, bottom: 3 } : undefined },
       });
       const type = Barline.typeString[style];
       stave.setEndBarType(type);
