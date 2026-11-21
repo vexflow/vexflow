@@ -15,6 +15,9 @@ export class FluteFingering extends Annotation {
 
   constructor(states: Partial<Record<FluteKey, FluteKeyState>>, { scale = 1 }: { scale?: number } = {}) {
     super('');
+    if (!states || typeof states !== 'object' || Array.isArray(states)) {
+      throw new TypeError('Expected a map of named flute keys to open or closed states.');
+    }
     if (!Number.isFinite(scale) || scale <= 0) throw new RangeError('Expected a positive flute diagram scale.');
     this.scale = scale;
     const normalized: Record<FluteKey, FluteKeyState> = {
@@ -45,12 +48,17 @@ export class FluteFingering extends Annotation {
 
   /** Include the left-hand labels and the offset right-hand circles in note spacing. */
   override getWidth(): number {
-    return 26 * this.scale;
+    return 28 * this.scale;
   }
 
   /** Allow five key intervals, a larger hand break and the outer edges of the circles. */
   protected override getLayoutHeight(): number {
     return 64 * this.scale;
+  }
+
+  /** Full diagram height in renderer pixels. */
+  override getHeight(): number {
+    return this.getLayoutHeight();
   }
 
   /** Use the diagram's lower edge as the baseline for annotation and tuplet layout. */
@@ -71,7 +79,7 @@ export class FluteFingering extends Annotation {
     const rightHand = index >= 3;
     const box = this.getBoundingBox();
     return {
-      x: box.x + (rightHand ? 21.5 : 15.5) * this.scale,
+      x: box.x + (rightHand ? 23.5 : 17.5) * this.scale,
       y: box.y + (4.5 + 10 * index + (rightHand ? 5 : 0)) * this.scale,
     };
   }
@@ -96,7 +104,7 @@ export class FluteFingering extends Annotation {
     ctx.setLineWidth(this.scale);
     for (const key of keys) {
       const { x, y } = this.getKeyCenter(key);
-      ctx.fillText(key, x - 15.5 * this.scale, y + 2.8 * this.scale);
+      ctx.fillText(key, x - 17.5 * this.scale, y + 2.8 * this.scale);
       this.drawKey(ctx, key, x, y, 4 * this.scale);
     }
     ctx.restore();
