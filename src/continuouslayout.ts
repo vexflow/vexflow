@@ -335,6 +335,7 @@ export class ContinuousLayout {
       )
         invalid('Expected a unique span ID and ordered composition anchors.');
       let spec = { ...span };
+      if (span.wavy && span.kind !== 'glissando') invalid('A wavy slide needs a glissando span.');
       if (span.flared && span.kind !== 'crescendo' && span.kind !== 'diminuendo')
         invalid('A flared profile needs a crescendo or diminuendo span.');
       if (span.dashed && span.kind !== 'tie') invalid('A dashed tie needs a tie span.');
@@ -966,6 +967,7 @@ export class ContinuousLayout {
       y1,
       y2,
       progress: [0, 1],
+      ...(s.spec.wavy && { wavy: true }),
       ...(s.spec.flared && { flared: true }),
       ...(s.spec.dashed && { dashed: true }),
       ...((kind === 'palmMute' || s.spec.string !== undefined) && {

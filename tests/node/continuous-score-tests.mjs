@@ -966,6 +966,76 @@ test('straight glissandi preserve direction and selected head clearance through 
   }
 });
 
+test('wavy glissandi fit whole waves normal to the pitch line through a break and rejoin', () => {
+  for (const descending of [false, true]) {
+    const source = glissandoStudy(descending);
+    source.continuous.spans[0].wavy = true;
+    const { f, ctx, canvas } = factory();
+    const score = f.EasyScore().compose(source);
+    const layout = score.sheet.getContinuousLayout();
+    const render = (width, parts) => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      score.sheet.setWidth(width);
+      f.draw({ retain: true });
+      assert.deepEqual(
+        layout.fragments.map((segment) => segment.part),
+        parts
+      );
+      assert.deepEqual(layout.diagnostics, []);
+      const paths = [];
+      layout.draw({
+        save() {},
+        restore() {},
+        beginPath() {},
+        stroke() {},
+        moveTo(x, y) {
+          paths.push([[x, y]]);
+        },
+        quadraticCurveTo(...points) {
+          paths.at(-1).push(points);
+        },
+      });
+      assert.equal(paths.length, parts.length);
+      for (const [i, segment] of layout.fragments.entries()) {
+        const { x1, x2, y1, y2, space } = segment;
+        const [start, ...halves] = paths[i];
+        assert.equal(segment.wavy, true);
+        assert.deepEqual(start, [x1, y1]);
+        assert.deepEqual(halves.at(-1).slice(2), [x2, y2]);
+        assert.ok(halves.length >= 2 && halves.length % 2 === 0);
+        const length = Math.hypot(x2 - x1, y2 - y1);
+        const tx = (x2 - x1) / length,
+          ty = (y2 - y1) / length;
+        assert.equal(Math.sign(ty), descending ? 1 : -1);
+        let previous = start;
+        for (const [index, [cx, cy, x, y]] of halves.entries()) {
+          // At the middle of a quadratic the crest is halfway to the control point from the chord.
+          const ox = (cx - (previous[0] + x) / 2) / 2,
+            oy = (cy - (previous[1] + y) / 2) / 2;
+          assert.ok(Math.abs(ox * tx + oy * ty) < 1e-8);
+          assert.ok(Math.hypot(ox, oy) > space * 0.1 && Math.hypot(ox, oy) <= space * 0.19);
+          assert.equal(Math.sign(tx * oy - ty * ox), index % 2 === 0 ? -1 : 1);
+          previous = [x, y];
+        }
+      }
+      const first = layout.fragments[0],
+        last = layout.fragments.at(-1);
+      const from = score.getNote('from'),
+        to = score.getNote('to');
+      const head = from.getHeadInk()[1];
+      assert.ok(first.x1 > head.x + head.w && last.x2 < to.getHeadInk()[0].x);
+      assert.equal(first.y1, from.getYs()[1]);
+      assert.equal(last.y2, to.getYs()[0]);
+      return { paths, pixels: canvas.toBuffer() };
+    };
+    const wide = render(520, ['single']);
+    const compact = render(320, ['single']);
+    assert.ok(wide.paths[0].length > compact.paths[0].length);
+    render(150, ['first', 'last']);
+    assert.deepEqual(render(520, ['single']), wide);
+  }
+});
+
 test('a glissando retains its pitch progression through an intermediate row and a repeated bass clef', () => {
   const source = glissandoStudy();
   source.staves[0].measures.splice(1, 0, {
