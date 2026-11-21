@@ -829,7 +829,7 @@
       "Annotation(params?: { text?: string; hJustify?: string | AnnotationHorizontalJustify; vJustify?: string | AnnotationVerticalJustify; font?: FontInfo; }): Annotation",
       "ChordSymbol(params?: { vJustify?: string; hJustify?: string; fontFamily?: string; fontSize?: number; fontWeight?: string; }): ChordSymbol",
       "Articulation(params?: { betweenLines?: boolean; type?: string; position?: string | number }): Articulation",
-      "Ornament(type: string, params?: { position?: string | number; upperAccidental?: string; lowerAccidental?: string; delayed?: boolean })",
+      "Ornament(type: string, params?: { position?: string | number; upperAccidental?: string; lowerAccidental?: string; auxiliaryPitch?: string; delayed?: boolean; })",
       "TextDynamics(params?: Partial<TextNoteStruct>): TextDynamics",
       "Fingering(params: { number?: string; position?: string }): FretHandFinger",
       "StringNumber(params: { number: string; position: string }, drawCircle = true): StringNumber",
@@ -842,7 +842,7 @@
       "Tuplet(params?: { notes?: Note[]; options?: TupletOptions }): Tuplet",
       "Beam(params: { notes: StemmableNote[]; options?: { autoStem?: boolean; feathered?: FeatheredBeamDirection; secondaryBeamBreaks?: number[]; partialBeamDirections?: { [noteIndex: number]: PartialBeamDirection; }; }; }): Beam",
       "Curve(params: { from: Note | undefined; to: Note | undefined; options: CurveOptions }): Curve",
-      "StaveTie(params: { from?: Note | null; to?: Note | null; firstIndexes?: number[]; lastIndexes?: number[]; text?: string; options?: { direction?: number }; }): StaveTie",
+      "StaveTie(params: { from?: Note | null; to?: Note | null; firstIndexes?: number[]; lastIndexes?: number[]; text?: string; options?: { direction?: number; laissezVibrer?: number }; }): StaveTie",
       "StaveLine(params: { from: StaveNote; to: StaveNote; firstIndexes: number[]; lastIndexes: number[]; options?: { text?: string; font?: FontInfo }; }): StaveLine",
       "VibratoBracket(params: { from: Note | null; to: Note | null; options: { code?: number; line?: number; }; }): VibratoBracket",
       "TextBracket(params: { from: Note; to: Note; text: string; options: { superscript: string; position: string; line?: number; font?: FontInfo; }; }): TextBracket",
@@ -1548,6 +1548,7 @@
       "setDelayed(delayed: boolean): this",
       "setUpperAccidental(accid: string): this",
       "setLowerAccidental(accid: string): this",
+      "setAuxiliaryPitch(pitch?: string): this",
       "setLayoutShiftY(y: number): void",
       "getBoundingBox(): BoundingBox",
       "draw(): void"
@@ -2238,6 +2239,7 @@
     "TieNotes": {
       "extends": [],
       "fields": [
+        "laissezVibrer?: number;",
         "firstNote?: Note | null;",
         "lastNote?: Note | null;",
         "firstIndexes?: number[];",
@@ -2264,6 +2266,7 @@
       "getFirstYs(): number[]",
       "getLastYs(): number[]",
       "synchronizeIndexes(): void",
+      "getBoundingBox(): BoundingBox",
       "draw(): boolean"
     ]
   },
