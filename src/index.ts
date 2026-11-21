@@ -38,6 +38,8 @@ export * from './gracenote';
 export * from './gracenotegroup';
 export * from './gracetabnote';
 export * from './harppedalchanges';
+export * from './harppedaldiagram';
+export * from './harppedals';
 export * from './keymanager';
 export * from './keysignature';
 export * from './keysignote';

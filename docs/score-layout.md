@@ -23,6 +23,21 @@ It uses the annotations' computed positions, so drawing order does not matter.
 - Explicit annotation baselines and vertical shifts are respected.
 - This is not a general collision solver for every modifier or unrelated voice.
 
+## Concert harp pedals
+
+Attach a complete setting to the note or rest where the player needs it.
+
+```js
+const pedals = { D: 'natural', C: 'sharp', B: 'flat', E: 'natural', F: 'sharp', G: 'natural', A: 'flat' };
+entrance.addModifier(new HarpPedalDiagram(pedals), 0);
+nextEntrance.addModifier(new HarpPedalDiagram({ ...pedals, F: 'natural' }), 0);
+```
+
+The music font supplies the joined rail, the divider between B and E, and the seven ticks.
+Flat points up, natural crosses the rail, and sharp points down.
+The diagram reserves space above its anchor. Use `{ scale: 1.5 }` as the second constructor argument for a larger diagram.
+After formatting, `getBoundingBox()` measures its ink at the current note position.
+
 ## Bounds before drawing
 
 `GraceNoteGroup.getBoundingBox()` works after formatting the parent note.
