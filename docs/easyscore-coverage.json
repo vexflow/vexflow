@@ -1,7 +1,16 @@
 {
   "description": "Every public module is classified. Every named EasyScore constructor has a native return path, guide entry, executable example, and regression contract. The API snapshot detects native option drift; rendering tests cover representative combinations, not every possible combination.",
   "modules": {
-    "instrument-profiles": ["alternatingtremolo", "fretdiagram", "instrumentprofile", "notationspelling"],
+    "instrument-profiles": [
+      "accordionregister",
+      "alternatingtremolo",
+      "fretdiagram",
+      "harppedalchanges",
+      "harppedaldiagram",
+      "harppedals",
+      "instrumentprofile",
+      "notationspelling"
+    ],
     "composition": ["easyscore", "factory", "system", "phraselayout", "continuouslayout", "scorenavigation", "publication", "sheet", "voice", "formatter", "registry"],
     "notes-and-rhythm": [
       "stavenote",
