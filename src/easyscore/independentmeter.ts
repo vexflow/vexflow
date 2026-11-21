@@ -46,18 +46,27 @@ function invalid(message: string): never {
   throw new RuntimeError('BadComposition', message);
 }
 
-/** Read each source bar once and keep the exact local onset of every attack. */
-function readStaff(
-  staff: EasyScoreStaveSpec,
-  materialize: (bar: EasyScoreMeasureSpec, initial: State) => { voices: Tickable[][]; end: State },
-  positions: Map<Tickable, MeterPosition>
-): LocalBar[] {
-  let state: State = {
+/** Initial written state before the first local measure applies its own changes. */
+export function initialStaffState(staff: EasyScoreStaveSpec): State {
+  return {
     clef: staff.clef ?? (staff.kind === 'tab' ? 'tab' : 'treble'),
     time: staff.time ?? '4/4',
     key: staff.key ?? 'C',
     showTimeSignature: staff.showTimeSignature ?? true,
   };
+}
+
+/** Read each source bar once and keep the exact local onset of every attack. */
+function readStaff(
+  staff: EasyScoreStaveSpec,
+  materialize: (
+    bar: EasyScoreMeasureSpec,
+    initial: State,
+    measureIndex: number
+  ) => { voices: Tickable[][]; end: State },
+  positions: Map<Tickable, MeterPosition>
+): LocalBar[] {
+  let state = initialStaffState(staff);
   const cursor = new Fraction(0, 1);
   return staff.measures.map((spec, m) => {
     const initial = {
@@ -66,7 +75,7 @@ function readStaff(
       time: spec.time ?? state.time,
       showTimeSignature: spec.showTimeSignature ?? state.showTimeSignature,
     };
-    const { voices, end } = materialize(spec, initial);
+    const { voices, end } = materialize(spec, initial, m);
     state = end;
     const duration = new Voice(spec.span ?? initial.time).getTotalTicks();
     const start = cursor.value();
@@ -151,10 +160,20 @@ function windowMeasure(bars: LocalBar[], start: number, end: number, interior: I
 }
 
 /** Build shared cuts from the union of real barlines. Spanning notes keep their written durations. */
-export function independentMeterGrid(spec: EasyScoreCompositionSpec, materialize: Parameters<typeof readStaff>[1]) {
+export function independentMeterGrid(
+  spec: EasyScoreCompositionSpec,
+  materialize: (
+    staffIndex: number,
+    bar: EasyScoreMeasureSpec,
+    initial: State,
+    measureIndex: number
+  ) => { voices: Tickable[][]; end: State }
+) {
   const positions = new Map<Tickable, MeterPosition>();
   const interior: InteriorBar[] = [];
-  const parts = spec.staves.map((staff) => readStaff(staff, materialize, positions));
+  const parts = spec.staves.map((staff, j) =>
+    readStaff(staff, (bar, initial, m) => materialize(j, bar, initial, m), positions)
+  );
   const total = parts[0]?.[parts[0].length - 1]?.end;
   if (!total || parts.some((bars) => bars[bars.length - 1]?.end !== total))
     invalid('Independent staves must cover the same total duration.');

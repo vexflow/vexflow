@@ -24,7 +24,7 @@ import { Tickable } from '../tickable';
 import { Tuplet, TupletOptions } from '../tuplet';
 import { RuntimeError } from '../util';
 import { Voice, VoiceTime } from '../voice';
-import { independentMeterGrid, InteriorBar, MeterPosition } from './independentmeter';
+import { independentMeterGrid, initialStaffState, InteriorBar, MeterPosition } from './independentmeter';
 import { applyCompositionAccidentals, KeyChange } from './policies';
 import { EasyScoreAutoBeamOptions } from './rhythm';
 
@@ -442,6 +442,28 @@ function measureState(measure: EasyScoreMeasureSpec, previous: Required<EasyScor
   };
 }
 
+/** Reuse the timed tuplet members when materializing either a local bar or a shared formatting window. */
+function measureVoices(
+  score: EasyScore,
+  measure: EasyScoreMeasureSpec,
+  state: Required<EasyScoreStaffState>,
+  prepared?: BuiltVoice[]
+) {
+  const built =
+    prepared ?? measure.voices.map((voice, voiceIndex) => buildVoice(score, voice, state, voiceIndex === 0));
+  if (prepared) {
+    prepared.forEach((voice, i) =>
+      autoBeamVoice(
+        score,
+        measure.voices[i],
+        voice.notes.filter((n) => !n.shouldIgnoreTicks()),
+        state.time
+      )
+    );
+  }
+  return built;
+}
+
 /** Build one staff measure before joining it to the shared native System. */
 function buildStaffMeasure(
   score: EasyScore,
@@ -458,18 +480,7 @@ function buildStaffMeasure(
   const state = measureState(measure, previous);
   const span = measure.span ?? state.time;
   const ticks = ticksFor(span);
-  const built =
-    prepared ?? measure.voices.map((voice, voiceIndex) => buildVoice(score, voice, state, voiceIndex === 0));
-  if (prepared) {
-    prepared.forEach((voice, i) =>
-      autoBeamVoice(
-        score,
-        measure.voices[i],
-        voice.notes.filter((n) => !n.shouldIgnoreTicks()),
-        state.time
-      )
-    );
-  }
+  const built = measureVoices(score, measure, state, prepared);
   const changes = stateChanges(built[0]);
   const signature = (items: ReturnType<typeof stateChanges>) =>
     JSON.stringify(items.map(({ at, state }) => [at.clone().simplify().toString(), state]));
@@ -572,9 +583,10 @@ export function compose(score: EasyScore, spec: EasyScoreCompositionSpec): EasyS
   return score.build(() => {
     const assignments = new Map<Note, string>();
     const placed = new Set<Accidental>();
-    const grid = independentMeterGrid(spec, (bar, initial) => {
+    const prepared = prepareTupletVoices(score, spec, spec.staves.map(initialStaffState));
+    const grid = independentMeterGrid(spec, (j, bar, initial, m) => {
       if (!bar.voices.length) invalid('Every stave measure needs at least one voice.');
-      const built = bar.voices.map((v, i) => buildVoice(score, v, initial, i === 0));
+      const built = measureVoices(score, bar, initial, prepared?.[j][m]);
       const voices = built.map((v) => v.notes);
       for (const v of built) v.assignments.forEach((staff, note) => assignments.set(note, staff));
       if (spec.accidentals === 'key-aware') {
@@ -635,17 +647,12 @@ function composeAligned(
           message:
             'Signatures appear at the first measure and explicit changes. Sheet does not repeat them at wrapped row starts.',
         });
-      const states = spec.staves.map((stave) => ({
-        clef: stave.clef ?? (stave.kind === 'tab' ? 'tab' : 'treble'),
-        key: stave.key ?? 'C',
-        time: stave.time ?? '4/4',
-        showTimeSignature: stave.showTimeSignature ?? true,
-      }));
+      const states = spec.staves.map(initialStaffState);
       const starts: Required<EasyScoreStaffState>[][] = [],
         ends: Required<EasyScoreStaffState>[][] = [];
       const placed = grid?.placed ?? (spec.continuous ? new Set<Accidental>() : undefined);
       const noteMeasures = new Map<Note, number>();
-      const prepared = prepareTupletVoices(score, spec, states);
+      const prepared = grid ? undefined : prepareTupletVoices(score, spec, states);
       for (let index = 0; index < count; index++) {
         starts.push(spec.staves.map((staff, j) => measureState(staff.measures[index], states[j])));
         const system = result.sheet.addSystem(spec.system);

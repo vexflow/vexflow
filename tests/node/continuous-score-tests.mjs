@@ -1330,3 +1330,32 @@ test('a held note survives a local barline on another staff', () => {
   assert.equal(score.getNote('held').getTicks().value(), VF.VexFlow.RESOLUTION);
   assert.equal(score.meterPositions.get(score.notes[0][0][0][1]).measure, 2);
 });
+
+test('cross-bar tuplet timing precedes alignment to an independently metered staff', () => {
+  const source = sextupletStudy();
+  source.continuous.independentMeters = true;
+  source.staves.push({
+    id: 'pulse',
+    time: '2/4',
+    measures: Array.from({ length: 4 }, () => ({
+      voices: [{ notes: 'G4/q, G4/q' }],
+    })),
+  });
+  const { f } = factory();
+  const score = f.EasyScore().compose(source);
+  const written = source.continuous.tuplets[0].members.map((id) => score.getNote(id));
+  for (const width of [530, 290, 530]) {
+    score.sheet.setWidth(width);
+    f.draw({ retain: true });
+    assert.deepEqual(
+      written.map((n) => n.getTupletStack().length),
+      Array(6).fill(1)
+    );
+    assert.deepEqual(
+      written.map((n) => score.meterPositions.get(n).measure),
+      [1, 1, 1, 2, 2, 2]
+    );
+    assert.ok(written.every((n) => n.getTicks().equals(new VF.Fraction(VF.VexFlow.RESOLUTION / 4, 3))));
+    assert.ok(score.meterPositions.get(score.getNote('next')).onset.equals(VF.VexFlow.RESOLUTION / 4));
+  }
+});
