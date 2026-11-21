@@ -561,6 +561,8 @@ The opt-in policy:
 - Shows both signs for conflicting simultaneous spellings. The next occurrence also gets a sign.
 
 Grace-note accidentals retain their explicit native notation. The policy does not rewrite grace groups.
+For an editorial sharp, attach `new Accidental('#').setAsCautionary('brackets')` to the selected chord-head index with `note.addModifier(sign, index)`. The sign keeps its accidental type for pitch handling. Calling `setAsCautionary()` uses round parentheses.
+
 The native `Accidental.applyAccidentals()` API remains unchanged.
 
 ### Reflow and spans
