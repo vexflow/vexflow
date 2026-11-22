@@ -900,6 +900,7 @@
       "GraceTabNote(options: TabNoteStruct): GraceTabNote",
       "StaveNote(noteStruct: StaveNoteStruct): StaveNote",
       "GermanLuteNote(spec: GermanLuteNoteStruct): GermanLuteNote",
+      "KievanNote(spec: KievanNoteStruct): KievanNote",
       "GlyphNote(glyph: string, noteStruct: NoteStruct, options?: GlyphNoteOptions): GlyphNote",
       "RepeatNote(type: string, noteStruct?: NoteStruct, options?: GlyphNoteOptions): RepeatNote",
       "GhostNote(noteStruct: string | NoteStruct): GhostNote",
@@ -1389,6 +1390,22 @@
       "addToModifierContext(mc: ModifierContext): this",
       "preFormat(): this",
       "draw(): void"
+    ]
+  },
+  "kievannote": {
+    "KievanNoteStruct": {
+      "extends": [],
+      "fields": [
+        "pitch: string;",
+        "duration: string;"
+      ]
+    },
+    "KievanNote": [
+      "CATEGORY(): string",
+      "constructor({ pitch, duration }: KievanNoteStruct)",
+      "setPitch(pitch: string): this",
+      "setStave(stave: Stave): this",
+      "preFormat(): this"
     ]
   },
   "metrics": {
@@ -2208,7 +2225,7 @@
     ]
   },
   "staveconnector": {
-    "StaveConnectorType": "export type StaveConnectorType = | 'singleRight' | 'singleLeft' | 'single' | 'double' | 'brace' | 'bracket' | 'boldDoubleLeft' | 'boldDoubleRight' | 'thinDouble' | 'none' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;",
+    "StaveConnectorType": "export type StaveConnectorType = | 'singleRight' | 'singleLeft' | 'single' | 'double' | 'brace' | 'bracket' | 'boldDoubleLeft' | 'boldDoubleRight' | 'mensurstrich' | 'thinDouble' | 'none' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;",
     "StaveConnector": [
       "CATEGORY(): string",
       "type: Record<string, Exclude<StaveConnectorType, string>>",
@@ -2338,6 +2355,7 @@
         "extends NoteStruct"
       ],
       "fields": [
+        "whiteMensural?: boolean;",
         "restLine?: number;",
         "musicFont?: string;",
         "engraving?: EngravingProfile;",
@@ -2761,6 +2779,7 @@
       "getWidth(): number",
       "setContext(context: RenderContext): this",
       "addConnector(type: StaveConnectorType = 'double'): StaveConnector",
+      "addMensurstriche(): StaveConnector[]",
       "addStave(params: SystemStave): Stave",
       "addVoices(voices: Voice[])",
       "getPhraseLayout(): PhraseLayout",
@@ -3129,7 +3148,7 @@
     "isStaveNote": "inferred",
     "isStemmableNote": "inferred",
     "isTabNote": "inferred",
-    "Category": "export const enum Category { Accidental = 'Accidental', Annotation = 'Annotation', Articulation = 'Articulation', Barline = 'Barline', BarNote = 'BarNote', Beam = 'Beam', Bend = 'Bend', ChordSymbol = 'ChordSymbol', Clef = 'Clef', ClefNote = 'ClefNote', Crescendo = 'Crescendo', Curve = 'Curve', Dot = 'Dot', Element = 'Element', FiguredBass = 'FiguredBass', Flag = 'Flag', Fraction = 'Fraction', FrenchLuteNote = 'FrenchLuteNote', FretDiagram = 'FretDiagram', FretHandFinger = 'FretHandFinger', GermanLuteNote = 'GermanLuteNote', GhostNote = 'GhostNote', Glyph = 'Glyph', GlyphNote = 'GlyphNote', GraceNote = 'GraceNote', GraceNoteGroup = 'GraceNoteGroup', GraceTabNote = 'GraceTabNote', KeySignature = 'KeySignature', KeySigNote = 'KeySigNote', Modifier = 'Modifier', MultiMeasureRest = 'MultiMeasureRest', Note = 'Note', NoteHead = 'NoteHead', NoteSubGroup = 'NoteSubGroup', Ornament = 'Ornament', Parenthesis = 'Parenthesis', PedalMarking = 'PedalMarking', RenderContext = 'RenderContext', RepeatNote = 'RepeatNote', Repetition = 'Repetition', Stave = 'Stave', StaveConnector = 'StaveConnector', StaveHairpin = 'StaveHairpin', StaveLine = 'StaveLine', StaveModifier = 'StaveModifier', StaveNote = 'StaveNote', StaveSection = 'StaveSection', StaveTempo = 'StaveTempo', StaveText = 'StaveText', StaveTie = 'StaveTie', Stem = 'Stem', StemmableNote = 'StemmableNote', StringNumber = 'StringNumber', Stroke = 'Stroke', System = 'System', TabNote = 'TabNote', TabSlide = 'TabSlide', TabStave = 'TabStave', TabTie = 'TabTie', TextBracket = 'TextBracket', TextDynamics = 'TextDynamics', TextNote = 'TextNote', Tickable = 'Tickable', TimeSignature = 'TimeSignature', TimeSigNote = 'TimeSigNote', Tremolo = 'Tremolo', Tuplet = 'Tuplet', Vibrato = 'Vibrato', VibratoBracket = 'VibratoBracket', Voice = 'Voice', Volta = 'Volta', }"
+    "Category": "export const enum Category { Accidental = 'Accidental', Annotation = 'Annotation', Articulation = 'Articulation', Barline = 'Barline', BarNote = 'BarNote', Beam = 'Beam', Bend = 'Bend', ChordSymbol = 'ChordSymbol', Clef = 'Clef', ClefNote = 'ClefNote', Crescendo = 'Crescendo', Curve = 'Curve', Dot = 'Dot', Element = 'Element', FiguredBass = 'FiguredBass', Flag = 'Flag', Fraction = 'Fraction', FrenchLuteNote = 'FrenchLuteNote', FretDiagram = 'FretDiagram', FretHandFinger = 'FretHandFinger', GermanLuteNote = 'GermanLuteNote', GhostNote = 'GhostNote', Glyph = 'Glyph', GlyphNote = 'GlyphNote', GraceNote = 'GraceNote', GraceNoteGroup = 'GraceNoteGroup', GraceTabNote = 'GraceTabNote', KeySignature = 'KeySignature', KeySigNote = 'KeySigNote', KievanNote = 'KievanNote', Modifier = 'Modifier', MultiMeasureRest = 'MultiMeasureRest', Note = 'Note', NoteHead = 'NoteHead', NoteSubGroup = 'NoteSubGroup', Ornament = 'Ornament', Parenthesis = 'Parenthesis', PedalMarking = 'PedalMarking', RenderContext = 'RenderContext', RepeatNote = 'RepeatNote', Repetition = 'Repetition', Stave = 'Stave', StaveConnector = 'StaveConnector', StaveHairpin = 'StaveHairpin', StaveLine = 'StaveLine', StaveModifier = 'StaveModifier', StaveNote = 'StaveNote', StaveSection = 'StaveSection', StaveTempo = 'StaveTempo', StaveText = 'StaveText', StaveTie = 'StaveTie', Stem = 'Stem', StemmableNote = 'StemmableNote', StringNumber = 'StringNumber', Stroke = 'Stroke', System = 'System', TabNote = 'TabNote', TabSlide = 'TabSlide', TabStave = 'TabStave', TabTie = 'TabTie', TextBracket = 'TextBracket', TextDynamics = 'TextDynamics', TextNote = 'TextNote', Tickable = 'Tickable', TimeSignature = 'TimeSignature', TimeSigNote = 'TimeSigNote', Tremolo = 'Tremolo', Tuplet = 'Tuplet', Vibrato = 'Vibrato', VibratoBracket = 'VibratoBracket', Voice = 'Voice', Volta = 'Volta', }"
   },
   "util": {
     "RuntimeError": [
@@ -3287,6 +3306,7 @@
       "KeySignature",
       "KeySignaturePresets",
       "KeySigNote",
+      "KievanNote",
       "Modifier",
       "ModifierContext",
       "MultiMeasureRest",
