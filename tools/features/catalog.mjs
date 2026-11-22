@@ -260,6 +260,13 @@ export const sections = [
     description: 'Write for strings, frets, and drum kits in the notation each player expects.',
     entries: [
       [
+        'guitar-tab',
+        'Guitar tablature',
+        'Read fret numbers on the strings and the picking rhythm underneath. High Wire marks hammer-ons, taps, pull-offs, and a full bend.',
+        'case-6a29cd24f475eb94',
+        'guitar tab hammer-on pull-off tapping',
+      ],
+      [
         'horizontal-frames',
         'Horizontal guitar chord frames',
         'Rotate a chord diagram so the highest string sits at the top. Follow the open strings, mutes and partial barre in the same grip.',
@@ -279,13 +286,6 @@ export const sections = [
         'Read the short fifth string as a drone. Its open G and the note at fret seven are a whole tone apart.',
         'review-422',
         'drone short string fret tuning',
-      ],
-      [
-        'guitar-tab',
-        'Guitar tablature',
-        'Read fret numbers on the strings and the picking rhythm underneath. High Wire marks hammer-ons, taps, pull-offs, and a full bend.',
-        'case-6a29cd24f475eb94',
-        'guitar tab hammer-on pull-off tapping',
       ],
       [
         'chord-frames',
@@ -337,18 +337,18 @@ export const sections = [
         'guitar tab flamenco golpe strum falseta',
       ],
       [
-        'sticking',
-        'Percussion sticking',
-        'Line up right- and left-hand strokes with their attacks and carry the pattern onto a new system.',
-        'review-428',
-        'drums paradiddle percussion hands',
-      ],
-      [
         'drum-kit',
         'Drum-set notation',
         'Distinguish kit pieces by staff position and notehead. Pocket Change combines kick, snare, and hi-hat in one groove.',
         'case-2a3a048766cd81bf',
         'percussion drums drumkit backbeat trap set',
+      ],
+      [
+        'sticking',
+        'Percussion sticking',
+        'Line up right- and left-hand strokes with their attacks and carry the pattern onto a new system.',
+        'review-428',
+        'drums paradiddle percussion hands',
       ],
       [
         'one-line-drum',
@@ -495,6 +495,13 @@ export const sections = [
         'dynamics silence swell',
       ],
       [
+        'extended-keys',
+        'Custom key signatures',
+        'Arrange accidentals in a nonstandard key signature and carry it into the music.',
+        'example-extended-keys',
+        'microtonal custom scales key spelling',
+      ],
+      [
         'written-keys',
         'Clef-aware written key signatures',
         'Write accidentals by pitch and keep their positions correct when the staff changes clef.',
@@ -508,26 +515,12 @@ export const sections = [
         'review-431',
         'Turkish Sabâ koma bakiye microtonal',
       ],
-      [
-        'extended-keys',
-        'Custom key signatures',
-        'Arrange accidentals in a nonstandard key signature and carry it into the music.',
-        'example-extended-keys',
-        'microtonal custom scales key spelling',
-      ],
     ],
   },
   {
     title: 'Specialist and early notation',
     description: 'Use instrument-specific diagrams and the reading conventions of early music.',
     entries: [
-      [
-        'harp-changes',
-        'Harp pedal changes',
-        'Print the pedals that move at each entrance. The harpist can read B-flat and F-sharp together, then a single F-natural.',
-        'review-424',
-        'orchestral pedal changes',
-      ],
       [
         'harp',
         'Harp pedal diagrams',
@@ -536,11 +529,11 @@ export const sections = [
         'harpist orchestral pedal diagram',
       ],
       [
-        'trill-keys',
-        'Moving woodwind trill keys',
-        'Mark an alternating flute key inside its fingering diagram while the other five retain their open or closed signs.',
-        'review-427',
-        'flute fingering trill',
+        'harp-changes',
+        'Harp pedal changes',
+        'Print the pedals that move at each entrance. The harpist can read B-flat and F-sharp together, then a single F-natural.',
+        'review-424',
+        'orchestral pedal changes',
       ],
       [
         'flute',
@@ -548,6 +541,13 @@ export const sections = [
         'Show open and closed keys in left- and right-hand groups above the notes.',
         'review-426',
         'woodwind fingering diagram trill keys',
+      ],
+      [
+        'trill-keys',
+        'Moving woodwind trill keys',
+        'Mark an alternating flute key inside its fingering diagram while the other five retain their open or closed signs.',
+        'review-427',
+        'flute fingering trill',
       ],
       [
         'accordion',
@@ -592,6 +592,13 @@ export const sections = [
         'gregorian plainsong barline',
       ],
       [
+        'chant',
+        'Chant and square neumes',
+        'Group the pitches of a podatus or clivis under one syllable on a four-line chant staff.',
+        'review-436',
+        'Gregorian plainsong plainchant early medieval neume',
+      ],
+      [
         'mensural',
         'White mensural notation',
         'Read maxima, longa and brevis alongside four mensuration signs. The long values keep their written durations.',
@@ -611,13 +618,6 @@ export const sections = [
         'Alternate line and space forms of the half note under a tse-fa-ut clef. Editing the pitch selects the corresponding form.',
         'review-439',
         'synodal chant half notes',
-      ],
-      [
-        'chant',
-        'Chant and square neumes',
-        'Group the pitches of a podatus or clivis under one syllable on a four-line chant staff.',
-        'review-436',
-        'Gregorian plainsong plainchant early medieval neume',
       ],
     ],
   },

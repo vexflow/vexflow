@@ -84,7 +84,7 @@ try {
   await page.screenshot({ path: fileURLToPath(new URL('mobile.png', captures)) });
   await page.locator('#category-select').selectOption(String(sections.length - 1));
   await page.locator('.card:visible .open').first().click();
-  assert.equal(await page.locator('#view-title').innerText(), 'Harp pedal diagrams');
+  assert.equal(await page.locator('#view-title').innerText(), sections.at(-1).entries[0][1]);
   await page.locator('#view-img').evaluate((img) => img.decode());
   await page.screenshot({ path: fileURLToPath(new URL('viewer.png', captures)) });
   await page.locator('#close').click();
