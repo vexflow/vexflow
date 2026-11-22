@@ -51,6 +51,20 @@ const fourShapeHeads = {
   mi: [Glyphs.noteShapeDiamondBlack, Glyphs.noteShapeDiamondWhite, Glyphs.noteShapeDiamondDoubleWhole],
 };
 
+/** Complete SMuFL signs carry both the white body and any descending stem. */
+function whiteMensuralSign(duration: string): string {
+  switch (Tables.sanitizeDuration(duration)) {
+    case '1/8':
+      return Glyphs.mensuralWhiteMaxima;
+    case '1/4':
+      return Glyphs.mensuralWhiteLonga;
+    case '1/2':
+      return Glyphs.mensuralWhiteBrevis;
+    default:
+      throw new RangeError('Expected a maxima, longa or brevis for white mensural notation.');
+  }
+}
+
 export interface StaveNoteHeadBounds {
   yTop: number;
   yBottom: number;
@@ -78,6 +92,8 @@ export interface StaveNoteFormatSettings {
 }
 
 export interface StaveNoteStruct extends NoteStruct {
+  /** Print the complete white mensural sign for a pitched maxima, longa or brevis. */
+  whiteMensural?: boolean;
   /** Fixed rest position in key-line coordinates. On a five-line stave, 1 is the bottom line. */
   restLine?: number;
   /** Override the music glyph family for this note, its heads and its flag. */
@@ -403,6 +419,8 @@ export class StaveNote extends StemmableNote {
   minLine: number = 0;
   maxLine: number = 0;
 
+  /** The historical sign takes precedence over modern heads when the note is rebuilt. */
+  private readonly mensuralSign?: string;
   protected readonly clef: string;
   protected readonly octaveShift?: number;
 
@@ -439,6 +457,12 @@ export class StaveNote extends StemmableNote {
       'BadArguments',
       `No glyph found for duration '${this.duration}' and type '${this.noteType}'`
     );
+
+    if (noteStruct.whiteMensural) {
+      if (this.noteType !== 'n') throw new RangeError('Expected a pitched note for white mensural notation.');
+      this.mensuralSign = whiteMensuralSign(this.duration);
+      this.glyphProps = { ...this.glyphProps, codeHead: this.mensuralSign, stem: false };
+    }
 
     // if true, displace note to right
     this.displaced = false;
@@ -578,7 +602,8 @@ export class StaveNote extends StemmableNote {
         noteType: this.noteType,
         displacementColumn: column,
         stemDirection,
-        customGlyphCode: this.fourShapeHead(this.sortedKeyProps[i].index, stemDirection) ?? noteProps.code,
+        customGlyphCode:
+          this.mensuralSign ?? this.fourShapeHead(this.sortedKeyProps[i].index, stemDirection) ?? noteProps.code,
         line: noteProps.line,
       });
 

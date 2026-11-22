@@ -25,6 +25,8 @@ const StaveConnectorTests = {
     run('Bold Double Line Left Draw Test', drawRepeatBegin);
     run('Bold Double Line Right Draw Test', drawRepeatEnd);
     run('Thin Double Line Right Draw Test', drawThinDouble);
+    run('Mensurstriche in a three-measure duet', drawMensurstriche, {}, ['Bravura']);
+    run('Mensurstriche in a three-staff group', mensurstricheGroup, {}, ['Bravura']);
     run('Bold Double Lines Overlapping Draw Test', drawRepeatAdjacent);
     run('Bold Double Lines Offset Draw Test', drawRepeatOffset);
     run('Bold Double Lines Offset Draw Test 2', drawRepeatOffset2);
@@ -88,6 +90,89 @@ function drawSingleBoth(options: TestOptions, contextBuilder: ContextBuilder): v
   connector2.drawWithStyle();
 
   options.assert.ok(true, 'all pass');
+}
+
+/** Count the two internal boundaries and redraw the same polyphony at a wider staff spacing. */
+function drawMensurstriche(options: TestOptions): void {
+  const f = VexFlowTests.makeFactory(options, 680, 230);
+  const ctx = f.getContext();
+  const score = f.EasyScore();
+  const measures = [
+    ['C5/h, B4/h', 'C3/h, G2/h'],
+    ['A4/w', 'F2/h, A2/h'],
+    ['G4/h, A4/h', 'C3/w'],
+  ].map(([treble, bass], i) => {
+    const system = f.System({ x: 10 + i * 215, y: 0, width: 215, spaceBetweenStaves: 8 });
+    const upper = score.voice(score.notes(treble));
+    const lower = score.voice(score.notes(bass, { clef: 'bass' }));
+    const top = system.addStave({ voices: [upper] });
+    const bottom = system.addStave({ voices: [lower] });
+    if (i === 0) {
+      top.addClef('treble');
+      bottom.addClef('bass');
+      system.addConnector('singleLeft');
+    }
+    if (i === 0) system.addConnector('mensurstrich');
+    else system.addMensurstriche();
+    return { system, top, bottom, upper, lower };
+  });
+
+  const strokes: number[][] = [];
+  const fill = ctx.fillRect;
+  ctx.fillRect = function (x, y, w, h) {
+    if ([225, 440].includes(x) && w === 1) strokes.push([x, y, h]);
+    return fill.call(this, x, y, w, h);
+  };
+  try {
+    for (const spacing of [8, 12]) {
+      if (spacing === 12) ctx.clear();
+      for (const { system } of measures)
+        system.setOptions({ factory: f, x: system.getX(), y: 0, width: 215, spaceBetweenStaves: spacing });
+      strokes.length = 0;
+      f.draw({ retain: true });
+      const expected = measures.slice(0, 2).map(({ top, bottom }) => {
+        const y = top.getYForDrawnLine(4);
+        return [top.getX() + top.getWidth(), y, bottom.getYForDrawnLine(0) - y];
+      });
+      options.assert.deepEqual(strokes, expected, 'Both boundaries stop at the facing lines');
+      options.assert.equal(strokes[0][2], (spacing - 4) * 10, 'The same connector follows the new gap');
+      const { upper, lower } = measures[1];
+      options.assert.ok(upper.isComplete() && lower.isComplete(), 'Both voices fill the second measure');
+      const ticks = upper.getTotalTicks().value();
+      options.assert.deepEqual(
+        upper.getTickables().map((n) => n.getTicks().value()),
+        [ticks],
+        'A4 is sustained'
+      );
+      options.assert.deepEqual(
+        lower.getTickables().map((n) => n.getTicks().value()),
+        [ticks / 2, ticks / 2],
+        'Two bass attacks'
+      );
+    }
+  } finally {
+    ctx.fillRect = fill;
+  }
+}
+
+/** A group uses separate strokes so the middle staff stays clear. */
+function mensurstricheGroup(options: TestOptions): void {
+  const f = VexFlowTests.makeFactory(options, 250, 300);
+  const system = f.System({ width: 220, spaceBetweenStaves: 9 });
+  const staves = ['treble', 'alto', 'bass'].map((clef) =>
+    system
+      .addStave({ voices: [f.Voice().addTickables([f.StaveNote({ clef, keys: ['c/4'], duration: 'w' })])] })
+      .addClef(clef)
+  );
+  options.assert.throws(() => system.addConnector('mensurstrich'), /addMensurstriche/);
+  const connectors = system.addMensurstriche();
+  options.assert.equal(connectors.length, 2);
+  connectors.forEach((connector, i) => {
+    options.assert.strictEqual(connector.topStave, staves[i]);
+    options.assert.strictEqual(connector.bottomStave, staves[i + 1]);
+    options.assert.equal(connector.getType(), StaveConnector.type.MENSURSTRICH);
+  });
+  f.draw();
 }
 
 function drawDouble(options: TestOptions, contextBuilder: ContextBuilder): void {

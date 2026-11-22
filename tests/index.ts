@@ -48,6 +48,7 @@ export * from './gracetabnote_tests';
 export * from './key_clef_tests';
 export * from './keymanager_tests';
 export * from './keysignature_tests';
+export * from './kievannote_tests';
 export * from './modifier_tests';
 export * from './multimeasurerest_tests';
 export * from './music_tests';

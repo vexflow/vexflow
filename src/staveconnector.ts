@@ -1,5 +1,6 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
+// Draw braces, brackets and barlines between staves.
 
 import { Element } from './element';
 import { Glyphs } from './glyphs';
@@ -41,6 +42,7 @@ export type StaveConnectorType =
   | 'bracket'
   | 'boldDoubleLeft'
   | 'boldDoubleRight'
+  | 'mensurstrich'
   | 'thinDouble'
   | 'none'
   | 0
@@ -51,7 +53,8 @@ export type StaveConnectorType =
   | 5
   | 6
   | 7
-  | 8;
+  | 8
+  | 9;
 
 /** StaveConnector implements the connector lines between staves of a system. */
 export class StaveConnector extends Element {
@@ -75,6 +78,7 @@ export class StaveConnector extends Element {
     BOLD_DOUBLE_RIGHT: 6,
     THIN_DOUBLE: 7,
     NONE: 8,
+    MENSURSTRICH: 9,
   } as const;
 
   /**
@@ -87,6 +91,7 @@ export class StaveConnector extends Element {
    * * "bracket"
    * * "boldDoubleLeft"
    * * "boldDoubleRight"
+   * * "mensurstrich" (right-edge stroke between two adjacent staves)
    * * "thinDouble"
    * * "none"
    */
@@ -99,6 +104,7 @@ export class StaveConnector extends Element {
     bracket: StaveConnector.type.BRACKET,
     boldDoubleLeft: StaveConnector.type.BOLD_DOUBLE_LEFT,
     boldDoubleRight: StaveConnector.type.BOLD_DOUBLE_RIGHT,
+    mensurstrich: StaveConnector.type.MENSURSTRICH,
     thinDouble: StaveConnector.type.THIN_DOUBLE,
     none: StaveConnector.type.NONE,
   } as const;
@@ -171,7 +177,8 @@ export class StaveConnector extends Element {
     const isRightSidedConnector =
       this.type === StaveConnector.type.SINGLE_RIGHT ||
       this.type === StaveConnector.type.BOLD_DOUBLE_RIGHT ||
-      this.type === StaveConnector.type.THIN_DOUBLE;
+      this.type === StaveConnector.type.THIN_DOUBLE ||
+      this.type === StaveConnector.type.MENSURSTRICH;
 
     if (isRightSidedConnector) {
       topX = this.topStave.getX() + this.topStave.getWidth();
@@ -187,6 +194,13 @@ export class StaveConnector extends Element {
         width = 1;
         break;
       case StaveConnector.type.SINGLE_RIGHT:
+        width = 1;
+        break;
+      case StaveConnector.type.MENSURSTRICH:
+        // Read both facing lines on each draw so retained connectors follow staff spacing.
+        topY = this.topStave.getYForDrawnLine(this.topStave.getNumLines() - 1);
+        botY = this.bottomStave.getYForDrawnLine(0);
+        attachmentHeight = Math.max(0, botY - topY);
         width = 1;
         break;
       case StaveConnector.type.DOUBLE:

@@ -1,13 +1,16 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 // MIT License
 //
-// TimeSignature Tests
+// Exercise numeric and symbolic meters, including the four basic mensuration signs.
 
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
+import { Fraction } from '../src/fraction';
+import { Glyphs } from '../src/glyphs';
 import { ContextBuilder } from '../src/renderer';
 import { Stave, StaveLineConfig } from '../src/stave';
 import { StaveConnector } from '../src/staveconnector';
+import { StaveNote } from '../src/stavenote';
 import { TimeSignature } from '../src/timesignature';
 
 const TimeSignatureTests = {
@@ -15,6 +18,7 @@ const TimeSignatureTests = {
     QUnit.module('TimeSignature');
     QUnit.test('Time Signature Parser', parser);
     const run = VexFlowTests.runTests;
+    run('White mensural long values and signs', mensuralValuesAndSigns, {}, ['Bravura']);
     run('Basic Time Signatures', basic);
     run('Big Signature Test', big);
     run('Additive Signature Test', additive);
@@ -27,6 +31,62 @@ const TimeSignatureTests = {
     run('Time Signature Change Test', change);
   },
 };
+
+/** Compare the same binary exercise under each sign and keep written time independent of the meter. */
+function mensuralValuesAndSigns(options: TestOptions): void {
+  const { assert } = options;
+  const f = VexFlowTests.makeFactory(options, 510, 430);
+  const signs = [
+    ['mensural-semicircle', Glyphs.mensuralProlation6],
+    ['mensural-circle', Glyphs.mensuralProlation2],
+    ['mensural-circle-dot', Glyphs.mensuralProlation1],
+    ['mensural-semicircle-dot', Glyphs.mensuralProlation5],
+  ];
+  const glyphs = [Glyphs.mensuralWhiteMaxima, Glyphs.mensuralWhiteLonga, Glyphs.mensuralWhiteBrevis];
+  signs.forEach(([spec, glyph], i) => {
+    const stave = f.Stave({ x: 10, y: i * 100, width: 475 }).addTimeSignature(spec);
+    const [sign] = stave.getModifiers(undefined, TimeSignature.CATEGORY) as TimeSignature[];
+    const notes = ['m', 'l', '1/2'].map((duration, index) =>
+      f.StaveNote({ duration, keys: [index === 1 ? 'c/5' : 'b/4'], whiteMensural: true })
+    );
+    const voice = f.Voice({ time: '14/1' }).addTickables(notes);
+    f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+    assert.ok(voice.isComplete(), 'four, two and one breves fill the voice');
+    assert.deepEqual(
+      notes.map((note) => note.getTicks().value() / notes[2].getTicks().value()),
+      [4, 2, 1]
+    );
+    assert.deepEqual(
+      notes.map((note) => note.noteHeads[0].text),
+      glyphs
+    );
+    assert.deepEqual(
+      notes.map((note) => note.getYs()[0]),
+      [2, 1.5, 2].map((line) => stave.getYForLine(line))
+    );
+    const [maxima, longa, brevis] = notes.map((note) => note.noteHeads[0].getTextInk(0, 0));
+    assert.ok(maxima.w > longa.w && Math.abs(longa.w - brevis.w) < 2, 'maxima has the widest body');
+    assert.ok(longa.h > brevis.h * 2 && maxima.h > brevis.h * 2, 'maxima and longa include descending stems');
+    assert.ok(
+      notes.every((note) => !note.hasStem()),
+      'no extra modern stem'
+    );
+    assert.equal(sign.text, glyph);
+    const ink = sign.getInkBounds();
+    assert.ok(ink.w > 0 && ink.x + ink.w < notes[0].getAbsoluteX(), 'sign precedes the first attack');
+  });
+  f.draw();
+  // An explicitly ternary longa can keep its own duration and its white outline on the same stave.
+  const ternary = new StaveNote({
+    keys: ['c/5'],
+    duration: 'l',
+    durationOverride: new Fraction(6, 1),
+    whiteMensural: true,
+  });
+  assert.equal(ternary.getTicks().value(), new StaveNote({ keys: ['c/5'], duration: '1/2' }).getTicks().value() * 3);
+  assert.equal(ternary.noteHeads[0].text, Glyphs.mensuralWhiteLonga);
+  assert.throws(() => new StaveNote({ keys: ['c/5'], duration: 'q', whiteMensural: true }), /maxima, longa or brevis/);
+}
 
 function parser(assert: Assert): void {
   const timeSig = new TimeSignature();
