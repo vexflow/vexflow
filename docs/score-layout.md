@@ -23,6 +23,23 @@ It uses the annotations' computed positions, so drawing order does not matter.
 - Explicit annotation baselines and vertical shifts are respected.
 - This is not a general collision solver for every modifier or unrelated voice.
 
+## Mensurstriche between voices
+
+For a polyphonic transcription, call `addMensurstriche()` on a measure-sized
+`System` after adding its staves. Each right-hand barline becomes a thin stroke
+in the gap between adjacent staves. The following measure uses the usual
+`System` default of an open left edge.
+
+```js
+const measure = factory.System({ x: 20, y: 10, width: 240 });
+measure.addStave({ voices: [trebleVoice] });
+measure.addStave({ voices: [bassVoice] });
+measure.addMensurstriche();
+```
+
+For separately constructed staves, set `rightBar: false` on both and draw a
+`StaveConnector` of type `'mensurstrich'` between each adjacent pair.
+
 ## French lute tablature
 
 Use a six-line `TabStave` and pass numeric `str` (course) and `fret` pairs to
