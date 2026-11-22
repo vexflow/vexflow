@@ -129,7 +129,9 @@ export async function captureTools(browser, directory, revision) {
       await page.goto('https://report.test' + url);
       await page.locator(selector).first().waitFor({ state: 'attached' });
       if (id === 'guide') {
-        await page.frameLocator('iframe').first().locator('#score svg text').first().waitFor({ state: 'attached' });
+        const example = page.locator('[data-example="rasgueado-golpe"]');
+        await example.frameLocator('iframe').locator('#score svg text').first().waitFor({ state: 'attached' });
+        await example.scrollIntoViewIfNeeded();
       }
       if (id === 'canvas-reader') {
         await page.locator('#backend').selectOption('Canvas');

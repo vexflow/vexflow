@@ -52,7 +52,7 @@ export const notes = [
     'Compare cross, diamond, triangle, and slash noteheads.',
     'StaveNote NoteHead',
     staff(
-      "['c/4', 'd/4', 'e/4', 'f/4'].map(key => factory.StaveNote({ keys: [key + '/' + params.shape], duration: 'q' }))",
+      "['c/4', 'd/4', 'e/4', 'f/4'].map(key => score.make.note({ keys: [key + '/' + params.shape], duration: 'q' }))",
       '// The suffix after the octave selects the head shape. Remove it to compare a normal head.'
     ),
     [select('shape', 'Shape', 'D', ['D', 'X0', 'X1', 'X2', 'T0', 'S1'])]

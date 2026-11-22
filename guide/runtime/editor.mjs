@@ -4,6 +4,17 @@ import { CodeJar } from './vendor/codejar.js';
 /** Prism escapes source text before adding token markup. Never insert raw code as HTML. */
 export function highlightCode(element) {
   const requested = Prism.util.getLanguage(element);
+  if (requested === 'vextab') {
+    // The comparison lesson uses a staff block, meter, duration, pitch, and barline.
+    const notation = {
+      keyword: /\b(?:staff|meter)\b/,
+      number: /\b\d+\/\d+\b/,
+      symbol: /:\w+|\b[A-G][#b]?\d+\b/,
+      punctuation: /[{}|]/,
+    };
+    element.innerHTML = Prism.highlight(element.textContent, notation, requested);
+    return;
+  }
   const language = Prism.languages[requested] ? requested : 'javascript';
   element.innerHTML = Prism.highlight(element.textContent, Prism.languages[language], language);
 }
@@ -35,7 +46,15 @@ export function createEditor(element, onChange) {
     if (event.isComposing) return;
     notify();
     inputTimer = setTimeout(() => {
-      const position = document.activeElement === element ? jar.save() : undefined;
+      // Focus can stay in an editor after its selection is cleared or moved to another example.
+      const selection = window.getSelection();
+      const position =
+        document.activeElement === element &&
+        selection?.rangeCount &&
+        element.contains(selection.anchorNode) &&
+        element.contains(selection.focusNode)
+          ? jar.save()
+          : undefined;
       highlightCode(element);
       if (position) jar.restore(position);
     }, 40);
@@ -49,6 +68,10 @@ export function createEditor(element, onChange) {
 
   return {
     getCode: () => jar.toString(),
+    dispose() {
+      clearTimeout(inputTimer);
+      jar.destroy();
+    },
     /** Select source without changing text, history, or scheduling a new render. */
     selectRange(start, end) {
       if (start < 0 || end < start || end > jar.toString().length) return;

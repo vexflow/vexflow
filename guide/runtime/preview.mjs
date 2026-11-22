@@ -7,12 +7,27 @@ const previewScale = 0.8;
 const defaultHeight = 245;
 // Inline our own runtime so delayed user errors are not masked as cross-origin script errors.
 const runtime = `(${runPreview.toString()})();`.replace(/<\/script/gi, '<\\/script');
+// Every sandbox gets its own JavaScript globals, while the page downloads the bundle once.
+let library;
+export function librarySource() {
+  library ??= fetch(new URL('./vexflow.js', import.meta.url))
+    .then((response) => {
+      if (!response.ok) throw Error('Could not load the VexFlow library.');
+      return response.text();
+    })
+    .catch((error) => {
+      library = undefined;
+      throw error;
+    });
+  return library;
+}
+
 export class Preview {
   constructor(host, onMessage) {
     this.host = host;
     this.onMessage = onMessage;
     this.host.style.height = `${defaultHeight * previewScale}px`;
-    window.addEventListener('message', (event) => {
+    this.receive = (event) => {
       if (event.source !== this.frame?.contentWindow || event.data?.channel !== channel) return;
       if (event.data.type === 'ready') {
         clearTimeout(this.timer);
@@ -33,7 +48,8 @@ export class Preview {
         event.data.totalDuration = Math.round((performance.now() - this.started) * 10) / 10;
       }
       this.onMessage(event.data);
-    });
+    };
+    window.addEventListener('message', this.receive);
   }
   /** Lay out at full score resolution, then fit the scaled result to the preview column. */
   getWidth() {
@@ -95,20 +111,34 @@ export class Preview {
     }, 10000);
   }
 
+  /** Release the sandbox and its listener when a chapter leaves the page. */
+  dispose() {
+    this.reset();
+    window.removeEventListener('message', this.receive);
+  }
+
   createFrame() {
     const frame = document.createElement('iframe');
     frame.title = 'Interactive VexFlow score';
     frame.setAttribute('sandbox', 'allow-scripts');
-    // Classic scripts can load in an opaque-origin frame without bucket CORS settings.
-    const asset = (name) => new URL(name, import.meta.url).href.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-    const origin = new URL(import.meta.url).origin;
-    frame.srcdoc = `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' ${origin}; style-src 'unsafe-inline'; font-src data:; img-src data: blob:; connect-src 'none';"><style>html,body{margin:0;padding:0;background:transparent;overflow:hidden}#score{max-width:100%}svg{display:block}svg *{cursor:crosshair}</style></head><body><div id="score"></div><script src="${asset('vexflow.js')}"></script><script>${runtime}</script></body></html>`;
     this.frame = frame;
     frame.style.width = `${100 / previewScale}%`;
     frame.style.transform = `scale(${previewScale})`;
     this.resize();
     this.host.replaceChildren(frame);
-    this.watch();
+    librarySource()
+      .then((source) => {
+        if (this.frame !== frame) return;
+        // Escape closing script tags before embedding the trusted bundle in the opaque-origin document.
+        const script = source.replace(/<\/script/gi, '<\\/script');
+        frame.srcdoc = `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval'; style-src 'unsafe-inline'; font-src data:; img-src data: blob:; connect-src 'none';"><style>html,body{margin:0;padding:0;background:transparent;overflow:hidden}#score{max-width:100%}svg{display:block}svg *{cursor:crosshair}</style></head><body><div id="score"></div><script>${script}</script><script>${runtime}</script></body></html>`;
+        this.watch();
+      })
+      .catch((error) => {
+        if (this.frame !== frame) return;
+        this.reset();
+        this.onMessage({ type: 'error', name: 'Preview', message: error.message });
+      });
   }
   post(message) {
     // Controls may change while the runtime is loading or another edit is queued.

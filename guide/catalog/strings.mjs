@@ -5,13 +5,12 @@ const group = 'Strings & tablature';
 function tab(modifications = '', after = '') {
   return `${setup}
 // Keep one string fixed so you can follow the fretting hand as the numbers rise.
-const notes = [3, 5, 7, 8].map(fret => factory.TabNote({ positions: [{ str: params.string ?? 2, fret }], duration: 'q' }));
+const notes = [3, 5, 7, 8].map(fret => score.make.tabNote({ positions: [{ str: params.string ?? 2, fret }], duration: 'q' }));
 ${modifications}
-const stave = factory.TabStave({ x: 30, y: 60, width: width - 60 }).addClef('tab');
-const voice = factory.Voice().setStave(stave).addTickables(notes);
-// Align the voice to the available space between the stave margins.
-factory.Formatter().joinVoices([voice]).formatToStave([voice], stave);
-factory.draw();
+const stave = score.make.tabStave({ x: 30, width: width - 60 }).addClef('tab');
+// Place the four quarter-note frets in one voice on the tab stave.
+score.system({ x: 30, y: 60, width: width - 60 }).addStave({ stave, voices: [score.voice(notes)] });
+score.draw();
 ${after ? '\n// Draw the connection after the fret positions have been calculated.\n' + after : ''}`.trim();
 }
 export const strings = [
@@ -79,7 +78,7 @@ new VF.TabTie({ firstNote: notes[0], lastNote: notes[1], firstIndexes: [0], last
     'Lead into a fretted note with a small grace-note group.',
     'GraceTabNote GraceNoteGroup',
     tab(
-      "// Lead into the first full-sized fret with a small fret 2 on the same string.\nconst grace = new VF.GraceTabNote({ positions: [{ str: 2, fret: 2 }], duration: '8' });\nnotes[0].addModifier(new VF.GraceNoteGroup([grace], true), 0);"
+      "// Lead into the first full-sized fret with a small fret 2 on the same string.\nconst grace = score.make.graceTabNote({ positions: [{ str: 2, fret: 2 }], duration: '8' });\nscore.attach(notes[0], score.make.graceNoteGroup({ notes: [grace], slur: true }));"
     )
   ),
   e(

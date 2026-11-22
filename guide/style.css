@@ -256,42 +256,12 @@ article table code {
   overflow-wrap: anywhere;
 }
 .workbench {
-  margin: 36px 0 25px;
+  margin: 18px 0 28px;
+  font: 14px/1.55 var(--sans);
   background: #fff;
   border: 1px solid #ccd6c9;
   border-radius: 6px;
   overflow: hidden;
-}
-article [data-show-example] {
-  font-size: 0.9em;
-  text-underline-offset: 3px;
-}
-#lesson-examples p {
-  font-size: 13px;
-  font-weight: 650;
-  margin: 14px 22px 0;
-}
-#lesson-examples ol {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 22px;
-  margin: 0;
-  padding: 6px 22px 14px;
-  list-style-position: inside;
-}
-#lesson-examples li {
-  margin: 0;
-  font-size: 13px;
-  color: var(--muted);
-}
-#lesson-examples a {
-  color: var(--green);
-  text-underline-offset: 3px;
-}
-#lesson-examples [aria-current='step'] {
-  font-weight: 700;
-  color: var(--ink);
-  text-decoration-thickness: 2px;
 }
 .workbench-heading {
   padding: 20px 22px;
@@ -351,7 +321,7 @@ article [data-show-example] {
   background: white;
   padding: 0 16px;
 }
-#frame-host {
+[data-part='frame-host'] {
   position: relative;
   min-width: 260px;
   overflow: hidden;
@@ -371,7 +341,7 @@ iframe {
   padding: 6px 22px 12px;
   gap: 10px;
 }
-#render-error {
+[data-part='render-error'] {
   color: #8a271e;
   background: #fff1ed;
   white-space: pre-wrap;
@@ -463,7 +433,7 @@ details pre {
   font-size: 12px;
   line-height: 1.7;
   min-height: 170px;
-  max-height: 510px;
+  max-height: 19rem;
   overflow: auto !important;
   padding: 19px 22px;
   tab-size: 2;
@@ -751,5 +721,157 @@ footer a {
   }
   a {
     color: inherit;
+  }
+}
+
+/* The tutorial opens like the VexTab book, with a score plate and a numbered reading order. */
+.cover-layout {
+  display: block;
+  max-width: 1160px;
+}
+.cover-layout .sidebar {
+  display: none;
+}
+.cover-layout main {
+  max-width: none;
+}
+.book-cover {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  align-items: center;
+  gap: clamp(24px, 4vw, 56px);
+  padding: 8px 0 30px;
+  border-bottom: var(--mast-rule);
+}
+.book-cover h1 {
+  font:
+    700 clamp(60px, 6.1vw, 86px)/0.95 Tangerine,
+    Georgia,
+    serif;
+  letter-spacing: -0.035em;
+}
+.book-cover .lead {
+  font: 18px/1.55 var(--book);
+  margin: 14px 0 22px;
+}
+.start-reading {
+  display: inline-block;
+  padding: 8px 16px;
+  background: var(--green);
+  color: white;
+  border-radius: 3px;
+  font-weight: 650;
+  text-decoration: none;
+}
+.start-reading:hover {
+  color: white;
+  background: #264a36;
+}
+.cover-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 18px;
+  margin: 16px 0 0;
+  font-size: 14px;
+}
+.book-cover figure {
+  min-width: 0;
+  margin: 0;
+  padding: 12px;
+  background: white;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--green);
+}
+.book-cover img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.book-cover figcaption {
+  padding: 8px 0 0;
+  border-top: 1px solid var(--line);
+  text-align: center;
+  font:
+    italic 14px/1.5 Georgia,
+    serif;
+}
+.chapter-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  list-style: none;
+  padding: 0;
+  gap: 0 26px;
+}
+.chapter-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0;
+  border-top: 1px solid var(--line);
+  padding: 10px 0;
+}
+ol.chapter-list {
+  counter-reset: chapter var(--chapter-start, 0);
+}
+ol.chapter-list li::before {
+  counter-increment: chapter;
+  content: counter(chapter, decimal-leading-zero);
+  font:
+    italic 15px Georgia,
+    serif;
+  color: var(--muted);
+}
+.chapter-list a {
+  font-weight: 650;
+  text-decoration-thickness: 1px;
+}
+.inline-example .workbench-heading {
+  padding: 8px 14px;
+  background: white;
+  border-bottom: 0;
+}
+.inline-example .workbench-heading h2 {
+  font: 650 14px/1.5 var(--sans);
+}
+.inline-example .editor {
+  min-height: 6rem;
+  max-height: 12.5rem;
+  padding: 10px 14px;
+  font:
+    13px/1.65 ui-monospace,
+    SFMono-Regular,
+    Consolas,
+    monospace;
+}
+.inline-example .status-bar {
+  padding: 3px 14px;
+}
+.inline-example .editor-bar {
+  padding: 6px 12px;
+  color: #3d583f;
+}
+.tools {
+  padding: 6px 12px;
+}
+.tools > summary {
+  font-size: 12px;
+}
+[data-example] {
+  scroll-margin-top: 16px;
+}
+@media (max-width: 700px) {
+  .book-cover,
+  .chapter-list {
+    grid-template-columns: 1fr;
+  }
+  .book-cover figure {
+    width: min(100%, 440px);
+    margin-inline: auto;
+  }
+  .inline-example .workbench-heading,
+  .inline-example .editor-bar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
   }
 }

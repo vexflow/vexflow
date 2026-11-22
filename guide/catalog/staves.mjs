@@ -78,11 +78,11 @@ factory.draw();`,
     'Draw boundaries, endings, and repeat marks on a staff.',
     'Barline Stave',
     `${setup}
-const stave = factory.Stave({ x: 35, y: 65, width: width - 70 }).addClef('treble');
+const stave = score.make.stave({ x: 35, y: 65, width: width - 70 }).addClef('treble');
 // The beginning repeat stays fixed while the control changes the other end.
 stave.setBegBarType(VF.Barline.type.REPEAT_BEGIN);
 stave.setEndBarType(VF.Barline.type[params.ending]);
-factory.draw();`,
+score.draw();`,
     [
       select('ending', 'End barline', 'REPEAT_END', [
         'SINGLE',

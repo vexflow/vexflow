@@ -12,7 +12,7 @@ import prettier from 'prettier';
 
 import { collectRuntime } from './runtime-assets.mjs';
 import { upload as uploadSite, validate } from '../tools/static-site-upload.mjs';
-import { examples, lessons, sections } from './content.mjs';
+import { examples, lessons, sections, tutorial, units } from './content.mjs';
 
 const source = dirname(fileURLToPath(import.meta.url));
 const root = resolve(source, '..');
@@ -30,6 +30,8 @@ export async function build() {
         assets.set(`licenses/${family}/${file}`, await readFile(join(directory, file)));
     }
   }
+  assets.set('chord-and-answer.png', await readFile(join(root, 'tools/features/images/example-chord-and-answer.png')));
+  assets.set('workbench.mjs', await readFile(join(source, 'workbench.mjs')));
   assets.set('app.mjs', await readFile(join(source, 'app.mjs')));
   assets.set(
     'style.css',
@@ -66,6 +68,8 @@ export async function build() {
     ids.add(example.id);
   }
   for (const lesson of lessons) {
+    if (!lesson.examples.length || new Set(lesson.examples).size !== lesson.examples.length)
+      throw new Error(`Lesson ${lesson.id} needs distinct inline examples.`);
     for (const id of lesson.examples) {
       if (!ids.has(id)) throw new Error(`Missing example ${id} for lesson ${lesson.id}`);
     }
@@ -73,7 +77,7 @@ export async function build() {
   assets.set(
     'content.mjs',
     Buffer.from(
-      `// Generated from guide/content.mjs.\nexport const sections = ${JSON.stringify(sections)};\nexport const lessons = ${JSON.stringify(lessons)};\nexport const examples = ${JSON.stringify(formatted)};\n`
+      `// Generated from guide/content.mjs.\nexport const units = ${JSON.stringify(units)};\nexport const tutorial = ${JSON.stringify(tutorial)};\nexport const sections = ${JSON.stringify(sections)};\nexport const lessons = ${JSON.stringify(lessons)};\nexport const examples = ${JSON.stringify(formatted)};\n`
     )
   );
   const { VERSION: version, ID: commit } = createRequire(import.meta.url)(library).BUILD;
@@ -102,6 +106,7 @@ export async function build() {
 export function serve({ port = 5174, host = '127.0.0.1' } = {}) {
   const types = {
     '.html': 'text/html',
+    '.png': 'image/png',
     '.css': 'text/css',
     '.js': 'text/javascript',
     '.mjs': 'text/javascript',

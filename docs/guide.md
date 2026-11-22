@@ -1,7 +1,7 @@
 # Interactive user guide
 
 The guide lives in [`guide/`](../guide/) and publishes to <https://vexflow.com/guide/>.
-It includes Quickstart, EasyScore, native API lessons, and an interactive playground.
+The tutorial covers EasyScore, instrument notation, print editions, and interactive scores. Its final lesson introduces the separate Native API Guide. Installation instructions and a playground are also available.
 
 Explore the [5.7 engraving lesson](https://vexflow.com/guide/#lesson/engraving-570) and edit its measured feathered beam. The [release highlights](../changelog/CHANGELOG.md#570) link to the API guides for all ten notation changes.
 
@@ -29,22 +29,23 @@ Do not commit generated screenshots. Attach relevant ones to the issue with `gh 
 
 ## Edit lessons and examples
 
-| File                 | Purpose                                                          |
-| -------------------- | ---------------------------------------------------------------- |
-| `guide/content.mjs`  | Sections, lesson prose, exercises, related lessons, source links |
-| `guide/examples.mjs` | Complete teaching snippets                                       |
-| `guide/app.mjs`      | Navigation, controls, editor, drafts, export                     |
-| `guide/style.css`    | Responsive layout and typography                                 |
-| `guide/index.html`   | Accessible page shell                                            |
-| `guide/cli.mjs`      | Build, preview server, upload command                            |
-| `guide/test.mjs`     | Browser and upload regressions                                   |
+| File                  | Purpose                                                          |
+| --------------------- | ---------------------------------------------------------------- |
+| `guide/content.mjs`   | Sections, lesson prose, exercises, related lessons, source links |
+| `guide/examples.mjs`  | Complete teaching snippets                                       |
+| `guide/app.mjs`       | Tutorial index, navigation, and chapter assembly                 |
+| `guide/workbench.mjs` | Per-example editor, preview, controls, drafts, and export        |
+| `guide/style.css`     | Responsive layout and typography                                 |
+| `guide/index.html`    | Accessible page shell                                            |
+| `guide/cli.mjs`       | Build, preview server, upload command                            |
+| `guide/test.mjs`      | Browser and upload regressions                                   |
 
-Lesson IDs are stable fragment links such as `#lesson/notation`. Pass example IDs to a lesson in teaching order.
-The lesson opens its first example, and each step has a direct link such as `#lesson/notation/two-pitches`.
+Lesson IDs are stable fragment links such as `#lesson/notation`. The tutorial index and page turns follow the units in `guide/curriculum.mjs`. That file also maps lessons to illustrated entries in the feature catalog. Instrument and publication lessons are in `guide/feature-lessons.mjs`.
+Place a marker such as `<div data-example="two-pitches"></div>` in the article directly after the passage it illustrates. The guide reads the example list from these markers. Each gets its own editable score. A link such as `#lesson/notation/two-pitches` scrolls directly to that editor.
 Playground links use `#playground/notes`.
 Keep IDs unchanged when revising titles. These routes need no server-side rewrite rules.
 
-Start with something the reader can find in the score. Introduce one idea per step, then give an edit and a visible result to check.
+Use the [technical writing guide](writing-style.md) when authoring or revising lessons. It includes worked examples of how to introduce a concept, explain the result, and design an exercise.
 Comment the musical or layout decision in each runnable example. For worked code in lesson text, use
 `sample(language, source)` with `markup`, `bash`, `typescript`, or `javascript` so the literal source is escaped and highlighted.
 Lesson bodies are trusted, repository-authored HTML. Do not insert user input into this HTML.
@@ -65,7 +66,7 @@ The guide builds VexFlow from source and bundles its CodeJar/Prism editor, sandb
 It does not use an npm VexFlow release or a runtime CDN. No new runtime dependency is required.
 
 The guide teaches the EasyScore API merged in [#354](https://github.com/vexflow/vexflow/issues/354).
-Quickstart uses `EasyScore.create()`. Lessons cover typed helpers, automatic beams, references,
+The opening lesson uses `EasyScore.create()`. Lessons cover typed helpers, automatic beams, references,
 ownership, batch construction, tablature, and structured composition with explicit layout policies.
 The native API section explains direct construction and formatting.
 
@@ -76,10 +77,10 @@ Run `npm run guide:test` against the combined source. The tests render every exa
 
 - Drafts are stored by example ID in browser local storage. Storage failure leaves editing usable.
 - Reset restores the original code and parameter values and recreates the sandbox.
-- Lesson and playground navigation reuse the sandbox, loaded library, and fonts without new asset requests.
+- Each visible example has its own sandbox. Chapter navigation reuses the mounted sandboxes when the browser supports state-preserving DOM moves. The library download is shared across all examples.
   Each run clears the previous score, inspection state, and tracked timers and listeners.
   Use Reset to clear arbitrary global changes made by edited code.
-- Run as you type is opt-in. Ctrl/Command+Enter runs immediately. Escape, then Tab leaves the editor.
+- Inline examples run as you type by default. The playground offers the same option. Ctrl/Command+Enter runs immediately. Escape, then Tab leaves the editor.
 - Clicking a parsed note selects its notation when one exact, unescaped source literal matches the unchanged editor.
   Ambiguous, computed, or stale source is inspected without selecting guessed text.
 - Copy link points to the original example. It does not upload or share a draft.
@@ -94,7 +95,7 @@ Run `npm run guide:test` against the combined source. The tests render every exa
 
 `npm run guide:test` covers:
 
-- All lesson routes, related links, and repository source paths.
+- The tutorial index, chapter order, inline example links, independent edits, and repository source paths.
 - Warm lesson and playground navigation with no asset requests and unchanged library/font objects.
 - Every teaching and playground example with Bravura, Petaluma, and Gonville.
 - Editing, literal source text, keyboard access, drafts, reset, and errors.

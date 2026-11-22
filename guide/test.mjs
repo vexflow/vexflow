@@ -14,7 +14,8 @@ import { findNotationRange } from './runtime/source.mjs';
 
 import { validate } from '../tools/static-site-upload.mjs';
 import { build, output, serve, upload } from './cli.mjs';
-import { examples, lessons } from './content.mjs';
+import { sections as featureCatalog } from '../tools/features/catalog.mjs';
+import { examples, lessons, tutorial } from './content.mjs';
 
 await build();
 const server = serve({ port: 0 });
@@ -33,7 +34,7 @@ test.beforeEach(async () => {
   context = await browser.createBrowserContext();
   page = await context.newPage();
   errors.length = failures.length = 0;
-  page.on('pageerror', (error) => errors.push(error.message));
+  page.on('pageerror', (error) => errors.push(String(error)));
   await page.setRequestInterception(true);
   page.on('request', (request) => {
     const url = request.url();
@@ -114,13 +115,12 @@ try {
     const requests = [];
     const record = (request) => {
       // Chromium may refresh the tab icon during fragment navigation.
-      if (request.url() !== `${origin}/favicon.ico`) requests.push(request.url());
+      if (request.url().startsWith(origin) && request.url() !== `${origin}/favicon.ico`) requests.push(request.url());
     };
     page.on('request', record);
     try {
       for (const hash of [
         ...lessons.filter((lesson) => lesson.id !== 'welcome').map((lesson) => `lesson/${lesson.id}`),
-        ...lessons.flatMap((lesson) => lesson.examples.slice(1).map((id) => `lesson/${lesson.id}/${id}`)),
         ...examples.map((example) => `playground/${example.id}`),
         'lesson/welcome',
       ]) {
@@ -253,31 +253,82 @@ throw new Error('Superseded error');`);
     assert.deepEqual(failures, []);
   });
 
-  await test('worked examples open the matching score and preserve lesson steps in browser history', async () => {
-    await visit('lesson/notation');
-    const frame = page.frames().find((frame) => frame.url() === 'about:srcdoc');
-    const current = '#lesson-examples [aria-current="step"]';
-    assert.equal(await page.$eval(current, (step) => step.textContent), 'Hold one note');
-    assert.equal(await page.$$eval('#lesson pre code .token.comment', (comments) => comments.length), 4);
-    await page.click('#lesson [href="#lesson/notation/chord-and-answer"]');
-    await page.waitForFunction(() => document.querySelector('#example-title').textContent === 'Stack three pitches');
-    await rendered('chord example');
-    assert.equal(await frame.$$eval('.vf-notehead', (items) => items.length), 4);
-    await page.focus(current);
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Enter');
-    await page.waitForFunction(
-      () => document.querySelector('#example-title').textContent === 'Chords, rests, and dotted rhythm'
+  await test('the cover leads into the tutorial and simultaneous examples edit independently', async () => {
+    await page.goto(origin + '/guide/');
+    await page.waitForSelector('.start-reading');
+    assert.equal(await page.$eval('#tutorial-index h1', (el) => el.textContent), 'The VexFlow Tutorial');
+    assert.equal(await page.$$eval('#chapter-directory ol li', (els) => els.length), tutorial.length);
+    assert.equal(await page.$('iframe'), null);
+    await page.click('.start-reading');
+    await rendered('first tutorial step');
+    await page.click('#next');
+    await page.waitForSelector('#lesson [data-example="held-note"] iframe');
+    assert.equal(await page.$eval('#title', (el) => el.textContent), 'EasyScore, VexTab, and the native API');
+    assert.equal(await page.$eval('#next', (el) => el.hash), '#lesson/notation');
+    await page.click('#next');
+    await page.waitForSelector('[data-example="rhythm-basics"] iframe');
+    const scores = '[data-example]';
+    assert.deepEqual(await page.$$eval(scores, (els) => els.map((el) => el.dataset.example)), [
+      'held-note',
+      'two-pitches',
+      'chord-and-answer',
+      'rhythm-basics',
+    ]);
+    const chord = '[data-example="chord-and-answer"]';
+    const original = await page.$eval(chord + ' .editor', (el) => el.textContent);
+    const firstCode = await page.$eval('#editor', (el) => el.textContent);
+    await page.$eval(chord + ' .editor', (el) => {
+      el.textContent += '\nconsole.log("edited chord");';
+      el.dispatchEvent(new Event('input'));
+    });
+    await page.waitForFunction(() =>
+      document
+        .querySelector('[data-example="chord-and-answer"] [data-part="logs"]')
+        .textContent.includes('edited chord')
     );
-    await rendered('rhythm example');
-    assert.equal(await frame.$$eval('.vf-stavenote', (items) => items.length), 4);
+    assert.equal(await page.$eval('#editor', (el) => el.textContent), firstCode);
+    await page.goto(origin + '/guide/#lesson/notation/chord-and-answer');
+    await page.waitForFunction(
+      () => document.activeElement.closest('[data-example]')?.dataset.example === 'chord-and-answer'
+    );
+    assert.match(await page.$eval(chord + ' .editor', (el) => el.textContent), /edited chord/);
+    await page.click(chord + ' [data-part="reset"]');
+    assert.equal(await page.$eval(chord + ' .editor', (el) => el.textContent), original);
+    assert.equal(await page.$$eval('[id]', (els) => new Set(els.map((e) => e.id)).size === els.length), true);
+    await page.goto(origin + '/guide/#tutorial');
+    await page.waitForSelector('.start-reading', { visible: true });
     await page.goBack();
-    await page.waitForFunction(() => document.querySelector('#example-title').textContent === 'Stack three pitches');
-    assert.equal(await page.$eval(current, (step) => step.hash), '#lesson/notation/chord-and-answer');
-    await visit('lesson/notation/unknown-example');
-    await page.waitForFunction(() => document.querySelector('#example-title').textContent === 'Hold one note');
-    assert.equal(await page.$eval(current, (step) => step.textContent), 'Hold one note');
+    await page.waitForFunction(
+      () => document.activeElement.closest('[data-example]')?.dataset.example === 'chord-and-answer'
+    );
     assert.deepEqual(errors, []);
+  });
+
+  await test('the tutorial includes every EasyScore lesson and illustrated feature and ends at the native guide', async () => {
+    assert.deepEqual(
+      tutorial.toSorted(),
+      lessons
+        .filter((lesson) => lesson.section === 'tutorial')
+        .map((lesson) => lesson.id)
+        .sort()
+    );
+    assert.equal(
+      lessons.some((lesson) => lesson.section === 'easyscore'),
+      false
+    );
+    assert.equal(tutorial[1], 'choose-api');
+    assert.equal(tutorial.at(-1), 'native-handoff');
+    const illustrated = lessons
+      .filter((lesson) => lesson.section === 'tutorial')
+      .flatMap((lesson) => lesson.features.map((item) => item.id));
+    assert.deepEqual(new Set(illustrated), new Set(featureCatalog.flatMap((s) => s.entries.map(([id]) => id))));
+    await visit('lesson/choose-api');
+    assert.equal(await page.$eval('.language-vextab .keyword', (element) => element.textContent), 'staff');
+    await visit('lesson/native-handoff');
+    await page.click('#next');
+    await page.waitForFunction(() => document.querySelector('#title').textContent === 'Renderer and drawing lifecycle');
+    assert.equal(new URL(page.url()).hash, '#lesson/native-lifecycle');
+    assert.equal(await page.$eval('.site-header [aria-current=page]', (link) => link.textContent), 'Native API');
   });
 
   await test('all lesson routes render and all local source references exist', async () => {
@@ -288,7 +339,7 @@ throw new Error('Superseded error');`);
       for (const source of lesson.sources.filter((value) => value.startsWith('repo:')))
         await stat(resolve(source.slice(5)));
       await visit(`lesson/${lesson.id}`);
-      assert.equal(await page.$eval('h1', (element) => element.textContent), lesson.title);
+      assert.equal(await page.$eval('#title', (element) => element.textContent), lesson.title);
       assert.equal(await page.$$eval('#navigation [aria-current=page]', (elements) => elements.length), 1);
     }
     assert.deepEqual(errors, []);
@@ -336,6 +387,24 @@ throw new Error('Superseded error');`);
     }
     assert.deepEqual(errors, []);
     assert.deepEqual(failures, []);
+  });
+
+  await test('the print lesson starts its second page on the specified measure', async () => {
+    await visit('playground/paper-edition');
+    const source = await page.$eval('#editor', (editor) => editor.textContent);
+    const frame = page.frames().find((item) => item.url() === 'about:srcdoc');
+    const readPage = () => frame.$eval('#score svg metadata', (data) => JSON.parse(data.textContent));
+    assert.deepEqual((await readPage()).measures, [1]);
+
+    // Follow the lesson's two edits and inspect the same metadata that travels with the printed SVG.
+    const secondPage = source.replace('const pageNumber = 1', 'const pageNumber = 2');
+    await edit(secondPage);
+    await rendered('page two before moving the turn');
+    assert.deepEqual((await readPage()).measures, [2, 3, 4]);
+
+    await edit(secondPage.replace('pageBreaks: [2]', 'pageBreaks: [4]'));
+    await rendered('turn after measure three');
+    assert.deepEqual((await readPage()).measures, [4]);
   });
 
   await test('composition lessons reflow and preserve explicit pitch spelling', async () => {
@@ -430,10 +499,11 @@ throw new Error('Superseded error');`);
     await rendered('tab navigation');
     await page.goBack();
     await page.waitForFunction(() => document.querySelector('#title').textContent === 'Make your first score');
-    await visit('unknown/not-found');
-    assert.equal(await page.$eval('#title', (element) => element.textContent), 'Make your first score');
-    await visit('%E0%A4%A');
-    assert.equal(await page.$eval('#title', (element) => element.textContent), 'Make your first score');
+    for (const fragment of ['unknown/not-found', '%E0%A4%A']) {
+      await page.goto(origin + '/guide/#' + fragment);
+      await page.waitForSelector('.start-reading', { visible: true });
+      assert.equal(await page.$('iframe'), null);
+    }
     assert.deepEqual(errors, []);
   });
 

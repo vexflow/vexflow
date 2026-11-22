@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Learn VexFlow with an interactive user guide: Quickstart, EasyScore, the native API, and a live music notation playground."
+      content="Learn to write and publish music with the interactive EasyScore tutorial, Native API Guide, and notation playground."
     />
     <title>VexFlow User Guide</title>
     <link rel="stylesheet" href="./assets/style.css" />
@@ -25,7 +25,8 @@
         >
       </div>
       <nav aria-label="VexFlow">
-        <a href="#lesson/welcome" aria-current="page">Guide</a><a href="https://github.com/vexflow/vexflow">GitHub ↗</a>
+        <a href="#tutorial">Tutorial</a><a href="#lesson/setup">Installation</a>
+        <a href="#lesson/native-lifecycle">Native API</a><a href="#playground/first-notes">Playground</a>
       </nav>
     </header>
     <div class="layout">
@@ -41,10 +42,6 @@
         </div>
       </aside>
       <main id="main" tabindex="-1">
-        <p class="eyebrow" id="section-label">Quickstart</p>
-        <h1 id="title">VexFlow User Guide</h1>
-        <p class="lead" id="summary">Learn to draw music, one example at a time.</p>
-        <article id="lesson"></article>
         <noscript
           ><p>
             This interactive guide needs JavaScript. Read the
@@ -53,20 +50,93 @@
             editor.
           </p></noscript
         >
-        <section class="workbench" aria-label="Interactive example">
-          <nav id="lesson-examples" aria-label="Examples in this lesson" hidden></nav>
-          <div class="workbench-heading">
+        <section id="tutorial-index">
+          <div class="book-cover" id="tutorial">
             <div>
-              <p class="eyebrow">Try it yourself</p>
-              <h2 id="example-title" tabindex="-1">Your first four notes</h2>
+              <h1>The VexFlow Tutorial</h1>
+              <p class="lead">
+                Learn to draw music in JavaScript with EasyScore, from a melody on one staff to a score with several
+                instrumental parts. Each example has its own editor, so you can change a pitch, try a different rhythm,
+                or adjust a page turn and see what the player will read.
+              </p>
+              <a class="start-reading" href="#lesson/welcome">Draw your first notes →</a>
+              <p class="cover-links">
+                <a href="#lesson/setup">Use VexFlow in your app</a>
+                <a href="#playground/first-notes">Open the playground</a>
+              </p>
             </div>
-            <a id="open-playground" href="#playground/first-notes">Open in playground →</a>
+            <figure>
+              <a href="#lesson/notation/chord-and-answer"
+                ><img
+                  src="./assets/chord-and-answer.png"
+                  alt="A C major chord held for two beats, followed by a single G for two beats."
+              /></a>
+              <figcaption>
+                <a href="#lesson/notation/chord-and-answer">Pitches, durations, and chords</a>
+              </figcaption>
+            </figure>
           </div>
-          <div id="example-picker" hidden>
-            <label for="example-select">Choose an example</label
-            ><select id="example-select"></select>
+          <div id="chapter-directory"></div>
+        </section>
+        <div id="chapter" hidden>
+          <p class="eyebrow" id="section-label">Tutorial</p>
+          <h1 id="title">VexFlow User Guide</h1>
+          <p class="lead" id="summary">Learn to draw music, one example at a time.</p>
+          <article id="lesson"></article>
+
+          <div id="playground-panel" hidden>
+            <div id="example-picker" hidden>
+              <label for="example-select">Choose an example</label
+              ><select id="example-select"></select>
+            </div>
+            <p id="example-description" hidden></p>
+            <div id="playground-example"></div>
           </div>
-          <p id="example-description" hidden></p>
+          <aside class="exercise">
+            <p class="eyebrow">Exercise</p>
+            <p id="exercise"></p>
+          </aside>
+          <section id="reading" aria-label="Related lessons and sources"></section>
+          <nav class="pagination" aria-label="Lesson navigation"><a id="previous"></a><a id="next"></a></nav>
+        </div>
+        <footer>
+          Made with VexFlow. <a href="https://github.com/vexflow/vexflow/issues">Improve this guide ↗</a><br />Examples
+          run locally in your browser. VexFlow is MIT licensed.
+        </footer>
+      </main>
+    </div>
+    <div id="parked-examples" hidden></div>
+    <template id="example-template">
+      <section class="workbench" aria-label="Interactive example">
+        <div class="workbench-heading">
+          <div>
+            <h2 id="example-title" tabindex="-1">Your first four notes</h2>
+          </div>
+          <a id="open-playground" href="#playground/first-notes">Open in playground →</a>
+        </div>
+        <div class="score-scroll"><div id="frame-host"></div></div>
+        <div class="status-bar">
+          <span id="render-status" role="status">Loading example…</span><span>SVG preview</span>
+        </div>
+        <pre id="render-error" role="alert" hidden></pre>
+        <div id="controls" class="controls"></div>
+        <div
+          id="editor"
+          class="editor language-javascript"
+          role="textbox"
+          aria-label="JavaScript example"
+          aria-multiline="true"
+          spellcheck="false"
+        ></div>
+        <div class="editor-bar">
+          <span>JavaScript <span class="draft" id="draft-state"></span></span>
+          <div>
+            <label><input type="checkbox" id="auto-run" /> Run as you type</label><button id="reset">Reset</button
+            ><button id="run" class="primary">Run <span aria-hidden="true">▶</span></button>
+          </div>
+        </div>
+        <details class="tools">
+          <summary>Score settings and downloads</summary>
           <div class="preview-bar">
             <label for="font"
               >Music font
@@ -78,39 +148,21 @@
             ><label><input type="checkbox" id="bounds" /> Show bounds</label
             ><button id="save-svg" disabled>Save SVG</button>
           </div>
-          <div class="score-scroll"><div id="frame-host"></div></div>
-          <div class="status-bar">
-            <span id="render-status" role="status">Loading example…</span><span>SVG preview</span>
-          </div>
-          <pre id="render-error" role="alert" hidden></pre>
           <details id="inspector">
             <summary>Inspect notation</summary>
             <p>Hover over a note or click to pin it. The inspector shows the selected notation element.</p>
             <pre id="inspection">No element selected.</pre>
           </details>
-          <div id="controls" class="controls"></div>
-          <div class="editor-bar">
-            <span>JavaScript <span class="draft" id="draft-state"></span></span>
-            <div>
-              <label><input type="checkbox" id="auto-run" /> Run as you type</label><button id="reset">Reset</button
-              ><button id="run" class="primary">Run <span aria-hidden="true">▶</span></button>
+          <details class="export">
+            <summary>Copy or download this example</summary>
+            <div class="editor-footer">
+              <span>⌘ / Ctrl + Enter to run · Escape, then Tab to leave</span>
+              <div>
+                <button id="copy-code">Copy code</button><button id="copy-link">Copy link</button
+                ><button id="save-js">Save JS</button><button id="save-html">Save HTML</button>
+              </div>
             </div>
-          </div>
-          <div
-            id="editor"
-            class="editor language-javascript"
-            role="textbox"
-            aria-label="JavaScript example"
-            aria-multiline="true"
-            spellcheck="false"
-          ></div>
-          <div class="editor-footer">
-            <span>⌘ / Ctrl + Enter to run · Escape, then Tab to leave</span>
-            <div>
-              <button id="copy-code">Copy code</button><button id="copy-link">Copy link</button
-              ><button id="save-js">Save JS</button><button id="save-html">Save HTML</button>
-            </div>
-          </div>
+          </details>
           <details>
             <summary>Example environment and output</summary>
             <p>
@@ -121,19 +173,9 @@
             <pre id="logs" aria-label="Console output"></pre>
           </details>
           <p class="example-links" id="api-links"></p>
-        </section>
-        <aside class="exercise">
-          <p class="eyebrow">One small experiment</p>
-          <p id="exercise"></p>
-        </aside>
-        <section id="reading" aria-label="Related lessons and sources"></section>
-        <nav class="pagination" aria-label="Lesson navigation"><a id="previous"></a><a id="next"></a></nav>
-        <footer>
-          Made with VexFlow. <a href="https://github.com/vexflow/vexflow/issues">Improve this guide ↗</a><br />Examples
-          run locally in your browser. VexFlow is MIT licensed.
-        </footer>
-      </main>
-    </div>
+        </details>
+      </section>
+    </template>
     <p id="toast" role="status" hidden></p>
   </body>
 </html>
