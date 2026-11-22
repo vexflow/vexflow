@@ -12,6 +12,7 @@ const TuningTests = {
   Start(): void {
     QUnit.module('Tuning');
     QUnit.test('Standard Tuning', standard);
+    QUnit.test('Half-step-down tuning lowers every open string by one semitone', halfStepDown);
     QUnit.test('Standard Banjo Tuning', banjo);
     QUnit.test('Short fifth string and paired banjo TAB', shortFifthString);
     QUnit.test('Return note for fret', noteForFret);
@@ -60,6 +61,14 @@ function standard(assert: Assert): void {
   // Set the tuning by specifying a name: 'standard'.
   tuning.setTuning('standard');
   checkStandard(assert, tuning);
+}
+
+function halfStepDown(assert: Assert): void {
+  const standard = new Tuning('standard');
+  const eb = new Tuning('eb');
+  for (let string = 1; string <= 6; string++) {
+    assert.strictEqual(eb.getValueForString(string), standard.getValueForString(string) - 1, `String ${string}`);
+  }
 }
 
 function banjo(assert: Assert): void {

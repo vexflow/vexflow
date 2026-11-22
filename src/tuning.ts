@@ -15,7 +15,7 @@ export class Tuning {
       standard: 'E/5,B/4,G/4,D/4,A/3,E/3',
       dagdad: 'D/5,A/4,G/4,D/4,A/3,D/3',
       dropd: 'E/5,B/4,G/4,D/4,A/3,D/3',
-      eb: 'Eb/5,Bb/4,Gb/4,Db/4,Ab/3,Db/3',
+      eb: 'Eb/5,Bb/4,Gb/4,Db/4,Ab/3,Eb/3',
       standardBanjo: 'D/5,B/4,G/4,D/4,G/5',
     };
   }
