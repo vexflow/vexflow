@@ -196,3 +196,9 @@ top line, the maior spans the interior, and the maxima and double finalis
 span all four lines. Change the mark in place with `division.setKind('maior')`.
 To change the anchor before placing the notes, call
 `stave.setChantClef('C', 2)`.
+
+### White mensural and Kievan notation
+
+The mensural example pairs timed long values with four opening signs. The Kievan
+example selects a half-note form from its position on the five-line staff.
+[White mensural values and signs](white-mensural.md) · [Kievan notation](kievan-notation.md)
