@@ -16,6 +16,16 @@ export interface TimeSignatureInfo {
   num: boolean;
 }
 
+/** Opening mensuration signs share the middle staff line and the ordinary meter spacing. */
+const symbolicMeters = new Map<string, string>([
+  ['C', Glyphs.timeSigCommon],
+  ['C|', Glyphs.timeSigCutCommon],
+  ['mensural-circle', Glyphs.mensuralProlation2],
+  ['mensural-circle-dot', Glyphs.mensuralProlation1],
+  ['mensural-semicircle', Glyphs.mensuralProlation6],
+  ['mensural-semicircle-dot', Glyphs.mensuralProlation5],
+]);
+
 const assertIsValidTimeSig = (timeSpec: string) => {
   const numbers = timeSpec.split('/');
 
@@ -75,14 +85,10 @@ export class TimeSignature extends StaveModifier {
   }
 
   static getTimeSigCode(key: string, smallSig = false): string {
+    const symbol = symbolicMeters.get(key);
+    if (symbol) return symbol;
     let code: string = Glyphs.null;
     switch (key) {
-      case 'C':
-        code = Glyphs.timeSigCommon;
-        break;
-      case 'C|':
-        code = Glyphs.timeSigCutCommon;
-        break;
       case '+':
         code = smallSig ? Glyphs.timeSigPlusSmall : Glyphs.timeSigPlus;
         break;
@@ -145,10 +151,10 @@ export class TimeSignature extends StaveModifier {
    */
   setTimeSig(timeSpec: string): this {
     this.timeSpec = timeSpec;
-    if (timeSpec === 'C' || timeSpec === 'C|') {
-      const code = TimeSignature.getTimeSigCode(timeSpec);
+    const symbol = symbolicMeters.get(timeSpec);
+    if (symbol) {
       this.line = 2;
-      this.text = code;
+      this.text = symbol;
       this.isNumeric = false;
     } else {
       if (this.validateArgs) {
