@@ -114,6 +114,7 @@ const clefs: Record<string, { lineShift: number }> = {
   treble: { lineShift: 0 },
   bass: { lineShift: 6 },
   tenor: { lineShift: 4 },
+  kievan: { lineShift: 3 },
   alto: { lineShift: 3 },
   soprano: { lineShift: 1 },
   percussion: { lineShift: 0 },

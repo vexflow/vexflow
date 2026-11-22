@@ -33,6 +33,7 @@ import { GraceNoteGroup } from './gracenotegroup';
 import { GraceTabNote } from './gracetabnote';
 import { KeySignature } from './keysignature';
 import { KeySigNote } from './keysignote';
+import { KievanNote, KievanNoteStruct } from './kievannote';
 import { Modifier } from './modifier';
 import { ModifierContext } from './modifiercontext';
 import { MultiMeasureRest, MultimeasureRestRenderOptions } from './multimeasurerest';
@@ -441,6 +442,13 @@ export class Factory {
   /** Place a German lute attack on the current staffless stave. */
   GermanLuteNote(spec: GermanLuteNoteStruct): GermanLuteNote {
     const note = this.musicGlyph(new GermanLuteNote(spec)).setContext(this.context);
+    if (this.stave) note.setStave(this.stave);
+    return this.adopt(note, 'note');
+  }
+
+  /** Engrave a written pitch with its Kievan half-note form. */
+  KievanNote(spec: KievanNoteStruct): KievanNote {
+    const note = this.musicGlyph(new KievanNote(spec)).setContext(this.context);
     if (this.stave) note.setStave(this.stave);
     return this.adopt(note, 'note');
   }

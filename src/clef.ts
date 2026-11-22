@@ -72,6 +72,7 @@ export class Clef extends StaveModifier {
     const { gClef, fClef, cClef, unpitchedPercussionClef1, sixStringTabClef } = Glyphs;
 
     return {
+      kievan: { code: Glyphs.kievanCClef, line: 2 },
       'chant-c': { code: Glyphs.chantCclef, line: 1 },
       'chant-f': { code: Glyphs.chantFclef, line: 2 },
       treble: {

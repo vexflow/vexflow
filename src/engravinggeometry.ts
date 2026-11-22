@@ -14,6 +14,7 @@ import { GermanLuteNote } from './germanlutenote';
 import { GraceNote } from './gracenote';
 import { GraceNoteGroup } from './gracenotegroup';
 import { HarpPedalDiagram } from './harppedaldiagram';
+import { KievanNote } from './kievannote';
 import { Ornament } from './ornament';
 import { PedalMarking } from './pedalmarking';
 import { StaveHairpin } from './stavehairpin';
@@ -113,6 +114,10 @@ export function measureEngraving(element: Element, options: GeometryOptions = {}
         const note = owner as StaveNote;
         Object.assign(shape, noteShape(note));
         if (note.renderOptions.draw !== false) children(note.getModifiers());
+      } else if (kind === KievanNote) {
+        const note = owner as KievanNote;
+        shape.parts.push(note.getTextInk(note.getAbsoluteX(), note.getYs()[0]));
+        children(note.getModifiers());
       } else if (kind === GermanLuteNote) {
         const note = owner as GermanLuteNote;
         shape.parts.push(...note.getInkParts());
