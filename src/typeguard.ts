@@ -96,6 +96,7 @@ export const enum Category {
   GraceTabNote = 'GraceTabNote',
   KeySignature = 'KeySignature',
   KeySigNote = 'KeySigNote',
+  KievanNote = 'KievanNote',
   Modifier = 'Modifier',
   MultiMeasureRest = 'MultiMeasureRest',
   Note = 'Note',

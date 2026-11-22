@@ -50,6 +50,7 @@ export * from './harppedals';
 export * from './keymanager';
 export * from './keysignature';
 export * from './keysignote';
+export * from './kievannote';
 export * from './metrics';
 export * from './modifier';
 export * from './modifiercontext';

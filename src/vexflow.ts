@@ -43,6 +43,7 @@ import { FrettedInstrument, PercussionMap } from './instrumentprofile';
 import { KeyManager } from './keymanager';
 import { KeySignature, KeySignaturePresets } from './keysignature';
 import { KeySigNote } from './keysignote';
+import { KievanNote } from './kievannote';
 import { Metrics, MetricsDefaults } from './metrics';
 import { Modifier, ModifierPosition } from './modifier';
 import { ModifierContext } from './modifiercontext';
@@ -157,6 +158,7 @@ export class VexFlow {
   static KeySignature = KeySignature;
   static KeySignaturePresets = KeySignaturePresets;
   static KeySigNote = KeySigNote;
+  static KievanNote = KievanNote;
   static Modifier = Modifier;
   static ModifierContext = ModifierContext;
   static MultiMeasureRest = MultiMeasureRest;
