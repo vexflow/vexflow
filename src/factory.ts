@@ -25,6 +25,7 @@ import { FontInfo } from './font';
 import { Formatter, FormatterOptions } from './formatter';
 import { FrenchLuteNote, FrenchLuteNoteStruct } from './frenchlutenote';
 import { FretHandFinger } from './frethandfinger';
+import { GermanLuteNote, GermanLuteNoteStruct } from './germanlutenote';
 import { GhostNote } from './ghostnote';
 import { GlyphNote, GlyphNoteOptions } from './glyphnote';
 import { GraceNote, GraceNoteStruct } from './gracenote';
@@ -435,6 +436,13 @@ export class Factory {
     note.setContext(this.context);
     this.renderQ.push(note);
     return this.own(note);
+  }
+
+  /** Place a German lute attack on the current staffless stave. */
+  GermanLuteNote(spec: GermanLuteNoteStruct): GermanLuteNote {
+    const note = this.musicGlyph(new GermanLuteNote(spec)).setContext(this.context);
+    if (this.stave) note.setStave(this.stave);
+    return this.adopt(note, 'note');
   }
 
   GlyphNote(glyph: string, noteStruct: NoteStruct, options?: GlyphNoteOptions): GlyphNote {

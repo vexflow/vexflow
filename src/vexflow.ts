@@ -30,6 +30,7 @@ import { Fraction } from './fraction';
 import { FrenchLuteNote } from './frenchlutenote';
 import { FretDiagram } from './fretdiagram';
 import { FretHandFinger } from './frethandfinger';
+import { GermanLuteNote } from './germanlutenote';
 import { GhostNote } from './ghostnote';
 import { GlyphNote } from './glyphnote';
 import { Glyphs } from './glyphs';
@@ -145,6 +146,7 @@ export class VexFlow {
   static Formatter = Formatter;
   static Fraction = Fraction;
   static FretHandFinger = FretHandFinger;
+  static GermanLuteNote = GermanLuteNote;
   static GhostNote = GhostNote;
   static GlyphNote = GlyphNote;
   static GraceNote = GraceNote;

@@ -40,6 +40,7 @@ export * from './font_tests';
 export * from './formatter_tests';
 export * from './fraction_tests';
 export * from './frenchlutenote_tests';
+export * from './germanlutenote_tests';
 export * from './ghostnote_tests';
 export * from './glyphnote_tests';
 export * from './gracenote_tests';
