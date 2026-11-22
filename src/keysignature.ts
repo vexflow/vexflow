@@ -19,6 +19,40 @@ import { defined, RuntimeError } from './util';
 export type OrderedKeySign =
   { type: string; pitch: string; line?: never } | { type: string; line: number; pitch?: never };
 
+/** Snapshot a definition before it becomes part of a reusable preset or a score. */
+function copyOrderedSigns(entries: readonly OrderedKeySign[]): OrderedKeySign[] {
+  for (const entry of entries) {
+    const placed =
+      entry.pitch !== undefined
+        ? entry.line === undefined &&
+          /^[a-g]\/-?\d+$/i.test(entry.pitch) &&
+          Number.isSafeInteger(Number(entry.pitch.split('/')[1]))
+        : Number.isSafeInteger(entry.line * 2);
+    if (!entry.type || !placed)
+      throw new RuntimeError('BadArguments', 'Expected an accidental with a written pitch or a staff line or space.');
+  }
+  return entries.map((entry) => ({ ...entry }));
+}
+
+/** An edition's named written signatures. Each selection creates an independent stave modifier. */
+export class KeySignaturePresets {
+  private readonly definitions = new Map<string, OrderedKeySign[]>();
+
+  /** Register or replace an edition's definition. Existing selections keep their own signs. */
+  register(name: string, entries: readonly OrderedKeySign[]): this {
+    if (!name.trim()) throw new RuntimeError('BadKeySignature', 'Expected a named key signature preset.');
+    this.definitions.set(name, copyOrderedSigns(entries));
+    return this;
+  }
+
+  /** Select a signature by its exact name within this edition. */
+  select(name: string): KeySignature {
+    const signs = this.definitions.get(name);
+    if (!signs) throw new RuntimeError('BadKeySignature', `Unknown key signature preset: '${name}'.`);
+    return new KeySignature('C').setOrdered(signs);
+  }
+}
+
 export class KeySignature extends StaveModifier {
   static override get CATEGORY(): string {
     return Category.KeySignature;
@@ -28,17 +62,7 @@ export class KeySignature extends StaveModifier {
 
   /** Preserve the author's sign order. Resolve pitches against the active clef during formatting. */
   setOrdered(entries: readonly OrderedKeySign[]): this {
-    for (const entry of entries) {
-      const placed =
-        entry.pitch !== undefined
-          ? entry.line === undefined &&
-            /^[a-g]\/-?\d+$/i.test(entry.pitch) &&
-            Number.isSafeInteger(Number(entry.pitch.split('/')[1]))
-          : Number.isSafeInteger(entry.line * 2);
-      if (!entry.type || !placed)
-        throw new RuntimeError('BadArguments', 'Expected an accidental with a written pitch or a staff line or space.');
-    }
-    this.ordered = entries.map((entry) => ({ ...entry }));
+    this.ordered = copyOrderedSigns(entries);
     this.formatted = false;
     return this;
   }

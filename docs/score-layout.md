@@ -143,3 +143,18 @@ const restatement = new KeySigNote('C').setOrdered(signs);
 ```
 
 Put the restatement after a `ClefNote` in the same voice to use that clef. For a clef change written in another voice, supply the active clef in the factory call, for example `factory.KeySigNote({ key: 'C', clef: 'alto' }).setOrdered(signs)`.
+
+### Edition-defined signatures
+
+Create one `KeySignaturePresets` collection per edition. In this Sabâ exercise, the caller supplies a koma flat on B4 and a bakiye flat on D5. The collection keeps the written signs in order. It makes a fresh modifier each time you select the name.
+
+```js
+const edition = new KeySignaturePresets().register('Sabâ', [
+  { type: Glyphs.accidentalKomaFlat, pitch: 'b/4' },
+  { type: Glyphs.accidentalBakiyeFlat, pitch: 'd/5' },
+]);
+firstStave.addModifier(edition.select('Sabâ'));
+secondStave.addModifier(edition.select('Sabâ'));
+```
+
+A second collection can register the same name with different signs. Names are exact. An unknown name raises `BadKeySignature`.
