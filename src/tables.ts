@@ -1,5 +1,7 @@
 // Copyright (c) 2023-present VexFlow contributors: https://github.com/vexflow/vexflow/graphs/contributors
 
+// Shared notation tables and written-pitch, clef, and duration lookups.
+
 import { ArticulationStruct } from './articulation';
 import { Fraction } from './fraction';
 import { Glyphs } from './glyphs';
@@ -106,6 +108,9 @@ const keySignatures: Record<string, KeySignature> = {
 };
 
 const clefs: Record<string, { lineShift: number }> = {
+  // Default chant clefs mark C4 on the second line from the top and F3 on the third.
+  'chant-c': { lineShift: 4 },
+  'chant-f': { lineShift: 5 },
   treble: { lineShift: 0 },
   bass: { lineShift: 6 },
   tenor: { lineShift: 4 },

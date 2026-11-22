@@ -5,7 +5,9 @@
 
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
 
+import { ChantDivision, ChantDivisionKind, ChantStave } from '../src/chantstave';
 import { Clef } from '../src/clef';
+import { GlyphNote } from '../src/glyphnote';
 import { Glyphs } from '../src/glyphs';
 
 const ClefTests = {
@@ -14,6 +16,7 @@ const ClefTests = {
     const run = VexFlowTests.runTests;
     run('Bounding Box', draw, { drawBoundingBox: true });
     run('Bounding Box Clef Change', drawClefChange, { drawBoundingBox: true });
+    run('Chant clefs and divisions', chantClefsAndDivisions, {}, ['Bravura']);
     run('Double-octave clefs', doubleOctaveClefs);
     run('Clef Test', draw, { drawBoundingBox: false });
     run('Clef End Test', drawEnd);
@@ -22,6 +25,81 @@ const ClefTests = {
     run('Clef Change Test', drawClefChange, { drawBoundingBox: false });
   },
 };
+
+/** Match the two example phrases and move the upper clef while keeping the written C. */
+function chantClefsAndDivisions(options: TestOptions): void {
+  const f = VexFlowTests.makeFactory(options, 620, 280);
+  const { assert } = options;
+  const glyphs = [
+    Glyphs.chantDivisioMinima,
+    Glyphs.chantDivisioMaior,
+    Glyphs.chantDivisioMaxima,
+    Glyphs.chantDivisioFinalis,
+  ];
+  const kinds: ChantDivisionKind[] = ['minima', 'maior', 'maxima', 'finalis'];
+  for (const [i, clef] of (['C', 'F'] as const).entries()) {
+    const anchor = clef === 'C' ? 'c/4' : 'f/3';
+    const keys =
+      clef === 'C'
+        ? ['c/4', 'd/4', 'd/4', 'e/4', 'e/4', 'd/4', 'd/4', 'c/4']
+        : ['f/3', 'g/3', 'a/3', 'g/3', 'a/3', 'g/3', 'g/3', 'f/3'];
+    const stave = new ChantStave(10, 5 + i * 125, 600, {
+      clef,
+      line: clef === 'C' ? 3 : 2,
+      spacingBetweenLinesPx: 12,
+    }).setContext(f.getContext());
+    const originalY = stave.getYForPitch(anchor);
+    if (clef === 'C') {
+      stave.setChantClef('C', 2);
+      assert.equal(stave.getYForPitch(anchor), originalY + 12, 'C follows the clef down one line');
+      stave.setChantClef('C', 3);
+      assert.equal(stave.getLineForPitch('b/3'), 1.5, 'B to middle C crosses an octave by a half-space');
+    }
+    const mark = stave.getModifiers(undefined, Clef.CATEGORY)[0] as Clef;
+    assert.equal(mark.code, clef === 'C' ? Glyphs.chantCclef : Glyphs.chantFclef, 'uses the chant clef glyph');
+    assert.equal(mark.getGlyphY(), originalY, 'the first punctum sits on its clef line');
+    const notes = keys.map(
+      (p) => new GlyphNote(Glyphs.chantPunctum, { duration: 'q' }, { line: stave.getLineForPitch(p) })
+    );
+    const divisions = kinds.map((kind) => new ChantDivision(kind));
+    const voice = f.Voice({ time: '8/4' });
+    for (let j = 0; j < divisions.length; j++) voice.addTickables([notes[2 * j], notes[2 * j + 1], divisions[j]]);
+    // All eight quarters fill a strict voice; the four intervening divisions take no musical time.
+    assert.ok(voice.isComplete(), 'strict voice counts only the eight pitches');
+    for (const [j, division] of divisions.entries()) {
+      assert.ok(division.shouldIgnoreTicks(), 'a phrase division has no duration in the voice');
+      assert.equal(division.getText(), glyphs[j], 'uses the requested division glyph');
+    }
+    divisions[0].setKind('maior');
+    assert.equal(divisions[0].getText(), Glyphs.chantDivisioMaior, 'replaces the mark in place');
+    assert.equal(voice.getTickables()[1], notes[1], 'keeps the preceding pitch');
+    assert.equal(voice.getTickables()[3], notes[2], 'keeps the following pitch');
+    assert.ok(voice.isComplete(), 'changing a division preserves musical duration');
+    divisions[0].setKind('minima');
+    stave.draw();
+    f.Formatter().joinVoices([voice]).formatToStave([voice], stave, { stave });
+    voice.draw(f.getContext(), stave);
+    const extents = [
+      [-0.5, 0.5],
+      [0.5, 2.5],
+      [0, 3],
+      [0, 3],
+    ];
+    for (const [j, division] of divisions.entries()) {
+      const box = division.getBoundingBox();
+      assert.ok(Math.abs(box.y - stave.getYForLine(extents[j][0])) <= 2, 'starts on the specified line or space');
+      // WebKit clamps negative text descent to zero for a glyph entirely above its baseline (minima).
+      if (j === 0) assert.equal(division.getY(), stave.getYForLine(1.5), 'minima uses its SMuFL center-staff origin');
+      else
+        assert.ok(
+          Math.abs(box.y + box.h - stave.getYForLine(extents[j][1])) <= 2,
+          'ends on the specified line or space'
+        );
+      assert.ok(division.getAbsoluteX() > notes[2 * j + 1].getAbsoluteX(), 'division follows its pair of puncta');
+      if (j < 3) assert.ok(division.getAbsoluteX() < notes[2 * j + 2].getAbsoluteX(), 'next pair follows the division');
+    }
+  }
+}
 
 /** Compare full-size and small inline forms at the same written pitch and inspect their visible ink. */
 function doubleOctaveClefs(options: TestOptions): void {
