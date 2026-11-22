@@ -1,3 +1,10 @@
+# 5.9.0
+
+- **Guitar and banjo.** Rotate chord frames, look up guitar voicings by chord symbol and tuning, and write for a five-string banjo with a short drone string. Half-step-down guitar tuning now gives E♭ on the open sixth string.
+- **Instrument parts.** Print a concert harp’s seven-pedal setting or only the changes at an entrance. Show accordion reed registers, flute fingerings and moving trill keys. Align percussion sticking through system breaks and expand named Highland pipe ornaments into grace notes. [Harp lesson](https://vexflow.com/guide/#lesson/instrument-signs)
+- **Pitch and early notation.** Place custom key signatures by written pitch and clef, select edition-specific makam signatures, and assign four-shape noteheads by scale degree. Engrave French and German lute tablature, four-line chant with square neumes, white mensural long values, interstaff Mensurstriche and Kievan half notes. [Historical notation lesson](https://vexflow.com/guide/#lesson/early-notation)
+- Browse the [illustrated feature catalog](https://vexflow.com/features/), [user guide](https://vexflow.com/guide/), [test gallery](https://vexflow.com/tests/) and [PDF editions](https://vexflow.com/pdfs/). See the [illustrated changes since 5.0](https://vexflow.com/reports/ai2026/) and the [5.9.0 quality report](https://vexflow.com/reports/5.9.0/).
+
 # 5.8.0
 
 - **Rhythm and parts.** Staves can follow independent meters across the same musical span. Tuplets can cross measure boundaries. Conductor scores can condense two players onto one stave, and quoted cues can transpose into the receiving instrument’s written key. Ossias can span several measures. [Continuous scores](../docs/vf6/m4.md) · [Parts and publication](../docs/vf6/m5.md)

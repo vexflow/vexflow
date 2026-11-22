@@ -3,6 +3,259 @@
 export const topics = [
   [
     'Features',
+    'New in 5.9.0',
+    [
+      [
+        'Horizontal guitar chord frames',
+        'The same D grip turns sideways with high E on top. The open circle and two mutes sit to the left of the nut. The second grip shows the upright fifth-fret label and partial barre.',
+        'issues/420',
+      ],
+      [
+        'Guitar voicing lookup',
+        'The open C voicing mutes low E. The open C/E voicing sounds it. Their bass notes and every sounded pitch were checked against standard guitar tuning. A second C voicing can be selected by name.',
+        'issues/421',
+      ],
+      [
+        'Five-string banjo tablature',
+        'The fifth-string TAB still reads 0 and 7. The paired staff now shows G and A, two semitones apart. Fret 7 on the full-length first string still raises its open D by seven semitones.',
+        'issues/422',
+      ],
+      [
+        'Seven-pedal harp diagrams',
+        'Read the left-foot pedals D C B before the divider and the right-foot pedals E F G A after it. The second setting moves only F from sharp to natural.',
+        'issues/423',
+      ],
+      [
+        'Harp pedal changes',
+        'Starting from seven naturals, the first change prints B♭ and F♯. Repeating the setting leaves that entrance clear. Returning F to natural prints F♮.',
+        'issues/424',
+      ],
+      [
+        'Accordion reed registers',
+        'Compare the single middle reed, the high and low reeds together, and the double middle reeds. Each register stays with its entrance when note spacing changes.',
+        'issues/425',
+      ],
+      [
+        'Flute fingering diagrams',
+        'The first fingering closes L1, L2 and R1. The second also closes L3. Both diagrams keep the same hand groups and key order.',
+        'issues/426',
+      ],
+      [
+        'Moving woodwind trill keys',
+        'R2 alternates between open and closed while the other five keys keep their positions. Compare the static and moving key at both sizes.',
+        'issues/427',
+      ],
+      [
+        'Percussion sticking',
+        'Follow R L R R, then L R L L. The letters share a baseline on each system, clear the below-staff accent, and stay centered on their attacks through a line break.',
+        'issues/428',
+      ],
+      [
+        'Named Highland embellishments',
+        'Both examples land on low A. The grip plays low G, D, low G. The taorluath adds E. The earlier example enters each pitch by hand. The named forms produce the same engraving.',
+        'issues/429',
+      ],
+      [
+        'Clef-aware written key signatures',
+        'The same G4 flat and E4 sharp are placed in treble and alto. The signs keep their input order when the clef changes and return to their original positions in treble.',
+        'issues/430',
+      ],
+      [
+        'Named makam key signatures',
+        'Two passages select Sabâ by name. The edition supplies a koma flat on B and a bakiye flat on D. Selecting another edition uses that edition’s written signs.',
+        'issues/431',
+      ],
+      [
+        'Movable four-shape notes',
+        'The C-major and D-major scales share the same degree sequence. Written E takes a square in C and an oval in D. The written pitches, quarter-note durations and key signatures are preserved.',
+        'issues/432',
+      ],
+      [
+        'French lute fret letters',
+        'The top course reads a, b, c, i, k. Open bass courses 7, 8 and 9 sit below the six ruled courses and carry distinct signs.',
+        'issues/433',
+      ],
+      [
+        'Staffless German lute tablature',
+        'The four attacks read a, b, f, k on a staffless row. Changing the first attack from course 5 to course 4 changes a to b and preserves the rhythm and spacing.',
+        'issues/434',
+      ],
+      [
+        'Chant clefs and divisions',
+        'The C and F clefs move between staff lines. Written pitches follow the selected clef. The four divisions reserve space without adding musical time.',
+        'issues/435',
+      ],
+      [
+        'Syllabic square neumes',
+        'Lu-mi-na sets five pitches under three syllables. C–D rises as a podatus, E–D falls as a clivis and the final C is a punctum. The narrow example breaks before the last syllable.',
+        'issues/436',
+      ],
+      [
+        'White mensural notation',
+        'The maxima, longa and brevis retain the exercise’s four, two and one breve units. The sign row shows a circle and semicircle, each with and without a dot.',
+        'issues/437',
+      ],
+      [
+        'Interstaff Mensurstriche',
+        'The two internal measure boundaries run between the facing staff lines. Increasing the staff spacing lengthens both strokes. The held upper A and the two bass attacks keep their timing.',
+        'issues/438',
+      ],
+      [
+        'Kievan half notes',
+        'The seven half notes use the Kievan line and space forms. Moving the second pitch from D to E replaces its space form with the line form and preserves the half-note duration.',
+        'issues/439',
+      ],
+      [
+        'Corrected sixth string in half-step-down tuning',
+        'The sixth open string now reads E♭3, one semitone below standard E3. The regression test caught the previous pitch (37) on string 6 and now passes on all six strings, including the corrected pitch (39).',
+        'issues/400',
+      ],
+    ],
+  ],
+  [
+    'Features',
+    'New in 5.8.0',
+    [
+      [
+        'SVG attribute filtering',
+        'The SVG renderer checks attribute names before applying them to live elements.',
+        'src/svgcontext.ts',
+      ],
+      [
+        'New engraving in five featured scores',
+        'The test gallery puts chord-frame fingerings, flared hairpins and pitched trills into complete musical phrases.',
+        'tests/flow.html',
+        'tool-gallery',
+      ],
+      [
+        'Additional barline styles',
+        'Dashed, dotted and double-heavy bars now work at stave ends and inside a voice. The upper row shows the full span. The lower row shows the shortened span. Compare the last two columns with the unchanged double-thin and final bars. The 5.7.0 panel uses single bars for the three previously unavailable styles.',
+        'issues/388',
+      ],
+      [
+        'Bracketed editorial accidentals',
+        "Use setAsCautionary('brackets') for an editorial sign. The no-argument call still uses round parentheses. In the final chord, the plain G♯ and bracketed B♮ clear each other and their noteheads without offsets.",
+        'issues/389',
+      ],
+      [
+        'Double-octave clefs',
+        'Treble and bass clefs now accept 15ma and 15mb at stave and inline sizes. Follow each small clef to its quarter note. The last two columns show the existing single-octave controls. The measured bounds include the full numeral in all three browsers.',
+        'issues/390',
+      ],
+      [
+        'Dashed pitch ties',
+        "StaveTie.setStyle({ lineDash: '4 3' }) now draws an open dashed arc. The lower E is tied and the upper B is struck twice. The solid G tie is the control. A continuous tie with dashed: true carries the pattern and selected pitches through a system break.",
+        'issues/392',
+      ],
+      [
+        'Laissez vibrer ties',
+        'A let-ring tie can now leave one selected head above or below the chord. The reach is measured from that head in pixels. The quarter rest still starts on beat two. The regular D tie in the last bar is the control.',
+        'issues/393',
+      ],
+      [
+        'Pitched trill cues',
+        'Both principals are half-note Gs. The parenthesized flat and head identify B-flat in the first bar. The second bar shows A with an explicit natural. Both full-size As still start on beat three. The final two bars show the plain and accidental-only controls.',
+        'issues/394',
+      ],
+      [
+        'Fingering inside chord frames',
+        'D major reads 1 3 2 and C major reads 3 2 1 from the lowest stopped string to the highest. In the third frame, only the G-string digit has been cleared.',
+        'issues/395',
+      ],
+      [
+        'Aligned stanza numbers',
+        'Compare 1. and 12. at the left of the first system. “Bright” and “The” stay centered on the first G. The labels appear once when the hymn wraps onto two systems.',
+        'issues/396',
+      ],
+      [
+        'Multi-measure ossias',
+        'The reduced staff covers bars 2–3. Its middle barline lines up with the main melody. After a break, the remaining six eighth notes resume above bar 3, and the ossia ends before bar 4.',
+        'issues/397',
+      ],
+      [
+        'Figured-bass continuation lines',
+        'Read 6 above 4 on beat one. The 6 holds through beat three. The lower 4 resolves to 3 on beat two and holds through beat four, where a new 5 appears above it. The lines follow their own endpoints at both widths.',
+        'issues/398',
+      ],
+      [
+        'Timed niente dynamics',
+        'The four-beat phrase begins at piano and arrives at niente on the last G. The earlier version rejected n, so its comparison shows the supported piano with the last beat left empty. The new version prints one niente letter on the same baseline after resizing.',
+        'issues/410',
+      ],
+      [
+        'Flared hairpins',
+        'The flared crescendo opens to a quarter of its final aperture halfway through the mark. The diminuendo mirrors it. Compare the straight controls at the same widths. With a system break, each fragment continues the curve from the preceding system.',
+        'issues/411',
+      ],
+      [
+        'Parenthesized turns',
+        'The first G carries a plain turn. The second carries the same named ornament in parentheses. The signs are included in its measured bounds and stay clear of the turn when the passage is redrawn.',
+        'issues/412',
+      ],
+      [
+        'Half-dashed slurs',
+        'The five-note phrase changes from dashed to solid above the middle B. Both parts follow the same curve. The comparison shows the join at two widths.',
+        'issues/413',
+      ],
+      [
+        'Wavy glissandi',
+        'The slide from G4 to D5 rises and the slide to A4 falls. The narrower score fits fewer waves between the heads. After a system break, each fragment keeps the direction of the slide.',
+        'issues/414',
+      ],
+      [
+        'French-style interior stems',
+        'Compare the two middle stems with the outer stems. In the French group the middle stems end at the beam closest to the heads, leaving the gap between strips clear. The four sixteenths still occupy one beat.',
+        'issues/415',
+      ],
+      [
+        'Tuplets across measures and systems',
+        'The earlier score uses two local triplets to fit the bar durations. The new score declares six members once. Their bracket shows one 6 and continues across the break. The next quarter still lands on beat two.',
+        'issues/416',
+      ],
+      [
+        'Independent meters on a shared pulse',
+        'The earlier renderer required separate parts for the two meters. The new score aligns twelve quarter-note attacks on two staves. The upper staff counts in threes and the lower in fours. At the break after pulse six, the lower staff resumes on beat three of its second local bar.',
+        'issues/417',
+      ],
+      [
+        'Transposing quoted cues',
+        'The clarinet part quotes the flute a written major second higher, in D major. Changing the flute’s final A to B-flat produces C natural in the cue. The attribution, cue size and clarinet rest are preserved.',
+        'issues/418',
+      ],
+      [
+        'Two-player conductor staves',
+        'Both flute parts come from the same source. The conductor sees “1.” for the solo, “a2” for the unison and opposing stems when the lines divide. The independent parts keep their original pitches, durations and rests.',
+        'issues/419',
+      ],
+      [
+        'Fret-hand fingering on tablature',
+        'The earlier version threw during formatting, so its panel shows the unmarked frets. The new fingering follows the selected string in a TAB chord. The comparison includes an open string, a nonnumeric label and an enclosed finger digit beside its fret.',
+        'issues/446',
+      ],
+      [
+        'Shared unison accidentals',
+        'The shared E-sharp carries one automatic sharp. The two voices keep their notes, and each independent extraction prints its own sharp.',
+        'issues/447',
+      ],
+      [
+        'TAB ties clear neighboring voices',
+        'The fitted tie accounts for the other voice’s fret digits. The comparison shows the authored and automatic sides on the sustained string.',
+        'issues/448',
+      ],
+      [
+        'Validated dashed-line patterns',
+        'Dashed-line drawing validates the pattern before changing the current path. The engraving comparison covers text brackets and circled string numbers.',
+        'issues/403',
+      ],
+      [
+        'Bounded beam slope fitting',
+        'Beam fitting checks both ends of a bounded slope range. Equal limits select a fixed slope. The comparison shows the default engraving on four passages.',
+        'issues/404',
+      ],
+    ],
+  ],
+  [
+    'Features',
     'New in 5.7.0',
     [
       [

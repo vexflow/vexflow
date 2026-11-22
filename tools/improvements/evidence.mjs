@@ -109,6 +109,7 @@ export async function printFigures(browser, staging, head) {
 
 // For changes without a visible score, select the actual implementation, tests, or design record.
 const references = {
+  'SVG attribute filtering': ['src/svgcontext.ts', 'function isUnsafeAttributeName'],
   'Modules and older Safari': ['src/util.ts', 'structured-clone-es'],
   'Registry keys': ['src/registry.ts', 'this.id = Object.create'],
   'Bounded notation parsing': ['src/fraction.ts', 'Invalid numbers'],

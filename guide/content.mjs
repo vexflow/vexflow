@@ -579,6 +579,32 @@ const voice = score.voice(score.notes('C5/h, G5/q'), { time: '3/4' });`
     ['repo:src/tabnote.ts', 'repo:src/tabstave.ts']
   ),
   lesson(
+    'instrument-signs',
+    'api',
+    'Write a harp part',
+    'Give the harpist a starting pedal diagram, then print just the changes.',
+    ['harp-setting', 'harp-changes'],
+    `<p>A concert harp has one pedal for each letter name. Moving the F pedal changes every F on the instrument. Give the player a complete diagram before the phrase begins. Read D, C and B on the left of the divider, then E, F, G and A on the right.</p>
+<h2>Read a complete setting</h2><p>In the first example, the F tick points down for sharp. Change it to <code>'flat'</code> and run the example again. The tick moves above the rail. The notes still come from the melody you wrote.</p>
+<h2>Mark a change during the phrase</h2><p>Open the second example. At the rest, the harpist moves B to flat and F to sharp. On beat three both are already in position, so the score leaves that beat clear. On beat four only F returns to natural. Keep the same <code>HarpPedalChanges</code> object as the part continues so it remembers the last setting.</p>`,
+    'Add a G-sharp to the last pedal change. Read the two letters beneath the final note in pedal order.',
+    ['modifiers', 'native-notes-lesson'],
+    ['repo:docs/score-layout.md', 'repo:docs/text-and-lyrics.md']
+  ),
+  lesson(
+    'early-notation',
+    'api',
+    'Read two historical scripts',
+    'Explore how mensural notation shows duration and Kievan notation shows pitch.',
+    ['mensural-values', 'kievan-pitches'],
+    `<p>Look at the three long notes in the first example. In this exercise a maxima lasts four breves, a longa lasts two and a brevis lasts one. The semicircle at the start is the printed mensuration sign. The durations on the notes give this exercise its timing.</p>
+<h2>Change the sign</h2><p>Replace <code>mensural-semicircle</code> with <code>mensural-circle-dot</code>. Look for the dot inside the circle, then trace the same three written values.</p>
+<h2>Follow a Kievan melody</h2><p>Open the second example. Here each note lasts half a whole note. The tse-fa-ut clef puts C on the middle line. D sits in the space above it and uses a different sign. Follow the line and space forms as the melody rises and returns to C.</p>`,
+    'Change the second Kievan pitch from d/4 to e/4. Compare its new shape with the first C and count the seven half notes again.',
+    ['native-notes-lesson', 'meter'],
+    ['repo:docs/white-mensural.md', 'repo:docs/kievan-notation.md']
+  ),
+  lesson(
     'structure',
     'api',
     'Repeats and score structure',

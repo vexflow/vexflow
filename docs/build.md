@@ -280,8 +280,11 @@ The guide and visual test gallery are self-contained static sites. Their upload 
 | Site         | Build only               | Upload                    | Bucket prefix                | Public URL                      |
 | ------------ | ------------------------ | ------------------------- | ---------------------------- | ------------------------------- |
 | User guide   | `npm run guide:build`    | `npm run guide:upload`    | `gs://vexflow.com/guide/`    | <https://vexflow.com/guide/>    |
+| Features | `npm run features:build` | `npm run features:upload` | `gs://vexflow.com/features/` | <https://vexflow.com/features/> |
 | Legacy notice | `npm run explorer:build` | `npm run explorer:upload` | `gs://vexflow.com/explorer/` | <https://vexflow.com/explorer/> |
 | Test gallery | `npm run tests:build`    | `npm run tests:upload`    | `gs://vexflow.com/tests/`    | <https://vexflow.com/tests/>    |
+
+The feature catalog builds to `build/features/`. Edit descriptions, search terms, category order, and the 15 carousel highlights in `tools/features/catalog.mjs`. The reviewed PNGs in `tools/features/images/` are snapshots from the illustrated report and issue reviews. Their learning and evidence links are in `sources.json`. The build creates compact previews and preserves the full images for the viewer. Run `npm run features:test` to check the catalog in Chromium, or `npm run features:upload -- --dry-run` to preview publication.
 
 The legacy Explorer upload publishes only a short HTML notice linking to the guide. Old bookmarks, including example and glyph fragments, open that page.
 
@@ -322,7 +325,7 @@ Uploads compare checksums and transfer changed assets first, with a one-year imm
 
 ### Clean up retired website assets
 
-Preview one site at a time. Supported names are `guide`, `explorer`, `tests`, and `reports/ai2026`. The first successful managed upload records the current inventory and starts the migration clock.
+Preview one site at a time. Supported names are `guide`, `explorer`, `tests`, `features`, and `reports/ai2026`. The first successful managed upload records the current inventory and starts the migration clock.
 
 ```sh
 npm run sites:clean -- guide

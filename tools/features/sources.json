@@ -1,0 +1,369 @@
+{
+  "example-rhythm-basics": {
+    "url": "https://vexflow.com/guide/#playground/rhythm-basics",
+    "label": "Try in the guide"
+  },
+  "example-chord-and-answer": {
+    "url": "https://vexflow.com/guide/#playground/chord-and-answer",
+    "label": "Try in the guide"
+  },
+  "example-clefs": {
+    "url": "https://vexflow.com/guide/#playground/clefs",
+    "label": "Try in the guide"
+  },
+  "example-keys": {
+    "url": "https://vexflow.com/guide/#playground/keys",
+    "label": "Try in the guide"
+  },
+  "example-meter": {
+    "url": "https://vexflow.com/guide/#playground/meter",
+    "label": "Try in the guide"
+  },
+  "example-accidentals": {
+    "url": "https://vexflow.com/guide/#playground/accidentals",
+    "label": "Try in the guide"
+  },
+  "example-dots": {
+    "url": "https://vexflow.com/guide/#playground/dots",
+    "label": "Try in the guide"
+  },
+  "example-barlines": {
+    "url": "https://vexflow.com/guide/#playground/barlines",
+    "label": "Try in the guide"
+  },
+  "case-a23ef711b0b32ea5": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-case-a23ef711b0b32ea5",
+    "label": "View report exhibit"
+  },
+  "example-beam-groups": {
+    "url": "https://vexflow.com/guide/#playground/beam-groups",
+    "label": "Try in the guide"
+  },
+  "example-triplet-bar": {
+    "url": "https://vexflow.com/guide/#playground/triplet-bar",
+    "label": "Try in the guide"
+  },
+  "m2-four-voices": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-m2-four-voices",
+    "label": "View report exhibit"
+  },
+  "example-ties": {
+    "url": "https://vexflow.com/guide/#playground/ties",
+    "label": "Try in the guide"
+  },
+  "m2-grace-sides": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-m2-grace-sides",
+    "label": "View report exhibit"
+  },
+  "example-tremolo": {
+    "url": "https://vexflow.com/guide/#playground/tremolo",
+    "label": "Try in the guide"
+  },
+  "example-multirests": {
+    "url": "https://vexflow.com/guide/#playground/multirests",
+    "label": "Try in the guide"
+  },
+  "example-automatic-beams": {
+    "url": "https://vexflow.com/guide/#playground/automatic-beams",
+    "label": "Try in the guide"
+  },
+  "example-articulations": {
+    "url": "https://vexflow.com/guide/#playground/articulations",
+    "label": "Try in the guide"
+  },
+  "example-dynamics": {
+    "url": "https://vexflow.com/guide/#playground/dynamics",
+    "label": "Try in the guide"
+  },
+  "example-hairpins": {
+    "url": "https://vexflow.com/guide/#playground/hairpins",
+    "label": "Try in the guide"
+  },
+  "example-slurs": {
+    "url": "https://vexflow.com/guide/#playground/slurs",
+    "label": "Try in the guide"
+  },
+  "example-ornaments": {
+    "url": "https://vexflow.com/guide/#playground/ornaments",
+    "label": "Try in the guide"
+  },
+  "example-tempo": {
+    "url": "https://vexflow.com/guide/#playground/tempo",
+    "label": "Try in the guide"
+  },
+  "example-pedal": {
+    "url": "https://vexflow.com/guide/#playground/pedal",
+    "label": "Try in the guide"
+  },
+  "example-octaves": {
+    "url": "https://vexflow.com/guide/#playground/octaves",
+    "label": "Try in the guide"
+  },
+  "example-glissando": {
+    "url": "https://vexflow.com/guide/#playground/glissando",
+    "label": "Try in the guide"
+  },
+  "case-cd8b5cf2b4692e17": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-case-cd8b5cf2b4692e17",
+    "label": "View report exhibit"
+  },
+  "m3-choir": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-m3-choir",
+    "label": "View report exhibit"
+  },
+  "example-chord-symbols": {
+    "url": "https://vexflow.com/guide/#playground/chord-symbols",
+    "label": "Try in the guide"
+  },
+  "example-rehearsal": {
+    "url": "https://vexflow.com/guide/#playground/rehearsal",
+    "label": "Try in the guide"
+  },
+  "example-volta": {
+    "url": "https://vexflow.com/guide/#playground/volta",
+    "label": "Try in the guide"
+  },
+  "issue-381-1e987d0b-3d4a-4f9e-8871-ebc1180d4243": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-issue-381-1e987d0b-3d4a-4f9e-8871-ebc1180d4243",
+    "label": "View report exhibit"
+  },
+  "review-398": {
+    "url": "https://github.com/vexflow/vexflow/issues/398#issuecomment-7064307653",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/6f2ad1d1-3818-4d1c-bc7e-05cf2de580bf"
+  },
+  "case-6a29cd24f475eb94": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-case-6a29cd24f475eb94",
+    "label": "View report exhibit"
+  },
+  "issue-358-2a374ff9-b449-4ac9-97f8-f6d11e430630": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-issue-358-2a374ff9-b449-4ac9-97f8-f6d11e430630",
+    "label": "View report exhibit"
+  },
+  "example-bends": {
+    "url": "https://vexflow.com/guide/#playground/bends",
+    "label": "Try in the guide"
+  },
+  "example-tab-slides": {
+    "url": "https://vexflow.com/guide/#playground/tab-slides",
+    "label": "Try in the guide"
+  },
+  "example-vibrato": {
+    "url": "https://vexflow.com/guide/#playground/vibrato",
+    "label": "Try in the guide"
+  },
+  "example-string-numbers": {
+    "url": "https://vexflow.com/guide/#playground/string-numbers",
+    "label": "Try in the guide"
+  },
+  "case-1a828092725c229c": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-case-1a828092725c229c",
+    "label": "View report exhibit"
+  },
+  "m8-flamenco": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-m8-flamenco",
+    "label": "View report exhibit"
+  },
+  "case-2a3a048766cd81bf": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-case-2a3a048766cd81bf",
+    "label": "View report exhibit"
+  },
+  "m6-line": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-m6-line",
+    "label": "View report exhibit"
+  },
+  "issue-376-3e45e79f-8089-4bad-80e9-cbdc08f58db3": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-issue-376-3e45e79f-8089-4bad-80e9-cbdc08f58db3",
+    "label": "View report exhibit"
+  },
+  "m4-choir-narrow": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-m4-choir-narrow",
+    "label": "View report exhibit"
+  },
+  "m2-optical": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-m2-optical",
+    "label": "View report exhibit"
+  },
+  "m5-part-a4": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-m5-part-a4",
+    "label": "View report exhibit"
+  },
+  "review-419": {
+    "url": "https://github.com/vexflow/vexflow/issues/419#issuecomment-7067666741",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/5adc7338-60e9-4236-a91e-320d360cae5d"
+  },
+  "print-minuet-1": {
+    "url": "https://vexflow.com/pdfs/minuet.pdf",
+    "label": "Read the PDF"
+  },
+  "example-sheet": {
+    "url": "https://vexflow.com/guide/#playground/sheet",
+    "label": "Try in the guide"
+  },
+  "example-easyscore-first-score": {
+    "url": "https://vexflow.com/guide/#playground/easyscore-first-score",
+    "label": "Try in the guide"
+  },
+  "example-native-notes": {
+    "url": "https://vexflow.com/guide/#playground/native-notes",
+    "label": "Try in the guide"
+  },
+  "tool-reader": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-tool-reader",
+    "label": "View report exhibit"
+  },
+  "tool-canvas-reader": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-tool-canvas-reader",
+    "label": "View report exhibit"
+  },
+  "archive-bravura": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-archive-bravura",
+    "label": "View report exhibit"
+  },
+  "m6-micro": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-m6-micro",
+    "label": "View report exhibit"
+  },
+  "example-feathered-group": {
+    "url": "https://vexflow.com/guide/#playground/feathered-group",
+    "label": "Try in the guide"
+  },
+  "review-417": {
+    "url": "https://github.com/vexflow/vexflow/issues/417#issuecomment-7067665240",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/2607c5c9-aa4f-484e-8f7b-0fa982110b3a"
+  },
+  "example-noteheads": {
+    "url": "https://vexflow.com/guide/#playground/noteheads",
+    "label": "Try in the guide"
+  },
+  "issue-384-a3b6d5aa-5e38-470a-af96-3361b8e448d7": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-issue-384-a3b6d5aa-5e38-470a-af96-3361b8e448d7",
+    "label": "View report exhibit"
+  },
+  "example-extended-keys": {
+    "url": "https://vexflow.com/reports/ai2026/#plate-example-extended-keys",
+    "label": "View report exhibit"
+  },
+  "review-423": {
+    "url": "https://github.com/vexflow/vexflow/issues/423#issuecomment-7068323748",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/ea5a4844-5bcb-4a00-b8c8-66403dcb6e98",
+    "availability": "Available since VexFlow 5.9.0."
+  },
+  "review-426": {
+    "url": "https://github.com/vexflow/vexflow/issues/426#issuecomment-7069467544",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/28a39258-2c7e-41a3-99bb-9e7283b18ca5",
+    "availability": "Available since VexFlow 5.9.0."
+  },
+  "review-425": {
+    "url": "https://github.com/vexflow/vexflow/issues/425#issuecomment-7068324797",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/76d98196-b44d-440b-803f-636fab4eece2",
+    "availability": "Available since VexFlow 5.9.0."
+  },
+  "review-429": {
+    "url": "https://github.com/vexflow/vexflow/issues/429#issuecomment-7069468925",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/7d341c39-c0a3-4d09-b522-a6d29820a326",
+    "availability": "Available since VexFlow 5.9.0."
+  },
+  "review-432": {
+    "url": "https://github.com/vexflow/vexflow/issues/432#issuecomment-7071360411",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/30baab79-9e7f-4bc2-b041-6d4bc5171c5c",
+    "availability": "Available since VexFlow 5.9.0."
+  },
+  "review-433": {
+    "url": "https://github.com/vexflow/vexflow/issues/433#issuecomment-7071652714",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/3934ac43-ddec-4d6b-b504-9eb96860ec88",
+    "availability": "Available since VexFlow 5.9.0."
+  },
+  "review-434": {
+    "url": "https://github.com/vexflow/vexflow/issues/434#issuecomment-7071653114",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/a752c487-108c-41b5-a749-0a3123858029",
+    "availability": "Available since VexFlow 5.9.0."
+  },
+  "review-436": {
+    "url": "https://github.com/vexflow/vexflow/issues/436#issuecomment-7071654070",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/9f775677-20a9-4c77-a358-7cbf6773897d",
+    "availability": "Available since VexFlow 5.9.0."
+  },
+  "review-420": {
+    "url": "https://github.com/vexflow/vexflow/issues/420#issuecomment-7068050786",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/6cb26778-2f92-426a-abed-dde4d6c76590",
+    "availability": "Available since VexFlow 5.9.0."
+  },
+  "review-421": {
+    "url": "https://github.com/vexflow/vexflow/issues/421#issuecomment-7068051262",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/8dfaf386-d1ef-483e-9fce-90d2ccabe817",
+    "availability": "Available since VexFlow 5.9.0."
+  },
+  "review-422": {
+    "url": "https://github.com/vexflow/vexflow/issues/422#issuecomment-7068051734",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/0f7f447d-8eac-4b28-b0bd-5d00add41d2e",
+    "availability": "Available since VexFlow 5.9.0."
+  },
+  "review-424": {
+    "url": "https://github.com/vexflow/vexflow/issues/424#issuecomment-7068324313",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/0bedbde8-6d1e-40b7-8733-373be9fbdea5",
+    "availability": "Available since VexFlow 5.9.0."
+  },
+  "review-427": {
+    "url": "https://github.com/vexflow/vexflow/issues/427#issuecomment-7069468013",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/18902fc9-eaf0-4a45-a32c-d32ceceaeffa",
+    "availability": "Available since VexFlow 5.9.0."
+  },
+  "review-428": {
+    "url": "https://github.com/vexflow/vexflow/issues/428#issuecomment-7069468508",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/995f4a9e-cd4b-422b-bb12-875958322e78",
+    "availability": "Available since VexFlow 5.9.0."
+  },
+  "review-430": {
+    "url": "https://github.com/vexflow/vexflow/issues/430#issuecomment-7071359567",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/fbe57fac-290d-4bb1-9afa-c01d12b0c713",
+    "availability": "Available since VexFlow 5.9.0."
+  },
+  "review-431": {
+    "url": "https://github.com/vexflow/vexflow/issues/431#issuecomment-7071360016",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/7a068bd8-65f7-4791-9504-8afe84fcc54d",
+    "availability": "Available since VexFlow 5.9.0."
+  },
+  "review-435": {
+    "url": "https://github.com/vexflow/vexflow/issues/435#issuecomment-7071653551",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/a2a35323-1bc5-4f8a-9fa1-f5d0f3bc1a30",
+    "availability": "Available since VexFlow 5.9.0."
+  },
+  "review-437": {
+    "url": "https://github.com/vexflow/vexflow/issues/437#issuecomment-7071832297",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/f0b0cebd-fc60-4e45-8585-2b7a4e7aba10",
+    "availability": "Available since VexFlow 5.9.0."
+  },
+  "review-438": {
+    "url": "https://github.com/vexflow/vexflow/issues/438#issuecomment-7071832678",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/53ee6abd-b50d-4e97-8d12-77c8a9334603",
+    "availability": "Available since VexFlow 5.9.0."
+  },
+  "review-439": {
+    "url": "https://github.com/vexflow/vexflow/issues/439#issuecomment-7071833084",
+    "label": "See engraving notes",
+    "original": "https://github.com/user-attachments/assets/5fe880e7-e200-42de-83e9-5428ee091ff8",
+    "availability": "Available since VexFlow 5.9.0."
+  }
+}

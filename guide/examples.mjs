@@ -20,6 +20,57 @@ function example(id, title, code, api = 'EasyScore System') {
 
 export const teachingExamples = [
   example(
+    'harp-setting',
+    'Read the seven harp pedals',
+    stave(`// The seven ticks describe the strings available before the melody begins.
+const notes = score.notes('C4/q, D4, E4, G4');
+const setting = { D: 'natural', C: 'natural', B: 'natural', E: 'natural',
+  F: 'sharp', G: 'natural', A: 'natural' };
+notes[0].addModifier(new VF.HarpPedalDiagram(setting), 0);`),
+    'HarpPedalDiagram EasyScore'
+  ),
+  example(
+    'harp-changes',
+    'Mark only the pedals that move',
+    stave(`// Start with natural pedals. Use the rest to prepare the next entrance.
+const notes = score.notes('D4/q, B4/q/r, A4/q, C5/q');
+const pedals = new VF.HarpPedalChanges({ D: 'natural', C: 'natural', B: 'natural',
+  E: 'natural', F: 'natural', G: 'natural', A: 'natural' });
+pedals.apply(notes[1], { B: 'flat', F: 'sharp' });
+pedals.apply(notes[2], { F: 'sharp' }); // Already sharp, so no label appears.
+pedals.apply(notes[3], { F: 'natural' });`),
+    'HarpPedalChanges EasyScore'
+  ),
+  example(
+    'mensural-values',
+    'Count three mensural long values',
+    `const factory = new VF.Factory({ renderer: { elementId: 'score', width, height } });
+// Print the sign, then supply the written durations for this binary reading.
+const staff = factory.Stave({ x: 20, y: 50, width: width - 40 }).addTimeSignature('mensural-semicircle');
+const values = [['b/4', 'm'], ['c/5', 'l'], ['b/4', '1/2']];
+const notes = values.map(([pitch, duration]) =>
+  factory.StaveNote({ keys: [pitch], duration, whiteMensural: true }));
+// Four plus two plus one breve totals fourteen whole notes.
+const voice = factory.Voice({ time: '14/1' }).addTickables(notes);
+factory.Formatter().joinVoices([voice]).formatToStave([voice], staff);
+factory.draw();`,
+    'StaveNote TimeSignature Factory'
+  ),
+  example(
+    'kievan-pitches',
+    'Follow a Kievan melody',
+    `const factory = new VF.Factory({ renderer: { elementId: 'score', width, height } });
+// The clef puts middle C on the middle line. D sits in the next space.
+const staff = factory.Stave({ x: 20, y: 50, width: width - 40 }).addClef('kievan');
+const pitches = ['c/4', 'd/4', 'e/4', 'f/4', 'e/4', 'd/4', 'c/4'];
+const notes = pitches.map(pitch => factory.KievanNote({ pitch, duration: 'h' }));
+// Keep all seven half notes in a single voice as the melody climbs and returns.
+const voice = factory.Voice({ time: '7/2' }).addTickables(notes);
+factory.Formatter().joinVoices([voice]).formatToStave([voice], staff);
+factory.draw();`,
+    'KievanNote Clef Factory'
+  ),
+  example(
     'held-note',
     'Hold one note',
     stave(

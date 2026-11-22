@@ -1,4 +1,4 @@
-// Preview and apply generation-pinned cleanup for the four managed public website prefixes.
+// Preview and apply generation-pinned cleanup for the managed public website prefixes.
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import { cleanupPlan, cloudStore, readJournal, withLock } from './site-deployments.mjs';
@@ -45,12 +45,12 @@ export function recover(store, id) {
 async function main() {
   const [site, ...args] = process.argv.slice(2);
   if (
-    !['guide', 'explorer', 'tests', 'reports/ai2026'].includes(site) ||
+    !['guide', 'explorer', 'tests', 'features', 'reports/ai2026'].includes(site) ||
     args.some((a) => !/^(--apply=[a-f0-9]{64}|--legacy=[a-f0-9]{16}|--recover=[a-f0-9-]{36})$/.test(a)) ||
     new Set(args.map((a) => a.split('=')[0])).size !== args.length
   ) {
     throw Error(
-      'Usage: npm run sites:clean -- <guide|explorer|tests|reports/ai2026> [--legacy=16hex] [--apply=plan] or --recover=lock-id'
+      'Usage: npm run sites:clean -- <guide|explorer|tests|features|reports/ai2026> [--legacy=16hex] [--apply=plan] or --recover=lock-id'
     );
   }
   const store = cloudStore('gs://vexflow.com/' + site + '/');

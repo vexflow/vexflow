@@ -1179,5 +1179,731 @@
         "sha256": "c804c391e21e947bedb6ca7d96e544711c17a4e7c5cfcbecdf06b3768bc3582b"
       }
     ]
+  },
+  {
+    "topic": "Horizontal guitar chord frames",
+    "source": "https://github.com/vexflow/vexflow/issues/420#issuecomment-7068050786",
+    "images": [
+      {
+        "caption": "Horizontal guitar chord frames before",
+        "asset": "589f77bb-4576-4511-b3ac-178cd37a3562",
+        "sha256": "2a0a2e4bfc1b32ee1abac7c3543e40dd0d3d6e0e6ac090d04eb31fe18d3856e5"
+      },
+      {
+        "caption": "Horizontal guitar chord frames after",
+        "asset": "6cb26778-2f92-426a-abed-dde4d6c76590",
+        "sha256": "b95419464d731e581619275e5f1eaec8851e264035e0a68d3d0ef29d5ddb288e"
+      }
+    ]
+  },
+  {
+    "topic": "Guitar voicing lookup",
+    "source": "https://github.com/vexflow/vexflow/issues/421#issuecomment-7068051262",
+    "images": [
+      {
+        "caption": "Voicing lookup for C and C/E before",
+        "asset": "33a4d0eb-aeae-495b-8cf3-4a81cd5defae",
+        "sha256": "99d7693c5e4f98e5311edd8a1e9dc1befd0f25c484d2464bf6f6250338b9fe01"
+      },
+      {
+        "caption": "Voicing lookup for C and C/E after",
+        "asset": "8dfaf386-d1ef-483e-9fce-90d2ccabe817",
+        "sha256": "92d9c4a6159751e51446b9ce259def4f51139f5151d56002dfb73ed618ed5abc"
+      }
+    ]
+  },
+  {
+    "topic": "Five-string banjo tablature",
+    "source": "https://github.com/vexflow/vexflow/issues/422#issuecomment-7068051734",
+    "images": [
+      {
+        "caption": "Short fifth string on the banjo before",
+        "asset": "1f15fc69-6f1c-4409-b26a-7832b055b3f9",
+        "sha256": "2ad4d8b84692aa626e3c7efa4050b3e4756daadcab9b060696e78562f8d68f24"
+      },
+      {
+        "caption": "Short fifth string on the banjo after",
+        "asset": "0f7f447d-8eac-4b28-b0bd-5d00add41d2e",
+        "sha256": "783858106ede24abf0b57805b2c68dcdd291bed9d75753f46a01e9cef3ef2f58"
+      }
+    ]
+  },
+  {
+    "topic": "Seven-pedal harp diagrams",
+    "source": "https://github.com/vexflow/vexflow/issues/423#issuecomment-7068323748",
+    "images": [
+      {
+        "caption": "Seven-pedal harp diagram before",
+        "asset": "e0e6e349-0329-4eb8-b449-1500e68261db",
+        "sha256": "7b9f19a7f552677ba8b8479ec516727cb57f1f667f599e09bc4253eee3c7c89c"
+      },
+      {
+        "caption": "Seven-pedal harp diagram after",
+        "asset": "ea5a4844-5bcb-4a00-b8c8-66403dcb6e98",
+        "sha256": "1ae534fb67bbc85bfe02dece7fd06085cc5655f963e15933cd9fcfbcdb7d2511"
+      }
+    ]
+  },
+  {
+    "topic": "Harp pedal changes",
+    "source": "https://github.com/vexflow/vexflow/issues/424#issuecomment-7068324313",
+    "images": [
+      {
+        "caption": "Harp pedal changes at a rest before",
+        "asset": "cf2ddd5d-1387-462f-9f20-4a3b4e7ed02c",
+        "sha256": "ef20be5eb6096eb81537d5192cf2a0ef18bb1ca057da1b90e66f36c4cc326637"
+      },
+      {
+        "caption": "Harp pedal changes at a rest after",
+        "asset": "0bedbde8-6d1e-40b7-8733-373be9fbdea5",
+        "sha256": "67c526847f961eb4e31793fbe721660eed9c7560ded598fc042ee8a92bf5242d"
+      }
+    ]
+  },
+  {
+    "topic": "Accordion reed registers",
+    "source": "https://github.com/vexflow/vexflow/issues/425#issuecomment-7068324797",
+    "images": [
+      {
+        "caption": "Accordion reed registers before",
+        "asset": "50274195-bfde-4807-b15a-070d19c75645",
+        "sha256": "3f56050b99dc3e1d62737544568b033bc5838056e97eed8b2ad375d7799d0ab4"
+      },
+      {
+        "caption": "Accordion reed registers after",
+        "asset": "76d98196-b44d-440b-803f-636fab4eece2",
+        "sha256": "9d2c4f0d9427d6f44a4645dbd613e6b13c1e0b57d5fd89197916472a999f8199"
+      }
+    ]
+  },
+  {
+    "topic": "Flute fingering diagrams",
+    "source": "https://github.com/vexflow/vexflow/issues/426#issuecomment-7069467544",
+    "images": [
+      {
+        "caption": "Six-key flute fingerings before",
+        "asset": "30795924-22ad-4e01-8f1a-3bf894fc8f3c",
+        "sha256": "1ccdf4de05a0a7c6547110ed1a67ecab7304837ab805f050e0cd7da984cbdfee"
+      },
+      {
+        "caption": "Six-key flute fingerings after",
+        "asset": "28a39258-2c7e-41a3-99bb-9e7283b18ca5",
+        "sha256": "97169fc312cdd27f13f1433e604705dd2e22e1bf5b114f23a3de30a2d59d5302"
+      }
+    ]
+  },
+  {
+    "topic": "Moving woodwind trill keys",
+    "source": "https://github.com/vexflow/vexflow/issues/427#issuecomment-7069468013",
+    "images": [
+      {
+        "caption": "Moving flute trill key before",
+        "asset": "fd2a381a-53d9-4aed-9a46-f08e31506dc1",
+        "sha256": "519fd0419942f767b662c0d630ba6d8a9b78100f9c39b20b1be5d9fce3d3f8fb"
+      },
+      {
+        "caption": "Moving flute trill key after",
+        "asset": "18902fc9-eaf0-4a45-a32c-d32ceceaeffa",
+        "sha256": "1c152dd49b057fca4d1222f0c5ce940cc22d1f7b10ebd9628f9b4698c8a511b2"
+      }
+    ]
+  },
+  {
+    "topic": "Percussion sticking",
+    "source": "https://github.com/vexflow/vexflow/issues/428#issuecomment-7069468508",
+    "images": [
+      {
+        "caption": "Side-drum sticking before",
+        "asset": "e1f1e7c6-866b-40ba-b997-945cf40ded35",
+        "sha256": "f354dffadc57f67e4c99672797a274012195aae0172c7b07d461c1ca8b95d2b5"
+      },
+      {
+        "caption": "Side-drum sticking after",
+        "asset": "995f4a9e-cd4b-422b-bb12-875958322e78",
+        "sha256": "8f43eef12a6303af91013f32ef165a9868f5a07d9b1b7dc49e663c2e7ce933a1"
+      }
+    ]
+  },
+  {
+    "topic": "Named Highland embellishments",
+    "source": "https://github.com/vexflow/vexflow/issues/429#issuecomment-7069468925",
+    "images": [
+      {
+        "caption": "Highland grip and taorluath before",
+        "asset": "b1f9dc0d-49b8-454a-bd3f-29790bbf059c",
+        "sha256": "c9d57fd95af5f48edaef0548d5a84b8a94a34d561f0ac5a0403790549fdb6c72"
+      },
+      {
+        "caption": "Highland grip and taorluath after",
+        "asset": "7d341c39-c0a3-4d09-b522-a6d29820a326",
+        "sha256": "873321a096cb4c67642176ae5c911dce8167b09ef31f7acc2d87e76f7f0ae1fc"
+      }
+    ]
+  },
+  {
+    "topic": "Clef-aware written key signatures",
+    "source": "https://github.com/vexflow/vexflow/issues/430#issuecomment-7071359567",
+    "images": [
+      {
+        "caption": "Clef-aware written signatures before",
+        "asset": "9c7ccac1-d36d-4697-8967-27d304e8f59c",
+        "sha256": "7aac8c128ea4fe13d01961f6fb8db9213bfe5ea28aa0fa88470a550f70aba1ba"
+      },
+      {
+        "caption": "Clef-aware written signatures after",
+        "asset": "fbe57fac-290d-4bb1-9afa-c01d12b0c713",
+        "sha256": "89795cf94e8c4e4adc935940e26ba3dbdda4f32ccc3a72629be4be0c442ec072"
+      }
+    ]
+  },
+  {
+    "topic": "Named makam key signatures",
+    "source": "https://github.com/vexflow/vexflow/issues/431#issuecomment-7071360016",
+    "images": [
+      {
+        "caption": "Edition-defined makam signatures before",
+        "asset": "352e2905-7fa8-435c-973a-7002f938bc1c",
+        "sha256": "af525d6a22d15a2045c42e5d347f73e889b520a5e7a9c707d8d3202e70c12f45"
+      },
+      {
+        "caption": "Edition-defined makam signatures after",
+        "asset": "7a068bd8-65f7-4791-9504-8afe84fcc54d",
+        "sha256": "e5b688919004b8a5a5ccbe081c04a615a4db0c120639c37d1bc27d1bf08872b7"
+      }
+    ]
+  },
+  {
+    "topic": "Movable four-shape notes",
+    "source": "https://github.com/vexflow/vexflow/issues/432#issuecomment-7071360411",
+    "images": [
+      {
+        "caption": "Movable four-shape heads before",
+        "asset": "204ded2e-68b0-4bb1-a5f3-01604681bda4",
+        "sha256": "a340fcceacd18dc9e32f3459a7957f33b6fb60eb3234191445b171717bc780f2"
+      },
+      {
+        "caption": "Movable four-shape heads after",
+        "asset": "30baab79-9e7f-4bc2-b041-6d4bc5171c5c",
+        "sha256": "d7c1e1d792c27326c5fa47d25c61f0e063208c6ed336423ef72d7f1dbdd14ba7"
+      }
+    ]
+  },
+  {
+    "topic": "French lute fret letters",
+    "source": "https://github.com/vexflow/vexflow/issues/433#issuecomment-7071652714",
+    "images": [
+      {
+        "caption": "French lute tablature before",
+        "asset": "c5a07892-41d0-4f4b-8ba0-9d47c9bd9e88",
+        "sha256": "d0d9aeccc3db83414b2df379b4d2cf40dbe3268e2011dde6b7bf41f98e01c9ae"
+      },
+      {
+        "caption": "French lute tablature after",
+        "asset": "3934ac43-ddec-4d6b-b504-9eb96860ec88",
+        "sha256": "ae6d6c0f0130bec74b5145b7118dda3a9f98c3cc6b3ad7e3d55de7d6ba87e2a6"
+      }
+    ]
+  },
+  {
+    "topic": "Staffless German lute tablature",
+    "source": "https://github.com/vexflow/vexflow/issues/434#issuecomment-7071653114",
+    "images": [
+      {
+        "caption": "German lute tablature before",
+        "asset": "4f94b678-ee2d-4561-aafb-e5ceef25fb91",
+        "sha256": "eaa5116198c0f562ef08cd3ed21e9cdb8fd2d6df9686e8a268cae2001fc8e910"
+      },
+      {
+        "caption": "German lute tablature after",
+        "asset": "a752c487-108c-41b5-a749-0a3123858029",
+        "sha256": "fa4633b857abfa70ac10da88cc387b56e25571b4ecfa4b03984ad1b82a478883"
+      }
+    ]
+  },
+  {
+    "topic": "Chant clefs and divisions",
+    "source": "https://github.com/vexflow/vexflow/issues/435#issuecomment-7071653551",
+    "images": [
+      {
+        "caption": "Chant clefs and divisions before",
+        "asset": "80c34c73-8eee-494b-8c12-16f5d32085f5",
+        "sha256": "7f5cc823a0b5705587fc677a5b12960c00f55f3161c769803e6914ba3a985cbe"
+      },
+      {
+        "caption": "Chant clefs and divisions after",
+        "asset": "a2a35323-1bc5-4f8a-9fa1-f5d0f3bc1a30",
+        "sha256": "0243dccc3e41968fdd5ee47599aad4625e5a207a3852124c6a1966a58e00ed3c"
+      }
+    ]
+  },
+  {
+    "topic": "Syllabic square neumes",
+    "source": "https://github.com/vexflow/vexflow/issues/436#issuecomment-7071654070",
+    "images": [
+      {
+        "caption": "Square neumes and lyrics before",
+        "asset": "2ecbc47b-f55f-4356-9c65-4902021cf15f",
+        "sha256": "27fd28fd55a7c3a267e2dac8d55e38ccaaaf3a770cdbb0531bd6e5cafc4ebf5f"
+      },
+      {
+        "caption": "Square neumes and lyrics after",
+        "asset": "9f775677-20a9-4c77-a358-7cbf6773897d",
+        "sha256": "98579c4d504f021088a97d869c66f88dd190330ae7a1fe629a813b317c906100"
+      }
+    ]
+  },
+  {
+    "topic": "White mensural notation",
+    "source": "https://github.com/vexflow/vexflow/issues/437#issuecomment-7071832297",
+    "images": [
+      {
+        "caption": "White mensural values and mensuration signs before",
+        "asset": "01a2cca5-5707-485e-82d2-49323a9284d4",
+        "sha256": "82b5f6efc1a30d0102d9a9d20f9e126564a5b40316993975319bae2c093ddbed"
+      },
+      {
+        "caption": "White mensural values and mensuration signs after",
+        "asset": "f0b0cebd-fc60-4e45-8585-2b7a4e7aba10",
+        "sha256": "20e0fbf26d8e7bef63e0059495ccf06b7accf9060dccd215981925a6f35f673d"
+      }
+    ]
+  },
+  {
+    "topic": "Interstaff Mensurstriche",
+    "source": "https://github.com/vexflow/vexflow/issues/438#issuecomment-7071832678",
+    "images": [
+      {
+        "caption": "Interstaff Mensurstriche before",
+        "asset": "56d0a2f3-6f24-4176-a967-5b75b90fb307",
+        "sha256": "1b5082f835bbbeaff558ff55a2abcad4153c3b28cbfef1d5d097908bb393fc44"
+      },
+      {
+        "caption": "Interstaff Mensurstriche after",
+        "asset": "53ee6abd-b50d-4e97-8d12-77c8a9334603",
+        "sha256": "95a0fa7e4454641d27d1576e76cd5d2abf5a983ae5e84414b30251e02ffe0820"
+      }
+    ]
+  },
+  {
+    "topic": "Kievan half notes",
+    "source": "https://github.com/vexflow/vexflow/issues/439#issuecomment-7071833084",
+    "images": [
+      {
+        "caption": "Kievan half notes before",
+        "asset": "af16bc5c-04c2-4184-aea4-5e0671f7046e",
+        "sha256": "5be59d781ecd96a13c33d3da1b26e5d49cb6cf8aa36d388fa7cd5b1a749c6e42"
+      },
+      {
+        "caption": "Kievan half notes after",
+        "asset": "5fe880e7-e200-42de-83e9-5428ee091ff8",
+        "sha256": "8e9c7434e7f7993c3b07ca31df0d2b1cc11acff602bfcad5d1959020d1fd4763"
+      }
+    ]
+  },
+  {
+    "topic": "Corrected sixth string in half-step-down tuning",
+    "source": "https://github.com/vexflow/vexflow/issues/400#issuecomment-7072073262",
+    "images": [
+      {
+        "caption": "Original tuning",
+        "asset": "b84c069f-6730-4773-a38a-8f33422d9b2e",
+        "sha256": "56dbd06dfd861074d749723a5460e908acbe1059430fce8b2d7e8d7ff9f20188"
+      },
+      {
+        "caption": "Corrected tuning",
+        "asset": "cddf32f2-e880-4943-9e7a-e6fa156e5ba9",
+        "sha256": "c1471db4cd08709d7721951a315c2a8fe860d2885118d6c0e65f5c60cf258eb1"
+      }
+    ]
+  },
+  {
+    "topic": "Additional barline styles",
+    "source": "https://github.com/vexflow/vexflow/issues/388#issuecomment-7063732760",
+    "images": [
+      {
+        "caption": "Measure boundaries before",
+        "asset": "9d56dec8-8a7d-4d7c-9a9d-5502143a2348",
+        "sha256": "501ff9899de681be0fb00d3d162a867dfa10924917fc704647032d14e0de246b"
+      },
+      {
+        "caption": "Measure boundaries after",
+        "asset": "a2387bbe-b8fe-42eb-83d4-32db23010b7e",
+        "sha256": "bc22d1f28b95860486d55c787ebe41cd1da62e1afbddc34edf9d34394297070e"
+      }
+    ]
+  },
+  {
+    "topic": "Bracketed editorial accidentals",
+    "source": "https://github.com/vexflow/vexflow/issues/389#issuecomment-7063732745",
+    "images": [
+      {
+        "caption": "Editorial accidentals before",
+        "asset": "28f1d244-9300-47f7-929b-65daf2ad3eec",
+        "sha256": "73a59484a5c1709b4d6d2137ddb8dbdedd6dfc3664cb41a52eef66cf6fc23a03"
+      },
+      {
+        "caption": "Editorial accidentals after",
+        "asset": "0342e35b-250d-4896-b143-abbd1bd4c609",
+        "sha256": "3d0dedb6be3e607463af69e8c97aa8b915e508801c74ea6b21ce2057c14d9fff"
+      }
+    ]
+  },
+  {
+    "topic": "Double-octave clefs",
+    "source": "https://github.com/vexflow/vexflow/issues/390#issuecomment-7063732870",
+    "images": [
+      {
+        "caption": "Double-octave clefs before",
+        "asset": "38c46e5c-b7b6-4f81-88b5-cc71a7a60f5f",
+        "sha256": "b1b06c82589137abe9151a5e91f61fd4c1f593e0697c2231eafb1f2c71d1be13"
+      },
+      {
+        "caption": "Double-octave clefs after",
+        "asset": "ea745d4f-4492-47f6-b703-8546c9d0db93",
+        "sha256": "6744473abc5fe964a5b4ffcf92546a59c53d68b150d2eb6e5c28dae261aeb1a6"
+      }
+    ]
+  },
+  {
+    "topic": "Dashed pitch ties",
+    "source": "https://github.com/vexflow/vexflow/issues/392#issuecomment-7063991595",
+    "images": [
+      {
+        "caption": "One dashed arc between the lower Es",
+        "asset": "97cf476f-ef01-4bd6-bbe6-90b47ff3de85",
+        "sha256": "f65bcc6cd663575535413283d81756035bebd4c5bcde0179f4dbba1e1fdcc9f0"
+      },
+      {
+        "caption": "Both dashed fragments after a system break",
+        "asset": "55f499a3-941a-42b7-b6ed-59ff0ee00f56",
+        "sha256": "320a231377ac6a68eab3a3b78e3a7dee73bcf10d1e480423c207f3d6b96c702d"
+      }
+    ]
+  },
+  {
+    "topic": "Laissez vibrer ties",
+    "source": "https://github.com/vexflow/vexflow/issues/393#issuecomment-7063991365",
+    "images": [
+      {
+        "caption": "Laissez vibrer ties before",
+        "asset": "be674c2c-4f7f-405c-adcd-a0a53b1ce677",
+        "sha256": "d4bf9ad2a87a4489fa89c81bbd5e9d15d392adf7cd60a19a367e0f3ca8a1f069"
+      },
+      {
+        "caption": "Laissez vibrer ties after",
+        "asset": "9f9eb5eb-9887-4e41-b346-f292bbcb3a27",
+        "sha256": "b3fa266673670cbd0520f99d2b95afae945bbd7e28442cf5d0010030eff0362b"
+      }
+    ]
+  },
+  {
+    "topic": "Pitched trill cues",
+    "source": "https://github.com/vexflow/vexflow/issues/394#issuecomment-7063991377",
+    "images": [
+      {
+        "caption": "Pitched trill partners before",
+        "asset": "115b96e1-0b9b-45f4-9183-698a1ba9adfb",
+        "sha256": "19ed3671fb0fd912e6d4ea651f58558961cfddfbd60a202347609faf94029002"
+      },
+      {
+        "caption": "Pitched trill partners after",
+        "asset": "ac7a4c7c-626d-4837-b9c8-dece2516e0f1",
+        "sha256": "6799c7bbdad728f9c510ac0bf5ae90bac5b9f7f6e8e1f6f92e349a5ecc08132e"
+      }
+    ]
+  },
+  {
+    "topic": "Fingering inside chord frames",
+    "source": "https://github.com/vexflow/vexflow/issues/395#issuecomment-7064305368",
+    "images": [
+      {
+        "caption": "Chord-frame fingerings before",
+        "asset": "aa45301f-51ac-4e4a-8dd6-23f8545d83b4",
+        "sha256": "2f969963b09de0c0a533810423ee6d9cef00afedbd3679aab28a9089a849ae94"
+      },
+      {
+        "caption": "Chord-frame fingerings after",
+        "asset": "61715ae6-811c-4577-85d4-2315e9de8534",
+        "sha256": "c70b3066ed7d0f62cd055bf232863d708c616c80b154d5dbd1d12cef0916f212"
+      }
+    ]
+  },
+  {
+    "topic": "Aligned stanza numbers",
+    "source": "https://github.com/vexflow/vexflow/issues/396#issuecomment-7064306081",
+    "images": [
+      {
+        "caption": "Stanza numbers at the lyric margin before",
+        "asset": "69358d36-9692-4704-bca1-36b9689b8180",
+        "sha256": "383d525929d2a947db69c5866664c9bd3619720802877e7e0bbc74fe141793e8"
+      },
+      {
+        "caption": "Stanza numbers at the lyric margin after",
+        "asset": "df0ee122-86b0-4a10-babf-1b0a0531e4ba",
+        "sha256": "44d0c86966ee6ebc1a80157de9510908c65c266ccbad7193897a32e47fa7dd18"
+      }
+    ]
+  },
+  {
+    "topic": "Multi-measure ossias",
+    "source": "https://github.com/vexflow/vexflow/issues/397#issuecomment-7064306883",
+    "images": [
+      {
+        "caption": "Ossias across measures after",
+        "asset": "ddfdc2a9-54c2-411f-83d6-b2c6de94e6b1",
+        "sha256": "6384aaed64e08d3985184ed4026c397e7bc97b2a4cb5c9ebb20359654aeac68d"
+      },
+      {
+        "caption": "Ossia split between bars 2 and 3",
+        "asset": "e966302e-1d21-4dc6-8322-e825df4ce31e",
+        "sha256": "8c87adea3de33b956e9beb0a0c5a78db37beb532d2269d88a29dcc957a83ffee"
+      }
+    ]
+  },
+  {
+    "topic": "Figured-bass continuation lines",
+    "source": "https://github.com/vexflow/vexflow/issues/398#issuecomment-7064307653",
+    "images": [
+      {
+        "caption": "Figured bass with independent continuations before",
+        "asset": "d62d5ca4-c27a-4627-b9c1-72a445218c9b",
+        "sha256": "db8280cd4ae8f06397d2455a0ff68bd121e8f4f560a77fc35397ac27e6137425"
+      },
+      {
+        "caption": "Figured bass with independent continuations after",
+        "asset": "6f2ad1d1-3818-4d1c-bc7e-05cf2de580bf",
+        "sha256": "04f4cc2e7d4d414305a10b1478edb318100449f64b17a89cb58ba87c32b7b496"
+      }
+    ]
+  },
+  {
+    "topic": "Timed niente dynamics",
+    "source": "https://github.com/vexflow/vexflow/issues/410#issuecomment-7064974617",
+    "images": [
+      {
+        "caption": "Timed niente letter before",
+        "asset": "6784b195-ad73-4730-8e27-742a6f3cbb06",
+        "sha256": "f5e5ac1f48cb95d8a4ee2090dd11c669a4b99497bfb3c6d52df67e73fad2157b"
+      },
+      {
+        "caption": "Timed niente letter after",
+        "asset": "d7efc9c3-4b66-43d4-9da6-0dc0319c6d59",
+        "sha256": "eabb7d23344ff3ead53f6bc552070ebef7a96236499cfac3e837004a5dafbef7"
+      }
+    ]
+  },
+  {
+    "topic": "Flared hairpins",
+    "source": "https://github.com/vexflow/vexflow/issues/411#issuecomment-7064975095",
+    "images": [
+      {
+        "caption": "Flared crescendo and diminuendo before",
+        "asset": "5b346830-a10c-4ca0-a189-7423464b04f3",
+        "sha256": "8ac95834277f67a6e8568c9e97f8a5285f0bb7cbb3bf57a0a09abb65223da5b9"
+      },
+      {
+        "caption": "Flared crescendo and diminuendo after",
+        "asset": "3f8ad84d-348d-48a7-8f69-deebe4df9ebc",
+        "sha256": "1696fe33f88c44b35495677cc049076e16c95996ff7926e797cb97de9b61fac2"
+      }
+    ]
+  },
+  {
+    "topic": "Parenthesized turns",
+    "source": "https://github.com/vexflow/vexflow/issues/412#issuecomment-7064975622",
+    "images": [
+      {
+        "caption": "Editorial turn in parentheses before",
+        "asset": "04aaf903-9a62-49f1-952a-e8abf7c54c76",
+        "sha256": "7f2ec56d8b7ca38102e5ec544cc0d06aa1e1fd66d2e6ed7e7792f85363a56f9d"
+      },
+      {
+        "caption": "Editorial turn in parentheses after",
+        "asset": "0a670b18-11c7-4fba-888e-187e3f014242",
+        "sha256": "cb44d4654ea6777cb52d60ffcfdafba71154c54912c7f2df95e91dfadc42f988"
+      }
+    ]
+  },
+  {
+    "topic": "Half-dashed slurs",
+    "source": "https://github.com/vexflow/vexflow/issues/413#issuecomment-7067323451",
+    "images": [
+      {
+        "caption": "Half-dashed slurs before",
+        "asset": "b1f9a37d-6ff5-4f68-997f-70751fbdec51",
+        "sha256": "a577a670b6e6b3962da4d7a2f8f28826ad7635ff0318f4e3a8c8220e7fb0601b"
+      },
+      {
+        "caption": "Half-dashed slurs after",
+        "asset": "a0495583-9ae7-42a1-b8f8-725abfba2228",
+        "sha256": "7b57191930100313e30377385633c1929e5d448538e65237dff9360c09450732"
+      }
+    ]
+  },
+  {
+    "topic": "Wavy glissandi",
+    "source": "https://github.com/vexflow/vexflow/issues/414#issuecomment-7067323960",
+    "images": [
+      {
+        "caption": "Wavy pitched glissandi before",
+        "asset": "6c6a1495-55f5-40a9-8d78-e683b104d825",
+        "sha256": "d9ea51ade46067c16107a83339e64edc65f691f71121ec1b65acc77556e9fdf6"
+      },
+      {
+        "caption": "Wavy pitched glissandi after",
+        "asset": "c43b9147-f57f-4879-a835-5f761209206a",
+        "sha256": "72ea3947f02cdc5d6713cbfe4ef1690313fbdbbabecde71abe8a3bca129632b5"
+      }
+    ]
+  },
+  {
+    "topic": "French-style interior stems",
+    "source": "https://github.com/vexflow/vexflow/issues/415#issuecomment-7067324457",
+    "images": [
+      {
+        "caption": "French-style beaming before",
+        "asset": "397c600f-3b07-4cac-8e31-c067c8a228e0",
+        "sha256": "2133b27002458c11b26f62e1f4e149336852adbb01683fef261caeef7e32526b"
+      },
+      {
+        "caption": "French-style beaming after",
+        "asset": "92ca94ce-26d7-4a2e-ac56-b4e3cf30512c",
+        "sha256": "c2b8b35abae7c6f73779fa9c200552684c136c1dad2d95ea379302c46cd47f4d"
+      }
+    ]
+  },
+  {
+    "topic": "Tuplets across measures and systems",
+    "source": "https://github.com/vexflow/vexflow/issues/416#issuecomment-7067664665",
+    "images": [
+      {
+        "caption": "Cross-bar sextuplet before",
+        "asset": "c4b9692c-b82b-4f60-9fd1-92491409ed72",
+        "sha256": "103a1343d0fa9c6e9e96bca82ef817f473456eb8b4500c3c898133031e480fd0"
+      },
+      {
+        "caption": "Cross-bar sextuplet after",
+        "asset": "e19db483-edef-4726-b2f6-722f9e2a40c1",
+        "sha256": "36d97dc8c7e63b3250775af0b7d801d04e8986bc3afb0b0226f3620196ebaf44"
+      }
+    ]
+  },
+  {
+    "topic": "Independent meters on a shared pulse",
+    "source": "https://github.com/vexflow/vexflow/issues/417#issuecomment-7067665240",
+    "images": [
+      {
+        "caption": "Independent barlines before",
+        "asset": "27c4af65-07f7-461c-833b-4f6f9ed025a6",
+        "sha256": "ca2fb99b484490edd4482d636239294991ad30243df478a6265b6390f8a2e930"
+      },
+      {
+        "caption": "Independent barlines after",
+        "asset": "2607c5c9-aa4f-484e-8f7b-0fa982110b3a",
+        "sha256": "614b9ddd2d2571b03a863bc7bd61f50637402c3b4f0b60d8cedd3b3f270bfb39"
+      }
+    ]
+  },
+  {
+    "topic": "Transposing quoted cues",
+    "source": "https://github.com/vexflow/vexflow/issues/418#issuecomment-7067665873",
+    "images": [
+      {
+        "caption": "Transposed flute cue before",
+        "asset": "524ecd1c-7e69-4281-938d-dcdda5695577",
+        "sha256": "10ffc50659a0b7ecfec4bebc235ab6a50584db7ca396cc9e3c132671abcf6861"
+      },
+      {
+        "caption": "Transposed flute cue after",
+        "asset": "160e7d56-6386-4b7f-b673-75f1921f390a",
+        "sha256": "76c1233a1e705f7abf730be60a8bd53045194cbf695243e0309d5a45600ad05f"
+      }
+    ]
+  },
+  {
+    "topic": "Two-player conductor staves",
+    "source": "https://github.com/vexflow/vexflow/issues/419#issuecomment-7067666741",
+    "images": [
+      {
+        "caption": "Condensed flute staff before",
+        "asset": "b3b07a30-81c1-4c47-9b32-8d46ef682435",
+        "sha256": "152857f15793b8f88d973b5b021d713d05344a0f11d0e7a0feb472052fab50af"
+      },
+      {
+        "caption": "Condensed flute staff after",
+        "asset": "5adc7338-60e9-4236-a91e-320d360cae5d",
+        "sha256": "d411c7c7ef9773b8c7b03adbdfbbadf998bf5a8c0fe3e558dfacffb18eb0ab7b"
+      }
+    ]
+  },
+  {
+    "topic": "Fret-hand fingering on tablature",
+    "source": "https://github.com/vexflow/vexflow/issues/446#issuecomment-7067667225",
+    "images": [
+      {
+        "caption": "Native TAB fingerings before",
+        "asset": "cafee068-074f-4bf8-9448-a5559c5f0291",
+        "sha256": "5d187bacb3ac5ef0427d674937ecc2ce04fc159936df27e08e62071fbe8adef8"
+      },
+      {
+        "caption": "Native TAB fingerings after",
+        "asset": "613ac62a-a117-435c-b310-e30cc72b7567",
+        "sha256": "eb0abf6f6c583be88e27d3d283674cbd5ca5bf5d111177d5abdb445ebcc66b44"
+      }
+    ]
+  },
+  {
+    "topic": "Shared unison accidentals",
+    "source": "https://github.com/vexflow/vexflow/issues/447#issuecomment-7067667782",
+    "images": [
+      {
+        "caption": "Shared unison accidentals before",
+        "asset": "77f09b59-95ba-420d-ac39-8c00f2114811",
+        "sha256": "a4119f0fc8693c8f9d96a7630ec9eb4d08b482f81c9dd818a5aa27a32efba15c"
+      },
+      {
+        "caption": "Shared unison accidentals after",
+        "asset": "16a548a2-c206-4b26-8a3f-a98bc0e64e14",
+        "sha256": "aad3d15ff3006fad8797b1b1859162d7fe4186bf3fb930ea0dbba1ac91f4a160"
+      }
+    ]
+  },
+  {
+    "topic": "TAB ties clear neighboring voices",
+    "source": "https://github.com/vexflow/vexflow/issues/448#issuecomment-7067668340",
+    "images": [
+      {
+        "caption": "TAB ties around fret ink before",
+        "asset": "484957ed-dc3f-4c84-9f65-7444bf4617ca",
+        "sha256": "b578b68bbd2ccad8aef14f91af14b5d64d4649ecc49555cb2590ac7a20a70598"
+      },
+      {
+        "caption": "TAB ties around fret ink after",
+        "asset": "02236583-c6fe-4603-853c-7160a459b4f1",
+        "sha256": "1fcda17176927c255e8058f3bdf293fe35ff2ab68af932c3ac57d7a6c3f40ee9"
+      }
+    ]
+  },
+  {
+    "topic": "Validated dashed-line patterns",
+    "source": "https://github.com/vexflow/vexflow/issues/403#issuecomment-7064712283",
+    "images": [
+      {
+        "caption": "Text brackets and string-number continuations before and after",
+        "asset": "20dc4abf-2186-4f43-96b3-c6c21dc93503",
+        "sha256": "6f0697c63078087e0e1242e4be95cae46df73c26d445b9f57aadf649d9ea4788"
+      }
+    ]
+  },
+  {
+    "topic": "Bounded beam slope fitting",
+    "source": "https://github.com/vexflow/vexflow/issues/404#issuecomment-7064734886",
+    "images": [
+      {
+        "caption": "Rising and falling beamed passages before and after",
+        "asset": "986fd68a-7c98-4bbc-93e1-a2a17714d349",
+        "sha256": "4cb8f7ad8c61c3aab9fd33cb8a6933e7b3f098fde6c719775c6bf9a067ca1b0f"
+      }
+    ]
   }
 ]
