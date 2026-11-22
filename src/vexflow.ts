@@ -9,6 +9,7 @@ import { Beam } from './beam';
 import { Bend } from './bend';
 import { BoundingBox } from './boundingbox';
 import { CanvasContext } from './canvascontext';
+import { ChantPhrase } from './chantphrase';
 import { ChordSymbol, ChordSymbolHorizontalJustify, ChordSymbolVerticalJustify, SymbolModifiers } from './chordsymbol';
 import { Clef } from './clef';
 import { ClefNote } from './clefnote';
@@ -112,6 +113,7 @@ export class VexFlow {
   };
 
   static measureEngraving = measureEngraving;
+  static ChantPhrase = ChantPhrase;
   static PhraseLayout = PhraseLayout;
   static EngravingProfile = EngravingProfile;
   static Accidental = Accidental;

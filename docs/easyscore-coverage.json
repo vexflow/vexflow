@@ -12,7 +12,7 @@
       "instrumentprofile",
       "notationspelling"
     ],
-    "composition": ["easyscore", "factory", "system", "phraselayout", "continuouslayout", "scorenavigation", "publication", "sheet", "voice", "formatter", "registry"],
+    "composition": ["chantphrase", "easyscore", "factory", "system", "phraselayout", "continuouslayout", "scorenavigation", "publication", "sheet", "voice", "formatter", "registry"],
     "notes-and-rhythm": [
       "stavenote",
       "ghostnote",
