@@ -9,6 +9,7 @@ import { Beam } from './beam';
 import { Bend } from './bend';
 import { BoundingBox } from './boundingbox';
 import { CanvasContext } from './canvascontext';
+import { ChantDivision, ChantStave } from './chantstave';
 import { ChordSymbol, ChordSymbolHorizontalJustify, ChordSymbolVerticalJustify, SymbolModifiers } from './chordsymbol';
 import { Clef } from './clef';
 import { ClefNote } from './clefnote';
@@ -124,6 +125,8 @@ export class VexFlow {
   static Bend = Bend;
   static BoundingBox = BoundingBox;
   static CanvasContext = CanvasContext;
+  static ChantDivision = ChantDivision;
+  static ChantStave = ChantStave;
   static ChordSymbol = ChordSymbol;
   static Clef = Clef;
   static ClefNote = ClefNote;
