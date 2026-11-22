@@ -260,6 +260,72 @@
       "getFont(): string"
     ]
   },
+  "chantphrase": {
+    "ChantSyllable": {
+      "extends": [],
+      "fields": [
+        "pitches: readonly string[];",
+        "syllable: string;"
+      ]
+    },
+    "ChantPhraseOptions": {
+      "extends": [],
+      "fields": [
+        "x: number;",
+        "y: number;",
+        "width: number;",
+        "clef: ChantClef;",
+        "line: ChantLine;"
+      ]
+    },
+    "ChantGroupPlacement": {
+      "extends": [
+        "extends ChantSyllable"
+      ],
+      "fields": [
+        "kind: 'punctum' | 'podatus' | 'clivis';",
+        "x: number;",
+        "ys: number[];"
+      ]
+    },
+    "ChantPhraseRow": {
+      "extends": [],
+      "fields": [
+        "stave: ChantStave;",
+        "groups: ChantGroupPlacement[];",
+        "lyricY: number;"
+      ]
+    },
+    "ChantPhrase": [
+      "constructor(syllables: readonly ChantSyllable[])",
+      "draw(ctx: RenderContext, options: ChantPhraseOptions): ChantPhraseRow[]"
+    ]
+  },
+  "chantstave": {
+    "ChantClef": "export type ChantClef = 'C' | 'F';",
+    "ChantLine": "export type ChantLine = 1 | 2 | 3 | 4;",
+    "ChantStaveOptions": {
+      "extends": [
+        "extends Omit<StaveOptions, 'clef' | 'numLines'>"
+      ],
+      "fields": [
+        "clef?: ChantClef;",
+        "line?: ChantLine;"
+      ]
+    },
+    "ChantStave": [
+      "constructor(x: number, y: number, width: number, options: ChantStaveOptions = {})",
+      "setChantClef(clef: ChantClef, line: ChantLine): this",
+      "getLineForPitch(pitch: string): number",
+      "getYForPitch(pitch: string): number"
+    ],
+    "ChantDivisionKind": "export type ChantDivisionKind = keyof typeof divisionGlyphs;",
+    "ChantDivision": [
+      "constructor(kind: ChantDivisionKind)",
+      "setKind(kind: ChantDivisionKind): this",
+      "setStave(stave: Stave): this"
+    ]
+  },
   "chordsymbol": {
     "ChordSymbolBlock": [
       "symbolModifier: SymbolModifiers",
@@ -833,6 +899,7 @@
       "TabSlide(...args: ConstructorParameters<typeof TabSlide>): TabSlide",
       "GraceTabNote(options: TabNoteStruct): GraceTabNote",
       "StaveNote(noteStruct: StaveNoteStruct): StaveNote",
+      "GermanLuteNote(spec: GermanLuteNoteStruct): GermanLuteNote",
       "GlyphNote(glyph: string, noteStruct: NoteStruct, options?: GlyphNoteOptions): GlyphNote",
       "RepeatNote(type: string, noteStruct?: NoteStruct, options?: GlyphNoteOptions): RepeatNote",
       "GhostNote(noteStruct: string | NoteStruct): GhostNote",
@@ -841,6 +908,7 @@
       "ClefNote(params?: { type?: string; options?: { size?: string; annotation?: string } }): ClefNote",
       "TimeSigNote(params?: { time?: string }): TimeSigNote",
       "KeySigNote(params: { key: string; cancelKey?: string; alterKey?: string[]; clef?: string }): KeySigNote",
+      "FrenchLuteNote(noteStruct: FrenchLuteNoteStruct, drawStem = false): FrenchLuteNote",
       "TabNote(noteStruct: TabNoteStruct, drawStem = false): TabNote",
       "GraceNote(noteStruct: GraceNoteStruct): GraceNote",
       "GraceNoteGroup(params: { notes: StemmableNote[]; slur?: boolean }): GraceNoteGroup",
@@ -951,6 +1019,26 @@
       "lookupVoicing(harmony: ChordHarmony, tuning: string, name?: string): FretDiagramSpec | undefined",
       "constructor(spec: FretDiagramSpec)",
       "setFingerings(fingerings: NonNullable<FretDiagramSpec['fingerings']> = []): this",
+      "getBoundingBox(): BoundingBox",
+      "draw(): void"
+    ]
+  },
+  "germanlutenote": {
+    "GermanLuteNoteStruct": {
+      "extends": [],
+      "fields": [
+        "course: number;",
+        "fret: number;",
+        "duration: string;"
+      ]
+    },
+    "GermanLuteNote": [
+      "CATEGORY(): string",
+      "constructor(spec: GermanLuteNoteStruct)",
+      "getPosition(): { course: number; fret: number }",
+      "setPosition(course: number, fret: number): this",
+      "preFormat(): this",
+      "getInkParts(): BoundingBox[]",
       "getBoundingBox(): BoundingBox",
       "draw(): void"
     ]
@@ -1134,6 +1222,20 @@
       "toSimplifiedString(): string",
       "toMixedString(): string",
       "parse(str: string): this"
+    ]
+  },
+  "frenchlutenote": {
+    "FrenchLuteNoteStruct": {
+      "extends": [
+        "extends TabNoteStruct"
+      ],
+      "fields": [
+        "positions: { str: number; fret: number }[];"
+      ]
+    },
+    "FrenchLuteNote": [
+      "CATEGORY(): string",
+      "constructor(noteStruct: FrenchLuteNoteStruct, drawStem = false)"
     ]
   },
   "frethandfinger": {
@@ -3027,7 +3129,7 @@
     "isStaveNote": "inferred",
     "isStemmableNote": "inferred",
     "isTabNote": "inferred",
-    "Category": "export const enum Category { Accidental = 'Accidental', Annotation = 'Annotation', Articulation = 'Articulation', Barline = 'Barline', BarNote = 'BarNote', Beam = 'Beam', Bend = 'Bend', ChordSymbol = 'ChordSymbol', Clef = 'Clef', ClefNote = 'ClefNote', Crescendo = 'Crescendo', Curve = 'Curve', Dot = 'Dot', Element = 'Element', FiguredBass = 'FiguredBass', Flag = 'Flag', Fraction = 'Fraction', FretDiagram = 'FretDiagram', FretHandFinger = 'FretHandFinger', GhostNote = 'GhostNote', Glyph = 'Glyph', GlyphNote = 'GlyphNote', GraceNote = 'GraceNote', GraceNoteGroup = 'GraceNoteGroup', GraceTabNote = 'GraceTabNote', KeySignature = 'KeySignature', KeySigNote = 'KeySigNote', Modifier = 'Modifier', MultiMeasureRest = 'MultiMeasureRest', Note = 'Note', NoteHead = 'NoteHead', NoteSubGroup = 'NoteSubGroup', Ornament = 'Ornament', Parenthesis = 'Parenthesis', PedalMarking = 'PedalMarking', RenderContext = 'RenderContext', RepeatNote = 'RepeatNote', Repetition = 'Repetition', Stave = 'Stave', StaveConnector = 'StaveConnector', StaveHairpin = 'StaveHairpin', StaveLine = 'StaveLine', StaveModifier = 'StaveModifier', StaveNote = 'StaveNote', StaveSection = 'StaveSection', StaveTempo = 'StaveTempo', StaveText = 'StaveText', StaveTie = 'StaveTie', Stem = 'Stem', StemmableNote = 'StemmableNote', StringNumber = 'StringNumber', Stroke = 'Stroke', System = 'System', TabNote = 'TabNote', TabSlide = 'TabSlide', TabStave = 'TabStave', TabTie = 'TabTie', TextBracket = 'TextBracket', TextDynamics = 'TextDynamics', TextNote = 'TextNote', Tickable = 'Tickable', TimeSignature = 'TimeSignature', TimeSigNote = 'TimeSigNote', Tremolo = 'Tremolo', Tuplet = 'Tuplet', Vibrato = 'Vibrato', VibratoBracket = 'VibratoBracket', Voice = 'Voice', Volta = 'Volta', }"
+    "Category": "export const enum Category { Accidental = 'Accidental', Annotation = 'Annotation', Articulation = 'Articulation', Barline = 'Barline', BarNote = 'BarNote', Beam = 'Beam', Bend = 'Bend', ChordSymbol = 'ChordSymbol', Clef = 'Clef', ClefNote = 'ClefNote', Crescendo = 'Crescendo', Curve = 'Curve', Dot = 'Dot', Element = 'Element', FiguredBass = 'FiguredBass', Flag = 'Flag', Fraction = 'Fraction', FrenchLuteNote = 'FrenchLuteNote', FretDiagram = 'FretDiagram', FretHandFinger = 'FretHandFinger', GermanLuteNote = 'GermanLuteNote', GhostNote = 'GhostNote', Glyph = 'Glyph', GlyphNote = 'GlyphNote', GraceNote = 'GraceNote', GraceNoteGroup = 'GraceNoteGroup', GraceTabNote = 'GraceTabNote', KeySignature = 'KeySignature', KeySigNote = 'KeySigNote', Modifier = 'Modifier', MultiMeasureRest = 'MultiMeasureRest', Note = 'Note', NoteHead = 'NoteHead', NoteSubGroup = 'NoteSubGroup', Ornament = 'Ornament', Parenthesis = 'Parenthesis', PedalMarking = 'PedalMarking', RenderContext = 'RenderContext', RepeatNote = 'RepeatNote', Repetition = 'Repetition', Stave = 'Stave', StaveConnector = 'StaveConnector', StaveHairpin = 'StaveHairpin', StaveLine = 'StaveLine', StaveModifier = 'StaveModifier', StaveNote = 'StaveNote', StaveSection = 'StaveSection', StaveTempo = 'StaveTempo', StaveText = 'StaveText', StaveTie = 'StaveTie', Stem = 'Stem', StemmableNote = 'StemmableNote', StringNumber = 'StringNumber', Stroke = 'Stroke', System = 'System', TabNote = 'TabNote', TabSlide = 'TabSlide', TabStave = 'TabStave', TabTie = 'TabTie', TextBracket = 'TextBracket', TextDynamics = 'TextDynamics', TextNote = 'TextNote', Tickable = 'Tickable', TimeSignature = 'TimeSignature', TimeSigNote = 'TimeSigNote', Tremolo = 'Tremolo', Tuplet = 'Tuplet', Vibrato = 'Vibrato', VibratoBracket = 'VibratoBracket', Voice = 'Voice', Volta = 'Volta', }"
   },
   "util": {
     "RuntimeError": [
@@ -3144,6 +3246,7 @@
     "VexFlow": [
       "BUILD",
       "measureEngraving",
+      "ChantPhrase",
       "PhraseLayout",
       "EngravingProfile",
       "Accidental",
@@ -3156,6 +3259,8 @@
       "Bend",
       "BoundingBox",
       "CanvasContext",
+      "ChantDivision",
+      "ChantStave",
       "ChordSymbol",
       "Clef",
       "ClefNote",
@@ -3171,6 +3276,7 @@
       "Formatter",
       "Fraction",
       "FretHandFinger",
+      "GermanLuteNote",
       "GhostNote",
       "GlyphNote",
       "GraceNote",
@@ -3216,6 +3322,7 @@
       "FrettedInstrument",
       "PercussionMap",
       "FiguredBass",
+      "FrenchLuteNote",
       "FretDiagram",
       "HarpPedalDiagram",
       "AlternatingTremolo",

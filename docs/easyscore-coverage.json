@@ -60,6 +60,7 @@
       "keysignature",
       "keysignote",
       "multimeasurerest",
+      "chantstave",
       "stave",
       "stavebarline",
       "staveconnector",
@@ -72,7 +73,7 @@
       "timesignature",
       "timesignote"
     ],
-    "tablature": ["gracetabnote", "tabnote", "tabslide", "tabstave", "tabtie", "tuning"],
+    "tablature": ["frenchlutenote", "germanlutenote", "gracetabnote", "tabnote", "tabslide", "tabstave", "tabtie", "tuning"],
     "infrastructure": [
       "boundingbox",
       "engravinggeometry",

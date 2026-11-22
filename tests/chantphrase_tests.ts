@@ -1,6 +1,7 @@
 // Verify the pitches, syllables and line breaks of a square-notation chant on SVG and Canvas.
-import { ChantPhrase } from '../src/chantphrase';
 import { TestOptions, VexFlowTests } from './vexflow_test_helpers';
+
+import { ChantPhrase } from '../src/chantphrase';
 
 function lumina(options: TestOptions): void {
   const { assert } = options;
