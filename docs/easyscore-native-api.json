@@ -1256,9 +1256,14 @@
     ]
   },
   "keysignature": {
+    "OrderedKeySign": "export type OrderedKeySign = { type: string; pitch: string; line?: never } | { type: string; line: number; pitch?: never };",
+    "KeySignaturePresets": [
+      "register(name: string, entries: readonly OrderedKeySign[]): this",
+      "select(name: string): KeySignature"
+    ],
     "KeySignature": [
       "CATEGORY(): string",
-      "setOrdered(entries: readonly { type: string; line: number }[]): this",
+      "setOrdered(entries: readonly OrderedKeySign[]): this",
       "constructor(keySpec: string, cancelKeySpec?: string, alterKeySpec?: string[])",
       "cancelKey(spec: string): this",
       "addToStave(stave: Stave): this",
@@ -1278,6 +1283,7 @@
     "KeySigNote": [
       "CATEGORY(): string",
       "constructor(keySpec: string, cancelKeySpec?: string, alterKeySpec?: string[], clef?: string)",
+      "setOrdered(entries: readonly OrderedKeySign[]): this",
       "addToModifierContext(mc: ModifierContext): this",
       "preFormat(): this",
       "draw(): void"
@@ -2253,6 +2259,7 @@
       "constructor(noteStruct: StaveNoteStruct)",
       "reset(): this",
       "setBeam(beam: Beam): this",
+      "applyFourShape(tonic: string, notes: readonly StaveNote[]): void",
       "buildStem(): this",
       "buildNoteHeads(): NoteHead[]",
       "autoStem(): void",
@@ -3172,6 +3179,7 @@
       "HarpPedalChanges",
       "KeyManager",
       "KeySignature",
+      "KeySignaturePresets",
       "KeySigNote",
       "Modifier",
       "ModifierContext",

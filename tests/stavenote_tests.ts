@@ -17,6 +17,7 @@ import { Dot } from '../src/dot';
 import { Formatter } from '../src/formatter';
 import { Fraction } from '../src/fraction';
 import { FretHandFinger } from '../src/frethandfinger';
+import { Glyphs } from '../src/glyphs';
 import { Modifier, ModifierPosition } from '../src/modifier';
 import { ModifierContext } from '../src/modifiercontext';
 import { Ornament } from '../src/ornament';
@@ -28,6 +29,61 @@ import { Stem } from '../src/stem';
 import { StringNumber } from '../src/stringnumber';
 import { Stroke } from '../src/strokes';
 import { TickContext } from '../src/tickcontext';
+
+/** The same signed pitch takes a different head when the tonic changes. */
+function fourShapeScales(options: TestOptions): void {
+  const { assert } = options;
+  const f = VexFlowTests.makeFactory(options, 580, 260);
+  const pitches = [
+    ['c/4', 'd/4', 'e/4', 'f/4', 'g/4', 'a/4', 'b/4', 'c/5'],
+    ['d/4', 'e/4', 'f#/4', 'g/4', 'a/4', 'b/4', 'c#/5', 'd/5'],
+  ];
+  const rows = pitches.map((scale, i) => {
+    const tonic = i ? 'D' : 'C';
+    const stave = f
+      .Stave({ x: 10, y: i * 115 + 10, width: 550 })
+      .addClef('treble')
+      .addKeySignature(tonic);
+    const notes = scale.map((key) => f.StaveNote({ keys: [key], duration: 'q', autoStem: true }));
+    StaveNote.applyFourShape(tonic, notes);
+    const voice = f.Voice({ time: '8/4' }).addTickables(notes);
+    f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+    return notes;
+  });
+  f.draw();
+  for (const [i, notes] of rows.entries()) {
+    const fa = (n: StaveNote) =>
+      n.getStemDirection() === Stem.UP ? Glyphs.noteShapeTriangleLeftBlack : Glyphs.noteShapeTriangleRightBlack;
+    const sol = Glyphs.noteShapeRoundBlack,
+      la = Glyphs.noteShapeSquareBlack,
+      mi = Glyphs.noteShapeDiamondBlack;
+    assert.deepEqual(
+      notes.map((n) => n.noteHeads[0].text),
+      [fa(notes[0]), sol, la, fa(notes[3]), sol, la, mi, fa(notes[7])]
+    );
+    assert.deepEqual(
+      notes.map((n) => n.getKeys()[0]),
+      pitches[i]
+    );
+    assert.ok(notes.every((n) => n.getTicks().value() === VexFlow.RESOLUTION / 4));
+    for (const n of notes) {
+      const head = n.getHeadInk()[0],
+        stem = n.getStemX();
+      const edge = n.getStemDirection() === Stem.UP ? head.x + head.w : head.x;
+      assert.ok(Math.abs(stem - edge) < 2, 'Stem meets the side of the shaped head');
+    }
+  }
+  const fa = rows[0][0];
+  fa.setStemDirection(Stem.DOWN);
+  assert.equal(fa.noteHeads[0].text, Glyphs.noteShapeTriangleRightBlack);
+  const half = new StaveNote({ keys: ['e/4'], duration: 'h' });
+  const rest = new StaveNote({ keys: ['b/4'], duration: 'qr' });
+  const before = rest.noteHeads[0].text;
+  StaveNote.applyFourShape('C', [half, rest]);
+  assert.equal(half.noteHeads[0].text, Glyphs.noteShapeSquareWhite);
+  assert.equal(rest.noteHeads[0].text, before);
+  assert.throws(() => StaveNote.applyFourShape('H', rows[0]), /tonic/);
+}
 
 const StaveNoteTests = {
   Start(): void {
@@ -45,6 +101,7 @@ const StaveNoteTests = {
     QUnit.test('TickContext', tickContext);
 
     const run = VexFlowTests.runTests;
+    run('Movable four-shape major scales', fourShapeScales);
     run('StaveNote Draw - Treble', drawBasic, { clef: 'treble', octaveShift: 0, restKey: 'r/4' });
     run('StaveNote BoundingBoxes - Treble', drawBoundingBoxes, { clef: 'treble', octaveShift: 0, restKey: 'r/4' });
     run('StaveNote Draw - Alto', drawBasic, { clef: 'alto', octaveShift: -1, restKey: 'r/4' });

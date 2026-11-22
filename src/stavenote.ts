@@ -34,6 +34,23 @@ const bravuraSlashAnchors: Record<string, { up: readonly [number, number]; down:
   [Glyphs.noteheadSlashWhiteHalf]: { up: [3.12, 1], down: [0, -1] },
 };
 
+/** Staff spelling determines the degree. Repeated fa, sol and la share the same SMuFL families. */
+const degreeLetters = 'CDEFGAB';
+const fourShapeDegrees = ['fa', 'sol', 'la', 'fa', 'sol', 'la', 'mi'] as const;
+
+/** Black, white and double-whole forms preserve the written duration of each pitch. */
+const fourShapeHeads = {
+  faUp: [Glyphs.noteShapeTriangleLeftBlack, Glyphs.noteShapeTriangleLeftWhite, Glyphs.noteShapeTriangleLeftDoubleWhole],
+  faDown: [
+    Glyphs.noteShapeTriangleRightBlack,
+    Glyphs.noteShapeTriangleRightWhite,
+    Glyphs.noteShapeTriangleRightDoubleWhole,
+  ],
+  sol: [Glyphs.noteShapeRoundBlack, Glyphs.noteShapeRoundWhite, Glyphs.noteShapeRoundDoubleWhole],
+  la: [Glyphs.noteShapeSquareBlack, Glyphs.noteShapeSquareWhite, Glyphs.noteShapeSquareDoubleWhole],
+  mi: [Glyphs.noteShapeDiamondBlack, Glyphs.noteShapeDiamondWhite, Glyphs.noteShapeDiamondDoubleWhole],
+};
+
 export interface StaveNoteHeadBounds {
   yTop: number;
   yBottom: number;
@@ -479,6 +496,37 @@ export class StaveNote extends StemmableNote {
     return this;
   }
 
+  private fourShapeTonic?: number;
+
+  /** Apply the movable major four-shape convention to the passage before formatting. */
+  static applyFourShape(tonic: string, notes: readonly StaveNote[]): void {
+    if (!/^[a-g](?:bb|##|b|#)?$/i.test(tonic))
+      throw new RangeError('Expected a written major tonic such as C, D or Bb.');
+    const tonicIndex = degreeLetters.indexOf(tonic[0].toUpperCase());
+    for (const note of notes) {
+      if (note.getNoteType() !== 'n') continue;
+      note.fourShapeTonic = tonicIndex;
+      note.preFormatted = false;
+      note.reset();
+    }
+  }
+
+  /** Choose each owned head again on a stem reversal. Explicit per-pitch head overrides take precedence. */
+  private fourShapeHead(index: number, direction: number): string | undefined {
+    if (this.fourShapeTonic === undefined) return;
+    const pitch = this.keys[index];
+    if (pitch.split('/').length > 2) return;
+    const letter = degreeLetters.indexOf(pitch[0].toUpperCase());
+    if (letter < 0) return;
+    const degree = (letter - this.fourShapeTonic + 7) % 7;
+    const shape = fourShapeDegrees[degree];
+    const family = shape === 'fa' ? (direction === Stem.UP ? 'faUp' : 'faDown') : shape;
+    const duration = Tables.sanitizeDuration(this.duration);
+    if (duration === '1/2') return fourShapeHeads[family][2];
+    if (duration === '1' || duration === '2') return fourShapeHeads[family][1];
+    return fourShapeHeads[family][0];
+  }
+
   // Builds a `Stem` for the note
   override buildStem(): this {
     this.setStem(new Stem({ hide: this.isRest() }));
@@ -530,7 +578,7 @@ export class StaveNote extends StemmableNote {
         noteType: this.noteType,
         displacementColumn: column,
         stemDirection,
-        customGlyphCode: noteProps.code,
+        customGlyphCode: this.fourShapeHead(this.sortedKeyProps[i].index, stemDirection) ?? noteProps.code,
         line: noteProps.line,
       });
 

@@ -131,3 +131,30 @@ Nested tuplets and detach operations are included.
 A strict voice still rejects too many ticks at insertion time.
 It cannot infer a tuplet that has not been created yet.
 Reformat after editing durations.
+
+## Written pitches in custom key signatures
+
+Use `setOrdered()` to supply accidental signs from left to right. A written pitch follows the stave’s clef. An explicit `line` stays at that position, counted down from zero at the top. Either kind can appear in the same signature.
+
+```js
+const signs = [{ type: 'b', pitch: 'g/4' }, { type: '#', pitch: 'e/4' }];
+stave.addModifier(new KeySignature('C').setOrdered(signs));
+const restatement = new KeySigNote('C').setOrdered(signs);
+```
+
+Put the restatement after a `ClefNote` in the same voice to use that clef. For a clef change written in another voice, supply the active clef in the factory call, for example `factory.KeySigNote({ key: 'C', clef: 'alto' }).setOrdered(signs)`.
+
+### Edition-defined signatures
+
+Create one `KeySignaturePresets` collection per edition. In this Sabâ exercise, the caller supplies a koma flat on B4 and a bakiye flat on D5. The collection keeps the written signs in order. It makes a fresh modifier each time you select the name.
+
+```js
+const edition = new KeySignaturePresets().register('Sabâ', [
+  { type: Glyphs.accidentalKomaFlat, pitch: 'b/4' },
+  { type: Glyphs.accidentalBakiyeFlat, pitch: 'd/5' },
+]);
+firstStave.addModifier(edition.select('Sabâ'));
+secondStave.addModifier(edition.select('Sabâ'));
+```
+
+A second collection can register the same name with different signs. Names are exact. An unknown name raises `BadKeySignature`.

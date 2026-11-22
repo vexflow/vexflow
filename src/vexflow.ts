@@ -37,7 +37,7 @@ import { HarpPedalChanges } from './harppedalchanges';
 import { HarpPedalDiagram } from './harppedaldiagram';
 import { FrettedInstrument, PercussionMap } from './instrumentprofile';
 import { KeyManager } from './keymanager';
-import { KeySignature } from './keysignature';
+import { KeySignature, KeySignaturePresets } from './keysignature';
 import { KeySigNote } from './keysignote';
 import { Metrics, MetricsDefaults } from './metrics';
 import { Modifier, ModifierPosition } from './modifier';
@@ -147,6 +147,7 @@ export class VexFlow {
   static HarpPedalChanges = HarpPedalChanges;
   static KeyManager = KeyManager;
   static KeySignature = KeySignature;
+  static KeySignaturePresets = KeySignaturePresets;
   static KeySigNote = KeySigNote;
   static Modifier = Modifier;
   static ModifierContext = ModifierContext;
