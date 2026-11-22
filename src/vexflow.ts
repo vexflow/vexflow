@@ -25,6 +25,7 @@ import { FluteFingering } from './flutefingering';
 import { Font, FontStyle, FontWeight } from './font';
 import { Formatter } from './formatter';
 import { Fraction } from './fraction';
+import { FrenchLuteNote } from './frenchlutenote';
 import { FretDiagram } from './fretdiagram';
 import { FretHandFinger } from './frethandfinger';
 import { GhostNote } from './ghostnote';
@@ -184,6 +185,7 @@ export class VexFlow {
   static FrettedInstrument = FrettedInstrument;
   static PercussionMap = PercussionMap;
   static FiguredBass = FiguredBass;
+  static FrenchLuteNote = FrenchLuteNote;
   static FretDiagram = FretDiagram;
   static HarpPedalDiagram = HarpPedalDiagram;
   static AlternatingTremolo = AlternatingTremolo;

@@ -133,6 +133,8 @@ export class TabNote extends StemmableNote {
   }
 
   protected ghost: boolean;
+  /** Numeric frets interrupt the course line underneath their ink. */
+  protected clearFretLines = true;
   protected fretElement: Element[] = [];
   protected positions: TabNotePosition[];
   /** Explicit fret size; otherwise use text metrics and this note's grace scale. */
@@ -244,22 +246,32 @@ export class TabNote extends StemmableNote {
     return this;
   }
 
+  /** Build and measure the label for one sounding position. */
+  protected createFretElement(position: TabNotePosition): Element {
+    const fret = this.ghost ? '(' + position.fret + ')' : String(position.fret);
+    const el = TabNote.tabToElement(fret);
+    const defaultSize = Font.convertSizeToPointValue(Metrics.getFontInfo('TabNote.text').size);
+    const size =
+      this.fretFontSize === undefined
+        ? defaultSize * this.getFontScale()
+        : Font.convertSizeToPointValue(this.fretFontSize);
+    el.setFontSize((Font.convertSizeToPointValue(el.fontInfo.size) * size) / defaultSize);
+    const metrics = el.getTextMetrics();
+    el.setYShift((metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent) / 2);
+    return el;
+  }
+
+  /** Convert a one-based string number to its zero-based stave line. */
+  protected getFretLine(position: TabNotePosition): number {
+    return Number(position.str) - 1;
+  }
+
   // Calculate and store the width of the note, retaining explicit sizes across ghost changes.
   updateWidth(): void {
     this.fretElement = [];
     this.width = 0;
-    for (let i = 0; i < this.positions.length; ++i) {
-      let fret = this.positions[i].fret;
-      if (this.ghost) fret = '(' + fret + ')';
-      const el = TabNote.tabToElement(fret.toString());
-      const defaultSize = Font.convertSizeToPointValue(Metrics.getFontInfo('TabNote.text').size);
-      const size =
-        this.fretFontSize === undefined
-          ? defaultSize * this.getFontScale()
-          : Font.convertSizeToPointValue(this.fretFontSize);
-      el.setFontSize((Font.convertSizeToPointValue(el.fontInfo.size) * size) / defaultSize);
-      const metrics = el.getTextMetrics();
-      el.setYShift((metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent) / 2);
+    for (const position of this.positions) {
+      const el = this.createFretElement(position);
       this.fretElement.push(el);
       this.width = Math.max(el.getWidth(), this.width);
     }
@@ -274,11 +286,7 @@ export class TabNote extends StemmableNote {
     const ctx = stave.getContext();
     this.setContext(ctx);
 
-    // we subtract 1 from `line` because getYForLine expects a 0-based index,
-    // while the position.str is a 1-based index
-    const ys = this.positions.map(({ str: line }) => stave.getYForLine(Number(line) - 1));
-
-    this.setYs(ys);
+    this.setYs(this.positions.map((position) => stave.getYForLine(this.getFretLine(position))));
 
     if (this.stem) {
       this.stem.setYBounds(this.getStemY(), this.getStemY());
@@ -439,8 +447,7 @@ export class TabNote extends StemmableNote {
       // Center the fret text beneath the stem
       const tabX = x - el.getWidth() / 2;
 
-      // FIXME: Magic numbers.
-      ctx.clearRect(tabX - 2, y - 3, el.getWidth() + 4, 6);
+      if (this.clearFretLines) ctx.clearRect(tabX - 2, y - 3, el.getWidth() + 4, 6);
 
       el.renderText(ctx, tabX, y);
     }

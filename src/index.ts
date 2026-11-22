@@ -34,6 +34,7 @@ export * from './flag';
 export * from './flutefingering';
 export * from './formatter';
 export * from './fraction';
+export * from './frenchlutenote';
 export * from './frethandfinger';
 export * from './ghostnote';
 export * from './glyphnote';

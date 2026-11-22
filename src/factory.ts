@@ -23,6 +23,7 @@ import { EngravingProfile } from './engravingprofile';
 import { FiguredBass, FiguredBassSpec } from './figuredbass';
 import { FontInfo } from './font';
 import { Formatter, FormatterOptions } from './formatter';
+import { FrenchLuteNote, FrenchLuteNoteStruct } from './frenchlutenote';
 import { FretHandFinger } from './frethandfinger';
 import { GhostNote } from './ghostnote';
 import { GlyphNote, GlyphNoteOptions } from './glyphnote';
@@ -503,6 +504,13 @@ export class Factory {
     keySigNote.setContext(this.context);
     this.renderQ.push(keySigNote);
     return this.own(keySigNote);
+  }
+
+  /** Queue French lute letters and open bass signs on the current tablature stave. */
+  FrenchLuteNote(noteStruct: FrenchLuteNoteStruct, drawStem = false): FrenchLuteNote {
+    const note = new FrenchLuteNote(noteStruct, drawStem);
+    if (this.stave) note.setStave(this.stave);
+    return this.adopt(note.setContext(this.context), 'note');
   }
 
   TabNote(noteStruct: TabNoteStruct, drawStem = false): TabNote {
