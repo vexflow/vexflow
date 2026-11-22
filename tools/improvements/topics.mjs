@@ -6,20 +6,55 @@ export const topics = [
     'New in 5.7.0',
     [
       [
-        'Lead sheets and divided piano chords',
-        'Long harmony labels reserve room across barlines. A transposed slash chord preserves the written interval of its root and bass. Beamed piano chords can share one stem between staves.',
-        'docs/chord-symbols.md',
+        'Chord clearance across barlines',
+        'Long harmony labels reserve space on both sides of a barline. At narrow widths the sheet can wrap the measures. Short chord names retain their spacing.',
+        'issues/375',
       ],
       [
-        'Beams, tremolos and slides',
-        'Ordinary beams and straight glissandi can span a system break. Feathered groups retain their written rhythm as the beam spacing opens. Alternating tremolos can join written whole notes or span two piano staves.',
-        'docs/vf6/m6.md',
+        'Shared stems across piano staves',
+        'Heads split between two piano staves can meet one stem on the beam. Compare the same chords drawn as two independent voices.',
+        'issues/376',
+      ],
+      [
+        'Transposing slash chords',
+        'A transposed passage now carries its harmony with it. The root and slash bass move by the written interval while the chord quality and N.C. remain literal.',
+        'issues/377',
+      ],
+      [
+        'Ordinary beams across systems',
+        'One beam can cross a barline on a wide system. When the score wraps, its outgoing and incoming segments retain the rhythm of the same group.',
+        'issues/378',
+      ],
+      [
+        'Whole-note and cross-staff tremolos',
+        'Measured alternating tremolos support up to four strokes. Whole notes can carry floating strokes, and a pair can span two staves at different separations.',
+        'issues/379',
+      ],
+      [
+        'Bends held through ties',
+        'A bend can start on one string, keep its pitch through a tied attack, and release later. An adjacent fretted string retains its pitch through the gesture.',
+        'issues/380',
+      ],
+      [
+        'Two lyric syllables on one attack',
+        'Two syllables sharing one note can be joined by an undertie. Follow the first verse as the same passage reflows.',
+        'issues/381',
+      ],
+      [
+        'Glissandi across systems',
+        'A straight glissando can connect selected chord heads across a break. Both segments preserve the direction of the slide and leave room beside the heads.',
+        'issues/382',
+      ],
+      [
+        'Feathered beams',
+        'Secondary beams fan open or closed while the primary beam and written note durations stay fixed. The editable example lets you change the direction.',
+        'issues/383',
         'example-feathered-group',
       ],
       [
-        'Expression for voice and guitar',
-        'A niente circle follows the closed end of its wedge. Two syllables on one note share an undertie. A bent guitar string can hold across a tie and release on a later attack. The cycle tracker links the reviewed score comparisons.',
-        'issues/374',
+        'Niente hairpin tips',
+        'An open circle marks the closed musical tip of a crescendo or diminuendo. Wrapping the passage leaves that circle at the endpoint without adding one at the break.',
+        'issues/384',
       ],
     ],
   ],
@@ -68,6 +103,31 @@ export const topics = [
         'Structured chord notes engrave augmentation dots on each head. Rhythmic tab places the dots at the shared stem. Lead sheets retain their barlines and signature choices in printed parts. Explicit rest positions retain their ledger lines, and Bravura slash heads meet their stems at the font anchors.',
         'docs/easyscore.md',
         'tabnote-1',
+      ],
+      [
+        'Lead sheets in extracted parts',
+        'Compare the screen score and the printed melody part. The Cmaj7 label, lyric syllables, double bar and final bar carry through publication, including measures with a hidden time signature.',
+        'issues/365',
+      ],
+      [
+        'Ledger lines for positioned rests',
+        'Whole and half rests retain their explicit staff positions. Ledger lines support the rests outside the stave, including in ensemble scores.',
+        'issues/366',
+      ],
+      [
+        'Fret diagram position labels',
+        'A chord diagram uses the score’s text face for the position label. An individual diagram can override the typeface and weight.',
+        'issues/367',
+      ],
+      [
+        'Rhythm slash stem anchors',
+        'Quarter, eighth and half slash heads now attach their stems at Bravura’s published anchors. The same correction is visible in the Harbor Song lead sheet.',
+        'issues/362',
+      ],
+      [
+        'Rehearsal lettering and lyric extenders',
+        'Rehearsal lettering sits inside its frame using the measured ink. Held lyrics retain their baseline and leave room after the last letter.',
+        'issues/361',
       ],
     ],
   ],
@@ -252,6 +312,61 @@ export const topics = [
     ],
   ],
   [
+    'Features',
+    'Repertoire and print editions',
+    [
+      [
+        'Petzold’s Minuet',
+        'The print edition lays out 32 bars on two Letter pages, with dynamics, ornaments, pedal markings and page furniture.',
+        'demos/pdf/minuet.js',
+        'print-minuet-1',
+        'print-minuet-2',
+      ],
+      [
+        'Bach’s D minor fugue',
+        'The eight-bar web study introduces the voices. Both pages of the print edition show their development through bar 44.',
+        'demos/pdf/fugue.js',
+        'case-e53251a5fefc16ce',
+        'print-fugue-1',
+        'print-fugue-2',
+      ],
+      [
+        'Chopin’s Ballade No. 3',
+        'Follow the opening 24 bars from the carousel study to the Letter edition, including the small ossia, fingering and pedal changes.',
+        'demos/pdf/ballade.js',
+        'case-a23ef711b0b32ea5',
+        'print-ballade-1',
+      ],
+      [
+        'When the Saints Go Marching In',
+        'The jazz arrangement pairs reharmonized chord changes with lyrics. The handwritten music face distinguishes the lead sheet from the keyboard studies.',
+        'tests/scores/saints.js',
+        'case-cd8b5cf2b4692e17',
+      ],
+      [
+        'Greensleeves and High Wire',
+        'Compare the guitar chord melody with an electric lead part. The two examples use paired notation and tab to show harmony, legato and technique markings.',
+        'tests/scores/electric.js',
+        'case-1a828092725c229c',
+        'case-6a29cd24f475eb94',
+      ],
+      [
+        'The Kesh Jig and Bach’s Prelude',
+        'The jig marks sections and grace notes in a dance tune. The Prelude uses groups of repeated arpeggios, dynamics and articulation on a grand staff.',
+        'tests/scores/kesh.js',
+        'case-1515a5f8f003a042',
+        'case-020b106ff6c8aa13',
+      ],
+      [
+        'Pocket Change and Narrow Steps',
+        'The drum study assigns rhythms to kit voices. The microtonal study shows how unfamiliar accidentals read in a short melodic passage.',
+        'tests/scores/drums.js',
+        'case-2a3a048766cd81bf',
+        'case-5897b3b83620d031',
+      ],
+    ],
+  ],
+  [
     'Bug fixes',
     'Engraving corrections',
     [
@@ -302,24 +417,28 @@ export const topics = [
         'Rest placement checks the other voice’s chord and stem at the same rhythmic position. The comparison shows the additional vertical clearance.',
         'issues/203',
         'archive-203-Bravura-0',
+        'archive-203-Petaluma-1',
       ],
       [
         'Pedal beneath annotations',
         'The pedal baseline accounts for intervening bottom annotations along the span. Text, brackets and change notches share the resulting reservation.',
         'issues/206',
         'archive-206-Bravura-0',
+        'archive-206-Petaluma-1',
       ],
       [
         'Grace group measurement',
         'A formatted grace group exposes bounds before drawing. Repeated queries preserve the note positions and the group continues to use the parent staff.',
         'issues/253',
         'archive-253-Bravura-0',
+        'archive-253-Petaluma-1',
       ],
       [
         'Grace TAB fret size',
         'Explicit and default grace fret sizes now affect both text and measured width. Multi-digit fret numbers stay centered even after ghost-note changes.',
         'issues/255',
         'archive-255-Bravura-0',
+        'archive-255-Petaluma-1',
       ],
       [
         'Grace accidentals and side',
@@ -332,12 +451,16 @@ export const topics = [
         'Annotations prefer the text face while notation glyphs retain the music face. Lyric syllables can share an explicit baseline across notes with different stems and pitches.',
         'issues/152',
         'archive-152-Bravura',
+        'archive-152-Petaluma',
+        'archive-177-Bravura',
+        'archive-177-Petaluma',
       ],
       [
         'Ties beneath lyrics',
         'Lyric widths no longer shorten a note-to-note tie. Both endpoints follow the noteheads independently of the length of an attached word.',
         'issues/182',
         'archive-182-Bravura',
+        'archive-182-Petaluma',
       ],
       [
         'Repeated drawing and bounds',
@@ -369,6 +492,20 @@ export const topics = [
     'Bug fixes',
     'Timing, rendering and delivery',
     [
+      [
+        'Accidentals in simultaneous voices',
+        'Automatic accidentals process onsets in numeric order and consider notes at a shared onset together. Reordering the input voices leaves the printed accidentals in place.',
+        'issues/348',
+        'accidental-3',
+      ],
+      [
+        'Bounds for curves and tuplet brackets',
+        'A curve exposes its bounding box for selection. Tuplets above and below the staff have bounds for the bracket and its number.',
+        'issues/252',
+        'curve-1',
+        'case-fbf8cf244d0d3ed9',
+        'case-9983f8a953e6b731',
+      ],
       [
         'Tuplet duration edits',
         'Repeated attachment is idempotent. Voices refresh total ticks, shortest duration and spacing weights after tuplet changes, including nesting and detachment.',
@@ -442,6 +579,36 @@ export const topics = [
     'Construction and ownership',
     [
       [
+        'Typed articulations and fermatas',
+        'Named articulations resolve to the requested glyph. The comparison shows the former staccato fallback alongside the corrected fermatas.',
+        'issues/354',
+      ],
+      [
+        'Native objects in EasyScore',
+        'Native notes and modifiers can participate in a managed score. The extension example combines typed construction and native objects on one stave.',
+        'docs/easyscore.md',
+      ],
+      [
+        'Grace groups and percussion heads',
+        'Construct and attach an owned grace group, or mix pitched and shaped percussion heads in a typed sequence. Both studies render through the public EasyScore API.',
+        'docs/easyscore.md',
+      ],
+      [
+        'Odd meters and nested brackets',
+        'Compose multiple voices in an odd meter and name the notes that belong to a tuplet. The bracket example shows nested rhythmic relationships.',
+        'docs/easyscore.md',
+      ],
+      [
+        'Staff labels and rhythmic tablature',
+        'Construct a tab stave with named strings and fret positions, then add staff labels through the same typed facade.',
+        'docs/easyscore.md',
+      ],
+      [
+        'Score connectors and repeats',
+        'Connect the staves of a system and preserve a measure’s repeat notation when laying out the complete score.',
+        'docs/easyscore.md',
+      ],
+      [
         'Managed EasyScore facade',
         'Typed constructors cover staff and TAB notes, rests, modifiers, grace groups and stave markings. Batch construction, validation and scoped defaults support editing without leaking temporary settings.',
         'docs/easyscore-contracts.md',
@@ -470,6 +637,7 @@ export const topics = [
         'Callers can supply matching fonts to convert music and text to paths for standalone SVG. Missing glyphs or unsupported text produce diagnostics during the export.',
         'docs/portable-svg.md',
         'archive-bravura',
+        'archive-petaluma',
       ],
       [
         'Persistence design',
@@ -543,6 +711,12 @@ export const topics = [
         'Text measurement and rendering work',
         'A shared measurement cache reduces repeated work for identical text and font settings. Engraving probes distinguish measured geometry from rasterized ink.',
         'commit/a7a3f4a4',
+      ],
+      [
+        'Construct noteheads and flags once',
+        'StaveNote avoids duplicating noteheads during construction. Rebuilding a chord removes obsolete child heads, and changing the stem direction reuses the note’s flag.',
+        'issues/335',
+        'example-noteheads',
       ],
       [
         'Fonts and rendering diagnostics',

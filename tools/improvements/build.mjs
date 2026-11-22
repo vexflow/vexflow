@@ -10,6 +10,7 @@ import { siteTheme } from '../site-theme.mjs';
 import { captureScores } from './scores.mjs';
 import { captureExamples, captureTools } from './screens.mjs';
 import { apiChanges, base, git, history, repo } from './history.mjs';
+import { collectIssueEvidence, printFigures, sourceFigures } from './evidence.mjs';
 import { topics } from './topics.mjs';
 import { renderReport } from './page.mjs';
 
@@ -152,6 +153,7 @@ try {
   run(process.execPath, 'tools/tests-site.mjs', 'build');
   if (!(await exists(quality))) run(process.execPath, 'tools/reports/cli.mjs', 'build');
   const browser = await web('playwright').chromium.launch();
+  const revision = history(head);
   let figures, stats, version;
   try {
     version = browser.version();
@@ -195,6 +197,9 @@ try {
         rightLabel: 'Current',
         right: await exhibit(toolDir, tool, 'current'),
       });
+    figures.push(...(await printFigures(browser, staging, head)));
+    figures.push(...(await collectIssueEvidence(staging, work)));
+    figures.push(...(await sourceFigures(browser, staging, head, revision.commits)));
     stats = {
       old: old.scores.images.length,
       current: now.scores.images.length,
@@ -219,15 +224,31 @@ try {
     stats,
     topics,
     figures,
-    ...history(head),
+    ...revision,
     api: await apiChanges(work),
   };
   const ids = new Set(figures.map((r) => r.id));
+  assert.equal(ids.size, figures.length, 'Duplicate exhibit IDs');
+  const byTopic = Map.groupBy(
+    figures.filter((f) => f.topic),
+    (f) => f.topic
+  );
+  const titles = new Set(topics.flatMap(([, , items]) => items.map(([title]) => title)));
+  for (const title of byTopic.keys()) assert.ok(titles.has(title), 'Unassigned evidence: ' + title);
+  data.topics = topics.map(([category, group, items]) => [
+    category,
+    group,
+    items.map(([title, body, path, ...examples]) => {
+      const originals = byTopic.get(title) ?? [];
+      for (const figure of originals) figure.description = body;
+      const evidence = [...originals.map((f) => f.id), ...examples];
+      assert.ok(evidence.length, 'Missing visual or source evidence: ' + title);
+      for (const id of evidence) assert.ok(ids.has(id), 'Missing figure for ' + title + ': ' + id);
+      return [title, body, path, ...evidence];
+    }),
+  ]);
   for (const [, , items] of topics)
-    for (const [title, , link, figure] of items) {
-      if (figure) assert.ok(ids.has(figure), 'Missing figure for ' + title + ': ' + figure);
-      if (!/^(commit|issues)\//.test(link)) await access(link);
-    }
+    for (const [, , link] of items) if (!/^(commit|issues)\//.test(link)) await access(link);
   await writeFile(join(assets, 'report.css'), siteTheme + (await readFile('tools/improvements/report.css', 'utf8')));
   await copyFile('tools/improvements/app.js', join(assets, 'app.js'));
   await writeFile(join(staging, 'changes.json'), JSON.stringify(data, null, 2));

@@ -11,6 +11,16 @@ await mkdir(evidence, { recursive: true });
 const data = JSON.parse(await readFile(join(root, 'changes.json'), 'utf8'));
 const figures = new Map(data.figures.map((x) => [x.id, x]));
 assert.equal(figures.size, data.figures.length);
+for (const [, , items] of data.topics) {
+  for (const [title, , , ...ids] of items) {
+    assert.ok(ids.length && ids.every((id) => figures.has(id)), 'Missing evidence for ' + title);
+  }
+}
+assert.ok(data.commits.every((c) => figures.get(c.figure)?.source.endsWith('/commit/' + c.hash)));
+const issue = data.topics.flatMap((t) => t[2]).find(([title]) => title === 'Chord clearance across barlines');
+assert.match(figures.get(issue[3]).source, /issues\/375#issuecomment-/);
+assert.ok(figures.get(issue[3]).left);
+
 for (const figure of figures.values()) {
   for (const file of [figure.left, figure.right].filter(Boolean)) {
     assert.ok(resolve(root, file).startsWith(root + sep));
@@ -61,10 +71,41 @@ try {
     await page.keyboard.press('Escape');
     await page.locator('dialog').waitFor({ state: 'hidden' });
     await page.locator('#search').fill('');
-    await page.locator('#figure-type').selectOption('Comparison');
-    await page.locator('#figures a').first().click();
-    assert.equal(await page.locator('#plates figure').count(), 2);
+    // A change's pictures follow editorial order, then continue into the next change.
+    const changes = await page
+      .locator('.change')
+      .evaluateAll((rows) => rows.flatMap((el) => el.dataset.exhibits.split(' ')));
+    await page.locator('.change [data-plate]').first().click();
+    assert.equal(await page.locator('#previous-plate').isDisabled(), true);
+    await page.getByRole('button', { name: 'Next exhibit' }).click();
+    assert.equal(new URL(page.url()).hash, '#plate-' + changes[1]);
+    await page.keyboard.press('ArrowLeft');
+    assert.equal(new URL(page.url()).hash, '#plate-' + changes[0]);
     await page.locator('#close').click();
+    await page.locator('dialog').waitFor({ state: 'hidden' });
+    assert.equal(
+      await page
+        .locator('.change [data-plate]')
+        .first()
+        .evaluate((el) => el === document.activeElement),
+      true
+    );
+
+    // The lightbox follows all matching results, even those beyond the first page of tiles.
+    await page.locator('#figure-type').selectOption('Comparison');
+    const comparisons = data.figures.filter((f) => f.status === 'Comparison');
+    await page.locator('#figures a').nth(23).click();
+    assert.equal(await page.locator('#plates figure').count(), 2);
+    await page.keyboard.press('ArrowRight');
+    assert.equal(new URL(page.url()).hash, '#plate-' + comparisons[24].id);
+    assert.equal(await page.locator('#plate-position').innerText(), '25 of ' + comparisons.length);
+    await page.goBack();
+    await page.locator('dialog').waitFor({ state: 'hidden' });
+    await page.goForward();
+    await page.locator('dialog[open]').waitFor();
+    assert.equal(new URL(page.url()).hash, '#plate-' + comparisons[24].id);
+    await page.keyboard.press('Escape');
+    await page.locator('dialog').waitFor({ state: 'hidden' });
     await page.locator('#api-query').fill('rasgueado');
     await page.locator('#api-list summary').first().click();
     assert.match(await page.locator('#api-list pre').first().textContent(), /rasgueado/i);
@@ -86,6 +127,12 @@ try {
   await page.reload();
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   await page.screenshot({ path: join(evidence, 'mobile.png') });
+  await page.locator('.change [data-plate]').first().click();
+  await page.locator('#next-plate').click();
+  assert.ok(await page.locator('#previous-plate').isVisible());
+  assert.equal(await page.locator('dialog').evaluate((el) => el.scrollWidth <= el.clientWidth), true);
+  await page.locator('#plates img').evaluateAll((imgs) => Promise.all(imgs.map((im) => im.decode())));
+  await page.screenshot({ path: join(evidence, 'viewer-mobile.png') });
   assert.deepEqual(errors, []);
   assert.deepEqual(network, []);
   console.log('Verified file and prefixed HTTP navigation, images, keyboard, inventories and mobile layout.');

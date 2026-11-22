@@ -277,9 +277,8 @@ select {
   border: 0;
 }
 .sample {
-  float: right;
-  width: 34%;
-  margin: 8px 0 18px 20px;
+  align-self: start;
+  min-width: 0;
 }
 .sample img {
   width: 100%;
@@ -288,7 +287,10 @@ select {
   display: block;
 }
 .change {
-  margin: 17px 0 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(165px, 33%);
+  gap: 10px 24px;
+  margin: 22px 0 26px;
 }
 .change h4 {
   font-size: 1rem;
@@ -488,8 +490,10 @@ dialog figcaption {
   .shell {
     padding: 0 16px 42px;
   }
+  .change {
+    display: block;
+  }
   .sample {
-    float: none;
     width: 100%;
     margin: 12px 0;
   }
@@ -523,5 +527,51 @@ dialog figcaption {
   }
   dialog {
     padding: 12px;
+  }
+}
+
+/* Keep navigation reachable while reading a tall print page or comparing two scores. */
+.viewer-toolbar {
+  position: sticky;
+  top: -22px;
+  z-index: 1;
+  background: var(--paper);
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 12px;
+}
+.viewer-toolbar nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.viewer-toolbar button {
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.viewer-toolbar button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+#plate-position {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.82rem;
+}
+@media (max-width: 520px) {
+  dialog {
+    padding: 12px;
+  }
+  .viewer-toolbar {
+    top: -12px;
+    gap: 6px;
+  }
+  .viewer-toolbar nav {
+    gap: 5px;
+  }
+  .viewer-toolbar button {
+    padding: 5px;
+    font-size: 0.8rem;
   }
 }

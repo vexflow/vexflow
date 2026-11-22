@@ -37,3 +37,11 @@ npm run improvements:upload -- --rebuild   # Generate, browser-check, and upload
 The script stages a copy of the bundle, checks its manifest, uploads assets first, and verifies the JSON downloads against the bucket before publishing and verifying the HTML. Older assets stay available to readers with a cached page. If an upload fails, rerun the same command. To preview retired assets, run `npm run sites:clean -- reports/ai2026`. [Website retention policy](build.md#clean-up-retired-website-assets)
 
 The versioned engineering metrics archive uses its own publisher. [Quality report publication](quality-reports.md)
+
+## Add evidence for a change
+
+Add a summary and source to `tools/improvements/topics.mjs`. After the source path, list the IDs of its score studies or print pages in reading order. The first exhibit appears beside the summary. The build checks that every summary has evidence and every ID resolves.
+
+For existing issue screenshots, add a record to `tools/improvements/issue-evidence.json` with the matching topic title, original issue comment URL, attachment ID, caption and SHA-256 of each PNG. Use one image for a study or an already-combined review sheet. Use two images in before/after order only when the comment identifies both sides. The first build fetches missing attachments from GitHub and caches verified originals in `build/improvements-work/issue-images/`. The published and offline viewers serve their own copies.
+
+For a change without visible notation, select a source or documentation excerpt in `tools/improvements/evidence.mjs`. Every commit in the range also has a first-parent diff excerpt or file inventory in the commit history, with a link to the full change. These records are separate from the score and reference gallery.

@@ -1,0 +1,1183 @@
+[
+  {
+    "topic": "Chord typography and lead sheets",
+    "source": "https://github.com/vexflow/vexflow/issues/20#issuecomment-6918007275",
+    "images": [
+      {
+        "caption": "Default spacing with Academico/Bravura and Petaluma Script/Petaluma",
+        "asset": "d2ca9f61-505e-4b87-b753-7434fcc83fe0",
+        "sha256": "7128b15aed42302efc94219906d4a8445e5f71f3447223c2a5503b98e2cbe474"
+      },
+      {
+        "caption": "Opt-in kerning with Academico/Bravura and Petaluma Script/Petaluma",
+        "asset": "31f11168-4cdc-4cce-b701-fc2a8601cdae",
+        "sha256": "a0c112ca8d785a2ba8499e304104fde7d0045ff27642ee2caa66347a62201e5d"
+      }
+    ]
+  },
+  {
+    "topic": "Proportional and optical spacing",
+    "source": "https://github.com/vexflow/vexflow/issues/313#issuecomment-6920888751",
+    "images": [
+      {
+        "caption": "Before: default engraving in VexFlow 5.1.2",
+        "asset": "45edcf8a-52d6-4ff8-9e94-19ecc0acc632",
+        "sha256": "2bfa4c53cb4b4e79c13f011db1d8831eb67741a8dcebd54715c11bf31583d132"
+      },
+      {
+        "caption": "After: strict proportional spacing across voices and rational rhythms",
+        "asset": "558417bb-ffdb-47c1-9dce-ecda241facf2",
+        "sha256": "cd30999d8f52aadcc7c192c17898bb88c32ecded0efb0455e728152d7abddf73"
+      }
+    ]
+  },
+  {
+    "topic": "Automatic stems across a beam group",
+    "source": "https://github.com/vexflow/vexflow/issues/353#issuecomment-6923640989",
+    "images": [
+      {
+        "caption": "Before: opposite stem on the seventh note in ascending and descending tuplets",
+        "asset": "d99eb7ac-a179-46ed-aaf2-2e79cd0d9a55",
+        "sha256": "7cb2e3d8fe5477868ea0e4891e94e0737f37d7b3096473ef5f451eeb67cfd593"
+      },
+      {
+        "caption": "After: EasyScore automatically chooses a shared beam direction",
+        "asset": "0a940c68-0fb0-4652-91c8-137ff1900e50",
+        "sha256": "9898abc026af4b6bebcb15d1a3c163c31efad63e0e9e5729ca66c216c34e41a4"
+      }
+    ]
+  },
+  {
+    "topic": "Responsive sheets",
+    "source": "https://github.com/vexflow/vexflow/issues/158#issuecomment-6902955935",
+    "images": [
+      {
+        "caption": "Bravura before",
+        "asset": "393f4d08-7653-48ab-b751-9ea5cb421fe1",
+        "sha256": "852936bc864cb3f598cc324bf8f957dfc081026ef3a98f54c6a17ec2ddb2d6d2"
+      },
+      {
+        "caption": "Bravura after",
+        "asset": "96078f6e-c3ed-4c18-9826-c049f72519a2",
+        "sha256": "9df33586f217a898b1a4c6a212636b20afd330dee23f39d7465ed72041706fbe"
+      }
+    ]
+  },
+  {
+    "topic": "Responsive sheets",
+    "source": "https://github.com/vexflow/vexflow/issues/158#issuecomment-6902955935",
+    "images": [
+      {
+        "caption": "Petaluma before",
+        "asset": "dfe4b2d3-9bbd-4692-9bdf-c9f7708b8919",
+        "sha256": "45ca9c800bed107cb5d2f8472378c6cd1a3dd2663cd393df84f1ac437d5f09fe"
+      },
+      {
+        "caption": "Petaluma after",
+        "asset": "1460ff1e-bd9e-4cbc-a2eb-9636fb03bcc2",
+        "sha256": "fbcebfe6dd870fe6a80dca3555aac3ad98e1c8a37985ec0c386f4ce10ab11e0f"
+      }
+    ]
+  },
+  {
+    "topic": "Inherited themes",
+    "source": "https://github.com/vexflow/vexflow/issues/333#issuecomment-6902956722",
+    "images": [
+      {
+        "caption": "Bravura before",
+        "asset": "660a286b-5b6b-4619-9623-7c9ebb711968",
+        "sha256": "852936bc864cb3f598cc324bf8f957dfc081026ef3a98f54c6a17ec2ddb2d6d2"
+      },
+      {
+        "caption": "Bravura after",
+        "asset": "06ff3404-5fdf-42d5-9751-32057f1cbe92",
+        "sha256": "9df33586f217a898b1a4c6a212636b20afd330dee23f39d7465ed72041706fbe"
+      }
+    ]
+  },
+  {
+    "topic": "Inherited themes",
+    "source": "https://github.com/vexflow/vexflow/issues/333#issuecomment-6902956722",
+    "images": [
+      {
+        "caption": "Petaluma before",
+        "asset": "9c5bd4ee-82b1-4fad-86e0-9c08aabb1612",
+        "sha256": "45ca9c800bed107cb5d2f8472378c6cd1a3dd2663cd393df84f1ac437d5f09fe"
+      },
+      {
+        "caption": "Petaluma after",
+        "asset": "3ee84458-483a-469a-bd71-5472ff6f98ca",
+        "sha256": "fbcebfe6dd870fe6a80dca3555aac3ad98e1c8a37985ec0c386f4ce10ab11e0f"
+      }
+    ]
+  },
+  {
+    "topic": "Typed articulations and fermatas",
+    "source": "https://github.com/vexflow/vexflow/issues/354#issuecomment-6931603419",
+    "images": [
+      {
+        "caption": "Before: fermata became staccato",
+        "asset": "a31b1067-ab10-43be-abe3-a6adf434083f",
+        "sha256": "78d4c43956fd02af5e289b07df0b1fb5c725a3d3d8063b2ffdfe37984d0b50df"
+      },
+      {
+        "caption": "After: correct fermatas",
+        "asset": "427166c6-3789-496b-b5ce-936defd97251",
+        "sha256": "dc215d6e14357216de78c9506a540676bac76ab6e05209ea7960de758266ad98"
+      }
+    ]
+  },
+  {
+    "topic": "Native objects in EasyScore",
+    "source": "https://github.com/vexflow/vexflow/issues/354#issuecomment-6932041032",
+    "images": [
+      {
+        "caption": "Native extensions on white",
+        "asset": "fcbd1290-7cb2-400f-afff-094f132a84a6",
+        "sha256": "86954160a610e35b9f1a6e06f759ae5220b1f58e2f9c96564ccd9f4ef64ec911"
+      }
+    ]
+  },
+  {
+    "topic": "Grace groups and percussion heads",
+    "source": "https://github.com/vexflow/vexflow/issues/354#issuecomment-6932416893",
+    "images": [
+      {
+        "caption": "Grace groups",
+        "asset": "73ad4cb9-8a93-480f-8511-a9d6c00851f5",
+        "sha256": "06526bcb107a08cf71223bd46d3875789fcd91844e6441ef9b00a2788976af3b"
+      }
+    ]
+  },
+  {
+    "topic": "Grace groups and percussion heads",
+    "source": "https://github.com/vexflow/vexflow/issues/354#issuecomment-6932416893",
+    "images": [
+      {
+        "caption": "Percussion heads",
+        "asset": "423beef8-5f7a-45e4-bdde-281b55afa257",
+        "sha256": "f0e0944c7b93eb231b84dca68e1375606d7681d5b0aa053aef5869539a30518c"
+      }
+    ]
+  },
+  {
+    "topic": "Odd meters and nested brackets",
+    "source": "https://github.com/vexflow/vexflow/issues/354#issuecomment-6932690070",
+    "images": [
+      {
+        "caption": "easyscore-m4-odd-meter",
+        "asset": "c6922381-c09d-4ce7-ad11-235f1d94d103",
+        "sha256": "a75c0f9af70291a72b227d906608783845078b5b89037e641c3c466085b30580"
+      }
+    ]
+  },
+  {
+    "topic": "Odd meters and nested brackets",
+    "source": "https://github.com/vexflow/vexflow/issues/354#issuecomment-6932690070",
+    "images": [
+      {
+        "caption": "easyscore-m4-brackets",
+        "asset": "cee23565-e5c4-4c3c-9026-1ecc0a7049dd",
+        "sha256": "b2c2aac1e8998c1769b73dcfd52c44fa92c75848a988845fec3f94132b602d5b"
+      }
+    ]
+  },
+  {
+    "topic": "Staff labels and rhythmic tablature",
+    "source": "https://github.com/vexflow/vexflow/issues/354#issuecomment-6932789584",
+    "images": [
+      {
+        "caption": "easyscore-m5-tab",
+        "asset": "1d6934cf-5e6d-4bee-baf4-a1f11f3865f5",
+        "sha256": "b98ec139a804cca7975efd92738706269c99a8b5a1c38bc747b8cb8160d0033d"
+      }
+    ]
+  },
+  {
+    "topic": "Staff labels and rhythmic tablature",
+    "source": "https://github.com/vexflow/vexflow/issues/354#issuecomment-6932789584",
+    "images": [
+      {
+        "caption": "easyscore-m5-labels",
+        "asset": "cebebe1e-9638-4e09-9712-fcef33c6062d",
+        "sha256": "93223f7a941b7edc713aadbb4c285cae576a637e1f84232b78e320ac9f84ce8b"
+      }
+    ]
+  },
+  {
+    "topic": "Composition policy",
+    "source": "https://github.com/vexflow/vexflow/issues/354#issuecomment-6933045211",
+    "images": [
+      {
+        "caption": "easyscore-m6-wide",
+        "asset": "f591cbb6-bc30-419b-8b14-edec8ba8d78b",
+        "sha256": "f3c1b787417675b7e5efa86d27c363504a7a3dc779a14d02c4df8f51740c8f6b"
+      }
+    ]
+  },
+  {
+    "topic": "Composition policy",
+    "source": "https://github.com/vexflow/vexflow/issues/354#issuecomment-6933045211",
+    "images": [
+      {
+        "caption": "easyscore-m6-narrow",
+        "asset": "e678e903-a1f2-4f34-ada5-78106efbed11",
+        "sha256": "e20175972a9efc45866d138b90793b67b9f5717984bb1cefd4b762367dd8bc58"
+      }
+    ]
+  },
+  {
+    "topic": "Score connectors and repeats",
+    "source": "https://github.com/vexflow/vexflow/issues/354#issuecomment-6933323529",
+    "images": [
+      {
+        "caption": "easyscore-m7-connector",
+        "asset": "6dd5eeb6-1fd9-4682-a876-eebb444a0783",
+        "sha256": "d816f5c038150c3a4f56fcf097beddbdd469795e46fd39ca94113bbf8190a3ec"
+      }
+    ]
+  },
+  {
+    "topic": "Score connectors and repeats",
+    "source": "https://github.com/vexflow/vexflow/issues/354#issuecomment-6933323529",
+    "images": [
+      {
+        "caption": "easyscore-m7-repeat",
+        "asset": "dd4b0ed1-03d6-4650-bd74-65de0436d957",
+        "sha256": "7e50a9ee2cd4ed657cbacef5c558ed470fd545c33ae1edd0ab399b92c049c274"
+      }
+    ]
+  },
+  {
+    "topic": "Interactive user guide",
+    "source": "https://github.com/vexflow/vexflow/issues/356#issuecomment-6935839504",
+    "images": [
+      {
+        "caption": "Before: Quickstart using Factory",
+        "asset": "aeb73d42-b801-4723-aeaf-7e817aff8d05",
+        "sha256": "3ea6fd7d95763190bba3b8487acdbd85f879e900fee54b05fbba197d110b9b75"
+      },
+      {
+        "caption": "After: Quickstart using EasyScore.create",
+        "asset": "8d04e717-9fdb-4ead-98cf-5cb247234953",
+        "sha256": "f46e2ace4048aca528b127d9acd10f7eecb9a4a70679e5d568e28ee92629c34b"
+      }
+    ]
+  },
+  {
+    "topic": "Interactive user guide",
+    "source": "https://github.com/vexflow/vexflow/issues/356#issuecomment-6935839504",
+    "images": [
+      {
+        "caption": "Before: helper lesson describing the initial API slice",
+        "asset": "6ff5ca59-3df6-498e-8757-b52dd58f058f",
+        "sha256": "b9a97cf298a6329a470e8a3c7ce12ed42697f007f255cc50f0d0289e055f4b4a"
+      },
+      {
+        "caption": "After: helper lesson for the merged API",
+        "asset": "7be031b0-968c-4525-8f60-e84b0cf8394f",
+        "sha256": "b83653ca51478f27bfc93d7a47d31ece781cc0abc18516cdab46d7effdc8ff6f"
+      }
+    ]
+  },
+  {
+    "topic": "Interactive user guide",
+    "source": "https://github.com/vexflow/vexflow/issues/356#issuecomment-6935839504",
+    "images": [
+      {
+        "caption": "New structured composition lesson",
+        "asset": "3dd8360d-56be-47e1-8a23-1489ce18fd17",
+        "sha256": "d0d70ea83c88158c83f264de8de22f9910e3441a5ab94edacfb406eb5232eff3"
+      }
+    ]
+  },
+  {
+    "topic": "Interactive user guide",
+    "source": "https://github.com/vexflow/vexflow/issues/356#issuecomment-6935839504",
+    "images": [
+      {
+        "caption": "Updated mobile Quickstart",
+        "asset": "489cdbc7-2f2a-471e-b388-367ab87f1c79",
+        "sha256": "0d66b6fe6ae3c880e6b19196e42319ec78c18d17bb3e29c6f50adcbd2e085a71"
+      }
+    ]
+  },
+  {
+    "topic": "Visual test gallery",
+    "source": "https://github.com/vexflow/vexflow/issues/360#issuecomment-6982017958",
+    "images": [
+      {
+        "caption": "Previous gallery on first load",
+        "asset": "15100327-81c5-4164-90fc-5cf045811963",
+        "sha256": "9ccdd2fea8a9477d11d326de841908f79aa368f22623f0f7f97708e7d67d7c7b"
+      },
+      {
+        "caption": "New module index and Minuet in G",
+        "asset": "4dcc6882-5460-493c-ba06-78d9cf6099ff",
+        "sha256": "8d6eff9d3734b168284d25ad5094a31f67f9e2cea662b1cb69f7ed587fdc1ce3"
+      }
+    ]
+  },
+  {
+    "topic": "Visual test gallery",
+    "source": "https://github.com/vexflow/vexflow/issues/360#issuecomment-6982017958",
+    "images": [
+      {
+        "caption": "StaveNote module results",
+        "asset": "8bf034dc-3974-4ed5-82b2-00b10d8a5cc9",
+        "sha256": "433a10a3c1ed95ac71cb455a167a9e14b86b0967d28d51dd9257ef172bed2704"
+      }
+    ]
+  },
+  {
+    "topic": "Beams between attacks",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6981314205",
+    "images": [
+      {
+        "caption": "5.2.0 before",
+        "asset": "25cfeddd-62e3-435c-8bfe-ec1074e63d01",
+        "sha256": "0e631f153e205c85bb31e2ad941d9ee963f80a15a044d5adc9ad0a0aaa8cf0fd"
+      },
+      {
+        "caption": "Corrected beam",
+        "asset": "2370b937-1407-448d-8325-8874b50933a8",
+        "sha256": "9c9036ae3899654080d81162fb8e66f7b15c19ebd98993cd2fbae7a8b1cd7cc1"
+      }
+    ]
+  },
+  {
+    "topic": "Bends on adjacent strings",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6981314205",
+    "images": [
+      {
+        "caption": "5.2.0 before",
+        "asset": "987d7935-e1e2-4735-a66e-a8b18c80c7a4",
+        "sha256": "0248945de58659d0e9570ccd1b401278be9221af73181ef37d2ceb5e4d64eb3e"
+      },
+      {
+        "caption": "Corrected bends",
+        "asset": "5595bea5-614d-4949-809d-14b806fce89d",
+        "sha256": "e03a10f5983604e553cd803d17260cf1a27a577d1c7c55e0298f34178f3638df"
+      }
+    ]
+  },
+  {
+    "topic": "Engraving measurements and profiles",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6982881669",
+    "images": [
+      {
+        "caption": "Before M1. A head overlaps a beam and three stems detach after narrowing.",
+        "asset": "6167b259-0f43-4625-8b9c-bf64170672b0",
+        "sha256": "36b029209e24a267c8a1b14d7520670d18152417498b45059b4841d5a2bdcc01"
+      },
+      {
+        "caption": "After M1. The head clears the beam and all four stems meet the refitted beam.",
+        "asset": "e7a75d96-677f-41a8-ac8f-41b77ff0896c",
+        "sha256": "b2385a0ace6a8fdef5474bb46912eccc75d43c170f3d997e7e9bc09d068a2bf9"
+      }
+    ]
+  },
+  {
+    "topic": "Unisons, voices and accidentals",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6984363531",
+    "images": [
+      {
+        "caption": "Altered unison and four voices on main and M2",
+        "asset": "29e60668-1c1c-4013-a23f-ddabc8869062",
+        "sha256": "d0ac67b77df2ab2def757323d2b468a103a5ac0ecc79c8df5d85b9001f37acc7"
+      }
+    ]
+  },
+  {
+    "topic": "Contour and partial beams",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6984363531",
+    "images": [
+      {
+        "caption": "Narrow and wide beam examples on main and M2",
+        "asset": "4baf3646-30c5-4e72-adff-ea19e264d9b5",
+        "sha256": "050708433617fe0d406b9999f871be73db706a1ab913b158df5da9917da24631"
+      }
+    ]
+  },
+  {
+    "topic": "Ornaments after resize",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6984363531",
+    "images": [
+      {
+        "caption": "Retained ornaments on main and M2",
+        "asset": "15cf68a2-8d37-4a07-b4aa-713fdaa4426d",
+        "sha256": "aedfc50cb87927496b3f44c8c512d2b21c731b4962d25e5ac48a3e6225678fd9"
+      }
+    ]
+  },
+  {
+    "topic": "Grace accidentals and side",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6984755522",
+    "images": [
+      {
+        "caption": "Main and M2 grace slurs, tuplet and ornament clearance, and optical spacing",
+        "asset": "edcd095e-d082-40c6-8709-420f626dc2b4",
+        "sha256": "d02f251daa83de6d5ce8076d785461509f035bfbcb1613713d778eb83cd20be1"
+      }
+    ]
+  },
+  {
+    "topic": "Verse layout",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6987483030",
+    "images": [
+      {
+        "caption": "Choir comparison showing two aligned verses, hyphens and melisma extenders",
+        "asset": "37e8d959-be3a-4993-b412-91ed71778049",
+        "sha256": "8e171523702f6437fce21b35344f0dbb172a78f4d9eeef62a40d3b9876ae47c5"
+      }
+    ]
+  },
+  {
+    "topic": "Curves and outside marks",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6987483030",
+    "images": [
+      {
+        "caption": "Piano comparison showing the slur above the accent, the crescendo between dynamics, the ottava and the pedal",
+        "asset": "a6e5a999-a82e-4b60-9d46-d6a2669f9918",
+        "sha256": "54da7394b10fa6c053f2ce76a6b316113422dde9ce6549762e9f00906527983b"
+      }
+    ]
+  },
+  {
+    "topic": "Continuous system breaks",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6988243866",
+    "images": [
+      {
+        "caption": "Choir at wide and narrow widths",
+        "asset": "e45823f9-8874-45a1-98d2-38a987373b53",
+        "sha256": "41cf585215597a27c2b4358baad50f940904aec4cb226c38dc436b5a94a74ff0"
+      }
+    ]
+  },
+  {
+    "topic": "Continuous system breaks",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6988243866",
+    "images": [
+      {
+        "caption": "Greedy and balanced breaks on the same seven-bar melody",
+        "asset": "9c69fc2c-f1fb-4226-9797-37d5bac4d435",
+        "sha256": "ca7ad782729429d625dd24892003c415964fb6211df13e89e2dc34f6a57e2c75"
+      }
+    ]
+  },
+  {
+    "topic": "Grand staff and ensemble policy",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6988243866",
+    "images": [
+      {
+        "caption": "Piano beam and pedal, then the split chord and arpeggio",
+        "asset": "a3b8a515-adcb-4c76-bada-8625778f5707",
+        "sha256": "c308b9abc3e16c93522dc8f2456abfacc6a5928ecde8c66978f259972fb2dc94"
+      }
+    ]
+  },
+  {
+    "topic": "Grand staff and ensemble policy",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6988243866",
+    "images": [
+      {
+        "caption": "Silent bars and the return of the cello",
+        "asset": "ef2c2c59-8828-4d0f-b168-3b066d4a3bc2",
+        "sha256": "a5f0d3dc34accc359c8f9634f9cf145c86b9d4992ea63d2d200b867a7fade3d2"
+      }
+    ]
+  },
+  {
+    "topic": "Pages, score and extracted parts",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6990165448",
+    "images": [
+      {
+        "caption": "Main’s continuous opening and M5’s first printed A4 page",
+        "asset": "c999ba50-9c20-426b-ae50-08f710ab8d4b",
+        "sha256": "ea93df37504b12dd941b3a17a4ad92b2ff44373f967e75068f68091da9242ed5"
+      }
+    ]
+  },
+  {
+    "topic": "Pages, score and extracted parts",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6990165448",
+    "images": [
+      {
+        "caption": "All three conductor pages on A4 and Letter",
+        "asset": "572ee9ae-e982-457b-ad81-a9a9ebe674f6",
+        "sha256": "dd89009aa7eb9c30361db51471b13f13b910c6d8e3bb13b74f106db38c867084"
+      }
+    ]
+  },
+  {
+    "topic": "Pages, score and extracted parts",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6990165448",
+    "images": [
+      {
+        "caption": "Both cello pages on A4 and Letter",
+        "asset": "5b559f0d-4f04-4773-ad16-8bc3ba9baaed",
+        "sha256": "026dd4af85143d77d49075967d549b2f5faabb4404a68fae1151b70777098a2f"
+      }
+    ]
+  },
+  {
+    "topic": "Pages, score and extracted parts",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6990165448",
+    "images": [
+      {
+        "caption": "Enlarged flute cue at the page turn and viola ossia at bar 21",
+        "asset": "66f5f0d4-41b4-4125-88e1-390b5233807b",
+        "sha256": "7b90f21c8c482dfbaf8034feedbd2f6ac2f560e59bf3c167c3d1f6ef29653f0e"
+      }
+    ]
+  },
+  {
+    "topic": "Page turns and text metrics",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6990618422",
+    "images": [
+      {
+        "caption": "Letter conductor and cello pages before and after measuring in the physical page viewport",
+        "asset": "318e36f5-7ae7-4557-aeaf-8ad3f34a8aa4",
+        "sha256": "94414ade1dd3eb4ae57f0090a59a5e35bc2796cdf4fdf6d25afec80f2b7fc37a"
+      }
+    ]
+  },
+  {
+    "topic": "Percussion barline height",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6991125649",
+    "images": [
+      {
+        "caption": "Single-line drum barline and alternating chord tremolo, main and M6",
+        "asset": "f22f582f-1912-4a53-b518-5f3f9aae2224",
+        "sha256": "d532a5056fd3a452a73011b54838e4ded8f901b7216ce129182bc1acb172782c"
+      }
+    ]
+  },
+  {
+    "topic": "Paired notation and fret diagrams",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6991125649",
+    "images": [
+      {
+        "caption": "Guitar bend and chord frame, and ordered microtonal signatures, main and M6",
+        "asset": "2a374ff9-b449-4ac9-97f8-f6d11e430630",
+        "sha256": "0ec278a913b90bb1004b2089a2593a1ad76bee375856fe43e168b91e7384ebe6"
+      }
+    ]
+  },
+  {
+    "topic": "Percussion profiles",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6991125649",
+    "images": [
+      {
+        "caption": "Two-voice kit with legend and the lead sheet",
+        "asset": "5db984ca-5d30-47bc-af04-42f3148e14c3",
+        "sha256": "96655214d4a73157c4040b60c68b391e7ea06d49a63e05b9323c12b8ed45a445"
+      }
+    ]
+  },
+  {
+    "topic": "Independent meter studies",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6991125649",
+    "images": [
+      {
+        "caption": "Clarinet pickup, independent barlines and the cadenza",
+        "asset": "2199fa24-9bf0-4a4a-a1e5-4a869132a0b7",
+        "sha256": "53332157f7cfd63d48e8ec20ba2e422213022a41e239abba33761fadd1a521ef"
+      }
+    ]
+  },
+  {
+    "topic": "Keyboard and screen-reader score navigation",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6992146798",
+    "images": [
+      {
+        "caption": "Desktop SVG reader with a flute note selected by keyboard",
+        "asset": "9a74acfa-5076-4dc4-9e3f-bbba7b4467dc",
+        "sha256": "ce67898e3e4121c72987ae262fa30ff24f372c81402621f94da77dc616c6c7b8"
+      }
+    ]
+  },
+  {
+    "topic": "Canvas on mobile",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6992146798",
+    "images": [
+      {
+        "caption": "Mobile Canvas reader with the same event selected",
+        "asset": "337091c5-3306-4be6-a4c8-435dc00187d2",
+        "sha256": "9de9a02f2af35a139f17676caf60e1e48710b9ea875be3fde59bec1439b3429d"
+      }
+    ]
+  },
+  {
+    "topic": "Contemporary performance controls",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6994227888",
+    "images": [
+      {
+        "caption": "Two metered piano groups and the flute entrances",
+        "asset": "28a53367-e2cd-4ad4-a58c-2d61d98c9e3b",
+        "sha256": "1388ee048860d83709e25769f917cfe37aafdfea12c5904d234714e17dbcb155"
+      }
+    ]
+  },
+  {
+    "topic": "Contemporary performance controls",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6994227888",
+    "images": [
+      {
+        "caption": "Two-player conductor score and independent flute and cello parts",
+        "asset": "902b1596-ac9a-48d1-b7b7-35af16378675",
+        "sha256": "b727d6d85fffbdc83915b92469d42f0b3b1aacc0aef0be1314f16c04bf6b5601"
+      }
+    ]
+  },
+  {
+    "topic": "Rasgueado and golpe",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6994640477",
+    "images": [
+      {
+        "caption": "Rasgueado with physical arrow legend and a simultaneous golpe",
+        "asset": "43f1531c-be5d-4f86-b9db-956aff5bea05",
+        "sha256": "0c0bfa5ee0260281b8d35c0211b75b3dc8c0b332e2b33d82192c37bbab2b5790"
+      }
+    ]
+  },
+  {
+    "topic": "Bossa nova accompaniment",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6994640477",
+    "images": [
+      {
+        "caption": "Bossa nova with the tied chord above the changing bass and the following muted attack",
+        "asset": "9de31049-bd4d-4d9b-aaad-138d4664df00",
+        "sha256": "91af1ad6848baa6f68f960bdac85262e169113ce70d78aa0db7e7f7aaa968411"
+      }
+    ]
+  },
+  {
+    "topic": "Palm mute and timed string bend",
+    "source": "https://github.com/vexflow/vexflow/issues/358#issuecomment-6994640477",
+    "images": [
+      {
+        "caption": "String six mute crosses the break, with a timed bend on string three",
+        "asset": "fb05d4c1-fa8a-4c1a-858e-d250d9a8f566",
+        "sha256": "f84748aa2b62c492f882bafa1aa320d5edda548636f4afa2484fc0e9a7949a8f"
+      }
+    ]
+  },
+  {
+    "topic": "Score lettering at reading size",
+    "source": "https://github.com/vexflow/vexflow/issues/361#issuecomment-7015747495",
+    "images": [
+      {
+        "caption": "Greensleeves and Kesh chord comparisons",
+        "asset": "4d8f90ca-8f9f-4b60-b095-fb1799a7868f",
+        "sha256": "7cb675400b70c509b7f0d14e399b7f8fa564e08432a4e60542f82891f3c99b4d"
+      }
+    ]
+  },
+  {
+    "topic": "Score lettering at reading size",
+    "source": "https://github.com/vexflow/vexflow/issues/361#issuecomment-7015747495",
+    "images": [
+      {
+        "caption": "Saints in the existing face and at three Academico sizes",
+        "asset": "3713c599-2dff-47dc-b911-a24e18449be9",
+        "sha256": "8baeb3a66a6aa3eb34630eee96b5f547ecf778f9bd6b19b3c5d242cb3a1f5d1d"
+      }
+    ]
+  },
+  {
+    "topic": "Score lettering at reading size",
+    "source": "https://github.com/vexflow/vexflow/issues/361#issuecomment-7015747495",
+    "images": [
+      {
+        "caption": "High Wire and Prelude excerpts",
+        "asset": "1afa5534-501c-4068-9713-7eaf6ceaa5a6",
+        "sha256": "88f903ef10a754b922606f1604bfc39028f7e11a708c9fbe431d4bd59bf6b674"
+      }
+    ]
+  },
+  {
+    "topic": "Score lettering at reading size",
+    "source": "https://github.com/vexflow/vexflow/issues/361#issuecomment-7015747495",
+    "images": [
+      {
+        "caption": "Ballade US Letter reference page",
+        "asset": "cc7df314-6275-47a7-8690-6d6644af81e5",
+        "sha256": "7377fc196d1d3bfe4c977f84d6efd8cf5db3d5cbfb42cb41f9327f7d23e9656c"
+      }
+    ]
+  },
+  {
+    "topic": "Score lettering at reading size",
+    "source": "https://github.com/vexflow/vexflow/issues/361#issuecomment-7016513090",
+    "images": [
+      {
+        "caption": "Greensleeves chord size comparison",
+        "asset": "bdf3a678-0f29-48ce-ae17-85e51734c4aa",
+        "sha256": "fc66698b1e4bc693ec0c1d57e6f5248488801b2e8486065d45a3e7180a5eea58"
+      }
+    ]
+  },
+  {
+    "topic": "Score lettering at reading size",
+    "source": "https://github.com/vexflow/vexflow/issues/361#issuecomment-7016513090",
+    "images": [
+      {
+        "caption": "Saints lyric treatment",
+        "asset": "26f4d4f8-0146-4b91-a80a-f4402245da92",
+        "sha256": "34177b4f7618b55209e9ab99d1bd6ab3200f400214d175500d7c850c85f37d09"
+      }
+    ]
+  },
+  {
+    "topic": "Score lettering at reading size",
+    "source": "https://github.com/vexflow/vexflow/issues/361#issuecomment-7016513090",
+    "images": [
+      {
+        "caption": "High Wire standard and tab technique letters",
+        "asset": "40615bd6-91ab-4af9-b275-67c476dbfbae",
+        "sha256": "e61b909940e2e54fb9a94dd011829ad027e3032338c3f347c311f59330320ba8"
+      }
+    ]
+  },
+  {
+    "topic": "Rehearsal lettering and lyric extenders",
+    "source": "https://github.com/vexflow/vexflow/issues/361#issuecomment-7020292745",
+    "images": [
+      {
+        "caption": "Saints before and after at page width",
+        "asset": "54e2140f-ba42-4c91-b7e8-92d3c37c9dd7",
+        "sha256": "e66221b1760f752e020d67420164b05f92b82d07bb3a948affe78e580b39788a"
+      }
+    ]
+  },
+  {
+    "topic": "Rehearsal lettering and lyric extenders",
+    "source": "https://github.com/vexflow/vexflow/issues/361#issuecomment-7020292745",
+    "images": [
+      {
+        "caption": "Offset rehearsal lettering and frame before and after",
+        "asset": "04c43cc6-6950-4ab0-8604-74c083adc434",
+        "sha256": "565af19da89cbaa0ae5feb4904548a6b64a5334fed4a9f2d1787a912e3a8c799"
+      }
+    ]
+  },
+  {
+    "topic": "Score lettering at reading size",
+    "source": "https://github.com/vexflow/vexflow/issues/361#issuecomment-7020709360",
+    "images": [
+      {
+        "caption": "Greensleeves and Kesh chord names at 13 and 14 pt",
+        "asset": "2c10413a-0121-4391-bf60-8aff5df3b342",
+        "sha256": "cc95b30adb860cf66a16443b72dffae9632c883039bab35c02369f697b60e8cd"
+      }
+    ]
+  },
+  {
+    "topic": "Score lettering at reading size",
+    "source": "https://github.com/vexflow/vexflow/issues/361#issuecomment-7020709360",
+    "images": [
+      {
+        "caption": "Sumer verse alignment and spacing before and after",
+        "asset": "1245e604-54fb-4b18-bc97-02b631e0fa3a",
+        "sha256": "6a09cbca3fdb9e868634cd02f0999b818d227797a16e2c2afce9781fa7af6202"
+      }
+    ]
+  },
+  {
+    "topic": "Score lettering at reading size",
+    "source": "https://github.com/vexflow/vexflow/issues/361#issuecomment-7020709360",
+    "images": [
+      {
+        "caption": "The Saints pickup with room for each word",
+        "asset": "5fb1fa4e-5436-4a67-8b19-d5d61df46f46",
+        "sha256": "0d5bd505b842bce1221e9b5699c16430396493031636a194f107970824025d3b"
+      }
+    ]
+  },
+  {
+    "topic": "Fonts and rendering diagnostics",
+    "source": "https://github.com/vexflow/vexflow/issues/361#issuecomment-7021298905",
+    "images": [
+      {
+        "caption": "Bravura and Petaluma with Academico in live SVG and standalone outlined SVG",
+        "asset": "ee0e192c-8e0d-4e1c-b165-7eec2a502677",
+        "sha256": "f61002e8b2115b60384e4d7b1032b98077c1975c836d92d7d72215f69740b284"
+      }
+    ]
+  },
+  {
+    "topic": "Written rhythm on screen and paper",
+    "source": "https://github.com/vexflow/vexflow/issues/364#issuecomment-7016574248",
+    "images": [
+      {
+        "caption": "Pitched chords and rhythmic tab both missing dots",
+        "asset": "0993e269-f37f-435c-bc88-f40a34c710f0",
+        "sha256": "6cd3b13dff44c12cf639427e997936d14507db043c6b62fccf20c9a7949f2d7e"
+      },
+      {
+        "caption": "Single and double dots on both chord heads and at each tab stem",
+        "asset": "b81fb34c-4c73-400d-ab05-1df62d866107",
+        "sha256": "06d5c51252163349498a0281ef04a04afa3398a934fa24438f0207466de30e29"
+      }
+    ]
+  },
+  {
+    "topic": "A tied string across a system break",
+    "source": "https://github.com/vexflow/vexflow/issues/363#issuecomment-7020023083",
+    "images": [
+      {
+        "caption": "Before: tab and error at both widths",
+        "asset": "ffdb754f-65db-4c53-9d8c-d63e9736aaa6",
+        "sha256": "ca26efe7b4cd137d37df693dad896611f917d4a9ff10f161489238ecad35c265"
+      },
+      {
+        "caption": "After: the same tie and first ending on one system and across a break",
+        "asset": "fde108e9-cd4e-4e80-820d-651e07bb595f",
+        "sha256": "1a9880b7497f7641006ae593f17fec786abd4eb9a3ad02dffcc02166a63c611d"
+      }
+    ]
+  },
+  {
+    "topic": "Fret diagram position labels",
+    "source": "https://github.com/vexflow/vexflow/issues/367#issuecomment-7020176796",
+    "images": [
+      {
+        "caption": "Before: default and override both use sans-serif",
+        "asset": "f0c88278-6496-4c26-8ab8-ec045fe5c735",
+        "sha256": "8aab3381e31a7cd25df8d4e1641d1b2433e128e5f9965d56e7ae5b326717b07a"
+      },
+      {
+        "caption": "After: Academico by default and a bold monospace override",
+        "asset": "833f1d74-ab38-47f3-bf0f-baf3a7f6bf0d",
+        "sha256": "0ce2061840afbd0ea1eb5014441884c804cd37b48266dea90d681d264d54f8e4"
+      }
+    ]
+  },
+  {
+    "topic": "Rhythm slash stem anchors",
+    "source": "https://github.com/vexflow/vexflow/issues/362#issuecomment-7020187248",
+    "images": [
+      {
+        "caption": "Quarter, eighth and half slash notes with stems meeting the centers",
+        "asset": "989efb59-3def-436f-93c8-1b8b55f384b3",
+        "sha256": "ad019a6a4daa91b3e40a42462b1880b104b971acc18ea94b354a6fc4ccb16e74"
+      },
+      {
+        "caption": "The same six slash notes with stems meeting the published Bravura anchors",
+        "asset": "165c08fc-818c-4d8c-b9de-3b7fa756f523",
+        "sha256": "d7f506f5dd632bba594eb94741c95ea34f4b75fc156fae375e36f573e90bd5bc"
+      }
+    ]
+  },
+  {
+    "topic": "Rhythm slash stem anchors",
+    "source": "https://github.com/vexflow/vexflow/issues/362#issuecomment-7020258769",
+    "images": [
+      {
+        "caption": "Previously approved Harbor song with the five stems starting at slash centers",
+        "asset": "5f6d47a2-83e4-486e-8567-aa35c941843a",
+        "sha256": "1c02d30f43a78249cd5bbaa83f2acc2a060737eab1035d7c869a8391204c2a24"
+      },
+      {
+        "caption": "Harbor song with the five stems attached at the ends of the rhythm slashes",
+        "asset": "83aac7c9-235c-4148-8fb2-7233aa092a71",
+        "sha256": "01cbc1ecf682f8aeb9dc714b706133af7605598c0d28895e80ca03bb74c5ebf6"
+      }
+    ]
+  },
+  {
+    "topic": "Lead sheets in extracted parts",
+    "source": "https://github.com/vexflow/vexflow/issues/365#issuecomment-7020229266",
+    "images": [
+      {
+        "caption": "Screen and melody part before the descriptors were supported",
+        "asset": "050bb191-fb85-4a18-8753-4929f3321ef4",
+        "sha256": "dad790f74455945aa867c16081bb23fbad980fce0a9efc022c389c4b793389d8"
+      },
+      {
+        "caption": "Screen and melody part with chord, lyrics and barlines",
+        "asset": "2f96a29f-2984-43f5-884a-d0858c2d1a1f",
+        "sha256": "4b3c41c124593fe55d65edb5d956af46040cd0b68857b3c50e935c16fa877995"
+      }
+    ]
+  },
+  {
+    "topic": "Ledger lines for positioned rests",
+    "source": "https://github.com/vexflow/vexflow/issues/366#issuecomment-7020308121",
+    "images": [
+      {
+        "caption": "Before, with displaced or unsupported rests",
+        "asset": "14176895-ebe3-4695-bf49-f4dbb0383ce0",
+        "sha256": "c99d0b3fcf63c16690b2888b3081904b2ad827ded45975060312d2b58e192b39"
+      },
+      {
+        "caption": "After, with supported rests at the requested lines",
+        "asset": "ff4cdce0-de91-4913-b3f1-e97a5bc36e91",
+        "sha256": "e2ed60bd311fe4315062d3f2b81be89105c1042c7620956b6c9d3930cdc3ce06"
+      }
+    ]
+  },
+  {
+    "topic": "Ledger lines for positioned rests",
+    "source": "https://github.com/vexflow/vexflow/issues/366#issuecomment-7020308121",
+    "images": [
+      {
+        "caption": "Ensemble before the correction",
+        "asset": "91f3039f-5725-4dcf-ac63-938944167a12",
+        "sha256": "d7e1a1500d2e1374ec23f0f0fe4826a86eb3f2ef86177401210060cc21ccd7f5"
+      },
+      {
+        "caption": "Ensemble after the correction",
+        "asset": "22dbd51b-4792-4f4f-8bef-a9f511d515e2",
+        "sha256": "d422229b6c6e4821311ebc2944e4d0b1f992d81166297d320a4331b51d83e333"
+      }
+    ]
+  },
+  {
+    "topic": "Fret numbers and picking-hand letters",
+    "source": "https://github.com/vexflow/vexflow/issues/371#issuecomment-7021839603",
+    "images": [
+      {
+        "caption": "Patio al alba stroke arrows and the accent below i plus golpe before and after",
+        "asset": "334d0ea1-3002-43af-bfeb-3d62bda6fd38",
+        "sha256": "7b3d85435a36d5093f4254f8863627231ed517c6350859101aeb9b957a8d82fd"
+      }
+    ]
+  },
+  {
+    "topic": "Fret numbers and picking-hand letters",
+    "source": "https://github.com/vexflow/vexflow/issues/371#issuecomment-7021839603",
+    "images": [
+      {
+        "caption": "The 9 and 11 point VexTab fret numbers in fixed and flow layouts",
+        "asset": "edd1d7e3-1d13-4ad3-9bbb-c9f230b43701",
+        "sha256": "121545c3d24f995f97492cc631b79545077e3b70bf587780758994df4e013592"
+      }
+    ]
+  },
+  {
+    "topic": "TAB clefs fit the strings",
+    "source": "https://github.com/vexflow/vexflow/issues/373#issuecomment-7045358478",
+    "images": [
+      {
+        "caption": "Four-string and six-string TAB clefs before the fix",
+        "asset": "9194665d-d3fb-413e-82bd-b5b85c7d9044",
+        "sha256": "a134f23d2531e24c416f57b1ea8f117959556d523b168294cba48e2a6776f0ba"
+      },
+      {
+        "caption": "Four-string and six-string TAB clefs after the fix",
+        "asset": "61803830-6a9a-4ca1-bfc6-1716366f9ad8",
+        "sha256": "bd7aa29395985b668d04b7cbceb8a9995fadd7dc1d9d43756409d8b1f06e0e34"
+      }
+    ]
+  },
+  {
+    "topic": "TAB clefs fit the strings",
+    "source": "https://github.com/vexflow/vexflow/issues/373#issuecomment-7047157326",
+    "images": [
+      {
+        "caption": "Before the half-pixel adjustment",
+        "asset": "d4bd9d25-01fe-4370-9d16-a01eee7d3cb1",
+        "sha256": "bd7aa29395985b668d04b7cbceb8a9995fadd7dc1d9d43756409d8b1f06e0e34"
+      },
+      {
+        "caption": "After centering on the drawn strings",
+        "asset": "0067f3b5-75b3-4cb7-ac97-163f38abd232",
+        "sha256": "51fe880c0db5999050026283f8169f8d67003516f48c917b6bee5047b537dbe7"
+      }
+    ]
+  },
+  {
+    "topic": "TAB clefs fit the strings",
+    "source": "https://github.com/vexflow/vexflow/issues/373#issuecomment-7050000592",
+    "images": [
+      {
+        "caption": "Before increasing the outer clearance",
+        "asset": "686d7e5f-3357-45b8-8623-7d979ec83b3e",
+        "sha256": "51fe880c0db5999050026283f8169f8d67003516f48c917b6bee5047b537dbe7"
+      },
+      {
+        "caption": "After increasing the outer clearance",
+        "asset": "a292d35a-1e86-4136-9798-315ba61804d1",
+        "sha256": "22e99c5100c836ab3862363d9c50961144a6a8db8697c05b5f36bebd29c89335"
+      }
+    ]
+  },
+  {
+    "topic": "TAB clefs fit the strings",
+    "source": "https://github.com/vexflow/vexflow/issues/373#issuecomment-7050365954",
+    "images": [
+      {
+        "caption": "Before",
+        "asset": "fa2ef4a5-c665-4bff-be79-68ddf1b6a581",
+        "sha256": "cc0a5f7ecb337d89bf95db632529067fb4f7a831199a6ff4beb2308bc78d660e"
+      },
+      {
+        "caption": "After",
+        "asset": "f4f0cf19-6c5a-4e9a-b6cd-5fb9a2650dd6",
+        "sha256": "5c8f174eff4de083ed95e5b651375e1f11078a53996a9ba7631c34ea3fe96adf"
+      }
+    ]
+  },
+  {
+    "topic": "Chord clearance across barlines",
+    "source": "https://github.com/vexflow/vexflow/issues/375#issuecomment-7052031489",
+    "images": [
+      {
+        "caption": "Original sheet with overlapping chord labels, a short-name control and a narrow row",
+        "asset": "6e52c78e-bab9-4b12-a521-685eb00a1dc3",
+        "sha256": "423e27afd84f8e7ffd2584814d754fbe0712034328ab2e1a12d73be421aece9b"
+      },
+      {
+        "caption": "Chord labels clear at the barline, short names keep their positions, and the narrow score wraps",
+        "asset": "6f8dbd53-bc76-40c1-851a-00d3208df95c",
+        "sha256": "f6d27829d78fa67da1378eadf01e1063e5707bcf22ba707e03670b8606bf97f2"
+      }
+    ]
+  },
+  {
+    "topic": "Shared stems across piano staves",
+    "source": "https://github.com/vexflow/vexflow/issues/376#issuecomment-7052031684",
+    "images": [
+      {
+        "caption": "Before, two voices with separate eighth-note stems",
+        "asset": "701f82cb-96ee-47f7-be75-bae0f72016cb",
+        "sha256": "8a0c5094206c1aa8646a2c885721888bec8b8c0b1c9894bfe48c51b3f82198cc"
+      },
+      {
+        "caption": "After, four shared stems join both staves to the beam",
+        "asset": "3e45e79f-8089-4bad-80e9-cbdc08f58db3",
+        "sha256": "b1693d88b9a7b70083ecb7ffd11b56a6114dacca40834705cdf32bedc58c7c1e"
+      }
+    ]
+  },
+  {
+    "topic": "Transposing slash chords",
+    "source": "https://github.com/vexflow/vexflow/issues/377#issuecomment-7052309352",
+    "images": [
+      {
+        "caption": "A transposed melody retains the original literal chord labels",
+        "asset": "7ceb78cb-a814-4d43-90ff-035fddebde60",
+        "sha256": "f60b21ce4276c98bb29b95ecc971c2b3bdb7fdde8575afcd71ae5247a4481f9d"
+      },
+      {
+        "caption": "The slash chord and altered chord transpose, and N.C. stays literal",
+        "asset": "01a57120-4e46-4d52-8e30-d809b9fd262f",
+        "sha256": "b7183b7c85827bda3e771bb887f6521312b23aa9125e92342be6dcedbcf11bdc"
+      }
+    ]
+  },
+  {
+    "topic": "Ordinary beams across systems",
+    "source": "https://github.com/vexflow/vexflow/issues/378#issuecomment-7052411083",
+    "images": [
+      {
+        "caption": "Per-measure beams in a wide layout and on two systems",
+        "asset": "fec703a6-60f4-41c2-996f-e82f645435e8",
+        "sha256": "5bf0f99f946b57908d69f9cea371931764ac50d4f9d17449ed1cfb6cec4e928a"
+      },
+      {
+        "caption": "One continuous beam in the wide layout, with outgoing and incoming segments on two systems",
+        "asset": "f12a9b5f-8653-4b4b-a940-ca6450a932ad",
+        "sha256": "9c2ba246cbfb14f82205c07432240801871a8d9c58ad48688548352c39896a4e"
+      }
+    ]
+  },
+  {
+    "topic": "Whole-note and cross-staff tremolos",
+    "source": "https://github.com/vexflow/vexflow/issues/379#issuecomment-7052348302",
+    "images": [
+      {
+        "caption": "The four requested tremolos with their unsupported strokes omitted",
+        "asset": "4350deeb-b7f3-4a90-9745-098da1e97341",
+        "sha256": "fc7e0d556290f7fa878f7e93db2259e604c73f1b79259e57862a1c666d7712ac"
+      },
+      {
+        "caption": "Whole-note floating strokes, a four-stroke half-note pair and cross-staff tremolos at two staff gaps",
+        "asset": "1b3a301c-c92b-4a0d-b85c-32348a9c9f65",
+        "sha256": "5b80d3af847cafedb42162637d93b23521a95766023f38d0291277ab110ff057"
+      }
+    ]
+  },
+  {
+    "topic": "Bends held through ties",
+    "source": "https://github.com/vexflow/vexflow/issues/380#issuecomment-7053543797",
+    "images": [
+      {
+        "caption": "Single-event bend and ordinary TAB tie, together and across a system break",
+        "asset": "38896669-a463-4b0d-bd56-2c6e8b7b318e",
+        "sha256": "d8bfb971f8dc7e39560b422aff0ee022bd011b6e9bde04fba3bcec845b0c4116"
+      },
+      {
+        "caption": "String three holds a whole-tone bend across a tied barline, then releases. The same gesture wraps on the right.",
+        "asset": "4be1d3a6-8ea3-4145-b32b-ab6fb5c4cd54",
+        "sha256": "ff9203d3877f908ba9b496ac6afb3580218480de9925a22f821149b8b55f1352"
+      }
+    ]
+  },
+  {
+    "topic": "Two lyric syllables on one attack",
+    "source": "https://github.com/vexflow/vexflow/issues/381#issuecomment-7053509966",
+    "images": [
+      {
+        "caption": "The first verse begins with la alone in both layouts",
+        "asset": "6ac627ab-2d4e-4717-ba4f-33c13e33c088",
+        "sha256": "4de9d37427b023e8298cf4207c01e63367678b563335b0026d711663bd54d526"
+      },
+      {
+        "caption": "The first verse begins with la and mi joined by an undertie in both layouts",
+        "asset": "1e987d0b-3d4a-4f9e-8871-ebc1180d4243",
+        "sha256": "ce28fca231750b50c7b76d06a781ea137cf9cb961e75682468ddfeaa997b59a8"
+      }
+    ]
+  },
+  {
+    "topic": "Glissandi across systems",
+    "source": "https://github.com/vexflow/vexflow/issues/382#issuecomment-7053528442",
+    "images": [
+      {
+        "caption": "Native StaveLine across selected chord heads on one row and two rows",
+        "asset": "e90b6e0a-cd50-481c-bc3a-e4777569bb7f",
+        "sha256": "d24aba9d1c276376d428bcc05a4240e2f84ba2c887d2a7bf292d2d5c79650d68"
+      },
+      {
+        "caption": "Ascending and descending glissandi keep their direction and head clearance on both rows",
+        "asset": "deb368b2-bc17-4174-9284-d94f57bbf24b",
+        "sha256": "20b560682c7b3ed7b5bc3567fac3bc6b262bdb994d0bcf1c18edd44f272cacad"
+      }
+    ]
+  },
+  {
+    "topic": "Feathered beams",
+    "source": "https://github.com/vexflow/vexflow/issues/383#issuecomment-7053530257",
+    "images": [
+      {
+        "caption": "Parallel beams on the same written music",
+        "asset": "df5eefb1-0f89-45d6-b139-0fdcc4a48851",
+        "sha256": "c5ac789a003be79f43f33a426c1a98ad62d089e86620e77ff29123ca9fe73780"
+      },
+      {
+        "caption": "Beams open in opposite directions above a shared second beat, including after reflow",
+        "asset": "50793c3a-644b-41f6-81a6-290228ac817a",
+        "sha256": "b3eb44977f94b1d1cf7f2592b1c0704f450942337c44dac0c923c3fa0a8791a3"
+      }
+    ]
+  },
+  {
+    "topic": "Niente hairpin tips",
+    "source": "https://github.com/vexflow/vexflow/issues/384#issuecomment-7052007036",
+    "images": [
+      {
+        "caption": "Plain tips on the six-note example and across a system break",
+        "asset": "06ff96e9-7e0f-4266-ad49-46cc108d1c6c",
+        "sha256": "36e2a80f4ff79565bd1767156054f5741e20dd7bc798e644178b2d4079bd714e"
+      },
+      {
+        "caption": "Open circles mark the closed tips of both hairpins. The system break adds no circles.",
+        "asset": "a3b6d5aa-5e38-470a-af96-3361b8e448d7",
+        "sha256": "c804c391e21e947bedb6ca7d96e544711c17a4e7c5cfcbecdf06b3768bc3582b"
+      }
+    ]
+  }
+]

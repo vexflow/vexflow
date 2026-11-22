@@ -17,28 +17,98 @@
   const figures = new Map(data.figures.map((f) => [f.id, f]));
   const dialog = $('lightbox');
   let invoking;
+  let sequence = [],
+    changeTitles = [],
+    position = 0;
+  const exhibits = data.figures.filter((f) => f.module !== 'Commit history');
+  const allIds = exhibits.map((f) => f.id);
+
+  const figureMatches = (f) =>
+    ($('figure-type').value === 'All exhibits' || f.status === $('figure-type').value) &&
+    matches(
+      query($('figure-query').value),
+      [f.name, f.module, f.description, f.status, f.leftCaption, f.rightCaption].join(' ')
+    );
+
+  /** Use the entire filtered collection, including exhibits beyond the current page of tiles. */
+  function chooseSequence(origin, id, historyIndex) {
+    changeTitles = [];
+    if (origin === 'gallery') sequence = exhibits.filter(figureMatches).map((f) => f.id);
+    else if (origin === 'history' || id.startsWith('commit-'))
+      sequence = data.commits
+        .filter((c) =>
+          matches(query($('commit-query').value), [c.hash, c.date, c.subject, c.body, ...c.paths].join(' '))
+        )
+        .map((c) => c.figure);
+    else if (origin === 'changes') {
+      sequence = [];
+      for (const row of document.querySelectorAll('.change:not([hidden])')) {
+        const ids = row.dataset.exhibits.split(' ');
+        sequence.push(...ids);
+        changeTitles.push(...ids.map(() => row.querySelector('h4').textContent));
+      }
+    } else sequence = allIds;
+    if (!sequence.includes(id)) {
+      sequence = [...figures.keys()];
+      changeTitles = [];
+    }
+    position = sequence[historyIndex] === id ? historyIndex : sequence.indexOf(id);
+  }
+
+  /** Replace the exhibit fragment so Close or browser Back returns directly to the report. */
+  function step(direction) {
+    const next = position + direction;
+    if (next < 0 || next >= sequence.length) return;
+    position = next;
+    const id = sequence[next];
+    history.replaceState({ ...history.state, index: next }, '', '#plate-' + id);
+    openFigure(id);
+    dialog.scrollTop = 0;
+  }
+  $('previous-plate').onclick = () => step(-1);
+  $('next-plate').onclick = () => step(1);
+  dialog.addEventListener('keydown', (event) => {
+    if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      event.preventDefault();
+      step(event.key === 'ArrowLeft' ? -1 : 1);
+    }
+  });
   function openFigure(id) {
     const figure = figures.get(id);
     if (!figure) return;
     if (!dialog.open) invoking = document.activeElement;
+    $('previous-plate').disabled = position <= 0;
+    $('next-plate').disabled = position >= sequence.length - 1;
+    $('plate-position').textContent = position + 1 + ' of ' + sequence.length;
     $('figure-title').textContent = figure.name;
-    $('figure-group').textContent = figure.module + ' · ' + figure.status;
-    $('figure-desc').textContent = figure.description ?? figure.name;
+    $('figure-group').textContent = [
+      changeTitles[position] !== figure.name && changeTitles[position],
+      figure.module,
+      figure.status,
+    ]
+      .filter(Boolean)
+      .join(' · ');
+    $('figure-desc').textContent = figure.description ?? '';
+    $('figure-desc').hidden = !figure.description || figure.description === figure.name;
     $('plates').replaceChildren();
-    for (const [path, label] of [
-      [figure.left, figure.leftLabel],
-      [figure.right, figure.rightLabel],
+    for (const [path, label, caption, size] of [
+      [figure.left, figure.leftLabel, figure.leftCaption, figure.leftSize],
+      [figure.right, figure.rightLabel, figure.rightCaption, figure.rightSize],
     ]) {
       if (!path) continue;
       const frame = make('figure'),
         image = make('img'),
         full = link(path, '');
+      if (size) [image.width, image.height] = size;
       image.src = path;
-      image.alt = label + ' — ' + figure.name;
+      image.alt = caption || label + ' — ' + figure.name;
       full.target = '_blank';
       full.rel = 'noopener';
       full.append(image);
-      frame.append(make('figcaption', label), full);
+      const heading =
+        caption && !caption.toLowerCase().startsWith(label.toLowerCase()) ? label + ' · ' + caption : caption || label;
+      frame.append(make('figcaption', heading), full);
       $('plates').append(frame);
     }
     $('plate-source').replaceChildren(...(figure.source ? [link(figure.source, 'Evidence and source')] : []));
@@ -46,14 +116,35 @@
   }
   function sync() {
     const hash = location.hash.slice(1);
-    if (hash.startsWith('plate-') && figures.has(hash.slice(6))) openFigure(hash.slice(6));
-    else if (dialog.open) dialog.close();
+    if (hash.startsWith('plate-') && figures.has(hash.slice(6))) {
+      chooseSequence(history.state?.origin, hash.slice(6), history.state?.index);
+      openFigure(hash.slice(6));
+    } else if (dialog.open) {
+      dialog.close();
+      // Restore focus now. A later close event could interrupt typing in another control.
+      invoking?.focus({ preventScroll: true });
+    }
   }
   document.addEventListener('click', (event) => {
     const a = event.target.closest('[data-plate]');
     if (!a) return;
     event.preventDefault();
-    history.pushState({ plate: true }, '', a.hash);
+    const change = a.closest('.change');
+    const origin = change
+      ? 'changes'
+      : a.closest('#figures')
+        ? 'gallery'
+        : a.closest('#commit-list')
+          ? 'history'
+          : 'all';
+    // A score may illustrate two changes. Start at the chosen row's occurrence.
+    let index = 0;
+    if (change)
+      for (const row of document.querySelectorAll('.change:not([hidden])')) {
+        if (row === change) break;
+        index += row.dataset.exhibits.split(' ').length;
+      }
+    history.pushState({ plate: true, origin, index }, '', a.hash);
     sync();
   });
   const close = () => {
@@ -68,7 +159,6 @@
     e.preventDefault();
     close();
   };
-  dialog.onclose = () => invoking?.focus();
   window.addEventListener('hashchange', sync);
   $('search').oninput = () => {
     const words = query($('search').value);
@@ -105,7 +195,7 @@
     return reset;
   }
   const resetFigures = paged(
-    data.figures,
+    exhibits,
     'figure-query',
     'figures',
     'more',
@@ -122,7 +212,7 @@
       a.append(img, info);
       return a;
     },
-    (f) => [f.name, f.module, f.description, f.status].join(' '),
+    (f) => [f.name, f.module, f.description, f.status, f.leftCaption, f.rightCaption].join(' '),
     (f) => $('figure-type').value === 'All exhibits' || f.status === $('figure-type').value,
     'figure-count'
   );
@@ -161,7 +251,12 @@
       row.append(
         make('p', c.body || (c.merge ? 'This merge includes ' : 'This commit touches ') + c.paths.length + ' paths.')
       );
-      row.append(link(data.repo + '/commit/' + c.hash, 'View commit and diff'));
+      const evidence = link('#plate-' + c.figure, 'Inspect change');
+      evidence.dataset.plate = c.figure;
+      const refs = make('div');
+      refs.className = 'refs';
+      refs.append(evidence, link(data.repo + '/commit/' + c.hash, 'Full commit and diff'));
+      row.append(refs);
       const paths = make('div');
       paths.className = 'paths';
       // Use the commit diff for deleted and renamed paths too.
