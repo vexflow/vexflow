@@ -10,6 +10,7 @@ import { Note } from './note';
 import { PhraseLayout } from './phraselayout';
 import { RenderContext } from './rendercontext';
 import { Stave, StaveOptions } from './stave';
+import { BarlineType } from './stavebarline';
 import { StaveConnector, StaveConnectorType } from './staveconnector';
 import { Category } from './typeguard';
 import { RuntimeError } from './util';
@@ -192,12 +193,32 @@ export class System extends Element {
    * @param type see {@link StaveConnector.typeString}
    */
   addConnector(type: StaveConnectorType = 'double'): StaveConnector {
+    if (type === 'mensurstrich' || type === StaveConnector.type.MENSURSTRICH) {
+      if (this.partStaves.length !== 2)
+        throw new RuntimeError(
+          'BadArgument',
+          'A single Mensurstrich requires two staves. Use addMensurstriche() for a group.'
+        );
+      this.connector = this.addMensurstriche()[0];
+      return this.connector;
+    }
     this.connector = this.factory.StaveConnector({
       topStave: this.partStaves[0],
       bottomStave: this.partStaves[this.partStaves.length - 1],
       type,
     });
     return this.connector;
+  }
+
+  /** Replace this measure's ending bars with one Mensurstrich per gap. Call after adding all staves. */
+  addMensurstriche(): StaveConnector[] {
+    if (this.partStaves.length < 2) throw new RuntimeError('BadArgument', 'Mensurstriche require at least two staves.');
+    this.partStaves.forEach((stave) => stave.setEndBarType(BarlineType.NONE));
+    return this.partStaves
+      .slice(1)
+      .map((bottomStave, index) =>
+        this.factory.StaveConnector({ topStave: this.partStaves[index], bottomStave, type: 'mensurstrich' })
+      );
   }
 
   /**
