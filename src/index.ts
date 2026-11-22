@@ -13,6 +13,7 @@ export * from './beam';
 export * from './bend';
 export * from './boundingbox';
 export * from './canvascontext';
+export * from './chantphrase';
 export * from './chantstave';
 export * from './chordsymbol';
 export * from './clef';
