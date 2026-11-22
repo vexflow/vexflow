@@ -166,3 +166,23 @@ These methods do not draw or change the annotation's stored position. `draw()` u
 ## Ties and lyrics
 
 Annotations above or below a note still reserve space between notes. Their text width no longer shifts the tie's starting point. Dots, side string numbers, and annotations centered on the note retain their clearance.
+
+## Square-chant syllables
+
+Give `ChantPhrase` one entry per syllable with its pitches in singing order. One
+pitch prints a punctum. Two ascending pitches print a podatus, and two descending
+pitches print a clivis. Include a hyphen in the syllable where you want it sung
+as part of a longer word.
+
+```js
+const phrase = new VexFlow.ChantPhrase([
+  { pitches: ['c/4', 'd/4'], syllable: 'Lu-' },
+  { pitches: ['e/4', 'd/4'], syllable: 'mi-' },
+  { pitches: ['c/4'], syllable: 'na' },
+]);
+const rows = phrase.draw(context, { x: 10, y: 10, width: 240, clef: 'C', line: 3 });
+```
+
+Draw the phrase again on a cleared context with the new width after a resize.
+The clef repeats at the start of each row. A break always falls between complete
+syllables. Each returned row contains its stave, lyric baseline and ordered groups.

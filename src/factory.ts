@@ -23,7 +23,9 @@ import { EngravingProfile } from './engravingprofile';
 import { FiguredBass, FiguredBassSpec } from './figuredbass';
 import { FontInfo } from './font';
 import { Formatter, FormatterOptions } from './formatter';
+import { FrenchLuteNote, FrenchLuteNoteStruct } from './frenchlutenote';
 import { FretHandFinger } from './frethandfinger';
+import { GermanLuteNote, GermanLuteNoteStruct } from './germanlutenote';
 import { GhostNote } from './ghostnote';
 import { GlyphNote, GlyphNoteOptions } from './glyphnote';
 import { GraceNote, GraceNoteStruct } from './gracenote';
@@ -436,6 +438,13 @@ export class Factory {
     return this.own(note);
   }
 
+  /** Place a German lute attack on the current staffless stave. */
+  GermanLuteNote(spec: GermanLuteNoteStruct): GermanLuteNote {
+    const note = this.musicGlyph(new GermanLuteNote(spec)).setContext(this.context);
+    if (this.stave) note.setStave(this.stave);
+    return this.adopt(note, 'note');
+  }
+
   GlyphNote(glyph: string, noteStruct: NoteStruct, options?: GlyphNoteOptions): GlyphNote {
     const note = new GlyphNote(glyph, noteStruct, options);
     if (this.stave) note.setStave(this.stave);
@@ -503,6 +512,13 @@ export class Factory {
     keySigNote.setContext(this.context);
     this.renderQ.push(keySigNote);
     return this.own(keySigNote);
+  }
+
+  /** Queue French lute letters and open bass signs on the current tablature stave. */
+  FrenchLuteNote(noteStruct: FrenchLuteNoteStruct, drawStem = false): FrenchLuteNote {
+    const note = new FrenchLuteNote(noteStruct, drawStem);
+    if (this.stave) note.setStave(this.stave);
+    return this.adopt(note.setContext(this.context), 'note');
   }
 
   TabNote(noteStruct: TabNoteStruct, drawStem = false): TabNote {

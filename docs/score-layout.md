@@ -23,6 +23,24 @@ It uses the annotations' computed positions, so drawing order does not matter.
 - Explicit annotation baselines and vertical shifts are respected.
 - This is not a general collision solver for every modifier or unrelated voice.
 
+## French lute tablature
+
+Use a six-line `TabStave` and pass numeric `str` (course) and `fret` pairs to
+`FrenchLuteNote` or `Factory.FrenchLuteNote()`. Course 1 uses the top line.
+On courses 1–6, frets 0–12 read **a b c d e f g h i k l m n**.
+Open bass courses 7–10 use **a**, **/a**, **//a**, and **///a** below the sixth line.
+Simultaneous basses stack in course order.
+
+```js
+const stave = new TabStave(10, 10, 460).setContext(ctx).drawWithStyle();
+const positions = [
+  ...[0, 1, 2, 8, 9].map((fret) => ({ str: 1, fret })),
+  ...[7, 8, 9].map((str) => ({ str, fret: 0 })),
+];
+const notes = positions.map((position) => new FrenchLuteNote({ positions: [position], duration: '8' }));
+Formatter.FormatAndDraw(ctx, stave, notes);
+```
+
 ## Flute fingering diagrams
 
 Attach a six-key flute fingering to each note in the exercise. An outlined key is open. A filled key is closed. Read L1 through L3 from the top, then R1 through R3 in the offset group.
@@ -158,3 +176,23 @@ secondStave.addModifier(edition.select('Sabâ'));
 ```
 
 A second collection can register the same name with different signs. Names are exact. An unknown name raises `BadKeySignature`.
+
+### Four-line square chant
+
+`ChantStave` numbers lines upward from 1 at the bottom. Its C clef marks
+`c/4` and its F clef marks `f/3`. Use `getYForPitch()` for a drawing
+coordinate or `getLineForPitch()` for a `GlyphNote` line.
+
+```ts
+const stave = new ChantStave(10, 10, 450, { clef: 'C', line: 3 });
+const punctum = (pitch: string) =>
+  new GlyphNote(Glyphs.chantPunctum, { duration: 'q' }, { line: stave.getLineForPitch(pitch) });
+const phrase = [punctum('c/4'), punctum('d/4'), new ChantDivision('minima')];
+```
+
+Add the phrase to a voice and format it against the chant stave. Divisions
+reserve horizontal space and contribute zero beats. The minima crosses the
+top line, the maior spans the interior, and the maxima and double finalis
+span all four lines. Change the mark in place with `division.setKind('maior')`.
+To change the anchor before placing the notes, call
+`stave.setChantClef('C', 2)`.

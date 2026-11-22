@@ -9,6 +9,8 @@ import { Beam } from './beam';
 import { Bend } from './bend';
 import { BoundingBox } from './boundingbox';
 import { CanvasContext } from './canvascontext';
+import { ChantPhrase } from './chantphrase';
+import { ChantDivision, ChantStave } from './chantstave';
 import { ChordSymbol, ChordSymbolHorizontalJustify, ChordSymbolVerticalJustify, SymbolModifiers } from './chordsymbol';
 import { Clef } from './clef';
 import { ClefNote } from './clefnote';
@@ -25,8 +27,10 @@ import { FluteFingering } from './flutefingering';
 import { Font, FontStyle, FontWeight } from './font';
 import { Formatter } from './formatter';
 import { Fraction } from './fraction';
+import { FrenchLuteNote } from './frenchlutenote';
 import { FretDiagram } from './fretdiagram';
 import { FretHandFinger } from './frethandfinger';
+import { GermanLuteNote } from './germanlutenote';
 import { GhostNote } from './ghostnote';
 import { GlyphNote } from './glyphnote';
 import { Glyphs } from './glyphs';
@@ -112,6 +116,7 @@ export class VexFlow {
   };
 
   static measureEngraving = measureEngraving;
+  static ChantPhrase = ChantPhrase;
   static PhraseLayout = PhraseLayout;
   static EngravingProfile = EngravingProfile;
   static Accidental = Accidental;
@@ -124,6 +129,8 @@ export class VexFlow {
   static Bend = Bend;
   static BoundingBox = BoundingBox;
   static CanvasContext = CanvasContext;
+  static ChantDivision = ChantDivision;
+  static ChantStave = ChantStave;
   static ChordSymbol = ChordSymbol;
   static Clef = Clef;
   static ClefNote = ClefNote;
@@ -139,6 +146,7 @@ export class VexFlow {
   static Formatter = Formatter;
   static Fraction = Fraction;
   static FretHandFinger = FretHandFinger;
+  static GermanLuteNote = GermanLuteNote;
   static GhostNote = GhostNote;
   static GlyphNote = GlyphNote;
   static GraceNote = GraceNote;
@@ -184,6 +192,7 @@ export class VexFlow {
   static FrettedInstrument = FrettedInstrument;
   static PercussionMap = PercussionMap;
   static FiguredBass = FiguredBass;
+  static FrenchLuteNote = FrenchLuteNote;
   static FretDiagram = FretDiagram;
   static HarpPedalDiagram = HarpPedalDiagram;
   static AlternatingTremolo = AlternatingTremolo;
