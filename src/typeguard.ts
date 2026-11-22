@@ -86,6 +86,7 @@ export const enum Category {
   Fraction = 'Fraction',
   FretDiagram = 'FretDiagram',
   FretHandFinger = 'FretHandFinger',
+  GermanLuteNote = 'GermanLuteNote',
   GhostNote = 'GhostNote',
   Glyph = 'Glyph',
   GlyphNote = 'GlyphNote',

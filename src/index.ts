@@ -27,6 +27,7 @@ export * from './factory';
 export * from './figuredbass';
 export * from './font';
 export * from './fretdiagram';
+export * from './germanlutenote';
 export * from './instrumentprofile';
 export * from './notationspelling';
 // Do not export './fonts/*' because they are used by the entry/* files.
