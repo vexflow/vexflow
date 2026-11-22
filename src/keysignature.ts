@@ -15,18 +15,28 @@ import { Tables } from './tables';
 import { Category } from './typeguard';
 import { defined, RuntimeError } from './util';
 
+/** A custom sign is anchored to a written pitch or to an explicit half-line measured from the top. */
+export type OrderedKeySign =
+  { type: string; pitch: string; line?: never } | { type: string; line: number; pitch?: never };
+
 export class KeySignature extends StaveModifier {
   static override get CATEGORY(): string {
     return Category.KeySignature;
   }
 
-  /** Explicit positions are already in the target clef, from the top staff line down. */
-  private ordered?: { type: string; line: number }[];
+  private ordered?: OrderedKeySign[];
 
-  setOrdered(entries: readonly { type: string; line: number }[]): this {
+  /** Preserve the author's sign order. Resolve pitches against the active clef during formatting. */
+  setOrdered(entries: readonly OrderedKeySign[]): this {
     for (const entry of entries) {
-      if (!entry.type || !Number.isSafeInteger(entry.line * 2))
-        throw new RuntimeError('BadArguments', 'Expected an accidental and a staff line or space.');
+      const placed =
+        entry.pitch !== undefined
+          ? entry.line === undefined &&
+            /^[a-g]\/-?\d+$/i.test(entry.pitch) &&
+            Number.isSafeInteger(Number(entry.pitch.split('/')[1]))
+          : Number.isSafeInteger(entry.line * 2);
+      if (!entry.type || !placed)
+        throw new RuntimeError('BadArguments', 'Expected an accidental with a written pitch or a staff line or space.');
     }
     this.ordered = entries.map((entry) => ({ ...entry }));
     this.formatted = false;
@@ -146,7 +156,7 @@ export class KeySignature extends StaveModifier {
 
   // Get the `BoundingBox`
   override getBoundingBox(): BoundingBox {
-    if (!this.formatted) this.format();
+    this.ensureFormatted();
 
     return super.getBoundingBox();
   }
@@ -218,14 +228,14 @@ export class KeySignature extends StaveModifier {
 
   // Get the padding required for this modifier
   override getPadding(index: number): number {
-    if (!this.formatted) this.format();
+    this.ensureFormatted();
 
     return this.children.length === 0 || (!this.paddingForced && index < 2) ? 0 : this.padding;
   }
 
   // Get the width of the modifier
   override getWidth(): number {
-    if (!this.formatted) this.format();
+    this.ensureFormatted();
 
     return this.width;
   }
@@ -280,11 +290,17 @@ export class KeySignature extends StaveModifier {
       this.setStave(stave);
     }
 
+    this.formattedClef = this.activeClef(stave);
     this.formattedStaveY = stave.getY();
     this.width = 0;
     this.children = [];
     if (this.ordered) {
-      this.ordered.forEach((entry, i, list) => this.convertToGlyph(entry, list[i + 1], stave));
+      const positioned = this.ordered.map(({ type, pitch, line }) => ({
+        type,
+        // Note lines count upward, with E4 on treble line one. Stave modifier lines count down from zero.
+        line: pitch === undefined ? line : 5 - Tables.keyProperties(pitch, this.formattedClef).line,
+      }));
+      positioned.forEach((entry, i, list) => this.convertToGlyph(entry, list[i + 1], stave));
       this.calculateDimensions();
       this.formatted = true;
       return;
@@ -301,9 +317,7 @@ export class KeySignature extends StaveModifier {
     }
 
     if (this.accList.length > 0) {
-      const clef =
-        this.clefOverride ??
-        ((this.position === StaveModifierPosition.END ? stave.getEndClef() : stave.getClef()) || stave.getClef());
+      const clef = this.activeClef(stave);
       if (cancelAccList) {
         this.convertAccLines(clef, cancelAccList.type, cancelAccList.accList);
       }
@@ -318,10 +332,28 @@ export class KeySignature extends StaveModifier {
   }
 
   private formattedStaveY?: number;
+  private formattedClef?: string;
+
+  /** End signatures follow an end clef when one is present. Inline signatures can override the stave. */
+  private activeClef(stave: Stave): string {
+    return (
+      this.clefOverride ?? ((this.position === StaveModifierPosition.END && stave.getEndClef()) || stave.getClef())
+    );
+  }
+
+  /** Stave clef and origin can change while the same signature object stays attached. */
+  private ensureFormatted(): void {
+    const stave = this.getStave();
+    if (
+      !this.formatted ||
+      (stave && (this.formattedClef !== this.activeClef(stave) || this.formattedStaveY !== stave.getY()))
+    )
+      this.format();
+  }
 
   /** Refresh the accidental origins after moving a staff and return each positioned glyph. */
   getInkParts(): BoundingBox[] {
-    if (!this.formatted || this.formattedStaveY !== this.checkStave().getY()) this.format();
+    this.ensureFormatted();
     return this.children.map((glyph) => glyph.getTextInk(this.x, 0));
   }
 
@@ -330,7 +362,7 @@ export class KeySignature extends StaveModifier {
     const stave = this.checkStave();
     const ctx = stave.checkContext();
 
-    if (!this.formatted) this.format();
+    this.ensureFormatted();
     this.setRendered();
 
     const clsAttribute = this.getAttribute('class');

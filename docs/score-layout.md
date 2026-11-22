@@ -131,3 +131,15 @@ Nested tuplets and detach operations are included.
 A strict voice still rejects too many ticks at insertion time.
 It cannot infer a tuplet that has not been created yet.
 Reformat after editing durations.
+
+## Written pitches in custom key signatures
+
+Use `setOrdered()` to supply accidental signs from left to right. A written pitch follows the stave’s clef. An explicit `line` stays at that position, counted down from zero at the top. Either kind can appear in the same signature.
+
+```js
+const signs = [{ type: 'b', pitch: 'g/4' }, { type: '#', pitch: 'e/4' }];
+stave.addModifier(new KeySignature('C').setOrdered(signs));
+const restatement = new KeySigNote('C').setOrdered(signs);
+```
+
+Put the restatement after a `ClefNote` in the same voice to use that clef. For a clef change written in another voice, supply the active clef in the factory call, for example `factory.KeySigNote({ key: 'C', clef: 'alto' }).setOrdered(signs)`.

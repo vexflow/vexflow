@@ -19,6 +19,7 @@ const KeySignatureTests = {
     QUnit.module('KeySignature');
     QUnit.test('Key Parser Test', parser);
     const run = VexFlowTests.runTests;
+    run('Written key signs follow the active clef', writtenKeySigns);
     run('Major Key Test', majorKeys);
     run('Minor Key Test', minorKeys);
     run('Stave Helper', staveHelper);
@@ -29,6 +30,66 @@ const KeySignatureTests = {
     run('Key Signature Change test', changeKey);
   },
 };
+
+/** Compare actual glyph origins with the same written pitches after each change of clef. */
+function writtenKeySigns(options: TestOptions): void {
+  const { assert } = options;
+  const f = VexFlowTests.makeFactory(options, 560, 155);
+  const stave = f.Stave({ x: 10, y: 38, width: 535 }).addClef('treble');
+  const entries = [
+    { type: 'b', pitch: 'g/4' },
+    { type: '#', pitch: 'e/4' },
+  ];
+  const signature = f.KeySignature('C').setOrdered(entries);
+  stave.addModifier(signature);
+  const notes = ['treble', 'alto', 'treble'].map((clef) => f.StaveNote({ keys: ['g/4'], duration: 'q', clef }));
+  const inline = () => f.KeySigNote({ key: 'C' }).setOrdered(entries);
+  const voice = f
+    .Voice({ time: '3/4' })
+    .addTickables([
+      notes[0],
+      f.ClefNote({ type: 'alto' }),
+      inline(),
+      notes[1],
+      f.ClefNote({ type: 'treble' }),
+      inline(),
+      notes[2],
+    ]);
+  f.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+  const ctx = f.getContext();
+  const paint = ctx.fillText.bind(ctx);
+  const drawn: [string, number][] = [];
+  ctx.fillText = (text, x, y) => {
+    if (text === Glyphs.accidentalFlat || text === Glyphs.accidentalSharp) drawn.push([text, y]);
+    return paint(text, x, y);
+  };
+  try {
+    f.draw();
+  } finally {
+    ctx.fillText = paint;
+  }
+  const pair = (g: number, e: number): [string, number][] => [
+    [Glyphs.accidentalFlat, stave.getYForLine(g)],
+    [Glyphs.accidentalSharp, stave.getYForLine(e)],
+  ];
+  assert.deepEqual(drawn, [...pair(3, 4), ...pair(0, 1), ...pair(3, 4)]);
+  assert.deepEqual(
+    notes.map((note) => note.getYs()[0]),
+    [3, 0, 3].map((line) => stave.getYForLine(line))
+  );
+
+  const literal = new KeySignature('C').setStave(stave).setOrdered([
+    { type: 'b', line: 3 },
+    { type: '#', line: 4 },
+  ]);
+  signature.setX(0);
+  assert.deepEqual(signature.getInkParts(), literal.getInkParts());
+  stave.setClef('alto');
+  assert.notDeepEqual(signature.getInkParts(), literal.getInkParts(), 'Only written pitches follow the new clef');
+  stave.setClef('treble');
+  assert.deepEqual(signature.getInkParts(), literal.getInkParts(), 'Moving back restores the original placement');
+  assert.throws(() => signature.setOrdered([{ type: 'b', pitch: 'g/4x' }]), /written pitch/);
+}
 
 const fontWidths = () => {
   const sharpWidth = Element.measureWidth(Glyphs.accidentalSharp) + 1;
