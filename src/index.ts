@@ -47,6 +47,8 @@ export * from './gracetabnote';
 export * from './harppedalchanges';
 export * from './harppedaldiagram';
 export * from './harppedals';
+export type { HeadOccurrence } from './headoccurrences';
+export { HeadOccurrenceIndex } from './headoccurrences';
 export * from './keymanager';
 export * from './keysignature';
 export * from './keysignote';

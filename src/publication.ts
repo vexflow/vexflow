@@ -4,6 +4,7 @@ import type { ContinuousRow } from './continuouslayout';
 import type { CommitHook, EasyScoreComposition, EasyScoreCompositionSpec } from './easyscore';
 import { Factory } from './factory';
 import { Fraction } from './fraction';
+import { collectHeads, HeadOccurrence, HeadOccurrenceIndex, placedHead } from './headoccurrences';
 import { InkProfile } from './inkprofile';
 import { Metrics } from './metrics';
 import { Note } from './note';
@@ -58,6 +59,8 @@ export interface PublicationDiagnostic {
 export interface PublicationPage {
   svg: SVGSVGElement;
   number: number;
+  /** Ink on this page, in physical millimeters from the top-left corner of its viewBox. */
+  heads: HeadOccurrenceIndex;
   systems: { measures: number[]; x: number; y: number; width: number; height: number }[];
 }
 
@@ -110,6 +113,8 @@ function compose(
 }
 
 interface RowDrawing {
+  insetHeads: HeadOccurrence[];
+  heads: HeadOccurrence[];
   profile?: InkProfile;
   insetProfile?: InkProfile;
   measures: number[];
@@ -229,6 +234,8 @@ function splitRows(
     bottom: row.y + row.height,
     left: row.x,
     right: row.x + row.width,
+    heads: [] as HeadOccurrence[],
+    insetHeads: [] as HeadOccurrence[],
     restAtEnd: restingMeasure(score, row.measures[row.measures.length - 1]),
     insetHeight: 0,
     insets: node('g'),
@@ -418,6 +425,11 @@ function addInsetFragment(
   music.setAttribute('transform', `translate(0,${captionHeight - ink.y * scale}) scale(${scale})`);
   if (right > width + 1 || inset.score.sheet.getRows().some((r) => r.overflow * scale > 1))
     diagnostics.push({ code: 'SystemOverflow', measures, detail: region.kind + ' exceeds its measure width.' });
+  // Inset geometry uses the same translated and scaled origin as its parent SVG group.
+  for (const head of collectHeads(inset.score, insetSpec.staves, { measureOffset: first - 1 })) {
+    const placed = placedHead(head, hosts[0].getX(), row.insetHeight + captionHeight - ink.y * scale, scale);
+    row.insetHeads.push({ ...placed, reference: region.kind, projection: true });
+  }
   wrap.append(music);
   row.insets.append(wrap);
   row.insetProfile?.add({
@@ -506,10 +518,11 @@ function semanticEvents(
           const direction = n instanceof TextNote && n.getDirectionAnchor();
           const onset = score.meterPositions?.get(n)?.onset.toString() ?? (direction ? clock.toString() : undefined);
           clock.add(n.getTicks());
-          if (!(n instanceof Note)) return [];
+          if (!(n instanceof Note) || n.headSource?.projection) return [];
           return [
             {
               id: n.getAttribute('id'),
+              ...(n.headSource && { sourceEvent: n.headSource.event }),
               measure: score.meterPositions?.get(n)?.measure ?? measure,
               staff: condense?.players[0] === spec.staves[j].id ? condense.players[voice] : spec.staves[j].id,
               voice: condense?.players[0] === spec.staves[j].id ? 0 : voice,
@@ -559,6 +572,7 @@ function buildPages(
     title.textContent = (options.title ?? 'Score') + ' · ' + number;
     svg.append(title);
     const f = furniture(svg, size, options, number);
+    const heads: HeadOccurrence[] = [];
     const systems = b.offsets.map((offset, i) => {
       const r = measured[b.first + i];
       const x = size.margin.left + size.scale,
@@ -568,6 +582,18 @@ function buildPages(
         'data-system': r.measures[0],
       });
       r.music.setAttribute('transform', `translate(0,${r.insetHeight - r.top})`);
+      // Page coordinates include the actual page break, staff size, furniture and space reserved for insets.
+      for (const head of [...r.heads, ...r.insetHeads]) {
+        const inset = head.reference !== undefined;
+        const originY = inset ? y : y + size.scale * (r.insetHeight - r.top);
+        heads.push({
+          ...placedHead(head, x, originY, size.scale),
+          ...(inset && { staff: spec.staves[0].id }),
+          system: b.first + i + 1,
+          page: number,
+          space: 'page-mm',
+        });
+      }
       group.append(r.insets, r.music);
       svg.append(group);
       if (r.left < -1.001 || x + r.right * size.scale > size.width - size.margin.right + 0.001)
@@ -623,7 +649,7 @@ function buildPages(
     });
     svg.append(metadata);
     scopeIds(svg, 'vf-pub-' + uid + '-' + number);
-    return { number, svg, systems };
+    return { number, svg, systems, heads: new HeadOccurrenceIndex(heads) };
   });
 }
 
@@ -671,12 +697,17 @@ export class Publication {
           detail: d.source ? d.code + ' ' + d.source : d.code,
         });
       const passage = options.condense?.measures;
-      const rows = splitRows(
+      const allRows = splitRows(
         ctx.svg,
         layout.rows,
         score,
         spec.continuous?.verticalSpacing === 'profile' ? spec.sheet?.width : undefined
-      ).filter((row) => !passage || (row.measures[0] >= passage[0] && row.measures[0] <= passage[1]));
+      );
+      for (const head of collectHeads(score, spec.staves, { players: options.condense?.players }))
+        allRows[head.system - 1].heads.push(head);
+      const rows = allRows.filter(
+        (row) => !passage || (row.measures[0] >= passage[0] && row.measures[0] <= passage[1])
+      );
       addInsets(host, this.source, options, score, rows, diagnostics, locate);
       const measured = rows.map((r) => {
         // Each system retains its full envelope at a page edge. Only neighbours on the same page share space.

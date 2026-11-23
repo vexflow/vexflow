@@ -5,6 +5,7 @@ import { test } from 'node:test';
 
 import puppeteer from 'puppeteer';
 
+import { headOccurrenceStudy } from '../engraving/head-occurrence-studies.mjs';
 import { textLaneStudy } from '../engraving/text-lane-studies.mjs';
 
 import { balladeSpacingStudy, sextupletStudy, tabEndingStudy } from '../engraving/continuous-studies.mjs';
@@ -42,6 +43,137 @@ test('publication views, pagination and portable printing', async (t) => {
       );
     }
     await page.evaluate(() => VexFlow.setFonts('Bravura', 'Academico'));
+    await t.test(
+      'one source head identifies its fret, custom ink and cue through reflow and physical page scaling',
+      async () => {
+        await page.addScriptTag({ content: 'window.occurrenceStudy=' + headOccurrenceStudy });
+        const result = await page.evaluate(() => {
+          const { Factory, SVGContext, Publication, ScoreNavigation } = VexFlow;
+          const scoreHost = document.querySelector('main'),
+            printHost = document.querySelector('aside');
+          const spec = occurrenceStudy('guitar');
+          const factory = new Factory({ renderer: { elementId: null, width: 1, height: 1 } }).setContext(
+            new SVGContext(scoreHost)
+          );
+          const score = factory.EasyScore().compose(spec);
+          function testHits(index, entries) {
+            return entries.every(
+              (e) =>
+                index.hitTest(e.bounds.x + e.bounds.w / 2, e.bounds.y + e.bounds.h / 2)?.sourceHead === e.sourceHead
+            );
+          }
+          // Ink centers in millimeters, measured independently from the browser's actual glyph and transform.
+          const ctx = document.createElement('canvas').getContext('2d');
+          function matchesInk(page, el, occurrence) {
+            const style = getComputedStyle(el);
+            ctx.font = style.fontSize + ' ' + style.fontFamily;
+            const ink = ctx.measureText(el.textContent);
+            const x = +el.getAttribute('x') + (ink.actualBoundingBoxRight - ink.actualBoundingBoxLeft) / 2;
+            const y = +el.getAttribute('y') + (ink.actualBoundingBoxDescent - ink.actualBoundingBoxAscent) / 2;
+            const mat = page.svg.getScreenCTM().inverse().multiply(el.getScreenCTM());
+            const point = new DOMPoint(x, y).matrixTransform(mat);
+            const b = occurrence.bounds;
+            return Math.abs(point.x - b.x - b.w / 2) < 0.12 && Math.abs(point.y - b.y - b.h / 2) < 0.12;
+          }
+          const screen = [490, 290].map((width) => {
+            score.sheet.setWidth(width);
+            factory.draw({ retain: true });
+            const nav = new ScoreNavigation(score, spec.staves),
+              entries = nav.heads.get('g13', 'string-5');
+            return {
+              roles: entries.map((e) => e.role).sort(),
+              hits: testHits(nav.heads, entries),
+              events: nav.events.length,
+              spaces: entries.every((e) => e.space === 'score' && e.system === 1),
+              all: nav.heads.get('g13').length,
+            };
+          });
+          const printed = [5, 8].map((staffSize) => {
+            const page = new Publication(spec).render(printHost, { paper: 'Letter', staffSize }).pages[0];
+            const entries = page.heads.get('g13', 'string-5');
+            const attacks = JSON.parse(page.svg.querySelector('metadata').textContent).events;
+            const samples = entries
+              .filter((e) => e.role !== 'mark')
+              .map((e) => {
+                const isFret = e.role === 'fret';
+                const selector = isFret
+                  ? '[data-vf-id="vf-tab-g13"] > text'
+                  : '[data-vf-id="vf-g13"] .vf-notehead text';
+                const nodes = page.svg.querySelectorAll(selector);
+                // The bass pitch is entered first on the written staff and last in the TAB chord.
+                return matchesInk(page, nodes[isFret ? nodes.length - 1 : 0], e);
+              });
+            return {
+              hits: testHits(page.heads, entries),
+              attacks: attacks.map((e) => e.sourceEvent),
+              samples,
+              spaces: entries.every((e) => e.space === 'page-mm' && e.page === 1),
+              width: entries.find((e) => e.role === 'notehead').bounds.w,
+            };
+          });
+          const haydn = occurrenceStudy('quartet');
+          const book = new Publication(haydn).render(printHost, {
+            paper: 'Letter',
+            staves: ['cello'],
+            pageBreaks: [23],
+            regions: [{ kind: 'cue', staff: 'violin-ii', measure: 23, label: 'Vln. II', scale: 0.65 }],
+          });
+          const last = book.pages.at(-1),
+            [cue] = last.heads.get('vln-23', 0);
+          const metadata = JSON.parse(last.svg.querySelector('metadata').textContent);
+          return {
+            screen,
+            printed,
+            cue: {
+              role: cue.role,
+              reference: cue.reference,
+              staff: cue.staff,
+              sourceStaff: cue.sourceStaff,
+              projection: cue.projection,
+              page: cue.page,
+              measure: cue.measure,
+              ink: matchesInk(
+                last,
+                last.svg.querySelector('[data-region="cue"] [data-vf-id="vf-vln-23"] .vf-notehead text'),
+                cue
+              ),
+              anonymous: last.heads.get(JSON.stringify(['violin-ii', 23, 0, 1]), 0)[0]?.reference,
+              hit: testHits(last.heads, [cue]),
+              sourceOnly: !metadata.events.some((e) => e.id === 'vln-23'),
+            },
+            earlier: book.pages.slice(0, -1).flatMap((page) => page.heads.get('vln-23')).length,
+          };
+        });
+        for (const sample of result.screen)
+          assert.deepEqual(sample, {
+            roles: ['fret', 'mark', 'notehead'],
+            hits: true,
+            events: 4,
+            spaces: true,
+            all: 9,
+          });
+        for (const p of result.printed) {
+          assert.ok(p.hits && p.spaces);
+          assert.deepEqual(p.samples, [true, true]);
+          assert.deepEqual(p.attacks, ['g13', 'melody-1', 'melody-2', 'melody-3']);
+        }
+        assert.ok(Math.abs(result.printed[1].width / result.printed[0].width - 8 / 5) < 1e-5);
+        assert.deepEqual(result.cue, {
+          role: 'notehead',
+          reference: 'cue',
+          staff: 'cello',
+          sourceStaff: 'violin-ii',
+          projection: true,
+          page: 2,
+          measure: 23,
+          ink: true,
+          anonymous: 'cue',
+          hit: true,
+          sourceOnly: true,
+        });
+        assert.equal(result.earlier, 0);
+      }
+    );
     await t.test('local tuplet brackets and independent hand slopes agree on screen and paper', async () => {
       await page.addScriptTag({ content: 'window.voiceBeamStudy=' + voiceBeamStudy });
       const appearances = await page.evaluate(() => {

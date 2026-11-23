@@ -79,7 +79,19 @@ export interface NotationIdentity {
   index?: number;
 }
 
+/** Logical attack and head IDs shared by independent visual projections of the same music. */
+export interface HeadSource {
+  event: string;
+  /** Original rhythmic staff if a display-only projection can also be extracted on its own. */
+  staff?: string;
+  /** One unique identity per head or fret, in this representation's written order. Defaults to its zero-based index. */
+  heads?: readonly (string | number)[];
+  /** This event draws another view of an attack that already exists in the reading order. */
+  projection?: boolean;
+}
+
 export interface NoteStruct {
+  headSource?: HeadSource;
   notation?: readonly NotationIdentity[];
   /** Array of pitches, e.g: `['c/4', 'e/4', 'g/4']` */
   keys?: string[];
@@ -259,6 +271,14 @@ export abstract class Note extends Tickable {
 
   /** Source identities survive native drawing, Canvas inspection and print export. */
   readonly notation: readonly NotationIdentity[];
+  readonly headSource?: HeadSource;
+  private readonly generatedId: string = this.getAttribute('id');
+
+  /** Generated drawing IDs change in independent parts. Use a staff-local event address when no ID was authored. */
+  getSourceEventId(fallback: string): string {
+    const id = this.getAttribute('id');
+    return this.headSource?.event ?? (id && id !== this.generatedId ? id : fallback);
+  }
   /** Augmentation dots in the written duration, independent of tick overrides or modifiers. */
   readonly writtenDots: number;
   glyphProps: GlyphProps;
@@ -300,6 +320,29 @@ export abstract class Note extends Tickable {
       throw new RuntimeError('BadArguments', 'Note must have valid initialization data to identify duration and type.');
     }
 
+    if (noteStruct.headSource) {
+      const { event, heads, projection, staff } = noteStruct.headSource;
+      const count =
+        'positions' in noteStruct && Array.isArray(noteStruct.positions)
+          ? noteStruct.positions.length
+          : noteStruct.keys?.length;
+      if (
+        typeof event !== 'string' ||
+        !event.trim() ||
+        (staff !== undefined && (typeof staff !== 'string' || !staff.trim())) ||
+        (projection !== undefined && typeof projection !== 'boolean')
+      )
+        throw new RuntimeError('BadArguments', 'A head source needs an event ID and an optional projection flag.');
+      if (
+        heads !== undefined &&
+        (!Array.isArray(heads) ||
+          heads.length !== count ||
+          new Set(heads).size !== heads.length ||
+          heads.some((id) => (typeof id === 'string' ? !id.trim() : !Number.isSafeInteger(id) || id < 0)))
+      )
+        throw new RuntimeError('BadArguments', 'Supply a distinct source ID for each head or fret.');
+      this.headSource = { event, staff, heads: heads?.slice(), projection };
+    }
     this.notation = (noteStruct.notation ?? []).map((entry) => ({
       ...entry,
       ...(entry.stroke && { stroke: { ...entry.stroke } }),

@@ -4,11 +4,14 @@ import type { CommitHook } from '../easyscore';
 import { Note } from '../note';
 import type { RenderContext } from '../rendercontext';
 import type { SheetRow } from '../sheet';
+import { TabNote } from '../tabnote';
 import type { EasyScoreComposition } from './composition';
 
 /** A custom drawing registered at final layout coordinates, in the same units as its source note. */
 export interface CompositionMark {
   source: Note;
+  /** Optional zero-based index of the source head or fret that owns this mark. */
+  head?: number;
   bounds: Bounds;
   draw: (context: RenderContext) => void;
 }
@@ -41,14 +44,21 @@ export function placeCompositionMarks(
           if (note instanceof Note) owners.set(note, row === undefined || hidden?.has(note) ? -1 : row);
   });
   const marks: PlacedCompositionMark[] = [];
-  place(score, ({ source, bounds, draw }) => {
+  place(score, ({ source, head, bounds, draw }) => {
     const row = owners.get(source);
     if (row === undefined) throw new RangeError('A custom mark must belong to a note in this composition.');
+    if (
+      head !== undefined &&
+      (!Number.isInteger(head) ||
+        head < 0 ||
+        head >= (source instanceof TabNote ? source.getPositions().length : source.getKeys().length))
+    )
+      throw new RangeError('A head-specific mark needs a valid source head index.');
     if (row < 0) return;
     const { x, y, w, h } = bounds;
     if (![x, y, w, h].every(Number.isFinite) || w < 0 || h < 0)
       throw new RangeError('Expected finite custom ink bounds and nonnegative dimensions.');
-    marks.push({ row, source, bounds: { x, y, w, h }, draw });
+    marks.push({ row, source, head, bounds: { x, y, w, h }, draw });
   });
   return marks;
 }

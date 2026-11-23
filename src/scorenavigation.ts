@@ -5,6 +5,7 @@ import type { EasyScoreComposition, EasyScoreStaveSpec } from './easyscore/compo
 import { GeometryDiagnostic, measureEngraving } from './engravinggeometry';
 import { Fraction } from './fraction';
 import { nienteBounds } from './hairpintip';
+import { collectHeads, HeadOccurrenceIndex } from './headoccurrences';
 import { StaveNote } from './stavenote';
 import { Tables } from './tables';
 import { TabNote } from './tabnote';
@@ -15,6 +16,8 @@ import { RuntimeError } from './util';
 export interface ScoreReadingEvent {
   id: string;
   source?: string;
+  /** Authored logical attack ID, when several visual projections share the event. */
+  sourceEvent?: string;
   staff: string;
   measure: number;
   voice: number;
@@ -112,6 +115,7 @@ function noteRegion(note: StaveNote | TabNote | TextNote, diagnostics: GeometryD
 /** Build after layout; rebuild after reflow and retain selection by authored ID across snapshots. */
 export class ScoreNavigation {
   readonly events: readonly ScoreReadingEvent[];
+  readonly heads: HeadOccurrenceIndex;
   readonly regions: readonly ScoreHitRegion[];
   readonly diagnostics: readonly GeometryDiagnostic[];
 
@@ -177,19 +181,21 @@ export class ScoreNavigation {
             ]
               .filter(Boolean)
               .join(', ');
-            ordered.push({
-              time,
-              event: {
-                id,
-                source: sourceFor(id),
-                staff: staff.id,
-                measure: measure + 1,
-                voice: voice + 1,
-                onset,
-                duration,
-                label,
-              },
-            });
+            if (!note.headSource?.projection)
+              ordered.push({
+                time,
+                event: {
+                  id,
+                  source: sourceFor(id),
+                  ...(note.headSource && { sourceEvent: note.headSource.event }),
+                  staff: staff.id,
+                  measure: measure + 1,
+                  voice: voice + 1,
+                  onset,
+                  duration,
+                  label,
+                },
+              });
             if (layout?.hidden.has(note)) continue;
             const box = noteRegion(note, diagnostics);
             if (box) regions.push({ id, source: sourceFor(id), kind: 'event', x: box.x, y: box.y, w: box.w, h: box.h });
@@ -220,6 +226,7 @@ export class ScoreNavigation {
         ...bounds,
       });
     }
+    this.heads = new HeadOccurrenceIndex(collectHeads(score, staves));
     this.events = events;
     this.regions = regions;
     this.diagnostics = diagnostics;

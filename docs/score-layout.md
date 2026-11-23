@@ -249,3 +249,34 @@ Pass the same score to `Publication` to use the profile on paper. The planner me
 drawn music and any cue or ossia above it, then applies `systemGap` in millimeters. Systems
 share space only within a page. A forced or automatic page turn restores the full extent
 of each system at its page margin.
+
+### Select a written head across views
+
+After formatting, construct `ScoreNavigation` to find the ink of a particular chord head, fret, or custom mark. The default head identity is its zero-based position in the written chord. When two representations use different head orders, give them the same logical event ID and list the head IDs in each representation's own order.
+
+```typescript
+// The second-string fret is written first in TAB and second in standard notation.
+const written = { id: 'grip', note: { duration: 'q', keys: ['c/4', 'e/4'],
+  headSource: { event: 'grip', heads: ['bass', 'melody'] } } };
+const tab = { id: 'tab-grip', tab: { duration: 'q',
+  positions: [{ str: 2, fret: 5 }, { str: 5, fret: 3 }],
+  headSource: { event: 'grip', staff: 'guitar', heads: ['melody', 'bass'], projection: true } } };
+
+// After adding the notes to their staves, compose the music and format the sheet.
+const targets = new ScoreNavigation(composition, spec.staves).heads.get('grip', 'melody');
+for (const target of targets) highlight(target.staff, target.bounds);
+```
+
+A head occurrence carries its source event and head, physical staff, source staff, one-based measure and system, and a role of `notehead`, `fret`, or `mark`. Screen bounds use score coordinates. Construct a fresh navigation snapshot after resizing or editing. An event's authored ID is its default source ID. An event without an authored ID uses a staff-local address that also survives part extraction and cue layout. Supply explicit IDs when selections must survive edits to the measure structure.
+
+A custom mark registered in `engraving.place` can set `head` to its owning head's zero-based index. Query `heads.get(event, head)` for this mark and the corresponding noteheads or frets. Query `heads.get(event)` for every occurrence, including marks attached to the whole event.
+
+Each `PublicationPage` has the same `heads` index in page millimeters, measured from the top-left of its SVG viewBox. A quoted note retains its source event. Its occurrence identifies the receiving staff, page number and `reference` (`cue` or `ossia`). Page metadata and the screen reading order count a linked sounding attack once. Marking a TAB event as a projection preserves all its fret locations.
+
+```typescript
+// Convert a pointer from CSS pixels to the page's coordinate system before testing ink.
+const point = new DOMPoint(event.clientX, event.clientY)
+  .matrixTransform(page.svg.getScreenCTM()!.inverse());
+const hit = page.heads.hitTest(point.x, point.y);
+if (hit) select(hit.sourceEvent, hit.sourceHead);
+```
