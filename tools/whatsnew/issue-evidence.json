@@ -1905,5 +1905,246 @@
         "sha256": "4cb8f7ad8c61c3aab9fd33cb8a6933e7b3f098fde6c719775c6bf9a067ca1b0f"
       }
     ]
+  },
+  {
+    "topic": "Typed notes in scores, parts and cues",
+    "source": "https://github.com/vexflow/vexflow/issues/458#issuecomment-7113795628",
+    "images": [
+      {
+        "asset": "3032ed94-892e-47f9-97c1-3d319034e65f",
+        "caption": "Part and cue before the hook fix",
+        "sha256": "e74621f19d89edd3adbd0a7c0c644708e7d72c62c75a9bd39b32752dc739cf21"
+      },
+      {
+        "asset": "bdd16d4d-51c1-40f6-955e-3819a1c0d9ae",
+        "caption": "Part and cue after the hook fix",
+        "sha256": "9149353cccd075488d8bafe60e40278411553e04cd2f4ed20bfb526ad742165d"
+      }
+    ]
+  },
+  {
+    "topic": "Vertical spacing from printed ink",
+    "source": "https://github.com/vexflow/vexflow/issues/459#issuecomment-7114285633",
+    "images": [
+      {
+        "asset": "e8a1b05a-9589-433f-ad93-2dfacff232e6",
+        "caption": "Ballade ossia staff above the grand staff with envelope and profile spacing",
+        "sha256": "430f860fd0e3ea1416a3ee7e3dd413fe0110980c2538078541005fe6d0c202c2"
+      }
+    ]
+  },
+  {
+    "topic": "Vertical spacing from printed ink",
+    "source": "https://github.com/vexflow/vexflow/issues/459#issuecomment-7114285633",
+    "images": [
+      {
+        "asset": "c2c4af4c-cbc8-447e-b2d0-3e71fecf610d",
+        "caption": "Ballade bass octave and release chord with the full sustain pedal bracket in both layouts",
+        "sha256": "f858b88742db745dbe1c2f5ea5eb6f6e294b6b1fc0646f90459d1ae48f923383"
+      }
+    ]
+  },
+  {
+    "topic": "Beams and tuplets in multiple voices",
+    "source": "https://github.com/vexflow/vexflow/issues/460#issuecomment-7113872077",
+    "images": [
+      {
+        "asset": "f57a662d-9a8d-43cf-a933-77a208659e00",
+        "caption": "Automatic grouping before the change",
+        "sha256": "f9d510e621146f5d9b656f745c6748506d0dce5090a522bfabd111db9f821c81"
+      },
+      {
+        "asset": "01068bf6-d3b0-4390-82f5-b09a8dbc0ac3",
+        "caption": "Active voices and explicit groups after the change",
+        "sha256": "c92daabce78069f03883355ea7a56d3b2627d2d340de18b1bb4193fd4a6f4713"
+      }
+    ]
+  },
+  {
+    "topic": "Slurs around chords and TAB frets",
+    "source": "https://github.com/vexflow/vexflow/issues/461#issuecomment-7114588586",
+    "images": [
+      {
+        "asset": "6e9f06cc-0cdf-4254-816b-76abebf8d47b",
+        "caption": "Soleá ligado across the system break",
+        "sha256": "c4b372a0d62ed5b92b18b24cde4d3f8295826018c02f67a29347b86677c3b3ec"
+      }
+    ]
+  },
+  {
+    "topic": "Slurs around chords and TAB frets",
+    "source": "https://github.com/vexflow/vexflow/issues/461#issuecomment-7114588586",
+    "images": [
+      {
+        "asset": "c3721466-0fa8-4ec6-9d01-60b74742715a",
+        "caption": "Friska slur around the right-hand chords",
+        "sha256": "ababf138660c1a904cbf91d91422076d2d99ed8bd9999f318a98625970b457d8"
+      }
+    ]
+  },
+  {
+    "topic": "Fingering and accidentals on chord heads",
+    "source": "https://github.com/vexflow/vexflow/issues/462#issuecomment-7114572259",
+    "images": [
+      {
+        "asset": "a17e4485-1830-4a71-8cba-96679c9b6025",
+        "caption": "Chopin thirds with two fingerings, before and after",
+        "sha256": "42b03cc4081ea86320992b8470d21f20760122a6ff7496b9f93d614e142dd3ec"
+      }
+    ]
+  },
+  {
+    "topic": "Fingering and accidentals on chord heads",
+    "source": "https://github.com/vexflow/vexflow/issues/462#issuecomment-7114572259",
+    "images": [
+      {
+        "asset": "d124eb28-20fe-4cd9-943e-cad9c000c781",
+        "caption": "Sor’s E-sharp fingering, before and after",
+        "sha256": "ac4776b10c87e5459379cbe898ea1bdd2a3e64c699df21d1bb0ef2c4e898eb55"
+      }
+    ]
+  },
+  {
+    "topic": "Verses, harmonies and timed directions",
+    "source": "https://github.com/vexflow/vexflow/issues/463#issuecomment-7114672785",
+    "images": [
+      {
+        "asset": "63c1c15b-84c1-46e3-9046-48ccaeb3de20",
+        "caption": "Two verses, cross-break hyphen, and extender",
+        "sha256": "803c05af011d0d3afdbfa3e03cfffb68e7a0f73e247e49d946f63731a57e0a84"
+      }
+    ]
+  },
+  {
+    "topic": "Verses, harmonies and timed directions",
+    "source": "https://github.com/vexflow/vexflow/issues/463#issuecomment-7114672785",
+    "images": [
+      {
+        "asset": "577ca2e6-57b5-4a8a-9916-38b7e77577bb",
+        "caption": "Guitar harmonies above two voices and the slur",
+        "sha256": "cdb936bbbc09035c956254c17d37a2b55003e6438cb96869b06497a573b7b378"
+      }
+    ]
+  },
+  {
+    "topic": "Verses, harmonies and timed directions",
+    "source": "https://github.com/vexflow/vexflow/issues/463#issuecomment-7114672785",
+    "images": [
+      {
+        "asset": "e673f7b3-ba39-4ef8-9221-ef07d822394f",
+        "caption": "Independently timed direction in the score and bass part",
+        "sha256": "f10ac6d84c86f135de5d9949f32ab90119c93cfdaa460c8d882101d06cf96f5a"
+      }
+    ]
+  },
+  {
+    "topic": "Inline ossias and traditional pedal signs",
+    "source": "https://github.com/vexflow/vexflow/issues/464#issuecomment-7115739495",
+    "images": [
+      {
+        "asset": "09dde07b-185a-4534-9a2b-845d1016d0f2",
+        "caption": "Measure 3 before and after adding the three-note bass ossia",
+        "sha256": "de6f5c87f36b10535a07eb4c65fb6d2103f835fb57076b1f6d51877045c9b309"
+      }
+    ]
+  },
+  {
+    "topic": "Inline ossias and traditional pedal signs",
+    "source": "https://github.com/vexflow/vexflow/issues/464#issuecomment-7115739495",
+    "images": [
+      {
+        "asset": "cc918f19-22a2-46cc-aa7d-61d2f456595f",
+        "caption": "Bass pedal bracket compared with traditional down and release signs",
+        "sha256": "0ac97ded1c28cf5cf68ac704b3f257c69bd040e98cc8b0b39a1fbb26bab2d7fb"
+      }
+    ]
+  },
+  {
+    "topic": "Inline ossias and traditional pedal signs",
+    "source": "https://github.com/vexflow/vexflow/issues/464#issuecomment-7115739495",
+    "images": [
+      {
+        "asset": "966cd49f-3b83-4837-9e22-451e8357ce13",
+        "caption": "Pedal pressed on page one and released on page two",
+        "sha256": "4578abfd18708677a2b2e35ae4d3ef4da2197d6c9baaf96b2880ba1628baf0df"
+      }
+    ]
+  },
+  {
+    "topic": "Head selection across notation and TAB",
+    "source": "https://github.com/vexflow/vexflow/issues/465#issuecomment-7115615292",
+    "images": [
+      {
+        "asset": "61625747-e521-4689-ab5b-5f0ca3678b1d",
+        "caption": "All of Me, whole-event selection and linked head selection",
+        "sha256": "09a6f87374748d26885758376ea0336b449b0c02df63116582151f4029f9da13"
+      }
+    ]
+  },
+  {
+    "topic": "Head selection across notation and TAB",
+    "source": "https://github.com/vexflow/vexflow/issues/465#issuecomment-7115615292",
+    "images": [
+      {
+        "asset": "7c24420d-9ab3-4e6a-8300-26f362b08c58",
+        "caption": "Haydn quartet, selected violin note and the same note in the cello cue",
+        "sha256": "b6336187e46bfd400dac9a178cb8ca8d8601df02e79730bf0a4fb3bb2e8f9d75"
+      }
+    ]
+  },
+  {
+    "topic": "Measured score openings",
+    "source": "https://github.com/vexflow/vexflow/issues/466#issuecomment-7115682950",
+    "images": [
+      {
+        "asset": "b546e0b2-4e0a-49af-ad19-bcf4a60dd10b",
+        "caption": "Liszt opening with heading and indented grand staff",
+        "sha256": "6d9478c4c165db960ce7ecd972e9f36736f7dae64886e2a96a1607fb1f71bdfe"
+      }
+    ]
+  },
+  {
+    "topic": "Measured score openings",
+    "source": "https://github.com/vexflow/vexflow/issues/466#issuecomment-7115682950",
+    "images": [
+      {
+        "asset": "787f63f8-b6f2-4aed-b90f-74e854d6b66d",
+        "caption": "Guitar chord frames at wide and narrow widths",
+        "sha256": "96f5db563b27e92c76912bdd4958e382453824f27ba96ccfbeeb488d288ea33b"
+      }
+    ]
+  },
+  {
+    "topic": "Measured score openings",
+    "source": "https://github.com/vexflow/vexflow/issues/466#issuecomment-7115682950",
+    "images": [
+      {
+        "asset": "4988dec1-f954-4752-bfe4-247a18387c51",
+        "caption": "Swing equation with enlarged screen and print details",
+        "sha256": "3cd149aa24985fb8a3f2d20cd8b95dc38f05341cd8905b82f9dd95418736712e"
+      }
+    ]
+  },
+  {
+    "topic": "Rolled chords before drawing",
+    "source": "https://github.com/vexflow/vexflow/issues/467#issuecomment-7116457828",
+    "images": [
+      {
+        "asset": "86495e4e-5b69-4ee2-ab5f-148ce865b4e9",
+        "caption": "Both roll directions before and after the fix, with pre-draw bounds outlined",
+        "sha256": "a6f32ecd61bc0267d104944d8efabc81bc0a84ea90ce4917d557b0d61f49f203"
+      }
+    ]
+  },
+  {
+    "topic": "Rolled chords before drawing",
+    "source": "https://github.com/vexflow/vexflow/issues/467#issuecomment-7116457828",
+    "images": [
+      {
+        "asset": "a96659cb-2294-4234-8e95-23bfb6535932",
+        "caption": "Liszt grand staff and extracted upper part, with the rolled inner-voice chord outlined after the fix",
+        "sha256": "9cb1cff49cabd6713e976bb5c77c0babe5fcb44d6240c33766e75a6a38b301f7"
+      }
+    ]
   }
 ]

@@ -3,6 +3,62 @@
 export const topics = [
   [
     'Features',
+    'New in 5.10.0',
+    [
+      [
+        'Typed notes in scores, parts and cues',
+        'Prepare each typed note before layout and place its custom marks after formatting. The same callbacks follow the source notes into an extracted part or a cue.',
+        'issues/458',
+      ],
+      [
+        'Vertical spacing from printed ink',
+        'Fit neighboring staves and systems by comparing the ink at each horizontal position. An ossia, beam or pedal sign reserves space where it meets the next staff.',
+        'issues/459',
+      ],
+      [
+        'Beams and tuplets in multiple voices',
+        'Resolve stems from the voices active at an attack. Explicit beam groups and tuplet brackets retain their intended grouping as the system reflows.',
+        'issues/460',
+      ],
+      [
+        'Slurs around chords and TAB frets',
+        'Route a slur from a selected chord head or guitar string. The curve clears the intervening notes and keeps its endpoints when the phrase crosses a system break.',
+        'issues/461',
+      ],
+      [
+        'Fingering and accidentals on chord heads',
+        'Attach fingering and accidental policies to individual pitches. Reordering the notes in a chord preserves each marking in the score and printed part.',
+        'issues/462',
+      ],
+      [
+        'Verses, harmonies and timed directions',
+        'Give each verse and harmony line its own vertical position across a system. A direction with its own rhythmic position stays at that beat even when another voice sustains a note.',
+        'issues/463',
+      ],
+      [
+        'Inline ossias and traditional pedal signs',
+        'Anchor a small alternative reading at a particular attack. A pedal-down sign and its release follow their own events across a line or page break.',
+        'issues/464',
+      ],
+      [
+        'Head selection across notation and TAB',
+        'Select one guitar pitch to find both its written head and its fret. A printed cue also leads back to the source note, with bounds expressed in page millimeters.',
+        'issues/465',
+      ],
+      [
+        'Measured score openings',
+        'Reserve room above the first staff for a heading, swing equation or wrapping chord diagrams. The first-system indent participates in line breaking on screen and paper.',
+        'issues/466',
+      ],
+      [
+        'Rolled chords before drawing',
+        'Measure the wave and arrowhead of a roll as soon as the chord is formatted. The staff fitter uses their actual position, including when the bar is printed in an extracted part.',
+        'issues/467',
+      ],
+    ],
+  ],
+  [
+    'Features',
     'New in 5.9.0',
     [
       [

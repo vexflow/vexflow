@@ -1,3 +1,11 @@
+# 5.10.0
+
+- **Score layout.** Fit staves and systems using the horizontal extent of their ink. Give headings, chord diagrams and swing equations measured space above an indented first system. Align verses, harmony and timed directions through reflow. [Layout guide](https://github.com/vexflow/vexflow/blob/5.10.0/docs/score-layout.md)
+- **Notes and expression.** Keep beams and tuplets with their active voices, route slurs around chords and TAB frets, and attach fingerings and accidentals to individual pitches. Rolled chords now report the wave and arrowhead bounds before drawing. [Engraving examples](https://github.com/vexflow/vexflow/issues/457) · [Rolled chords](https://github.com/vexflow/vexflow/issues/467)
+- **Parts and interaction.** Anchor an inline ossia or traditional pedal sign to a musical event. Track an individual head across notation, TAB and printed cues, and reuse typed-note engraving callbacks in an extracted part. [Selection examples](https://github.com/vexflow/vexflow/issues/465#issuecomment-7115615292)
+- **Guide and tooling.** The guide now teaches EasyScore through a sequence of editable examples. The illustrated report restricts exhibit and source links, the standalone score reader packages its scripts as separate resources, and CI audits both dependency lockfiles.
+- Browse the [user guide](https://vexflow.com/guide/), [features](https://vexflow.com/features/), [test gallery](https://vexflow.com/tests/), [PDF editions](https://vexflow.com/pdfs/), [What's New?](https://vexflow.com/reports/whatsnew/), and [5.10.0 quality report](https://vexflow.com/reports/5.10.0/).
+
 # 5.9.0
 
 - **Guitar and banjo.** Rotate chord frames, look up guitar voicings by chord symbol and tuning, and write for a five-string banjo with a short drone string. Half-step-down guitar tuning now gives E♭ on the open sixth string.
