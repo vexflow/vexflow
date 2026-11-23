@@ -11,6 +11,7 @@ import { Metrics } from './metrics';
 import { Modifier } from './modifier';
 import { ModifierContextState } from './modifiercontext';
 import { Note } from './note';
+import type { RenderContext } from './rendercontext';
 import { Category, isNote, isStaveNote, isTabNote } from './typeguard';
 import { RuntimeError } from './util';
 
@@ -73,7 +74,6 @@ export class Stroke extends Modifier {
   public renderOptions: {
     fontScale: number;
   };
-  protected boundingBox = new BoundingBox(0, 0, 0, 0);
 
   constructor(type: number, options?: { allVoices: boolean }) {
     super();
@@ -83,7 +83,6 @@ export class Stroke extends Modifier {
     // multi voice - span stroke across all voices if true
     this.allVoices = this.options.allVoices;
 
-    // multi voice - end note of stroke, set in draw()
     this.type = type;
     this.position = Modifier.Position.LEFT;
 
@@ -104,32 +103,34 @@ export class Stroke extends Modifier {
     return this;
   }
 
-  override draw(): void {
-    const ctx = this.checkContext();
+  /** A stroke joining two movable staves follows their separation; it cannot determine that gap. */
+  spansStaves(): boolean {
     const note = this.checkAttachedNote();
-    this.setRendered();
+    const stave = note.checkStave();
+    if (this.noteEnd && this.noteEnd.getStave() !== stave) return true;
+    return (
+      this.allVoices &&
+      this.checkModifierContext()
+        .getMembers(note.getCategory())
+        .some((member) => isNote(member) && member.getStave() !== stave)
+    );
+  }
 
+  /** Locate each piece of ink from the current formatted notes. Drawing uses the same placements. */
+  private layout(bounds: 'ink' | 'pointer', ctx?: RenderContext): BoundingBox[] {
+    const note = this.checkAttachedNote();
     const start = note.getModifierStartXY(this.position, this.index);
-    let yPositions = note.getYs();
-    let topY = start.y;
-    let botY = start.y;
+    const parts: BoundingBox[] = [];
+    let topY = Math.min(...note.getYs());
+    let botY = Math.max(...note.getYs());
     // Leave a visible gap between a tab fret's string mask and the tip of a broad arrow.
-    const x = start.x - 5 - (isTabNote(note) ? Metrics.get('NoteHead.minPadding') : 0);
+    const x = start.x + this.xShift - 5 - (isTabNote(note) ? Metrics.get('NoteHead.minPadding') : 0);
     const lineSpace = note.checkStave().getSpacingBetweenLines();
-
-    const notes = this.checkModifierContext().getMembers(note.getCategory());
-    for (let i = 0; i < notes.length; i++) {
-      const note = notes[i];
-      if (isNote(note)) {
-        // Only Note objects have getYs().
-        // note is an instance of either StaveNote or TabNote.
-        yPositions = note.getYs();
-        for (let n = 0; n < yPositions.length; n++) {
-          if (this.note === notes[i] || this.allVoices) {
-            topY = Math.min(topY, yPositions[n]);
-            botY = Math.max(botY, yPositions[n]);
-          }
-        }
+    if (this.allVoices) {
+      for (const member of this.checkModifierContext().getMembers(note.getCategory())) {
+        if (!isNote(member)) continue;
+        topY = Math.min(topY, ...member.getYs());
+        botY = Math.max(botY, ...member.getYs());
       }
     }
 
@@ -167,86 +168,74 @@ export class Stroke extends Modifier {
         throw new RuntimeError('InvalidType', `The stroke type ${this.type} does not exist`);
     }
 
-    // Draw the stroke
     if (this.type === Stroke.Type.BRUSH_DOWN || this.type === Stroke.Type.BRUSH_UP) {
-      ctx.fillRect(x + this.xShift, topY, 1, botY - topY);
-      this.boundingBox = new BoundingBox(x + this.xShift, topY, 1, botY - topY);
+      ctx?.fillRect(x, topY, 1, botY - topY);
+      parts.push(new BoundingBox(x, topY, 1, botY - topY));
     } else {
-      // Select the wiggle glyph depending on the arrow direction
-      const lineGlyph = arrow === Glyphs.arrowheadBlackDown ? Glyphs.wiggleArpeggiatoDown : Glyphs.wiggleArpeggiatoUp;
-      let txt = '';
-      const el = new Element();
-      // add glyphs until the required length is achieved
-      while (el.getWidth() < botY - topY) {
-        txt += lineGlyph;
-        el.setText(txt);
-      }
-      if (
-        this.type === Stroke.Type.RASGUEADO_DOWN ||
-        this.type === Stroke.Type.ROLL_DOWN ||
-        this.type === Stroke.Type.ARPEGGIO_DIRECTIONLESS
-      ) {
-        ctx.openRotation(90, x + this.xShift, topY);
-        el.renderText(ctx, x + this.xShift, topY - el.getTextMetrics().actualBoundingBoxDescent + el.getHeight() / 2);
-        ctx.closeRotation();
-        textY = topY + el.getWidth() + 5;
-        this.boundingBox = new BoundingBox(
-          x + this.xShift - el.getHeight() / 2,
-          topY - el.getTextMetrics().actualBoundingBoxDescent + el.getHeight() / 2,
-          el.getHeight(),
-          el.getWidth()
-        );
-      } else {
-        ctx.openRotation(-90, x + this.xShift, botY);
-        el.renderText(ctx, x + this.xShift, botY - el.getTextMetrics().actualBoundingBoxDescent + el.getHeight() / 2);
-        ctx.closeRotation();
-        textY = botY - el.getWidth() - 5;
-        this.boundingBox = new BoundingBox(
-          x + this.xShift - el.getHeight() / 2,
-          botY - el.getTextMetrics().actualBoundingBoxDescent + el.getHeight() / 2 - el.getWidth(),
-          el.getHeight(),
-          el.getWidth()
-        );
+      const turnsUp = arrow === Glyphs.arrowheadBlackDown;
+      const glyph = turnsUp ? Glyphs.wiggleArpeggiatoDown : Glyphs.wiggleArpeggiatoUp;
+      const wave = new Element().setText(glyph);
+      // Without font metrics there is no measurable glyph. Avoid extending a zero-width run.
+      if (wave.getWidth() > 0) {
+        while (wave.getWidth() < botY - topY) wave.setText(wave.getText() + glyph);
+        const pivotY = turnsUp ? botY : topY;
+        const baseline = wave.getHeight() / 2 - wave.getTextMetrics().actualBoundingBoxDescent;
+        if (bounds === 'pointer') {
+          // Chord selection historically uses the full advance of the run.
+          const width = wave.getWidth(),
+            height = wave.getHeight();
+          parts.push(new BoundingBox(x - height / 2, pivotY + baseline - (turnsUp ? width : 0), height, width));
+        } else {
+          // Rotate the ink edges about the same origin as the renderer.
+          const box = wave.getTextInk(0, baseline);
+          parts.push(
+            turnsUp
+              ? new BoundingBox(x + box.y, pivotY - box.x - box.w, box.h, box.w)
+              : new BoundingBox(x - box.y - box.h, pivotY + box.x, box.h, box.w)
+          );
+        }
+        if (ctx) {
+          ctx.openRotation(turnsUp ? -90 : 90, x, pivotY);
+          wave.renderText(ctx, x, pivotY + baseline);
+          ctx.closeRotation();
+        }
+        textY = turnsUp ? botY - wave.getWidth() - 5 : topY + wave.getWidth() + 5;
       }
     }
 
-    // Draw the arrow head
-    if (arrowY !== 0) {
-      const el = new Element();
-      el.setText(arrow);
-      el.renderText(
-        ctx,
-        // Center the arrow head substracting its width / 2
-        x + this.xShift - el.getWidth() / 2,
-        arrowY
+    // The glyph advance centers the sign. The ink may extend beyond that advance.
+    const place = (glyph: Element, y: number) => {
+      const left = x - glyph.getWidth() / 2;
+      parts.push(
+        bounds === 'pointer'
+          ? new BoundingBox(left, y - glyph.getHeight(), glyph.getWidth(), glyph.getHeight())
+          : glyph.getTextInk(left, y)
       );
-      this.boundingBox.mergeWith(
-        new BoundingBox(x + this.xShift - el.getWidth() / 2, arrowY - el.getHeight(), el.getWidth(), el.getHeight())
-      );
-    }
-
-    // Draw the rasgueado "R"
+      if (ctx) glyph.renderText(ctx, left, y);
+    };
+    if (arrow) place(new Element().setText(arrow), arrowY);
     if (this.type === Stroke.Type.RASGUEADO_DOWN || this.type === Stroke.Type.RASGUEADO_UP) {
-      const el = new Element('Stroke.text');
-      el.setText('R');
-      el.renderText(
-        ctx,
-        x + this.xShift - el.getWidth() / 2,
-        textY + (this.type === Stroke.Type.RASGUEADO_DOWN ? el.getHeight() : 0)
-      );
-      this.boundingBox.mergeWith(
-        new BoundingBox(
-          x + this.xShift - el.getWidth() / 2,
-          textY + (this.type === Stroke.Type.RASGUEADO_DOWN ? el.getHeight() : 0) - el.getHeight(),
-          el.getWidth(),
-          el.getHeight()
-        )
-      );
+      const label = new Element('Stroke.text').setText('R');
+      place(label, textY + (this.type === Stroke.Type.RASGUEADO_DOWN ? label.getHeight() : 0));
     }
+    return parts;
   }
 
-  /** Get the boundingBox. */
+  /** Separate ink for the brush or wave, its arrow, and any rasgueado label. */
+  getInkParts(): BoundingBox[] {
+    return this.layout('ink');
+  }
+
+  /** Preserve the chord's pointer target based on glyph advances, including before drawing. */
   override getBoundingBox(): BoundingBox {
-    return this.boundingBox;
+    if (!this.note?.preFormatted) return new BoundingBox(0, 0, 0, 0);
+    const [first, ...rest] = this.layout('pointer');
+    return rest.reduce((box, part) => box.mergeWith(part), first ?? new BoundingBox(0, 0, 0, 0));
+  }
+
+  override draw(): void {
+    const ctx = this.checkContext();
+    this.setRendered();
+    this.layout('ink', ctx);
   }
 }

@@ -3,10 +3,12 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
 
+import { createCanvas, loadImage } from 'canvas';
 import puppeteer from 'puppeteer';
 
 import { balladeDetailStudy } from '../engraving/ballade-detail-study.mjs';
 import { headOccurrenceStudy } from '../engraving/head-occurrence-studies.mjs';
+import { rolledChordStudy } from '../engraving/rolled-chord-study.mjs';
 import { openingStudy } from '../engraving/opening-studies.mjs';
 import { textLaneStudy } from '../engraving/text-lane-studies.mjs';
 
@@ -45,6 +47,124 @@ test('publication views, pagination and portable printing', async (t) => {
       );
     }
     await page.evaluate(() => VexFlow.setFonts('Bravura', 'Academico'));
+    await t.test('rolled chords report the painted wave and arrow before draw and after reflow', async () => {
+      // Paint only the measured stroke. The raster checks the transformed SVG text and the native Canvas glyphs.
+      for (const backend of ['SVG', 'CANVAS']) {
+        for (const direction of ['ROLL_DOWN', 'ROLL_UP']) {
+          await page.evaluate(
+            ({ backend, direction }) => {
+              const VF = VexFlow;
+              const target = document.createElement(backend === 'SVG' ? 'div' : 'canvas');
+              document.querySelector('main').replaceChildren(target);
+              target.id = 'roll-test';
+              const f = new VF.Factory({
+                renderer: { elementId: target.id, width: 450, height: 200, backend: VF.Renderer.Backends[backend] },
+              });
+              const es = f.EasyScore();
+              const notes = es.notes('D4/h, (C4 E4 G4)/h');
+              const stroke = new VF.Stroke(VF.Stroke.Type[direction]);
+              notes[1].addModifier(stroke, 0);
+              const system = f.System({ width: 360, x: 15, y: 25 });
+              system.addStave({ voices: [es.voice(notes)] });
+              window.rollFrame = (width, y) => {
+                system.setWidth(width).setY(y).format();
+                const { ink, parts, diagnostics } = VF.measureEngraving(stroke);
+                const owner = VF.measureEngraving(notes[1]);
+                const before = stroke.getBoundingBox();
+                const ctx = f.getContext();
+                ctx.clear();
+                stroke.setStyle({ fillStyle: '#0055dd' }).setContext(ctx).drawWithStyle();
+                return {
+                  ink,
+                  before,
+                  after: stroke.getBoundingBox(),
+                  parts,
+                  diagnostics,
+                  included: parts.every((p) =>
+                    owner.parts.some((b) => ['x', 'y', 'w', 'h'].every((key) => b[key] === p[key]))
+                  ),
+                };
+              };
+            },
+            { backend, direction }
+          );
+          const frames = [];
+          for (const [width, y] of [
+            [360, 25],
+            [245, 54],
+            [360, 25],
+          ]) {
+            const frame = await page.evaluate((w, y) => rollFrame(w, y), width, y);
+            assert.deepEqual(frame.diagnostics, []);
+            assert.ok(frame.before.w > 0 && frame.before.h > 0);
+            assert.deepEqual(frame.after, frame.before);
+            assert.ok(frame.included);
+            assert.equal(frame.parts.length, 2);
+            const surface = await page.$(backend === 'SVG' ? '#roll-test svg' : '#roll-test');
+            const pixels = await loadImage(Buffer.from(await surface.screenshot()));
+            const ctx = createCanvas(pixels.width, pixels.height).getContext('2d');
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, pixels.width, pixels.height);
+            ctx.drawImage(pixels, 0, 0);
+            const data = ctx.getImageData(0, 0, pixels.width, pixels.height).data;
+            let left = pixels.width,
+              top = pixels.height,
+              right = 0,
+              bottom = 0;
+            for (let y = 0; y < pixels.height; y++)
+              for (let x = 0; x < pixels.width; x++) {
+                const pixel = (y * pixels.width + x) * 4;
+                if (data[pixel + 2] - data[pixel] < 64) continue;
+                left = Math.min(left, x);
+                right = Math.max(right, x + 1);
+                top = Math.min(top, y);
+                bottom = Math.max(bottom, y + 1);
+              }
+            const b = frame.ink;
+            const errors = [left - b.x, top - b.y, right - b.x - b.w, bottom - b.y - b.h];
+            assert.ok(
+              errors.every((error) => Math.abs(error) <= 2),
+              backend + ' ' + direction + ' ' + JSON.stringify(errors)
+            );
+            frames.push(b);
+          }
+          assert.ok(frames[1].x < frames[0].x && frames[1].y > frames[0].y);
+          assert.deepEqual(frames[0], frames[2]);
+        }
+      }
+    });
+
+    await t.test('the Liszt rolled inner voice is measured on screen and in an extracted part', async () => {
+      await page.addScriptTag({ content: 'window.rolledChordStudy=' + rolledChordStudy });
+      const runs = await page.evaluate(() => {
+        const VF = VexFlow,
+          source = rolledChordStudy(VF),
+          frames = [];
+        source.engraving.place = (score) => {
+          const chord = score.getNote('roll'),
+            stroke = chord.getModifiers().find((m) => m instanceof VF.Stroke);
+          const { ink, diagnostics } = VF.measureEngraving(stroke);
+          const head = chord.getHeadInk()[0];
+          frames.push({ diagnostics, clear: ink.x + ink.w < head.x, parts: VF.measureEngraving(stroke).parts.length });
+        };
+        const main = document.querySelector('main');
+        main.replaceChildren();
+        const f = new VF.Factory({ renderer: { elementId: null } }).setContext(new VF.SVGContext(main));
+        const c = f.EasyScore().compose(source);
+        c.sheet.format();
+        f.draw({ retain: true });
+        const printed = new VF.Publication(source).render(document.querySelector('aside'), {
+          staves: ['upper'],
+          paper: 'Letter',
+        });
+        const glyph = VF.Glyphs.arrowheadBlackDown;
+        const arrows = (svg) => [...svg.querySelectorAll('text')].filter((t) => t.textContent === glyph).length;
+        return { frames, screen: arrows(main), paper: arrows(printed.pages[0].svg), diagnostics: printed.diagnostics };
+      });
+      assert.ok(runs.frames.length >= 2);
+      for (const frame of runs.frames) assert.deepEqual(frame, { diagnostics: [], clear: true, parts: 2 });
+      assert.deepEqual([runs.screen, runs.paper, runs.diagnostics], [1, 1, []]);
+    });
     await t.test(
       'one source head identifies its fret, custom ink and cue through reflow and physical page scaling',
       async () => {

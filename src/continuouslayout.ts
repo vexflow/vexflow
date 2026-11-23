@@ -44,6 +44,7 @@ import { StaveConnector } from './staveconnector';
 import { StaveModifier, StaveModifierPosition as Position } from './stavemodifier';
 import { StaveNote } from './stavenote';
 import { Stem } from './stem';
+import { Stroke } from './strokes';
 import type { System } from './system';
 import { BreakUnit, chooseSystemBreaks } from './systembreaks';
 import { fitTabCurve, oppositeTabCurve } from './tabcurvefit';
@@ -824,6 +825,11 @@ export class ContinuousLayout {
   private measureStaffInk(positions: PlacedMeasure[], visible: number[], profiles?: InkProfile[]) {
     // Staff-relative extrema exclude crossing beams and their stems, which are refitted to these very gaps.
     const ink = this.spec.staves.map(() => ({ top: Infinity, bottom: -Infinity }));
+    // A cross-staff roll grows to fill the chosen gap, just like a cross-staff stem.
+    const staffGeometry = {
+      extension: (mark: Element) =>
+        mark instanceof Stroke && mark.spansStaves() ? { parts: [], anchors: {} } : undefined,
+    };
     for (const { u, sys } of positions)
       for (const j of visible) {
         const stave = this.score.staves[u.first][j],
@@ -866,7 +872,7 @@ export class ContinuousLayout {
             }
             if (n instanceof TabNote && n.getStave() === stave && profiles) {
               n.getFretInk().forEach(addPart);
-              for (const mark of n.getModifiers()) measureEngraving(mark).parts.forEach(addPart);
+              for (const mark of n.getModifiers()) measureEngraving(mark, staffGeometry).parts.forEach(addPart);
             }
             if (n instanceof TabNote && n.getStave() === stave && n.hasStem()) {
               const { topY, baseY } = n.getStemExtents();
@@ -879,7 +885,7 @@ export class ContinuousLayout {
             const beam = shared ? shared.owner.getBeam() : n.getBeam();
             const tipStave = beam && beamStave(n);
             const bridge = !(beam instanceof ContinuousBeam) && beam?.getNotes().some((p) => beamStave(p) !== tipStave);
-            const parts = bridge && !shared && !profiles ? n.getHeadInk() : measureEngraving(n).parts;
+            const parts = bridge && !shared && !profiles ? n.getHeadInk() : measureEngraving(n, staffGeometry).parts;
             parts.forEach((box, index) => {
               // The shared stem spans this very gap and must not increase it.
               if ((shared?.owner !== n && !(profiles && bridge)) || index !== n.noteHeads.length) {

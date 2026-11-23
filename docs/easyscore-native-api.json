@@ -2656,8 +2656,10 @@
       "constructor(type: number, options?: { allVoices: boolean })",
       "getPosition(): number",
       "addEndNote(note: Note): this",
-      "draw(): void",
-      "getBoundingBox(): BoundingBox"
+      "spansStaves(): boolean",
+      "getInkParts(): BoundingBox[]",
+      "getBoundingBox(): BoundingBox",
+      "draw(): void"
     ]
   },
   "svgcontext": {

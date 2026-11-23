@@ -1573,6 +1573,28 @@ test('continuous score breaks retain centered drum hands and enclose the stickin
   }
 });
 
+test('a rolled chord reserves staff clearance at its attack when the lower voice reaches up', () => {
+  function distance(staggered, roll) {
+    const { f } = factory();
+    const staff = (id, clef, notes) => ({ id, clef, measures: [{ voices: [{ notes }] }] });
+    const score = f.EasyScore().compose({
+      staves: [
+        staff('upper', 'treble', '(G3 E4)/h[id="rolled"], B5/h'),
+        staff('lower', 'bass', staggered ? 'C2/h, G4/h' : 'G4/h, C2/h'),
+      ],
+      sheet: { width: 360 },
+      system: { spaceBetweenStaves: 3 },
+      continuous: { verticalSpacing: 'profile' },
+    });
+    if (roll) score.getNote('rolled').addModifier(f.Stroke(VF.Stroke.Type.ROLL_UP, { allVoices: false }), 0);
+    score.sheet.format();
+    const [upper, lower] = score.staves[0];
+    return lower.getY() - upper.getY();
+  }
+  assert.ok(distance(false, true) > distance(false, false));
+  assert.equal(distance(true, true), distance(true, false));
+});
+
 test('staff profiles distinguish coincident and staggered extremes after reflow', () => {
   function gap(staggered, extraInk = false, minimum) {
     const { f } = factory();

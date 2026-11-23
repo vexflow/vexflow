@@ -239,8 +239,10 @@ const composition = factory.EasyScore().compose(spec);
 ```
 
 The profile includes native noteheads, fingering, ledger lines, beam strips and registered
-phrase markings. The formatter refits connecting stems and beams after it has placed both
-staves. For a custom cue or symbol, supply `continuous.inkBounds(stave, measure)` and return
+phrase markings. A rolled chord also contributes the ink of its wave and arrowhead at
+the attack. After formatting, call `measureEngraving(stroke)` to inspect those parts
+individually or `measureEngraving(chord)` to include them with the noteheads. A stroke
+that joins two staves follows their final separation, as do connecting stems and beams. For a custom cue or symbol, supply `continuous.inkBounds(stave, measure)` and return
 rectangles of the form `{ x, y, w, h }` in current score coordinates. The measure number
 starts at one. Compute these bounds from the supplied stave on each call so they follow
 resizes and changes of row.

@@ -22,6 +22,7 @@ import { StaveHairpin } from './stavehairpin';
 import { StaveNote } from './stavenote';
 import { StaveTie } from './stavetie';
 import { Stem } from './stem';
+import { Stroke } from './strokes';
 import { TextBracket } from './textbracket';
 import { TextNote } from './textnote';
 import { Tuplet } from './tuplet';
@@ -126,8 +127,8 @@ export function measureEngraving(element: Element, options: GeometryOptions = {}
         const note = owner as GermanLuteNote;
         shape.parts.push(...note.getInkParts());
         children(note.getModifiers());
-      } else if (kind === FiguredBass) {
-        shape.parts.push(...(owner as FiguredBass).getInkParts());
+      } else if (kind === FiguredBass || kind === Stroke) {
+        shape.parts.push(...(owner as FiguredBass | Stroke).getInkParts());
       } else if (kind === GraceNoteGroup) children((owner as GraceNoteGroup).getLayoutElements());
       else if (kind === FretHandFinger) shape.parts.push(...(owner as FretHandFinger).getInkParts());
       else if (kind === Articulation) {

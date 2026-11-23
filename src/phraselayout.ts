@@ -22,6 +22,7 @@ import { Barline } from './stavebarline';
 import { StaveHairpin } from './stavehairpin';
 import { StaveNote } from './stavenote';
 import { StaveTie } from './stavetie';
+import { Stroke } from './strokes';
 import { TextBracket } from './textbracket';
 import { TimeSignature } from './timesignature';
 import { Tuplet } from './tuplet';
@@ -227,7 +228,7 @@ export class PhraseLayout {
   private measure(owner: Element, stave: Stave): void {
     const g = measureEngraving(owner);
     if (g.diagnostics.length) this.report('UnsupportedGeometry', owner);
-    this.addParts(owner, stave, g.parts);
+    this.addParts(owner, stave, g.parts, owner instanceof Stroke && owner.spansStaves());
   }
 
   /** Collect native ink once per owner. Bare staff lines constrain outside lanes but permit notes and curves. */
