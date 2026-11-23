@@ -9,9 +9,10 @@
   };
   // The offline report and its published copy share the same PNG names. The website adds a content hash.
   const imagePath = (path) => {
-    const match = /^(?:\.\/)?assets\/((?:[a-f0-9]{64}\/)?[\w-]+\.png)$/.exec(path);
+    const match = /^(?:\.\/)?assets\/(?:([a-f0-9]{64})\/)?([\w-]+\.png)$/.exec(path);
     if (!match) throw new Error('Invalid exhibit image path.');
-    return './assets/' + match[1];
+    const directory = match[1] ? encodeURIComponent(match[1]) + '/' : '';
+    return './assets/' + directory + encodeURIComponent(match[2]);
   };
   const exhibitLink = (id, label) => {
     const a = make('a', label);
