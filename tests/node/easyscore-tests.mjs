@@ -251,7 +251,7 @@ test('public modules and implemented contracts have coverage entries', async () 
   assert.equal(new Set(classified).size, classified.length, 'each module has one classification');
   assert.deepEqual([...classified].sort(), modules.sort());
   const guide = readFileSync(new URL('../../docs/easyscore.md', import.meta.url), 'utf8');
-  const testSources = ['easyscore-tests.mjs', 'easyscore-rendering-tests.mjs']
+  const testSources = ['easyscore-tests.mjs', 'easyscore-rendering-tests.mjs', 'publication-tests.mjs']
     .map((file) => readFileSync(new URL(file, import.meta.url), 'utf8'))
     .join('\n');
   const { examples } = await import('../../guide/catalog.mjs');

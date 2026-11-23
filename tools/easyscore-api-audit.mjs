@@ -15,7 +15,7 @@ export function nativeSurface() {
   const index = readFileSync(new URL('src/index.ts', root), 'utf8');
   const modules = [...index.matchAll(/^export \* from '\.\/([^']+)';/gm)].map((match) => match[1]);
   // The make facade's public methods live outside index.ts but are part of EasyScore's surface.
-  modules.push('easyscore/elements', 'easyscore/composition', 'easyscore/rhythm');
+  modules.push('easyscore/elements', 'easyscore/composition', 'easyscore/engraving', 'easyscore/rhythm');
   return Object.fromEntries(
     modules.map((module) => {
       const path = new URL(`src/${module}.ts`, root);
