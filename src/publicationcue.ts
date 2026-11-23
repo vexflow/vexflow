@@ -44,10 +44,12 @@ export class CueBuilder extends Builder {
 /** Rebuild typed pitched events and key changes. Rest positions and durations are copied literally. */
 export function writtenCue(staff: EasyScoreStaveSpec, interval: CueTransposition): EasyScoreStaveSpec {
   const signature = (key: string) => NotationSpelling.transposeKey(key, interval.semitones, interval.steps);
-  const note = <T extends StaveNoteStruct>(source: T): T =>
-    source.type === 'r' || source.duration.endsWith('r') || !source.keys
-      ? source
-      : { ...source, keys: source.keys.map((key) => pitch(key, interval)) };
+  function note<T extends StaveNoteStruct>(source: T): T {
+    if (source.type === 'r' || source.duration.endsWith('r')) return source;
+    if (source.heads)
+      return { ...source, heads: source.heads.map((head) => ({ ...head, key: pitch(head.key, interval) })) };
+    return source.keys ? { ...source, keys: source.keys.map((key) => pitch(key, interval)) } : source;
+  }
   function event(item: EasyScoreContent): EasyScoreContent {
     if (typeof item === 'string') return item; // CueBuilder handles each parsed pitch.
     if (item instanceof Tickable || 'tab' in item)
@@ -60,7 +62,7 @@ export function writtenCue(staff: EasyScoreStaveSpec, interval: CueTransposition
     const notes = item.grace.notes.map((grace) => {
       const written = note(grace);
       const accidentals = grace.accidentals?.map((mark) => {
-        const key = grace.keys?.[mark.index];
+        const key = grace.heads?.[mark.index]?.key ?? grace.keys?.[mark.index];
         if (!key) throw new RuntimeError('BadPublication', 'Missing grace head for a cue accidental.');
         const [name, octave] = key.split('/');
         const transposed = pitch(name[0] + mark.type + '/' + octave, interval);

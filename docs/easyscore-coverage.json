@@ -569,6 +569,12 @@
       "test": "resizing a canvas to sheet height includes the registered ink below the last system"
     },
     {
+      "api": "StaveNoteStruct.heads",
+      "guide": "docs/easyscore.md",
+      "example": null,
+      "test": "typed chord fingerings and authored unisons keep their pitch and ink in extracted parts"
+    },
+    {
       "api": "withDefaults()",
       "guide": "docs/easyscore.md",
       "example": "easyscore-composition",

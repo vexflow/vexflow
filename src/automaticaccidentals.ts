@@ -3,3 +3,6 @@ import type { Accidental } from './accidental';
 
 /** Explicit and cautionary signs retain independent placement. */
 export const automaticAccidentals = new WeakSet<Accidental>();
+
+/** A typed head explicitly requesting its sign retains the native modifier across spelling passes. */
+export const requiredAccidentals = new WeakSet<Accidental>();

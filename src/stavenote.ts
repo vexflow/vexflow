@@ -11,6 +11,7 @@
 
 import { Beam } from './beam';
 import { BoundingBox } from './boundingbox';
+import { attachHeadMarks, withHeadKeys } from './chordhead';
 import { ElementStyle } from './element';
 import { EngravingProfile } from './engravingprofile';
 import { Glyphs } from './glyphs';
@@ -91,7 +92,17 @@ export interface StaveNoteFormatSettings {
   note: StaveNote;
 }
 
+/** A head's pitch and marks travel together when the chord or its extracted part is rebuilt. */
+export interface ChordHeadSpec {
+  key: string;
+  fingering?: { finger: string; position: 'above' | 'below' | 'left' | 'right' };
+  /** Always print the written sign. A cautionary also encloses it in parentheses. */
+  accidental?: 'force' | 'cautionary';
+}
+
 export interface StaveNoteStruct extends NoteStruct {
+  /** Written pitches with individual marks, as an alternative to keys. */
+  heads?: readonly ChordHeadSpec[];
   /** Print the complete white mensural sign for a pitched maxima, longa or brevis. */
   whiteMensural?: boolean;
   /** Fixed rest position in key-line coordinates. On a five-line stave, 1 is the bottom line. */
@@ -440,7 +451,7 @@ export class StaveNote extends StemmableNote {
   readonly engraving?: EngravingProfile;
 
   constructor(noteStruct: StaveNoteStruct) {
-    super(noteStruct);
+    super(withHeadKeys(noteStruct));
     this.engraving = noteStruct.engraving;
     const musicFont = noteStruct.musicFont ?? this.engraving?.musicFont;
     if (musicFont) this.setFont({ ...this.fontInfo, family: musicFont });
@@ -489,6 +500,7 @@ export class StaveNote extends StemmableNote {
     }
     if (noteStruct.restLine !== undefined) this.setRestLine(noteStruct.restLine);
     if (this.notation.length) attachGuitarGestures(this);
+    if (noteStruct.heads) attachHeadMarks(this, noteStruct.heads);
   }
 
   override reset(): this {

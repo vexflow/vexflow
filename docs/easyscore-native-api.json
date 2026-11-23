@@ -1244,7 +1244,7 @@
       "CATEGORY(): string",
       "format(nums: FretHandFinger[], state: ModifierContextState): boolean",
       "easyScoreHook({ fingerings }: { fingerings?: string } = {}, note: StemmableNote, builder: Builder): void",
-      "constructor(finger: string)",
+      "constructor(finger: string, options: { headPlacement?: boolean } = {})",
       "setDrawCircle(drawCircle: boolean): this",
       "getWidth(): number",
       "setFretHandFinger(finger: string): this",
@@ -2355,11 +2355,20 @@
         "note: StaveNote;"
       ]
     },
+    "ChordHeadSpec": {
+      "extends": [],
+      "fields": [
+        "key: string;",
+        "fingering?: { finger: string; position: 'above' | 'below' | 'left' | 'right' };",
+        "accidental?: 'force' | 'cautionary';"
+      ]
+    },
     "StaveNoteStruct": {
       "extends": [
         "extends NoteStruct"
       ],
       "fields": [
+        "heads?: readonly ChordHeadSpec[];",
         "whiteMensural?: boolean;",
         "restLine?: number;",
         "musicFont?: string;",

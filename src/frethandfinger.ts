@@ -2,14 +2,16 @@
 // @author Larry Kuhns 2013
 // Left-hand fingerings on pitched notes and TAB frets, with optional enclosing circles.
 
+import { Articulation } from './articulation';
 import { BoundingBox } from './boundingbox';
 import { Builder } from './easyscore';
 import { Metrics } from './metrics';
 import { Modifier, ModifierPosition } from './modifier';
 import { ModifierContextState } from './modifiercontext';
+import type { StaveNote } from './stavenote';
 import { StemmableNote } from './stemmablenote';
 import { Tables } from './tables';
-import { Category, isTabNote } from './typeguard';
+import { Category, isStaveNote, isTabNote } from './typeguard';
 import { RuntimeError } from './util';
 
 export class FretHandFinger extends Modifier {
@@ -35,10 +37,10 @@ export class FretHandFinger extends Modifier {
       const pos = num.getPosition();
       const line = num.getAttachedLine();
       const textHeight = Metrics.get('FretHandFinger.fontSize');
-      if (num.position === ModifierPosition.ABOVE) {
+      if (!num.headPlacement && num.position === ModifierPosition.ABOVE) {
         state.topTextLine += textHeight / Tables.STAVE_LINE_DISTANCE + 0.5;
       }
-      if (num.position === ModifierPosition.BELOW) {
+      if (!num.headPlacement && num.position === ModifierPosition.BELOW) {
         state.textLine += textHeight / Tables.STAVE_LINE_DISTANCE + 0.5;
       }
 
@@ -120,8 +122,12 @@ export class FretHandFinger extends Modifier {
   protected xOffset: number;
   protected yOffset: number;
 
-  constructor(finger: string) {
+  /** Typed pitched heads use measured columns. Legacy fingerings keep their individual offsets. */
+  private readonly headPlacement: boolean;
+
+  constructor(finger: string, options: { headPlacement?: boolean } = {}) {
     super();
+    this.headPlacement = options.headPlacement ?? false;
 
     this.setFretHandFinger(finger);
     this.position = Modifier.Position.LEFT; // Default position above stem or note head
@@ -137,7 +143,11 @@ export class FretHandFinger extends Modifier {
 
   /** Reserve enough room for the complete enclosure at the current font size. */
   override getWidth(): number {
-    return this.drawCircle ? Math.max(this.width, this.height) + 5 : this.width;
+    if (this.drawCircle) return Math.max(this.width, this.height) + 5;
+    // Reserve padding on both sides of a typed digit before the accidental columns are formatted.
+    if (this.headPlacement && (this.position === Modifier.Position.LEFT || this.position === Modifier.Position.RIGHT))
+      return this.width + 2 * FretHandFinger.headGap;
+    return this.width;
   }
 
   setFretHandFinger(finger: string): this {
@@ -159,11 +169,82 @@ export class FretHandFinger extends Modifier {
     return this;
   }
 
+  /** Two renderer pixels between a typed side label and the adjacent head or accidental column. */
+  private static readonly headGap = 2;
+
+  /** Gather the digits in this column once per placement, keeping the highest written pitch at the top. */
+  private headColumn(note: StaveNote): FretHandFinger[] {
+    const ys = note.getYs();
+    return note
+      .getModifiers()
+      .filter(
+        (m): m is FretHandFinger => m instanceof FretHandFinger && m.headPlacement && m.position === this.position
+      )
+      .sort((a, b) => ys[a.checkIndex()] - ys[b.checkIndex()] || a.checkIndex() - b.checkIndex());
+  }
+
+  /** Place side digits near their own staff lines and separate the ink on close intervals. */
+  private sideBaseline(note: StaveNote): number {
+    const column = this.headColumn(note);
+    const gap = FretHandFinger.headGap;
+    let bottom = -Infinity;
+    let shift = 0;
+    let baseline = 0;
+    for (const digit of column) {
+      const m = digit.getTextMetrics();
+      const center = note.getYs()[digit.checkIndex()];
+      const natural = center + (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2;
+      const y = Math.max(natural, bottom + gap + m.actualBoundingBoxAscent);
+      if (digit === this) baseline = y;
+      shift = Math.max(shift, y - natural);
+      bottom = y + m.actualBoundingBoxDescent;
+    }
+    return baseline - shift / 2;
+  }
+
+  /** Stack from the outside of the stave, heads, stem, flag and articulations on the requested side. */
+  private outsideBaseline(note: StaveNote): number {
+    const above = this.position === Modifier.Position.ABOVE;
+    const stave = note.checkStave();
+    const gap = stave.getSpacingBetweenLines() * 0.2;
+    const outside = above ? Math.min : Math.max;
+    let edge = stave.getYForLine(above ? 0 : stave.getNumLines() - 1);
+    const ink = note.getHeadInk();
+    const flag = note.getFlagInk();
+    if (flag) ink.push(flag);
+    const stem = note.getStemSegment();
+    if (stem) edge = outside(edge, stem.tipY, stem.baseY);
+    for (const mark of note.getModifiers()) {
+      if (mark instanceof Articulation && mark.getPosition() === this.position) ink.push(mark.getInkBounds());
+    }
+    for (const box of ink) edge = outside(edge, above ? box.y : box.y + box.h);
+    const column = this.headColumn(note);
+    if (above) column.reverse();
+    for (const digit of column) {
+      const m = digit.getTextMetrics();
+      const y = above ? edge - gap - m.actualBoundingBoxDescent : edge + gap + m.actualBoundingBoxAscent;
+      if (digit === this) return y;
+      edge = above ? y - m.actualBoundingBoxAscent : y + m.actualBoundingBoxDescent;
+    }
+    return edge;
+  }
+
+  /** Use the same formatted coordinates in the screen renderer, staff fitter and publication. */
+  private headOrigin(note: StaveNote, startX: number) {
+    if (this.position === Modifier.Position.LEFT || this.position === Modifier.Position.RIGHT) {
+      const dx =
+        this.position === Modifier.Position.LEFT ? -this.width - FretHandFinger.headGap : FretHandFinger.headGap;
+      return { x: startX + dx + this.xOffset, y: this.sideBaseline(note) + this.yOffset };
+    }
+    return { x: startX - this.width / 2 + this.xOffset, y: this.outsideBaseline(note) + this.yOffset };
+  }
+
   /** Resolve the digit baseline and optional circle from the same head anchor used for drawing. */
   private placement() {
     const note = this.checkAttachedNote();
 
     const start = note.getModifierStartXY(this.position, this.index);
+    if (this.headPlacement && !this.drawCircle && isStaveNote(note)) return this.headOrigin(note, start.x);
     let dotX = start.x + this.xOffset;
     let dotY = start.y + this.yOffset + 5;
 
@@ -215,7 +296,7 @@ export class FretHandFinger extends Modifier {
   getInkParts() {
     const p = this.placement();
     const ink = [this.getTextInk(p.x, p.y)];
-    if (this.drawCircle && p.centerX !== undefined)
+    if (this.drawCircle && 'centerX' in p)
       ink.push(new BoundingBox(p.centerX - p.width / 2, p.centerY - p.width / 2, p.width, p.width));
     return ink;
   }
@@ -224,7 +305,7 @@ export class FretHandFinger extends Modifier {
     const ctx = this.checkContext();
     this.setRendered();
     const p = this.placement();
-    if (p.centerX === undefined) {
+    if (!('centerX' in p)) {
       this.renderText(ctx, p.x, p.y);
       return;
     }

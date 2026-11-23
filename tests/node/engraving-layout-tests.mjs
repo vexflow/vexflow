@@ -844,3 +844,38 @@ test('key-aware accidentals share one sign only at the same printed unison head'
     VF.VexFlow.UNISON = unison;
   }
 });
+
+test('typed heads keep their written sign on repeated native spelling passes and draw inside the measured Canvas ink', () => {
+  const { f, canvas } = factory(profile('Bravura'));
+  const es = f.EasyScore();
+  const make = (keys, heads) => es.make.note({ keys, heads, duration: 'q' });
+  assert.throws(() => make(['c/4'], [{ key: 'e/4' }]), /keys or a nonempty heads/);
+  assert.throws(() => make(undefined, []), /nonempty heads/);
+  const marked = make(undefined, [
+    { key: 'f#/4', accidental: 'cautionary', fingering: { finger: '2', position: 'above' } },
+  ]);
+  const change = make(['f/4']);
+  const voice = es.voice([marked, change], { mode: 'soft' });
+  const sign = marked.getModifiers().find((m) => m instanceof VF.Accidental);
+  for (let i = 0; i < 2; i++) {
+    VF.Accidental.applyAccidentals([voice], 'C');
+    assert.deepEqual(
+      marked.getModifiers().filter((m) => m instanceof VF.Accidental),
+      [sign]
+    );
+    assert.equal(change.getModifiers().filter((m) => m instanceof VF.Accidental && m.type === 'n').length, 1);
+  }
+  const system = f.System({ width: 350, y: 70 });
+  system.addStave({ voices: [voice] });
+  system.format();
+  const digit = marked.getModifiers().find((m) => m instanceof VF.FretHandFinger);
+  const box = measured(digit).ink;
+  f.draw({ retain: true });
+  const pixels = canvas
+    .getContext('2d')
+    .getImageData(Math.floor(box.x), Math.floor(box.y), Math.ceil(box.w) + 1, Math.ceil(box.h) + 1);
+  assert.ok(
+    pixels.data.some((alpha, i) => i % 4 === 3 && alpha > 0),
+    'the measured digit contains painted pixels'
+  );
+});

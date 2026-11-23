@@ -84,6 +84,21 @@ const hiHat = score.make.note({ keys: ['g/5/x'], duration: 'q', clef: 'percussio
 hiHat.setKeyLine(0, 4).setKeyStyle(0, { fillStyle: '#b74632' });
 ```
 
+When a fingering or a sign belongs to a particular pitch, supply `StaveNoteStruct.heads` in place of `keys`. Each head describes its own spelling and marks, so you can reorder the array without changing which finger plays each pitch. The same form works in a composition, in `make.note()`, and in a native `StaveNote`.
+
+```js
+// The higher note takes finger 4. Both digits sit above the chord in pitch order.
+const third = score.make.note({
+  duration: '16',
+  heads: [
+    { key: 'b/4', fingering: { finger: '1', position: 'above' } },
+    { key: 'd#/5', fingering: { finger: '4', position: 'above' }, accidental: 'force' },
+  ],
+});
+```
+
+Use `above` or `below` for a column outside the chord and its articulations. Use `left` or `right` to keep a digit beside its pitch. A left fingering reserves space between the head and its accidentals. To show a sign even when the key signature or a previous note implies it, set `accidental` to `'force'`. Use `'cautionary'` to enclose that sign in parentheses. Both policies follow the written key, including a natural on an unaltered pitch, and retain the authored voice in an extracted part.
+
 `sequence()` accepts strings, native note structs, and already-owned Tickables. It returns `Tickable[]` for `voice()`.
 Each string is a separate notation fragment with its own duration inheritance. Typed structs require explicit durations.
 A failed sequence removes its new objects. It preserves the existing objects passed in.

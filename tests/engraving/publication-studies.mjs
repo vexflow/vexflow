@@ -265,3 +265,78 @@ export function voiceBeamStudy() {
     ],
   };
 }
+
+/** Etude thirds, Sor's altered guitar note and two voices sharing one written sharp. */
+export function headMarksStudy() {
+  const head = (key, finger, position = 'above') => ({ key, fingering: { finger, position } });
+  const third = (id, duration, heads) => ({ id, note: { heads, duration } });
+  const low = head('b/4', '1');
+  const high = head('d#/5', '4');
+  const below = [head('c#/5', '2', 'below'), head('e/5', '5', 'below')];
+  const staff = (id, measures, key = 'C') => ({
+    id,
+    key,
+    time: '4/4',
+    measures: measures.map((voices) => ({ voices })),
+  });
+  return {
+    accidentals: 'key-aware',
+    continuous: { verticalSpacing: 'profile' },
+    staves: [
+      staff(
+        'piano',
+        [
+          [
+            {
+              stem: 'down',
+              notes: [
+                third('ascending', 'q', [low, high]),
+                third('reversed', 'q', [high, low]),
+                third('lower-column', 'q', below),
+                third('lower-reversed', 'q', [...below].reverse()),
+              ],
+            },
+          ],
+        ],
+        'G#m'
+      ),
+      staff('guitar', [
+        [
+          {
+            notes: [
+              { note: { keys: ['e/5'], duration: 'h' } },
+              third('sor', 'q', [{ ...head('e#/5', '1', 'left'), accidental: 'force' }]),
+              third('courtesy', 'q', [{ ...head('e/5', '0', 'right'), accidental: 'cautionary' }]),
+            ],
+          },
+        ],
+      ]),
+      staff('duet', [
+        [
+          {
+            stem: 'up',
+            notes: [
+              { id: 'automatic', note: { keys: ['f#/4'], duration: 'h' } },
+              { id: 'plain-1', note: { keys: ['g#/4'], duration: 'h' } },
+            ],
+          },
+          {
+            stem: 'down',
+            notes: [
+              third('forced', 'h', [{ key: 'f#/4', accidental: 'force' }]),
+              { id: 'plain-2', note: { keys: ['g#/4'], duration: 'h' } },
+            ],
+          },
+        ],
+      ]),
+    ],
+    engraving: {
+      prepareNote({ id }, note) {
+        if (id === 'ascending' || id === 'reversed')
+          note.addModifier(new VexFlow.Articulation('a.').setPosition('above'), 0);
+        if (id === 'lower-column' || id === 'lower-reversed')
+          note.addModifier(new VexFlow.Articulation('a>').setPosition('below'), 0);
+      },
+    },
+  };
+}

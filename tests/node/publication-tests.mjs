@@ -8,6 +8,7 @@ import puppeteer from 'puppeteer';
 import { balladeSpacingStudy, sextupletStudy, tabEndingStudy } from '../engraving/continuous-studies.mjs';
 import {
   condensedFlutesStudy,
+  headMarksStudy,
   leadSheetStudy,
   ossiaRangeStudy,
   publicationStudy,
@@ -665,6 +666,139 @@ test('publication views, pagination and portable printing', async (t) => {
         assert.deepEqual(sample.legacy, ['chord', 'answer', 'chord', 'answer', 'rest', 'chord', 'answer']);
       }
     });
+    await t.test(
+      'typed chord fingerings and authored unisons keep their pitch and ink in extracted parts',
+      async () => {
+        await page.addScriptTag({ content: 'window.headMarksStudy=' + headMarksStudy });
+        const result = await page.evaluate(() => {
+          const VF = VexFlow;
+          const source = headMarksStudy();
+          const samples = [];
+          source.engraving.place = (score) => {
+            const third = (id) => {
+              const note = score.getElement(id);
+              if (!note) return;
+              const digits = note.getModifiers().filter((m) => m instanceof VF.FretHandFinger);
+              const art = VF.measureEngraving(note.getModifiers().find((m) => m instanceof VF.Articulation)).ink;
+              const heads = note.getHeadInk();
+              const stem = note.getStemSegment();
+              const above = digits[0].getPosition() === VF.Modifier.Position.ABOVE;
+              const boxes = digits
+                .map((digit) => {
+                  const index = digit.getIndex();
+                  const { ink } = VF.measureEngraving(digit);
+                  return { key: note.getKeys()[index], label: digit.getText(), y: ink.y, bottom: ink.y + ink.h };
+                })
+                .sort((a, b) => a.y - b.y);
+              const top = Math.min(...heads.map((h) => h.y), stem.tipY, art.y);
+              const bottom = Math.max(...heads.map((h) => h.y + h.h), stem.tipY, art.y + art.h);
+              return {
+                digits: boxes.map(({ key, label }) => [key, label]),
+                stacked: boxes[0].bottom < boxes[1].y,
+                clear: above ? boxes[1].bottom < top : bottom < boxes[0].y,
+              };
+            };
+            const guitar = score.getElement('sor');
+            let clearance;
+            if (guitar) {
+              const box = (type) => VF.measureEngraving(guitar.getModifiers().find((m) => m instanceof type)).ink;
+              const sign = box(VF.Accidental),
+                digit = box(VF.FretHandFinger),
+                [head] = guitar.getHeadInk();
+              clearance = [digit.x - sign.x - sign.w, head.x - digit.x - digit.w];
+            }
+            samples.push({
+              thirds: ['ascending', 'reversed', 'lower-column', 'lower-reversed'].map(third).filter(Boolean),
+              clearance,
+            });
+          };
+          const host = document.querySelector('aside');
+          const f = new VF.Factory({ renderer: { elementId: null } }).setContext(new VF.SVGContext(host));
+          host.replaceChildren(f.getContext().svg);
+          const score = f.EasyScore().compose(source);
+          for (const w of [650, 395]) {
+            score.sheet.setWidth(w);
+            f.getContext().clear();
+            f.draw({ retain: true });
+          }
+          const book = new VF.Publication(source);
+          const render = (staves) =>
+            book.render(document.querySelector('main'), { staves, paper: 'Letter' }).pages[0].svg;
+          const written = (svg, id) =>
+            Array.from(svg.querySelectorAll('[data-vf-id="vf-' + id + '"] text'), (el) => el.textContent);
+          const thirds = written(render(['piano']), 'reversed').filter((s) => /^\d$/.test(s));
+          const guitar = render(['guitar']);
+          const sor = written(guitar, 'sor');
+          const cautionary = written(guitar, 'courtesy').join('');
+          const duet = render(['duet']);
+          const sharp = (id) => written(duet, id).filter((s) => s === VF.Glyphs.accidentalSharp).length;
+          // The written E-sharp and cautionary E become G-double-sharp and cautionary G-sharp in the cue.
+          const cuePage = book.render(document.querySelector('main'), {
+            staves: ['duet'],
+            regions: [
+              { kind: 'cue', staff: 'guitar', measure: 1, label: 'Guitar', transpose: { semitones: 4, steps: 2 } },
+            ],
+          }).pages[0].svg;
+          const cue = cuePage.querySelector('[data-region="cue"]');
+          const cueSor = written(cue, 'sor');
+          const cueCourtesy = written(cue, 'courtesy').join('');
+          return {
+            samples,
+            thirds: thirds.sort(),
+            sor: [sor.includes('1'), sor.includes(VF.Glyphs.accidentalSharp)],
+            cautionary: cautionary.includes(
+              VF.Glyphs.accidentalParensLeft + VF.Glyphs.accidentalNatural + VF.Glyphs.accidentalParensRight
+            ),
+            cue: [
+              cueSor.includes('1'),
+              cueSor.includes(VF.Glyphs.accidentalDoubleSharp),
+              cueCourtesy.includes(
+                VF.Glyphs.accidentalParensLeft + VF.Glyphs.accidentalSharp + VF.Glyphs.accidentalParensRight
+              ),
+            ],
+            unison: [sharp('automatic'), sharp('forced'), sharp('plain-1') + sharp('plain-2')],
+          };
+        });
+        const piano = result.samples.filter((s) => s.thirds.length);
+        assert.ok(piano.length >= 3);
+        for (const sample of piano) {
+          for (const third of sample.thirds) assert.ok(third.clear && third.stacked, JSON.stringify(third));
+          assert.deepEqual(
+            sample.thirds.map((s) => s.digits),
+            [
+              [
+                ['d#/5', '4'],
+                ['b/4', '1'],
+              ],
+              [
+                ['d#/5', '4'],
+                ['b/4', '1'],
+              ],
+              [
+                ['e/5', '5'],
+                ['c#/5', '2'],
+              ],
+              [
+                ['e/5', '5'],
+                ['c#/5', '2'],
+              ],
+            ]
+          );
+        }
+        const sor = result.samples.filter((s) => s.clearance);
+        assert.ok(sor.length >= 3);
+        for (const { clearance } of sor)
+          assert.ok(
+            clearance.every((gap) => gap >= 2),
+            JSON.stringify(clearance)
+          );
+        assert.deepEqual(result.thirds, ['1', '4']);
+        assert.deepEqual(result.sor, [true, true]);
+        assert.ok(result.cautionary);
+        assert.deepEqual(result.unison, [0, 1, 1]);
+        assert.deepEqual(result.cue, [true, true, true]);
+      }
+    );
     await t.test('resizing a canvas to sheet height includes the registered ink below the last system', async () => {
       const result = await page.evaluate(() => {
         const canvas = document.createElement('canvas');

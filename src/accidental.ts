@@ -4,7 +4,7 @@
 // @author Greg Ristow (modifications)
 // Defines accidental modifiers, their layout, and automatic placement across voices.
 
-import { automaticAccidentals } from './automaticaccidentals';
+import { automaticAccidentals, requiredAccidentals } from './automaticaccidentals';
 import type { BoundingBox } from './boundingbox';
 import { Fraction } from './fraction';
 import { Glyphs } from './glyphs';
@@ -497,6 +497,9 @@ export class Accidental extends Modifier {
 
     tickPositions.forEach((tickPos: number) => {
       const tickables = tickNoteMap[tickPos];
+      const hasRequiredSign = tickables.some(
+        (tick) => isStaveNote(tick) && tick.getModifiers().some((m) => isAccidental(m) && requiredAccidentals.has(m))
+      );
 
       // Array to store all pitches that modified accidental states
       // at this tick position
@@ -527,12 +530,16 @@ export class Accidental extends Modifier {
           // modified the accidental state
           const previouslyModified = modifiedPitches.indexOf(keyString) > -1;
 
-          // Remove accidentals
-          staveNote.getModifiers().forEach((modifier, index) => {
-            if (isAccidental(modifier) && modifier.type == accidentalString && modifier.getIndex() == keyIndex) {
-              staveNote.getModifiers().splice(index, 1);
+          let required = false;
+          // Replace generated signs while keeping the authored head modifier in its original voice.
+          const modifiers = staveNote.getModifiers();
+          for (let i = modifiers.length - 1; i >= 0; i--) {
+            const mark = modifiers[i];
+            if (isAccidental(mark) && mark.type === accidentalString && mark.getIndex() === keyIndex) {
+              if (requiredAccidentals.has(mark)) required = true;
+              else modifiers.splice(i, 1);
             }
-          });
+          }
 
           // Add the accidental to the StaveNote
           if (!sameAccidental || (sameAccidental && previouslyModified)) {
@@ -540,11 +547,11 @@ export class Accidental extends Modifier {
             // updated state
             scaleMap[key.root + octave] = pitch;
 
-            // Create the accidental
-            const accidental = new Accidental(accidentalString);
-
-            // Attach the accidental to the StaveNote
-            staveNote.addModifier(accidental, keyIndex);
+            if (!required) {
+              const accidental = new Accidental(accidentalString);
+              if (hasRequiredSign) automaticAccidentals.add(accidental);
+              staveNote.addModifier(accidental, keyIndex);
+            }
 
             // Add the pitch to list of pitches that modified accidentals
             modifiedPitches.push(keyString);
