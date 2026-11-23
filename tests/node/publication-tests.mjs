@@ -37,47 +37,6 @@ test('publication views, pagination and portable printing', async (t) => {
       );
     }
     await page.evaluate(() => VexFlow.setFonts('Bravura', 'Academico'));
-    await t.test('Letter page turns retain the Ballade ossia, pedal and physical margins', async () => {
-      await page.addScriptTag({ content: 'window.balladeSpacingStudy=' + balladeSpacingStudy });
-      const result = await page.evaluate(() => {
-        const source = balladeSpacingStudy();
-        const publication = new VexFlow.Publication(source);
-        const view = {
-          paper: 'Letter',
-          margins: { top: 16, bottom: 18, left: 16, right: 16 },
-          pageNumbers: false,
-          systemGap: 8,
-          maxExtraGap: 0,
-          staves: ['upper', 'lower'],
-          regions: [{ kind: 'ossia', staff: 'ossia', measure: 1, label: 'Ossia' }],
-        };
-        const frame = (pageBreaks) => {
-          const r = publication.render(document.querySelector('main'), { ...view, pageBreaks });
-          return {
-            diagnostics: r.diagnostics,
-            pages: r.pages.map((p) => ({
-              systems: p.systems,
-              regions: p.svg.querySelectorAll('[data-region="ossia"]').length,
-            })),
-          };
-        };
-        return { same: frame([]), split: frame([2]) };
-      });
-      const { same, split } = result;
-      assert.deepEqual(same.diagnostics, []);
-      assert.deepEqual(split.diagnostics, []);
-      assert.equal(same.pages.length, 1);
-      assert.deepEqual(
-        split.pages.map((p) => p.regions),
-        [1, 0]
-      );
-      const [first, second] = same.pages[0].systems;
-      assert.ok(second.y < first.y + first.height + 8, 'neighbouring systems share unused vertical space');
-      assert.equal(split.pages[1].systems[0].y, first.y);
-      for (const page of split.pages) {
-        assert.ok(page.systems.every((s) => s.y >= 16 && s.y + s.height <= 279.4 - 18));
-      }
-    });
     await t.test('two flute players retain their individual attacks in a condensed conductor passage', async () => {
       await page.addScriptTag({ content: 'window.flutesStudy=' + condensedFlutesStudy });
       const views = await page.evaluate(() => {
@@ -757,6 +716,47 @@ test('publication views, pagination and portable printing', async (t) => {
         };
       });
       assert.deepEqual(printed, { system: '6', clear: true, aligned: true });
+    });
+    await t.test('Letter page turns retain the Ballade ossia, pedal and physical margins', async () => {
+      await page.addScriptTag({ content: 'window.balladeSpacingStudy=' + balladeSpacingStudy });
+      const result = await page.evaluate(() => {
+        const source = balladeSpacingStudy();
+        const publication = new VexFlow.Publication(source);
+        const view = {
+          paper: 'Letter',
+          margins: { top: 16, bottom: 18, left: 16, right: 16 },
+          pageNumbers: false,
+          systemGap: 8,
+          maxExtraGap: 0,
+          staves: ['upper', 'lower'],
+          regions: [{ kind: 'ossia', staff: 'ossia', measure: 1, label: 'Ossia' }],
+        };
+        const frame = (pageBreaks) => {
+          const r = publication.render(document.querySelector('main'), { ...view, pageBreaks });
+          return {
+            diagnostics: r.diagnostics,
+            pages: r.pages.map((p) => ({
+              systems: p.systems,
+              regions: p.svg.querySelectorAll('[data-region="ossia"]').length,
+            })),
+          };
+        };
+        return { same: frame([]), split: frame([2]) };
+      });
+      const { same, split } = result;
+      assert.deepEqual(same.diagnostics, []);
+      assert.deepEqual(split.diagnostics, []);
+      assert.equal(same.pages.length, 1);
+      assert.deepEqual(
+        split.pages.map((p) => p.regions),
+        [1, 0]
+      );
+      const [first, second] = same.pages[0].systems;
+      assert.ok(second.y < first.y + first.height + 8, 'neighbouring systems share unused vertical space');
+      assert.equal(split.pages[1].systems[0].y, first.y);
+      for (const page of split.pages) {
+        assert.ok(page.systems.every((s) => s.y >= 16 && s.y + s.height <= 279.4 - 18));
+      }
     });
     await t.test('pagination reserves running text at the final page scale', async () => {
       const result = await page.evaluate(() => {
