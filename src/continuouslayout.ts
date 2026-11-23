@@ -31,6 +31,7 @@ import { InkProfile } from './inkprofile';
 import { KeySignature } from './keysignature';
 import { MultiMeasureRest } from './multimeasurerest';
 import { Note } from './note';
+import { layoutOpening, ScoreOpening } from './openinglayout';
 import { RenderContext } from './rendercontext';
 import type { SheetOptions, SheetRow } from './sheet';
 import { fitPitchedSlur, fitTabSlur, hasSimpleSlurAnchors, slurHead, slurInk } from './slurfit';
@@ -64,6 +65,8 @@ export interface ContinuousBoundary {
   keepRest?: boolean;
 }
 export interface ContinuousOptions {
+  /** Opening blocks above the first system and extra horizontal indent before its connector. */
+  opening?: ScoreOpening;
   /** Align lead harmonies and verses across each printed system and continue their connectors across breaks. */
   textLanes?: 'system';
   /** Fit horizontal ink profiles of adjacent staves and rows. Defaults to the traditional full-width envelope. */
@@ -92,6 +95,8 @@ export interface ContinuousOptions {
   groups?: readonly { first: string; last: string; type: 'brace' | 'bracket'; barlines?: boolean }[];
 }
 export interface ContinuousRow extends SheetRow {
+  /** Height above the first system reserved for the score opening. */
+  openingHeight?: number;
   measures: number[];
   visibleStaves: string[];
   restGroups: number[][];
@@ -224,6 +229,8 @@ export class ContinuousLayout {
     private readonly textLanes?: SystemTextLanes
   ) {
     this.options = spec.continuous ?? {};
+    const openingIndent = this.options.opening?.indent ?? 0;
+    if (!Number.isFinite(openingIndent) || openingIndent < 0) invalid('Opening indent must be finite and nonnegative.');
     for (const voice of score.voices.flat(2)) voice.preserveStaveAssignments = true;
     if (this.options.mode && !['greedy', 'balanced'].includes(this.options.mode)) invalid('Unknown break mode.');
     const ids = spec.staves.map((s) => s.id);
@@ -611,7 +618,7 @@ export class ContinuousLayout {
   }
   /** Reserve the full 14 px brace width and the 8 px offset of each additional connector. */
   private connectorWidth(): number {
-    if (this.options.verticalSpacing !== 'profile') return this.groups.length * 9;
+    if (this.options.verticalSpacing !== 'profile' && !this.options.opening) return this.groups.length * 9;
     return Math.max(0, ...this.groups.map((group, i) => i * 8 + (group.type === 'brace' ? 14 : 9)));
   }
 
@@ -620,7 +627,7 @@ export class ContinuousLayout {
       (n, j) => (measure === 0 || this.spec.staves[j].measures[measure].instrument ? n.full : n.short)?.getWidth() ?? 0
     );
     const w = Math.max(0, ...widths);
-    return (w ? w + 10 : 0) + this.connectorWidth();
+    return (w ? w + 10 : 0) + this.connectorWidth() + (measure === 0 ? (this.options.opening?.indent ?? 0) : 0);
   }
   /** Preserve staves carrying a spanning instruction or cross-staff note, including silent middle rows. */
   private visible(first: number, last: number): number[] {
@@ -1112,14 +1119,20 @@ export class ContinuousLayout {
         : 0;
     const rowProfile = profiles && new InkProfile(options.x, options.width);
     if (rowProfile && profiles) visible.forEach((staff) => rowProfile.include(profiles[staff], offsets[staff]));
-    const originOffset = header + (rowProfile ? 4 - rowProfile.minY : -limits[visible[0]].top);
+    const opening =
+      first === 0 && this.options.opening?.blocks?.length
+        ? layoutOpening(this.options.opening, options.x, y, options.width)
+        : undefined;
+    const openingHeight = opening?.height ?? 0;
+    if (opening) this.drawing.push(opening.draw);
+    const originOffset = openingHeight + header + (rowProfile ? 4 - rowProfile.minY : -limits[visible[0]].top);
     const rowInk = rowProfile && new InkProfile(options.x, options.width);
     rowInk?.include(rowProfile!, originOffset);
     const rowHeight = rowInk
       ? rowInk.maxY + 4
       : originOffset + offsets[visible[visible.length - 1]] + limits[visible[visible.length - 1]].bottom;
     if (rowInk) {
-      if (header) rowInk.add({ x: options.x, y: 0, w: options.width, h: header });
+      if (header || openingHeight) rowInk.add({ x: options.x, y: 0, w: options.width, h: header + openingHeight });
       const previous = this.rows[this.rows.length - 1];
       const previousInk = previous && this.rowInk.get(previous);
       if (previousInk) {
@@ -1135,7 +1148,8 @@ export class ContinuousLayout {
       y,
       width: x - options.measureGap - options.x,
       height: rowHeight,
-      overflow: Math.max(measureOverflow, minimum - options.width),
+      ...(openingHeight && { openingHeight }),
+      overflow: Math.max(measureOverflow, opening?.overflow ?? 0, minimum - options.width),
       measures,
       visibleStaves: visible.map((j) => this.spec.staves[j].id),
       restGroups: units
@@ -1144,7 +1158,7 @@ export class ContinuousLayout {
     };
     if (rowInk) this.rowInk.set(row, rowInk);
     if (row.overflow) this.diagnostics.push({ code: 'RowOverflow', measures });
-    this.decorate(units, visible, first === 0, y + 15);
+    this.decorate(units, visible, first === 0, y + openingHeight + 15);
     for (const chord of this.splitChords) {
       if (chord.measure < first || chord.measure > last) continue;
       const a = chord.upper,

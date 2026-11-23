@@ -3215,6 +3215,7 @@
     "ContinuousOptions": {
       "extends": [],
       "fields": [
+        "opening?: ScoreOpening;",
         "textLanes?: 'system';",
         "verticalSpacing?: 'profile' | 'envelope';",
         "inkBounds?: (stave: Stave, measure: number) => readonly Bounds[];",
@@ -3236,6 +3237,7 @@
         "extends SheetRow"
       ],
       "fields": [
+        "openingHeight?: number;",
         "measures: number[];",
         "visibleStaves: string[];",
         "restGroups: number[][];"

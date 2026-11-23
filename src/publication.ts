@@ -124,6 +124,7 @@ interface RowDrawing {
   left: number;
   right: number;
   restAtEnd: boolean;
+  openingHeight: number;
   insetHeight: number;
   insets: SVGGElement;
   references: {
@@ -237,6 +238,7 @@ function splitRows(
     heads: [] as HeadOccurrence[],
     insetHeads: [] as HeadOccurrence[],
     restAtEnd: restingMeasure(score, row.measures[row.measures.length - 1]),
+    openingHeight: row.openingHeight ?? 0,
     insetHeight: 0,
     insets: node('g'),
     references: [],
@@ -276,7 +278,9 @@ function splitRows(
     row.bottom = Math.max(row.bottom, bottom);
     row.left = Math.min(row.left, box.left);
     row.right = Math.max(row.right, box.right);
-    parts?.forEach((b) => row.profile!.add({ x: b.x, y: b.y - 0.5, w: b.width, h: b.height + 1 }));
+    // Headings stay above the first inset. Keep their profile separate from the translated notes.
+    const profile = el.classList.contains('vf-score-opening') ? row.insetProfile : row.profile;
+    parts?.forEach((b) => profile!.add({ x: b.x, y: b.y - 0.5, w: b.width, h: b.height + 1 }));
     row.music.append(el);
   }
   return result;
@@ -412,7 +416,8 @@ function addInsetFragment(
   for (const mark of inset.score.sheet.getEngravingMarks()) ink = includeInk(ink, mark.bounds);
   const wrap = node('g', { 'data-region': region.kind, 'data-source-staff': region.staff, 'data-measure': first });
   if (region.endMeasure !== undefined) wrap.setAttribute('data-end-measure', String(last));
-  wrap.setAttribute('transform', `translate(${hosts[0].getX()},${row.insetHeight})`);
+  const insetY = row.openingHeight + row.insetHeight;
+  wrap.setAttribute('transform', `translate(${hosts[0].getX()},${insetY})`);
   let captionHeight = 0;
   let right = ink.right * scale;
   if (first === region.measure) {
@@ -427,14 +432,14 @@ function addInsetFragment(
     diagnostics.push({ code: 'SystemOverflow', measures, detail: region.kind + ' exceeds its measure width.' });
   // Inset geometry uses the same translated and scaled origin as its parent SVG group.
   for (const head of collectHeads(inset.score, insetSpec.staves, { measureOffset: first - 1 })) {
-    const placed = placedHead(head, hosts[0].getX(), row.insetHeight + captionHeight - ink.y * scale, scale);
+    const placed = placedHead(head, hosts[0].getX(), insetY + captionHeight - ink.y * scale, scale);
     row.insetHeads.push({ ...placed, reference: region.kind, projection: true });
   }
   wrap.append(music);
   row.insets.append(wrap);
   row.insetProfile?.add({
     x: hosts[0].getX() + Math.min(0, ink.x * scale),
-    y: row.insetHeight,
+    y: insetY,
     w: right - Math.min(0, ink.x * scale),
     h: captionHeight + ink.height * scale,
   });
@@ -594,6 +599,8 @@ function buildPages(
           space: 'page-mm',
         });
       }
+      if (r.openingHeight && r.insetHeight)
+        r.music.querySelector('.vf-score-opening')?.setAttribute('transform', `translate(0,${-r.insetHeight})`);
       group.append(r.insets, r.music);
       svg.append(group);
       if (r.left < -1.001 || x + r.right * size.scale > size.width - size.margin.right + 0.001)

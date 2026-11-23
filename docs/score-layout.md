@@ -279,4 +279,56 @@ const point = new DOMPoint(event.clientX, event.clientY)
   .matrixTransform(page.svg.getScreenCTM()!.inverse());
 const hit = page.heads.hitTest(point.x, point.y);
 if (hit) select(hit.sourceEvent, hit.sourceHead);
+
+```
+
+## Headings and chord diagrams before the first system
+
+In a continuous score, put the title, credit and performance directions in
+`continuous.opening.blocks`. These blocks share the width of the music area.
+The first system starts below their measured height. Use `indent` to move
+the first system and its connector inward. The formatter accounts for this
+space when choosing where to break the music, so later systems can use the
+full width. Distances use the same drawing units as the sheet.
+
+```js
+const opening = {
+  indent: 36,
+  font: { family: 'Academico', size: 13 },
+  blocks: [
+    { kind: 'text', align: 'center', font: { size: 22, weight: 'bold' }, runs: ['Pocket Change'] },
+    {
+      kind: 'text',
+      runs: [
+        { text: 'Swing  ', font: { style: 'italic' } },
+        { notes: ['8', '8'], beam: true },
+        '  =  ',
+        { notes: ['q', '8'], tuplet: [3, 2] },
+      ],
+    },
+  ],
+};
+const source = { staves, continuous: { opening } };
+factory.EasyScore().compose(source);
+```
+
+A text block occupies one line. Its runs can contain words or a cue-sized
+rhythm made from native notes, beams and tuplets. Font settings apply to this
+opening and can be overridden on a block or a text run. Use `align: 'left'`,
+`'center'` or `'right'` to position each block independently.
+
+For a chord key, supply labeled fret diagrams in reading order. Each label
+stays with its diagram as the group wraps to fit the available width. When
+you render the same source with `Publication`, the opening uses the width of
+the printed music area and appears above the first system of each view.
+
+```js
+opening.blocks.push({
+  kind: 'diagrams',
+  align: 'center',
+  diagrams: [
+    { label: 'G13', firstFret: 9, frets: ['x', 10, 9, 10, 'x', 12] },
+    { label: 'C6', firstFret: 7, frets: [8, 10, 7, 9, 'x', 'x'] },
+  ],
+});
 ```

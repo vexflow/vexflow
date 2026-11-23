@@ -113,6 +113,7 @@ export * from './util';
 export * from './continuouslayout';
 export type { ContinuousSpan, ContinuousSpanKind, SpanFragment } from './continuousspan';
 export type { GuitarStroke, TiedBend, TimedStringBend } from './guitargesture';
+export type { OpeningBlock, OpeningRhythm, OpeningRun, ScoreOpening } from './openinglayout';
 export * from './publication';
 export * from './vexflow';
 export * from './vibrato';

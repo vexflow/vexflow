@@ -6,6 +6,7 @@ import { test } from 'node:test';
 import puppeteer from 'puppeteer';
 
 import { headOccurrenceStudy } from '../engraving/head-occurrence-studies.mjs';
+import { openingStudy } from '../engraving/opening-studies.mjs';
 import { textLaneStudy } from '../engraving/text-lane-studies.mjs';
 
 import { balladeSpacingStudy, sextupletStudy, tabEndingStudy } from '../engraving/continuous-studies.mjs';
@@ -172,6 +173,148 @@ test('publication views, pagination and portable printing', async (t) => {
           sourceOnly: true,
         });
         assert.equal(result.earlier, 0);
+      }
+    );
+    await t.test(
+      'opening blocks, indentation and swing notation follow the first system on screen and paper',
+      async () => {
+        await page.addScriptTag({ content: 'window.openingStudy=' + openingStudy });
+        const views = await page.evaluate(() => {
+          const main = document.querySelector('main');
+          const aside = document.querySelector('aside');
+          function screen(source, backend = 'SVG') {
+            const target = document.createElement(backend === 'SVG' ? 'div' : 'canvas');
+            main.replaceChildren(target);
+            target.id = 'opening-test';
+            const f = new VexFlow.Factory({
+              renderer: { elementId: target.id, width: 700, height: 700, backend: VexFlow.Renderer.Backends[backend] },
+            });
+            const c = f.EasyScore().compose(source);
+            function draw(width) {
+              f.getContext().clear();
+              c.sheet.setWidth(width);
+              f.draw({ retain: true });
+              return c.sheet.getContinuousLayout().rows;
+            }
+            return { draw, target };
+          }
+          const liszt = openingStudy('consolation');
+          const piano = screen(liszt);
+          const rows = piano.draw(616).map((r) => ({
+            left: r.systems[0].getStaves()[0].getX(),
+            right: r.systems.at(-1).getStaves()[0].getX() + r.systems.at(-1).getStaves()[0].getWidth(),
+            opening: r.openingHeight ?? 0,
+          }));
+          const book = new VexFlow.Publication(liszt).render(aside, {
+            paper: 'Letter',
+            pageBreaks: [3],
+            staves: ['upper'],
+            regions: [{ kind: 'cue', measure: 1, staff: 'lower', label: 'Bass' }],
+          });
+          const first = book.pages[0].svg;
+          const rect = (n) => n.getBoundingClientRect();
+          const placement = {
+            openings: book.pages.map((p) => p.svg.querySelectorAll('.vf-score-opening').length),
+            titleBeforeCue:
+              rect(first.querySelector('.vf-score-opening')).bottom <
+              rect(first.querySelector('[data-region] > text')).top,
+            diagnostics: book.diagnostics,
+          };
+          const guitar = openingStudy('guitar');
+          guitar.continuous.opening.font = { family: 'Georgia' };
+          const labels = guitar.continuous.opening.blocks.at(-1).diagrams.map((d) => d.label);
+          function key(svg) {
+            const opening = svg.querySelector('.vf-score-opening');
+            const words = [...opening.querySelectorAll('text')].filter((n) => labels.includes(n.textContent));
+            return {
+              labels: words.map((n) => n.textContent),
+              baselines: words.map((n) => Number(n.getAttribute('y'))),
+              font: getComputedStyle(words[0]).fontFamily,
+              belowCredit: rect(words[0]).top > rect(opening.children[1]).bottom,
+              aboveStaff: rect(opening).bottom < rect(svg.querySelector('.vf-stave')).top,
+            };
+          }
+          const lead = screen(guitar);
+          const keys = [616, 320, 616].map((width) => {
+            lead.draw(width);
+            return key(lead.target);
+          });
+          const part = new VexFlow.Publication(guitar).render(aside, {
+            paper: { width: 97, height: 245 },
+            staves: ['guitar'],
+          });
+          keys.push(key(part.pages[0].svg));
+          const swing = openingStudy('swing');
+          const jazz = screen(swing);
+          jazz.draw(616);
+          function equation(target) {
+            const op = target.querySelector('.vf-score-opening');
+            const [a, b] = op.querySelectorAll('.vf-opening-rhythm');
+            const equals = [...op.querySelectorAll('text')].find((n) => n.textContent.trim() === '=');
+            return {
+              beams: a.querySelectorAll('.vf-beam').length,
+              notes: [a, b].map((g) => g.querySelectorAll('.vf-stavenote').length),
+              bracket: b.querySelectorAll('.vf-tuplet rect:not([opacity="0"])').length,
+              order: rect(a).right + 2 < rect(equals).left && rect(equals).right + 2 < rect(b).left,
+              font: getComputedStyle(equals).fontFamily,
+            };
+          }
+          const screenSwing = equation(jazz.target);
+          const paper = new VexFlow.Publication(swing).render(aside, { paper: 'Letter' });
+          const canvas = screen(swing, 'CANVAS');
+          const canvasRows = canvas.draw(616);
+          const ink = canvas.target.getContext('2d').getImageData(12, 41, 160, 42).data;
+          const painted = Array.from(ink).filter((alpha, i) => i % 4 === 3 && alpha > 127).length;
+          // A first-line inset must influence the break choice even for a staff with no connector.
+          const measures = Array.from({ length: 8 }, () => ({ voices: [{ notes: 'C4/w' }] }));
+          const count = (indent, mode) =>
+            screen({
+              staves: [{ id: 's', clef: 'treble', time: '4/4', measures }],
+              continuous: { mode, opening: { indent } },
+            }).draw(300)[0].measures.length;
+          const breaks = ['greedy', 'balanced'].map((mode) => [count(0, mode), count(150, mode)]);
+          return {
+            rows,
+            placement,
+            keys,
+            labels,
+            screenSwing,
+            paperSwing: equation(paper.pages[0].svg),
+            painted,
+            breaks,
+            canvasHeight: canvasRows[0].openingHeight,
+            diagnostics: [...part.diagnostics, ...paper.diagnostics],
+          };
+        });
+        assert.equal(views.rows.length, 2);
+        assert.equal(views.rows[0].left - views.rows[1].left, 42);
+        assert.ok(views.rows[1].left - 14 >= 12);
+        assert.ok(Math.abs(views.rows[0].right - views.rows[1].right) < 0.01);
+        assert.ok(views.rows[0].opening > 30 && views.rows[1].opening === 0);
+        assert.deepEqual(views.placement.openings, [1, 0]);
+        assert.ok(views.placement.titleBeforeCue);
+        assert.deepEqual(views.placement.diagnostics, []);
+        assert.deepEqual(views.keys[0], views.keys[2]);
+        for (const key of views.keys) {
+          assert.deepEqual(key.labels, views.labels);
+          assert.match(key.font, /Georgia/);
+          assert.ok(key.belowCredit && key.aboveStaff, JSON.stringify(key));
+          assert.deepEqual(
+            key.baselines,
+            [...key.baselines].sort((a, b) => a - b)
+          );
+        }
+        assert.equal(new Set(views.keys[0].baselines).size, 1);
+        for (const key of [views.keys[1], views.keys[3]]) assert.ok(new Set(key.baselines).size > 1);
+        for (const equation of [views.screenSwing, views.paperSwing]) {
+          assert.match(equation.font, /Academico/);
+          assert.deepEqual(equation.notes, [2, 2]);
+          assert.equal(equation.beams, 1);
+          assert.ok(equation.bracket >= 4 && equation.order, JSON.stringify(equation));
+        }
+        assert.ok(views.canvasHeight > 50 && views.painted > 30);
+        for (const [full, indented] of views.breaks) assert.ok(full > indented);
+        assert.deepEqual(views.diagnostics, []);
       }
     );
     await t.test('local tuplet brackets and independent hand slopes agree on screen and paper', async () => {
