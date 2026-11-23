@@ -440,6 +440,7 @@ var ChopinBallade = (() => {
     ossia(VF, ctx, measures[2]);
     return rows.map(({ first, edges }) => ({ measures: edges.slice(1).map((_, i) => first + i) }));
   }
-  return { draw, width, height };
+  // The publication study shares the exact same two-hand transcription.
+  return { draw, width, height, bars };
 })();
 globalThis.ChopinBallade = ChopinBallade;

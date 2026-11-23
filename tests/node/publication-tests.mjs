@@ -5,6 +5,7 @@ import { test } from 'node:test';
 
 import puppeteer from 'puppeteer';
 
+import { balladeDetailStudy } from '../engraving/ballade-detail-study.mjs';
 import { headOccurrenceStudy } from '../engraving/head-occurrence-studies.mjs';
 import { openingStudy } from '../engraving/opening-studies.mjs';
 import { textLaneStudy } from '../engraving/text-lane-studies.mjs';
@@ -315,6 +316,139 @@ test('publication views, pagination and portable printing', async (t) => {
         assert.ok(views.canvasHeight > 50 && views.painted > 30);
         for (const [full, indented] of views.breaks) assert.ok(full > indented);
         assert.deepEqual(views.diagnostics, []);
+      }
+    );
+    await t.test(
+      'an event ossia and 16 traditional pedal pairs follow their music on screen and Letter paper',
+      async () => {
+        await page.addScriptTag({ path: 'tests/scores/ballade.js' });
+        await page.addScriptTag({ content: 'window.detailStudy=' + balladeDetailStudy });
+        const views = await page.evaluate(() => {
+          const source = detailStudy(ChopinBallade.bars);
+          source.sheet = { width: 1250 };
+          const draw = (canvas) => {
+            const host = document.createElement('div');
+            document.body.append(host);
+            const surface = document.createElement('canvas');
+            surface.width = 1300;
+            surface.height = 7000;
+            const ctx = surface.getContext('2d', { willReadFrequently: true });
+            const factory = VexFlow.Factory.newFromElementId(null).setContext(
+              canvas ? new VexFlow.CanvasContext(ctx) : new VexFlow.SVGContext(host)
+            );
+            const composition = factory.EasyScore().compose(source);
+            const frame = (width) => {
+              composition.sheet.setWidth(width);
+              ctx.clearRect(0, 0, surface.width, surface.height);
+              host.querySelector('svg')?.replaceChildren();
+              factory.draw({ retain: true });
+              return composition.sheet.getEngravingMarks().map(({ id, kind, bounds, source: note, row }) => {
+                const { x, y, w, h } = bounds;
+                const pixels =
+                  canvas && ctx.getImageData(Math.floor(x), Math.floor(y), Math.ceil(w), Math.ceil(h)).data;
+                return {
+                  id,
+                  kind,
+                  x,
+                  y,
+                  w,
+                  h,
+                  row,
+                  painted: !canvas || pixels.some((v, i) => i % 4 === 3 && v > 40),
+                  source: note.getAttribute('id'),
+                };
+              });
+            };
+            const wide = frame(1250),
+              narrow = frame(580),
+              restored = frame(1250);
+            const firstHead = host.querySelector('.vf-ossia .vf-notehead text');
+            const cueOrigin =
+              firstHead &&
+              new DOMPoint(firstHead.x.baseVal.getItem(0).value, firstHead.y.baseVal.getItem(0).value).matrixTransform(
+                firstHead.getCTM()
+              );
+            const hostX = composition.getNote('lower-3-0-3').getAbsoluteX();
+            const cueX = cueOrigin?.x;
+            const notes = host.querySelectorAll('.vf-ossia .vf-stavenote').length;
+            const accidentalCount = [...host.querySelectorAll('.vf-ossia text')].filter((el) =>
+              ['♭', '\uE260', '\uE261'].includes(el.textContent)
+            ).length;
+            const nextX = composition.getNote('lower-9-0-3').getAbsoluteX();
+            host.remove();
+            return { wide, narrow, restored, cueX, hostX, notes, accidentalCount, nextX };
+          };
+          const svg = draw(false),
+            canvas = draw(true);
+          function pages(spec, options = {}) {
+            const paper = new VexFlow.Publication(spec).render(document.querySelector('aside'), {
+              paper: 'Letter',
+              staffSize: 5.0,
+              systemBreaks: [7, 13, 17, 21],
+              ...options,
+            });
+            return {
+              diagnostics: paper.diagnostics,
+              pages: paper.pages.map(({ svg, systems }) => ({
+                measures: systems.map((s) => s.measures),
+                marks: [...svg.querySelectorAll('[data-detail-id]')].map((group) => {
+                  const { left, top, right, bottom } = group.getBoundingClientRect();
+                  const matrix = svg.getScreenCTM().inverse();
+                  const tl = new DOMPoint(left, top).matrixTransform(matrix),
+                    br = new DOMPoint(right, bottom).matrixTransform(matrix);
+                  return {
+                    id: group.dataset.detailId,
+                    owner: group.dataset.sourceEvent,
+                    x: tl.x,
+                    y: tl.y,
+                    right: br.x,
+                    bottom: br.y,
+                  };
+                }),
+              })),
+            };
+          }
+          const full = pages(source),
+            rightHand = pages(source, { staves: ['upper'] });
+          const split = structuredClone(source);
+          split.continuous.spans[0].to = 'lower-10-0-0';
+          return { svg, canvas, full, rightHand, turn: pages(split, { pageBreaks: [10] }) };
+        });
+        for (const screen of [views.svg, views.canvas]) {
+          assert.equal(screen.wide.length, 33);
+          assert.deepEqual(screen.restored, screen.wide);
+          assert.deepEqual(
+            screen.narrow.filter((mark) => !mark.painted),
+            []
+          );
+          assert.ok(screen.wide.every((mark) => mark.painted));
+          const up = screen.wide.find((mark) => mark.kind === 'pedal-up');
+          assert.ok(Math.abs(up.x + up.w - screen.nextX) < 0.01);
+        }
+        assert.deepEqual(views.svg.wide, views.canvas.wide);
+        assert.equal(views.svg.wide[0].row, 0);
+        assert.equal(views.svg.notes, 3);
+        assert.equal(views.svg.accidentalCount, 3);
+        assert.ok(Math.abs(views.svg.cueX - views.svg.hostX) < 2, JSON.stringify([views.svg.cueX, views.svg.hostX]));
+        assert.deepEqual(views.full.diagnostics, []);
+        assert.deepEqual(
+          views.full.pages.flatMap((p) => p.measures.flat()),
+          Array.from({ length: 24 }, (_, i) => i + 1)
+        );
+        const marks = views.full.pages.flatMap((p) => p.marks);
+        assert.equal(marks.length, 33);
+        for (let bar = 9; bar <= 24; bar++) assert.equal(marks.filter((m) => m.id === 'pedal-' + bar).length, 2);
+        assert.ok(
+          marks.every((m) => m.x >= 16 - 0.1 && m.right <= 215.9 - 16 + 0.1 && m.y >= 15 && m.bottom <= 279.4 - 15)
+        );
+        assert.ok(views.rightHand.pages.every((p) => p.marks.length === 0));
+        const ends = views.turn.pages.flatMap((p, i) =>
+          p.marks.filter((m) => m.id === 'pedal-9').map((m) => [i, m.owner])
+        );
+        assert.deepEqual(ends, [
+          [0, 'lower-9-0-0'],
+          [1, 'lower-10-0-0'],
+        ]);
       }
     );
     await t.test('local tuplet brackets and independent hand slopes agree on screen and paper', async () => {

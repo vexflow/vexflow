@@ -1,5 +1,6 @@
 // Row-dependent notation for a responsive EasyScore composition. Source measures and notes keep their identity.
 import { Accidental } from './accidental';
+import { AnchoredDetail, InlineOssia, inlineOssia, pedalSign, placeDetails } from './anchoreddetail';
 import { Annotation } from './annotation';
 import type { Bounds } from './boundingbox';
 import { reserveChordSpacing } from './chordspacing';
@@ -19,6 +20,7 @@ import {
   spanLabel,
 } from './continuousspan';
 import type { EasyScoreComposition, EasyScoreCompositionSpec, EasyScoreStaffState } from './easyscore/composition';
+import type { PlacedCompositionMark } from './easyscore/engraving';
 import type { InteriorBar } from './easyscore/independentmeter';
 import type { SystemTextLanes } from './easyscore/textlanes';
 import { Element } from './element';
@@ -86,6 +88,8 @@ export interface ContinuousOptions {
     side?: 'above' | 'below';
   }[];
   spans?: readonly ContinuousSpan[];
+  /** Cue-sized passages that follow a specific event when the systems reflow. */
+  ossias?: readonly InlineOssia[];
   hideEmptyStaves?: boolean;
   compressRests?: boolean;
   measureNumbers?: boolean;
@@ -165,6 +169,9 @@ export class ContinuousLayout {
     source?: string;
   }[] = [];
   readonly fragments: SpanFragment[] = [];
+  /** Event-owned ossias and individual pedal signs in final sheet coordinates. */
+  readonly detailMarks: PlacedCompositionMark[] = [];
+  private readonly details: AnchoredDetail[] = [];
   readonly rows: ContinuousRow[] = [];
   private readonly rowInk = new WeakMap<ContinuousRow, InkProfile>();
   private readonly marks: Marks[][];
@@ -301,6 +308,13 @@ export class ContinuousLayout {
       })
     );
     const seen = new Set<string>();
+    for (const ossia of this.options.ossias ?? []) {
+      const anchor = locations.get(score.getNote(ossia.at));
+      if (!ossia.id || seen.has(ossia.id) || !anchor || anchor.note.shouldIgnoreTicks())
+        invalid('Expected a unique ossia ID and a timed source event.');
+      this.details.push(inlineOssia(ossia, anchor));
+      seen.add(ossia.id);
+    }
     const onset = (n: Note) => {
       const time = new Fraction(0, 1);
       for (const tick of n.getVoice().getTickables()) {
@@ -480,6 +494,12 @@ export class ContinuousLayout {
         }
       }
       seen.add(span.id);
+      if (span.pedalStyle !== undefined && (span.kind !== 'pedal' || !['bracket', 'text'].includes(span.pedalStyle)))
+        invalid('A pedal style requires a pedal span and a supported style.');
+      if (span.pedalStyle === 'text') {
+        this.details.push(pedalSign(span.id, first, true), pedalSign(span.id, last, false));
+        continue;
+      }
       const resolved: ResolvedSpan = { spec, first, last, label: spanLabel(spec) };
       if (spec.bend) resolved.bendLabel = new Element('Bend').setText(bendAmount(spec.bend));
       if (span.kind === 'beam') {
@@ -507,6 +527,7 @@ export class ContinuousLayout {
       boundary ||
       this.spelledSpans.has(i) ||
       this.spec.staves.some((staff) => staff.measures[i].instrument) ||
+      this.details.some((detail) => detail.anchor.measure === i) ||
       this.spans.some((s) => s.first.measure <= i && i <= s.last.measure)
     )
       return false;
@@ -587,6 +608,7 @@ export class ContinuousLayout {
         width: Math.max(
           base + padding,
           last > i ? 68 : 0,
+          ...this.details.filter((d) => d.anchor.measure === i).map((d) => d.ink.w + padding),
           reserve,
           ...[false, true].map((atStart) =>
             this.headerParts(i, atStart).reduce((w, p) => w + p.mark.getWidth() + (p.boxed ? 12 : 7), 0)
@@ -648,6 +670,8 @@ export class ContinuousLayout {
         used.add(s.first.staff);
         used.add(s.last.staff);
       }
+    for (const { anchor } of this.details)
+      if (first <= anchor.measure && anchor.measure <= last) used.add(anchor.staff);
     return used.size ? indices.filter((i) => used.has(i)) : [0];
   }
   private suppress(i: number, visible: number[], compressed: boolean, omitted: boolean): void {
@@ -710,6 +734,7 @@ export class ContinuousLayout {
       this.hidden.clear();
       this.diagnostics.length = 0;
       this.fragments.length = 0;
+      this.detailMarks.length = 0;
       this.rows.length = 0;
       this.drawing = [];
       for (const u of units) u.after = padding.get(this.score.systems[u.first]) ?? 0;
@@ -1062,6 +1087,23 @@ export class ContinuousLayout {
       if (profiles) beam.getStripBounds().forEach((b) => profiles[staff].add(b, -staveY));
       beam.resetLayout();
     }
+    const details = placeDetails(
+      this.details.filter(({ anchor }) => first <= anchor.measure && anchor.measure <= last),
+      this.rows.length,
+      options.x + indent + 1,
+      x - options.measureGap - 1,
+      ink
+    );
+    // Include the actual local boxes in both the full-width and sampled staff fit.
+    for (const {
+      staff,
+      top,
+      mark: { bounds },
+    } of details) {
+      ink[staff].top = Math.min(ink[staff].top, bounds.y - top);
+      ink[staff].bottom = Math.max(ink[staff].bottom, bounds.y + bounds.h - top);
+      profiles?.[staff].add(bounds, -top);
+    }
     const lanes = new Map<ResolvedSpan, number>();
     // Prefer the nearest free lane. Non-overlapping spans can reuse it.
     const laneEnds = new Map<string, number[]>();
@@ -1141,6 +1183,10 @@ export class ContinuousLayout {
     }
     const origin = y + originOffset;
     const stable = this.alignStaves(positions, visible, origin, offsets);
+    for (const { mark, top } of details) {
+      mark.bounds.y += mark.source.checkStave().getY() - top;
+      this.detailMarks.push(mark);
+    }
     if (!stable) this.diagnostics.push({ code: 'StaffSpacingLimit', measures });
     const row: ContinuousRow = {
       systems: positions.map((p) => p.sys),

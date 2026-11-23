@@ -3224,6 +3224,7 @@
         "boundaries?: readonly ContinuousBoundary[];",
         "tuplets?: readonly { id: string; members: readonly string[]; numNotes: number; notesOccupied: number; side?: 'above' | 'below'; }[];",
         "spans?: readonly ContinuousSpan[];",
+        "ossias?: readonly InlineOssia[];",
         "hideEmptyStaves?: boolean;",
         "compressRests?: boolean;",
         "measureNumbers?: boolean;",
@@ -3247,6 +3248,7 @@
       "hidden",
       "diagnostics: { code: 'RowOverflow' | 'CurveCollision' | 'SplitStemAlignment' | 'SpanOverflow' | 'StaffSpacingLimit'; measures: number[]; source?: string; }[]",
       "fragments: SpanFragment[]",
+      "detailMarks: PlacedCompositionMark[]",
       "rows: ContinuousRow[]",
       "constructor(private readonly score: EasyScoreComposition, private readonly spec: EasyScoreCompositionSpec, starts: State[][], ends: State[][], placed?: Set<Accidental>, private readonly interiorBars: InteriorBar[] = [], private readonly textLanes?: SystemTextLanes)",
       "format(options: Required<SheetOptions>, alignedWidths?: readonly number[]): ContinuousRow[]",
@@ -3725,6 +3727,8 @@
         "extends CompositionMark"
       ],
       "fields": [
+        "id?: string;",
+        "kind?: 'ossia' | 'pedal-down' | 'pedal-up';",
         "row: number;"
       ]
     },

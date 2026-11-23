@@ -679,6 +679,7 @@ export class Publication {
         (options.staves || options.condense || options.regions?.length) &&
         (this.source.spans?.length ||
           this.source.continuous?.spans?.length ||
+          this.source.continuous?.ossias?.length ||
           this.source.continuous?.tuplets?.length ||
           this.source.continuous?.splitChords?.length)
           ? sourceLocator(this.source, () => compose(host, this.source, options.noteHooks).score)

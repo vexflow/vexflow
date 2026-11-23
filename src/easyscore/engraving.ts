@@ -22,8 +22,11 @@ export interface CompositionEngraving {
   place?: (score: EasyScoreComposition, addMark: (mark: CompositionMark) => void) => void;
 }
 
-/** Measured custom ink, associated with its visible system after reflow. Row indices start at zero. */
+/** Measured native or custom ink, associated with its visible system after reflow. Row indices start at zero. */
 export interface PlacedCompositionMark extends CompositionMark {
+  /** Native attachments identify the authored detail and its individual printed sign. */
+  id?: string;
+  kind?: 'ossia' | 'pedal-down' | 'pedal-up';
   row: number;
 }
 

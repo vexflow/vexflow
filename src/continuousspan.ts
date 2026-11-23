@@ -31,6 +31,8 @@ export type ContinuousSpanKind =
   | 'palmMute';
 export interface ContinuousSpan {
   kind: ContinuousSpanKind;
+  /** Traditional signs are anchored independently. The release sign ends at the end of its timed event. */
+  pedalStyle?: 'text' | 'bracket';
   /** Apply a flared aperture along the whole crescendo or diminuendo. */
   flared?: boolean;
   /** Draw this pitched glissando with waves perpendicular to its slope. */

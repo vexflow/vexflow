@@ -110,6 +110,7 @@ export * from './tuplet';
 export * from './typeguard';
 export * from './util';
 // Do not export './version'. It is accessible via VexFlow.BUILD.
+export type { InlineOssia } from './anchoreddetail';
 export * from './continuouslayout';
 export type { ContinuousSpan, ContinuousSpanKind, SpanFragment } from './continuousspan';
 export type { GuitarStroke, TiedBend, TimedStringBend } from './guitargesture';

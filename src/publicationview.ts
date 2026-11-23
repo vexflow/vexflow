@@ -175,6 +175,7 @@ export function projectScore(
     continuous: {
       ...original,
       boundaries: [...boundaries.values()],
+      ossias: original.ossias?.filter((o) => keep(o.at, undefined, o.id)),
       spans: original.spans?.filter((s) => keep(s.from, s.to, s.id)),
       tuplets: original.tuplets?.filter((t) => keep(t.members[0], t.members[t.members.length - 1], t.id)),
       splitChords: original.splitChords?.filter((c) => keep(c.upper, c.lower, c.id)),

@@ -279,7 +279,6 @@ const point = new DOMPoint(event.clientX, event.clientY)
   .matrixTransform(page.svg.getScreenCTM()!.inverse());
 const hit = page.heads.hitTest(point.x, point.y);
 if (hit) select(hit.sourceEvent, hit.sourceHead);
-
 ```
 
 ## Headings and chord diagrams before the first system
@@ -332,3 +331,33 @@ opening.blocks.push({
   ],
 });
 ```
+
+## Alternate readings and traditional pedal signs
+
+An inline ossia gives the player a short alternative at a particular attack. Give the host note an ID and supply the passage in `continuous.ossias`. The first cue note aligns with the host attack when there is room. Near a system edge the stave moves inward so the clef, label and notes stay on the page.
+
+```js
+const score = {
+  staves: [{
+    id: 'piano',
+    clef: 'bass',
+    time: '6/8',
+    measures: [{
+      voices: [{ notes: 'Db4/8[id="press"], C4, Bb3, Bb3[id="reading"], A3[id="lift"], Bb3' }],
+    }],
+  }],
+  continuous: {
+    ossias: [{
+      id: 'bass-reading', at: 'reading', clef: 'bass', label: 'Ossia',
+      notes: 'Bb3/8, An3/8, Bb3/8', scale: 0.68, beam: true,
+    }],
+    spans: [{
+      id: 'sustain', kind: 'pedal', pedalStyle: 'text', from: 'press', to: 'lift',
+    }],
+  },
+};
+```
+
+The ossia has its own rhythm. It uses a scale of 0.65 below the host stave by default. Set `side: 'above'` to move it above the stave, or pass an empty label to show the music alone. For an alternative that follows whole measures of an existing part, use a publication region with `kind: 'ossia'`.
+
+A traditional pedal span prints a pedal-down glyph at the first event and right-aligns its release sign at the end of the last event. Each sign follows its own event across a system break or page turn. Omitting `pedalStyle` gives the usual continuous bracket. Both signs and the inline ossia reserve measured space on screen and in print. Their IDs, source notes, row indices and bounds are available from `composition.sheet.getEngravingMarks()` after layout.

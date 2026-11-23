@@ -55,7 +55,7 @@ export class Sheet {
     this.placeEngraving = place;
   }
 
-  /** Source-owned custom ink in the sheet coordinate system. Recomputed on every format. */
+  /** Source-owned native and custom ink in the sheet coordinate system. Recomputed on every format. */
   getEngravingMarks(): readonly PlacedCompositionMark[] {
     return this.engravingMarks;
   }
@@ -64,9 +64,10 @@ export class Sheet {
   drawEngraving(context: RenderContext): void {
     this.engravingMarks.forEach((mark, index) => {
       context.save();
-      const group = context.openGroup('custom-engraving');
+      const group = context.openGroup(mark.kind ?? 'custom-engraving');
       try {
         group?.setAttribute('data-engraving-mark', String(index));
+        if (mark.id) group?.setAttribute('data-detail-id', mark.id);
         group?.setAttribute('data-source-event', mark.source.getAttribute('id'));
         mark.draw(context);
       } finally {
@@ -214,7 +215,7 @@ export class Sheet {
   /** Measure and pack rows. Always recompute, so repeated resize is deterministic. */
   format(): this {
     this.formatRows();
-    if (this.placeEngraving) this.engravingMarks = this.placeEngraving(this.rows);
+    this.engravingMarks = [...(this.continuous?.detailMarks ?? []), ...(this.placeEngraving?.(this.rows) ?? [])];
     return this;
   }
 
