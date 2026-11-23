@@ -33,7 +33,7 @@ import { MultiMeasureRest } from './multimeasurerest';
 import { Note } from './note';
 import { RenderContext } from './rendercontext';
 import type { SheetOptions, SheetRow } from './sheet';
-import { fitPitchedSlur, fitTabSlur, slurHead, slurInk } from './slurfit';
+import { fitPitchedSlur, fitTabSlur, hasSimpleSlurAnchors, slurHead, slurInk } from './slurfit';
 import { beamStave, linkSplitStem, splitStemFor } from './splitstem';
 import type { Stave } from './stave';
 import { Barline, BarlineType } from './stavebarline';
@@ -756,11 +756,6 @@ export class ContinuousLayout {
     return this.rows;
   }
 
-  /** Managed text lanes move after curve fitting, while head fingerings and other fixed marks constrain the route. */
-  private measureSlurInk(events: (StaveNote | TabNote)[]): Bounds[] {
-    return slurInk(events, (mark) => this.textLanes?.isMark(mark) ?? false);
-  }
-
   /** A tie only needs other fret numbers; a slur can run past modifiers or other positions of its own chord. */
   private tabCurveInk(span: ResolvedSpan, f: SpanFragment, measures: number[]): Bounds[] {
     return measures.flatMap((m) => {
@@ -770,7 +765,7 @@ export class ContinuousLayout {
         .filter((n): n is TabNote => n instanceof TabNote && n.getStave() === stave);
       const ink =
         span.spec.kind === 'slur'
-          ? this.measureSlurInk(events)
+          ? slurInk(events, (mark) => this.textLanes?.isMark(mark) ?? false)
           : events.filter((n) => n !== span.first.note && n !== span.last.note).flatMap((n) => n.getFretInk());
       return ink.filter((b) => b.x + b.w >= f.x1 - f.space && b.x <= f.x2 + f.space);
     });
@@ -1254,10 +1249,11 @@ export class ContinuousLayout {
         y1 =
           (starts ? s.first.note.getYs()[fromHead ?? 0] : continuationPitch(s.first, startStaff, fromHead)) +
           sign * space * (starts ? 0.5 : 1.1);
+        const carryOpening = kind === 'slur' && !hasSimpleSlurAnchors(s);
         y2 =
           (ends
             ? s.last.note.getYs()[toHead ?? 0]
-            : continuationPitch(kind === 'slur' ? s.first : s.last, endStaff, kind === 'slur' ? fromHead : toHead)) +
+            : continuationPitch(carryOpening ? s.first : s.last, endStaff, carryOpening ? fromHead : toHead)) +
           sign * space * (ends ? 0.5 : 1.1);
       }
     }
@@ -1340,7 +1336,7 @@ export class ContinuousLayout {
       // System text is placed outside the finished curve; it must not push that same curve away.
       let fitted: boolean;
       if (kind === 'slur') {
-        fitted = fitPitchedSlur(fragment, s, this.measureSlurInk(events));
+        fitted = fitPitchedSlur(fragment, s, events, (mark) => this.textLanes?.isMark(mark) ?? false);
       } else {
         const obstacles = events
           .filter((n) => n !== s.first.note && n !== s.last.note)

@@ -11,7 +11,11 @@ import { StaveTie } from './stavetie';
 import { TabNote } from './tabnote';
 
 /** Measure small pieces of curves and beams so the space under a grace slur or sloping beam stays usable. */
-export function slurInk(notes: (TabNote | StaveNote)[], exclude?: (owner: Element) => boolean): Bounds[] {
+export function slurInk(
+  notes: (TabNote | StaveNote)[],
+  exclude?: (owner: Element) => boolean,
+  attachments?: ResolvedSpan
+): Bounds[] {
   const beams = new Set<Beam>();
   const options = {
     extension(owner: Element) {
@@ -24,6 +28,9 @@ export function slurInk(notes: (TabNote | StaveNote)[], exclude?: (owner: Elemen
   const parts = notes.flatMap((note) => {
     const beam = note.getBeam();
     if (beam) beams.add(beam);
+    // A plain slur may touch its own head or stem tip. Dots, fingers and grace groups on that note still obstruct it.
+    if (attachments && (note === attachments.first.note || note === attachments.last.note))
+      return note.getModifiers().flatMap((mark) => measureEngraving(mark, options).parts);
     if (note instanceof TabNote)
       return [...note.getFretInk(), ...note.getModifiers().flatMap((mark) => measureEngraving(mark, options).parts)];
     return measureEngraving(note, options).parts;
@@ -83,8 +90,51 @@ function continuationEnds(x: number, y: number, f: SpanFragment, ink: Bounds[]):
   ];
 }
 
+// A chord or an explicitly selected head needs the edge of that individual head.
+export function hasSimpleSlurAnchors(span: ResolvedSpan): boolean {
+  return (
+    span.spec.fromHead === undefined &&
+    span.spec.toHead === undefined &&
+    span.first.note.getKeys().length === 1 &&
+    span.last.note.getKeys().length === 1
+  );
+}
+
+/**
+ * An ordinary single-note phrase has a conventional initial route. It leaves on the stem side or half a space
+ * from the head and continues outside the row's notes at a break. Keep it when it clears the measured ink.
+ */
+function fitSimpleSlur(f: SpanFragment, span: ResolvedSpan, ink: Bounds[]): boolean {
+  const trial = { ...f };
+  const above = f.above,
+    sign = above ? -1 : 1;
+  const start = f.part === 'first' || f.part === 'single',
+    end = f.part === 'last' || f.part === 'single';
+  if (start) trial.x1 = span.first.note.getTieRightX();
+  if (end) trial.x2 = span.last.note.getTieLeftX();
+  if (trial.x2 <= trial.x1) return false;
+  const inside = ink.filter((b) => b.x + b.w > trial.x1 && b.x < trial.x2);
+  const edge = above
+    ? Math.min(f.y1, f.y2, ...inside.map((b) => b.y)) - f.space * 0.6
+    : Math.max(f.y1, f.y2, ...inside.map((b) => b.y + b.h)) + f.space * 0.6;
+  const endpoint = (n: Note, y: number) =>
+    n.hasStem() && n.getStemDirection() === -sign ? n.getStemExtents().topY + sign * f.space * 0.4 : y;
+  trial.y1 = start ? endpoint(span.first.note, f.y1) : edge;
+  trial.y2 = end ? endpoint(span.last.note, f.y2) : edge;
+  if (!fitSpan(trial, ink)) return false;
+  Object.assign(f, trial);
+  return true;
+}
+
 /** Build attachments for each closed or continuing end at the selected pitch. */
-export function fitPitchedSlur(f: SpanFragment, span: ResolvedSpan, ink: Bounds[]): boolean {
+export function fitPitchedSlur(
+  f: SpanFragment,
+  span: ResolvedSpan,
+  events: StaveNote[],
+  exclude?: (owner: Element) => boolean
+): boolean {
+  if (hasSimpleSlurAnchors(span) && fitSimpleSlur(f, span, slurInk(events, exclude, span))) return true;
+  const ink = slurInk(events, exclude);
   const start = f.part === 'single' || f.part === 'first';
   const end = f.part === 'single' || f.part === 'last';
   const left = start
