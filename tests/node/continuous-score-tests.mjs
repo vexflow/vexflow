@@ -16,6 +16,9 @@ import {
   tabEndingStudy,
 } from '../engraving/continuous-studies.mjs';
 
+import { friskaSlurStudy, soleaSlurStudy } from '../engraving/slur-studies.mjs';
+
+const { curveParts } = await import(new URL('../../build/esm/src/continuousspan.js', import.meta.url));
 const VF = await import(new URL('../../build/esm/entry/vexflow-core.js', import.meta.url));
 for (const family of ['Bravura', 'Academico']) {
   const name = family.toLowerCase();
@@ -566,6 +569,134 @@ test('tab ties reject unmatched strings, frets and invalid chord positions befor
   source.staves[0].measures[1].voices[0].notes[0].tab.positions[0] = { str: 2, fret: 11 };
   assert.throws(() => factory().f.EasyScore().compose(source), /same string and fret/);
 });
+test('a Soleá ligado and a Friska chord phrase clear the printed ink on each side of a break', () => {
+  for (const [source, label] of [
+    [soleaSlurStudy(), 'ligado'],
+    [friskaSlurStudy(VF), 'friska'],
+  ]) {
+    for (const split of [false, true]) {
+      source.continuous.verticalSpacing = 'profile';
+      if (split) source.continuous.boundaries = [{ measure: 2, breakBefore: 'force' }];
+      const { f } = factory();
+      const c = f.EasyScore().compose(source),
+        layout = c.sheet.getContinuousLayout();
+      for (const width of [620, 460, 620]) {
+        c.sheet.setWidth(width).format();
+        f.draw({ retain: true });
+        assert.deepEqual(layout.diagnostics, [], label + ' at ' + width);
+        assert.deepEqual(
+          layout.fragments.map((f) => f.part),
+          split ? ['first', 'last'] : ['single']
+        );
+        for (const fragment of layout.fragments) {
+          assert.ok(fragment.above, 'the explicit side survives a break');
+          const notes = layout.rows[fragment.row].measures.flatMap((m) => c.notes[m - 1][0].flat());
+          const boxes = notes.flatMap((n) => (n instanceof VF.TabNote ? n.getFretInk() : VF.measureEngraving(n).parts));
+          const ribbon = curveParts(fragment);
+          assert.ok(
+            !ribbon.some((p) =>
+              boxes.some((b) => p.x < b.x + b.w && b.x < p.x + p.w && p.y < b.y + b.h && b.y < p.y + p.h)
+            ),
+            'clear heads, dots, fingerings and articulations'
+          );
+          if (label === 'ligado') {
+            const stave = notes[0].getStave(),
+              line = stave.getYForLine(3);
+            assert.deepEqual(fragment.strings, [4]);
+            for (const y of [fragment.y1, fragment.y2]) assert.ok(y < line && y > line - stave.space(0.5));
+          }
+        }
+      }
+    }
+  }
+});
+
+test('a selected head follows its pitch through reversal and the curve clears a slurred grace group', () => {
+  for (const reversed of [false, true]) {
+    const source = spec(2, {
+      spans: [
+        {
+          id: 'selected',
+          kind: 'slur',
+          from: 'n0',
+          to: 'n1',
+          side: 'below',
+          fromHead: reversed ? 1 : 0,
+          toHead: reversed ? 1 : 0,
+        },
+      ],
+    });
+    source.staves[0].measures.forEach((m, i) => {
+      const keys = ['d/4', 'a/4'];
+      if (reversed) keys.reverse();
+      m.voices[0].notes = [
+        {
+          id: 'n' + i,
+          note: { keys, duration: 'w' },
+          ...(i === 1 && {
+            grace: { side: 'before', slur: true, notes: [{ keys: ['c/4'], duration: '16', slash: true }] },
+          }),
+        },
+      ];
+    });
+    const { f } = factory(),
+      score = f.EasyScore().compose(source);
+    score.sheet.setWidth(400).format();
+    const l = score.sheet.getContinuousLayout(),
+      fragment = l.fragments[0];
+    assert.deepEqual(l.diagnostics, []);
+    assert.equal(fragment.above, false);
+    const start = score.getNote('n0'),
+      head = start.getHeadInk()[start.getKeys().indexOf('d/4')];
+    assert.ok(
+      fragment.y1 > head.y + head.h && fragment.y1 < head.y + head.h + fragment.space,
+      'belongs to the selected low D'
+    );
+    const group = score
+      .getNote('n1')
+      .getModifiers()
+      .find((m) => m instanceof VF.GraceNoteGroup);
+    const graceSlur = group.getLayoutElements().find((e) => e instanceof VF.StaveTie);
+    const ribbon = curveParts(fragment);
+    for (const b of graceSlur.getRouteParts())
+      assert.ok(!ribbon.some((p) => p.x < b.x + b.w && b.x < p.x + p.w && p.y < b.y + b.h && b.y < p.y + p.h));
+  }
+});
+
+test('TAB phrase endpoints can change fret or select a different string in the arrival chord', () => {
+  const positions = (str, fret) => ({ str, fret });
+  const source = soleaSlurStudy();
+  const span = source.continuous.spans[0];
+  source.staves[0].time = '2/2';
+  source.staves[0].measures = [
+    {
+      voices: [
+        {
+          notes: [
+            { id: span.from, tab: { positions: [positions(2, 2)], duration: 'h' } },
+            { id: span.to, tab: { positions: [positions(3, 5), positions(2, 4)], duration: 'h' } },
+          ],
+        },
+      ],
+    },
+  ];
+  const draw = () => {
+    const { f } = factory(),
+      c = f.EasyScore().compose(source);
+    c.sheet.format();
+    assert.deepEqual(c.sheet.getContinuousLayout().diagnostics, []);
+    return c.sheet.getContinuousLayout().fragments[0];
+  };
+  span.string = 2;
+  assert.deepEqual(draw().strings, [2]);
+  delete span.string;
+  span.fromHead = 0;
+  span.toHead = 0;
+  assert.deepEqual(draw().strings, [2, 3]);
+  span.string = 2;
+  assert.throws(draw, /selected string/);
+});
+
 test('boundary key, clef and meter move together; explicit signs survive and returned tied accidentals reflow', () => {
   const { f } = factory(),
     es = f.EasyScore();

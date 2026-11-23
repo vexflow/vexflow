@@ -1,22 +1,28 @@
-// Fit every fragment of a TAB tie to the same side of its string, using the actual fret text on each row.
+// Fit every fragment of a TAB curve to the same side of its string, using the actual fret text on each row.
 import type { Bounds } from './boundingbox';
 import { fitSpan, SpanFragment } from './continuousspan';
+import { fitTabSlur } from './slurfit';
+
+// The two candidates start the same distance from the string on opposite sides.
+export function oppositeTabCurve(curve: SpanFragment): SpanFragment {
+  const shift = (curve.above ? 1 : -1) * curve.space * 0.6;
+  return { ...curve, above: !curve.above, y1: curve.y1 + shift, y2: curve.y2 + shift };
+}
 
 /** Evaluate both sides from the same string anchors. Prefer the shallower clear fit, retaining the default on a tie. */
-export function fitTabTie(fragments: SpanFragment[], obstacles: Bounds[][], automatic: boolean): SpanFragment[] {
+export function fitTabCurve(
+  fragments: SpanFragment[],
+  obstacles: Bounds[][],
+  automatic: boolean,
+  ends?: [Bounds, Bounds]
+): SpanFragment[] {
   function candidate(reverse: boolean) {
     const missed: number[] = [];
     let lift = 0;
     const curves = fragments.map((fragment, i) => {
-      const curve = { ...fragment };
-      if (reverse) {
-        curve.above = !curve.above;
-        // The authored endpoints sit 0.3 staff spaces on either side of their string.
-        const shift = (curve.above ? -1 : 1) * curve.space * 0.6;
-        curve.y1 += shift;
-        curve.y2 += shift;
-      }
-      if (!fitSpan(curve, obstacles[i])) missed.push(i);
+      const curve = reverse ? oppositeTabCurve(fragment) : { ...fragment };
+      const clear = ends ? fitTabSlur(curve, obstacles[i], ...ends) : fitSpan(curve, obstacles[i]);
+      if (!clear) missed.push(i);
       lift += curve.rise!;
       return curve;
     });

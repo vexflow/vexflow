@@ -6,6 +6,7 @@ import { test } from 'node:test';
 import puppeteer from 'puppeteer';
 
 import { balladeSpacingStudy, sextupletStudy, tabEndingStudy } from '../engraving/continuous-studies.mjs';
+import { friskaSlurStudy, soleaSlurStudy } from '../engraving/slur-studies.mjs';
 import {
   condensedFlutesStudy,
   headMarksStudy,
@@ -519,6 +520,59 @@ test('publication views, pagination and portable printing', async (t) => {
         );
       }
     );
+    await t.test('the extracted guitar and piano parts retain the slur through a forced page turn', async () => {
+      await page.addScriptTag({ content: 'window.solea=' + soleaSlurStudy + ';window.friska=' + friskaSlurStudy });
+      const results = await page.evaluate(() =>
+        [solea(), friska(VexFlow)].map((source) => {
+          source.staves.push({
+            id: 'other',
+            time: source.staves[0].time,
+            measures: source.staves[0].measures.map(() => ({
+              voices: [{ notes: source.staves[0].time === '2/4' ? 'B4/h/r' : 'B4/q./r' }],
+            })),
+          });
+          const views = [];
+          source.engraving = {
+            ...source.engraving,
+            place(c) {
+              views.push(c.sheet.getContinuousLayout().fragments.map((f) => [f.part, f.above, f.strings]));
+            },
+          };
+          const r = new VexFlow.Publication(source).render(document.querySelector('main'), {
+            staves: [source.staves[0].id],
+            paper: 'Letter',
+            pageBreaks: [2],
+          });
+          return {
+            views: views.at(-1),
+            spans: r.pages.flatMap((p) => JSON.parse(p.svg.querySelector('metadata').textContent).spans),
+            diagnostics: r.diagnostics.filter((d) => d.detail.startsWith('CurveCollision')),
+          };
+        })
+      );
+      for (const [i, result] of results.entries()) {
+        assert.deepEqual(result.diagnostics, []);
+        assert.deepEqual(
+          result.views.map((v) => v.slice(0, 2)),
+          [
+            ['first', true],
+            ['last', true],
+          ]
+        );
+        assert.deepEqual(
+          result.spans.map((s) => s.part),
+          ['first', 'last']
+        );
+        if (i === 0)
+          assert.deepEqual(
+            result.spans.map((s) => [s.strings, s.from, s.to]),
+            [
+              [[4], 'ligado-start', undefined],
+              [[4], undefined, 'ligado-end'],
+            ]
+          );
+      }
+    });
     await t.test('lead sheet marks stay on their notes through reflow and part extraction', async () => {
       await page.addScriptTag({ content: 'window.leadSheetStudy=' + leadSheetStudy });
       const result = await page.evaluate(() => {

@@ -32,6 +32,7 @@ import { MultiMeasureRest } from './multimeasurerest';
 import { Note } from './note';
 import { RenderContext } from './rendercontext';
 import type { SheetOptions, SheetRow } from './sheet';
+import { fitPitchedSlur, fitTabSlur, slurHead, slurInk } from './slurfit';
 import { beamStave, linkSplitStem, splitStemFor } from './splitstem';
 import type { Stave } from './stave';
 import { Barline, BarlineType } from './stavebarline';
@@ -41,8 +42,8 @@ import { StaveNote } from './stavenote';
 import { Stem } from './stem';
 import type { System } from './system';
 import { BreakUnit, chooseSystemBreaks } from './systembreaks';
+import { fitTabCurve, oppositeTabCurve } from './tabcurvefit';
 import { TabNote } from './tabnote';
-import { fitTabTie } from './tabtiefit';
 import { layoutTiedBend } from './tiedbend';
 import { TimeSignature } from './timesignature';
 import { RuntimeError } from './util';
@@ -104,25 +105,32 @@ function invalid(message: string): never {
 }
 
 /** Resolve each end independently because chord positions can be reordered between attacks. */
-function resolveTabTie(span: ContinuousSpan, first: TabNote, last: TabNote): ContinuousSpan {
+function resolveTabCurve(span: ContinuousSpan, first: TabNote, last: TabNote): ContinuousSpan {
   const start = first.getPositions();
   const end = last.getPositions();
   for (const head of [span.fromHead, span.toHead]) {
-    if (head !== undefined && (!Number.isInteger(head) || head < 0)) invalid('Invalid tab tie position index.');
+    if (head !== undefined && (!Number.isInteger(head) || head < 0))
+      invalid('Invalid tab ' + span.kind + ' position index.');
   }
   const selected =
     span.fromHead === undefined && span.toHead !== undefined ? end[span.toHead] : start[span.fromHead ?? 0];
   const string = span.string ?? selected?.str;
   if (string === undefined || !Number.isInteger(string) || string < 1 || string > first.checkStave().getNumLines())
-    invalid('A tab tie needs a string on its staff.');
-  const fromHead = span.fromHead ?? start.findIndex((p) => p.str === string);
-  const toHead = span.toHead ?? end.findIndex((p) => p.str === string);
+    invalid('A tab ' + span.kind + ' needs a string on its staff.');
+  const openingMatch = start.findIndex((p) => p.str === string);
+  const fromHead =
+    span.fromHead ?? (span.kind === 'slur' && span.string === undefined && openingMatch < 0 ? 0 : openingMatch);
+  // On a slur an explicitly selected arrival can use a different string. Prefer the opening string if present.
+  const matching = end.findIndex((p) => p.str === string);
+  const toHead = span.toHead ?? (span.kind === 'slur' && span.string === undefined && matching < 0 ? 0 : matching);
   const from = start[fromHead],
     to = end[toHead];
-  if (!from || !to || from.str !== string || to.str !== string || String(from.fret) !== String(to.fret))
+  if (!from || !to || (span.string !== undefined && (from.str !== string || to.str !== string)))
+    invalid('Invalid tab ' + span.kind + ' endpoints on the selected string.');
+  if (span.kind === 'tie' && (to.str !== string || String(from.fret) !== String(to.fret)))
     invalid('Tab tie endpoints must play the same string and fret.');
   if (span.bend && !Number.isFinite(Number(from.fret))) invalid('A tied bend needs a pitched fret.');
-  return { ...span, fromHead, toHead, string };
+  return { ...span, fromHead, toHead, string: from.str };
 }
 
 /** A string sustains into the immediately following event of the same rhythmic voice. */
@@ -374,8 +382,11 @@ export class ContinuousLayout {
         !(span.kind === 'tie' && first.note instanceof TabNote && last.note instanceof TabNote)
       )
         invalid('A tied bend needs two TAB endpoints.');
-      if (span.string !== undefined && !(span.kind === 'tie' && first.note instanceof TabNote))
-        invalid('A string selector requires a tab tie.');
+      if (
+        span.string !== undefined &&
+        !((span.kind === 'tie' || span.kind === 'slur') && first.note instanceof TabNote)
+      )
+        invalid('A string selector requires a tab tie or slur.');
       if (span.kind === 'palmMute') {
         if (!(first.note instanceof TabNote) || !(last.note instanceof TabNote) || first.staff !== last.staff)
           invalid('A palm mute needs two TAB anchors on the same staff.');
@@ -390,18 +401,14 @@ export class ContinuousLayout {
             invalid('Each palm-mute anchor must play a targeted string.');
         spec.strings = [...span.strings];
       } else if (first.note instanceof TabNote && last.note instanceof TabNote) {
-        if (first.staff !== last.staff || (span.kind !== 'tie' && span.kind !== 'volta'))
-          invalid('Tab ties and endings need anchors on the same tab staff.');
-        if (span.kind === 'tie') {
-          spec = resolveTabTie(span, first.note, last.note);
+        if (first.staff !== last.staff || (span.kind !== 'tie' && span.kind !== 'slur' && span.kind !== 'volta'))
+          invalid('Tab ties, slurs and endings need anchors on the same tab staff.');
+        if (span.kind === 'tie' || span.kind === 'slur') {
+          spec = resolveTabCurve(span, first.note, last.note);
           if (span.bend) {
             if (!adjacentBendEvents(score, first, last))
               invalid('A tied bend needs adjacent events in the same TAB voice.');
             spec.bend = copyTiedBend(span.bend);
-          }
-          if (first.measure !== last.measure && onset(last.note).numerator === 0) {
-            const stave = last.note.checkStave();
-            this.continuationPadding.set(stave, stave.space(1.5));
           }
         }
       } else {
@@ -421,11 +428,15 @@ export class ContinuousLayout {
           (first.measure === last.measure && onset(first.note).equals(onset(last.note)))
         )
           invalid('A glissando needs two ordered pitched attacks on the same staff.');
-        // Reserve a visible lead-in after the clef when the arrival is the first attack on its row.
-        if (first.measure !== last.measure && onset(last.note).numerator === 0) {
-          const stave = last.note.checkStave();
-          this.continuationPadding.set(stave, stave.space(1.5));
-        }
+      }
+      // A curved or sliding arrival on the first beat needs room after the clef for its incoming fragment.
+      if (
+        (span.kind === 'slur' || span.kind === 'glissando' || (span.kind === 'tie' && first.note instanceof TabNote)) &&
+        first.measure !== last.measure &&
+        onset(last.note).numerator === 0
+      ) {
+        const stave = last.note.checkStave();
+        this.continuationPadding.set(stave, stave.space(1.5));
       }
       if (first.measure === last.measure && onset(first.note).greaterThan(onset(last.note))) invalid('Reversed span.');
       if (
@@ -688,7 +699,7 @@ export class ContinuousLayout {
     } while (reserveChordSpacing(this.rows, padding));
     for (const s of this.spans) {
       const parts = this.fragments.filter((f) => f.id === s.spec.id);
-      if (s.spec.kind === 'tie' && s.spec.string !== undefined) this.fitTabTieRows(s, parts);
+      if (s.spec.string !== undefined) this.fitTabCurveRows(s, parts);
       const total = parts.reduce((a, f) => a + f.x2 - f.x1, 0);
       let prior = 0;
       for (const f of parts) {
@@ -712,19 +723,34 @@ export class ContinuousLayout {
     return this.rows;
   }
 
-  /** A TAB tie chooses its side once, after all row-local fret coordinates have settled. */
-  private fitTabTieRows(span: ResolvedSpan, parts: SpanFragment[]): void {
-    const ink = parts.map((f) =>
-      this.rows[f.row].measures.flatMap((m) => {
-        const stave = this.score.staves[m - 1][span.first.staff];
-        return this.score.notes[m - 1].flat(2).flatMap((n) => {
-          if (!(n instanceof TabNote) || n.getStave() !== stave || n === span.first.note || n === span.last.note)
-            return [];
-          return n.getFretInk().filter((b) => b.x + b.w >= f.x1 - f.space && b.x <= f.x2 + f.space);
-        });
-      })
-    );
-    for (const f of fitTabTie(parts, ink, span.spec.side === undefined && !span.spec.bend)) {
+  /** A tie only needs other fret numbers; a slur can run past modifiers or other positions of its own chord. */
+  private tabCurveInk(span: ResolvedSpan, f: SpanFragment, measures: number[]): Bounds[] {
+    return measures.flatMap((m) => {
+      const stave = this.score.staves[m - 1][span.first.staff];
+      const events = this.score.notes[m - 1]
+        .flat(2)
+        .filter((n): n is TabNote => n instanceof TabNote && n.getStave() === stave);
+      const ink =
+        span.spec.kind === 'slur'
+          ? slurInk(events)
+          : events.filter((n) => n !== span.first.note && n !== span.last.note).flatMap((n) => n.getFretInk());
+      return ink.filter((b) => b.x + b.w >= f.x1 - f.space && b.x <= f.x2 + f.space);
+    });
+  }
+
+  /** The selected digits can have different widths or positions within their respective chords. */
+  private tabSlurEnds(span: ResolvedSpan): [Bounds, Bounds] {
+    return [
+      (span.first.note as TabNote).getFretInk()[span.spec.fromHead!],
+      (span.last.note as TabNote).getFretInk()[span.spec.toHead!],
+    ];
+  }
+
+  /** Choose one side for the whole TAB curve after the positions of all its frets are known. */
+  private fitTabCurveRows(span: ResolvedSpan, parts: SpanFragment[]): void {
+    const ink = parts.map((f) => this.tabCurveInk(span, f, this.rows[f.row].measures));
+    const ends = span.spec.kind === 'slur' ? this.tabSlurEnds(span) : undefined;
+    for (const f of fitTabCurve(parts, ink, span.spec.side === undefined && !span.spec.bend, ends)) {
       this.diagnostics.push({ code: 'CurveCollision', measures: this.rows[f.row].measures, source: span.spec.id });
     }
   }
@@ -846,7 +872,15 @@ export class ContinuousLayout {
       const f = this.makeFragment(s, units, measures, base + baseline(s), false);
       if (!f) continue;
       const p = profiles[staff];
-      if (f.kind === 'tie' || f.kind === 'slur') curveParts(f).forEach((b) => p.add(b, -base));
+      if (s.spec.string !== undefined && f.kind === 'slur') {
+        // The full phrase selects one side after all rows have been placed. Reserve both possible ribbons.
+        const ink = this.tabCurveInk(s, f, measures),
+          ends = this.tabSlurEnds(s);
+        for (const curve of s.spec.side ? [f] : [f, oppositeTabCurve(f)]) {
+          fitTabSlur(curve, ink, ...ends);
+          curveParts(curve).forEach((b) => p.add(b, -base));
+        }
+      } else if (f.kind === 'tie' || f.kind === 'slur') curveParts(f).forEach((b) => p.add(b, -base));
       else {
         if (f.kind === 'glissando') {
           f.y1 = glissandoY(s, this.score.staves[first][staff], 0);
@@ -1078,23 +1112,44 @@ export class ContinuousLayout {
       if (ends) x2 = (s.last.note as StaveNote).getNoteHeadBeginX() + s.last.note.getGlyphWidth();
     }
     if (kind === 'tie' || kind === 'slur') {
+      if (!starts && (kind === 'slur' || s.spec.string !== undefined))
+        x1 -= this.continuationPadding.get(startStaff) ?? 0;
       if (starts) x1 = s.first.note.getTieRightX();
       if (ends) x2 = s.last.note.getTieLeftX();
       if (s.spec.string !== undefined) {
         // Follow the same physical string at both row edges, with clearance for the fret numbers.
-        if (!starts) x1 -= this.continuationPadding.get(startStaff) ?? 0;
         const line = s.spec.string - 1;
+        const endLine = ends ? (s.last.note as TabNote).getPositions()[s.spec.toHead!].str - 1 : line;
         const clearance = sign * space * 0.3;
         y1 = (starts ? s.first.note.checkStave() : startStaff).getYForLine(line) + clearance;
-        y2 = (ends ? s.last.note.checkStave() : endStaff).getYForLine(line) + clearance;
+        y2 = (ends ? s.last.note.checkStave() : endStaff).getYForLine(endLine) + clearance;
+        if (kind === 'slur') {
+          const pad = space * 0.3;
+          if (starts) {
+            const digit = (s.first.note as TabNote).getFretInk()[s.spec.fromHead!];
+            x1 = digit.x + digit.w + pad;
+          }
+          if (ends) x2 = (s.last.note as TabNote).getFretInk()[s.spec.toHead!].x - pad;
+        }
       } else {
+        const fromHead = kind === 'slur' ? slurHead(s.first.note, s.spec.fromHead, above) : s.spec.fromHead;
+        const toHead = kind === 'slur' ? slurHead(s.last.note, s.spec.toHead, above) : s.spec.toHead;
+        if (kind === 'slur') {
+          // A long right-hand modifier can push a tie's default anchor past the next attack.
+          // Check the selected heads before concluding that the row has no room for the slur.
+          if (starts) {
+            const head = (s.first.note as StaveNote).getHeadInk()[fromHead!];
+            x1 = head.x + head.w;
+          }
+          if (ends) x2 = (s.last.note as StaveNote).getHeadInk()[toHead!].x;
+        }
         y1 =
-          (starts
-            ? s.first.note.getYs()[s.spec.fromHead ?? 0]
-            : continuationPitch(s.first, startStaff, s.spec.fromHead)) +
+          (starts ? s.first.note.getYs()[fromHead ?? 0] : continuationPitch(s.first, startStaff, fromHead)) +
           sign * space * (starts ? 0.5 : 1.1);
         y2 =
-          (ends ? s.last.note.getYs()[s.spec.toHead ?? 0] : continuationPitch(s.last, endStaff, s.spec.toHead)) +
+          (ends
+            ? s.last.note.getYs()[toHead ?? 0]
+            : continuationPitch(kind === 'slur' ? s.first : s.last, endStaff, kind === 'slur' ? fromHead : toHead)) +
           sign * space * (ends ? 0.5 : 1.1);
       }
     }
@@ -1138,7 +1193,10 @@ export class ContinuousLayout {
       ...(s.spec.halfDashed && { halfDashed: true }),
       ...(s.spec.dashed && { dashed: true }),
       ...((kind === 'palmMute' || s.spec.string !== undefined) && {
-        strings: s.spec.string !== undefined ? [s.spec.string] : s.spec.strings,
+        strings:
+          s.spec.string !== undefined
+            ? [...new Set([s.spec.string, (s.last.note as TabNote).getPositions()[s.spec.toHead!].str])]
+            : s.spec.strings,
         ...(starts && { from: s.spec.from }),
         ...(ends && { to: s.spec.to }),
       }),
@@ -1160,7 +1218,7 @@ export class ContinuousLayout {
     }
     if (s.spec.niente && kind === 'crescendo' && starts) fragment.nienteTip = nienteTip(x1, y1, space, 'left');
     if (s.spec.niente && kind === 'diminuendo' && ends) fragment.nienteTip = nienteTip(x2, y2, space, 'right');
-    if (kind === 'slur' || (kind === 'tie' && s.spec.string === undefined)) {
+    if ((kind === 'slur' || kind === 'tie') && s.spec.string === undefined) {
       const events = units.flatMap((u) => {
         const staves = this.score.staves[u.first];
         return this.score.notes[u.first]
@@ -1171,23 +1229,14 @@ export class ContinuousLayout {
               (n.getStave() === staves[s.first.staff] || n.getStave() === staves[s.last.staff])
           );
       });
-      const obstacles = events
-        .filter((n) => n !== s.first.note && n !== s.last.note)
-        .flatMap((n) => measureEngraving(n).parts);
-      if (kind === 'slur') {
-        const endpoint = (n: Note, y: number) =>
-          n.hasStem() && n.getStemDirection() === -sign ? n.getStemExtents().topY + sign * space * 0.4 : y;
-        if (starts) fragment.y1 = endpoint(s.first.note, y1);
-        if (ends) fragment.y2 = endpoint(s.last.note, y2);
-        const within = obstacles.filter((b) => b.x + b.w > x1 && b.x < x2);
-        const edge = above
-          ? Math.min(y1, y2, ...within.map((b) => b.y)) - space * 0.6
-          : Math.max(y1, y2, ...within.map((b) => b.y + b.h)) + space * 0.6;
-        if (!starts) fragment.y1 = edge;
-        if (!ends) fragment.y2 = edge;
-      }
-      if (!fitSpan(fragment, obstacles) && report)
-        this.diagnostics.push({ code: 'CurveCollision', measures, source: s.spec.id });
+      const fitted =
+        kind === 'slur'
+          ? fitPitchedSlur(fragment, s, slurInk(events))
+          : fitSpan(
+              fragment,
+              events.filter((n) => n !== s.first.note && n !== s.last.note).flatMap((n) => measureEngraving(n).parts)
+            );
+      if (!fitted && report) this.diagnostics.push({ code: 'CurveCollision', measures, source: s.spec.id });
     }
     return fragment;
   }

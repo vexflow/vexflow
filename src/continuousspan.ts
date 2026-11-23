@@ -43,14 +43,14 @@ export interface ContinuousSpan {
   niente?: boolean;
   /** Bend one TAB string through this tie, with rise on the first event and release on the second. */
   bend?: TiedBend;
-  /** One-based string of a tab tie. Defaults to the string of the selected chord position. */
+  /** One-based string shared by both TAB tie or slur endpoints. Defaults to the string of the selected chord position. */
   string?: number;
   /** Required for palmMute. String numbers are one-based. */
   strings?: readonly number[];
   id: string;
   from: string;
   to: string;
-  /** Optional zero-based chord-head indices. On a tab tie these index the positions arrays. */
+  /** Optional zero-based chord-head indices. On TAB ties and slurs these index the positions arrays. */
   fromHead?: number;
   toHead?: number;
   side?: 'above' | 'below';
@@ -98,7 +98,7 @@ export interface SpanFragment {
   nienteTip?: NienteTip;
   /** Row-local geometry and authored envelope of a tied string bend. */
   bend?: TiedBendDrawing;
-  /** String numbers covered by a tab tie or palm-mute fragment. */
+  /** String numbers covered by a TAB curve or palm-mute fragment. */
   strings?: readonly number[];
   /** Authored TAB endpoints appear on the fragments containing them. */
   from?: string;

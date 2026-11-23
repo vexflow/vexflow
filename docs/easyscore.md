@@ -681,6 +681,10 @@ For a hairpin that grows from silence, pass `{ id: 'swell', kind: 'crescendo', f
 
 For tab, use `{ id: 'hold', kind: 'tie', from: 'a', to: 'b', string: 2 }` to sustain a fret on the second string of the same staff. Both chords must play that fret on that string, in any position order. You can also select a position with a zero-based `fromHead` or `toHead`. With no selector, the tie starts at the first position of the opening chord.
 
+For a ligado from fret 2 to fret 4 on the same string, use `{ id: 'ligado', kind: 'slur', from: 'first', to: 'last', string: 2 }`. The slur starts beside the first fret number and returns to the selected string when the passage wraps. To connect different strings, select the two chord positions with `fromHead` and `toHead` and omit `string`.
+
+On a pitched slur, `fromHead` and `toHead` index the written pitches at the two ends independently. Without an index, the slur uses the outside pitch on its side of a chord. The layout tries alternate points around that head when fingerings, dots, grace notes or another voice obstruct the curve. Set `side: 'above'` or `side: 'below'` to keep the phrase on its written side. Check the continuous layout’s `diagnostics` for a `CurveCollision` carrying the span ID when no route clears the available space.
+
 A tab ending uses `{ id: 'ending', kind: 'volta', from: 'a', to: 'b', text: '1.' }`. The bracket and ties split at system breaks and follow the guitar into an extracted part.
 
 Use `continuous.verticalSpacing: 'profile'` to fit staves and successive systems to horizontally overlapping ink. For a piano passage, simultaneous low treble notes and high bass notes receive more room than the same pitches on different beats. See [vertical spacing in continuous scores](score-layout.md#vertical-spacing-in-continuous-scores) for staff distances, custom symbols and printed page margins.
