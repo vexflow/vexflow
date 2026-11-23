@@ -12,6 +12,7 @@ import {
   ossiaRangeStudy,
   publicationStudy,
   transposedCueStudy,
+  voiceBeamStudy,
 } from '../engraving/publication-studies.mjs';
 
 test('publication views, pagination and portable printing', async (t) => {
@@ -37,6 +38,45 @@ test('publication views, pagination and portable printing', async (t) => {
       );
     }
     await page.evaluate(() => VexFlow.setFonts('Bravura', 'Academico'));
+    await t.test('local tuplet brackets and independent hand slopes agree on screen and paper', async () => {
+      await page.addScriptTag({ content: 'window.voiceBeamStudy=' + voiceBeamStudy });
+      const appearances = await page.evaluate(() => {
+        const source = voiceBeamStudy();
+        const main = document.querySelector('main');
+        const host = document.createElement('div');
+        main.replaceChildren(host);
+        const vf = new VexFlow.Factory({ renderer: { elementId: null, width: 1, height: 1 } }).setContext(
+          new VexFlow.SVGContext(host)
+        );
+        vf.EasyScore().compose(source);
+        vf.draw();
+        const paper = new VexFlow.Publication(source).render(document.querySelector('aside'), { paper: 'Letter' });
+        function appearance(svg) {
+          const tuplets = [...svg.querySelectorAll('.vf-tuplet')];
+          const heads = [...svg.querySelectorAll('.vf-notehead')].map((el) => el.getBBox().y);
+          const middle = (Math.min(...heads) + Math.max(...heads)) / 2;
+          return {
+            brackets: tuplets.map((el) => el.querySelectorAll('rect:not([opacity="0"])').length),
+            above: tuplets.map((el) => Number(el.querySelector('text').getAttribute('y')) < middle),
+            beamPaths: [...svg.querySelectorAll('.vf-beam')].map((g) =>
+              g.querySelector(':scope > path')?.getAttribute('d')
+            ),
+          };
+        }
+        return [appearance(host.querySelector('svg')), appearance(paper.pages[0].svg)];
+      });
+      for (const view of appearances) {
+        assert.deepEqual(view.brackets, [0, 0, 0, 4]);
+        assert.deepEqual(view.above, [true, true, false, false]);
+        // A beam strip begins at one stem and runs to the opposite stem. Compare the two upper corners.
+        const flat = view.beamPaths.map((d) => {
+          const [x1, y1, , , , , x2, y2] = d.match(/-?[\d.]+/g).map(Number);
+          assert.notEqual(x1, x2);
+          return y1 === y2;
+        });
+        assert.deepEqual(flat, [false, false, true, true], JSON.stringify(view.beamPaths));
+      }
+    });
     await t.test('two flute players retain their individual attacks in a condensed conductor passage', async () => {
       await page.addScriptTag({ content: 'window.flutesStudy=' + condensedFlutesStudy });
       const views = await page.evaluate(() => {

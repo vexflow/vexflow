@@ -1,6 +1,7 @@
 // Structured construction delegates timing and layout to native Voice, System, and Sheet objects.
 import { Accidental } from '../accidental';
 import { Annotation } from '../annotation';
+import type { FeatheredBeamDirection } from '../beam';
 import { leadChordAnnotations } from '../chordspacing';
 import { ContinuousLayout, ContinuousOptions } from '../continuouslayout';
 import { Dot } from '../dot';
@@ -12,7 +13,7 @@ import { GraceNoteStruct } from '../gracenote';
 import { Metrics } from '../metrics';
 import { Modifier } from '../modifier';
 import { ChordHarmony, NotationSpelling } from '../notationspelling';
-import { Note } from '../note';
+import { Note, NoteStruct } from '../note';
 import { Sheet, SheetOptions } from '../sheet';
 import { Stave, StaveOptions } from '../stave';
 import { BarlineType } from '../stavebarline';
@@ -27,6 +28,7 @@ import { Voice, VoiceTime } from '../voice';
 import { independentMeterGrid, initialStaffState, InteriorBar, MeterPosition } from './independentmeter';
 import { applyCompositionAccidentals, KeyChange } from './policies';
 import { EasyScoreAutoBeamOptions } from './rhythm';
+import { resolveActiveStems, resolveTupletAppearance, resolveVoiceBeams, VoiceRhythm } from './voicerhythm';
 
 /** Written pitches stay literal, even when a key signature is displayed. */
 export interface EasyScoreStaffState {
@@ -79,6 +81,7 @@ export type EasyScoreContent =
       grace?: GraceGroupSpec;
     }
   | { tab: TabNoteStruct; id?: string; stave?: string; drawStem?: boolean }
+  | { skip: string | NoteStruct; id?: string }
   | { change: EasyScoreStaffState };
 
 /** Tuplet indexes count timed notes, excluding inline signatures and barlines. */
@@ -87,6 +90,15 @@ export interface EasyScoreVoiceSpec {
   stem?: 'auto' | 'up' | 'down';
   options?: Omit<EasyScoreVoiceOptions, 'time' | 'mode'>;
   tuplets?: readonly { start: number; count: number; options?: TupletOptions }[];
+  /** Explicit local beams use zero-based timed-event ranges, just like tuplets. Skips split a range. */
+  beams?: readonly {
+    start: number;
+    count: number;
+    flatBeams?: boolean;
+    showStemlets?: boolean;
+    frenchBeams?: boolean;
+    feathered?: FeatheredBeamDirection;
+  }[];
   autoBeam?: boolean | EasyScoreAutoBeamOptions;
 }
 
@@ -147,6 +159,8 @@ export interface EasyScoreCompositionSpec {
   continuous?: ContinuousOptions;
   sheet?: Omit<SheetOptions, 'factory'>;
   system?: Omit<SystemOptions, 'factory' | 'width' | 'autoWidth' | 'noJustification'>;
+  /** Infer polyphonic stems from simultaneous voices on each physical staff, including cross-staff notes. */
+  stemPolicy?: 'active-voices';
   accidentals?: 'literal' | 'key-aware';
   /** Include written grace pitches in key-aware state at their host onset. */
   graceAccidentals?: 'explicit' | 'ordered';
@@ -177,11 +191,9 @@ export interface EasyScoreComposition {
 }
 
 /** Internal voice metadata keeps inline state and explicit cross-staff assignments separate from layout. */
-interface BuiltVoice {
-  notes: Tickable[];
+interface BuiltVoice extends VoiceRhythm {
   state: Required<EasyScoreStaffState>;
   changes: { index: number; state: Required<EasyScoreStaffState> }[];
-  assignments: Map<Note, string>;
   generated: Set<Accidental>;
 }
 
@@ -201,7 +213,8 @@ function buildVoice(
   spec: EasyScoreVoiceSpec,
   initial: Required<EasyScoreStaffState>,
   display: boolean,
-  deferBeam = false
+  deferBeam = false,
+  activeStems = false
 ): BuiltVoice {
   return score.withDefaults({ clef: initial.clef, time: initial.time, stem: spec.stem ?? 'auto' }, () => {
     let state = { ...initial };
@@ -227,6 +240,10 @@ function buildVoice(
           if (!(error instanceof RuntimeError) || error.code !== 'NoVoice') throw error;
         }
         notes.push(item);
+      } else if ('skip' in item) {
+        const skip = score.make.ghostNote(item.skip);
+        if (item.id !== undefined) skip.setAttribute('id', item.id);
+        notes.push(skip);
       } else if ('change' in item) {
         const previous = state;
         state = { ...state, ...item.change };
@@ -244,6 +261,9 @@ function buildVoice(
         const note = tab
           ? score.make.tabNote(item.tab, item.drawStem)
           : score.make.note('note' in item ? item.note : item);
+        if (activeStems && tab && item.tab.stemDirection === undefined && item.drawStem) {
+          note.setStemDirection(spec.stem === 'down' ? -1 : 1, !spec.stem || spec.stem === 'auto');
+        }
         // Each pitched head gets its own dots. Rhythmic tab shares one set at the stem.
         if (!tab || item.drawStem) {
           for (let i = 0; i < note.writtenDots; i++) Dot.buildAndAttach([note], { all: !tab });
@@ -257,6 +277,7 @@ function buildVoice(
       }
     }
     const timed = notes.filter((note) => !note.shouldIgnoreTicks());
+    const tuplets: BuiltVoice['tuplets'] = [];
     for (const group of spec.tuplets ?? []) {
       if (
         !Number.isInteger(group.start) ||
@@ -268,30 +289,27 @@ function buildVoice(
         invalid('Tuplet range is outside its voice.');
       const members = timed.slice(group.start, group.start + group.count);
       if (!members.every((note): note is Note => note instanceof Note)) invalid('Tuplets require native notes.');
-      score.make.tuplet({ notes: members, options: group.options });
+      tuplets.push({ tuplet: score.make.tuplet({ notes: members, options: group.options }), options: group.options });
     }
-    if (!deferBeam) autoBeamVoice(score, spec, timed, initial.time);
-    return { notes, state, changes, assignments, generated };
+    const built = { notes, state, changes, assignments, generated, tuplets };
+    if (!deferBeam) {
+      resolveVoiceBeams(score, spec, built, initial.time);
+      resolveTupletAppearance(built);
+    }
+    return built;
   });
 }
 
-/** Beam the timed members after both measure-local and cross-measure ratios have been applied. */
-function autoBeamVoice(score: EasyScore, spec: EasyScoreVoiceSpec, timed: Tickable[], time: string): void {
-  if (!spec.autoBeam) return;
-  if (!timed.every((note): note is StemmableNote => note instanceof StemmableNote))
-    invalid('Automatic beams require stemmable notes.');
-  const options = typeof spec.autoBeam === 'boolean' ? {} : spec.autoBeam;
-  score.withDefaults({ time }, () => score.autoBeam(timed, options));
-}
-
-/** Build the unvoiced members of cross-measure tuplets before any strict measure counts its ticks. */
-function prepareTupletVoices(
+/** Resolve score-wide timing, physical voice activity and beam ownership before strict voice construction. */
+function prepareRhythm(
   score: EasyScore,
   spec: EasyScoreCompositionSpec,
-  initial: Required<EasyScoreStaffState>[]
+  initial: Required<EasyScoreStaffState>[],
+  nativeInputs: Note[]
 ) {
-  const groups = spec.continuous?.tuplets;
-  if (!groups?.length) return;
+  const groups = spec.continuous?.tuplets ?? [];
+  const beams = spec.continuous?.spans?.filter((span) => span.kind === 'beam') ?? [];
+  if (!groups.length && !spec.stemPolicy && !beams.length) return;
   const locations = new Map<Tickable, { lane: Tickable[]; index: number; measure: number }>();
   const prepared = spec.staves.map((staff, j) => {
     let state = initial[j];
@@ -300,7 +318,7 @@ function prepareTupletVoices(
       if (!measure.voices.length) invalid('Every stave measure needs at least one voice.');
       const start = measureState(measure, state);
       const voices = measure.voices.map((voice, v) => {
-        const built = buildVoice(score, voice, start, v === 0, true);
+        const built = buildVoice(score, voice, start, v === 0, true, spec.stemPolicy === 'active-voices');
         const lane = (lanes[v] ??= []);
         for (const tick of built.notes) {
           if (tick.shouldIgnoreTicks()) continue;
@@ -331,6 +349,32 @@ function prepareTupletVoices(
     // The notes own the native timing group. ContinuousLayout draws its bracket once per visible fragment.
     new Tuplet(notes, { numNotes, notesOccupied });
   }
+  const reserved = new Set<StemmableNote>();
+  for (const span of beams) {
+    const first = locations.get(score.getNote(span.from));
+    const last = locations.get(score.getNote(span.to));
+    // ContinuousLayout validates the endpoints after the staves have been assigned.
+    if (first && last && first.lane === last.lane)
+      for (const member of first.lane.slice(first.index, last.index + 1))
+        if (member instanceof StemmableNote) reserved.add(member);
+  }
+  if (spec.stemPolicy === 'active-voices')
+    resolveActiveStems(
+      prepared,
+      spec.staves.map((staff) => staff.id),
+      new Set(nativeInputs)
+    );
+  prepared.forEach((measures, j) => {
+    let state = initial[j];
+    measures.forEach((voices, m) => {
+      const measure = spec.staves[j].measures[m];
+      const time = measure.time ?? state.time;
+      voices.forEach((voice, v) => {
+        resolveVoiceBeams(score, measure.voices[v], voice, time, reserved);
+      });
+      state = voices[0].state;
+    });
+  });
   return prepared;
 }
 
@@ -449,19 +493,7 @@ function measureVoices(
   state: Required<EasyScoreStaffState>,
   prepared?: BuiltVoice[]
 ) {
-  const built =
-    prepared ?? measure.voices.map((voice, voiceIndex) => buildVoice(score, voice, state, voiceIndex === 0));
-  if (prepared) {
-    prepared.forEach((voice, i) =>
-      autoBeamVoice(
-        score,
-        measure.voices[i],
-        voice.notes.filter((n) => !n.shouldIgnoreTicks()),
-        state.time
-      )
-    );
-  }
-  return built;
+  return prepared ?? measure.voices.map((voice, voiceIndex) => buildVoice(score, voice, state, voiceIndex === 0));
 }
 
 /** Build one staff measure before joining it to the shared native System. */
@@ -551,6 +583,7 @@ function validateComposition(spec: EasyScoreCompositionSpec): Note[] {
     invalid('Staff IDs must be unique and nonempty.');
   if (!spec.continuous?.independentMeters && spec.staves.some((stave) => stave.measures.length !== count))
     invalid('All staves need the same number of measures.');
+  if (spec.stemPolicy !== undefined && spec.stemPolicy !== 'active-voices') invalid('Unknown stem policy.');
   if (spec.accidentals && !['literal', 'key-aware'].includes(spec.accidentals)) invalid('Unknown accidental policy.');
   if (spec.graceAccidentals && !['explicit', 'ordered'].includes(spec.graceAccidentals))
     invalid('Unknown grace accidental policy.');
@@ -569,7 +602,9 @@ function validateComposition(spec: EasyScoreCompositionSpec): Note[] {
     (spec.accidentals === 'key-aware' ||
       spec.continuous?.tuplets?.length ||
       spec.staves.some((stave) =>
-        stave.measures.some((measure) => measure.voices.some((voice) => voice.autoBeam || voice.tuplets?.length))
+        stave.measures.some((measure) =>
+          measure.voices.some((voice) => voice.autoBeam || voice.beams?.length || voice.tuplets?.length)
+        )
       ))
   )
     invalid('Apply rhythm and accidental policies before adopting native inputs, or use typed note descriptions.');
@@ -583,7 +618,7 @@ export function compose(score: EasyScore, spec: EasyScoreCompositionSpec): EasyS
   return score.build(() => {
     const assignments = new Map<Note, string>();
     const placed = new Set<Accidental>();
-    const prepared = prepareTupletVoices(score, spec, spec.staves.map(initialStaffState));
+    const prepared = prepareRhythm(score, spec, spec.staves.map(initialStaffState), nativeInputs);
     const grid = independentMeterGrid(spec, (j, bar, initial, m) => {
       if (!bar.voices.length) invalid('Every stave measure needs at least one voice.');
       const built = measureVoices(score, bar, initial, prepared?.[j][m]);
@@ -610,6 +645,7 @@ export function compose(score: EasyScore, spec: EasyScoreCompositionSpec): EasyS
       return { voices, end: built[0].state };
     });
     const result = composeAligned(score, grid.spec, nativeInputs, { assignments, interior: grid.interior, placed });
+    for (const voice of prepared?.flat(2) ?? []) resolveTupletAppearance(voice);
     result.meterPositions = grid.positions;
     return result;
   });
@@ -652,7 +688,7 @@ function composeAligned(
         ends: Required<EasyScoreStaffState>[][] = [];
       const placed = grid?.placed ?? (spec.continuous ? new Set<Accidental>() : undefined);
       const noteMeasures = new Map<Note, number>();
-      const prepared = grid ? undefined : prepareTupletVoices(score, spec, states);
+      const prepared = grid ? undefined : prepareRhythm(score, spec, states, nativeInputs);
       for (let index = 0; index < count; index++) {
         starts.push(spec.staves.map((staff, j) => measureState(staff.measures[index], states[j])));
         const system = result.sheet.addSystem(spec.system);
@@ -717,6 +753,7 @@ function composeAligned(
       result.spans = buildSpans(score, spec, noteMeasures, result.diagnostics);
       if (spec.continuous)
         result.sheet.setContinuousLayout(new ContinuousLayout(result, spec, starts, ends, placed, grid?.interior));
+      for (const voice of prepared?.flat(2) ?? []) resolveTupletAppearance(voice);
       return result;
     });
   } catch (error) {

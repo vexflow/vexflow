@@ -13,12 +13,18 @@ export type EasyScoreAutoBeamOptions = Omit<NonNullable<Parameters<typeof Beam.g
 };
 
 /** Validate every setting before native grouping mutates existing notes or tuplets. */
-export function autoBeam(score: EasyScore, notes: StemmableNote[], options: EasyScoreAutoBeamOptions): Beam[] {
+export function autoBeam(
+  score: EasyScore,
+  notes: StemmableNote[],
+  options: EasyScoreAutoBeamOptions,
+  reserved?: ReadonlySet<StemmableNote>
+): Beam[] {
   if (new Set(notes).size !== notes.length) throw new RuntimeError('BadArguments', 'Beam notes must be distinct.');
   notes.forEach((note) => {
     if (!(note instanceof StemmableNote) || Factory.getOwner(note) !== score.factory)
       throw new RuntimeError('BadArguments', 'Beam notes must belong to this Factory.');
-    if (note.hasBeam()) throw new RuntimeError('BadArguments', 'Note already belongs to a beam.');
+    if (note.hasBeam() && !reserved?.has(note))
+      throw new RuntimeError('BadArguments', 'Note already belongs to a beam.');
   });
   const time = score.defaults.time ?? '4/4';
   const signature = typeof time === 'string' ? time : `${time.numBeats}/${time.beatValue}`;
@@ -36,8 +42,8 @@ export function autoBeam(score: EasyScore, notes: StemmableNote[], options: Easy
   const stemPolicy =
     autoStem === false ? 'preserve' : autoStem === true || options.stemDirection !== undefined ? 'auto' : 'explicit';
   return score.build(() =>
-    Beam.generateBeams(notes, { ...native, groups: groups.map((group) => group.clone()), stemPolicy }).map((beam) =>
-      score.adopt(beam, 'drawable')
+    Beam.generateBeams(notes, { ...native, groups: groups.map((group) => group.clone()), stemPolicy }, reserved).map(
+      (beam) => score.adopt(beam, 'drawable')
     )
   );
 }

@@ -245,7 +245,9 @@ export class Beam extends Element {
       beamRests?: boolean;
       groups?: Fraction[];
       stemDirection?: number;
-    } = {}
+    } = {},
+    /** Timed members reserved by an explicitly authored beam. They still advance the grouping pulse. */
+    reserved?: ReadonlySet<StemmableNote>
   ): Beam[] {
     if (!config.groups || !config.groups.length) {
       config.groups = [new Fraction(2, 8)];
@@ -344,14 +346,26 @@ export class Beam extends Element {
       });
     }
 
-    // Splits up groups by Rest
+    // Count skips and authored beams toward the meter, but let neither join an automatic beam.
+    function isBoundary(note: StemmableNote) {
+      return note.getCategory() === Category.GhostNote || reserved?.has(note);
+    }
+
+    // Split at visible rests, long notes, authored groups and stem changes.
     function sanitizeGroups() {
       const sanitizedGroups: StemmableNote[][] = [];
       noteGroups.forEach((group) => {
         let tempGroup: StemmableNote[] = [];
         group.forEach((note, index, group) => {
-          const isFirstOrLast = index === 0 || index === group.length - 1;
-          const prevNote = group[index - 1];
+          if (isBoundary(note)) {
+            if (tempGroup.length) sanitizedGroups.push(tempGroup);
+            tempGroup = [];
+            return;
+          }
+          const previous = group[index - 1];
+          const next = group[index + 1];
+          const prevNote = previous && !isBoundary(previous) ? previous : undefined;
+          const isFirstOrLast = !prevNote || !next || isBoundary(next);
 
           const breaksOnEachRest = !config.beamRests && note.isRest();
           const breaksOnFirstOrLastRest = config.beamRests && config.beamMiddleOnly && note.isRest() && isFirstOrLast;

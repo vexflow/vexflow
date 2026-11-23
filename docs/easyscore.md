@@ -501,7 +501,7 @@ In a composition descriptor, `dots: 2` on a quarter note engraves a double-dotte
 Adopt native notes before passing them in. They must not already belong to a voice.
 When native inputs are present, apply beams, tuplets, and accidental policy beforehand. This keeps failed composition from rewriting caller-owned notation.
 
-Voice options include explicit `stem: 'up' | 'down' | 'auto'`, native spacing options, `autoBeam`, and `tuplets`.
+Voice options include explicit `stem: 'up' | 'down' | 'auto'`, native spacing options, `beams`, `autoBeam`, and `tuplets`.
 Tuplet ranges use `{ start, count, options }` and count timed notes only. Ranges apply in array order, so nested tuplets are supported.
 Tuplets are constructed before Voice insertion. Timing comparisons use native Fractions.
 Set `system.details.spacing` to the native engraving/proportional options; no separate spacing engine is used.
@@ -525,6 +525,48 @@ attach a native beam before formatting. The other voice supplies the second head
 ```js
 const bass = score.withDefaults({ clef: 'bass', stem: 'down' }, (s) => s.notes('C3/h, G2'));
 ```
+
+### Beam groups and simultaneous voices
+
+When two voices share a staff, set the composition's `stemPolicy` to `'active-voices'` and list the upper voice first. Where the voices overlap, the upper line takes upward stems and the lower line takes downward stems. If one line contains only skips, the other line keeps its natural stem direction. VexFlow checks the staff where each note is displayed, including notes sent to another staff with `stave`. A stem direction supplied on the note or its voice takes precedence.
+
+In this bass passage from Liszt's _Consolation No. 5_, the bass plays the upbeat alone. Later, six eighth notes form one beam beneath three quarters.
+
+```js
+score.compose({
+  stemPolicy: 'active-voices',
+  staves: [
+    {
+      id: 'bass',
+      clef: 'bass',
+      time: '3/4',
+      measures: [
+        {
+          span: '1/4',
+          voices: [
+            { notes: [{ skip: 'q' }] }, // Count the upbeat without drawing a rest.
+            { notes: 'G#2/8., C#3/16', autoBeam: true },
+          ],
+        },
+        {
+          voices: [
+            { notes: 'E4/q, E4, F#4' },
+            {
+              notes: 'C#4/8, B3, C#4, B3, D#4, B3',
+              beams: [{ start: 0, count: 6 }], // Join all three beats of the lower line.
+              autoBeam: true,
+            },
+          ],
+        },
+      ],
+    },
+  ],
+});
+```
+
+Each beam range counts timed events from zero, including rests and skips. Inline clefs and signatures do not count. A skip consumes its written duration and splits a beam into separate runs. Use a visible rest inside the group and set `showStemlets: true` to give that rest a short stem. For automatic groups that include rests, also set `autoBeam.beamRests: true`.
+
+You can set `flatBeams: true` on one hand's beam group and let the other hand's beam follow its pitches. If the same voice also uses `autoBeam`, the remaining notes group according to their original position in the meter. A tuplet whose members share one beam shows just the number, while a partial beam leaves the bracket visible. VexFlow places the number on the stem side unless you supply a tuplet `location` or override `bracketed` explicitly.
 
 ### Lead sheets and extracted parts
 
