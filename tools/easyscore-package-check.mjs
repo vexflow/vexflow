@@ -88,7 +88,20 @@ const markedPart: EasyScoreCompositionSpec = {
   ]}]}],
   continuous: {textLanes: 'system', spans: [{id: 'phrase', kind: 'slur', from: 'start', fromHead: 1, to: 'end'}]}
 };
-new Publication(markedPart);
+// A reader can locate the same head after adding an opening, a small alternative and pedal signs.
+const annotatedPart: EasyScoreCompositionSpec = {
+  ...markedPart,
+  continuous: {
+    ...markedPart.continuous,
+    opening: {indent: 32, blocks: [{kind: 'text', runs: ['Andante']}]},
+    ossias: [{id: 'alternative', at: 'start', notes: 'E4/8, F4, G4', clef: 'treble', scale: 0.65, label: 'Ossia'}],
+    spans: [{kind: 'pedal', id: 'pedal', from: 'start', to: 'end', pedalStyle: 'text'}]
+  }
+};
+const annotated = score.compose(annotatedPart);
+annotated.sheet.format();
+new ScoreNavigation(annotated, annotatedPart.staves).heads.get('start');
+new Publication(annotatedPart).render(document.createElement('aside')).pages[0].heads.get('start');
 const result: EasyScoreComposition = score.compose(spec);
 result.sheet.setWidth(400);
 const nav = new ScoreNavigation(result, spec.staves);

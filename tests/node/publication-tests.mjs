@@ -1467,6 +1467,65 @@ test('publication views, pagination and portable printing', async (t) => {
         }
       }
     );
+    await t.test(
+      'a first-page cue and its hit target move together below the opening and above the pedal staff',
+      async () => {
+        const results = await page.evaluate(() => {
+          const source = {
+            staves: [
+              { id: 'solo', measures: [{ voices: [{ notes: 'E5/w[id="quote"]' }] }] },
+              { id: 'piano', clef: 'bass', measures: [{ voices: [{ notes: 'C3/h[id="down"], G3/h[id="up"]' }] }] },
+            ],
+            continuous: {
+              opening: { indent: 30, blocks: [{ kind: 'text', runs: ['Andante'] }] },
+              ossias: [{ id: 'alternative', at: 'up', notes: 'Fn3/8, G3, A3', side: 'below', label: 'Ossia' }],
+              spans: [{ id: 'pedal', kind: 'pedal', from: 'down', to: 'up', pedalStyle: 'text' }],
+            },
+          };
+          return [5, 8].map((staffSize) => {
+            const { pages } = new VexFlow.Publication(source).render(document.querySelector('main'), {
+              paper: 'Letter',
+              staffSize,
+              staves: ['piano'],
+              regions: [{ kind: 'cue', staff: 'solo', measure: 1, label: 'Solo', scale: 0.65 }],
+            });
+            const printed = pages[0];
+            const note = printed.svg.querySelector('[data-region="cue"] .vf-notehead text');
+            // Font ink and the final SVG transforms provide an independent check of the physical hit location.
+            const metrics = document.createElement('canvas').getContext('2d');
+            const style = getComputedStyle(note);
+            metrics.font = style.fontSize + ' ' + style.fontFamily;
+            const ink = metrics.measureText(note.textContent);
+            const point = new DOMPoint(
+              Number(note.getAttribute('x')) + (ink.actualBoundingBoxRight - ink.actualBoundingBoxLeft) / 2,
+              Number(note.getAttribute('y')) + (ink.actualBoundingBoxDescent - ink.actualBoundingBoxAscent) / 2
+            ).matrixTransform(printed.svg.getScreenCTM().inverse().multiply(note.getScreenCTM()));
+            const hit = printed.heads.hitTest(point.x, point.y);
+            const details = printed.heads.get('up').filter((entry) => entry.role === 'mark');
+            return {
+              event: hit?.sourceEvent,
+              reference: hit?.reference,
+              source: hit?.sourceStaff,
+              staff: hit?.staff,
+              page: hit?.page,
+              space: hit?.space,
+              details: details.length,
+            };
+          });
+        });
+        for (const result of results) {
+          assert.deepEqual(result, {
+            event: 'quote',
+            reference: 'cue',
+            source: 'solo',
+            staff: 'piano',
+            page: 1,
+            space: 'page-mm',
+            details: 2,
+          });
+        }
+      }
+    );
     await t.test('a fingering and its transparent hit area stay with the printed note', async () => {
       const printed = await page.evaluate(() => {
         const measures = Array.from({ length: 6 }, (_, i) => ({
