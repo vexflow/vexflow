@@ -115,7 +115,7 @@ const references = {
   'Bounded notation parsing': ['src/fraction.ts', 'Invalid numbers'],
   'Release and font tools': ['docs/dependencies.md', 'Security regression checks'],
   'Dependency advisories': ['docs/dependencies.md', 'Security overrides'],
-  'Locked tools and audit policy': ['SECURITY.md', 'Known Issues'],
+  'Locked tools and audit policy': ['package.json', '"audit:ci"'],
   'Persistence design': ['docs/vf6/requirements/score-persistence.md', '## '],
   'Regression comparison': ['docs/vf6/m0.md', '5.2.0'],
   'Browser and importer qualification': ['docs/vf6/m7.md', 'OSMD'],
