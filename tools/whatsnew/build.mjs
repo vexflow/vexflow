@@ -15,8 +15,8 @@ import { topics } from './topics.mjs';
 import { renderReport } from './page.mjs';
 
 process.chdir(fileURLToPath(new URL('../../', import.meta.url)));
-const output = resolve('build/improvements'),
-  work = resolve('build/improvements-work');
+const output = resolve('build/whatsnew'),
+  work = resolve('build/whatsnew-work');
 await mkdir(work, { recursive: true });
 const head = git('rev-parse', 'HEAD');
 const before = git('rev-parse', base + '^{commit}');
@@ -31,7 +31,7 @@ const json = async (path) => JSON.parse(await readFile(path, 'utf8'));
 const sha = (b) => createHash('sha256').update(b).digest('hex');
 const web = createRequire(new URL('../../tests/web/package.json', import.meta.url));
 const quality = 'build/reports/' + head + '/index.html';
-const staging = await mkdtemp('build/improvements-staging-');
+const staging = await mkdtemp('build/whatsnew-staging-');
 const assets = join(staging, 'assets');
 await mkdir(assets);
 const manifest = await json('tests/engraving/manifest.json');
@@ -249,8 +249,8 @@ try {
   ]);
   for (const [, , items] of topics)
     for (const [, , link] of items) if (!/^(commit|issues)\//.test(link)) await access(link);
-  await writeFile(join(assets, 'report.css'), siteTheme + (await readFile('tools/improvements/report.css', 'utf8')));
-  await copyFile('tools/improvements/app.js', join(assets, 'app.js'));
+  await writeFile(join(assets, 'report.css'), siteTheme + (await readFile('tools/whatsnew/report.css', 'utf8')));
+  await copyFile('tools/whatsnew/app.js', join(assets, 'app.js'));
   await writeFile(join(staging, 'changes.json'), JSON.stringify(data, null, 2));
   await writeFile(join(staging, 'index.html'), renderReport(data));
   // Only replace a directory previously produced by this generator.

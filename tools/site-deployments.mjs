@@ -234,7 +234,7 @@ function legacyObjects(store, state, now, version) {
     inputs.set(name, store.bytes(obj.path, obj.generation));
   }
   // The illustrated report hashed a sorted list of names and digests; the other builders hashed names and bytes.
-  const hash = store.destination.endsWith('/reports/ai2026/')
+  const hash = store.destination.endsWith('/reports/whatsnew/')
     ? digest(JSON.stringify([...inputs.keys()].sort().map((k) => ['assets/' + k, digest(inputs.get(k))])))
     : digest(Buffer.concat([...inputs].sort().flatMap(([k, v]) => [Buffer.from(k), v])));
   if (!objects.length || hash.slice(0, 16) !== version)

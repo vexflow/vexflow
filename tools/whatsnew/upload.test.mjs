@@ -27,14 +27,14 @@ test('upload caches immutable assets, verifies stable downloads and switches the
   }
   const log = join(root, 'calls');
   const command = join(root, 'gcloud.cjs');
-  const store = memoryStore('gs://vexflow.com/reports/ai2026/');
+  const store = memoryStore('gs://vexflow.com/reports/whatsnew/');
   store.bytes = (page) => readFileSync(join(bucket, page));
   await writeFile(
     command,
     `#!${process.execPath}
 const fs = require('node:fs');
 const [service, op, source, target, ...flags] = process.argv.slice(2);
-const local = (url) => url.replace('gs://vexflow.com/reports/ai2026/', ${JSON.stringify(bucket + '/')});
+const local = (url) => url.replace('gs://vexflow.com/reports/whatsnew/', ${JSON.stringify(bucket + '/')});
 fs.appendFileSync(${JSON.stringify(log)}, JSON.stringify({ op, source, target, flags }) + '\\n');
 if (op === 'rsync') fs.cpSync(source, local(target), { recursive: true });
 if (op === 'cp') fs.copyFileSync(source, local(target));

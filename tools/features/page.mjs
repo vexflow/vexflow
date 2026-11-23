@@ -52,7 +52,7 @@ export function page(features, paths) {
     )
     .join('')}
   <div id="empty" hidden><h2>No matching features</h2><p>Try another term or browse all categories.</p><button type="button" id="reset">Clear filters</button></div></div></div></main>
-  <footer><span>VexFlow</span><a href="https://vexflow.com/reports/ai2026/">Illustrated project history ↗</a></footer>
+  <footer><span>VexFlow</span><a href="https://vexflow.com/reports/whatsnew/">What's New? ↗</a></footer>
   <dialog id="viewer" aria-labelledby="view-title"><div class="viewer-top"><span id="view-category"></span><button id="close" aria-label="Close example">Close ×</button></div>
   <h2 id="view-title"></h2><p id="view-desc"></p><p id="availability" hidden></p><a class="plate" id="original" target="_blank" rel="noopener" aria-label="Open original screenshot at full resolution in a new tab"><img id="view-img" alt=""></a><div class="viewer-bottom"><a class="source" id="view-source"></a><div class="viewer-controls">${buttons('view')}<span id="view-count"></span></div></div></dialog>
   </body></html>`;

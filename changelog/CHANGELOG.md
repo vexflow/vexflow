@@ -3,7 +3,7 @@
 - **Guitar and banjo.** Rotate chord frames, look up guitar voicings by chord symbol and tuning, and write for a five-string banjo with a short drone string. Half-step-down guitar tuning now gives E♭ on the open sixth string.
 - **Instrument parts.** Print a concert harp’s seven-pedal setting or only the changes at an entrance. Show accordion reed registers, flute fingerings and moving trill keys. Align percussion sticking through system breaks and expand named Highland pipe ornaments into grace notes. [Harp lesson](https://vexflow.com/guide/#lesson/instrument-signs)
 - **Pitch and early notation.** Place custom key signatures by written pitch and clef, select edition-specific makam signatures, and assign four-shape noteheads by scale degree. Engrave French and German lute tablature, four-line chant with square neumes, white mensural long values, interstaff Mensurstriche and Kievan half notes. [Historical notation lesson](https://vexflow.com/guide/#lesson/early-notation)
-- Browse the [illustrated feature catalog](https://vexflow.com/features/), [user guide](https://vexflow.com/guide/), [test gallery](https://vexflow.com/tests/) and [PDF editions](https://vexflow.com/pdfs/). See the [illustrated changes since 5.0](https://vexflow.com/reports/ai2026/) and the [5.9.0 quality report](https://vexflow.com/reports/5.9.0/).
+- Browse the [illustrated feature catalog](https://vexflow.com/features/), [user guide](https://vexflow.com/guide/), [test gallery](https://vexflow.com/tests/) and [PDF editions](https://vexflow.com/pdfs/). See [What's New?](https://vexflow.com/reports/whatsnew/) and the [5.9.0 quality report](https://vexflow.com/reports/5.9.0/).
 
 # 5.8.0
 
@@ -11,7 +11,7 @@
 - **Expression.** Engrave half-dashed slurs, wavy glissandi, French-style beams, flared hairpins, timed niente markings, parenthesized turns and pitched trills. Dashed ties and laissez vibrer ties attach to individual chord heads. [EasyScore](../docs/easyscore.md)
 - **Notation.** Add dashed, dotted and double-heavy barlines, double-octave clefs, bracketed editorial accidentals, and shared accidentals at coincident unisons. Align stanza numbers and give figured-bass rows independent continuation lines. Guitar chord frames can show left-hand fingering, and tablature can place fingering and string numbers beside the fret. [Text and lyrics](../docs/text-and-lyrics.md)
 - **Rendering safeguards.** SVG rendering filters script-capable attributes. Dashed-line drawing and beam slope fitting validate their inputs and bound the work they perform. [SVG attributes](https://github.com/vexflow/vexflow/pull/405) · [Dashed lines](https://github.com/vexflow/vexflow/pull/440) · [Beam slopes](https://github.com/vexflow/vexflow/pull/441)
-- Explore the [user guide](https://vexflow.com/guide/), [test gallery with five refreshed demos](https://vexflow.com/tests/) and [PDF editions](https://vexflow.com/pdfs/). See the [5.8.0 quality report](https://vexflow.com/reports/5.8.0/) and [illustrated project history](https://vexflow.com/reports/ai2026/).
+- Explore the [user guide](https://vexflow.com/guide/), [test gallery with five refreshed demos](https://vexflow.com/tests/) and [PDF editions](https://vexflow.com/pdfs/). See the [5.8.0 quality report](https://vexflow.com/reports/5.8.0/) and [What's New?](https://vexflow.com/reports/whatsnew/).
 
 # 5.7.0
 
@@ -25,7 +25,7 @@
 
 - TAB clefs now fit between the outer strings and center on the actual tablature stave. Four-string instruments use the four-string clef glyph. Numeric, common, and cut time signatures also center on the strings.
 - The [user guide](https://vexflow.com/guide/) and [test gallery](https://vexflow.com/tests/) share the VexTab guide’s typography and colors. Their deployments reuse unchanged assets so browsers can keep them cached between releases.
-- Browse the [PDF score library](https://vexflow.com/pdfs/), see the tablature changes in the [illustrated AI 2026 report](https://vexflow.com/reports/ai2026/), or inspect the [5.6.1 code quality report](https://vexflow.com/reports/5.6.1/).
+- Browse the [PDF score library](https://vexflow.com/pdfs/), see the tablature changes in [What's New?](https://vexflow.com/reports/whatsnew/), or inspect the [5.6.1 code quality report](https://vexflow.com/reports/5.6.1/).
 
 # 5.6.0
 
@@ -33,7 +33,7 @@
 - EasyScore can tie a fret on a specific string across a system break and carry repeat endings into an extracted guitar part. Structured notes and rhythmic tab now engrave their written augmentation dots.
 - Lead sheets preserve authored barlines and time-signature visibility in print. Rest ledger lines follow explicit rest positions, and rhythm slashes use Bravura’s stem anchors.
 - Explore the [user guide](https://vexflow.com/guide/), [test gallery](https://vexflow.com/tests/), and [PDF score library](https://vexflow.com/pdfs/).
-- See the [illustrated AI 2026 report](https://vexflow.com/reports/ai2026/) and the [5.6.0 code quality report](https://vexflow.com/reports/5.6.0/).
+- See [What's New?](https://vexflow.com/reports/whatsnew/) and the [5.6.0 code quality report](https://vexflow.com/reports/5.6.0/).
 
 # 5.5.0
 
@@ -49,7 +49,7 @@
 - Add instrument profiles and playable reference scores. The guitar studies show how to lay out bends, slides, and other gestures in tablature.
 - Expose a renderer-independent score reader for accessible navigation. Qualify web rendering in Chromium, Firefox, and WebKit.
 - Learn VexFlow through progressive, editable examples in the [user guide](https://vexflow.com/guide/). Browse the [visual tests and example scores](https://vexflow.com/tests/).
-- Read the [illustrated history of changes since VexFlow 5.0](https://vexflow.com/reports/ai2026) and the [5.4.0 code quality report](https://vexflow.com/reports/5.4.0/).
+- Read [What's New?](https://vexflow.com/reports/whatsnew/) and the [5.4.0 code quality report](https://vexflow.com/reports/5.4.0/).
 
 # 5.3.0
 

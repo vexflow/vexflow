@@ -11,8 +11,8 @@ import { externalFonts, linkAssets, writeAssets } from '../site-assets.mjs';
 import { upload } from '../static-site-upload.mjs';
 
 const jsonFiles = ['changes.json', 'render-inventory.json'];
-const destination = 'gs://vexflow.com/reports/ai2026/';
-const publicURL = 'https://vexflow.com/reports/ai2026/';
+const destination = 'gs://vexflow.com/reports/whatsnew/';
+const publicURL = 'https://vexflow.com/reports/whatsnew/';
 const digest = (bytes) => createHash('sha256').update(bytes).digest('hex');
 
 /** Include only the report's own resources and the score images named by its inventory. */
@@ -92,7 +92,7 @@ export async function stageReport(source, staging) {
 
 /** Stage in isolation so a dry run or failed upload never modifies the offline bundle. */
 export async function publishReport(source, { dryRun = false, command = 'gcloud', store } = {}) {
-  const staging = await mkdtemp(join(tmpdir(), 'vexflow-improvements-'));
+  const staging = await mkdtemp(join(tmpdir(), 'vexflow-whatsnew-'));
   try {
     await stageReport(source, staging);
     await upload({ directory: staging, destination, publicURL, jsonFiles, dryRun, command, store });
@@ -104,12 +104,12 @@ export async function publishReport(source, { dryRun = false, command = 'gcloud'
 /** Reuse an existing review build, or generate and browser-check a fresh report on demand. */
 async function main(args) {
   if (args.some((arg) => !['--dry-run', '--rebuild'].includes(arg)))
-    throw new Error('Usage: npm run improvements:upload -- [--dry-run] [--rebuild]');
+    throw new Error('Usage: npm run whatsnew:upload -- [--dry-run] [--rebuild]');
   const root = fileURLToPath(new URL('../../', import.meta.url));
-  const source = join(root, 'build/improvements');
+  const source = join(root, 'build/whatsnew');
   if (args.includes('--rebuild') || !existsSync(join(source, 'index.html'))) {
     for (const script of ['build', 'verify']) {
-      execFileSync(process.execPath, [`tools/improvements/${script}.mjs`], { cwd: root, stdio: 'inherit' });
+      execFileSync(process.execPath, [`tools/whatsnew/${script}.mjs`], { cwd: root, stdio: 'inherit' });
     }
   }
   await publishReport(source, { dryRun: args.includes('--dry-run') });

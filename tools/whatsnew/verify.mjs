@@ -5,8 +5,8 @@ import { resolve, extname, sep, join } from 'node:path';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 
-const root = resolve('build/improvements'),
-  evidence = resolve('build/improvements-work/verification');
+const root = resolve('build/whatsnew'),
+  evidence = resolve('build/whatsnew-work/verification');
 await mkdir(evidence, { recursive: true });
 const data = JSON.parse(await readFile(join(root, 'changes.json'), 'utf8'));
 const figures = new Map(data.figures.map((x) => [x.id, x]));
@@ -37,7 +37,7 @@ try {
   const errors = [],
     network = [];
   page.on('pageerror', (e) => errors.push(e.message));
-  const prefix = '/reports/ai2026/';
+  const prefix = '/reports/whatsnew/';
   await page.route('**/*', async (route) => {
     const u = new URL(route.request().url());
     if (u.protocol === 'file:') return route.continue();
@@ -61,7 +61,8 @@ try {
   for (const url of [pathToFileURL(join(root, 'index.html')).href, 'https://verify.test' + prefix]) {
     await page.goto(url);
     await page.evaluate(() => document.fonts.ready);
-    assert.equal(await page.title(), 'VexFlow · Changes since 5.0.0');
+    assert.equal(await page.title(), "VexFlow · What's New?");
+    assert.equal(await page.locator('h1').innerText(), "What's New?");
     assert.equal(await page.locator('.tiles img').count(), 24);
     const before = await page.locator('.change:visible').count();
     await page.locator('#search').fill('rasgueado');

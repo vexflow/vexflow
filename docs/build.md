@@ -280,6 +280,7 @@ The guide and visual test gallery are self-contained static sites. Their upload 
 | Site         | Build only               | Upload                    | Bucket prefix                | Public URL                      |
 | ------------ | ------------------------ | ------------------------- | ---------------------------- | ------------------------------- |
 | User guide   | `npm run guide:build`    | `npm run guide:upload`    | `gs://vexflow.com/guide/`    | <https://vexflow.com/guide/>    |
+| What's New? | `npm run whatsnew:build` | `npm run whatsnew:upload` | `gs://vexflow.com/reports/whatsnew/` | <https://vexflow.com/reports/whatsnew/> |
 | Features | `npm run features:build` | `npm run features:upload` | `gs://vexflow.com/features/` | <https://vexflow.com/features/> |
 | Legacy notice | `npm run explorer:build` | `npm run explorer:upload` | `gs://vexflow.com/explorer/` | <https://vexflow.com/explorer/> |
 | Test gallery | `npm run tests:build`    | `npm run tests:upload`    | `gs://vexflow.com/tests/`    | <https://vexflow.com/tests/>    |
@@ -288,7 +289,7 @@ The feature catalog builds to `build/features/`. Edit descriptions, search terms
 
 The legacy Explorer upload publishes only a short HTML notice linking to the guide. Old bookmarks, including example and glyph fragments, open that page.
 
-For commit-by-commit repository metrics, see [code quality reports](quality-reports.md). Build with `npm run report` and publish with `npm run report:upload`.
+For report builds, verification, and publication options, see [What's New?](whatsnew.md). For commit-by-commit repository metrics, see [code quality reports](quality-reports.md). Build with `npm run report` and publish with `npm run report:upload`.
 
 Install the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install) and [authenticate](https://docs.cloud.google.com/sdk/docs/authenticate) with an account allowed to upload objects, set their public ACLs, and read them back:
 
@@ -325,7 +326,7 @@ Uploads compare checksums and transfer changed assets first, with a one-year imm
 
 ### Clean up retired website assets
 
-Preview one site at a time. Supported names are `guide`, `explorer`, `tests`, `features`, and `reports/ai2026`. The first successful managed upload records the current inventory and starts the migration clock.
+Preview one site at a time. Supported names are `guide`, `explorer`, `tests`, `features`, and `reports/whatsnew`. The first successful managed upload records the current inventory and starts the migration clock.
 
 ```sh
 npm run sites:clean -- guide

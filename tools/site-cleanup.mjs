@@ -45,12 +45,12 @@ export function recover(store, id) {
 async function main() {
   const [site, ...args] = process.argv.slice(2);
   if (
-    !['guide', 'explorer', 'tests', 'features', 'reports/ai2026'].includes(site) ||
+    !['guide', 'explorer', 'tests', 'features', 'reports/whatsnew'].includes(site) ||
     args.some((a) => !/^(--apply=[a-f0-9]{64}|--legacy=[a-f0-9]{16}|--recover=[a-f0-9-]{36})$/.test(a)) ||
     new Set(args.map((a) => a.split('=')[0])).size !== args.length
   ) {
     throw Error(
-      'Usage: npm run sites:clean -- <guide|explorer|tests|features|reports/ai2026> [--legacy=16hex] [--apply=plan] or --recover=lock-id'
+      'Usage: npm run sites:clean -- <guide|explorer|tests|features|reports/whatsnew> [--legacy=16hex] [--apply=plan] or --recover=lock-id'
     );
   }
   const store = cloudStore('gs://vexflow.com/' + site + '/');

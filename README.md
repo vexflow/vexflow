@@ -52,6 +52,7 @@ has things like an online audio player, a serialization format, native web contr
 ## Other Resources
 
 - [Building, testing, releasing, and uploading static sites](docs/build.md).
+- [What's New?](https://vexflow.com/reports/whatsnew/) covers features and fixes since VexFlow 5.0.
 - [Code quality reports and commit archive](docs/quality-reports.md).
 - [Text fonts and lyric layout](docs/text-and-lyrics.md), [jsdom rendering](docs/jsdom.md), and [score benchmarks](docs/benchmarks.md).
 - [Chord symbol kerning](docs/chord-symbols.md).
