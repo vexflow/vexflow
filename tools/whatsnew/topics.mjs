@@ -816,7 +816,7 @@ export const topics = [
       ],
       [
         'Locked tools and audit policy',
-        'CI checks the locked dependency graph. The dated picomatch exception applies to named development-tool paths and has an expiry and removal procedure.',
+        'CI audits both the main build and browser qualification dependencies. The temporary picomatch exception was removed after the advisory was withdrawn.',
         'SECURITY.md',
       ],
       [

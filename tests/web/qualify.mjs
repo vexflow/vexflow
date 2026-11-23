@@ -19,11 +19,11 @@ const html = await readFile('demos/ui/score-reader.html', 'utf8');
 const app = await readFile('demos/ui/score-reader.js', 'utf8');
 const bundle = await readFile(current, 'utf8');
 const face = await readFile('node_modules/@vexflow-fonts/academico/academico.otf');
-const selfContained = html.replace(
-  /<script src="[^"]+"><\/script>/g,
-  (tag) =>
-    '<script>' + (tag.includes('vexflow-debug') ? bundle : app).replace(/<\/script/gi, '<\\/script') + '</script>'
-);
+// Package the two trusted scripts as external data URLs so their contents never enter the HTML parser.
+const scriptURL = (source) => 'data:text/javascript;base64,' + Buffer.from(source).toString('base64');
+const selfContained = html
+  .replace('src="../../build/cjs/vexflow-debug.js"', 'src="' + scriptURL(bundle) + '"')
+  .replace('src="score-reader.js"', 'src="' + scriptURL(app) + '"');
 await writeFile(output + '/score-reader.html', selfContained);
 
 const files = new Map([
@@ -326,6 +326,10 @@ for (const engine of requested.length ? requested : Object.keys(engines)) {
   try {
     const page = await context.newPage();
     page.on('pageerror', (e) => console.error(engine, e.message));
+    // An unserved copy must initialize the reader using only the scripts embedded in the artifact.
+    await page.setContent(selfContained);
+    await page.waitForFunction(() => window.scoreReader?.snapshot);
+    assert.equal(await page.getByRole('listbox', { name: 'Score events' }).locator('option').count(), 24);
     report.interaction = await interaction(page, engine);
     await navigationContracts(page);
     report.diagnostics = await diagnosticsContracts(page);

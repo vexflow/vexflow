@@ -7,10 +7,26 @@
     if (text !== undefined) e.textContent = text;
     return e;
   };
-  const link = (url, label) => {
-    const e = make('a', label);
-    e.href = url;
-    return e;
+  // The offline report and its published copy share the same PNG names. The website adds a content hash.
+  const imagePath = (path) => {
+    const match = /^(?:\.\/)?assets\/((?:[a-f0-9]{64}\/)?[\w-]+\.png)$/.exec(path);
+    if (!match) throw new Error('Invalid exhibit image path.');
+    return './assets/' + match[1];
+  };
+  const exhibitLink = (id, label) => {
+    const a = make('a', label);
+    a.href = '#plate-' + encodeURIComponent(id);
+    a.dataset.plate = id;
+    return a;
+  };
+  // Every evidence link is a source file, change, or issue in the VexFlow repository.
+  const repositoryLink = (source, label) => {
+    const u = new URL(source);
+    if (u.origin !== 'https://github.com' || !u.pathname.startsWith('/vexflow/vexflow/'))
+      throw new Error('Invalid evidence source.');
+    const a = make('a', label);
+    a.href = 'https://github.com' + u.pathname + u.search + u.hash;
+    return a;
   };
   const query = (v) => v.toLowerCase().trim().split(/\s+/).filter(Boolean);
   const matches = (words, value) => words.every((w) => value.toLowerCase().includes(w));
@@ -99,9 +115,10 @@
       if (!path) continue;
       const frame = make('figure'),
         image = make('img'),
-        full = link(path, '');
+        full = make('a');
       if (size) [image.width, image.height] = size;
-      image.src = path;
+      image.src = imagePath(path);
+      full.href = imagePath(path);
       image.alt = caption || label + ' — ' + figure.name;
       full.target = '_blank';
       full.rel = 'noopener';
@@ -111,7 +128,7 @@
       frame.append(make('figcaption', heading), full);
       $('plates').append(frame);
     }
-    $('plate-source').replaceChildren(...(figure.source ? [link(figure.source, 'Evidence and source')] : []));
+    $('plate-source').replaceChildren(...(figure.source ? [repositoryLink(figure.source, 'Evidence and source')] : []));
     if (!dialog.open) dialog.showModal();
   }
   function sync() {
@@ -200,11 +217,10 @@
     'figures',
     'more',
     (f) => {
-      const a = link('#plate-' + f.id, '');
+      const a = exhibitLink(f.id, '');
       a.className = 'tile';
-      a.dataset.plate = f.id;
       const img = make('img');
-      img.src = f.right;
+      img.src = imagePath(f.right);
       img.alt = '';
       img.loading = 'lazy';
       const info = make('div');
@@ -251,11 +267,10 @@
       row.append(
         make('p', c.body || (c.merge ? 'This merge includes ' : 'This commit touches ') + c.paths.length + ' paths.')
       );
-      const evidence = link('#plate-' + c.figure, 'Inspect change');
-      evidence.dataset.plate = c.figure;
+      const evidence = exhibitLink(c.figure, 'Inspect change');
       const refs = make('div');
       refs.className = 'refs';
-      refs.append(evidence, link(data.repo + '/commit/' + c.hash, 'Full commit and diff'));
+      refs.append(evidence, repositoryLink('https://github.com/vexflow/vexflow/commit/' + c.hash, 'Full commit and diff'));
       row.append(refs);
       const paths = make('div');
       paths.className = 'paths';

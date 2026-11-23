@@ -10,7 +10,7 @@ npm test
 npm run guide:test
 ```
 
-CI checks all dependency severities, including development dependencies. See [SECURITY.md](../SECURITY.md) for temporary exceptions. Run `npm audit` for the unfiltered result.
+CI audits the root and web-qualification lockfiles at every severity, including development dependencies.
 
 ## Security overrides
 
