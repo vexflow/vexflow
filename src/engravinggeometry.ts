@@ -23,6 +23,7 @@ import { StaveNote } from './stavenote';
 import { StaveTie } from './stavetie';
 import { Stem } from './stem';
 import { TextBracket } from './textbracket';
+import { TextNote } from './textnote';
 import { Tuplet } from './tuplet';
 import { RuntimeError } from './util';
 
@@ -115,6 +116,8 @@ export function measureEngraving(element: Element, options: GeometryOptions = {}
         const note = owner as StaveNote;
         Object.assign(shape, noteShape(note));
         if (note.renderOptions.draw !== false) children(note.getModifiers());
+      } else if (kind === TextNote && (owner as TextNote).getDirectionAnchor()) {
+        shape.parts.push(owner.getBoundingBox());
       } else if (kind === KievanNote) {
         const note = owner as KievanNote;
         shape.parts.push(note.getTextInk(note.getAbsoluteX(), note.getYs()[0]));

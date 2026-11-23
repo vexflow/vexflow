@@ -3,6 +3,7 @@ import type { Bounds } from './boundingbox';
 import type { ContinuousRow } from './continuouslayout';
 import type { CommitHook, EasyScoreComposition, EasyScoreCompositionSpec } from './easyscore';
 import { Factory } from './factory';
+import { Fraction } from './fraction';
 import { InkProfile } from './inkprofile';
 import { Metrics } from './metrics';
 import { Note } from './note';
@@ -24,6 +25,7 @@ import { Registry } from './registry';
 import { SVGContext } from './svgcontext';
 import type { SVGFont } from './svgexport';
 import { Tables } from './tables';
+import { TextNote } from './textnote';
 
 export type { PublicationCondense } from './publicationcondense';
 export type { CueTransposition } from './publicationcue';
@@ -233,6 +235,12 @@ function splitRows(
     references: [],
   }));
   const edges = rows.slice(1).map((r, i) => (r.y + rows[i].y + rows[i].height) / 2);
+  const directionRows = new Map<string, number>();
+  rows.forEach((row, index) => {
+    for (const m of row.measures)
+      for (const note of score.notes[m - 1].flat(2))
+        if (note instanceof TextNote && note.getDirectionAnchor()) directionRows.set(note.getAttribute('id'), index);
+  });
   const context = document.createElement('canvas').getContext('2d')!;
   // Read ink while the whole drawing is mounted. Moving one node at a time during measurement forces browser reflow.
   const elements = Array.from(svg.children, (child) => {
@@ -253,7 +261,8 @@ function splitRows(
       if ((top + bottom) / 2 < edges[mid]) high = mid;
       else low = mid + 1;
     }
-    const row = result[mark?.row ?? low];
+    const direction = el.getAttribute('data-direction-id');
+    const row = result[mark?.row ?? (direction === null ? undefined : directionRows.get(direction)) ?? low];
     // A custom mark can reserve more clearance than its visible drawing occupies.
     if (mark) row.profile?.add(mark.bounds);
     row.top = Math.min(row.top, top);
@@ -348,6 +357,17 @@ function addInsetFragment(
     const source = locate(id);
     return source.staff === region.staff && source.measure >= first && source.measure <= last;
   };
+  if (spec.continuous?.textLanes === 'system') {
+    // Rebuild only connectors whose destination survives this cue or ossia fragment.
+    quoted.measures = quoted.measures.map((m) => ({
+      ...m,
+      verses: m.verses?.map((verse) => {
+        const words = 'syllables' in verse ? verse.syllables : verse;
+        const syllables = words.map((w) => (w.extendTo && !within(w.extendTo) ? { ...w, extendTo: undefined } : w));
+        return 'syllables' in verse ? { ...verse, syllables } : syllables;
+      }),
+    }));
+  }
   const insetSpec: EasyScoreCompositionSpec = {
     engraving: spec.engraving,
     spans: spec.spans?.filter((span) => within(span.from) && within(span.to)),
@@ -357,8 +377,13 @@ function addInsetFragment(
     graceAccidentals: region.transpose ? 'ordered' : spec.graceAccidentals,
     sheet: { x: 0, y: 0, width: width / scale, measurePadding: 4, measureGap: Math.max(0, gap) / scale },
     // Keep the existing single-bar signature and spacing policy. A longer fragment shares one signature prefix.
-    ...(hosts.length === 1
-      ? { continuous: { spans: spec.continuous?.spans?.filter((span) => within(span.from) && within(span.to)) } }
+    ...(hosts.length === 1 || spec.continuous?.textLanes === 'system'
+      ? {
+          continuous: {
+            textLanes: spec.continuous?.textLanes,
+            spans: spec.continuous?.spans?.filter((span) => within(span.from) && within(span.to)),
+          },
+        }
       : {}),
   };
   const inset = compose(host, insetSpec, hooks, region.transpose);
@@ -473,28 +498,32 @@ function semanticEvents(
   condense?: PublicationCondense
 ) {
   return score.notes[measure - 1].flatMap((voices, j) =>
-    voices.flatMap((ticks, voice) =>
-      ticks
+    voices.flatMap((ticks, voice) => {
+      const clock = new Fraction(0, 1);
+      return ticks
         .filter((t) => !t.shouldIgnoreTicks())
-        .flatMap((n, event) =>
-          n instanceof Note
-            ? [
-                {
-                  id: n.getAttribute('id'),
-                  measure: score.meterPositions?.get(n)?.measure ?? measure,
-                  staff: condense?.players[0] === spec.staves[j].id ? condense.players[voice] : spec.staves[j].id,
-                  voice: condense?.players[0] === spec.staves[j].id ? 0 : voice,
-                  event: score.meterPositions?.get(n)?.event ?? event,
-                  ...(score.meterPositions && { onset: score.meterPositions.get(n)?.onset.toString() }),
-                  keys: n.getKeys(),
-                  ...(n.notation.length && { notation: n.notation }),
-                  ticks: n.getTicks().toString(),
-                  rest: n.isRest(),
-                },
-              ]
-            : []
-        )
-    )
+        .flatMap((n, event) => {
+          const direction = n instanceof TextNote && n.getDirectionAnchor();
+          const onset = score.meterPositions?.get(n)?.onset.toString() ?? (direction ? clock.toString() : undefined);
+          clock.add(n.getTicks());
+          if (!(n instanceof Note)) return [];
+          return [
+            {
+              id: n.getAttribute('id'),
+              measure: score.meterPositions?.get(n)?.measure ?? measure,
+              staff: condense?.players[0] === spec.staves[j].id ? condense.players[voice] : spec.staves[j].id,
+              voice: condense?.players[0] === spec.staves[j].id ? 0 : voice,
+              event: score.meterPositions?.get(n)?.event ?? event,
+              ...(onset && { onset }),
+              ...(direction && { text: n.getText(), anchor: direction }),
+              keys: n.getKeys(),
+              ...(n.notation.length && { notation: n.notation }),
+              ticks: n.getTicks().toString(),
+              rest: n.isRest(),
+            },
+          ];
+        });
+    })
   );
 }
 

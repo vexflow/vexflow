@@ -5,6 +5,8 @@ import { test } from 'node:test';
 
 import puppeteer from 'puppeteer';
 
+import { textLaneStudy } from '../engraving/text-lane-studies.mjs';
+
 import { balladeSpacingStudy, sextupletStudy, tabEndingStudy } from '../engraving/continuous-studies.mjs';
 import { friskaSlurStudy, soleaSlurStudy } from '../engraving/slur-studies.mjs';
 import {
@@ -923,6 +925,139 @@ test('publication views, pagination and portable printing', async (t) => {
       });
       assert.deepEqual(pages, [['1'], []]);
     });
+    await t.test(
+      'system text lanes follow the reflowed music and timed directions remain selectable in parts',
+      async () => {
+        await page.addScriptTag({ content: 'window.textLaneStudy=' + textLaneStudy });
+        for (const backend of ['SVG', 'CANVAS']) {
+          const frames = await page.evaluate((backend) => {
+            const { Factory, Renderer, Annotation, ScoreNavigation, Publication } = VexFlow;
+            const host = document.querySelector('aside');
+            const make = (kind) => {
+              const target = document.createElement(backend === 'SVG' ? 'div' : 'canvas');
+              host.replaceChildren(target);
+              target.id = 'lanes';
+              const factory = new Factory({
+                renderer: { elementId: target.id, backend: Renderer.Backends[backend], width: 900, height: 600 },
+              });
+              const source = textLaneStudy(kind);
+              const score = factory.EasyScore().compose(source);
+              const draw = (width) => {
+                factory.getContext().clear();
+                score.sheet.setWidth(width);
+                factory.draw({ retain: true });
+                return score.sheet.getContinuousLayout().fragments;
+              };
+              const word = (id, text) =>
+                score
+                  .getNote(id)
+                  .getModifiers()
+                  .find((m) => m instanceof Annotation && m.text === text);
+              const ink = (mark) => mark.getTextInk(mark.computeX().x, mark.computeY().y);
+              return { score, source, draw, word, ink };
+            };
+            const blues = make('blues');
+            const verses = [720, 210, 720].map((width) => {
+              const fs = blues.draw(width),
+                gyp = blues.word('a3', 'Gyp'),
+                sy = blues.word('b0', 'sy');
+              const syllables = [
+                ...['I', 'hate', 'to', 'see'].map((t, i) => blues.word('a' + i, t)),
+                ...['Been', 'to', 'de', 'Gyp'].map((t, i) => blues.word('a' + i, t)),
+              ];
+              const ys = syllables.map((m) => m.computeY().y);
+              const hyphens = fs.filter((f) => f.kind === 'hyphen'),
+                extenders = fs.filter((f) => f.kind === 'lyric');
+              const start = hyphens[0],
+                end = hyphens.at(-1);
+              return {
+                ys,
+                clear: start.x1 > blues.ink(gyp).x + blues.ink(gyp).w && end.x2 < blues.ink(sy).x,
+                attached: start.y1 === gyp.computeY().y && end.y2 === sy.computeY().y,
+                hyphens: hyphens.map((f) => f.part),
+                extenders: extenders.map((f) => f.part),
+                distinct: extenders.at(-1).y2 < end.y2 - 6,
+              };
+            });
+            const guitar = make('guitar');
+            const harmony = [720, 210, 720].map((width) => {
+              const slurs = guitar.draw(width).filter((f) => f.kind === 'slur');
+              return {
+                slurs,
+                chords: ['G13', 'C6'].map((t, i) => ({
+                  ...guitar.ink(guitar.word('bass' + i, t)),
+                  yBase: guitar.word('bass' + i, t).computeY().y,
+                })),
+              };
+            });
+            const direction = make('direction');
+            direction.draw(720);
+            const nav = new ScoreNavigation(direction.score, direction.source.staves);
+            const event = nav.events.find((e) => e.id === 'instruction'),
+              box = nav.regions.find((e) => e.id === event.id);
+            const note = direction.score.getNote('instruction'),
+              stave = note.checkStave();
+            const start = direction.score.getNote('start').getBoundingBox(),
+              end = direction.score.getNote('end').getBoundingBox();
+            const center = note.getAbsoluteX() + note.checkTickContext().getMetrics().glyphPx / 2;
+            const book = new Publication(direction.source).render(document.querySelector('main'), {
+              staves: ['lower'],
+              paper: 'Letter',
+            });
+            const printed = book.pages[0].svg.querySelector('[data-vf-id="vf-instruction"]');
+            const rect = printed.querySelector('rect');
+            const meta = JSON.parse(book.pages[0].svg.querySelector('metadata').textContent).events.find(
+              (e) => e.id === 'instruction'
+            );
+            return {
+              verses,
+              harmony,
+              event,
+              hit: nav.hitTest(box.x + box.w / 2, box.y + box.h / 2)?.id,
+              centerError: Math.abs(box.x + box.w / 2 - center),
+              edges: [start.x - stave.getNoteStartX(), end.x + end.w - stave.getNoteEndX()],
+              printed: [
+                printed.querySelector('text').textContent,
+                Number(rect.getAttribute('width')),
+                rect.getAttribute('pointer-events'),
+              ],
+              diagnostics: book.diagnostics,
+              printedTiming: [meta.onset, meta.ticks, meta.anchor, meta.staff],
+            };
+          }, backend);
+          const [wide, narrow, again] = frames.verses;
+          assert.deepEqual(wide, again);
+          for (const verse of [wide, narrow]) {
+            assert.equal(new Set(verse.ys.slice(0, 4)).size, 1);
+            assert.equal(new Set(verse.ys.slice(4)).size, 1);
+            assert.ok(verse.ys[4] > verse.ys[0] + 6 && verse.clear && verse.attached && verse.distinct);
+          }
+          assert.deepEqual(wide.hyphens, ['single']);
+          assert.deepEqual(narrow.hyphens, ['first', 'last']);
+          assert.deepEqual(narrow.extenders, ['first', 'last']);
+          assert.deepEqual(frames.harmony[0], frames.harmony[2]);
+          assert.equal(frames.harmony[0].chords[0].yBase, frames.harmony[0].chords[1].yBase);
+          const { curveParts } = await import(new URL('../../build/esm/src/continuousspan.js', import.meta.url));
+          for (const { slurs, chords } of frames.harmony) {
+            chords.forEach((chord, i) => {
+              const slur = slurs.length === 1 ? slurs[0] : slurs[i];
+              assert.ok(
+                chord.y + chord.h < Math.min(...curveParts(slur).map((b) => b.y)),
+                'guitar harmony clears the complete slur'
+              );
+            });
+          }
+          assert.equal(frames.hit, 'instruction');
+          assert.deepEqual([frames.event.onset, frames.event.duration, frames.event.voice], ['1/4', '1/2', 2]);
+          assert.ok(frames.centerError < 2 && frames.edges.every((edge) => Math.abs(edge) < 0.01));
+          assert.deepEqual(frames.printedTiming, ['4096/1', '8192/1', 'beat', 'lower']);
+          assert.equal(frames.printed[0], 'il basso sempre stacc.');
+          assert.ok(frames.printed[1] > 10);
+          assert.equal(frames.printed[2], 'auto');
+          assert.deepEqual(frames.diagnostics, []);
+        }
+      }
+    );
     await t.test('a fingering and its transparent hit area stay with the printed note', async () => {
       const printed = await page.evaluate(() => {
         const measures = Array.from({ length: 6 }, (_, i) => ({

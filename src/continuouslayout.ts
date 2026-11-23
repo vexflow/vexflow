@@ -20,6 +20,7 @@ import {
 } from './continuousspan';
 import type { EasyScoreComposition, EasyScoreCompositionSpec, EasyScoreStaffState } from './easyscore/composition';
 import type { InteriorBar } from './easyscore/independentmeter';
+import type { SystemTextLanes } from './easyscore/textlanes';
 import { Element } from './element';
 import { measureEngraving } from './engravinggeometry';
 import { Fraction } from './fraction';
@@ -44,6 +45,7 @@ import type { System } from './system';
 import { BreakUnit, chooseSystemBreaks } from './systembreaks';
 import { fitTabCurve, oppositeTabCurve } from './tabcurvefit';
 import { TabNote } from './tabnote';
+import { TextNote } from './textnote';
 import { layoutTiedBend } from './tiedbend';
 import { TimeSignature } from './timesignature';
 import { RuntimeError } from './util';
@@ -62,6 +64,8 @@ export interface ContinuousBoundary {
   keepRest?: boolean;
 }
 export interface ContinuousOptions {
+  /** Align lead harmonies and verses across each printed system and continue their connectors across breaks. */
+  textLanes?: 'system';
   /** Fit horizontal ink profiles of adjacent staves and rows. Defaults to the traditional full-width envelope. */
   verticalSpacing?: 'profile' | 'envelope';
   /** Extra measured ink on this stave, in current score coordinates. Measure numbers are one-based. */
@@ -216,7 +220,8 @@ export class ContinuousLayout {
     starts: State[][],
     ends: State[][],
     placed?: Set<Accidental>,
-    private readonly interiorBars: InteriorBar[] = []
+    private readonly interiorBars: InteriorBar[] = [],
+    private readonly textLanes?: SystemTextLanes
   ) {
     this.options = spec.continuous ?? {};
     for (const voice of score.voices.flat(2)) voice.preserveStaveAssignments = true;
@@ -359,7 +364,7 @@ export class ContinuousLayout {
       text: String(numNotes),
       side,
     }));
-    for (const span of [...(this.options.spans ?? []), ...tuplets]) {
+    for (const span of [...(this.options.spans ?? []), ...(textLanes?.connectors() ?? []), ...tuplets]) {
       const first = locations.get(score.getNote(span.from)),
         last = locations.get(score.getNote(span.to));
       if (
@@ -443,7 +448,7 @@ export class ContinuousLayout {
         span.syllableId !== undefined &&
         (typeof span.syllableId !== 'string' ||
           span.syllableId.length === 0 ||
-          span.kind !== 'lyric' ||
+          !['lyric', 'hyphen'].includes(span.kind) ||
           first.staff !== last.staff ||
           span.text !== undefined ||
           span.labelFontSize !== undefined)
@@ -451,6 +456,8 @@ export class ContinuousLayout {
         invalid(
           'An anchored lyric extender needs a syllable ID and two notes on the same staff. Its annotation supplies the text and font.'
         );
+      if (span.toSyllableId !== undefined && (!span.syllableId || !span.toSyllableId))
+        invalid('An arrival syllable needs an anchored lyric or hyphen.');
       if (span.kind === 'tie' && first.note instanceof StaveNote && first.measure !== last.measure) {
         const fi = span.fromHead ?? 0,
           li = span.toHead ?? 0;
@@ -650,7 +657,7 @@ export class ContinuousLayout {
     }
   }
 
-  format(options: Required<SheetOptions>): ContinuousRow[] {
+  format(options: Required<SheetOptions>, alignedWidths?: readonly number[]): ContinuousRow[] {
     // A verse can be attached after composition. Resolve its current mark before every reflow.
     for (const span of this.spans) {
       if (!span.spec.syllableId) continue;
@@ -659,6 +666,28 @@ export class ContinuousLayout {
         .filter((m): m is Annotation => m instanceof Annotation && m.getAttribute('id') === span.spec.syllableId);
       if (matches.length !== 1) invalid('Expected one lyric annotation on the source note: ' + span.spec.syllableId);
       span.syllable = matches[0];
+      if (span.spec.toSyllableId) {
+        const destination = span.last.note
+          .getModifiers()
+          .filter(
+            (mark): mark is Annotation =>
+              mark instanceof Annotation && mark.getAttribute('id') === span.spec.toSyllableId
+          );
+        if (destination.length !== 1) invalid('Expected one arrival annotation: ' + span.spec.toSyllableId);
+        span.toSyllable = destination[0];
+        if (
+          span.first.measure !== span.last.measure &&
+          span.last.note ===
+            span.last.note
+              .getVoice()
+              .getTickables()
+              .find((note) => !note.shouldIgnoreTicks())
+        ) {
+          const stave = span.last.note.checkStave();
+          const advance = span.toSyllable.getTextMetrics().width / 2 + stave.space(1.5);
+          this.continuationPadding.set(stave, Math.max(this.continuationPadding.get(stave) ?? 0, advance));
+        }
+      }
     }
     // A caller may attach the native beam after composition. Validate every owner before modifying either voice.
     const eighths = this.splitChords.filter(({ upper }) => upper.getDuration() === '8');
@@ -677,26 +706,30 @@ export class ContinuousLayout {
       this.rows.length = 0;
       this.drawing = [];
       for (const u of units) u.after = padding.get(this.score.systems[u.first]) ?? 0;
-      const groups = chooseSystemBreaks(
-        units,
-        options.width,
-        options.measureGap,
-        (i) => this.indent(units[i].first),
-        this.options.mode ?? 'balanced'
-      );
+      // A multi-bar publication inset inherits the host barlines and must keep the supplied widths.
+      const groups = alignedWidths
+        ? [units.map((_, i) => i)]
+        : chooseSystemBreaks(
+            units,
+            options.width,
+            options.measureGap,
+            (i) => this.indent(units[i].first),
+            this.options.mode ?? 'balanced'
+          );
       let y = options.y;
       for (const indices of groups) {
         const row = this.layoutRow(
           indices.map((i) => units[i]),
           options,
-          y
+          y,
+          alignedWidths
         );
         const profile = this.rowInk.get(row);
         this.score.sheet.alignSticking(row, profile && ((box) => profile.add(box, -row.y)));
         this.rows.push(row);
         y = row.y + row.height + options.rowGap;
       }
-    } while (reserveChordSpacing(this.rows, padding));
+    } while (!alignedWidths && reserveChordSpacing(this.rows, padding));
     for (const s of this.spans) {
       const parts = this.fragments.filter((f) => f.id === s.spec.id);
       if (s.spec.string !== undefined) this.fitTabCurveRows(s, parts);
@@ -723,6 +756,11 @@ export class ContinuousLayout {
     return this.rows;
   }
 
+  /** Managed text lanes move after curve fitting, while head fingerings and other fixed marks constrain the route. */
+  private measureSlurInk(events: (StaveNote | TabNote)[]): Bounds[] {
+    return slurInk(events, (mark) => this.textLanes?.isMark(mark) ?? false);
+  }
+
   /** A tie only needs other fret numbers; a slur can run past modifiers or other positions of its own chord. */
   private tabCurveInk(span: ResolvedSpan, f: SpanFragment, measures: number[]): Bounds[] {
     return measures.flatMap((m) => {
@@ -732,7 +770,7 @@ export class ContinuousLayout {
         .filter((n): n is TabNote => n instanceof TabNote && n.getStave() === stave);
       const ink =
         span.spec.kind === 'slur'
-          ? slurInk(events)
+          ? this.measureSlurInk(events)
           : events.filter((n) => n !== span.first.note && n !== span.last.note).flatMap((n) => n.getFretInk());
       return ink.filter((b) => b.x + b.w >= f.x1 - f.space && b.x <= f.x2 + f.space);
     });
@@ -794,6 +832,11 @@ export class ContinuousLayout {
         }
         if (u.first === u.last)
           for (const n of this.score.notes[u.first].flat(2)) {
+            if (n instanceof TextNote && n.getDirectionAnchor() && n.getStave() === stave) {
+              const box = n.getBoundingBox();
+              take(box.y, box.y + box.h);
+              addPart(box);
+            }
             if (n instanceof TabNote && n.getStave() === stave && profiles) {
               n.getFretInk().forEach(addPart);
               for (const mark of n.getModifiers()) measureEngraving(mark).parts.forEach(addPart);
@@ -904,8 +947,60 @@ export class ContinuousLayout {
     }
   }
 
+  /** Fit the music and its curves first, then reserve a shared baseline for each text lane. */
+  private fitTextLanes(
+    positions: PlacedMeasure[],
+    units: Unit[],
+    spans: ResolvedSpan[],
+    visible: number[],
+    offsets: number[]
+  ): void {
+    if (!this.textLanes) return;
+    const first = units[0].first;
+    this.alignStaves(positions, visible, 0, offsets);
+    // Compare each physical staff's music to the common text line, including both fragments of a broken slur.
+    const staffInk = new Map<number, Bounds[]>();
+    for (const { u } of positions) {
+      const staves = this.score.staves[u.first];
+      for (const note of this.score.notes[u.first].flat(2)) {
+        if (!(note instanceof StaveNote) || note.renderOptions.draw === false) continue;
+        const stave = note.checkStave();
+        const staff = staves.indexOf(stave);
+        const parts = staffInk.get(staff) ?? [];
+        const ink = measureEngraving(note, {
+          extension: (el) => (this.textLanes?.isMark(el) ? { parts: [], anchors: {} } : undefined),
+        });
+        for (const b of ink.parts) parts.push({ ...b, y: b.y - stave.getYForLine(0) });
+        staffInk.set(staff, parts);
+      }
+    }
+    for (const span of spans) {
+      if (span.spec.kind !== 'slur' || span.first.staff !== span.last.staff) continue;
+      const index = span.first.staff;
+      const f = this.makeFragment(span, units, [], 0, false);
+      if (!f) continue;
+      const line = this.score.staves[first][index].getYForLine(0);
+      const parts = staffInk.get(index) ?? [];
+      parts.push(...curveParts(f).map((b) => ({ ...b, y: b.y - line })));
+      staffInk.set(index, parts);
+    }
+    if (
+      this.textLanes.fit(
+        positions.map((p) => p.sys),
+        staffInk
+      )
+    )
+      for (const { sys, endPadding } of positions)
+        sys.format({ endPadding, deferStaffSpacing: this.options.verticalSpacing === 'profile' });
+  }
+
   /** Reconcile staff envelopes across all measures in a row, then translate the entire solved row once. */
-  private layoutRow(units: Unit[], options: Required<SheetOptions>, y: number): ContinuousRow {
+  private layoutRow(
+    units: Unit[],
+    options: Required<SheetOptions>,
+    y: number,
+    alignedWidths?: readonly number[]
+  ): ContinuousRow {
     const first = units[0].first,
       last = units[units.length - 1].last;
     const visible = this.visible(first, last);
@@ -928,14 +1023,18 @@ export class ContinuousLayout {
         ? this.spec.staves.map(() => new InkProfile(options.x, options.width))
         : undefined;
     const offsets = this.spec.staves.map(() => 0);
+    let measureOverflow = 0;
     const positions = units.map((u, k) => {
       const begin = k === 0,
         end = k === units.length - 1;
       const sys = this.score.systems[u.first];
+      this.textLanes?.clear(sys);
       sys.setX(x).setY(0);
       const chordPadding = end ? 0 : u.after;
       const endPadding = this.install(u.first, u.last, begin, end) + chordPadding;
-      const width = u.width + extra * weights[k] + chordPadding + (begin ? u.start : 0) + (end ? u.end : 0);
+      const minimumWidth = u.width + chordPadding + (begin ? u.start : 0) + (end ? u.end : 0);
+      const width = alignedWidths?.[u.first] ?? minimumWidth + extra * weights[k];
+      if (alignedWidths) measureOverflow = Math.max(measureOverflow, minimumWidth - width);
       sys.setWidth(width).format({ endPadding, deferStaffSpacing: !!profiles });
       for (let j = 1; j < visible.length; j++) {
         const staves = sys.getStaves(),
@@ -951,6 +1050,7 @@ export class ContinuousLayout {
     const fitted = spans.flatMap((s) =>
       s.beam ? [{ beam: s.beam.measureRow(first, last), staff: s.first.staff }] : []
     );
+    this.fitTextLanes(positions, units, spans, visible, offsets);
     const ink = this.measureStaffInk(positions, visible, profiles);
     for (const { beam, staff } of fitted) {
       const bounds = beam.getBoundingBox();
@@ -969,7 +1069,8 @@ export class ContinuousLayout {
       if (s.syllable) {
         // A continuation row may have no sung words of its own. Include the extender in that staff's envelope.
         const stave = this.score.staves[first][s.first.staff];
-        const relativeY = this.lyricBaseline(s.syllable, stave) - stave.getY();
+        const word = s.toSyllable && s.first.measure < first && s.last.measure <= last ? s.toSyllable : s.syllable;
+        const relativeY = this.lyricBaseline(word, stave) - stave.getY();
         const bounds = ink[s.first.staff];
         bounds.top = Math.min(bounds.top, relativeY);
         bounds.bottom = Math.max(bounds.bottom, relativeY + 2);
@@ -1039,7 +1140,7 @@ export class ContinuousLayout {
       y,
       width: x - options.measureGap - options.x,
       height: rowHeight,
-      overflow: Math.max(0, minimum - options.width),
+      overflow: Math.max(measureOverflow, minimum - options.width),
       measures,
       visibleStaves: visible.map((j) => this.spec.staves[j].id),
       restGroups: units
@@ -1076,6 +1177,8 @@ export class ContinuousLayout {
 
   /** Carry the source syllable's distance from its top staff line to each continuation. */
   private lyricBaseline(word: Annotation, stave: Stave): number {
+    const rowBaseline = this.textLanes?.baseline(word, stave);
+    if (rowBaseline !== undefined) return rowBaseline;
     const source = word.checkAttachedNote().checkStave();
     const spaces = (word.computeY().y + word.getYShift() - source.getYForLine(0)) / source.space(1);
     return stave.getYForLine(0) + stave.space(spaces);
@@ -1104,12 +1207,17 @@ export class ContinuousLayout {
     let y1 = baseline,
       y2 = baseline;
     if (s.syllable) {
-      y1 = y2 = this.lyricBaseline(s.syllable, startStaff);
+      y1 = y2 = this.lyricBaseline(!starts && ends && s.toSyllable ? s.toSyllable : s.syllable, startStaff);
+      if (!starts && s.toSyllable) x1 -= this.continuationPadding.get(startStaff) ?? 0;
       if (starts) {
         const ink = s.syllable.getTextInk(s.syllable.computeX().x, s.syllable.computeY().y);
         x1 = ink.x + ink.w + space * 0.35;
       }
-      if (ends) x2 = (s.last.note as StaveNote).getNoteHeadBeginX() + s.last.note.getGlyphWidth();
+      if (ends) {
+        x2 = s.toSyllable
+          ? s.toSyllable.getTextInk(s.toSyllable.computeX().x, 0).x - space * 0.35
+          : (s.last.note as StaveNote).getNoteHeadBeginX() + s.last.note.getGlyphWidth();
+      }
     }
     if (kind === 'tie' || kind === 'slur') {
       if (!starts && (kind === 'slur' || s.spec.string !== undefined))
@@ -1173,7 +1281,7 @@ export class ContinuousLayout {
     if (kind === 'palmMute' && starts && s.label) {
       x1 = Math.max(startStaff.getX(), Math.min(x1, x2 - s.label.getWidth() - space));
     }
-    if (kind === 'hyphen' && ends) x2 = s.last.note.getAbsoluteX() - space * 0.3;
+    if (kind === 'hyphen' && ends && !s.toSyllable) x2 = s.last.note.getAbsoluteX() - space * 0.3;
     if (x2 <= x1 || (starts && s.label && x1 + s.label.getWidth() > x2)) {
       if (report) this.diagnostics.push({ code: 'SpanOverflow', measures, source: s.spec.id });
       if (x2 <= x1) return;
@@ -1229,13 +1337,21 @@ export class ContinuousLayout {
               (n.getStave() === staves[s.first.staff] || n.getStave() === staves[s.last.staff])
           );
       });
-      const fitted =
-        kind === 'slur'
-          ? fitPitchedSlur(fragment, s, slurInk(events))
-          : fitSpan(
-              fragment,
-              events.filter((n) => n !== s.first.note && n !== s.last.note).flatMap((n) => measureEngraving(n).parts)
-            );
+      // System text is placed outside the finished curve; it must not push that same curve away.
+      let fitted: boolean;
+      if (kind === 'slur') {
+        fitted = fitPitchedSlur(fragment, s, this.measureSlurInk(events));
+      } else {
+        const obstacles = events
+          .filter((n) => n !== s.first.note && n !== s.last.note)
+          .flatMap(
+            (n) =>
+              measureEngraving(n, {
+                extension: (e) => (this.textLanes?.isMark(e) ? { parts: [], anchors: {} } : undefined),
+              }).parts
+          );
+        fitted = fitSpan(fragment, obstacles);
+      }
       if (!fitted && report) this.diagnostics.push({ code: 'CurveCollision', measures, source: s.spec.id });
     }
     return fragment;

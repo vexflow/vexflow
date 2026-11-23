@@ -65,6 +65,7 @@ interface Lane {
   options: PhraseLaneOptions;
   syllables?: PhraseSyllable[];
   stanzaLabel?: Annotation;
+  rowBaselineSpaces?: number;
 }
 interface Obstacle extends Bounds {
   owner: Element;
@@ -144,6 +145,12 @@ export class PhraseLayout {
       if (mark instanceof Annotation) mark.phraseManaged = true;
     }
     return this;
+  }
+
+  /** Pin a registered text lane to the shared row solution before its final native layout. */
+  setRowBaseline(first: Annotation, spaces: number | undefined): void {
+    const lane = this.lanes.find((lane) => lane.marks[0] === first);
+    if (lane) lane.rowBaselineSpaces = spaces;
   }
 
   /** Each whole syllable uses native text shaping and participates in ModifierContext horizontal spacing. */
@@ -483,10 +490,11 @@ export class PhraseLayout {
       this.stanzaLabels.push(label);
     }
     const authored = marks.filter((m): m is Annotation => m instanceof Annotation && m.getTextBaseline() !== undefined);
-    const pinned = options.baselineSpaces !== undefined || authored.length > 0;
+    const spaces = lane.rowBaselineSpaces ?? options.baselineSpaces;
+    const pinned = spaces !== undefined || authored.length > 0;
     let y =
-      options.baselineSpaces !== undefined
-        ? stave.getYForLine(0) + stave.space(options.baselineSpaces)
+      spaces !== undefined
+        ? stave.getYForLine(0) + stave.space(spaces)
         : (authored[0]?.getTextBaseline() ?? stave.getYForLine(above ? 0 : stave.getNumLines() - 1));
     for (const m of marks) m.setLayoutBaseline(y);
     const labels = marks.filter((m): m is Annotation => m instanceof Annotation);

@@ -609,6 +609,31 @@ const chords = [{ note: 'downbeat', harmony: written }, { note: 'rest', text: 'N
 
 `showTimeSignature` carries forward on the staff. Set it to `true` to print the active meter again. The meter still governs voice timing and automatic beaming while hidden. Use `Barline.type.DOUBLE` for a double bar. The same descriptors drive screen reflow and the selected staff in a `Publication`.
 
+#### Aligning verses and harmonies across a system
+
+Set `continuous: { textLanes: 'system' }` on the composition when adjacent measures belong to the same lead sheet. Each physical staff has a harmony lane above its voices and slurs. Each singing voice has separate verse lanes below the music. VexFlow fits them again whenever the line breaks change, including when you extract a part.
+
+The order of the verse arrays identifies them across measures. For a verse that skips a bar or enters late, give it a stable ID, such as `{ id: 'second', syllables: [...] }`. A `hyphenAfter` at the last attack of a bar connects to the next syllable in that verse. An `extendTo` may name a later note in the same staff. When that note carries another syllable in the verse, the extender stops before its first letter. Both kinds of connector can cross a system break.
+
+#### Placing a direction on its own beat
+
+A text direction can enter while a sounding note is still held. Give the direction its own voice, filling the rest of the measure with skips just as you would in a rhythmic voice.
+
+```js
+const directions = {
+  notes: [
+    { skip: 'q' }, // The bass can sustain through the first beat.
+    { id: 'bass-style', direction: {
+      text: 'il basso sempre stacc.', duration: 'h', align: 'center', line: 11,
+      font: { style: 'italic' },
+    } },
+    { skip: 'q' }, // Complete the 4/4 measure.
+  ],
+};
+```
+
+The `align` setting aligns the left edge, center, or right edge of the text to its beat. The vertical coordinate uses native `TextNote` lines, with line 3 at the top staff line. Use `anchor: 'start'` or `anchor: 'end'` to place the corresponding ink edge at the measure's music margin while preserving the event's duration and onset. The source ID identifies both the reading event in `ScoreNavigation` and the printed SVG group in an extracted part.
+
 ### Editorial turns
 
 Attach `score.make.ornament('turn', { parenthesized: true })` to the written note to show a turn supplied by the editor. The parentheses enclose the turn sign above the staff. A native `new Ornament('turn').setParenthesized()` gives the same engraving. Pass `false` to the setter to restore the bare turn.

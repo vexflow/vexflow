@@ -8,6 +8,7 @@ import { nienteBounds } from './hairpintip';
 import { StaveNote } from './stavenote';
 import { Tables } from './tables';
 import { TabNote } from './tabnote';
+import { TextNote } from './textnote';
 import { RuntimeError } from './util';
 
 /** Rational times are in whole notes. Measure and voice numbers start at one. */
@@ -64,7 +65,8 @@ function spokenPitch(key: string, sign?: Accidental): string {
 }
 
 /** Describe written attacks. Unpitched instruments are named in place of their display keys. */
-function describe(note: StaveNote | TabNote): string {
+function describe(note: StaveNote | TabNote | TextNote): string {
+  if (note instanceof TextNote) return note.getText();
   if (note.isRest()) return '';
   const marks = note.notation.map((n) => n.label);
   if (note instanceof TabNote) {
@@ -91,8 +93,8 @@ function describe(note: StaveNote | TabNote): string {
 }
 
 /** Get the painted note envelope or the string/fret target on TAB. Hidden events remain in reading order. */
-function noteRegion(note: StaveNote | TabNote, diagnostics: GeometryDiagnostic[]): Bounds | undefined {
-  if (note instanceof StaveNote) {
+function noteRegion(note: StaveNote | TabNote | TextNote, diagnostics: GeometryDiagnostic[]): Bounds | undefined {
+  if (note instanceof StaveNote || note instanceof TextNote) {
     const measured = measureEngraving(note);
     diagnostics.push(...measured.diagnostics);
     return measured.ink;
@@ -153,7 +155,12 @@ export class ScoreNavigation {
             if (note.shouldIgnoreTicks()) continue;
             const time = clock.clone();
             clock.add(note.getTicks());
-            if (!(note instanceof StaveNote || note instanceof TabNote)) continue;
+            if (!(
+              note instanceof StaveNote ||
+              note instanceof TabNote ||
+              (note instanceof TextNote && note.getDirectionAnchor())
+            ))
+              continue;
             const id = note.getAttribute('id');
             if (seen.has(id)) throw new RuntimeError('DuplicateID', 'Duplicate score event: ' + id);
             seen.add(id);
@@ -165,7 +172,7 @@ export class ScoreNavigation {
               staff.name || staff.id,
               `voice ${voice + 1}`,
               describe(note),
-              length + (note.isRest() ? ' rest' : ' note'),
+              note instanceof TextNote ? length + ' direction' : length + (note.isRest() ? ' rest' : ' note'),
               ...(techniqueLabels.get(id) ?? []),
             ]
               .filter(Boolean)

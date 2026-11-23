@@ -54,7 +54,7 @@ export function writtenCue(staff: EasyScoreStaveSpec, interval: CueTransposition
     if (typeof item === 'string') return item; // CueBuilder handles each parsed pitch.
     if (item instanceof Tickable || 'tab' in item)
       throw new RuntimeError('BadPublication', 'A written cue transposes declarative pitched staff notes.');
-    if ('skip' in item) return item;
+    if ('skip' in item || 'direction' in item) return item;
     if ('change' in item)
       return item.change.key ? { change: { ...item.change, key: signature(item.change.key) } } : item;
     if (!('note' in item)) return note(item);

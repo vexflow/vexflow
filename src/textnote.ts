@@ -2,6 +2,7 @@
 // MIT License
 // Timed text and optional music glyphs, including smaller text scripts.
 
+import { BoundingBox } from './boundingbox';
 import { Element } from './element';
 import { Font, FontInfo } from './font';
 import { Glyphs } from './glyphs';
@@ -68,6 +69,37 @@ export class TextNote extends Note {
   protected smooth: boolean;
   protected justification: TextJustification;
   protected line: number;
+  private directionAnchor?: 'beat' | 'start' | 'end';
+
+  /** A selectable direction retains its rhythm even when its text is aligned with a bar edge. */
+  setDirectionAnchor(anchor: 'beat' | 'start' | 'end'): this {
+    this.directionAnchor = anchor;
+    return this;
+  }
+
+  getDirectionAnchor(): 'beat' | 'start' | 'end' | undefined {
+    return this.directionAnchor;
+  }
+
+  /** Both drawing and pointer selection use the same justified origin. */
+  private textOrigin(): { x: number; y: number } {
+    const stave = this.checkStave();
+    let x = this.getAbsoluteX() + this.checkTickContext().getMetrics().glyphPx / 2;
+    const advance = this.directionAnchor ? this.getTextMetrics().width : this.getWidth();
+    if (this.justification === TextJustification.CENTER) x -= advance / 2;
+    if (this.justification === TextJustification.RIGHT) x -= advance;
+    if (this.directionAnchor === 'start' || this.directionAnchor === 'end') {
+      const ink = this.getTextInk(0, 0);
+      x = this.directionAnchor === 'start' ? stave.getNoteStartX() - ink.x : stave.getNoteEndX() - ink.x - ink.w;
+    }
+    return { x, y: stave.getYForLine(this.line - 3) };
+  }
+
+  override getBoundingBox(): BoundingBox {
+    if (!this.directionAnchor) return super.getBoundingBox();
+    const { x, y } = this.textOrigin();
+    return this.getTextInk(x, y);
+  }
 
   constructor(noteStruct: TextNoteStruct) {
     super(noteStruct);
@@ -140,26 +172,19 @@ export class TextNote extends Note {
    */
   override draw(): void {
     const ctx = this.checkContext();
-    const stave = this.checkStave();
-    const tickContext = this.checkTickContext(`Can't draw without a TickContext.`);
-
     this.setRendered();
-
-    // Reposition to center of note head
-    let x = this.getAbsoluteX() + tickContext.getMetrics().glyphPx / 2;
-
-    // Align based on tick-context width.
-    const width = this.getWidth();
-
-    if (this.justification === TextJustification.CENTER) {
-      x -= width / 2;
-    } else if (this.justification === TextJustification.RIGHT) {
-      x -= width;
+    const { x, y } = this.textOrigin();
+    if (this.directionAnchor) {
+      const id = this.getAttribute('id');
+      ctx.openGroup('timed-direction', id)?.setAttribute('data-direction-id', id);
     }
-
-    const y = stave.getYForLine(this.line + -3);
     this.renderText(ctx, x, y);
 
+    if (this.directionAnchor) {
+      const ink = this.getBoundingBox();
+      ctx.pointerRect(ink.x, ink.y, ink.w, ink.h);
+      ctx.closeGroup();
+    }
     const height = this.getHeight();
 
     if (this.superscript) {

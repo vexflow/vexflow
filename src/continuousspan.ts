@@ -60,6 +60,8 @@ export interface ContinuousSpan {
   labelFontSize?: number;
   /** For a lyric extender, take the baseline and ink edge from this Annotation on the source note. */
   syllableId?: string;
+  /** Leave clearance before the ink of this arrival syllable on the destination note. */
+  toSyllableId?: string;
 }
 export interface SpanAnchor {
   measure: number;
@@ -72,6 +74,7 @@ export interface ResolvedSpan {
   last: SpanAnchor;
   label?: Element;
   syllable?: Annotation;
+  toSyllable?: Annotation;
   beam?: ContinuousBeam;
   bendLabel?: Element;
 }

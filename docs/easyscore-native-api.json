@@ -1911,6 +1911,7 @@
       "setPassLimit(limit: number): this",
       "route(span: Route): this",
       "addLane(stave: Stave, marks: PhraseMark[], options: PhraseLaneOptions = {}): this",
+      "setRowBaseline(first: Annotation, spaces: number | undefined): void",
       "addVerse(stave: Stave, syllables: PhraseSyllable[], options: PhraseVerseOptions = {}): Annotation[]",
       "getStanzaColumnWidth(stave: Stave): number",
       "resetPlacement(): void",
@@ -2937,6 +2938,9 @@
       "CATEGORY(): string",
       "Justification",
       "GLYPHS(): Record<string, string>",
+      "setDirectionAnchor(anchor: 'beat' | 'start' | 'end'): this",
+      "getDirectionAnchor(): 'beat' | 'start' | 'end' | undefined",
+      "getBoundingBox(): BoundingBox",
       "constructor(noteStruct: TextNoteStruct)",
       "setJustification(just: TextJustification): this",
       "setLine(line: number): this",
@@ -3197,6 +3201,7 @@
     "ContinuousOptions": {
       "extends": [],
       "fields": [
+        "textLanes?: 'system';",
         "verticalSpacing?: 'profile' | 'envelope';",
         "inkBounds?: (stave: Stave, measure: number) => readonly Bounds[];",
         "independentMeters?: boolean;",
@@ -3227,8 +3232,8 @@
       "diagnostics: { code: 'RowOverflow' | 'CurveCollision' | 'SplitStemAlignment' | 'SpanOverflow' | 'StaffSpacingLimit'; measures: number[]; source?: string; }[]",
       "fragments: SpanFragment[]",
       "rows: ContinuousRow[]",
-      "constructor(private readonly score: EasyScoreComposition, private readonly spec: EasyScoreCompositionSpec, starts: State[][], ends: State[][], placed?: Set<Accidental>, private readonly interiorBars: InteriorBar[] = [])",
-      "format(options: Required<SheetOptions>): ContinuousRow[]",
+      "constructor(private readonly score: EasyScoreComposition, private readonly spec: EasyScoreCompositionSpec, starts: State[][], ends: State[][], placed?: Set<Accidental>, private readonly interiorBars: InteriorBar[] = [], private readonly textLanes?: SystemTextLanes)",
+      "format(options: Required<SheetOptions>, alignedWidths?: readonly number[]): ContinuousRow[]",
       "draw(context: RenderContext): void"
     ]
   },
@@ -3600,7 +3605,7 @@
         "showTimeSignature?: boolean;"
       ]
     },
-    "EasyScoreContent": "export type EasyScoreContent = | string | StaveNoteStruct | Tickable | { note: StaveNoteStruct; id?: string; stave?: string; grace?: GraceGroupSpec; } | { tab: TabNoteStruct; id?: string; stave?: string; drawStem?: boolean } | { skip: string | NoteStruct; id?: string } | { change: EasyScoreStaffState };",
+    "EasyScoreContent": "export type EasyScoreContent = | string | StaveNoteStruct | Tickable | { note: StaveNoteStruct; id?: string; stave?: string; grace?: GraceGroupSpec; } | { tab: TabNoteStruct; id?: string; stave?: string; drawStem?: boolean } | { skip: string | NoteStruct; id?: string } | { direction: Pick<TextNoteStruct, 'duration' | 'dots' | 'line' | 'font'> & { text: string; align?: 'left' | 'center' | 'right'; anchor?: 'beat' | 'start' | 'end'; }; id?: string; } | { change: EasyScoreStaffState };",
     "EasyScoreVoiceSpec": {
       "extends": [],
       "fields": [
@@ -3622,7 +3627,7 @@
         "span?: VoiceTime | string;",
         "endBarline?: BarlineType;",
         "chords?: readonly (LeadMark | { note: string; harmony: ChordHarmony })[];",
-        "verses?: readonly (readonly LyricMark[] | { stanza?: string; syllables: readonly LyricMark[] })[];"
+        "verses?: readonly (readonly LyricMark[] | { id?: string; stanza?: string; syllables: readonly LyricMark[] })[];"
       ]
     },
     "EasyScoreStaveSpec": {

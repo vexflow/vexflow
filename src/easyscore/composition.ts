@@ -1,8 +1,6 @@
 // Structured construction delegates timing and layout to native Voice, System, and Sheet objects.
 import { Accidental } from '../accidental';
-import { Annotation } from '../annotation';
 import type { FeatheredBeamDirection } from '../beam';
-import { leadChordAnnotations } from '../chordspacing';
 import { ContinuousLayout, ContinuousOptions } from '../continuouslayout';
 import { Dot } from '../dot';
 import type { EasyScore, EasyScoreVoiceOptions } from '../easyscore';
@@ -12,23 +10,26 @@ import { Fraction } from '../fraction';
 import { GraceNoteStruct } from '../gracenote';
 import { Metrics } from '../metrics';
 import { Modifier } from '../modifier';
-import { ChordHarmony, NotationSpelling } from '../notationspelling';
+import type { ChordHarmony } from '../notationspelling';
 import { Note, NoteStruct } from '../note';
 import { Sheet, SheetOptions } from '../sheet';
 import { Stave, StaveOptions } from '../stave';
 import { BarlineType } from '../stavebarline';
-import { StaveNote, StaveNoteStruct } from '../stavenote';
+import { StaveNoteStruct } from '../stavenote';
 import { StemmableNote } from '../stemmablenote';
 import { System, SystemOptions } from '../system';
 import { TabNoteStruct } from '../tabnote';
+import { TextJustification, TextNoteStruct } from '../textnote';
 import { Tickable } from '../tickable';
 import { Tuplet, TupletOptions } from '../tuplet';
 import { RuntimeError } from '../util';
 import { Voice, VoiceTime } from '../voice';
 import { CompositionEngraving, placeCompositionMarks } from './engraving';
 import { independentMeterGrid, initialStaffState, InteriorBar, MeterPosition } from './independentmeter';
+import { addLeadMarks, LeadMark, LyricMark } from './leadmarks';
 import { applyCompositionAccidentals, KeyChange } from './policies';
 import { EasyScoreAutoBeamOptions } from './rhythm';
+import { SystemTextLanes } from './textlanes';
 import { resolveActiveStems, resolveTupletAppearance, resolveVoiceBeams, VoiceRhythm } from './voicerhythm';
 
 /** Written pitches stay literal, even when a key signature is displayed. */
@@ -83,6 +84,14 @@ export type EasyScoreContent =
     }
   | { tab: TabNoteStruct; id?: string; stave?: string; drawStem?: boolean }
   | { skip: string | NoteStruct; id?: string }
+  | {
+      direction: Pick<TextNoteStruct, 'duration' | 'dots' | 'line' | 'font'> & {
+        text: string;
+        align?: 'left' | 'center' | 'right';
+        anchor?: 'beat' | 'start' | 'end';
+      };
+      id?: string;
+    }
   | { change: EasyScoreStaffState };
 
 /** Tuplet indexes count timed notes, excluding inline signatures and barlines. */
@@ -103,20 +112,6 @@ export interface EasyScoreVoiceSpec {
   autoBeam?: boolean | EasyScoreAutoBeamOptions;
 }
 
-/** A written mark anchored by note ID on its owning staff and measure. */
-interface LeadMark {
-  note: string;
-  text: string;
-}
-
-/** A lyric connector stays within its verse and measure. */
-interface LyricMark extends LeadMark {
-  /** A second syllable sharing this attack and its verse baseline. */
-  elideWith?: string;
-  hyphenAfter?: boolean;
-  extendTo?: string;
-}
-
 /** span is the actual duration of a pickup; time remains its displayed meter. */
 export interface EasyScoreMeasureSpec extends EasyScoreStaffState {
   instrument?: { name: string; shortName?: string };
@@ -127,7 +122,7 @@ export interface EasyScoreMeasureSpec extends EasyScoreStaffState {
   /** Literal labels or spelled harmonies sharing a lane above their notes. */
   chords?: readonly (LeadMark | { note: string; harmony: ChordHarmony })[];
   /** A verse can supply a printed stanza label on the measure where it begins. */
-  verses?: readonly (readonly LyricMark[] | { stanza?: string; syllables: readonly LyricMark[] })[];
+  verses?: readonly (readonly LyricMark[] | { id?: string; stanza?: string; syllables: readonly LyricMark[] })[];
 }
 
 /** Staves have aligned measure arrays. Missing or uneven measures are errors. */
@@ -243,6 +238,18 @@ function buildVoice(
           if (!(error instanceof RuntimeError) || error.code !== 'NoVoice') throw error;
         }
         notes.push(item);
+      } else if ('direction' in item) {
+        const { text, align = 'left', anchor = 'beat' } = item.direction;
+        if (!text?.trim() || !['left', 'center', 'right'].includes(align) || !['beat', 'start', 'end'].includes(anchor))
+          invalid('A timed direction needs text, a supported alignment and a measure anchor.');
+        const note = score.make
+          .textNote({ ...item.direction, font: { ...Metrics.getFontInfo('TextNote.text'), ...item.direction.font } })
+          .setJustification(
+            { left: TextJustification.LEFT, center: TextJustification.CENTER, right: TextJustification.RIGHT }[align]
+          )
+          .setDirectionAnchor(anchor);
+        if (item.id !== undefined) note.setAttribute('id', item.id);
+        notes.push(note);
       } else if ('skip' in item) {
         const skip = score.make.ghostNote(item.skip);
         if (item.id !== undefined) skip.setAttribute('id', item.id);
@@ -437,53 +444,6 @@ function buildSpans(
     if (!from || !to) invalid('Hairpins require both endpoints.');
     return score.make.hairpin({ from, to, type: span.type, options: span.options });
   });
-}
-
-/** Rebuild the same native chord and lyric lanes for screen systems and independent publication views. */
-function addLeadMarks(score: EasyScore, system: System, measure: EasyScoreMeasureSpec, voices: Tickable[][]): void {
-  if (!measure.chords?.length && !measure.verses?.length) return;
-  const members = new Set(voices.flat());
-  const anchor = (id: string) => {
-    const note = score.getNote(id);
-    if (!members.has(note)) invalid(`Lead mark anchor ${id} belongs to another staff or measure.`);
-    return note;
-  };
-  const chordLanes = new Map<Stave, Annotation[]>();
-  for (const chord of measure.chords ?? []) {
-    const note = anchor(chord.note);
-    if ('harmony' in chord && 'text' in chord) invalid('Choose either chord harmony or literal text.');
-    const text = 'harmony' in chord ? NotationSpelling.chordText(chord.harmony) : chord.text;
-    if (!text) invalid('A chord label needs text.');
-    const mark = score.make.annotation({ text, vJustify: 'top', font: Metrics.getFontInfo('ChordSymbol') });
-    leadChordAnnotations.add(mark);
-    score.attach(note, mark);
-    if (note instanceof StaveNote) {
-      const stave = note.checkStave();
-      const lane = chordLanes.get(stave) ?? [];
-      lane.push(mark);
-      chordLanes.set(stave, lane);
-    }
-  }
-  for (const [stave, marks] of chordLanes) system.getPhraseLayout().addLane(stave, marks, { side: 'above' });
-
-  const lyricAnchor = (id: string) => {
-    const note = anchor(id);
-    if (!(note instanceof StaveNote)) invalid('A lyric needs a pitched staff note.');
-    return note;
-  };
-  for (const verse of measure.verses ?? []) {
-    const entries = 'syllables' in verse ? verse.syllables : verse;
-    const stanza = 'syllables' in verse ? verse.stanza : undefined;
-    if (!entries.length) invalid('A verse needs at least one syllable.');
-    const syllables = entries.map(({ note, text, elideWith, hyphenAfter, extendTo }) => ({
-      note: lyricAnchor(note),
-      text,
-      elideWith,
-      hyphenAfter,
-      extendTo: extendTo === undefined ? undefined : lyricAnchor(extendTo),
-    }));
-    system.getPhraseLayout().addVerse(syllables[0].note.checkStave(), syllables, { stanza });
-  }
 }
 
 /** Carry the previous written state through omitted measure fields. */
@@ -698,6 +658,7 @@ function composeAligned(
         ends: Required<EasyScoreStaffState>[][] = [];
       const placed = grid?.placed ?? (spec.continuous ? new Set<Accidental>() : undefined);
       const noteMeasures = new Map<Note, number>();
+      const rowLanes = spec.continuous?.textLanes === 'system' ? new SystemTextLanes() : undefined;
       const prepared = grid ? undefined : prepareRhythm(score, spec, states, nativeInputs);
       for (let index = 0; index < count; index++) {
         starts.push(spec.staves.map((staff, j) => measureState(staff.measures[index], states[j])));
@@ -754,7 +715,7 @@ function composeAligned(
             )
           );
         }
-        spec.staves.forEach((staff, j) => addLeadMarks(score, system, staff.measures[index], notes[j]));
+        spec.staves.forEach((staff, j) => addLeadMarks(score, system, staff.measures[index], notes[j], j, rowLanes));
         ends.push(states.slice());
         result.staves.push(staves);
         result.voices.push(voices);
@@ -764,7 +725,9 @@ function composeAligned(
       if (place) result.sheet.setEngravingPlacement((rows) => placeCompositionMarks(result, rows, place));
       result.spans = buildSpans(score, spec, noteMeasures, result.diagnostics);
       if (spec.continuous)
-        result.sheet.setContinuousLayout(new ContinuousLayout(result, spec, starts, ends, placed, grid?.interior));
+        result.sheet.setContinuousLayout(
+          new ContinuousLayout(result, spec, starts, ends, placed, grid?.interior, rowLanes)
+        );
       for (const voice of prepared?.flat(2) ?? []) resolveTupletAppearance(voice);
       return result;
     });

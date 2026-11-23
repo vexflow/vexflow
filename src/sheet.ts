@@ -221,7 +221,7 @@ export class Sheet {
   /** Measure and position native rows before custom elements read final coordinates. */
   private formatRows(): this {
     if (this.continuous) {
-      this.rows = this.continuous.format(this.options);
+      this.rows = this.continuous.format(this.options, this.alignedWidths);
       return this;
     }
     const widths = this.measureSystems();
