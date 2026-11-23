@@ -1176,3 +1176,217 @@ test('explicit grace cautionaries survive ordered generation and suppress redund
     [['#', true]]
   );
 });
+
+test('active voices resolve the Liszt pickup and six-eighth accompaniment before joining the staves', () => {
+  const score = create();
+  const composition = score.compose({
+    stemPolicy: 'active-voices',
+    staves: [
+      {
+        id: 'bass',
+        clef: 'bass',
+        time: '3/4',
+        measures: [
+          {
+            span: '1/4',
+            voices: [
+              { notes: [{ skip: '8', id: 'silent' }, { skip: '8' }] },
+              { notes: 'G#2/8., C#3/16', autoBeam: true },
+            ],
+          },
+          {
+            voices: [
+              { notes: 'E4/q, E4, F#4' },
+              { notes: 'C#4/8, B3, C#4, B3, D#4, B3', beams: [{ start: 0, count: 6 }], autoBeam: true },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+  const [pickup, bar] = composition.notes.map(([voices]) => voices);
+  assert.equal(score.getNote('silent'), pickup[0][0]);
+  assert.ok(pickup[1].every((n) => n.getStemDirection() === VF.Stem.UP));
+  assert.ok(pickup[1][0].getBeam());
+  const [upper, lower] = bar;
+  assert.ok(upper.every((n) => n.getStemDirection() === VF.Stem.UP));
+  assert.ok(lower.every((n) => n.getStemDirection() === VF.Stem.DOWN));
+  assert.deepEqual(lower[0].getBeam().getNotes(), lower);
+  composition.sheet.format();
+  upper.forEach((note, i) => assert.equal(note.getAbsoluteX(), lower[2 * i].getAbsoluteX()));
+});
+
+test('timed skips and explicit ranges preserve the automatic beam pulse and visible rest stemlets', () => {
+  const score = create();
+  const study = score.compose({
+    staves: [
+      {
+        id: 'staff',
+        time: '4/4',
+        measures: [
+          {
+            voices: [
+              {
+                notes: ['A4/16, B4, C5', { skip: '16' }, 'B4/16, B4/16/r, C5/16, D5, E5, F5, G5, A5, B5, C6, D6, E6'],
+                beams: [{ start: 1, count: 6, flatBeams: true, showStemlets: true }],
+                autoBeam: { beamRests: true },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+  const [notes] = study.notes[0][0];
+  const group = (index, ...members) =>
+    assert.deepEqual(
+      notes[index].getBeam().getNotes(),
+      members.map((i) => notes[i])
+    );
+  group(1, 1, 2);
+  group(4, 4, 5, 6);
+  group(8, 8, 9, 10, 11);
+  group(12, 12, 13, 14, 15);
+  assert.ok(notes[5].isRest() && notes[5].getBeam().renderOptions.showStemlets);
+  study.sheet.format();
+  notes[5].getBeam().postFormat();
+  const stemlet = notes[5].getStem().getBoundingBox().h;
+  assert.ok(stemlet > 0 && stemlet < notes[4].getStem().getBoundingBox().h);
+  assert.equal(notes[4].getBeam().renderOptions.flatBeams, true);
+  assert.equal(notes[8].getBeam().renderOptions.flatBeams, false);
+  for (const i of [0, 3, 7]) assert.ok(!notes[i].hasBeam());
+  const [auto] = create().compose({
+    staves: [
+      {
+        id: 'upper',
+        time: '2/4',
+        measures: [
+          {
+            voices: [
+              {
+                notes: ['C4/16, D4', { skip: '16' }, 'F4/16, G4/16, B4/16/r, A4/16, B4'],
+                autoBeam: { beamRests: true, showStemlets: true },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  }).notes[0][0];
+  assert.ok(!auto[2].hasBeam() && !auto[3].hasBeam());
+  assert.equal(auto[4].getBeam(), auto[7].getBeam());
+  assert.ok(auto[5].getBeam().renderOptions.showStemlets);
+});
+
+test('voices on different physical staves retain natural stems and authored directions', () => {
+  const note = (key, stave, stemDirection) => ({
+    note: { keys: [key], clef: 'treble', duration: 'q', stemDirection },
+    stave,
+  });
+  const score = create();
+  const spec = {
+    stemPolicy: 'active-voices',
+    staves: [
+      {
+        id: 'first',
+        time: '3/4',
+        measures: [
+          { voices: [{ notes: [note('c/4', 'second'), note('c/4', 'first'), note('c/4', 'second', VF.Stem.DOWN)] }] },
+        ],
+      },
+      {
+        id: 'second',
+        time: '3/4',
+        measures: [{ voices: [{ notes: [note('d/4'), note('d/4'), note('d/4', undefined, VF.Stem.UP)] }] }],
+      },
+    ],
+  };
+  const composition = score.compose(spec);
+  composition.sheet.format();
+  const [[first], [second]] = composition.notes[0];
+  assert.deepEqual(
+    first.map((n) => n.getStemDirection()),
+    [VF.Stem.UP, VF.Stem.UP, VF.Stem.DOWN]
+  );
+  assert.deepEqual(
+    second.map((n) => n.getStemDirection()),
+    [VF.Stem.DOWN, VF.Stem.UP, VF.Stem.UP]
+  );
+});
+
+test('explicit beam ranges reject overlaps, out-of-bounds members and unbeamable durations atomically', () => {
+  for (const beams of [
+    [
+      { start: 0, count: 2 },
+      { start: 1, count: 2 },
+    ],
+    [{ start: 4, count: 2 }],
+    [{ start: 2, count: 2 }],
+  ]) {
+    const score = create();
+    assert.throws(
+      () =>
+        score.compose({
+          staves: [
+            {
+              id: 'a',
+              time: '3/4',
+              measures: [
+                {
+                  voices: [
+                    {
+                      notes: 'C4/8, D4, E4/q, F4',
+                      beams,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      /overlap|outside|shorter/
+    );
+    assert.equal(queued(score), 0);
+  }
+});
+
+test('continuous beam ownership leaves automatic space on both sides and finalizes authored tuplets', () => {
+  const score = create();
+  const note = (key, id) => ({ note: { keys: [key], duration: '8' }, id });
+  const measures = [
+    {
+      voices: [
+        {
+          stem: 'down',
+          notes: [note('a/4', 'a'), note('b/4', 'b'), note('c/5', 'c'), note('d/5', 'd'), note('e/5', 'e')],
+          autoBeam: true,
+          tuplets: [{ start: 2, count: 3 }],
+        },
+      ],
+    },
+    {
+      voices: [
+        {
+          stem: 'down',
+          notes: [note('f/5', 'f'), note('g/5', 'g'), note('a/5', 'h'), note('b/5', 'i'), note('c/6', 'j')],
+          autoBeam: true,
+          tuplets: [{ start: 0, count: 3, options: { location: VF.Tuplet.LOCATION_TOP, bracketed: true } }],
+        },
+      ],
+    },
+  ];
+  const source = {
+    staves: [{ id: 'part', time: '2/4', measures }],
+    continuous: { spans: [{ kind: 'beam', id: 'over-bar', from: 'c', to: 'h' }] },
+  };
+  const music = score.compose(source);
+  const [[first]] = music.notes[0];
+  const [[second]] = music.notes[1];
+  assert.deepEqual(first[0].getBeam().getNotes(), first.slice(0, 2));
+  assert.deepEqual(second[4].getBeam().getNotes(), second.slice(3));
+  assert.deepEqual(first[2].getBeam().getNotes(), [...first.slice(2), ...second.slice(0, 3)]);
+  assert.equal(first[2].getTuplet().options.bracketed, false);
+  assert.equal(first[2].getTuplet().options.location, VF.Tuplet.LOCATION_BOTTOM);
+  assert.equal(second[0].getTuplet().options.bracketed, true);
+  assert.equal(second[0].getTuplet().options.location, VF.Tuplet.LOCATION_TOP);
+});

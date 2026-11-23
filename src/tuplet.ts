@@ -287,7 +287,7 @@ export class Tuplet extends Element {
           modLines = mc.getUnmeasuredTextLines(true);
         }
         const modY = note.getYForTopText(modLines) - 2 * Tables.STAVE_LINE_DISTANCE;
-        if (note.hasStem() || note.isRest()) {
+        if (note.getCategory() !== Category.GhostNote && (note.hasStem() || note.isRest())) {
           const topY =
             note.getStemDirection() === Stem.UP
               ? note.getStemExtents().topY - Tables.STAVE_LINE_DISTANCE
@@ -310,7 +310,7 @@ export class Tuplet extends Element {
       yPosition = firstNote.checkStave().getYForLine(lineCheck) + 2 * Tables.STAVE_LINE_DISTANCE;
 
       for (let i = 0; i < this.notes.length; ++i) {
-        if (this.notes[i].hasStem() || this.notes[i].isRest()) {
+        if (this.notes[i].getCategory() !== Category.GhostNote && (this.notes[i].hasStem() || this.notes[i].isRest())) {
           const bottomY =
             this.notes[i].getStemDirection() === Stem.UP
               ? this.notes[i].getStemExtents().baseY + 2 * Tables.STAVE_LINE_DISTANCE

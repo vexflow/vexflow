@@ -127,7 +127,7 @@
       "getStemDirection(): number",
       "getDefaultBeamGroups(timeSig: string): Fraction[]",
       "applyAndGetBeams(voice: Voice, stemDirection?: number, groups?: Fraction[]): Beam[]",
-      "generateBeams(notes: StemmableNote[], config: { feathered?: FeatheredBeamDirection; frenchBeams?: boolean; flatBeamOffset?: number; flatBeams?: boolean; secondaryBreaks?: string; showStemlets?: boolean; maintainStemDirections?: boolean; /** Optional facade policy. Omitted preserves the native generator's historical behavior. */ stemPolicy?: 'auto' | 'explicit' | 'preserve'; beamMiddleOnly?: boolean; beamRests?: boolean; groups?: Fraction[]; stemDirection?: number; } = {}): Beam[]",
+      "generateBeams(notes: StemmableNote[], config: { feathered?: FeatheredBeamDirection; frenchBeams?: boolean; flatBeamOffset?: number; flatBeams?: boolean; secondaryBreaks?: string; showStemlets?: boolean; maintainStemDirections?: boolean; /** Optional facade policy. Omitted preserves the native generator's historical behavior. */ stemPolicy?: 'auto' | 'explicit' | 'preserve'; beamMiddleOnly?: boolean; beamRests?: boolean; groups?: Fraction[]; stemDirection?: number; } = {}, reserved?: ReadonlySet<StemmableNote>): Beam[]",
       "constructor(notes: StemmableNote[], autoStem: boolean = false, private readonly continuation?: BeamContinuation)",
       "getNotes(): StemmableNote[]",
       "getBeamCount(): number",
@@ -3585,7 +3585,7 @@
         "showTimeSignature?: boolean;"
       ]
     },
-    "EasyScoreContent": "export type EasyScoreContent = | string | StaveNoteStruct | Tickable | { note: StaveNoteStruct; id?: string; stave?: string; grace?: GraceGroupSpec; } | { tab: TabNoteStruct; id?: string; stave?: string; drawStem?: boolean } | { change: EasyScoreStaffState };",
+    "EasyScoreContent": "export type EasyScoreContent = | string | StaveNoteStruct | Tickable | { note: StaveNoteStruct; id?: string; stave?: string; grace?: GraceGroupSpec; } | { tab: TabNoteStruct; id?: string; stave?: string; drawStem?: boolean } | { skip: string | NoteStruct; id?: string } | { change: EasyScoreStaffState };",
     "EasyScoreVoiceSpec": {
       "extends": [],
       "fields": [
@@ -3593,6 +3593,7 @@
         "stem?: 'auto' | 'up' | 'down';",
         "options?: Omit<EasyScoreVoiceOptions, 'time' | 'mode'>;",
         "tuplets?: readonly { start: number; count: number; options?: TupletOptions }[];",
+        "beams?: readonly { start: number; count: number; flatBeams?: boolean; showStemlets?: boolean; frenchBeams?: boolean; feathered?: FeatheredBeamDirection; }[];",
         "autoBeam?: boolean | EasyScoreAutoBeamOptions;"
       ]
     },
@@ -3633,6 +3634,7 @@
         "continuous?: ContinuousOptions;",
         "sheet?: Omit<SheetOptions, 'factory'>;",
         "system?: Omit<SystemOptions, 'factory' | 'width' | 'autoWidth' | 'noJustification'>;",
+        "stemPolicy?: 'active-voices';",
         "accidentals?: 'literal' | 'key-aware';",
         "graceAccidentals?: 'explicit' | 'ordered';",
         "signatures?: 'changes' | 'every-measure';",
@@ -3692,6 +3694,6 @@
   },
   "easyscore/rhythm": {
     "EasyScoreAutoBeamOptions": "export type EasyScoreAutoBeamOptions = Omit<NonNullable<Parameters<typeof Beam.generateBeams>[1]>, 'stemPolicy'> & { autoStem?: boolean; };",
-    "autoBeam": "(score: EasyScore, notes: StemmableNote[], options: EasyScoreAutoBeamOptions): Beam[]"
+    "autoBeam": "(score: EasyScore, notes: StemmableNote[], options: EasyScoreAutoBeamOptions, reserved?: ReadonlySet<StemmableNote>): Beam[]"
   }
 }

@@ -218,3 +218,50 @@ export function condensedFlutesStudy() {
   }));
   return { source: { staves }, condense: { players: ['fl1', 'fl2'], name: 'Flutes' } };
 }
+
+/** Compare the Friska's independent hand engraving and fully and partly beamed triplets. */
+export function voiceBeamStudy() {
+  const group = (start, count, flatBeams) => ({ start, count, flatBeams });
+  const triplets = [
+    { start: 0, count: 3 },
+    { start: 3, count: 3 },
+  ];
+  return {
+    continuous: {},
+    staves: [
+      {
+        id: 'right',
+        time: '2/4',
+        measures: [
+          {
+            voices: [
+              {
+                stem: 'up',
+                notes: 'C4/8, D4, G4, D4, E4, A4',
+                beams: [group(0, 3, false), group(3, 3, false)],
+                tuplets: triplets,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'left',
+        clef: 'bass',
+        time: '2/4',
+        measures: [
+          {
+            voices: [
+              {
+                stem: 'down',
+                notes: ['E3/8, G3, B3, D3, F3', { skip: '8' }],
+                beams: [group(0, 3, true), group(3, 3, true)],
+                tuplets: triplets,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+}
