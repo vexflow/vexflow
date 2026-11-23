@@ -634,7 +634,49 @@ The guide’s **EasyScore: responsive composition** example covers a grand staff
 
 Pass the same declarative composition to `new Publication(spec)`. Each call to `render(container, options)` builds a separate layout. A conductor score and a cello part can share note IDs and have different staff sizes, page breaks and turn preferences. Dimensions are in millimeters. Each returned page is a standalone SVG. The browser print adapter accepts outline fonts for portable PDF output. [Page and part examples](vf6/m5.md)
 
-If your arrangement uses EasyScore commit hooks to add fingerings or ornaments, pass the same functions to `render(container, { noteHooks: [decorateNote] })`. The print renderer calls them as it builds the notes for each part and cue.
+### Engrave the same source for screen, parts and cues
+
+A fingering or a forced accidental occupies space beside a notehead. Put these modifiers in `engraving.prepareNote` so the formatter can measure them. EasyScore calls this function once for each note it constructs from a string or typed event. Each extracted part or cue gets its own native notes. Use an explicit event ID to recognize the same musical event across views, and look up the pitch in the current chord to find its head index.
+
+```js
+const spec = {
+  staves: [{
+    id: 'piano',
+    measures: [{ voices: [{ notes: [
+      { id: 'entry', note: { keys: ['e/4', 'c/4'], duration: 'w' } },
+    ] }] }],
+  }],
+  engraving: {
+    prepareNote({ id }, note) {
+      if (id !== 'entry') return;
+      const head = note.getKeys().findIndex((key) => key.toLowerCase() === 'e/4');
+      if (head < 0) return;
+      note.addModifier(new Accidental('n'), head);
+      note.addModifier(new FretHandFinger('2').setPosition(Modifier.Position.LEFT), head);
+    },
+  },
+};
+```
+
+The string `'(E4 C4)/w[id="entry"]'` can replace the typed array in this example. If a renderer already supplies EasyScore commit hooks through `Publication.render(container, { noteHooks: [decorateNote] })`, those hooks also run on either input form.
+
+Use `engraving.place` for custom graphics that depend on the final system breaks and note positions. The following example adds a small proofing mark above the entry. Each registration includes the note that owns the mark, its ink rectangle in score coordinates, and a drawing callback for SVG or Canvas. Publication uses the owner to keep the mark on its system and includes the rectangle when measuring the page.
+
+```js
+spec.engraving.place = (composition, addMark) => {
+  const note = composition.getElement('entry');
+  if (!(note instanceof StaveNote)) return; // This part may omit the piano.
+  const x = note.getAbsoluteX();
+  const y = Math.min(...note.getYs()) - 40;
+  addMark({
+    source: note,
+    bounds: { x, y, w: 5, h: 2 },
+    draw: (context) => context.fillRect(x, y, 5, 2),
+  });
+};
+```
+
+Formatting or resizing the sheet replaces its previous registrations. Calculate the geometry from the composition passed to the callback each time. You can inspect the current rectangles and their zero-based system rows with `composition.sheet.getEngravingMarks()`.
 
 ## Native customization and infrastructure
 
