@@ -74,6 +74,21 @@ import { EasyScore as Core } from 'vexflow/core';
 import { EasyScore as Bravura } from 'vexflow/bravura';
 const score = EasyScore.create({renderer: {elementId: null, width: 500, height: 240}});
 const spec: EasyScoreCompositionSpec = {staves: [{id: 'staff', measures: [{voices: [{notes: 'C4/w'}]}]}]};
+// A typed chord, timed direction, and phrase can travel together through the public package types.
+const markedPart: EasyScoreCompositionSpec = {
+  staves: [{id: 'solo', measures: [{voices: [
+    {notes: [
+      {id: 'start', note: {duration: 'h', heads: [
+        {key: 'f#/4', fingering: {finger: '2', position: 'left'}, accidental: 'force'},
+        {key: 'a/4', fingering: {finger: '4', position: 'above'}}
+      ]}},
+      {id: 'end', note: {duration: 'h', keys: ['g/4']}}
+    ]},
+    {notes: [{skip: 'q'}, {id: 'expression', direction: {text: 'dolce', duration: 'h', align: 'left'}}, {skip: 'q'}]}
+  ]}]}],
+  continuous: {textLanes: 'system', spans: [{id: 'phrase', kind: 'slur', from: 'start', fromHead: 1, to: 'end'}]}
+};
+new Publication(markedPart);
 const result: EasyScoreComposition = score.compose(spec);
 result.sheet.setWidth(400);
 const nav = new ScoreNavigation(result, spec.staves);
