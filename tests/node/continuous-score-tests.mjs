@@ -7,6 +7,7 @@ import { createCanvas, registerFont } from 'canvas';
 import puppeteer from 'puppeteer';
 
 import {
+  balladeSpacingStudy,
   beamedSplitChordStudy,
   continuousBeamStudy,
   glissandoStudy,
@@ -673,11 +674,13 @@ test('the shared stem and arpeggio follow the two native heads at each width', (
 });
 
 /** Count rendered stems and heads, then check the joins independently against native geometry. */
-test('beamed split piano chords keep one stem and one beam attachment per attack at either staff distance', () => {
+function checkSplitChords(verticalSpacing) {
   for (const direction of [VF.Stem.UP, VF.Stem.DOWN]) {
     for (const beamStaff of ['upper', 'lower']) {
       const { f, canvas, ctx } = factory();
-      const c = f.EasyScore().compose(beamedSplitChordStudy(VF, direction, 8, beamStaff));
+      const source = beamedSplitChordStudy(VF, direction, 8, beamStaff);
+      source.continuous.verticalSpacing = verticalSpacing;
+      const c = f.EasyScore().compose(source);
       const beam = c.getNote(beamStaff + '0').getBeam();
       const phrase = c.systems[0].getPhraseLayout();
       const stems = [];
@@ -728,7 +731,13 @@ test('beamed split piano chords keep one stem and one beam attachment per attack
       assert.deepEqual(frame(8), narrow);
     }
   }
-});
+}
+
+for (const mode of ['envelope', 'profile']) {
+  test('beamed split piano chords keep their beam and stem joins under ' + mode + ' spacing', () => {
+    checkSplitChords(mode);
+  });
+}
 
 test('a split eighth must have exactly one beam owner and a unique pair of notes', () => {
   for (const beams of [false, true]) {
@@ -1431,4 +1440,137 @@ test('continuous score breaks retain centered drum hands and enclose the stickin
     const ink = VF.measureEngraving(mark).ink;
     assert.ok(ink.y >= row.y && ink.y + ink.h <= row.y + row.height);
   }
+});
+
+test('staff profiles distinguish coincident and staggered extremes after reflow', () => {
+  function gap(staggered, extraInk = false, minimum) {
+    const { f } = factory();
+    const part = (id, clef, pitches) => ({
+      id,
+      clef,
+      time: '4/4',
+      measures: [{ voices: [{ notes: pitches.map((pitch) => ({ note: { keys: [pitch], duration: 'h' } })) }] }],
+    });
+    const c = f.EasyScore().compose({
+      staves: [
+        part('upper', 'treble', ['c/3', 'g/5']),
+        part('lower', 'bass', staggered ? ['c/2', 'g/4'] : ['g/4', 'c/2']),
+      ],
+      sheet: { width: 350 },
+      system: minimum === undefined ? {} : { spaceBetweenStaves: minimum },
+      continuous: {
+        verticalSpacing: 'profile',
+        inkBounds: (stave) =>
+          extraInk && stave.getClef() === 'treble'
+            ? [{ x: stave.getX(), y: stave.getYForLine(11), w: stave.getWidth(), h: 12 }]
+            : [],
+      },
+    });
+    const measure = (width) => {
+      c.sheet.setWidth(width).format();
+      const [upper, lower] = c.staves[0];
+      return lower.getYForLine(0) - upper.getYForLine(4);
+    };
+    const first = measure(350);
+    measure(250);
+    assert.equal(measure(350), first);
+    return first;
+  }
+  assert.ok(gap(false) - gap(true) >= 30);
+  assert.ok(gap(true, true) > gap(true) + 20);
+  assert.ok(gap(true, false, 18) >= 140);
+});
+
+test('Maple Leaf Rag crossed-hand sixteenths remain attached to the lower stave and their beams', () => {
+  const { f } = factory();
+  const pitches = ['b/3', 'ab/2', 'cb/3', 'ab/3', 'b/3', 'ab/3', 'cb/4', 'ab/4'];
+  const notes = pitches.map((pitch, i) => ({
+    id: 'cross' + i,
+    stave: 'lower',
+    note: { keys: [pitch], clef: 'bass', duration: i % 4 === 0 ? '16r' : '16', stemDirection: 1 },
+  }));
+  const c = f.EasyScore().compose({
+    staves: [
+      {
+        id: 'upper',
+        clef: 'treble',
+        time: '2/4',
+        measures: [{ voices: [{ notes, autoBeam: true }] }, { voices: [{ notes: 'Ab4/8, Cb5, Ab5, Ab6' }] }],
+      },
+      {
+        id: 'lower',
+        clef: 'bass',
+        time: '2/4',
+        measures: [
+          { voices: [{ notes: 'Ab1/8, B3/8/r, Ab2/8, B3/8/r' }] },
+          { voices: [{ notes: 'Ab3/8, B3/8/r, Ab4/8, B3/8/r' }] },
+        ],
+      },
+    ],
+    continuous: { verticalSpacing: 'profile' },
+  });
+  for (const width of [640, 195, 640]) {
+    c.sheet.setWidth(width).format();
+    for (const i of [1, 2, 3, 5, 6, 7]) {
+      const n = c.getNote('cross' + i);
+      assert.equal(n.getStave(), c.staves[0][1]);
+      const tip = n.getStemSegment();
+      assert.ok(
+        n
+          .getBeam()
+          .getStripBounds()
+          .some((b) => tip.x >= b.x && tip.x <= b.x + b.w && tip.tipY >= b.y - 1 && tip.tipY <= b.y + b.h + 1)
+      );
+    }
+  }
+});
+
+test('the Ballade cue and pedal remain inside their screen rows', () => {
+  const c = factory().f.EasyScore().compose(balladeSpacingStudy());
+  for (const width of [580, 340]) {
+    c.sheet.setWidth(width).format();
+    const { rows, fragments } = c.sheet.getContinuousLayout();
+    assert.deepEqual(
+      rows.map((r) => r.visibleStaves),
+      [
+        ['ossia', 'upper', 'lower'],
+        ['upper', 'lower'],
+      ]
+    );
+    const cue = c.staves[0][0];
+    assert.ok(cue.getYForLine(0) >= rows[0].y && cue.getYForLine(4) < c.staves[0][1].getYForLine(0));
+    const pedal = fragments.find((f) => f.id === 'pedal');
+    assert.ok(pedal.y1 > c.staves[1][2].getYForLine(4));
+    assert.ok(pedal.y1 <= rows[1].y + rows[1].height);
+  }
+});
+
+test('screen rows share whitespace while retaining the requested clearance at every beat', () => {
+  const gap = 24;
+  const bottom = (box) => box.y + box.h;
+  function layout(staggered) {
+    const { f } = factory();
+    const c = f.EasyScore().compose({
+      sheet: { width: 380, rowGap: gap },
+      continuous: { verticalSpacing: 'profile', boundaries: [{ measure: 2, breakBefore: 'force' }] },
+      staves: [
+        {
+          id: 'part',
+          time: '4/4',
+          showTimeSignature: false,
+          measures: [{ voices: [{ notes: 'C3/h, G5' }] }, { voices: [{ notes: staggered ? 'C4/h, G6' : 'G6/h, C4' }] }],
+        },
+      ],
+    });
+    c.sheet.format();
+    const boxes = c.notes.map((m) => m.flat(2).flatMap((n) => VF.measureEngraving(n).parts));
+    for (const a of boxes[0])
+      for (const b of boxes[1]) {
+        if (a.x < b.x + b.w && b.x < a.x + a.w) assert.ok(b.y - bottom(a) >= gap - 0.01);
+      }
+    return c.sheet.getRows()[1].y;
+  }
+  const aligned = layout(false),
+    staggered = layout(true);
+  assert.ok(aligned - staggered > 20, JSON.stringify({ aligned, staggered }));
 });

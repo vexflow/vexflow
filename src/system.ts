@@ -75,6 +75,7 @@ export class System extends Element {
   }
 
   protected options!: Required<SystemOptions>;
+  private requestedStaffDistance?: number;
   protected factory!: Factory;
   protected formatter?: Formatter;
   protected startX?: number;
@@ -99,6 +100,7 @@ export class System extends Element {
       throw new RuntimeError('NoFactory', 'System.setOptions(options) requires a factory.');
     }
     this.factory = options.factory;
+    this.requestedStaffDistance = options.spaceBetweenStaves;
     this.options = {
       factory: this.factory,
       x: 10,
@@ -283,8 +285,22 @@ export class System extends Element {
     return (this.phrase ??= new PhraseLayout());
   }
 
+  /** Minimum origin-to-origin distance for profiled staves, including per-staff padding. */
+  getMinimumStaffDistance(upper: number, lower: number): number {
+    const distance = this.requestedStaffDistance ?? 8;
+    return (
+      this.partStaves[upper].space(distance + this.partStaveInfos[upper].spaceBelow) +
+      this.partStaves[lower].space(this.partStaveInfos[lower].spaceAbove)
+    );
+  }
+
+  /** Ink positioned by registered phrase lanes and routes on this stave. */
+  getPhraseInk(stave: Stave) {
+    return this.phrase?.getStaffInk(stave) ?? [];
+  }
+
   /** Format the system. */
-  format(row?: { staffOffsets?: readonly number[]; endPadding?: number }): void {
+  format(row?: { staffOffsets?: readonly number[]; endPadding?: number; deferStaffSpacing?: boolean }): void {
     this.phrase?.resetPlacement();
     const optionsDetails = this.options.details;
     let justifyWidth = 0;
@@ -351,7 +367,7 @@ export class System extends Element {
     this.debugNoteMetricsYs = debugNoteMetricsYs;
     this.lastY = y;
     Stave.formatBegModifiers(this.partStaves);
-    this.phrase?.format(this.partStaves, this.partVoices);
+    this.phrase?.format(this.partStaves, this.partVoices, row?.deferStaffSpacing);
   }
 
   /** Get the boundingBox. */

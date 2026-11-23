@@ -2,6 +2,7 @@
 // @author Larry Kuhns 2013
 // Left-hand fingerings on pitched notes and TAB frets, with optional enclosing circles.
 
+import { BoundingBox } from './boundingbox';
 import { Builder } from './easyscore';
 import { Metrics } from './metrics';
 import { Modifier, ModifierPosition } from './modifier';
@@ -158,10 +159,9 @@ export class FretHandFinger extends Modifier {
     return this;
   }
 
-  override draw(): void {
-    const ctx = this.checkContext();
+  /** Resolve the digit baseline and optional circle from the same head anchor used for drawing. */
+  private placement() {
     const note = this.checkAttachedNote();
-    this.setRendered();
 
     const start = note.getModifierStartXY(this.position, this.index);
     let dotX = start.x + this.xOffset;
@@ -188,8 +188,7 @@ export class FretHandFinger extends Modifier {
 
     const tab = isTabNote(note);
     if (!tab && !this.drawCircle) {
-      this.renderText(ctx, dotX, dotY);
-      return;
+      return { x: dotX, y: dotY };
     }
     // Place the actual ink on the selected string. Leave the fret number and the finger independent.
     const side = this.position === Modifier.Position.LEFT || this.position === Modifier.Position.RIGHT;
@@ -202,19 +201,42 @@ export class FretHandFinger extends Modifier {
           : start.x + this.xOffset;
     const centerY = side ? start.y + this.yOffset : dotY - 5;
     const metrics = this.getTextMetrics();
-    if (tab && side) ctx.clearRect(centerX + this.xShift - width / 2 - 1, centerY + this.yShift - 2, width + 2, 4);
+    return {
+      x: centerX - this.width / 2,
+      y: centerY + (metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent) / 2,
+      centerX: centerX + this.xShift,
+      centerY: centerY + this.yShift,
+      width,
+      tabSide: tab && side,
+    };
+  }
+
+  /** Return the digit ink and its enclosing circle when drawn. */
+  getInkParts() {
+    const p = this.placement();
+    const ink = [this.getTextInk(p.x, p.y)];
+    if (this.drawCircle && p.centerX !== undefined)
+      ink.push(new BoundingBox(p.centerX - p.width / 2, p.centerY - p.width / 2, p.width, p.width));
+    return ink;
+  }
+
+  override draw(): void {
+    const ctx = this.checkContext();
+    this.setRendered();
+    const p = this.placement();
+    if (p.centerX === undefined) {
+      this.renderText(ctx, p.x, p.y);
+      return;
+    }
+    if (p.tabSide) ctx.clearRect(p.centerX - p.width / 2 - 1, p.centerY - 2, p.width + 2, 4);
     if (this.drawCircle) {
       ctx.save();
       ctx.beginPath();
-      ctx.arc(centerX + this.xShift, centerY + this.yShift, width / 2 - 0.5, 0, 2 * Math.PI, false);
+      ctx.arc(p.centerX, p.centerY, p.width / 2 - 0.5, 0, 2 * Math.PI, false);
       ctx.setLineWidth(1);
       ctx.stroke();
       ctx.restore();
     }
-    this.renderText(
-      ctx,
-      centerX - this.width / 2,
-      centerY + (metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent) / 2
-    );
+    this.renderText(ctx, p.x, p.y);
   }
 }

@@ -1,5 +1,6 @@
 // Optional continuous-sheet layout for existing Systems. No music data model or pagination.
 import type { Annotation } from './annotation';
+import type { Bounds } from './boundingbox';
 import { reserveChordSpacing } from './chordspacing';
 import { ClefNote } from './clefnote';
 import type { ContinuousLayout } from './continuouslayout';
@@ -167,7 +168,7 @@ export class Sheet {
   }
 
   /** @internal Carry the lowest solved sticking baseline across the row before placing the next row. */
-  alignSticking(row: SheetRow): void {
+  alignSticking(row: SheetRow, includeInk?: (box: Bounds) => void): void {
     for (const line of this.stickingLines) {
       const marks = row.systems
         .flatMap((system) => line.get(system) ?? [])
@@ -177,6 +178,7 @@ export class Sheet {
       for (const mark of marks) {
         mark.setLayoutBaseline(baseline);
         const ink = mark.getTextInk(mark.computeX().x, baseline);
+        includeInk?.(ink);
         row.height = Math.max(row.height, ink.y + ink.h - row.y);
       }
     }

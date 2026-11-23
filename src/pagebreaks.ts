@@ -2,6 +2,8 @@
 export interface PrintableSystem {
   measures: number[];
   height: number;
+  /** Millimeters of compatible ink envelopes shared with the preceding system on the same page. */
+  overlapBefore?: number;
   restAtEnd: boolean;
 }
 
@@ -38,7 +40,7 @@ export function paginate(systems: PrintableSystem[], rules: PageConstraints): Pa
     for (let i = first; i < count; i++) {
       const row = systems[i];
       if (i > first && rules.forceBefore.has(row.measures[0])) break;
-      used += row.height + (i === first ? 0 : rules.gap);
+      used += row.height + (i === first ? 0 : rules.gap - (row.overlapBefore ?? 0));
       if (i > first && used > capacity + 1e-7) break;
       const after = row.measures[row.measures.length - 1];
       const turn = i + 1 < count;
@@ -65,13 +67,17 @@ export function paginate(systems: PrintableSystem[], rules: PageConstraints): Pa
     const end = ends[first];
     const rows = systems.slice(first, end);
     const capacity = first === 0 ? rules.firstHeight : rules.laterHeight;
-    const spare = capacity - rows.reduce((h, r) => h + r.height, 0) - rules.gap * (rows.length - 1);
+    const spare =
+      capacity -
+      rows.reduce((h, r, i) => h + r.height - (i ? (r.overlapBefore ?? 0) : 0), 0) -
+      rules.gap * (rows.length - 1);
     const extra =
       rows.length > 1 && (end < count || rules.justifyLast)
         ? Math.min(rules.maxExtraGap, Math.max(0, spare) / (rows.length - 1))
         : 0;
     let y = 0;
-    const offsets = rows.map((row) => {
+    const offsets = rows.map((row, i) => {
+      if (i) y -= row.overlapBefore ?? 0;
       const start = y;
       y += row.height + rules.gap + extra;
       return start;

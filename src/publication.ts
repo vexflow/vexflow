@@ -3,6 +3,7 @@ import type { Bounds } from './boundingbox';
 import type { ContinuousRow } from './continuouslayout';
 import type { CommitHook, EasyScoreComposition, EasyScoreCompositionSpec } from './easyscore';
 import { Factory } from './factory';
+import { InkProfile } from './inkprofile';
 import { Metrics } from './metrics';
 import { Note } from './note';
 import { paginate } from './pagebreaks';
@@ -107,6 +108,8 @@ function compose(
 }
 
 interface RowDrawing {
+  profile?: InkProfile;
+  insetProfile?: InkProfile;
   measures: number[];
   music: SVGGElement;
   top: number;
@@ -136,12 +139,22 @@ function musicGroup(svg: SVGSVGElement) {
 }
 
 /** SVG text boxes include an entire music font's ascent. Use glyph ink to keep cues close to their notes. */
-function inkBox(el: SVGGraphicsElement, context: CanvasRenderingContext2D): DOMRect | undefined {
+function inkBox(
+  el: SVGGraphicsElement,
+  context: CanvasRenderingContext2D,
+  parts?: DOMRect[],
+  ancestors?: DOMMatrix
+): DOMRect | undefined {
   // Invisible pointer targets can extend well beyond a modifier's ink. They must not move notes to another system.
   if (el.getAttribute('opacity') === '0') return;
+  const matrix = el.transform.baseVal.consolidate()?.matrix;
+  const local = parts && matrix ? DOMMatrix.fromMatrix(matrix) : undefined;
+  const transform = parts && local ? (ancestors?.multiply(local) ?? local) : ancestors;
   let box: DOMRect;
   if (el.tagName === 'g') {
-    const children = Array.from(el.children).flatMap((c) => inkBox(c as SVGGraphicsElement, context) ?? []);
+    const children = Array.from(el.children).flatMap(
+      (c) => inkBox(c as SVGGraphicsElement, context, parts, transform) ?? []
+    );
     if (!children.length) return;
     const x = Math.min(...children.map((c) => c.x)),
       y = Math.min(...children.map((c) => c.y));
@@ -167,8 +180,12 @@ function inkBox(el: SVGGraphicsElement, context: CanvasRenderingContext2D): DOMR
     box = new DOMRect(native.x, native.y, native.width, native.height);
   }
   if (![box.x, box.y, box.width, box.height].every(Number.isFinite)) invalidPage('Nonfinite SVG ink bounds.');
-  const matrix = el.transform.baseVal.consolidate()?.matrix;
-  if (!matrix) return box;
+  if (parts && el.tagName !== 'g') parts.push(transform ? transformBox(box, transform) : box);
+  return matrix ? transformBox(box, matrix) : box;
+}
+
+/** Transform all four corners, including rotated/scaled score glyphs. */
+function transformBox(box: DOMRect, matrix: DOMMatrixReadOnly | SVGMatrix) {
   const corners = [
     [box.x, box.y],
     [box.right, box.y],
@@ -195,8 +212,15 @@ function includeInk(box: DOMRect | undefined, bounds: Bounds): DOMRect {
 }
 
 /** SVG glyphs can extend beyond a formatter envelope. Include both before breaking pages. */
-function splitRows(svg: SVGSVGElement, rows: ContinuousRow[], score: EasyScoreComposition): RowDrawing[] {
+function splitRows(
+  svg: SVGSVGElement,
+  rows: ContinuousRow[],
+  score: EasyScoreComposition,
+  profileWidth?: number
+): RowDrawing[] {
   const result = rows.map((row) => ({
+    profile: profileWidth ? new InkProfile(0, profileWidth) : undefined,
+    insetProfile: profileWidth ? new InkProfile(0, profileWidth) : undefined,
     measures: row.measures,
     music: musicGroup(svg),
     top: row.y,
@@ -213,11 +237,12 @@ function splitRows(svg: SVGSVGElement, rows: ContinuousRow[], score: EasyScoreCo
   // Read ink while the whole drawing is mounted. Moving one node at a time during measurement forces browser reflow.
   const elements = Array.from(svg.children, (child) => {
     const el = child as SVGGraphicsElement;
+    const parts = profileWidth ? ([] as DOMRect[]) : undefined;
     const mark = customInk(el, score);
-    const ink = inkBox(el, context);
-    return { el, box: mark ? includeInk(ink, mark.bounds) : ink, owner: mark?.row };
+    const ink = inkBox(el, context, parts);
+    return { el, parts, mark, box: mark ? includeInk(ink, mark.bounds) : ink };
   });
-  for (const { el, box, owner } of elements) {
+  for (const { el, parts, mark, box } of elements) {
     if (!box) continue;
     const { top, bottom } = box;
     // Binary search matters on orchestral scores with thousands of glyph groups.
@@ -228,11 +253,14 @@ function splitRows(svg: SVGSVGElement, rows: ContinuousRow[], score: EasyScoreCo
       if ((top + bottom) / 2 < edges[mid]) high = mid;
       else low = mid + 1;
     }
-    const row = result[owner ?? low];
+    const row = result[mark?.row ?? low];
+    // A custom mark can reserve more clearance than its visible drawing occupies.
+    if (mark) row.profile?.add(mark.bounds);
     row.top = Math.min(row.top, top);
     row.bottom = Math.max(row.bottom, bottom);
     row.left = Math.min(row.left, box.left);
     row.right = Math.max(row.right, box.right);
+    parts?.forEach((b) => row.profile!.add({ x: b.x, y: b.y - 0.5, w: b.width, h: b.height + 1 }));
     row.music.append(el);
   }
   return result;
@@ -367,6 +395,12 @@ function addInsetFragment(
     diagnostics.push({ code: 'SystemOverflow', measures, detail: region.kind + ' exceeds its measure width.' });
   wrap.append(music);
   row.insets.append(wrap);
+  row.insetProfile?.add({
+    x: hosts[0].getX() + Math.min(0, ink.x * scale),
+    y: row.insetHeight,
+    w: right - Math.min(0, ink.x * scale),
+    h: captionHeight + ink.height * scale,
+  });
   row.insetHeight += captionHeight + ink.height * scale + 6;
   inset.ctx.svg.remove();
 }
@@ -608,11 +642,27 @@ export class Publication {
           detail: d.source ? d.code + ' ' + d.source : d.code,
         });
       const passage = options.condense?.measures;
-      const rows = splitRows(ctx.svg, layout.rows, score).filter(
-        (row) => !passage || (row.measures[0] >= passage[0] && row.measures[0] <= passage[1])
-      );
+      const rows = splitRows(
+        ctx.svg,
+        layout.rows,
+        score,
+        spec.continuous?.verticalSpacing === 'profile' ? spec.sheet?.width : undefined
+      ).filter((row) => !passage || (row.measures[0] >= passage[0] && row.measures[0] <= passage[1]));
       addInsets(host, this.source, options, score, rows, diagnostics, locate);
-      const measured = rows.map((r) => ({ ...r, height: (r.bottom - r.top + r.insetHeight) * size.scale }));
+      const measured = rows.map((r) => {
+        // Each system retains its full envelope at a page edge. Only neighbours on the same page share space.
+        r.insetProfile?.include(r.profile!, r.insetHeight - r.top);
+        return { ...r, height: (r.bottom - r.top + r.insetHeight) * size.scale, overlapBefore: 0 };
+      });
+      for (let i = 1; i < measured.length; i++) {
+        const upper = measured[i - 1],
+          lower = measured[i];
+        if (upper.insetProfile && lower.insetProfile) {
+          lower.overlapBefore =
+            size.scale *
+            upper.insetProfile.sharedHeight(lower.insetProfile, upper.height / size.scale, lower.height / size.scale);
+        }
+      }
       const surface = pageSurface(host, size);
       const first = furniture(surface, size, options, 1);
       first.group.remove();

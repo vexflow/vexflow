@@ -539,8 +539,13 @@ export class PhraseLayout {
     }
   }
 
+  /** Staff-owned ink after placement, excluding stems and beams that bridge a movable gap. */
+  getStaffInk(stave: Stave): Bounds[] {
+    return this.obstacles.filter((box) => box.stave === stave && !box.bridge);
+  }
+
   /** Refit from the native staff positions on every format, never from the previous solution. */
-  format(staves: Stave[], voices: Voice[]): void {
+  format(staves: Stave[], voices: Voice[], deferStaffSpacing = false): void {
     const ticks = voices.flatMap((v) => v.getTickables());
     const notes = ticks.filter((n): n is StaveNote => n instanceof StaveNote);
     const members = new Set<Note>(notes);
@@ -584,6 +589,7 @@ export class PhraseLayout {
       }
       this.placeRoutes(notes);
       for (const lane of automatic) this.placeLane(lane);
+      if (deferStaffSpacing) break;
       // Ignore connecting stems when computing the separation they themselves depend on.
       const envelopes = staves.map((stave) => {
         const boxes = this.obstacles.filter((o) => o.stave === stave && !o.bridge);

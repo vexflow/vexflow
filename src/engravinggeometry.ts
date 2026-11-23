@@ -10,6 +10,7 @@ import { Dot } from './dot';
 import { Element } from './element';
 import { FiguredBass } from './figuredbass';
 import { FluteFingering } from './flutefingering';
+import { FretHandFinger } from './frethandfinger';
 import { GermanLuteNote } from './germanlutenote';
 import { GraceNote } from './gracenote';
 import { GraceNoteGroup } from './gracenotegroup';
@@ -125,6 +126,7 @@ export function measureEngraving(element: Element, options: GeometryOptions = {}
       } else if (kind === FiguredBass) {
         shape.parts.push(...(owner as FiguredBass).getInkParts());
       } else if (kind === GraceNoteGroup) children((owner as GraceNoteGroup).getLayoutElements());
+      else if (kind === FretHandFinger) shape.parts.push(...(owner as FretHandFinger).getInkParts());
       else if (kind === Articulation) {
         const box = (owner as Articulation).getInkBounds();
         shape.parts.push(box);

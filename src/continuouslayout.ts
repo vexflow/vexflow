@@ -1,12 +1,14 @@
 // Row-dependent notation for a responsive EasyScore composition. Source measures and notes keep their identity.
 import { Accidental } from './accidental';
 import { Annotation } from './annotation';
+import type { Bounds } from './boundingbox';
 import { reserveChordSpacing } from './chordspacing';
 import { Clef } from './clef';
 import { beamMembers, ContinuousBeam } from './continuousbeam';
 import {
   continuationPitch,
   ContinuousSpan,
+  curveParts,
   drawSpan,
   fitSpan,
   glissandoY,
@@ -24,6 +26,7 @@ import { Fraction } from './fraction';
 import { Glyphs } from './glyphs';
 import { bendAmount, copyTiedBend } from './guitargesture';
 import { nienteTip } from './hairpintip';
+import { InkProfile } from './inkprofile';
 import { KeySignature } from './keysignature';
 import { MultiMeasureRest } from './multimeasurerest';
 import { Note } from './note';
@@ -58,6 +61,10 @@ export interface ContinuousBoundary {
   keepRest?: boolean;
 }
 export interface ContinuousOptions {
+  /** Fit horizontal ink profiles of adjacent staves and rows. Defaults to the traditional full-width envelope. */
+  verticalSpacing?: 'profile' | 'envelope';
+  /** Extra measured ink on this stave, in current score coordinates. Measure numbers are one-based. */
+  inkBounds?: (stave: Stave, measure: number) => readonly Bounds[];
   /** Reflow staff-local measure grids on a common rhythmic timeline. */
   independentMeters?: boolean;
   mode?: 'balanced' | 'greedy';
@@ -142,6 +149,7 @@ export class ContinuousLayout {
   }[] = [];
   readonly fragments: SpanFragment[] = [];
   readonly rows: ContinuousRow[] = [];
+  private readonly rowInk = new WeakMap<ContinuousRow, InkProfile>();
   private readonly marks: Marks[][];
   private readonly boundaries = new Map<number, ContinuousBoundary>();
   private readonly spans: ResolvedSpan[] = [];
@@ -583,12 +591,18 @@ export class ContinuousLayout {
       })
     );
   }
+  /** Reserve the full 14 px brace width and the 8 px offset of each additional connector. */
+  private connectorWidth(): number {
+    if (this.options.verticalSpacing !== 'profile') return this.groups.length * 9;
+    return Math.max(0, ...this.groups.map((group, i) => i * 8 + (group.type === 'brace' ? 14 : 9)));
+  }
+
   private indent(measure: number): number {
     const widths = this.names[measure].map(
       (n, j) => (measure === 0 || this.spec.staves[j].measures[measure].instrument ? n.full : n.short)?.getWidth() ?? 0
     );
     const w = Math.max(0, ...widths);
-    return (w ? w + 10 : 0) + this.groups.length * 9;
+    return (w ? w + 10 : 0) + this.connectorWidth();
   }
   /** Preserve staves carrying a spanning instruction or cross-staff note, including silent middle rows. */
   private visible(first: number, last: number): number[] {
@@ -666,9 +680,10 @@ export class ContinuousLayout {
           options,
           y
         );
-        this.score.sheet.alignSticking(row);
+        const profile = this.rowInk.get(row);
+        this.score.sheet.alignSticking(row, profile && ((box) => profile.add(box, -row.y)));
         this.rows.push(row);
-        y += row.height + options.rowGap;
+        y = row.y + row.height + options.rowGap;
       }
     } while (reserveChordSpacing(this.rows, padding));
     for (const s of this.spans) {
@@ -715,10 +730,10 @@ export class ContinuousLayout {
   }
 
   /** Measure native ink once the horizontal positions and beam fits for this row are known. */
-  private measureStaffInk(positions: PlacedMeasure[], visible: number[]) {
+  private measureStaffInk(positions: PlacedMeasure[], visible: number[], profiles?: InkProfile[]) {
     // Staff-relative extrema exclude crossing beams and their stems, which are refitted to these very gaps.
     const ink = this.spec.staves.map(() => ({ top: Infinity, bottom: -Infinity }));
-    for (const { u } of positions)
+    for (const { u, sys } of positions)
       for (const j of visible) {
         const stave = this.score.staves[u.first][j],
           base = stave.getY();
@@ -726,6 +741,18 @@ export class ContinuousLayout {
           ink[j].top = Math.min(ink[j].top, top - base);
           ink[j].bottom = Math.max(ink[j].bottom, bottom - base);
         };
+        const addPart = (box: Bounds) => profiles?.[j].add(box, -base);
+        if (profiles) {
+          const top = stave.getYForLine(0) - 0.5;
+          addPart({
+            x: stave.getX(),
+            y: top,
+            w: stave.getWidth(),
+            h: stave.getYForLine(stave.getNumLines() - 1) + 0.5 - top,
+          });
+          sys.getPhraseInk(stave).forEach(addPart);
+          this.options.inkBounds?.(stave, u.first + 1).forEach(addPart);
+        }
         take(stave.getYForLine(0) - stave.space(1.6), stave.getYForLine(stave.getNumLines() - 1) + stave.space(1.6));
         for (const m of stave.getModifiers()) {
           const boxes =
@@ -734,30 +761,44 @@ export class ContinuousLayout {
               : m instanceof KeySignature
                 ? m.getInkParts()
                 : [];
-          for (const box of boxes) take(box.y, box.y + box.h);
+          for (const box of boxes) {
+            take(box.y, box.y + box.h);
+            addPart(box);
+          }
         }
         if (u.first === u.last)
           for (const n of this.score.notes[u.first].flat(2)) {
+            if (n instanceof TabNote && n.getStave() === stave && profiles) {
+              n.getFretInk().forEach(addPart);
+              for (const mark of n.getModifiers()) measureEngraving(mark).parts.forEach(addPart);
+            }
             if (n instanceof TabNote && n.getStave() === stave && n.hasStem()) {
               const { topY, baseY } = n.getStemExtents();
               take(Math.min(topY, baseY), Math.max(topY, baseY));
+              if (profiles)
+                addPart({ x: n.getStemX(), y: Math.min(topY, baseY), w: Stem.WIDTH, h: Math.abs(topY - baseY) });
             }
             if (!(n instanceof StaveNote) || n.getStave() !== stave) continue;
             const shared = splitStemFor(n);
             const beam = shared ? shared.owner.getBeam() : n.getBeam();
             const tipStave = beam && beamStave(n);
             const bridge = !(beam instanceof ContinuousBeam) && beam?.getNotes().some((p) => beamStave(p) !== tipStave);
-            const parts = bridge && !shared ? n.getHeadInk() : measureEngraving(n).parts;
+            const parts = bridge && !shared && !profiles ? n.getHeadInk() : measureEngraving(n).parts;
             parts.forEach((box, index) => {
               // The shared stem spans this very gap and must not increase it.
-              if (shared?.owner !== n || index !== n.noteHeads.length) take(box.y, box.y + box.h);
+              if ((shared?.owner !== n && !(profiles && bridge)) || index !== n.noteHeads.length) {
+                take(box.y, box.y + box.h);
+                addPart(box);
+              }
             });
             if (beam && !(beam instanceof ContinuousBeam) && !bridge && tipStave === stave) {
+              if (profiles) beam.getStripBounds().forEach(addPart);
               const box = beam.getBoundingBox();
               take(box.y, box.y + box.h);
             }
             for (const t of n.getTupletStack()) {
               const box = t.getBoundingBox();
+              addPart(box);
               take(box.y, box.y + box.h);
             }
           }
@@ -771,7 +812,9 @@ export class ContinuousLayout {
     for (let pass = 0; pass < 4; pass++) {
       const next = offsets.slice();
       for (const { sys, endPadding } of positions) {
-        sys.setY(origin).format({ staffOffsets: offsets, endPadding });
+        sys
+          .setY(origin)
+          .format({ staffOffsets: offsets, endPadding, deferStaffSpacing: this.options.verticalSpacing === 'profile' });
         const staves = sys.getStaves();
         for (let k = 1; k < visible.length; k++) {
           const a = visible[k - 1],
@@ -784,6 +827,47 @@ export class ContinuousLayout {
       next.forEach((v, j) => (offsets[j] = v));
     }
     return false;
+  }
+
+  /** Fit local curves and labels to their native notes before comparing adjoining staff profiles. */
+  private profileSpans(
+    profiles: InkProfile[],
+    spans: ResolvedSpan[],
+    units: Unit[],
+    measures: number[],
+    baseline: (span: ResolvedSpan) => number
+  ): void {
+    const first = units[0].first,
+      last = units[units.length - 1].last;
+    for (const s of spans) {
+      if (s.beam || s.first.staff !== s.last.staff) continue;
+      const staff = s.first.staff,
+        base = this.score.staves[first][staff].getY();
+      const f = this.makeFragment(s, units, measures, base + baseline(s), false);
+      if (!f) continue;
+      const p = profiles[staff];
+      if (f.kind === 'tie' || f.kind === 'slur') curveParts(f).forEach((b) => p.add(b, -base));
+      else {
+        if (f.kind === 'glissando') {
+          f.y1 = glissandoY(s, this.score.staves[first][staff], 0);
+          f.y2 = glissandoY(s, this.score.staves[last][staff], 1);
+        }
+        p.add(
+          {
+            x: f.x1,
+            y: Math.min(f.y1, f.y2) - (f.kind === 'volta' ? 1.4 : 1) * f.space,
+            w: f.x2 - f.x1,
+            h: Math.abs(f.y2 - f.y1) + 2 * f.space,
+          },
+          -base
+        );
+      }
+      if (s.label) {
+        const x = f.kind === 'tuplet' ? (f.x1 + f.x2 - s.label.getWidth()) / 2 : f.x1;
+        p.add(s.label.getTextInk(x, f.y1), -base);
+      }
+      if (f.bend) p.add(f.bend.bounds, -base);
+    }
   }
 
   /** Reconcile staff envelopes across all measures in a row, then translate the entire solved row once. */
@@ -805,6 +889,10 @@ export class ContinuousLayout {
     );
     const extra = options.justify ? Math.max(0, options.width - minimum) / weights.reduce((sum, w) => sum + w, 0) : 0;
     let x = options.x + indent;
+    const profiles =
+      this.options.verticalSpacing === 'profile'
+        ? this.spec.staves.map(() => new InkProfile(options.x, options.width))
+        : undefined;
     const offsets = this.spec.staves.map(() => 0);
     const positions = units.map((u, k) => {
       const begin = k === 0,
@@ -814,11 +902,12 @@ export class ContinuousLayout {
       const chordPadding = end ? 0 : u.after;
       const endPadding = this.install(u.first, u.last, begin, end) + chordPadding;
       const width = u.width + extra * weights[k] + chordPadding + (begin ? u.start : 0) + (end ? u.end : 0);
-      sys.setWidth(width).format({ endPadding });
+      sys.setWidth(width).format({ endPadding, deferStaffSpacing: !!profiles });
       for (let j = 1; j < visible.length; j++) {
         const staves = sys.getStaves(),
           b = visible[j];
-        const nominal = staves[b].getY() - staves[b - 1].getY();
+        const a = visible[j - 1];
+        const nominal = profiles ? sys.getMinimumStaffDistance(a, b) : staves[b].getY() - staves[b - 1].getY();
         offsets[b] = Math.max(offsets[b], nominal);
       }
       for (let i = u.first; i <= u.last; i++) this.suppress(i, visible, u.first !== u.last, i !== u.first);
@@ -828,12 +917,13 @@ export class ContinuousLayout {
     const fitted = spans.flatMap((s) =>
       s.beam ? [{ beam: s.beam.measureRow(first, last), staff: s.first.staff }] : []
     );
-    const ink = this.measureStaffInk(positions, visible);
+    const ink = this.measureStaffInk(positions, visible, profiles);
     for (const { beam, staff } of fitted) {
       const bounds = beam.getBoundingBox();
       const staveY = this.score.staves[first][staff].getY();
       ink[staff].top = Math.min(ink[staff].top, bounds.y - staveY);
       ink[staff].bottom = Math.max(ink[staff].bottom, bounds.y + bounds.h - staveY);
+      if (profiles) beam.getStripBounds().forEach((b) => profiles[staff].add(b, -staveY));
       beam.resetLayout();
     }
     const lanes = new Map<ResolvedSpan, number>();
@@ -867,10 +957,19 @@ export class ContinuousLayout {
         below = laneEnds.get(j + '-false')?.length ?? 0;
       return { top: bounds.top - space * (2 + above * 2.5), bottom: bounds.bottom + space * (1 + below * 2.5) };
     });
+    const measures = Array.from({ length: last - first + 1 }, (_, i) => first + i + 1);
+    const baseline = (s: ResolvedSpan) => {
+      const staff = s.first.staff,
+        lane = lanes.get(s) ?? 0;
+      return s.spec.bend || spanAbove(s.spec) ? ink[staff].top - lane * 25 - 4 : ink[staff].bottom + lane * 25 + 14;
+    };
+    if (profiles) this.profileSpans(profiles, spans, units, measures, baseline);
     for (let j = 1; j < visible.length; j++) {
       const a = visible[j - 1],
         b = visible[j];
-      offsets[b] = offsets[a] + Math.max(offsets[b], limits[a].bottom - limits[b].top + 8);
+      offsets[b] =
+        offsets[a] +
+        Math.max(offsets[b], (profiles ? profiles[a].distance(profiles[b]) : limits[a].bottom - limits[b].top) + 8);
     }
     const instrumentChange = units.some(
       (u, k) => k > 0 && this.spec.staves.some((s) => s.measures[u.first].instrument)
@@ -881,16 +980,31 @@ export class ContinuousLayout {
       this.options.measureNumbers
         ? 20
         : 0;
-    const origin = y + header - limits[visible[0]].top;
+    const rowProfile = profiles && new InkProfile(options.x, options.width);
+    if (rowProfile && profiles) visible.forEach((staff) => rowProfile.include(profiles[staff], offsets[staff]));
+    const originOffset = header + (rowProfile ? 4 - rowProfile.minY : -limits[visible[0]].top);
+    const rowInk = rowProfile && new InkProfile(options.x, options.width);
+    rowInk?.include(rowProfile!, originOffset);
+    const rowHeight = rowInk
+      ? rowInk.maxY + 4
+      : originOffset + offsets[visible[visible.length - 1]] + limits[visible[visible.length - 1]].bottom;
+    if (rowInk) {
+      if (header) rowInk.add({ x: options.x, y: 0, w: options.width, h: header });
+      const previous = this.rows[this.rows.length - 1];
+      const previousInk = previous && this.rowInk.get(previous);
+      if (previousInk) {
+        y -= previousInk.sharedHeight(rowInk, previous.height, rowHeight);
+      }
+    }
+    const origin = y + originOffset;
     const stable = this.alignStaves(positions, visible, origin, offsets);
-    const measures = Array.from({ length: last - first + 1 }, (_, i) => first + i + 1);
     if (!stable) this.diagnostics.push({ code: 'StaffSpacingLimit', measures });
     const row: ContinuousRow = {
       systems: positions.map((p) => p.sys),
       x: options.x,
       y,
       width: x - options.measureGap - options.x,
-      height: origin - y + offsets[visible[visible.length - 1]] + limits[visible[visible.length - 1]].bottom,
+      height: rowHeight,
       overflow: Math.max(0, minimum - options.width),
       measures,
       visibleStaves: visible.map((j) => this.spec.staves[j].id),
@@ -898,6 +1012,7 @@ export class ContinuousLayout {
         .filter((u) => u.last > u.first)
         .map((u) => Array.from({ length: u.last - u.first + 1 }, (_, k) => u.first + k + 1)),
     };
+    if (rowInk) this.rowInk.set(row, rowInk);
     if (row.overflow) this.diagnostics.push({ code: 'RowOverflow', measures });
     this.decorate(units, visible, first === 0, y + 15);
     for (const chord of this.splitChords) {
@@ -919,13 +1034,8 @@ export class ContinuousLayout {
         this.fragments.push(s.beam.placeRow(first, last, this.rows.length, s.spec.id));
         continue;
       }
-      const staff = s.first.staff;
-      const lane = lanes.get(s) ?? 0;
-      const yBase =
-        origin +
-        offsets[staff] +
-        (s.spec.bend || spanAbove(s.spec) ? ink[staff].top - lane * 25 - 4 : ink[staff].bottom + lane * 25 + 14);
-      this.addFragment(s, units, row, yBase);
+      const f = this.makeFragment(s, units, measures, origin + offsets[s.first.staff] + baseline(s));
+      if (f) this.fragments.push(f);
     }
     return row;
   }
@@ -938,7 +1048,13 @@ export class ContinuousLayout {
   }
 
   /** Keep continuation hooks and labels on the correct end when a span crosses a row. */
-  private addFragment(s: ResolvedSpan, units: Unit[], row: ContinuousRow, baseline: number): void {
+  private makeFragment(
+    s: ResolvedSpan,
+    units: Unit[],
+    measures: number[],
+    baseline: number,
+    report = true
+  ): SpanFragment | undefined {
     const first = units[0].first,
       last = units[units.length - 1].first;
     const starts = s.first.measure >= first,
@@ -1004,7 +1120,7 @@ export class ContinuousLayout {
     }
     if (kind === 'hyphen' && ends) x2 = s.last.note.getAbsoluteX() - space * 0.3;
     if (x2 <= x1 || (starts && s.label && x1 + s.label.getWidth() > x2)) {
-      this.diagnostics.push({ code: 'SpanOverflow', measures: row.measures, source: s.spec.id });
+      if (report) this.diagnostics.push({ code: 'SpanOverflow', measures, source: s.spec.id });
       if (x2 <= x1) return;
     }
     const fragment: SpanFragment = {
@@ -1070,10 +1186,10 @@ export class ContinuousLayout {
         if (!starts) fragment.y1 = edge;
         if (!ends) fragment.y2 = edge;
       }
-      if (!fitSpan(fragment, obstacles))
-        this.diagnostics.push({ code: 'CurveCollision', measures: row.measures, source: s.spec.id });
+      if (!fitSpan(fragment, obstacles) && report)
+        this.diagnostics.push({ code: 'CurveCollision', measures, source: s.spec.id });
     }
-    this.fragments.push(fragment);
+    return fragment;
   }
 
   /** Add labels, connectors and numbered rests after all native positions have settled. */
@@ -1088,7 +1204,7 @@ export class ContinuousLayout {
         this.drawing.push((ctx) =>
           label.renderText(
             ctx,
-            head[j].getX() - this.groups.length * 9 - 7 - label.getWidth(),
+            head[j].getX() - this.connectorWidth() - 7 - label.getWidth(),
             head[j].getYForLine(2) + 4
           )
         );
