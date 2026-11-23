@@ -545,6 +545,24 @@
       "test": "structured composition reflows wide narrow wide with stable native geometry"
     },
     {
+      "api": "engraving.prepareNote",
+      "guide": "docs/easyscore.md",
+      "example": null,
+      "test": "typed and parsed engraving follows each note into independent parts and a slurred cue"
+    },
+    {
+      "api": "engraving.place",
+      "guide": "docs/easyscore.md",
+      "example": null,
+      "test": "a custom mark stays on its source page even when its ink reaches the next system"
+    },
+    {
+      "api": "getEngravingMarks()",
+      "guide": "docs/easyscore.md",
+      "example": null,
+      "test": "resizing a canvas to sheet height includes the registered ink below the last system"
+    },
+    {
       "api": "withDefaults()",
       "guide": "docs/easyscore.md",
       "example": "easyscore-composition",

@@ -46,6 +46,7 @@ export type {
 } from './easyscore/composition';
 export type { EasyScoreSource } from './easyscore/elementindex';
 export type { EasyScoreTabSpan } from './easyscore/elements';
+export type { CompositionEngraving, CompositionMark, PlacedCompositionMark } from './easyscore/engraving';
 export type { EasyScoreAutoBeamOptions } from './easyscore/rhythm';
 
 // To enable logging for this class. Set `VexFlow.EasyScore.DEBUG` to `true`.
@@ -673,7 +674,15 @@ export class EasyScore {
 
   /** Construct aligned measures and resolve forward references before layout or drawing. */
   compose(spec: EasyScoreCompositionSpec): EasyScoreComposition {
-    return compose(this, spec);
+    const prepare = spec.engraving?.prepareNote;
+    if (!prepare) return compose(this, spec);
+    // Scope the shared source hook to this composition, including construction failures.
+    const index = this.builder.commitHooks.push(prepare) - 1;
+    try {
+      return compose(this, spec);
+    } finally {
+      this.builder.commitHooks.splice(index, 1);
+    }
   }
 
   /** Build a normal System; its staff API and formatter options stay available. */

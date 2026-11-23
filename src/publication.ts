@@ -1,4 +1,5 @@
 // Print-ready SVG pages over independent EasyScore views. Public dimensions are millimeters.
+import type { Bounds } from './boundingbox';
 import type { ContinuousRow } from './continuouslayout';
 import type { CommitHook, EasyScoreComposition, EasyScoreCompositionSpec } from './easyscore';
 import { Factory } from './factory';
@@ -11,10 +12,12 @@ import {
   checkView,
   insetStaff,
   invalidPage,
+  LocateSource,
   projectScore,
   PublicationRegion,
   PublicationView,
   restingMeasure,
+  sourceLocator,
 } from './publicationview';
 import { Registry } from './registry';
 import { SVGContext } from './svgcontext';
@@ -177,6 +180,20 @@ function inkBox(el: SVGGraphicsElement, context: CanvasRenderingContext2D): DOMR
   return new DOMRect(x, y, Math.max(...corners.map((p) => p.x)) - x, Math.max(...corners.map((p) => p.y)) - y);
 }
 
+// Reported custom ink uses the source note's system even when it lies closer to a neighboring row.
+function customInk(el: SVGGraphicsElement, score: EasyScoreComposition) {
+  const index = el.getAttribute('data-engraving-mark');
+  return index === null ? undefined : score.sheet.getEngravingMarks()[Number(index)];
+}
+
+/** Union painted and explicitly reported ink, allowing custom elements to reserve an invisible margin. */
+function includeInk(box: DOMRect | undefined, bounds: Bounds): DOMRect {
+  if (!box) return new DOMRect(bounds.x, bounds.y, bounds.w, bounds.h);
+  const x = Math.min(bounds.x, box.x);
+  const y = Math.min(bounds.y, box.y);
+  return new DOMRect(x, y, Math.max(box.right, bounds.x + bounds.w) - x, Math.max(box.bottom, bounds.y + bounds.h) - y);
+}
+
 /** SVG glyphs can extend beyond a formatter envelope. Include both before breaking pages. */
 function splitRows(svg: SVGSVGElement, rows: ContinuousRow[], score: EasyScoreComposition): RowDrawing[] {
   const result = rows.map((row) => ({
@@ -196,9 +213,11 @@ function splitRows(svg: SVGSVGElement, rows: ContinuousRow[], score: EasyScoreCo
   // Read ink while the whole drawing is mounted. Moving one node at a time during measurement forces browser reflow.
   const elements = Array.from(svg.children, (child) => {
     const el = child as SVGGraphicsElement;
-    return { el, box: inkBox(el, context) };
+    const mark = customInk(el, score);
+    const ink = inkBox(el, context);
+    return { el, box: mark ? includeInk(ink, mark.bounds) : ink, owner: mark?.row };
   });
-  for (const { el, box } of elements) {
+  for (const { el, box, owner } of elements) {
     if (!box) continue;
     const { top, bottom } = box;
     // Binary search matters on orchestral scores with thousands of glyph groups.
@@ -209,7 +228,7 @@ function splitRows(svg: SVGSVGElement, rows: ContinuousRow[], score: EasyScoreCo
       if ((top + bottom) / 2 < edges[mid]) high = mid;
       else low = mid + 1;
     }
-    const row = result[low];
+    const row = result[owner ?? low];
     row.top = Math.min(row.top, top);
     row.bottom = Math.max(row.bottom, bottom);
     row.left = Math.min(row.left, box.left);
@@ -280,7 +299,8 @@ function addInsetFragment(
   row: RowDrawing,
   region: PublicationRegion,
   measures: number[],
-  diagnostics: PublicationDiagnostic[]
+  diagnostics: PublicationDiagnostic[],
+  locate?: LocateSource
 ) {
   const first = measures[0];
   const last = measures[measures.length - 1];
@@ -294,13 +314,24 @@ function addInsetFragment(
     first,
     last
   );
+  // A quoted span survives only when its complete endpoints belong to this reference fragment.
+  const within = (id?: string) => {
+    if (!id || !locate) return false;
+    const source = locate(id);
+    return source.staff === region.staff && source.measure >= first && source.measure <= last;
+  };
   const insetSpec: EasyScoreCompositionSpec = {
+    engraving: spec.engraving,
+    spans: spec.spans?.filter((span) => within(span.from) && within(span.to)),
+    crossMeasureSpans: spec.crossMeasureSpans,
     staves: [region.transpose ? writtenCue(quoted, region.transpose) : quoted],
     accidentals: region.transpose ? 'key-aware' : spec.accidentals,
     graceAccidentals: region.transpose ? 'ordered' : spec.graceAccidentals,
     sheet: { x: 0, y: 0, width: width / scale, measurePadding: 4, measureGap: Math.max(0, gap) / scale },
     // Keep the existing single-bar signature and spacing policy. A longer fragment shares one signature prefix.
-    ...(hosts.length === 1 ? { continuous: {} } : {}),
+    ...(hosts.length === 1
+      ? { continuous: { spans: spec.continuous?.spans?.filter((span) => within(span.from) && within(span.to)) } }
+      : {}),
   };
   const inset = compose(host, insetSpec, hooks, region.transpose);
   if (hosts.length > 1) inset.score.sheet.alignToMeasures(hosts.map((s) => s.getWidth() / scale));
@@ -317,7 +348,8 @@ function addInsetFragment(
   const music = musicGroup(inset.ctx.svg);
   while (inset.ctx.svg.firstChild) music.append(inset.ctx.svg.firstChild);
   inset.ctx.svg.append(music);
-  const ink = inkBox(music, document.createElement('canvas').getContext('2d')!)!;
+  let ink = inkBox(music, document.createElement('canvas').getContext('2d')!)!;
+  for (const mark of inset.score.sheet.getEngravingMarks()) ink = includeInk(ink, mark.bounds);
   const wrap = node('g', { 'data-region': region.kind, 'data-source-staff': region.staff, 'data-measure': first });
   if (region.endMeasure !== undefined) wrap.setAttribute('data-end-measure', String(last));
   wrap.setAttribute('transform', `translate(${hosts[0].getX()},${row.insetHeight})`);
@@ -346,13 +378,14 @@ function addInsets(
   o: PublicationOptions,
   score: EasyScoreComposition,
   rows: RowDrawing[],
-  diagnostics: PublicationDiagnostic[]
+  diagnostics: PublicationDiagnostic[],
+  locate?: LocateSource
 ) {
   for (const region of o.regions ?? []) {
     const end = region.endMeasure ?? region.measure;
     for (const row of rows) {
       const measures = row.measures.filter((m) => m >= region.measure && m <= end);
-      if (measures.length) addInsetFragment(host, spec, o.noteHooks, score, row, region, measures, diagnostics);
+      if (measures.length) addInsetFragment(host, spec, o.noteHooks, score, row, region, measures, diagnostics, locate);
     }
   }
 }
@@ -546,17 +579,17 @@ export class Publication {
     Registry.disableDefaultRegistry();
     try {
       const diagnostics: PublicationDiagnostic[] = [];
-      const ref =
-        (options.staves || options.condense) &&
+      const locate =
+        (options.staves || options.condense || options.regions?.length) &&
         (this.source.spans?.length ||
           this.source.continuous?.spans?.length ||
           this.source.continuous?.tuplets?.length ||
           this.source.continuous?.splitChords?.length)
-          ? compose(host, this.source, options.noteHooks).score
+          ? sourceLocator(this.source, () => compose(host, this.source, options.noteHooks).score)
           : undefined;
       // A one-unit inset keeps edge strokes inside the requested margin.
       const width = size.musicWidth / size.scale - 2;
-      const spec = projectScore(this.source, options, width, ref, (id, measures) =>
+      const spec = projectScore(this.source, options, width, locate, (id, measures) =>
         diagnostics.push({ code: 'ExcludedAnchor', measures, detail: id })
       );
       const { ctx, factory, score } = compose(host, spec, options.noteHooks);
@@ -578,7 +611,7 @@ export class Publication {
       const rows = splitRows(ctx.svg, layout.rows, score).filter(
         (row) => !passage || (row.measures[0] >= passage[0] && row.measures[0] <= passage[1])
       );
-      addInsets(host, this.source, options, score, rows, diagnostics);
+      addInsets(host, this.source, options, score, rows, diagnostics, locate);
       const measured = rows.map((r) => ({ ...r, height: (r.bottom - r.top + r.insetHeight) * size.scale }));
       const surface = pageSurface(host, size);
       const first = furniture(surface, size, options, 1);

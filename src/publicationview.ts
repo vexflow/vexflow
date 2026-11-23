@@ -1,6 +1,6 @@
 // Project declarative EasyScore music into an independent printed score or part.
 import type { ContinuousBoundary } from './continuouslayout';
-import type { EasyScoreComposition, EasyScoreCompositionSpec, EasyScoreStaveSpec } from './easyscore';
+import { EasyScore, type EasyScoreComposition, EasyScoreCompositionSpec, EasyScoreStaveSpec } from './easyscore';
 import { Note } from './note';
 import { condenseStaves, PublicationCondense } from './publicationcondense';
 import type { CueTransposition } from './publicationcue';
@@ -84,12 +84,50 @@ export function checkView(source: EasyScoreCompositionSpec, view: PublicationVie
           invalidPage('Use declarative events for independently rendered publication views.');
 }
 
-/** Track only declared IDs for relationships. The score's native lookup also handles IDs in EasyScore strings. */
+export type LocateSource = (id: string) => { staff: string; measure: number };
+
+/** Index declared anchors without replaying engraving hooks on a disposable copy of the complete score. */
+export function sourceLocator(source: EasyScoreCompositionSpec, reference: () => EasyScoreComposition): LocateSource {
+  const locations = new Map<string, ReturnType<LocateSource>>();
+  const parser = new EasyScore();
+  for (const staff of source.staves) {
+    staff.measures.forEach((measure, i) => {
+      const location = { staff: staff.id, measure: i + 1 };
+      for (const voice of measure.voices)
+        for (const entry of typeof voice.notes === 'string' ? [voice.notes] : voice.notes) {
+          if (typeof entry === 'string') {
+            for (const piece of parser.parseNotation(entry).pieces)
+              if (piece.options.id) locations.set(piece.options.id, location);
+          } else if ('id' in entry && typeof entry.id === 'string') locations.set(entry.id, location);
+        }
+    });
+  }
+  let indexedReference = false;
+  return (id) => {
+    // Legacy hooks may assign IDs that do not appear in the source. Build that reference only if needed.
+    if (!locations.has(id) && !indexedReference) {
+      const score = reference();
+      score.notes.forEach((parts, m) =>
+        parts.forEach((voices, j) => {
+          for (const tick of voices.flat())
+            locations.set(tick.getAttribute('id'), {
+              staff: source.staves[j].id,
+              measure: score.meterPositions?.get(tick)?.measure ?? m + 1,
+            });
+        })
+      );
+      indexedReference = true;
+    }
+    return locations.get(id) ?? invalidPage('Unknown source anchor: ' + id);
+  };
+}
+
+/** Project relationships that survive selection, following each event's rhythmic source staff. */
 export function projectScore(
   source: EasyScoreCompositionSpec,
   view: PublicationView,
   width: number,
-  reference?: EasyScoreComposition,
+  locate?: LocateSource,
   omitted?: (id: string, measures: number[]) => void
 ): EasyScoreCompositionSpec {
   const selected = new Set(view.staves ?? view.condense?.players ?? source.staves.map((s) => s.id));
@@ -98,16 +136,9 @@ export function projectScore(
     .map((s) => (view.staves || view.condense ? homeStaff(s, selected) : s));
   const printedStaves = view.condense ? condenseStaves(staves, view.condense) : staves;
   const printedIds = new Set(printedStaves.map((s) => s.id));
-  // Follow rhythmic ownership when a note is displayed on a different staff.
-  const owners = new Map<Tickable, { staff: string; measure: number }>();
-  reference?.notes.forEach((parts, m) =>
-    parts.forEach((voices, j) => {
-      for (const event of voices.flat()) owners.set(event, { staff: source.staves[j].id, measure: m + 1 });
-    })
-  );
   const keep = (a?: string, b?: string, id?: string) => {
-    if (!reference) return true;
-    const ends = [a, b].flatMap((name) => (name ? [owners.get(reference.getNote(name))!] : []));
+    if (!locate) return true;
+    const ends = [a, b].flatMap((name) => (name ? [locate(name)] : []));
     const included = ends.filter((e) => selected.has(e.staff));
     if (included.length && included.length < ends.length)
       omitted?.(

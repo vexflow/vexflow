@@ -1023,6 +1023,7 @@ export class Factory {
         if (!hidden.has(s)) s.setContext(ctx).drawWithStyle();
       });
       layouts.forEach((layout) => layout.draw(ctx));
+      this.sheets.forEach((sheet) => sheet.drawEngraving(ctx));
     } finally {
       ctx.setDefaultStyle(defaults);
       ctx.restore();

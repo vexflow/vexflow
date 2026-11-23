@@ -525,6 +525,175 @@ test('publication views, pagination and portable printing', async (t) => {
       assert.deepEqual(result.printed, drawing);
       assert.deepEqual(result.diagnostics, []);
     });
+    await t.test('typed and parsed engraving follows each note into independent parts and a slurred cue', async () => {
+      const samples = await page.evaluate(() => {
+        const { Factory, Publication, StaveNote, Accidental, FretHandFinger, Modifier } = VexFlow;
+        return [true, false].map((typed) => {
+          // The two sources spell the same chord in opposite orders. Select E by pitch.
+          const notes = typed
+            ? [
+                { id: 'chord', note: { keys: ['e/4', 'c/4'], duration: 'h' } },
+                { id: 'answer', note: { keys: ['g/4'], duration: 'h' } },
+              ]
+            : '(C4 E4)/h[id="chord"], G4/h[id="answer"]';
+          const instances = new Set();
+          const prepared = [];
+          const legacy = [];
+          const fragments = [];
+          const source = {
+            staves: [
+              { id: 'solo', measures: [{ voices: [{ notes }] }] },
+              { id: 'bass', measures: [{ voices: [{ notes: 'B4/w/r[id="rest"]' }] }] },
+            ],
+            continuous: { spans: [{ id: 'phrase', kind: 'slur', from: 'chord', to: 'answer' }] },
+            engraving: {
+              prepareNote({ id }, note) {
+                prepared.push(id);
+                if (id !== 'chord') return;
+                instances.add(note);
+                const index = note.getKeys().findIndex((p) => p.toLowerCase() === 'e/4');
+                note.addModifier(new Accidental('n'), index);
+                note.addModifier(new FretHandFinger('2').setPosition(Modifier.Position.LEFT), index);
+              },
+              place(score, addMark) {
+                const note = score.getElement('chord');
+                if (!(note instanceof StaveNote)) return;
+                fragments.push(score.sheet.getContinuousLayout().fragments.map((f) => f.id));
+                const bounds = { x: note.getAbsoluteX(), y: note.getYs()[0] - 55, w: 6, h: 3 };
+                addMark({ source: note, bounds, draw: (ctx) => ctx.fillRect(bounds.x, bounds.y, 6, 3) });
+              },
+            },
+          };
+          const host = document.querySelector('aside');
+          host.replaceChildren();
+          host.id = 'engraving-score';
+          const factory = new Factory({ renderer: { elementId: host.id, width: 600, height: 450 } });
+          const score = factory.EasyScore().compose(source);
+          const counts = [460, 280].map((width) => {
+            factory.getContext().clear();
+            score.sheet.setWidth(width);
+            factory.draw({ retain: true });
+            return [
+              score.sheet.getEngravingMarks().length,
+              host.querySelectorAll('[data-source-event="chord"]').length,
+            ];
+          });
+          const book = new Publication(source);
+          function print(staff, cue) {
+            const opts = { staves: [staff], noteHooks: [({ id }) => legacy.push(id)] };
+            if (cue) opts.regions = [{ kind: 'cue', staff: 'solo', measure: 1, label: 'Solo' }];
+            const svg = book.render(document.querySelector('main'), opts).pages[0].svg;
+            const g = cue ? svg.querySelector('[data-region="cue"]') : svg;
+            const text = Array.from(g.querySelectorAll('text'), (el) => el.textContent);
+            return [
+              g.querySelectorAll('[data-source-event="chord"]').length,
+              text.filter((value) => value === '2').length,
+              text.filter((value) => value === VexFlow.Glyphs.accidentalNatural).length,
+            ];
+          }
+          const parts = [print('solo'), print('solo'), print('bass', true)];
+          const selected = [...instances].map((n) =>
+            n
+              .getModifiers()
+              .filter((m) => m instanceof Accidental || m instanceof FretHandFinger)
+              .map((m) => n.getKeys()[m.getIndex()].toLowerCase())
+          );
+          return { counts, parts, instances: instances.size, prepared, legacy, fragments, selected };
+        });
+      });
+      for (const sample of samples) {
+        assert.deepEqual(sample.counts, [
+          [1, 1],
+          [1, 1],
+        ]);
+        assert.deepEqual(sample.parts, Array(3).fill([1, 1, 1]));
+        assert.equal(sample.instances, 4);
+        assert.deepEqual(sample.selected, Array(4).fill(['e/4', 'e/4']));
+        assert.deepEqual(sample.fragments, Array(5).fill(['phrase']));
+        assert.deepEqual(sample.prepared, [
+          'chord',
+          'answer',
+          'rest',
+          'chord',
+          'answer',
+          'chord',
+          'answer',
+          'rest',
+          'chord',
+          'answer',
+        ]);
+        assert.deepEqual(sample.legacy, ['chord', 'answer', 'chord', 'answer', 'rest', 'chord', 'answer']);
+      }
+    });
+    await t.test('resizing a canvas to sheet height includes the registered ink below the last system', async () => {
+      const result = await page.evaluate(() => {
+        const canvas = document.createElement('canvas');
+        canvas.id = 'mark-canvas';
+        document.querySelector('aside').replaceChildren(canvas);
+        const factory = new VexFlow.Factory({
+          renderer: { elementId: canvas.id, width: 400, height: 200, backend: VexFlow.Renderer.Backends.CANVAS },
+        });
+        let addProofMark = false;
+        let draws = 0;
+        const score = factory.EasyScore().compose({
+          staves: [{ id: 'solo', measures: [{ voices: [{ notes: 'C4/w[id="a"]' }] }] }],
+          engraving: {
+            place(score, addMark) {
+              if (!addProofMark) return;
+              const source = score.getNote('a');
+              const last = score.sheet.getRows().at(-1);
+              const bounds = { x: source.getAbsoluteX(), y: last.y + last.height + 10, w: 3, h: 3 };
+              addMark({
+                source,
+                bounds,
+                draw(ctx) {
+                  draws++;
+                  ctx.fillRect(bounds.x, bounds.y, 3, 3);
+                },
+              });
+            },
+          },
+        });
+        score.sheet.format();
+        const unmarked = score.sheet.getHeight();
+        addProofMark = true;
+        score.sheet.format();
+        const height = score.sheet.getHeight();
+        const ctx = factory.getContext();
+        ctx.resize(400, height);
+        factory.draw({ retain: true });
+        const { x, y } = score.sheet.getEngravingMarks()[0].bounds;
+        const alpha = canvas.getContext('2d').getImageData(Math.ceil(x), Math.ceil(y), 1, 1).data[3];
+        addProofMark = false;
+        score.sheet.format();
+        return { extra: height - unmarked, restored: score.sheet.getHeight() === unmarked, draws, alpha };
+      });
+      assert.deepEqual(result, { extra: 13, restored: true, draws: 1, alpha: 255 });
+    });
+    await t.test('a custom mark stays on its source page even when its ink reaches the next system', async () => {
+      const pages = await page.evaluate(() => {
+        const source = {
+          staves: [
+            { id: 'solo', measures: ['a', 'b'].map((id) => ({ voices: [{ notes: 'C4/w[id="' + id + '"]' }] })) },
+          ],
+          engraving: {
+            place(score, addMark) {
+              const source = score.getNote('a');
+              const bounds = { x: source.getAbsoluteX(), y: score.getNote('b').getYs()[0], w: 8, h: 10 };
+              addMark({ source, bounds, draw: (ctx) => ctx.fillRect(bounds.x, bounds.y, bounds.w, bounds.h) });
+            },
+          },
+        };
+        return new VexFlow.Publication(source)
+          .render(document.querySelector('main'), { pageBreaks: [2] })
+          .pages.map(({ svg }) =>
+            Array.from(svg.querySelectorAll('[data-source-event]'), (el) =>
+              el.closest('[data-system]').getAttribute('data-system')
+            )
+          );
+      });
+      assert.deepEqual(pages, [['1'], []]);
+    });
     await t.test('a fingering and its transparent hit area stay with the printed note', async () => {
       const printed = await page.evaluate(() => {
         const measures = Array.from({ length: 6 }, (_, i) => ({

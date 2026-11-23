@@ -24,6 +24,7 @@ import { Tickable } from '../tickable';
 import { Tuplet, TupletOptions } from '../tuplet';
 import { RuntimeError } from '../util';
 import { Voice, VoiceTime } from '../voice';
+import { CompositionEngraving, placeCompositionMarks } from './engraving';
 import { independentMeterGrid, initialStaffState, InteriorBar, MeterPosition } from './independentmeter';
 import { applyCompositionAccidentals, KeyChange } from './policies';
 import { EasyScoreAutoBeamOptions } from './rhythm';
@@ -143,6 +144,8 @@ export type EasyScoreSpanSpec =
 
 /** Layout policies are explicit. Sheet does not split spans or repeat signatures at row starts. */
 export interface EasyScoreCompositionSpec {
+  /** Prepare freshly built notes and place custom ink after each layout of this view. */
+  engraving?: CompositionEngraving;
   staves: readonly EasyScoreStaveSpec[];
   continuous?: ContinuousOptions;
   sheet?: Omit<SheetOptions, 'factory'>;
@@ -253,6 +256,13 @@ function buildVoice(
         }
         if ('id' in item && item.id !== undefined) note.setAttribute('id', item.id);
         if ('stave' in item && item.stave) assignments.set(note, item.stave);
+        // String events run these hooks in Builder.commitPiece(). Typed events arrive with their source ID and dots.
+        const options = {
+          ...score.defaults,
+          ...('tab' in item ? item.tab : 'note' in item ? item.note : item),
+          ...('id' in item && { id: item.id }),
+        };
+        for (const hook of score.builder.commitHooks) hook(options, note, score.builder);
         notes.push(note);
       }
     }
@@ -714,6 +724,8 @@ function composeAligned(
         result.voices.push(voices);
         result.notes.push(notes);
       }
+      const place = spec.engraving?.place;
+      if (place) result.sheet.setEngravingPlacement((rows) => placeCompositionMarks(result, rows, place));
       result.spans = buildSpans(score, spec, noteMeasures, result.diagnostics);
       if (spec.continuous)
         result.sheet.setContinuousLayout(new ContinuousLayout(result, spec, starts, ends, placed, grid?.interior));

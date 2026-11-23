@@ -3,8 +3,10 @@ import type { Annotation } from './annotation';
 import { reserveChordSpacing } from './chordspacing';
 import { ClefNote } from './clefnote';
 import type { ContinuousLayout } from './continuouslayout';
+import type { PlacedCompositionMark } from './easyscore/engraving';
 import { Factory } from './factory';
 import { Note } from './note';
+import type { RenderContext } from './rendercontext';
 import { StaveNote } from './stavenote';
 import { StemmableNote } from './stemmablenote';
 import { System, SystemOptions } from './system';
@@ -44,6 +46,35 @@ export class Sheet {
   private continuous?: ContinuousLayout;
   /** Note-owned marks, grouped by measure so a line can follow any set of row breaks. */
   private stickingLines: Map<System, Annotation[]>[] = [];
+  private placeEngraving?: (rows: readonly SheetRow[]) => PlacedCompositionMark[];
+  private engravingMarks: PlacedCompositionMark[] = [];
+
+  /** @internal Run the composition's final-placement hook after all its systems have coordinates. */
+  setEngravingPlacement(place: (rows: readonly SheetRow[]) => PlacedCompositionMark[]): void {
+    this.placeEngraving = place;
+  }
+
+  /** Source-owned custom ink in the sheet coordinate system. Recomputed on every format. */
+  getEngravingMarks(): readonly PlacedCompositionMark[] {
+    return this.engravingMarks;
+  }
+
+  /** @internal Paint after native notation. SVG groups retain the anchor and index into the measured marks. */
+  drawEngraving(context: RenderContext): void {
+    this.engravingMarks.forEach((mark, index) => {
+      context.save();
+      const group = context.openGroup('custom-engraving');
+      try {
+        group?.setAttribute('data-engraving-mark', String(index));
+        group?.setAttribute('data-source-event', mark.source.getAttribute('id'));
+        mark.draw(context);
+      } finally {
+        context.closeGroup();
+        context.restore();
+      }
+    });
+  }
+
   private alignedWidths?: readonly number[];
 
   /** @internal Fit a single reference system to the already formatted measures of a publication. */
@@ -170,14 +201,23 @@ export class Sheet {
     return this.rows.map((row) => ({ ...row, systems: row.systems.slice() }));
   }
 
-  /** Required drawing height, including the top inset. */
+  /** Required drawing height, including the top inset and final custom ink. */
   getHeight(): number {
     const last = this.rows[this.rows.length - 1];
-    return last ? last.y + last.height : this.options.y;
+    let height = last ? last.y + last.height : this.options.y;
+    for (const { bounds } of this.engravingMarks) height = Math.max(height, bounds.y + bounds.h);
+    return height;
   }
 
   /** Measure and pack rows. Always recompute, so repeated resize is deterministic. */
   format(): this {
+    this.formatRows();
+    if (this.placeEngraving) this.engravingMarks = this.placeEngraving(this.rows);
+    return this;
+  }
+
+  /** Measure and position native rows before custom elements read final coordinates. */
+  private formatRows(): this {
     if (this.continuous) {
       this.rows = this.continuous.format(this.options);
       return this;

@@ -2095,6 +2095,9 @@
       ]
     },
     "Sheet": [
+      "setEngravingPlacement(place: (rows: readonly SheetRow[]) => PlacedCompositionMark[]): void",
+      "getEngravingMarks(): readonly PlacedCompositionMark[]",
+      "drawEngraving(context: RenderContext): void",
       "alignToMeasures(widths: readonly number[]): this",
       "setContinuousLayout(layout: ContinuousLayout): this",
       "getContinuousLayout(): ContinuousLayout | undefined",
@@ -3625,6 +3628,7 @@
     "EasyScoreCompositionSpec": {
       "extends": [],
       "fields": [
+        "engraving?: CompositionEngraving;",
         "staves: readonly EasyScoreStaveSpec[];",
         "continuous?: ContinuousOptions;",
         "sheet?: Omit<SheetOptions, 'factory'>;",
@@ -3659,6 +3663,32 @@
       ]
     },
     "compose": "(score: EasyScore, spec: EasyScoreCompositionSpec): EasyScoreComposition"
+  },
+  "easyscore/engraving": {
+    "CompositionMark": {
+      "extends": [],
+      "fields": [
+        "source: Note;",
+        "bounds: Bounds;",
+        "draw: (context: RenderContext) => void;"
+      ]
+    },
+    "CompositionEngraving": {
+      "extends": [],
+      "fields": [
+        "prepareNote?: CommitHook;",
+        "place?: (score: EasyScoreComposition, addMark: (mark: CompositionMark) => void) => void;"
+      ]
+    },
+    "PlacedCompositionMark": {
+      "extends": [
+        "extends CompositionMark"
+      ],
+      "fields": [
+        "row: number;"
+      ]
+    },
+    "placeCompositionMarks": "(score: EasyScoreComposition, rows: readonly SheetRow[], place: NonNullable<CompositionEngraving['place']>): PlacedCompositionMark[]"
   },
   "easyscore/rhythm": {
     "EasyScoreAutoBeamOptions": "export type EasyScoreAutoBeamOptions = Omit<NonNullable<Parameters<typeof Beam.generateBeams>[1]>, 'stemPolicy'> & { autoStem?: boolean; };",
