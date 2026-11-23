@@ -219,3 +219,33 @@ To change the anchor before placing the notes, call
 The mensural example pairs timed long values with four opening signs. The Kievan
 example selects a half-note form from its position on the five-line staff.
 [White mensural values and signs](white-mensural.md) · [Kievan notation](kievan-notation.md)
+
+## Vertical spacing in continuous scores
+
+A low treble note and a high bass note need extra clearance when they sound together.
+When they occur on different beats, the two staves can sit closer together. Set
+`continuous.verticalSpacing` to `'profile'` to compare the ink at each horizontal
+position when placing staves and systems. The default `'envelope'` keeps the
+traditional full-width staff bounds.
+
+```js
+const spec = {
+  staves: [treble, bass],
+  continuous: { verticalSpacing: 'profile' },
+  system: { spaceBetweenStaves: 9 }, // Minimum distance between staff origins, in staff spaces.
+  sheet: { width: 720, rowGap: 24 }, // Minimum vertical clearance between systems, in pixels.
+};
+const composition = factory.EasyScore().compose(spec);
+```
+
+The profile includes native noteheads, fingering, ledger lines, beam strips and registered
+phrase markings. The formatter refits connecting stems and beams after it has placed both
+staves. For a custom cue or symbol, supply `continuous.inkBounds(stave, measure)` and return
+rectangles of the form `{ x, y, w, h }` in current score coordinates. The measure number
+starts at one. Compute these bounds from the supplied stave on each call so they follow
+resizes and changes of row.
+
+Pass the same score to `Publication` to use the profile on paper. The planner measures the
+drawn music and any cue or ossia above it, then applies `systemGap` in millimeters. Systems
+share space only within a page. A forced or automatic page turn restores the full extent
+of each system at its page margin.

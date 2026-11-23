@@ -107,6 +107,12 @@
   },
   "implemented": [
     {
+      "api": "continuous.verticalSpacing",
+      "guide": "docs/score-layout.md",
+      "example": null,
+      "test": "staff profiles distinguish coincident and staggered extremes after reflow"
+    },
+    {
       "api": "EasyScore.create()",
       "guide": "docs/easyscore.md",
       "example": null,

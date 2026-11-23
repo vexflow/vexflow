@@ -668,6 +668,8 @@ For tab, use `{ id: 'hold', kind: 'tie', from: 'a', to: 'b', string: 2 }` to sus
 
 A tab ending uses `{ id: 'ending', kind: 'volta', from: 'a', to: 'b', text: '1.' }`. The bracket and ties split at system breaks and follow the guitar into an extracted part.
 
+Use `continuous.verticalSpacing: 'profile'` to fit staves and successive systems to horizontally overlapping ink. For a piano passage, simultaneous low treble notes and high bass notes receive more room than the same pitches on different beats. See [vertical spacing in continuous scores](score-layout.md#vertical-spacing-in-continuous-scores) for staff distances, custom symbols and printed page margins.
+
 See the [continuous score guide](vf6/m4.md) for break constraints, rest grouping, staff names and span conventions.
 
 The guide’s **EasyScore: responsive composition** example covers a grand staff, pickup, multiple voices, tuplets, changing meter, inline state, and both spacing modes.

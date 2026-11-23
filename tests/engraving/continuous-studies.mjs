@@ -266,3 +266,59 @@ export function sextupletStudy() {
     },
   };
 }
+
+/** Two excerpts from Chopin's Ballade No. 3 with the ossia at m. 3 and the pedal change at m. 9. */
+export function balladeSpacingStudy() {
+  const event = (id, keys, duration) => ({ id, note: { keys: keys.split(' '), duration } });
+  const bar = (notes, autoBeam = false) => ({ voices: [{ notes, autoBeam }] });
+  return {
+    sheet: { width: 580, rowGap: 24 },
+    staves: [
+      {
+        id: 'ossia',
+        clef: 'bass',
+        key: 'Ab',
+        time: '6/8',
+        options: { spacingBetweenLinesPx: 7 },
+        measures: [bar('Bb3/8, An3, Bb3, B3/q/r, B3/8/r', true), bar('B3/h/r, B3/q/r')],
+      },
+      {
+        id: 'upper',
+        clef: 'treble',
+        key: 'Ab',
+        time: '6/8',
+        measures: [
+          bar('Eb5/h.'),
+          bar([
+            event('octave', 'ab/5 ab/6', 'qd'),
+            event('upper-rest', 'b/4', 'qr'),
+            event('upper-rest2', 'b/4', '8r'),
+          ]),
+        ],
+      },
+      {
+        id: 'lower',
+        clef: 'bass',
+        key: 'Ab',
+        time: '6/8',
+        measures: [
+          bar('Db4/8, C4, Bb3, Bb3, An3, Bb3', true),
+          bar([
+            event('pedal-down', 'ab/1 ab/2', '8'),
+            event('lower-rest', 'd/3', '8r'),
+            event('pedal-up', 'gb/4 ab/4 eb/5', '8'),
+            event('lower-chord', 'f/4 ab/4 d/5', 'q'),
+            event('lower-rest2', 'd/3', '8r'),
+          ]),
+        ],
+      },
+    ],
+    continuous: {
+      verticalSpacing: 'profile',
+      hideEmptyStaves: true,
+      groups: [{ first: 'upper', last: 'lower', type: 'brace', barlines: true }],
+      boundaries: [{ measure: 2, breakBefore: 'force' }],
+      spans: [{ id: 'pedal', kind: 'pedal', from: 'pedal-down', to: 'pedal-up' }],
+    },
+  };
+}

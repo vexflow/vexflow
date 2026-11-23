@@ -162,29 +162,34 @@ function controls(f: SpanFragment) {
   };
 }
 
+/** Subdivide the actual ribbon for collision checks and vertical fitting. */
+export function curveParts(f: SpanFragment): Bounds[] {
+  const thickness = (f.above ? -1 : 1) * f.space * 0.22;
+  const { dx, a, b } = controls(f);
+  const left = { x: f.x1, y: f.y1 },
+    right = { x: f.x2, y: f.y2 };
+  const cps =
+    f.kind === 'tie'
+      ? [{ x: (f.x1 + f.x2) / 2, y: (a + b) / 2 }]
+      : [
+          { x: f.x1 + dx, y: a },
+          { x: f.x2 - dx, y: b },
+        ];
+  return ribbonParts(
+    [left, ...cps, right],
+    [left, ...cps.map((p) => ({ ...p, y: p.y + thickness })), right],
+    f.space * 0.15
+  );
+}
+
 /** Prefer the shallowest clear curve. Preserve the best finite candidate if the space is infeasible. */
 export function fitSpan(f: SpanFragment, obstacles: Bounds[]): boolean {
-  const thickness = (f.above ? -1 : 1) * f.space * 0.22;
   const initial = Math.min(f.space * (f.kind === 'tie' ? 0.85 : 1.5), (f.x2 - f.x1) * 0.18);
   let best = initial,
     cost = Infinity;
   for (let step = 0; step <= (f.kind === 'tie' ? 6 : 20); step++) {
     f.rise = initial + step * f.space * 0.4;
-    const { dx, a, b } = controls(f);
-    const left = { x: f.x1, y: f.y1 },
-      right = { x: f.x2, y: f.y2 };
-    const cps =
-      f.kind === 'tie'
-        ? [{ x: (f.x1 + f.x2) / 2, y: (a + b) / 2 }]
-        : [
-            { x: f.x1 + dx, y: a },
-            { x: f.x2 - dx, y: b },
-          ];
-    const parts = ribbonParts(
-      [left, ...cps, right],
-      [left, ...cps.map((p) => ({ ...p, y: p.y + thickness })), right],
-      f.space * 0.15
-    );
+    const parts = curveParts(f);
     const hits = parts.filter((p) =>
       obstacles.some((o) => p.x < o.x + o.w && o.x < p.x + p.w && p.y < o.y + o.h && o.y < p.y + p.h)
     ).length;

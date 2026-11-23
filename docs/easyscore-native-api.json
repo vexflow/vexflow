@@ -1251,6 +1251,7 @@
       "getFretHandFinger(): string",
       "setOffsetX(x: number): this",
       "setOffsetY(y: number): this",
+      "getInkParts()",
       "draw(): void"
     ]
   },
@@ -1913,7 +1914,8 @@
       "addVerse(stave: Stave, syllables: PhraseSyllable[], options: PhraseVerseOptions = {}): Annotation[]",
       "getStanzaColumnWidth(stave: Stave): number",
       "resetPlacement(): void",
-      "format(staves: Stave[], voices: Voice[]): void",
+      "getStaffInk(stave: Stave): Bounds[]",
+      "format(staves: Stave[], voices: Voice[], deferStaffSpacing = false): void",
       "getLyricConnectors(): BoundingBox[]",
       "draw(context: RenderContext): void"
     ]
@@ -2104,7 +2106,7 @@
       "constructor(options: SheetOptions)",
       "addSystem(options: Omit<SystemOptions, 'factory' | 'width' | 'autoWidth' | 'noJustification'> = {}): System",
       "addStickingLine(assignments: readonly StickingAssignment[]): Annotation[]",
-      "alignSticking(row: SheetRow): void",
+      "alignSticking(row: SheetRow, includeInk?: (box: Bounds) => void): void",
       "setWidth(width: number): this",
       "getSystems(): System[]",
       "getRows(): SheetRow[]",
@@ -2786,7 +2788,9 @@
       "addStave(params: SystemStave): Stave",
       "addVoices(voices: Voice[])",
       "getPhraseLayout(): PhraseLayout",
-      "format(row?: { staffOffsets?: readonly number[]; endPadding?: number }): void",
+      "getMinimumStaffDistance(upper: number, lower: number): number",
+      "getPhraseInk(stave: Stave)",
+      "format(row?: { staffOffsets?: readonly number[]; endPadding?: number; deferStaffSpacing?: boolean }): void",
       "getBoundingBox(): BoundingBox",
       "draw(): void"
     ]
@@ -3184,6 +3188,8 @@
     "ContinuousOptions": {
       "extends": [],
       "fields": [
+        "verticalSpacing?: 'profile' | 'envelope';",
+        "inkBounds?: (stave: Stave, measure: number) => readonly Bounds[];",
         "independentMeters?: boolean;",
         "mode?: 'balanced' | 'greedy';",
         "boundaries?: readonly ContinuousBoundary[];",
