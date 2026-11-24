@@ -4,6 +4,7 @@ Run commands from the repository root. Shell examples use Bash or Zsh.
 
 - [Local setup](#local-setup)
 - [Build and develop](#build-and-develop)
+- [Package contents](#package-contents)
 - [Test locally](#test-locally)
 - [Release a version](#release-a-version)
 - [Publish to npm](#publish-to-npm)
@@ -82,6 +83,20 @@ npx grunt clean:build
 
 Use `npx grunt clean` to also remove `reference/` and tool caches. Save any visual baseline you still need before running it.
 
+## Package contents
+
+The npm package and GitHub release tarball contain the same production JavaScript, TypeScript declarations, and license notices. Choose an entry point according to the fonts your score needs. The same names work with `import` and `require`.
+
+| Package entry | Standalone script in `build/cjs/` | Embedded fonts |
+| --- | --- | --- |
+| `vexflow/bravura` | `vexflow-bravura.js` | Bravura and Academico (regular and bold). Recommended for standard notation. |
+| `vexflow` | `vexflow.js` | The Bravura set plus Gonville, Petaluma, and Petaluma Script. |
+| `vexflow/core` | `vexflow-core.js` | Supply the fonts your application uses and await loading before drawing. |
+
+Each standalone script exposes the global `VexFlow`. Load a single file, for example `https://cdn.jsdelivr.net/npm/vexflow@5.11.0/build/cjs/vexflow-bravura.js`. The browser downloads only the selected bundle. With an embedded-font build, await `document.fonts.ready` before laying out the first score.
+
+For the current demos and browser tests, open the [hosted test gallery](https://vexflow.com/tests/). For a specific release, check out its Git tag, run `npm ci` and `npm start`, and follow [Browse the visual tests](#browse-the-visual-tests). This produces the debug bundles, source maps, and examples previously available through npm CDN paths such as `tests/flow.html`.
+
 ## Test locally
 
 Run the same checks as CI, in order:
@@ -99,7 +114,7 @@ npm run guide:test
 - `npm test` builds debug and ESM outputs, runs Node integration checks, and runs QUnit in headless Chrome.
 - `explorer:test` checks that the retired URL publishes only its guide notice.
 - `tests:test` builds and checks the standalone test gallery and its upload behavior.
-- `test:easyscore-package` builds ESM, declarations, and CJS, then checks EasyScore package exports and types.
+- `test:easyscore-package` installs the actual tarball into a temporary consumer, checks its contents and 2.5 MiB compressed size budget, then exercises ESM, CommonJS, strict TypeScript, and each standalone script in Chrome.
 - `guide:test` checks lesson routes, all editable examples, mobile layout, exports, and upload behavior.
 - Upload tests use a fake cloud command. They do not publish anything.
 
@@ -142,6 +157,8 @@ npm run test:reference
 ```
 
 Open `build/images/diff/index.html` and inspect the differences. See [rendering tests](testing.md) for focused comparisons, geometry checks, and interpreting pixel differences.
+
+For a comparison against a release, fetch the Git tags and run `npx grunt get:releases:X.Y.Z`. The tool uses the published test bundle when available. For a production-only package, it builds the test suite from the matching local tag using that release's lockfile. The engraving qualification suite uses a separate, checksum-pinned 5.2.0 control from the GitHub release, which `node tools/historical-engraving.mjs` caches locally.
 
 ## Release a version
 
@@ -194,7 +211,7 @@ npm pack --pack-destination "releases/$release_version"
 release_tarball="$PWD/releases/$release_version/vexflow-$release_version.tgz"
 ```
 
-Review the package contents. They must include `build/cjs/vexflow.js`, `build/esm/entry/vexflow.js`, and `build/types/entry/vexflow.d.ts`. `npm pack` does not build missing files.
+Review the package contents against the three production entries above, including their declarations and license notices. `npm pack` does not build missing files.
 
 Install the exact tarball in a temporary project and check both module formats:
 
@@ -238,7 +255,7 @@ To rehearse locally after preparing the tag and assets, append `--dry-run`. If p
 
 The release tarball contains the built npm package. GitHub's automatic source archives contain the source checkout. Stop here when preparing a release for someone else to publish to npm.
 
-The older `npx grunt release` task combines GitHub and npm publication and temporarily commits build output. Use the staged workflow above to control these steps separately.
+The older `npx grunt release` task combines GitHub and npm publication. It builds and tests the production package before publication. Use the staged workflow above to control these steps separately.
 
 ## Publish to npm
 

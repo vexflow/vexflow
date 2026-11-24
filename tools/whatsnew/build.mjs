@@ -6,6 +6,7 @@ import { access, copyFile, mkdir, mkdtemp, readFile, rename, rm, writeFile } fro
 import { basename, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import { historicalEngravingBundle } from '../historical-engraving.mjs';
 import { siteTheme } from '../site-theme.mjs';
 import { captureScores } from './scores.mjs';
 import { captureExamples, captureTools } from './screens.mjs';
@@ -131,22 +132,6 @@ async function historicalPairs() {
   return pairs;
 }
 
-/** Retrieve the pinned intermediate control for roadmap scores whose inputs postdate 5.0.0. */
-async function intermediateBundle() {
-  const file = 'package/build/cjs/vexflow-debug-with-tests.js';
-  let path = join('build/m0-release', file);
-  if (!(await exists(path))) {
-    path = join(work, file);
-    if (!(await exists(path))) {
-      run('npm', 'pack', 'vexflow@5.2.0', '--ignore-scripts', '--silent', '--pack-destination', work);
-      run('tar', '-xzf', join(work, 'vexflow-5.2.0.tgz'), '-C', work, file);
-    }
-  }
-  const bytes = await readFile(path);
-  assert.equal(sha(bytes), manifest.historicalRelease.bundleSHA256);
-  return bytes;
-}
-
 try {
   run(process.execPath, 'node_modules/grunt/bin/grunt', 'clean:webpack_cache', 'webpack:debug', 'build:types');
   run(process.execPath, 'guide/cli.mjs', 'build');
@@ -178,7 +163,7 @@ try {
     const [old, now] = results;
     const lateScores = await captureScores(
       browser,
-      await intermediateBundle(),
+      await historicalEngravingBundle(),
       join(work, 'intermediate'),
       new Set(manifest.groups.flatMap((g) => Object.values(g.cases)))
     );

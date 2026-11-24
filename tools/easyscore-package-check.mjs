@@ -1,10 +1,11 @@
 // Verify the packed npm artifact, its public entry points, and an external TypeScript consumer.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import puppeteer from 'puppeteer';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = mkdtempSync(join(tmpdir(), 'vexflow-package-contract-'));
@@ -22,22 +23,107 @@ function run(command, args, cwd = root) {
   return result.stdout;
 }
 
+/** Exercise the standalone scripts with only the fonts each script promises to register. */
+async function checkBrowserScripts(packageDir) {
+  const browser = await puppeteer.launch({ args: process.env.CI ? ['--no-sandbox'] : [] });
+  const standard = ['Academico:bold', 'Academico:normal', 'Bravura:normal'];
+  const bundles = {
+    'vexflow.js': [...standard, 'Gonville:normal', 'Petaluma:normal', 'Petaluma Script:normal'],
+    'vexflow-bravura.js': standard,
+    'vexflow-core.js': [],
+  };
+  try {
+    for (const [file, faces] of Object.entries(bundles)) {
+      const page = await browser.newPage();
+      await page.setContent('<div id="score"></div>');
+      await page.addScriptTag({ path: join(packageDir, 'build/cjs', file) });
+      const loaded = await page.evaluate(async () => {
+        await document.fonts.ready;
+        return [...document.fonts].map((face) => {
+          if (face.status !== 'loaded') throw Error('Font failed to load: ' + face.family);
+          return face.family.replace(/["']/g, '') + ':' + face.weight;
+        });
+      });
+      assert.deepEqual(loaded.sort(), faces.toSorted(), file);
+      if (!faces.length) {
+        // A core consumer provides its own faces. Keep the browser fixture independent of a CDN.
+        for (const family of ['Bravura', 'Academico']) {
+          const name = family.toLowerCase();
+          const bytes = readFileSync(join(root, 'node_modules/@vexflow-fonts', name, name + '.woff2'));
+          await page.evaluate(
+            ([family, url]) => VexFlow.Font.load(family, url),
+            [family, 'data:font/woff2;base64,' + bytes.toString('base64')]
+          );
+        }
+        await page.evaluate(() => VexFlow.setFonts('Bravura', 'Academico'));
+      }
+      const notes = await page.evaluate(() => {
+        const score = VexFlow.EasyScore.create({ renderer: { elementId: 'score', width: 320, height: 160 } });
+        score
+          .system({ width: 300 })
+          .addStave({ voices: [score.voice(score.notes('C4/w'))] })
+          .addClef('treble');
+        score.draw();
+        return document.querySelectorAll('#score svg .vf-stavenote').length;
+      });
+      assert.equal(notes, 1, file);
+      await page.close();
+    }
+  } finally {
+    await browser.close();
+  }
+}
+
 try {
   const metadata = JSON.parse(run('npm', ['pack', '--ignore-scripts', '--json', '--pack-destination', directory]))[0];
-  assert.ok(
-    metadata.files.every((file) => !file.path.startsWith('build/esm/tests/web/')),
-    'Keep browser qualification tools outside the published package'
+  const budget = 2.5 * 1024 * 1024;
+  assert.ok(metadata.size <= budget, `Packed tarball is ${metadata.size} bytes; budget is ${budget}.`);
+  const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+  const entryFiles = new Set(
+    Object.values(pkg.exports).flatMap((entry) => Object.values(entry).map((p) => p.slice(2)))
   );
-  run('tar', ['-xzf', join(directory, metadata.filename), '-C', directory]);
-  mkdirSync(join(directory, 'node_modules'));
-  renameSync(join(directory, 'package'), join(directory, 'node_modules/vexflow'));
-  const pkg = JSON.parse(readFileSync(join(directory, 'node_modules/vexflow/package.json'), 'utf8'));
-  // Reuse installed runtime dependencies without fetching or running install scripts.
-  for (const name of Object.keys(pkg.dependencies ?? {})) {
-    const target = join(directory, 'node_modules', name);
-    mkdirSync(dirname(target), { recursive: true });
-    symlinkSync(join(root, 'node_modules', name), target, 'dir');
+  const packageFiles = new Set(['package.json', 'README.md', 'LICENSE', 'AUTHORS.md', 'build/esm/package.json']);
+  for (const { path } of metadata.files) {
+    assert.ok(
+      entryFiles.has(path) ||
+        packageFiles.has(path) ||
+        path.startsWith('licenses/') ||
+        /^build\/esm\/src\/.+\.js$/.test(path) ||
+        /^build\/types\/src\/.+\.d\.ts$/.test(path),
+      'Unexpected package file: ' + path
+    );
   }
+  // Install the actual tarball. Supply the locked runtime dependency locally to exercise an offline installation.
+  writeFileSync(join(directory, 'package.json'), '{"name":"vexflow-consumer","private":true}\n');
+  const dependencies = Object.keys(pkg.dependencies ?? {}).map((name) => join(root, 'node_modules', name));
+  run(
+    'npm',
+    [
+      'install',
+      '--offline',
+      '--ignore-scripts',
+      '--no-audit',
+      '--no-fund',
+      '--no-package-lock',
+      join(directory, metadata.filename),
+      ...dependencies,
+    ],
+    directory
+  );
+  const packageDir = join(directory, 'node_modules/vexflow');
+  for (const name of [
+    'Academico.txt',
+    'Bravura.txt',
+    'Gonville.txt',
+    'Petaluma-and-Petaluma-Script.txt',
+    'structured-clone-es.md',
+  ]) {
+    assert.ok(readFileSync(join(packageDir, 'licenses', name)).length, 'Missing license notice: ' + name);
+  }
+  for (const { path } of metadata.files.filter(({ path }) => path.startsWith('build/types/src/fonts/'))) {
+    assert.doesNotMatch(readFileSync(join(packageDir, path), 'utf8'), /data:font\//, path);
+  }
+  await checkBrowserScripts(packageDir);
   for (const entry of Object.values(pkg.exports))
     for (const path of Object.values(entry))
       assert.ok(
@@ -130,7 +216,6 @@ score.withDefaults({}, async () => 1);
       join(root, 'node_modules/typescript/bin/tsc'),
       '--noEmit',
       '--strict',
-      '--skipLibCheck',
       '--target',
       'es2020',
       '--module',
@@ -141,7 +226,9 @@ score.withDefaults({}, async () => 1);
     ],
     directory
   );
-  console.log(`Packed EasyScore contracts passed: ${entries.join(', ')}; ESM, CommonJS, and declarations.`);
+  console.log(
+    `Packed ${metadata.size} bytes. EasyScore contracts passed: ${entries.join(', ')}; ESM, CommonJS, and declarations.`
+  );
 } finally {
   rmSync(directory, { recursive: true, force: true });
 }

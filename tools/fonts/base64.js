@@ -73,7 +73,7 @@ for (const fontName in fonts) {
 
   const dataURIPrefix = 'data:font/woff2;charset=utf-8;base64,';
 
-  const output = `export const ${fontNameNoSpaces} = '${dataURIPrefix}${base64}';`;
+  const output = `export const ${fontNameNoSpaces}: string = '${dataURIPrefix}${base64}';`;
 
   // Use our prettier rules to format the output JSON file. See: .prettierrc.js
   // That way, if we ever edit & save the file, the diff will be minimal.

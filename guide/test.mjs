@@ -239,11 +239,11 @@ throw new Error('Superseded error');`);
     ])
       assert.ok(await page.$(selector), selector);
     const html = await page.$eval('#lesson pre .language-markup', (element) => element.textContent);
-    // Use the published package layout, with the equivalent full-font debug bundle built by this suite.
+    // Use the published package layout, using the guide runtime as the fixture. The package test executes the actual production scripts.
     const manifest = await validate(output);
     const packageDir = join(artifacts, 'node_modules/vexflow/build/cjs');
     await mkdir(packageDir, { recursive: true });
-    await copyFile(join(output, manifest.paths['runtime/vexflow.js']), join(packageDir, 'vexflow.js'));
+    await copyFile(join(output, manifest.paths['runtime/vexflow.js']), join(packageDir, 'vexflow-bravura.js'));
     const standalone = join(artifacts, 'setup.html');
     await writeFile(standalone, html);
     await page.goto(pathToFileURL(standalone).href);

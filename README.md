@@ -2,7 +2,7 @@
 
 VexFlow is an open-source library for rendering sheet music. It is written in TypeScript, and outputs scores to HTML Canvas and SVG. It works in browsers and in Node.js projects (e.g., a command line script to save a score as a PDF).
 
-Browse the [illustrated feature catalog](https://vexflow.com/features/). Try a [harp pedal diagram in the guide](https://vexflow.com/guide/#playground/harp-setting) or read the [5.10.1 release highlights](changelog/CHANGELOG.md#5101).
+Browse the [illustrated feature catalog](https://vexflow.com/features/). Try a [harp pedal diagram in the guide](https://vexflow.com/guide/#playground/harp-setting) or read the [5.11.0 release highlights](https://github.com/vexflow/vexflow/releases/tag/5.11.0).
 
 ## Quick Start
 
@@ -11,8 +11,6 @@ The simplest way to add VexFlow to a web page is via a `<script>` tag.
 Save the page as UTF-8 and put `<meta charset="utf-8">` at the start of `<head>`. Without an explicit encoding, music symbols can appear as incorrect characters. A doctype alone does not set the encoding.
 
 See this example: [https://jsfiddle.net/ck6erLhm/](https://jsfiddle.net/ck6erLhm/)
-
-For more informa
 
 ```html
 <!doctype html>
@@ -23,15 +21,22 @@ For more informa
   </head>
   <body>
     <div id="output"></div>
-    <script src="https://cdn.jsdelivr.net/npm/vexflow@5.10.1/build/cjs/vexflow.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vexflow@5.11.0/build/cjs/vexflow-bravura.js"></script>
     <script>
-      // YOUR CODE GOES HERE
+      // Wait for the bundled Bravura and Academico faces before laying out the first measure.
+      document.fonts.ready.then(() => {
+        const score = VexFlow.EasyScore.create({ renderer: { elementId: 'output', width: 320, height: 160 } });
+        score.system({ width: 300 }).addStave({ voices: [score.voice(score.notes('C4/w'))] }).addClef('treble');
+        score.draw();
+      });
     </script>
   </body>
 </html>
 ```
 
 The URL above includes a version number <code>vexflow@x.y.z</code>. Specifying a version prevents a future update from breaking your deployment.
+
+Use <code>vexflow.js</code> to include Petaluma, Petaluma Script, and Gonville as well. Use <code>vexflow-core.js</code> to load the fonts separately. All three scripts expose the same <code>VexFlow</code> global.
 
 See more about this in the [VexFlow Guide](https://vexflow.com/guide/index.html#lesson/setup).
 

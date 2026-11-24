@@ -1,3 +1,10 @@
+# 5.11.0
+
+- **Smaller npm download.** The production tarball is 2.33 MiB compressed, down from 11.24 MiB in 5.10.1. TypeScript declarations no longer repeat embedded font data. The tarball includes the production code, types, and license notices.
+- **Choosing a bundle.** Use `vexflow/bravura` for standard notation with Bravura and both weights of Academico, `vexflow` for all six font faces, or `vexflow/core` to supply your own fonts. All three retain their CommonJS, ESM, and standalone script entry points. [Installation guide](https://vexflow.com/guide/#lesson/setup)
+- **Debugging and examples.** If you used an npm CDN for debug builds, source maps, or demo pages, use the [hosted test gallery](https://vexflow.com/tests/) or [build the tagged source](https://github.com/vexflow/vexflow/blob/5.11.0/docs/build.md#browse-the-visual-tests). CI installs the packed artifact and verifies its exports, declarations, browser fonts, and 2.5 MiB compressed size budget.
+- Browse the [features](https://vexflow.com/features/), [PDF editions](https://vexflow.com/pdfs/), [What's New?](https://vexflow.com/reports/whatsnew/), and [5.11.0 quality report](https://vexflow.com/reports/5.11.0/).
+
 # 5.10.1
 
 - **Slurs.** TAB slurs clear the first fret after a system break. Pitched slurs can try the opposite side in a crowded bar or find a nearby attachment when the score specifies a side. [A4 guitar part](https://github.com/vexflow/vexflow/issues/471#issuecomment-7120481849) · [Violin and piano examples](https://github.com/vexflow/vexflow/issues/473#issuecomment-7120483971)

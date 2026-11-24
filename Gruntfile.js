@@ -101,7 +101,7 @@ You can also do it all on one line:
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const { execSync, spawnSync } = require('child_process');
+const { spawnSync } = require('child_process');
 
 const ts = require('typescript');
 const webpack = require('webpack');
@@ -290,7 +290,8 @@ function webpackConfigs() {
         globalObject,
       },
       resolve: { extensions: ['.ts', '.tsx', '.js', '...'] },
-      devtool: DEVTOOL,
+      // Keep local production maps available without sending CDN users to an unpublished .map file.
+      devtool: mode === PRODUCTION_MODE && DEVTOOL === 'source-map' ? 'hidden-source-map' : DEVTOOL,
       module: {
         rules: [
           {
@@ -778,7 +779,7 @@ module.exports = (grunt) => {
       // verbose: 2, // Only for debugging.
       hooks: {
         'before:init': ['grunt clean'],
-        'after:bump': ['grunt', 'echo Adding build/ folder...', 'git add -f build/'],
+        'after:bump': ['npm run test:easyscore-package'],
         'after:npm:release': [],
         'after:git:release': [],
         // Git has committed and tagged the exact version before the GitHub release is published.
@@ -840,17 +841,7 @@ module.exports = (grunt) => {
         const runTasks = module.default;
         return runTasks(options);
       })
-      .then((output) => {
-        try {
-          log('Removing build/ folder...');
-          execSync('git rm -rf build/', { stdio: 'pipe' }); // { stdio: 'pipe' } hides the output.
-          execSync(`git commit -m 'Remove build/ after releasing version ${output.version} to npm and GitHub.'`);
-          runCommand('git', 'push');
-        } catch (e) {
-          // If the build/ folder was not added/checked in, we do nothing.
-        }
-        done();
-      });
+      .then(() => done(), done);
   });
 };
 

@@ -2,6 +2,7 @@
   "reference": "origin/main",
   "historicalRelease": {
     "tag": "5.2.0",
+    "archiveSHA256": "7443c3e99b896f982c8fbb249b48639d4bbecbddcf4bb3f0df567bc61a7fcef7",
     "bundleSHA256": "14d30cef7899645816d1eb50b85cf4190e20eefc709219d60c4928af7a914021"
   },
   "license": "MIT",

@@ -180,9 +180,8 @@
       if (bundledSource) {
         vexPlusTestsURL = bundledSource;
       } else if (useCDN) {
-        // `ver` can specify a version hosted on the unpkg.com / jsdelivr.com CDN. We only support VexFlow 4 or newer:
+        // Older npm packages include a test suite that can still be loaded from a CDN:
         //   ver=unpkg@4.2.3     =>  https://unpkg.com/vexflow@4.2.3/build/cjs/vexflow-debug-with-tests.js
-        //   ver=unpkg@alpha     =>  https://unpkg.com/vexflow@alpha/build/cjs/vexflow-debug-with-tests.js
         //   ver=jsdelivr@4.2.3  =>  https://cdn.jsdelivr.net/npm/vexflow@4.2.3/build/cjs/vexflow-debug-with-tests.js
         const versionNumber = ver.split('@')[1];
         vexPlusTestsURL = `${cdnURLPath}vexflow@${versionNumber}/build/${pathCJSorESM}`;
@@ -228,7 +227,15 @@
 
       showFontLoadingStatus();
 
-      const VF = await loadVexFlow();
+      const VF = await loadVexFlow().catch((error) => {
+        if (useCDN) {
+          document.getElementById('run-title').textContent = 'The test suite could not be loaded from this CDN.';
+          const link = document.getElementById('gallery-link');
+          link.href = 'https://vexflow.com/tests/';
+          link.textContent = 'Browse the hosted test gallery';
+        }
+        throw error;
+      });
       if (bundledSource) await document.fonts.ready;
 
       // If you did not load the fonts via the div#font-preload above, you can load them with this API:

@@ -76,9 +76,9 @@ ${sample(
 <body>
   <!-- VexFlow inserts the finished SVG inside this container. -->
   <div id="score"></div>
-  <script src="./node_modules/vexflow/build/cjs/vexflow.js"></script>
+  <script src="./node_modules/vexflow/build/cjs/vexflow-bravura.js"></script>
   <script type="module">
-    // The full bundle registers its fonts. Wait for them before measuring notes.
+    // The Bravura bundle registers its music and text fonts. Wait for them before measuring notes.
     await document.fonts.ready;
     const score = VexFlow.EasyScore.create({
       renderer: { elementId: 'score', width: 360, height: 160 }
@@ -101,12 +101,14 @@ python3 -m http.server 8000`
 )}
 <p>Compare your result with the editor below. On a treble staff, middle C sits on a short line below the five staff lines. Its open head has no stem because the note lasts the whole bar.</p>
 <div data-example="held-note"></div>
-<p>If your page is blank, check the request for <code>vexflow.js</code> in the browser’s Network panel. A 404 usually means the server started in a different folder or the script path doesn’t match the package location. If the script loaded, check the console and make sure an element with the renderer’s ID exists when the drawing code runs.</p>
+<p>If your page is blank, check the request for <code>vexflow-bravura.js</code> in the browser’s Network panel. A 404 usually means the server started in a different folder or the script path doesn’t match the package location. If the script loaded, check the console and make sure an element with the renderer’s ID exists when the drawing code runs.</p>
+<p>The Bravura bundle includes Bravura for music and regular and bold Academico for text. To add the jazz faces Petaluma and Petaluma Script and the Gonville music face, use <code>vexflow.js</code>. If your application loads its own fonts, choose <code>vexflow-core.js</code> and wait for those fonts before drawing.</p>
+<p>Starting in 5.11.0, the npm package contains the production builds and their type declarations. To explore the demos, open the <a href="https://vexflow.com/tests/">test gallery</a>. To debug a particular release with source maps or run its tests locally, follow the <a href="https://github.com/vexflow/vexflow/blob/5.11.0/docs/build.md#browse-the-visual-tests">build instructions for that tag</a>.</p>
 <h2>Import VexFlow in a TypeScript application</h2>
 <p>In an existing browser project, run the same npm install command in the project directory. Put <code class="language-markup">&lt;div id="score"&gt;&lt;/div&gt;</code> in the page or component that will display the music. The following browser entry module assumes your build tool resolves npm imports and the element exists by the time you call <code>drawBar()</code>.</p>
 ${sample(
   'typescript',
-  `import { VexFlow as VF } from 'vexflow';
+  `import { VexFlow as VF } from 'vexflow/bravura';
 
 // A reusable function lets another part of the app supply a different melody.
 async function drawBar(phrase: string) {

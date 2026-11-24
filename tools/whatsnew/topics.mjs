@@ -3,6 +3,17 @@
 export const topics = [
   [
     'Features',
+    'New in 5.11.0',
+    [
+      [
+        'Smaller production package',
+        'The npm download is 2.33 MiB, down from 11.24 MiB in 5.10.1. Use the Bravura bundle for standard notation, the full bundle for all six font faces, or the core bundle to supply your own fonts. All three support script tags, ES modules and CommonJS.',
+        'docs/build.md',
+      ],
+    ],
+  ],
+  [
+    'Features',
     'New in 5.10.1',
     [
       [

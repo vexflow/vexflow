@@ -130,7 +130,24 @@ async function getReleasesForVersion3OrEarlier() {
 }
 await getReleasesForVersion3OrEarlier();
 
-// For versions >= 4.0, we download the package from npm.
+// Rebuild the test suite for production-only packages, using the release's own source and lockfile.
+function buildTaggedTests(version, tempDir) {
+  const repo = path.resolve(__dirname, '..');
+  const commit = execFileSync('git', ['rev-parse', '--verify', `refs/tags/${version}^{commit}`], {
+    cwd: repo,
+    encoding: 'utf8',
+  }).trim();
+  const cwd = path.join(tempDir, 'source');
+  console.log(`Building visual tests from tag ${version} (${commit}).`);
+  execFileSync('git', ['clone', '--quiet', '--local', '--no-checkout', '--', repo, cwd]);
+  execFileSync('git', ['checkout', '--quiet', '--detach', commit], { cwd });
+  const options = { cwd, stdio: 'inherit', env: { ...process.env, PUPPETEER_SKIP_DOWNLOAD: 'true' } };
+  execFileSync('npm', ['ci'], options);
+  execFileSync(process.execPath, ['node_modules/grunt/bin/grunt', 'webpack:debug', 'build:esm'], options);
+  return path.join(cwd, 'build');
+}
+
+// For versions >= 4.0, use the published production files and obtain a matching visual test suite.
 async function getReleasesForVersion4OrLater() {
   for (const ver of versions4OrLater) {
     // Download & extract the package in a temporary directory.
@@ -155,16 +172,17 @@ async function getReleasesForVersion4OrLater() {
     // Copy the files from the temporary directory to the target directory.
     const sourceDir = path.join(tempDir, 'package', 'build');
     const targetDir = path.join(RELEASES_DIR, ver);
-    // copy all files from sourceDir to targetDir.
     try {
-      const results = await copy(sourceDir, targetDir);
-      console.info('Copied ' + results.length + ' files to: ' + targetDir);
-    } catch (error) {
-      console.error('Copy failed: ' + error);
+      if (!fs.existsSync(path.join(sourceDir, 'cjs/vexflow-debug-with-tests.js'))) {
+        const tests = buildTaggedTests(ver, tempDir);
+        // Preserve the published bytes wherever the two builds overlap.
+        fs.cpSync(tests, sourceDir, { recursive: true, force: false });
+      }
+      fs.cpSync(sourceDir, targetDir, { recursive: true });
+      console.info('Copied release builds to: ' + targetDir);
+    } finally {
+      fs.rmSync(tempDir, { recursive: true });
     }
-
-    // Remove the temporary directory.
-    fs.rmSync(tempDir, { recursive: true });
   }
 }
 

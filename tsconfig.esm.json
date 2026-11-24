@@ -10,6 +10,6 @@
     // "tsBuildInfoFile": "./node_modules/.cache/typescript/tsbuildinfo.json"
   },
   "include": ["./src", "./entry", "./tests"],
-  // The release qualification harness runs in Node with its own locked test dependencies.
-  "exclude": ["./tests/web", "**/node_modules"]
+  // Node integration and qualification tests consume the built outputs directly.
+  "exclude": ["./tests/node", "./tests/web", "**/node_modules"]
 }

@@ -50,8 +50,8 @@ const args = process.argv.slice(2);
 fs.appendFileSync(process.env.COMMAND_LOG, JSON.stringify({name,args}) + '\\n');
 if (name === 'tar') {
   const build = path.join(args[args.indexOf('-C') + 1], 'package', 'build');
-  fs.mkdirSync(build, {recursive:true});
-  fs.writeFileSync(path.join(build, 'fixture.js'), 'release fixture');
+  fs.mkdirSync(path.join(build, 'cjs'), {recursive:true});
+  fs.writeFileSync(path.join(build, 'cjs/vexflow-debug-with-tests.js'), 'release fixture');
 }
 `;
     for (const name of ['git', 'npm', 'tar']) writeFileSync(join(directory, 'bin', name), command, { mode: 0o755 });
@@ -67,7 +67,8 @@ if (name === 'tar') {
     });
     assert.ifError(result.error);
     assert.equal(result.status, 0, result.stderr || result.stdout);
-    assert.equal(readFileSync(join(directory, 'releases/5.0.0-beta.1/fixture.js'), 'utf8'), 'release fixture');
+    const bundle = join(directory, 'releases/5.0.0-beta.1/cjs/vexflow-debug-with-tests.js');
+    assert.equal(readFileSync(bundle, 'utf8'), 'release fixture');
     const calls = readFileSync(log, 'utf8').trim().split('\n').map(JSON.parse);
     const pack = calls.find(({ name }) => name === 'npm').args;
     assert.equal(
