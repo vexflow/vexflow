@@ -2146,5 +2146,82 @@
         "sha256": "9cb1cff49cabd6713e976bb5c77c0babe5fcb44d6240c33766e75a6a38b301f7"
       }
     ]
+  },
+  {
+    "topic": "TAB slurs across a system break",
+    "source": "https://github.com/vexflow/vexflow/issues/471#issuecomment-7120481849",
+    "images": [
+      {
+        "caption": "Start of the second system in the A4 guitar part",
+        "asset": "acd493a5-1eb6-472e-a457-c499cfc17322",
+        "sha256": "249012547fc87b4e9f962f83e9b10ad47e3b3d49452989105672be74e089082d"
+      }
+    ]
+  },
+  {
+    "topic": "Harmony above paired tablature",
+    "source": "https://github.com/vexflow/vexflow/issues/472#issuecomment-7120482824",
+    "images": [
+      {
+        "caption": "Paired TAB and harmony, with the measured fret bounds outlined on the right",
+        "asset": "74d5b83a-71e9-4a10-8e04-cc20627718ed",
+        "sha256": "df559fdcc5fe1ef0d3069699a1ee74cf7732463a800cd4a140094cd5bf0d502d"
+      }
+    ]
+  },
+  {
+    "topic": "Slurs at fingered and beamed notes",
+    "source": "https://github.com/vexflow/vexflow/issues/473#issuecomment-7120483971",
+    "images": [
+      {
+        "caption": "Haydn violin phrase at a width of 200 units",
+        "asset": "34ece99f-8ea4-474c-bc4e-8104b32131e7",
+        "sha256": "76e97e92afcb2618dd1f36a219c22f5d376f21b50a55231480c03e0e976585d3"
+      }
+    ]
+  },
+  {
+    "topic": "Slurs at fingered and beamed notes",
+    "source": "https://github.com/vexflow/vexflow/issues/473#issuecomment-7120483971",
+    "images": [
+      {
+        "caption": "Authored upper slurs in Liszt and Chopin",
+        "asset": "d1df2c6c-04b7-4b23-ac6a-39b911ba7e1c",
+        "sha256": "290d151fd2207aa418014358da7d852c1d8ce13b47f8ae09d3ffd85c5f9f202e"
+      }
+    ]
+  },
+  {
+    "topic": "Independent directions at a bar edge",
+    "source": "https://github.com/vexflow/vexflow/issues/474#issuecomment-7120484886",
+    "images": [
+      {
+        "caption": "Two start signs, one beat label and two end signs",
+        "asset": "c9c78533-30ed-4b2a-a1a5-133d7fb996bf",
+        "sha256": "f5bd2aef4e6e2da2a3e22eaf967a93fd7bfde2053036f927dafce29255f404e3"
+      }
+    ]
+  },
+  {
+    "topic": "Inward grand-staff hairpins",
+    "source": "https://github.com/vexflow/vexflow/issues/475#issuecomment-7120485791",
+    "images": [
+      {
+        "caption": "Grand-staff crescendo and a low note outside its span",
+        "asset": "f54cf32b-3bde-444c-aa73-6271148805aa",
+        "sha256": "d6da23688092c5aa253eab50398f01a7027499bdf157188756a3671b3f528f30"
+      }
+    ]
+  },
+  {
+    "topic": "Tuplets on rhythmic tablature",
+    "source": "https://github.com/vexflow/vexflow/issues/476#issuecomment-7120486638",
+    "images": [
+      {
+        "caption": "Facing tuplets on notation and rhythmic TAB",
+        "asset": "311c8064-aae4-4cdb-9a31-77bd94e108a8",
+        "sha256": "d66ad2b02a2bc881f6b2b532badcf96b555a084578da9fa07e8c7ae4c60b8899"
+      }
+    ]
   }
 ]

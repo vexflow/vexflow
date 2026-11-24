@@ -3,6 +3,42 @@
 export const topics = [
   [
     'Features',
+    'New in 5.10.1',
+    [
+      [
+        'TAB slurs across a system break',
+        'A continuing slur clears the first fret of the new system and reaches the final attack on the requested side, including in an extracted A4 guitar part.',
+        'issues/471',
+      ],
+      [
+        'Harmony above paired tablature',
+        'The harmony lane recognizes fret numbers on the accompanying TAB staff. Its ink measurements include chords and slurred grace frets.',
+        'issues/472',
+      ],
+      [
+        'Slurs at fingered and beamed notes',
+        'An undirected violin phrase can move below a beam at narrow widths. An explicitly directed piano phrase can move its attachment to clear fingerings while keeping its written side.',
+        'issues/473',
+      ],
+      [
+        'Independent directions at a bar edge',
+        'Place several directions at the start or end of a measure. They appear in voice order and each keeps its own selection target after reflow and in an extracted part.',
+        'issues/474',
+      ],
+      [
+        'Inward grand-staff hairpins',
+        'An inward crescendo or diminuendo reserves room against the notes along its own span. A low note later in the bar can use the space beside the wedge.',
+        'issues/475',
+      ],
+      [
+        'Tuplets on rhythmic tablature',
+        'A tuplet on rhythmic TAB contributes its numeral and bracket to the staff spacing, keeping both markings legible when the notation staff also shows the tuplet.',
+        'issues/476',
+      ],
+    ],
+  ],
+  [
+    'Features',
     'New in 5.10.0',
     [
       [

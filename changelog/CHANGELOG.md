@@ -1,3 +1,10 @@
+# 5.10.1
+
+- **Slurs.** TAB slurs clear the first fret after a system break. Pitched slurs can try the opposite side in a crowded bar or find a nearby attachment when the score specifies a side. [A4 guitar part](https://github.com/vexflow/vexflow/issues/471#issuecomment-7120481849) · [Violin and piano examples](https://github.com/vexflow/vexflow/issues/473#issuecomment-7120483971)
+- **Paired staves.** Harmony layout measures ordinary and grace TAB frets. Staff spacing accounts for facing tuplet numerals and brackets, and inward hairpins clear the notes along their own span. [Harmony](https://github.com/vexflow/vexflow/issues/472#issuecomment-7120482824) · [Tuplets](https://github.com/vexflow/vexflow/issues/476#issuecomment-7120486638) · [Hairpins](https://github.com/vexflow/vexflow/issues/475#issuecomment-7120485791)
+- **Bar-edge directions.** Several directions at the same bar edge keep their written order and separate selection targets on screen and in printed parts. [Direction examples](https://github.com/vexflow/vexflow/issues/474#issuecomment-7120484886)
+- Browse the [user guide](https://vexflow.com/guide/), [features](https://vexflow.com/features/), [test gallery](https://vexflow.com/tests/), [PDF editions](https://vexflow.com/pdfs/), [What's New?](https://vexflow.com/reports/whatsnew/), and [5.10.1 quality report](https://vexflow.com/reports/5.10.1/).
+
 # 5.10.0
 
 - **Score layout.** Fit staves and systems using the horizontal extent of their ink. Give headings, chord diagrams and swing equations measured space above an indented first system. Align verses, harmony and timed directions through reflow. [Layout guide](https://github.com/vexflow/vexflow/blob/5.10.0/docs/score-layout.md)
