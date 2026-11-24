@@ -27,11 +27,17 @@ Local reports live under the normal build directory. Commands such as `npm test`
 
 ## Release reports
 
+A tagged report opens with a table comparing its measurements with the preceding release on the same first-parent Git history. Counts and sizes show their absolute and relative changes. Coverage changes use percentage points, so a move from 80% to 82% reads as an increase of two points. The comparison links to the source changes between the two commits.
+
+Six charts track the npm tarball, gzipped core browser bundle, authored code lines, browser line coverage, functions with complexity above 10, and passing browser tests. Hover over a point to see its version and value, or expand **Measurements for every release** to read every value in a table. The charts and comparison are embedded in the report and work offline.
+
+The build reads the published measurements for earlier tagged commits and uses local reports for unpublished commits or offline builds. Stable releases compare with previous stable releases. Prereleases also include earlier prereleases. A missing report leaves a gap, and a previous value of zero allows an absolute change only. The npm size comes from the release tarball on GitHub or the staged tarball in `releases/<version>/`.
+
 Each new release also publishes its report at `https://vexflow.com/reports/<version>/`. Use this permalink in the changelog before the release commit exists.
 
 `npm run release:github -- <tag>` publishes the tagged report before creating the GitHub release. The legacy Grunt release path calls the same report publisher. See [cutting a release](build.md#release-a-version) for tag and artifact preparation.
 
-To publish the report for an existing release, run `npm run report:release -- <tag>`. Append `--dry-run` to build and preview locally. The command measures the commit the tag identifies, including prereleases, and verifies its package version. The archive puts tagged releases first with an explicit **Release** label beside the version. When a previously reported commit becomes a release, its existing measurements stay at the same URL and its archive entry gains the release label.
+To publish the report for an existing release, run `npm run report:release -- <tag>`. Append `--dry-run` to build and preview locally. The command measures the commit the tag identifies, including prereleases, and verifies its package version. The archive puts tagged releases first with an explicit **Release** label beside the version. Republishing a version can update its comparisons while preserving the original measurements at the immutable commit URL. When a previously reported commit becomes a release, its existing measurements stay at the same URL and its archive entry gains the release label.
 
 ## What the numbers mean
 

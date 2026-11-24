@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { releaseHistory } from './history.mjs';
 import { browserCoverage } from './coverage.mjs';
 import { bundleSizes, dependencies, sourceMetrics } from './metrics.mjs';
 import { archivePage, commitPage, readEntries } from './html.mjs';
@@ -108,6 +109,7 @@ export async function buildReport(release) {
       bundles,
       dependencies: dependencies(pkg, lock),
     };
+    if (releaseTag) report.releaseHistory = await releaseHistory(root, output, report);
     await save(join(output, commit, 'index.html'), commitPage(report));
     await refreshArchive(output);
     console.log(`Report: ${join(output, commit, 'index.html')}\nArchive: ${join(output, 'index.html')}`);

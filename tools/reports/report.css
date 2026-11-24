@@ -296,3 +296,46 @@ tr:has(.release-label) td:first-child {
   border-left: 3px solid var(--green);
   font-weight: 650;
 }
+
+/* Release figures use separate scales so bytes, counts and coverage keep their units. */
+.trends-heading {
+  margin-top: 2rem;
+}
+.trends {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 285px), 1fr));
+  gap: 1rem;
+}
+.trend {
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  background: white;
+  break-inside: avoid;
+}
+.trend figcaption {
+  font-weight: 600;
+}
+.trend svg {
+  display: block;
+  width: 100%;
+  margin-top: 0.6rem;
+}
+.trend .grid {
+  stroke: var(--line);
+  fill: none;
+}
+.trend .series {
+  fill: none;
+  stroke: var(--green);
+  stroke-width: 2;
+}
+.trend circle {
+  fill: var(--green);
+}
+.trend .axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--muted);
+}

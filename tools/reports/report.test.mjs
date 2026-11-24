@@ -8,6 +8,7 @@ import test from 'node:test';
 import { releaseRevision } from './build.mjs';
 import { summarizeFile } from './coverage.mjs';
 import { archivePage, commitPage, readEntries } from './html.mjs';
+import { measurements, readReport, releaseHistory } from './history.mjs';
 import { dependencies, sourceMetrics } from './metrics.mjs';
 import { verifyPublishedTag } from './release.mjs';
 import { uploadReport } from './upload.mjs';
@@ -252,4 +253,102 @@ test('tagging an already published commit promotes its original measurements and
   await writeFile(path, original);
   await uploadReport(options);
   assert.equal(files.get(index).html, archive);
+});
+
+test('release comparisons use absolute units, relative changes and the immediate baseline', () => {
+  const report = readReport(examplePage({ ...entry('a'), version: '5.11.0', releaseTag: '5.11.0' }));
+  const prior = {
+    version: '5.10.1',
+    commit: 'b'.repeat(40),
+    values: { ...measurements(report), coverage: 48, tests: 0, package: 4000 },
+  };
+  report.releaseHistory = { prior: [prior], package: 2000 };
+  const html = commitPage(report);
+  assert.match(html, /Changes since VexFlow 5\.10\.1/);
+  assert.match(html, /Down 50%/);
+  assert.match(html, /Up 2 percentage points/);
+  assert.match(html, /Up 1 from zero/);
+  assert.match(html, /Unchanged/);
+  assert.equal((html.match(/class="trend"/g) ?? []).length, 6);
+  report.releaseHistory.prior.push({ version: '5.10.2', commit: 'd'.repeat(40), values: null });
+  const gap = commitPage(report);
+  assert.match(gap, /Changes since VexFlow 5\.10\.2/);
+  assert.doesNotMatch(gap, /Down 50%/);
+  assert.match(gap, /no recorded measurements/);
+});
+
+test('release history uses tagged ancestors, skips prereleases on stable builds, and uses saved offline reports', async (t) => {
+  const root = await mkdtemp(join(tmpdir(), 'report-offline-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const git = (...args) =>
+    execFileSync(
+      'git',
+      [
+        '-c',
+        'user.name=Test',
+        '-c',
+        'user.email=test@example.org',
+        '-c',
+        'commit.gpgSign=false',
+        '-c',
+        'tag.gpgSign=false',
+        ...args,
+      ],
+      { cwd: root, encoding: 'utf8' }
+    ).trim();
+  git('init', '--quiet');
+  const output = join(root, 'reports');
+  for (const version of ['5.9.0', '5.10.0', '5.10.1-beta.1', '5.11.0']) {
+    git('commit', '--allow-empty', '-qm', version);
+    git('tag', version);
+    if (version === '5.9.0') {
+      const commit = git('rev-parse', 'HEAD');
+      await mkdir(join(output, commit), { recursive: true });
+      await writeFile(join(output, commit, 'index.html'), examplePage({ ...entry('a'), commit, version }));
+    }
+  }
+  const offline = async () => {
+    throw Error('Offline');
+  };
+  const history = await releaseHistory(
+    root,
+    output,
+    { commit: git('rev-parse', 'HEAD'), version: '5.11.0', releaseTag: '5.11.0' },
+    offline
+  );
+  assert.deepEqual(
+    history.prior.map((r) => r.version),
+    ['5.9.0', '5.10.0']
+  );
+  assert.equal(history.prior[0].values.loc, 100);
+  assert.equal(history.prior[1].values, null);
+  assert.equal(history.package, null);
+});
+
+test('adding history to a published release preserves its canonical measurements and is idempotent', async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), 'report-history-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const { files, storage } = bucket();
+  const e = { ...entry('a'), version: '5.11.0', releaseTag: '5.11.0' };
+  const path = join(directory, e.commit, 'index.html');
+  const original = examplePage(e);
+  const options = { directory, destination, commit: e.commit, storage };
+  await mkdir(join(directory, e.commit));
+  await writeFile(path, original);
+  await uploadReport(options);
+  const report = readReport(original);
+  report.releaseHistory = {
+    prior: [{ version: '5.10.1', commit: 'b'.repeat(40), values: measurements(report) }],
+    package: 2000,
+  };
+  report.coverage.tests.passed = 123;
+  await writeFile(path, commitPage(report));
+  await uploadReport(options);
+  await uploadReport(options);
+  const version = files.get(destination + '5.11.0/index.html');
+  assert.equal(version.generation, 2);
+  assert.equal(readReport(version.html).coverage.tests.passed, 1);
+  assert.match(version.html, /Changes since VexFlow 5\.10\.1/);
+  assert.equal(files.get(destination + e.commit + '/index.html').html, original);
+  assert.match(files.get(destination + 'index.html').html, /href="5\.11\.0\/index.html"/);
 });

@@ -1,8 +1,9 @@
 // Publish immutable commit pages and merge the shared archive with Cloud Storage generation preconditions.
+import { readReport } from './history.mjs';
 import { spawnSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { archivePage, readEntries, summary } from './html.mjs';
+import { archivePage, commitPage, readEntries, summary } from './html.mjs';
 
 /** Other failures (including permission errors) must never be treated as an empty archive. */
 function storageError(stderr) {
@@ -51,6 +52,50 @@ function publishOnce(storage, url, html) {
   return saved;
 }
 
+/** A version permalink may gain comparisons. Keep the original SHA measurements and make updates generation-safe. */
+function publishVersion(storage, url, canonical, localReport) {
+  const original = readReport(canonical);
+  const history = localReport.releaseHistory;
+  const rendered = history
+    ? commitPage({ ...original, releaseTag: localReport.releaseTag, releaseHistory: history })
+    : canonical;
+  for (let attempt = 0; attempt < 10; attempt++) {
+    let generation = '0';
+    try {
+      generation = storage(['objects', 'describe', url, '--format=value(generation)']).trim();
+      if (!/^\d+$/.test(generation)) throw Error('Invalid release report generation.');
+      const saved = storage(['cat', url + '#' + generation]);
+      const existing = readReport(saved);
+      if (existing.commit !== original.commit || existing.version !== original.version)
+        throw Error('Release URL already points to a different report: ' + url);
+      if (saved === rendered || !history) return;
+      // An offline retry must not replace a complete comparison with partial history.
+      const earlier = existing.releaseHistory;
+      if (earlier) {
+        const losesMeasurements = earlier.prior.some((old) => {
+          const next = history.prior.find((row) => row.commit === old.commit);
+          return Object.entries(old.values ?? {}).some(
+            ([key, value]) => Number.isFinite(value) && !Number.isFinite(next?.values?.[key])
+          );
+        });
+        if (losesMeasurements || (Number.isFinite(earlier.package) && !Number.isFinite(history.package)))
+          throw Error('Refusing to discard published release history.');
+      }
+    } catch (err) {
+      if (err.kind !== 'missing') throw err;
+      if (generation !== '0') continue;
+    }
+    try {
+      put(storage, url, rendered, generation, 'public,max-age=60,must-revalidate');
+      if (storage(['cat', url]) !== rendered) throw Error('Published release report failed readback.');
+      return;
+    } catch (err) {
+      if (err.kind !== 'conflict') throw err;
+    }
+  }
+  throw Error('Release report changed concurrently. Retry its upload.');
+}
+
 /** Read exactly the generation we will replace. Retry if another publisher removes that generation. */
 function readArchive(storage, url) {
   let generation;
@@ -61,7 +106,8 @@ function readArchive(storage, url) {
     throw err;
   }
   if (!/^\d+$/.test(generation)) throw Error('Invalid archive generation from gcloud.');
-  return { generation, entries: readEntries(storage(['cat', url + '#' + generation])) };
+  const html = storage(['cat', url + '#' + generation]);
+  return { generation, entries: readEntries(html), html };
 }
 
 /** The first report for a SHA wins. A later retry can repair the archive after an interrupted upload. */
@@ -79,9 +125,7 @@ export async function uploadReport({
     const entries = readEntries(page);
     if (entries.length !== 1 || entries[0].commit !== commit)
       throw Error('Report metadata does not match its commit path.');
-    const data = /<script type="application\/json" id="report-data">([^<]+)<\/script>/.exec(page)?.[1];
-    if (!data || !page.trimEnd().endsWith('</html>')) throw Error('Incomplete commit report.');
-    const report = JSON.parse(data);
+    const report = readReport(page);
     if (report.schema !== 1 || JSON.stringify(summary(report)) !== JSON.stringify(entries[0]))
       throw Error('Report measurements do not match the archive entry.');
     return entries[0];
@@ -104,18 +148,18 @@ export async function uploadReport({
     throw Error('Published package version differs from the tagged report.');
   if (local.releaseTag) {
     const versionURL = destination + local.version + '/index.html';
-    if (publishOnce(storage, versionURL, canonical) !== canonical)
-      throw Error('Release URL already points to a different report: ' + versionURL);
+    publishVersion(storage, versionURL, canonical, readReport(html));
     entry.releaseTag = local.releaseTag;
   }
   for (let attempt = 0; attempt < 10; attempt++) {
     try {
-      const { generation, entries } = readArchive(storage, indexURL);
-      const previous = entries.find((e) => e.commit === commit);
-      if (!previous || (entry.releaseTag && !previous.releaseTag)) {
-        const merged = [...entries.filter((e) => e.commit !== commit), entry];
-        put(storage, indexURL, archivePage(merged), generation, 'public,max-age=60,must-revalidate');
-      }
+      const archive = readArchive(storage, indexURL);
+      const previous = archive.entries.find((e) => e.commit === commit);
+      const merged = archive.entries.filter((e) => e.commit !== commit);
+      // Ordinary retries retain the tag of a commit promoted by a release publisher.
+      merged.push(previous?.releaseTag ? previous : entry);
+      const next = archivePage(merged, true);
+      if (next !== archive.html) put(storage, indexURL, next, archive.generation, 'public,max-age=60,must-revalidate');
       console.log(`Report available at ${commitURL}. Archive: ${indexURL}`);
       return;
     } catch (err) {
