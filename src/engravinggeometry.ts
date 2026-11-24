@@ -14,6 +14,7 @@ import { FretHandFinger } from './frethandfinger';
 import { GermanLuteNote } from './germanlutenote';
 import { GraceNote } from './gracenote';
 import { GraceNoteGroup } from './gracenotegroup';
+import { GraceTabNote } from './gracetabnote';
 import { HarpPedalDiagram } from './harppedaldiagram';
 import { KievanNote } from './kievannote';
 import { Ornament } from './ornament';
@@ -23,6 +24,8 @@ import { StaveNote } from './stavenote';
 import { StaveTie } from './stavetie';
 import { Stem } from './stem';
 import { Stroke } from './strokes';
+import { TabNote } from './tabnote';
+import { TabTie } from './tabtie';
 import { TextBracket } from './textbracket';
 import { TextNote } from './textnote';
 import { Tuplet } from './tuplet';
@@ -117,6 +120,17 @@ export function measureEngraving(element: Element, options: GeometryOptions = {}
         const note = owner as StaveNote;
         Object.assign(shape, noteShape(note));
         if (note.renderOptions.draw !== false) children(note.getModifiers());
+      } else if (kind === TabNote || kind === GraceTabNote) {
+        const note = owner as TabNote;
+        shape.parts.push(...note.getFretInk());
+        if (note.hasStem()) {
+          note.getBeam()?.postFormat();
+          const { topY, baseY } = note.getStemExtents();
+          shape.parts.push(inflate(rectangle(note.getStemX(), baseY, note.getStemX(), topY), Stem.WIDTH / 2));
+          const flag = note.getFlagInk();
+          if (flag) shape.parts.push(flag);
+        }
+        children(note.getModifiers().filter((mark) => !(mark instanceof Dot) || note.renderOptions.drawDots));
       } else if (kind === TextNote && (owner as TextNote).getDirectionAnchor()) {
         shape.parts.push(owner.getBoundingBox());
       } else if (kind === KievanNote) {
@@ -165,7 +179,8 @@ export function measureEngraving(element: Element, options: GeometryOptions = {}
         const { y } = mark.computeY();
         shape.parts.push(mark.getTextInk(x, y));
         shape.anchors.baseline = { x: x + mark.getXShift(), y: y + mark.getYShift() };
-      } else if (kind === StaveTie && !owner.text) shape.parts.push((owner as StaveTie).getRibbonBounds());
+      } else if ((kind === StaveTie || kind === TabTie) && !owner.text)
+        shape.parts.push((owner as StaveTie).getRibbonBounds());
       else report(owner, 'UnsupportedGeometry');
       const finiteBox = (b: Bounds) => [b.x, b.y, b.w, b.h].every(Number.isFinite) && b.w >= 0 && b.h >= 0;
       if (

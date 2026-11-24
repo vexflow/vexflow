@@ -47,7 +47,13 @@ export function slurHead(note: Note, index: number | undefined, above: boolean):
 }
 
 /** Try the normal attachment first, then the corner and crown of the same head, staying on the authored side. */
-function attachments(note: StaveNote, head: number | undefined, start: boolean, f: SpanFragment): Point[] {
+function attachments(
+  note: StaveNote,
+  head: number | undefined,
+  start: boolean,
+  f: SpanFragment,
+  searchNearby: boolean
+): Point[] {
   const box = note.getHeadInk()[slurHead(note, head, f.above)];
   const sign = f.above ? -1 : 1;
   const tip = f.above ? box.y : box.y + box.h;
@@ -62,6 +68,22 @@ function attachments(note: StaveNote, head: number | undefined, start: boolean, 
     });
   }
   for (const lift of [0.5, 1, 1.75, 2.5]) {
+    options.push({ x: box.x + box.w / 2, y: tip + sign * f.space * lift });
+    options.push({ x: x + (start ? 1 : -1) * f.space * 0.3, y: tip + sign * f.space * lift });
+  }
+  if (!searchNearby) return options;
+  // At a fingered beam end the head can be several spaces away from the nearest clear attachment.
+  if (head === undefined && note.getBeam() && note.getStemDirection() === -sign) {
+    const stemX = note.getStemX(),
+      stemY = note.getStemExtents().topY;
+    for (const lift of [0.6, 1, 1.5]) {
+      for (const shift of [0, 0.45, -0.45])
+        options.push({ x: stemX + shift * f.space, y: stemY + sign * lift * f.space });
+    }
+  }
+  const anchor = options[0];
+  for (const lift of [0.3, 0.6, 1]) options.push({ x: anchor.x, y: anchor.y + sign * f.space * lift });
+  for (const lift of [1.1, 3.1]) {
     options.push({ x: box.x + box.w / 2, y: tip + sign * f.space * lift });
     options.push({ x: x + (start ? 1 : -1) * f.space * 0.3, y: tip + sign * f.space * lift });
   }
@@ -131,19 +153,32 @@ export function fitPitchedSlur(
   f: SpanFragment,
   span: ResolvedSpan,
   events: StaveNote[],
-  exclude?: (owner: Element) => boolean
+  exclude?: (owner: Element) => boolean,
+  searchNearby = span.spec.side !== undefined
 ): boolean {
   if (hasSimpleSlurAnchors(span) && fitSimpleSlur(f, span, slurInk(events, exclude, span))) return true;
   const ink = slurInk(events, exclude);
   const start = f.part === 'single' || f.part === 'first';
   const end = f.part === 'single' || f.part === 'last';
   const left = start
-    ? attachments(span.first.note as StaveNote, span.spec.fromHead, true, f)
+    ? attachments(span.first.note as StaveNote, span.spec.fromHead, true, f, searchNearby)
     : continuationEnds(f.x1, f.y1, f, ink);
   const right = end
-    ? attachments(span.last.note as StaveNote, span.spec.toHead, false, f)
+    ? attachments(span.last.note as StaveNote, span.spec.toHead, false, f, searchNearby)
     : continuationEnds(f.x2, f.y2, f, ink);
-  return fitSlurEndpoints(f, left, right, ink);
+  if (fitSlurEndpoints(f, left, right, ink)) return true;
+  if (!searchNearby) return false;
+  // A phrase may touch its selected head or stem. Keep the other chord heads, fingers and beam as obstacles.
+  const contactInk = slurInk(events, exclude, span);
+  for (const [note, head] of [
+    [span.first.note, span.spec.fromHead],
+    [span.last.note, span.spec.toHead],
+  ] as const) {
+    if (!(note instanceof StaveNote) || !events.includes(note)) continue;
+    const selected = slurHead(note, head, f.above);
+    contactInk.push(...note.getHeadInk().filter((_, i) => i !== selected));
+  }
+  return fitSlurEndpoints(f, left, right, contactInk);
 }
 
 /** Keep each closed TAB endpoint beside its digit. If crowded, try its outside corner and upper or lower edge. */
@@ -158,6 +193,11 @@ export function fitTabSlur(f: SpanFragment, ink: Bounds[], start: Bounds, end: B
     b = { x: f.x2, y: f.y2 };
   const left = f.part === 'single' || f.part === 'first' ? ends(a, start, true) : [a];
   const right = f.part === 'single' || f.part === 'last' ? ends(b, end, false) : [b];
+  if (fitSlurEndpoints(f, left, right, ink)) return true;
+  // A system edge can coincide with the first or last fret. Move only the open end away from that ink.
+  if (f.part === 'single') return false;
+  if (f.part !== 'first') left.push(...continuationEnds(a.x, a.y, f, ink));
+  if (f.part !== 'last') right.push(...continuationEnds(b.x, b.y, f, ink));
   return fitSlurEndpoints(f, left, right, ink);
 }
 

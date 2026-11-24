@@ -19,11 +19,22 @@ export class InkProfile {
     this.bottom = new Float64Array(columns).fill(-Infinity);
   }
 
+  private column(x: number): number {
+    return Math.max(0, Math.min(this.top.length - 1, Math.floor((x - this.x) / this.step)));
+  }
+
+  /** Return the outermost ink touched by this horizontal interval on the requested side. */
+  edge(x1: number, x2: number, above: boolean): number {
+    let edge = above ? Infinity : -Infinity;
+    for (let i = this.column(x1); i <= this.column(x2); i++)
+      edge = above ? Math.min(edge, this.top[i]) : Math.max(edge, this.bottom[i]);
+    return edge;
+  }
+
   /** Round outwards, retaining overhanging ink in the nearest edge column. */
   add(box: Bounds, dy = 0): void {
-    const column = (x: number) => Math.max(0, Math.min(this.top.length - 1, Math.floor((x - this.x) / this.step)));
-    const last = column(box.x + box.w + 0.5);
-    for (let i = column(box.x - 0.5); i <= last; i++) {
+    const last = this.column(box.x + box.w + 0.5);
+    for (let i = this.column(box.x - 0.5); i <= last; i++) {
       this.top[i] = Math.min(this.top[i], box.y + dy);
       this.bottom[i] = Math.max(this.bottom[i], box.y + box.h + dy);
     }

@@ -9,6 +9,7 @@ import puppeteer from 'puppeteer';
 import { balladeDetailStudy } from '../engraving/ballade-detail-study.mjs';
 import { headOccurrenceStudy } from '../engraving/head-occurrence-studies.mjs';
 import { rolledChordStudy } from '../engraving/rolled-chord-study.mjs';
+import { pairedLayoutStudy } from '../engraving/paired-layout-studies.mjs';
 import { openingStudy } from '../engraving/opening-studies.mjs';
 import { textLaneStudy } from '../engraving/text-lane-studies.mjs';
 
@@ -47,6 +48,178 @@ test('publication views, pagination and portable printing', async (t) => {
       );
     }
     await page.evaluate(() => VexFlow.setFonts('Bravura', 'Academico'));
+    await page.addScriptTag({ content: 'window.pairedStudy=' + pairedLayoutStudy });
+    await t.test(
+      'broken TAB phrases and narrow violin phrases retain clear, correctly directed attachments',
+      async () => {
+        const results = await page.evaluate(() => {
+          const VF = VexFlow;
+          const observe = (spec, part = false) => {
+            const main = document.querySelector('main');
+            main.replaceChildren();
+            let last;
+            spec.engraving = {
+              place(score) {
+                const layout = score.sheet.getContinuousLayout();
+                last = { diagnostics: layout.diagnostics.slice(), fragments: layout.fragments.map((f) => ({ ...f })) };
+                if (spec.staves[0].kind === 'tab') last.fret = score.getNote('b0').getFretInk()[0];
+              },
+            };
+            if (part) {
+              const publication = new VF.Publication(spec).render(main, { paper: 'A4' });
+              last.diagnostics.push(...publication.diagnostics);
+            } else {
+              const factory = new VF.Factory({ renderer: { elementId: main, width: 650, height: 480 } });
+              factory.EasyScore().compose(spec);
+              factory.draw();
+            }
+            return {
+              diagnostics: last.diagnostics,
+              fragments: last.fragments.map((f) => [f.part, f.above, f.y1]),
+              fret: last.fret,
+            };
+          };
+          return {
+            tab: [false, true].map((part) => observe(pairedStudy('tab-break'), part)),
+            violin: [200, 260, 400, 550].map((width) => observe(pairedStudy('violin', { width }))),
+            directed: observe(pairedStudy('violin', { width: 200, side: 'above' })),
+          };
+        });
+        for (const frame of results.tab) {
+          assert.deepEqual(frame.diagnostics, []);
+          assert.deepEqual(
+            frame.fragments.map((f) => f.slice(0, 2)),
+            [
+              ['first', false],
+              ['last', false],
+            ]
+          );
+          assert.ok(frame.fragments[1][2] > frame.fret.y + frame.fret.h);
+        }
+        for (const frame of results.violin) assert.deepEqual(frame.diagnostics, []);
+        assert.deepEqual(
+          results.violin.map((f) => f.fragments[0][1]),
+          [false, false, true, true]
+        );
+        assert.equal(results.directed.fragments[0][1], true);
+        assert.deepEqual(results.directed.diagnostics, []);
+      }
+    );
+    await t.test('plain and grace-decorated TAB chords have measured ink in the harmony system', async () => {
+      const frames = await page.evaluate(() => {
+        const VF = VexFlow,
+          host = document.querySelector('main');
+        host.replaceChildren();
+        const f = new VF.Factory({ renderer: { elementId: host, width: 620, height: 310 } });
+        const spec = pairedStudy('harmony');
+        spec.staves[1].measures[0].voices[0].notes[0].tab.positions.push({ str: 2, fret: 3 });
+        const score = f.EasyScore().compose(spec);
+        const chord = score.getNote('f0');
+        const grace = new VF.GraceTabNote({ positions: [{ str: 4, fret: 2 }], duration: '16' });
+        chord.addModifier(new VF.GraceNoteGroup([grace], true), 0);
+        f.draw({ retain: true });
+        const geometry = VF.measureEngraving(chord),
+          earlier = grace.getFretInk()[0];
+        return {
+          diagnostics: score.systems[0].getPhraseLayout().diagnostics,
+          geometry: geometry.diagnostics,
+          includesGrace: geometry.parts.some((b) => b.x === earlier.x && b.y === earlier.y),
+          part: new VF.Publication(spec).render(document.querySelector('aside'), { paper: 'A4' }).diagnostics,
+        };
+      });
+      assert.deepEqual(frames, { diagnostics: [], geometry: [], includesGrace: true, part: [] });
+    });
+    await t.test('bar-edge directions keep separate selection targets through reflow and in a fresh part', async () => {
+      const result = await page.evaluate(() => {
+        const VF = VexFlow,
+          host = document.querySelector('main');
+        host.replaceChildren();
+        const spec = pairedStudy('directions'),
+          f = new VF.Factory({ renderer: { elementId: host, width: 650, height: 320 } });
+        const score = f.EasyScore().compose(spec),
+          ids = ['solo', 'tempo', 'beat', 'hold', 'fine'];
+        const frames = [520, 290, 520].map((width) => {
+          score.sheet.setWidth(width);
+          f.draw({ retain: true });
+          const nav = new VF.ScoreNavigation(score, spec.staves);
+          return ids.map((id) => {
+            const b = score.getNote(id).getBoundingBox();
+            return [b.x, b.x + b.w, nav.hitTest(b.x + b.w / 2, b.y + b.h / 2)?.id];
+          });
+        });
+        const book = new VF.Publication(spec).render(document.querySelector('aside'), {
+          paper: 'A4',
+          staves: ['lead'],
+        });
+        const svg = book.pages[0].svg;
+        frames.push(
+          ids.map((id) => {
+            const group = svg.querySelector('[data-vf-id="vf-' + id + '"]');
+            const r = group.querySelector('rect'),
+              x = Number(r.getAttribute('x'));
+            return [x, x + Number(r.getAttribute('width')), id];
+          })
+        );
+        return { frames, ids, diagnostics: book.diagnostics };
+      });
+      for (const row of result.frames) {
+        assert.deepEqual(
+          row.map((b) => b[2]),
+          result.ids
+        );
+        for (let i = 1; i < row.length; i++) assert.ok(row[i][0] >= row[i - 1][1] + 4);
+      }
+      assert.deepEqual(result.frames[0], result.frames[2]);
+      assert.deepEqual(result.diagnostics, []);
+    });
+    await t.test('profile spacing uses the wedge interval and clears both rhythmic TAB tuplet forms', async () => {
+      const result = await page.evaluate(() => {
+        const VF = VexFlow;
+        const measure = (kind, options, print) => {
+          const spec = pairedStudy(kind, options);
+          let metrics;
+          spec.engraving = {
+            place(score) {
+              const [top, bottom] = score.staves[0],
+                fragments = score.sheet.getContinuousLayout().fragments;
+              metrics = { gap: bottom.getYForLine(0) - top.getYForLine(4) };
+              if (kind === 'hairpin' && !options.omit) {
+                const wedge = fragments[0],
+                  n = score.getNote('t0');
+                const ink = VF.measureEngraving(n).parts;
+                metrics.clearance = wedge.y1 - wedge.space * 0.55 - Math.max(...ink.map((b) => b.y + b.h));
+              }
+              if (kind === 'tuplets') {
+                const box = (id) => score.getNote(id).getTupletStack()[0].getBoundingBox();
+                const upper = box('n0'),
+                  lower = box('f0');
+                metrics.clearance = lower.y - upper.y - upper.h;
+              }
+            },
+          };
+          const host = document.querySelector('main');
+          host.replaceChildren();
+          if (print) new VF.Publication(spec).render(host, { paper: 'Letter' });
+          else {
+            const f = new VF.Factory({ renderer: { elementId: host, width: 610, height: 520 } });
+            f.EasyScore().compose(spec);
+            f.draw();
+          }
+          return metrics;
+        };
+        return [false, true].map((print) => ({
+          far: measure('hairpin', {}, print),
+          none: measure('hairpin', { omit: true }, print),
+          near: measure('hairpin', { near: true }, print),
+          tuplets: [false, true].map((bracketed) => measure('tuplets', { bracketed }, print)),
+        }));
+      });
+      for (const { far, none, near, tuplets } of result) {
+        assert.ok(Math.abs(far.gap - none.gap) < 1);
+        assert.ok(far.clearance >= 4 && near.clearance >= 4);
+        for (const t of tuplets) assert.ok(t.clearance >= 7);
+      }
+    });
     await t.test('rolled chords report the painted wave and arrow before draw and after reflow', async () => {
       // Paint only the measured stroke. The raster checks the transformed SVG text and the native Canvas glyphs.
       for (const backend of ['SVG', 'CANVAS']) {

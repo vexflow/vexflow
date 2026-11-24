@@ -12,6 +12,7 @@ import { RenderContext } from './rendercontext';
 import { Stave, StaveOptions } from './stave';
 import { BarlineType } from './stavebarline';
 import { StaveConnector, StaveConnectorType } from './staveconnector';
+import { TextNote } from './textnote';
 import { Category } from './typeguard';
 import { RuntimeError } from './util';
 import { Voice } from './voice';
@@ -299,6 +300,26 @@ export class System extends Element {
     return this.phrase?.getStaffInk(stave) ?? [];
   }
 
+  /** Group bar-edge signs by physical stave and text line before choosing the measure width. */
+  private formatDirections(): number {
+    const groups = new Map<Stave, Map<number, TextNote[]>>();
+    for (const voice of this.partVoices) {
+      for (const note of voice.getTickables()) {
+        if (!(note instanceof TextNote) || !note.getDirectionAnchor()) continue;
+        const stave = note.checkStave();
+        const lines = groups.get(stave) ?? new Map<number, TextNote[]>();
+        const signs = lines.get(note.getLine()) ?? [];
+        signs.push(note);
+        lines.set(note.getLine(), signs);
+        groups.set(stave, lines);
+      }
+    }
+    let width = 0;
+    for (const [stave, lines] of groups)
+      for (const signs of lines.values()) width = Math.max(width, TextNote.formatDirections(signs, stave.space(0.6)));
+    return width;
+  }
+
   /** Format the system. */
   format(row?: { staffOffsets?: readonly number[]; endPadding?: number; deferStaffSpacing?: boolean }): void {
     this.phrase?.resetPlacement();
@@ -340,8 +361,9 @@ export class System extends Element {
 
     // Update the start position of all staves.
     this.partStaves.forEach((part) => part.setNoteStartX(startX));
+    const directionWidth = this.formatDirections();
     if (this.options.autoWidth && this.partVoices.length > 0) {
-      justifyWidth = formatter.preCalculateMinTotalWidth(this.partVoices);
+      justifyWidth = Math.max(directionWidth, formatter.preCalculateMinTotalWidth(this.partVoices));
       this.options.width = justifyWidth + Stave.rightPadding + (startX - this.options.x) + (row?.endPadding ?? 0);
       this.partStaves.forEach((part) => {
         part.setWidth(this.options.width);

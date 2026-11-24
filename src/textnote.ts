@@ -71,6 +71,30 @@ export class TextNote extends Note {
   protected line: number;
   private directionAnchor?: 'beat' | 'start' | 'end';
 
+  private edgeOffset = 0;
+  private beatInsets = { left: 0, right: 0 };
+
+  /** Lay out one line of directions in voice order, leaving beat labels in the available interval. */
+  static formatDirections(notes: TextNote[], gap: number): number {
+    const starts = notes.filter((note) => note.directionAnchor === 'start');
+    const ends = notes.filter((note) => note.directionAnchor === 'end');
+    const beats = notes.filter((note) => note.directionAnchor === 'beat');
+    function group(signs: TextNote[], sign: number): number {
+      let offset = 0;
+      for (const note of signs) {
+        note.edgeOffset = sign * offset;
+        offset += note.getTextInk(0, 0).w + gap;
+      }
+      return offset;
+    }
+    const left = group(starts, 1);
+    const right = group(ends.reverse(), -1);
+    for (const beat of beats) beat.beatInsets = { left, right };
+    if (!left && !right) return 0;
+    const beatWidth = Math.max(0, ...beats.map((note) => note.getTextInk(0, 0).w));
+    return left + right + beatWidth - (beats.length ? 0 : gap);
+  }
+
   /** A selectable direction retains its rhythm even when its text is aligned with a bar edge. */
   setDirectionAnchor(anchor: 'beat' | 'start' | 'end'): this {
     this.directionAnchor = anchor;
@@ -91,6 +115,13 @@ export class TextNote extends Note {
     if (this.directionAnchor === 'start' || this.directionAnchor === 'end') {
       const ink = this.getTextInk(0, 0);
       x = this.directionAnchor === 'start' ? stave.getNoteStartX() - ink.x : stave.getNoteEndX() - ink.x - ink.w;
+      x += this.edgeOffset;
+    } else if (this.directionAnchor === 'beat' && (this.beatInsets.left || this.beatInsets.right)) {
+      const ink = this.getTextInk(0, 0);
+      x = Math.max(
+        stave.getNoteStartX() + this.beatInsets.left - ink.x,
+        Math.min(x, stave.getNoteEndX() - this.beatInsets.right - ink.w - ink.x)
+      );
     }
     return { x, y: stave.getYForLine(this.line - 3) };
   }

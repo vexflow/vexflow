@@ -52,6 +52,7 @@ import { TabNote } from './tabnote';
 import { TextNote } from './textnote';
 import { layoutTiedBend } from './tiedbend';
 import { TimeSignature } from './timesignature';
+import type { Tuplet } from './tuplet';
 import { RuntimeError } from './util';
 
 export interface ContinuousBoundary {
@@ -863,6 +864,7 @@ export class ContinuousLayout {
             addPart(box);
           }
         }
+        const measuredTuplets = new Set<Tuplet>();
         if (u.first === u.last)
           for (const n of this.score.notes[u.first].flat(2)) {
             if (n instanceof TextNote && n.getDirectionAnchor() && n.getStave() === stave) {
@@ -880,6 +882,16 @@ export class ContinuousLayout {
               if (profiles)
                 addPart({ x: n.getStemX(), y: Math.min(topY, baseY), w: Stem.WIDTH, h: Math.abs(topY - baseY) });
             }
+            // Tuplets are referenced by every member. Include their ink once per physical stave.
+            if ((n instanceof StaveNote || n instanceof TabNote) && n.getStave() === stave) {
+              for (const tuplet of n.getTupletStack()) {
+                if (measuredTuplets.has(tuplet)) continue;
+                measuredTuplets.add(tuplet);
+                const box = tuplet.getBoundingBox();
+                addPart(box);
+                take(box.y, box.y + box.h);
+              }
+            }
             if (!(n instanceof StaveNote) || n.getStave() !== stave) continue;
             const shared = splitStemFor(n);
             const beam = shared ? shared.owner.getBeam() : n.getBeam();
@@ -896,11 +908,6 @@ export class ContinuousLayout {
             if (beam && !(beam instanceof ContinuousBeam) && !bridge && tipStave === stave) {
               if (profiles) beam.getStripBounds().forEach(addPart);
               const box = beam.getBoundingBox();
-              take(box.y, box.y + box.h);
-            }
-            for (const t of n.getTupletStack()) {
-              const box = t.getBoundingBox();
-              addPart(box);
               take(box.y, box.y + box.h);
             }
           }
@@ -937,17 +944,27 @@ export class ContinuousLayout {
     spans: ResolvedSpan[],
     units: Unit[],
     measures: number[],
-    baseline: (span: ResolvedSpan) => number
+    baseline: (span: ResolvedSpan) => number,
+    inward: (span: ResolvedSpan) => boolean,
+    hairpinBaselines: Map<ResolvedSpan, number>
   ): void {
     const first = units[0].first,
       last = units[units.length - 1].last;
-    for (const s of spans) {
+    // Place inward wedges last so other spans are already represented in the obstacle profile.
+    for (const s of [...spans.filter((span) => !inward(span)), ...spans.filter(inward)]) {
       if (s.beam || s.first.staff !== s.last.staff) continue;
       const staff = s.first.staff,
         base = this.score.staves[first][staff].getY();
       const f = this.makeFragment(s, units, measures, base + baseline(s), false);
       if (!f) continue;
       const p = profiles[staff];
+      if (inward(s)) {
+        const edge = p.edge(f.x1, f.x2, f.above);
+        // Half a space for the wedge aperture and half a space for clearance.
+        const y = edge + (f.above ? -1 : 1) * f.space * 1.1;
+        hairpinBaselines.set(s, y);
+        f.y1 = f.y2 = base + y;
+      }
       if (s.spec.string !== undefined && f.kind === 'slur') {
         // The full phrase selects one side after all rows have been placed. Reserve both possible ribbons.
         const ink = this.tabCurveInk(s, f, measures),
@@ -1143,12 +1160,21 @@ export class ContinuousLayout {
       return { top: bounds.top - space * (2 + above * 2.5), bottom: bounds.bottom + space * (1 + below * 2.5) };
     });
     const measures = Array.from({ length: last - first + 1 }, (_, i) => first + i + 1);
+    const hairpinBaselines = new Map<ResolvedSpan, number>();
     const baseline = (s: ResolvedSpan) => {
+      const local = hairpinBaselines.get(s);
+      if (local !== undefined) return local;
       const staff = s.first.staff,
         lane = lanes.get(s) ?? 0;
       return s.spec.bend || spanAbove(s.spec) ? ink[staff].top - lane * 25 - 4 : ink[staff].bottom + lane * 25 + 14;
     };
-    if (profiles) this.profileSpans(profiles, spans, units, measures, baseline);
+    if (profiles) {
+      const inward = (s: ResolvedSpan) =>
+        (s.spec.kind === 'crescendo' || s.spec.kind === 'diminuendo') &&
+        visible.includes(s.first.staff) &&
+        s.first.staff !== (spanAbove(s.spec) ? visible[0] : visible[visible.length - 1]);
+      this.profileSpans(profiles, spans, units, measures, baseline, inward, hairpinBaselines);
+    }
     for (let j = 1; j < visible.length; j++) {
       const a = visible[j - 1],
         b = visible[j];
@@ -1402,7 +1428,28 @@ export class ContinuousLayout {
       // System text is placed outside the finished curve; it must not push that same curve away.
       let fitted: boolean;
       if (kind === 'slur') {
-        fitted = fitPitchedSlur(fragment, s, events, (mark) => this.textLanes?.isMark(mark) ?? false);
+        const exclude = (mark: Element) => this.textLanes?.isMark(mark) ?? false;
+        fitted = fitPitchedSlur(fragment, s, events, exclude);
+        if (!fitted && starts && ends && !s.spec.side) {
+          const endpoint = (note: Note, head?: number) =>
+            note.getYs()[slurHead(note, head, !above)] - sign * space * 0.5;
+          const alternate = {
+            ...fragment,
+            above: !above,
+            y1: endpoint(s.first.note, s.spec.fromHead),
+            y2: endpoint(s.last.note, s.spec.toHead),
+          };
+          fitted = fitPitchedSlur(alternate, s, events, exclude);
+          if (fitted) Object.assign(fragment, alternate);
+          else {
+            // Crowded undirected phrases may still need a nearby attachment on either side.
+            fitted = fitPitchedSlur(fragment, s, events, exclude, true);
+            if (!fitted && fitPitchedSlur(alternate, s, events, exclude, true)) {
+              Object.assign(fragment, alternate);
+              fitted = true;
+            }
+          }
+        }
       } else {
         const obstacles = events
           .filter((n) => n !== s.first.note && n !== s.last.note)

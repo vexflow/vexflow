@@ -361,30 +361,23 @@ export class TabNote extends StemmableNote {
     return this.checkStem().getExtents();
   }
 
-  // Draw the fal onto the context
+  /** The rendered flag and its pre-draw ink share the same stem-tip origin. */
+  private flagOrigin() {
+    if (this.beam || !this.renderOptions.drawStem || !this.glyphProps.codeFlagUp) return;
+    return {
+      x: this.getStemX(),
+      y: this.getStemY() - this.checkStem().getHeight() + this.getStemDirection() * this.getStemExtension(),
+    };
+  }
+
+  getFlagInk() {
+    const origin = this.flagOrigin();
+    return origin && this.flag.getTextInk(origin.x, origin.y);
+  }
+
   drawFlag(): void {
-    const {
-      beam,
-      glyphProps,
-      renderOptions: { drawStem },
-    } = this;
-    const context = this.checkContext();
-
-    const shouldDrawFlag = beam === undefined && drawStem;
-
-    // Now it's the flag's turn.
-    if (glyphProps.codeFlagUp && shouldDrawFlag) {
-      const flagX = this.getStemX();
-      const flagY =
-        this.getStemDirection() === Stem.DOWN
-          ? // Down stems are below the note head and have flags on the right.
-            this.getStemY() - this.checkStem().getHeight() - this.getStemExtension()
-          : // Up stems are above the note head and have flags on the right.
-            this.getStemY() - this.checkStem().getHeight() + this.getStemExtension();
-
-      // Draw the Flag
-      this.flag.setContext(context).setX(flagX).setY(flagY).drawWithStyle();
-    }
+    const origin = this.flagOrigin();
+    if (origin) this.flag.setContext(this.checkContext()).setX(origin.x).setY(origin.y).drawWithStyle();
   }
 
   // Render the modifiers onto the context.
