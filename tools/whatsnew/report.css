@@ -292,6 +292,29 @@ select {
   gap: 10px 24px;
   margin: 22px 0 26px;
 }
+.change > :only-child {
+  grid-column: 1 / -1;
+  max-width: 76ch;
+}
+.comparison {
+  align-self: start;
+  margin: 0;
+  padding: 12px 15px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  font-size: .85rem;
+  font-variant-numeric: tabular-nums;
+}
+.comparison figcaption { font-weight: 600; }
+.comparison dl {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: .45em .8em;
+  margin: .65em 0;
+}
+.comparison dd { margin: 0; }
+.comparison dd span { display: block; height: 4px; background: var(--accent); }
+.comparison dd:first-of-type span { background: var(--muted); }
 .change h4 {
   font-size: 1rem;
   margin: 0;

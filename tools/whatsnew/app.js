@@ -37,7 +37,7 @@
   let sequence = [],
     changeTitles = [],
     position = 0;
-  const exhibits = data.figures.filter((f) => f.module !== 'Commit history');
+  const exhibits = data.figures;
   const allIds = exhibits.map((f) => f.id);
 
   const figureMatches = (f) =>
@@ -51,15 +51,9 @@
   function chooseSequence(origin, id, historyIndex) {
     changeTitles = [];
     if (origin === 'gallery') sequence = exhibits.filter(figureMatches).map((f) => f.id);
-    else if (origin === 'history' || id.startsWith('commit-'))
-      sequence = data.commits
-        .filter((c) =>
-          matches(query($('commit-query').value), [c.hash, c.date, c.subject, c.body, ...c.paths].join(' '))
-        )
-        .map((c) => c.figure);
     else if (origin === 'changes') {
       sequence = [];
-      for (const row of document.querySelectorAll('.change:not([hidden])')) {
+      for (const row of document.querySelectorAll('.change[data-exhibits]:not([hidden])')) {
         const ids = row.dataset.exhibits.split(' ');
         sequence.push(...ids);
         changeTitles.push(...ids.map(() => row.querySelector('h4').textContent));
@@ -134,7 +128,18 @@
   }
   function sync() {
     const hash = location.hash.slice(1);
-    if (hash.startsWith('plate-') && figures.has(hash.slice(6))) {
+    // Bookmarks to the former commit screenshots now open the text record.
+    if (hash.startsWith('plate-commit-')) {
+      const sha = hash.slice('plate-commit-'.length);
+      if (data.commits.some((commit) => commit.hash === sha)) {
+        const search = $('commit-query');
+        search.value = sha;
+        search.dispatchEvent(new Event('input'));
+        const row = $('commit-' + sha);
+        row.open = true;
+        row.scrollIntoView();
+      }
+    } else if (hash.startsWith('plate-') && figures.has(hash.slice(6))) {
       chooseSequence(history.state?.origin, hash.slice(6), history.state?.index);
       openFigure(hash.slice(6));
     } else if (dialog.open) {
@@ -148,17 +153,11 @@
     if (!a) return;
     event.preventDefault();
     const change = a.closest('.change');
-    const origin = change
-      ? 'changes'
-      : a.closest('#figures')
-        ? 'gallery'
-        : a.closest('#commit-list')
-          ? 'history'
-          : 'all';
+    const origin = change ? 'changes' : a.closest('#figures') ? 'gallery' : 'all';
     // A score may illustrate two changes. Start at the chosen row's occurrence.
     let index = 0;
     if (change)
-      for (const row of document.querySelectorAll('.change:not([hidden])')) {
+      for (const row of document.querySelectorAll('.change[data-exhibits]:not([hidden])')) {
         if (row === change) break;
         index += row.dataset.exhibits.split(' ').length;
       }
@@ -186,7 +185,7 @@
       if (!item.hidden) count++;
     }
     for (const el of document.querySelectorAll('.chapter,.category'))
-      el.hidden = !el.querySelector('.change:not([hidden])');
+      el.hidden = !el.querySelector('.change[data-exhibits]:not([hidden])');
     $('matches').textContent = words.length ? count + ' matching changes' : '';
   };
   function paged(items, input, list, more, render, search, extra = () => true, status) {
@@ -268,10 +267,11 @@
       row.append(
         make('p', c.body || (c.merge ? 'This merge includes ' : 'This commit touches ') + c.paths.length + ' paths.')
       );
-      const evidence = exhibitLink(c.figure, 'Inspect change');
+      row.id = 'commit-' + c.hash;
+      if (c.excerpt) row.append(make('small', c.excerpt.path), make('pre', c.excerpt.text));
       const refs = make('div');
       refs.className = 'refs';
-      refs.append(evidence, repositoryLink('https://github.com/vexflow/vexflow/commit/' + c.hash, 'Full commit and diff'));
+      refs.append(repositoryLink('https://github.com/vexflow/vexflow/commit/' + c.hash, 'Full commit and diff'));
       row.append(refs);
       const paths = make('div');
       paths.className = 'paths';

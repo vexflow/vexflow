@@ -1,5 +1,6 @@
 // Render an offline-first report. Every source link and image has the same meaning when the folder moves.
 import { repo } from './history.mjs';
+
 const esc = (v) =>
   String(v ?? '').replace(
     /[&<>"']/g,
@@ -13,6 +14,21 @@ const slug = (t) =>
 const anchor = (url, title) => '<a href="' + esc(url) + '">' + esc(title) + '</a>';
 const src = (head, path) => repo + (/^(commit|issues)\//.test(path) ? '/' : '/blob/' + head + '/') + path;
 const groups = (a, key) => [...new Set(a.map((x) => x[key]))];
+/** The values and version labels remain readable with CSS or JavaScript disabled. */
+function comparison({ label, samples, unit }) {
+  const bytes = unit === 'bytes';
+  const [before, after] = samples;
+  const reduction = Math.round(100 * (1 - after.value / before.value));
+  const rows = samples.map(({ version, value }) => {
+    const amount = bytes ? (value / 2 ** 20).toFixed(2) + ' MiB' : String(value);
+    const source = bytes
+      ? 'https://registry.npmjs.org/vexflow/-/vexflow-' + version + '.tgz'
+      : repo + '/releases/tag/' + version;
+    return `<dt>${anchor(source, version)}</dt><dd>${esc(amount)}<span aria-hidden="true" style="width:${(100 * value) / before.value}%"></span></dd>`;
+  });
+  return `<figure class="comparison"><figcaption>${esc(label)}</figcaption><dl>${rows.join('')}</dl><strong>${reduction}% ${bytes ? 'smaller' : 'fewer builds'}</strong></figure>`;
+}
+
 /** Show the first exhibit beside each change. The viewer continues through its other images in order. */
 function chapters(d, topics) {
   const figures = new Map(d.figures.map((f) => [f.id, f]));
@@ -20,16 +36,22 @@ function chapters(d, topics) {
     .map(([category, group, items]) => {
       const changes = items.map(([title, body, path, ...ids]) => {
         const f = figures.get(ids[0]);
-        const label = ids.length > 1 ? ids.length + ' exhibits' : f.left ? 'Before and after' : f.rightLabel;
+        const metric = d.comparisons[title];
+        const label = ids.length > 1 ? ids.length + ' exhibits' : f?.left ? 'Before and after' : f?.rightLabel;
+        const artifact = metric
+          ? comparison(metric)
+          : f
+            ? `<a class="sample open-score" href="#plate-${esc(f.id)}" data-plate="${esc(f.id)}" aria-label="${esc(title + ' · ' + label)}">
+          <img loading="lazy" decoding="async" src="${esc(f.right)}" alt="${esc(f.rightCaption || f.name)}"><span>${esc(label)} <b aria-hidden="true">↗</b></span></a>`
+            : '';
         const sourceLabel = path.startsWith('issues/')
           ? 'Issue #' + path.split('/')[1]
           : path.startsWith('commit/')
             ? 'Commit ' + path.split('/')[1]
             : path.split('/').at(-1);
-        return `<div class="change" data-search="${esc([category, group, title, body, path].join(' '))}" data-exhibits="${esc(ids.join(' '))}">
+        return `<div class="change" data-search="${esc([category, group, title, body, path].join(' '))}" ${ids.length ? 'data-exhibits="' + esc(ids.join(' ')) + '"' : ''}>
         <div><h4>${esc(title)}</h4><p>${esc(body)}</p><div class="refs">${anchor(src(d.head, path), sourceLabel)}</div></div>
-        <a class="sample open-score" href="#plate-${esc(f.id)}" data-plate="${esc(f.id)}" aria-label="${esc(title + ' · ' + label)}">
-        <img loading="lazy" decoding="async" src="${esc(f.right)}" alt="${esc(f.rightCaption || f.name)}"><span>${esc(label)} <b aria-hidden="true">↗</b></span></a></div>`;
+        ${artifact}</div>`;
       });
       return `<article class="chapter" id="${slug(group)}"><h3>${esc(group)}</h3>${changes.join('')}</article>`;
     })
@@ -42,7 +64,7 @@ export function renderReport(d) {
     category === 'Features' && !group.startsWith('New in ') ? 'New since ' + d.base : category
   );
   const count = d.topics.reduce((n, row) => n + row[2].length, 0);
-  const exhibits = d.figures.filter((f) => f.module !== 'Commit history');
+  const exhibits = d.figures;
   const nav = [...sections.keys(), 'Visual index', 'API inventory', 'Documentation', 'Commit history', 'Method'];
   const lead = d.figures.find((f) => f.module === 'Demo - Ballade No. 3 in A-flat major');
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="An illustrated, searchable account of VexFlow changes since 5.0.0."><title>VexFlow · What's New?</title><link rel="stylesheet" href="assets/report.css"><script src="assets/app.js" defer></script></head><body>
@@ -73,7 +95,7 @@ ${Array.from(sections, ([section, topics]) => '<section class="category" id="' +
 <section id="documentation"><h2>Documentation</h2><p>Open a guide from the revision that contains it. The inventory includes added, modified, moved and removed Markdown files between the two endpoints.</p><details><summary>${d.docs.length} documentation files</summary><ul class="doclist">${d.docs.map((r) => '<li><code>' + esc(r.status) + '</code>' + anchor(repo + '/blob/' + (r.status === 'D' ? d.before : d.head) + '/' + (r.newPath || r.path), r.newPath ? r.path + ' → ' + r.newPath : r.path) + '</li>').join('')}</ul></details></section>
 <section id="commit-history"><h2>Commit history</h2><p>Every commit reachable from the endpoint after the 5.0.0 tag, including merges, release preparation, dependency updates and follow-up corrections. Expand a commit to inspect a source excerpt, read its description, or open the full diff.</p><label class="search">Find a commit<input type="search" id="commit-query" placeholder="Subject, SHA, date or file"></label><div id="commit-list"></div><button class="more" id="commit-more">Show more commits</button></section>
 <section id="method"><h2>Method and limits</h2><p>The release images come from the browser bundle stored in the 5.0.0 Git tag. The current bundle was built from <a href="${repo}/commit/${d.head}">${d.head.slice(0, 12)}</a>. Both ran in Chromium ${esc(d.version)} on a white background at device scale 1. The native suites produced ${d.stats.old} and ${d.stats.current} score captures respectively. The current examples include ${d.stats.examples} guide examples and supplementary studies.</p>
-<p>Native comparisons match module, test name and font at both revisions. Test source can also evolve. Shared roadmap studies use the same authored score and the release’s native soft-voice equivalent where needed. When the 5.0.0 input is unavailable, a changed intermediate roadmap control is explicitly labeled 5.2.0. A current-only image means the old test or drawing was unavailable. Some studies exercise familiar notation through a new API. Issue screenshots link to the original review comment; paired images retain their before and after captions. Source excerpts document changes without a visible score. Each commit also has a first-parent diff excerpt or file inventory and a link to its full Git record. Reference controls that render identically are identified in the index.</p>
+<p>Native comparisons match module, test name and font at both revisions. Test source can also evolve. Shared roadmap studies use the same authored score and the release’s native soft-voice equivalent where needed. When the 5.0.0 input is unavailable, a changed intermediate roadmap control is explicitly labeled 5.2.0. A current-only image means the old test or drawing was unavailable. Some studies exercise familiar notation through a new API. Issue screenshots link to the original review comment; paired images retain their before and after captions. Package sizes measure the published npm tarballs. The construction comparison counts notehead builds for one three-note eighth-note chord. Commit entries include changed paths and a link to the full diff. Text changes also include a selectable diff excerpt. Reference controls that render identically are identified in the index.</p>
 <p>The declaration inventory includes exported types and public members, excludes private and protected members, and compares emitted TypeScript. Compiler changes can affect a printed declaration. The complete Git comparison also covers internal implementations, configuration, generated files and assets. The proposed VF6 requirements and future specialist work are documented in their own section.</p>
 <div class="refs">${anchor(repo + '/compare/5.0.0...' + d.head, 'Full source comparison')}${anchor('render-inventory.json', 'Complete render inventory')}${anchor('changes.json', 'Report data')}</div></section>
 </main></div>

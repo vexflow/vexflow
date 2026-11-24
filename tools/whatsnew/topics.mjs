@@ -7,7 +7,7 @@ export const topics = [
     [
       [
         'Smaller production package',
-        'The npm download is 2.33 MiB, down from 11.24 MiB in 5.10.1. Use the Bravura bundle for standard notation, the full bundle for all six font faces, or the core bundle to supply your own fonts. All three support script tags, ES modules and CommonJS.',
+        'The npm download contains production code, types and licenses. Debug builds, source maps and demos are available from the tagged source. Use the Bravura bundle for standard notation, the full bundle for all six font faces, or the core bundle to supply your own fonts. All three support script tags, ES modules and CommonJS.',
         'docs/build.md',
       ],
     ],
@@ -226,9 +226,9 @@ export const topics = [
       ],
       [
         'New engraving in five featured scores',
-        'The test gallery puts chord-frame fingerings, flared hairpins and pitched trills into complete musical phrases.',
+        'The four opening chord diagrams in Greensleeves now show which fingers stop each string. Other featured scores demonstrate flared hairpins and pitched trills.',
         'tests/flow.html',
-        'tool-gallery',
+        'case-1a828092725c229c',
       ],
       [
         'Additional barline styles',
@@ -822,7 +822,6 @@ export const topics = [
         'Repeated drawing and bounds',
         'Drawing an articulation twice preserves its position. Curves, strokes, clefs, signatures and tuplets gained or corrected bounds used by pointer targeting and measurement.',
         'src/articulation.ts',
-        'case-87bbdb963607a449',
       ],
       [
         'Ornaments after resize',
@@ -858,7 +857,6 @@ export const topics = [
         'Bounds for curves and tuplet brackets',
         'A curve exposes its bounding box for selection. Tuplets above and below the staff have bounds for the bracket and its number.',
         'issues/252',
-        'curve-1',
         'case-fbf8cf244d0d3ed9',
         'case-9983f8a953e6b731',
       ],
@@ -866,7 +864,6 @@ export const topics = [
         'Tuplet duration edits',
         'Repeated attachment is idempotent. Voices refresh total ticks, shortest duration and spacing weights after tuplet changes, including nesting and detachment.',
         'issues/268',
-        'case-e07e32e7ff453379',
       ],
       [
         'Clef state and key spelling',
@@ -878,7 +875,6 @@ export const topics = [
         'SVG groups and dimensions',
         'Group class attributes are retained for styling and inspection. Resizing the SVG surface uses valid CSS lengths and keeps viewBox geometry consistent.',
         'src/svgcontext.ts',
-        'case-ac8da66e557631ef',
       ],
       [
         'Modules and older Safari',
@@ -889,7 +885,6 @@ export const topics = [
         'Preview state and errors',
         'The guide reuses a warm runtime across edits and navigation. Async failures keep their error details, reset isolates prior execution, and scaled pointer coordinates resolve the intended target.',
         'docs/guide.md',
-        'tool-guide',
       ],
     ],
   ],
@@ -926,7 +921,6 @@ export const topics = [
         'Editable examples',
         'The host runs editable code inside a sandboxed preview iframe and handles its messages and errors. Standalone downloads and resets have regression checks for isolation.',
         'docs/guide.md',
-        'tool-guide',
       ],
     ],
   ],
@@ -968,13 +962,11 @@ export const topics = [
         'Managed EasyScore facade',
         'Typed constructors cover staff and TAB notes, rests, modifiers, grace groups and stave markings. Batch construction, validation and scoped defaults support editing without leaking temporary settings.',
         'docs/easyscore-contracts.md',
-        'example-easyscore-families',
       ],
       [
         'References and source selection',
         'Authored IDs, source spans and validated native adoption let a host map a drawn note back to its input. Relationships validate endpoints and Factory ownership.',
         'docs/easyscore.md',
-        'example-easyscore-references',
       ],
       [
         'Composition policy',
@@ -1072,13 +1064,11 @@ export const topics = [
         'Construct noteheads and flags once',
         'StaveNote avoids duplicating noteheads during construction. Rebuilding a chord removes obsolete child heads, and changing the stem direction reuses the note’s flag.',
         'issues/335',
-        'example-noteheads',
       ],
       [
         'Fonts and rendering diagnostics',
         'Failed font requests now identify the requested face. Tests cover delayed loads, failed glyph lookup, fallback behavior and agreement between live text and exported outlines.',
         'docs/vf6/m7.md',
-        'archive-petaluma',
       ],
       [
         'Demo migration',
@@ -1099,7 +1089,6 @@ export const topics = [
         'Contributor and user documentation',
         'The README adds UTF-8 setup and links to worked examples. API contracts, score-layout policies, portable export, security guidance and the roadmap have dedicated reference documents.',
         'README.md',
-        'tool-guide',
       ],
       [
         'VF6 acceptance baseline',

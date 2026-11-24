@@ -2,6 +2,7 @@
 import { execFileSync } from 'node:child_process';
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+
 import ts from 'typescript';
 
 export const git = (...args) => execFileSync('git', args, { encoding: 'utf8', maxBuffer: 48 * 1024 * 1024 }).trimEnd();
@@ -66,8 +67,29 @@ export async function apiChanges(work) {
   });
 }
 
+/** Retain a short, selectable first-parent diff. Binary changes already list their paths. */
+function diffExcerpt(hash, paths) {
+  const files = paths.filter(
+    (path) =>
+      /\.(ts|js|mjs|md|ya?ml|css|html|json)$/.test(path) &&
+      !/^(build\/|src\/fonts\/)|package-lock\.json$|\.min\.js$/.test(path)
+  );
+  const path = files.find((file) => file.startsWith('src/')) ?? files[0];
+  if (!path) return;
+  const lines = git('diff', '--no-ext-diff', '--no-textconv', '--unified=2', hash + '^1', hash, '--', path).split('\n');
+  const start = lines.findIndex((line) => line.startsWith('@@'));
+  if (start >= 0)
+    return {
+      path,
+      text: lines
+        .slice(start, start + 16)
+        .map((line) => (line.length > 160 ? line.slice(0, 157) + '…' : line))
+        .join('\n'),
+    };
+}
+
 /** Include merge and maintenance commits so each overview can be checked against the complete range. */
-export function history(head) {
+export function collectHistory(head) {
   const range = base + '..' + head;
   const commits = git('log', '--topo-order', '--format=%H%x1f%as%x1f%s%x1f%P%x1f%b%x1e', range)
     .split('\x1e')
@@ -78,7 +100,7 @@ export function history(head) {
       const paths = git('diff-tree', '--no-commit-id', '-r', '--name-only', parents.split(' ')[0], hash)
         .split('\n')
         .filter(Boolean);
-      return { hash, date, subject, body, merge: parents.includes(' '), paths };
+      return { hash, date, subject, body, merge: parents.includes(' '), paths, excerpt: diffExcerpt(hash, paths) };
     });
   const docs = git('diff', '--name-status', '-M', base, head, '--', '*.md', 'docs', 'guide', 'tools/explorer')
     .split('\n')

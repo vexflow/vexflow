@@ -1,9 +1,10 @@
-// Collect original issue attachments, printed score pages and readable Git evidence for the offline report.
+// Collect original issue attachments, printed score pages for the offline report.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { git, repo } from './history.mjs';
+
+import { repo } from './history.mjs';
 
 const digest = (bytes) => createHash('sha256').update(bytes).digest('hex');
 
@@ -103,142 +104,6 @@ export async function printFigures(browser, staging, head) {
     } finally {
       await page.close();
     }
-  }
-  return figures;
-}
-
-// For changes without a visible score, select the actual implementation, tests, or design record.
-const references = {
-  'SVG attribute filtering': ['src/svgcontext.ts', 'function isUnsafeAttributeName'],
-  'Modules and older Safari': ['src/util.ts', 'structured-clone-es'],
-  'Registry keys': ['src/registry.ts', 'this.id = Object.create'],
-  'Bounded notation parsing': ['src/fraction.ts', 'Invalid numbers'],
-  'Release and font tools': ['docs/dependencies.md', 'Security regression checks'],
-  'Dependency advisories': ['docs/dependencies.md', 'Security overrides'],
-  'Smaller production package': ['docs/build.md', '## Package contents'],
-  'Locked tools and audit policy': ['package.json', '"audit:ci"'],
-  'Persistence design': ['docs/vf6/requirements/score-persistence.md', '## '],
-  'Regression comparison': ['docs/vf6/m0.md', '5.2.0'],
-  'Browser and importer qualification': ['docs/vf6/m7.md', 'OSMD'],
-  'Performance studies': ['docs/benchmarks.md', '| Study'],
-  'Text measurement and rendering work': ['src/textmetricscache.ts', 'class TextMetricsCache'],
-  'Demo migration': ['demos/README.md', 'Build the library'],
-  'Headless and package workflows': ['docs/jsdom.md', '## Application setup'],
-  'Build and release instructions': ['docs/build.md', '### Tag and publish'],
-  'VF6 acceptance baseline': ['docs/vf6/requirements/README.md', '## '],
-};
-
-/** Typeset a real source excerpt. Insert repository contents as text, never as HTML. */
-async function captureExcerpt(page, staging, id, title, path, lines, label) {
-  await page.evaluate(
-    ({ title, path, lines, label }) => {
-      document.querySelector('small').textContent = label;
-      document.querySelector('h1').textContent = title;
-      document.querySelector('p').textContent = path;
-      document.querySelector('pre').replaceChildren(
-        ...lines.map((text) => {
-          const span = document.createElement('span');
-          span.textContent = text.length > 160 ? text.slice(0, 157) + '…' : text;
-          span.className = text.startsWith('+') ? 'add' : text.startsWith('-') ? 'del' : '';
-          return span;
-        })
-      );
-    },
-    { title, path, lines, label }
-  );
-  const right = 'assets/' + id + '.png';
-  await page.locator('main').screenshot({ path: join(staging, right) });
-  return right;
-}
-
-/** Select a first-parent hunk from handwritten source, or the changed paths for a binary-only commit. */
-function commitExcerpt(c) {
-  const textPaths = c.paths.filter(
-    (p) =>
-      /\.(ts|js|mjs|md|ya?ml|css|html|json)$/.test(p) &&
-      !/^(build\/|src\/fonts\/)|package-lock\.json$|\.min\.js$/.test(p)
-  );
-  const path = textPaths.find((p) => p.startsWith('src/')) ?? textPaths[0];
-  let lines = [];
-  if (path) {
-    const diff = git('diff', '--no-ext-diff', '--no-textconv', '--unified=2', c.hash + '^1', c.hash, '--', path).split(
-      '\n'
-    );
-    const start = diff.findIndex((l) => l.startsWith('@@'));
-    if (start >= 0) lines = diff.slice(start, start + 16);
-  }
-  const label = lines.length ? 'Git diff excerpt' : 'Git file inventory';
-  if (!lines.length) lines = c.paths.filter(Boolean).slice(0, 16);
-  return { path: label === 'Git diff excerpt' ? path : 'Changed paths', lines, label };
-}
-
-/** Keep the issue-independent technical evidence available in the downloaded report. */
-export async function sourceFigures(browser, staging, head, commits) {
-  const page = await browser.newPage({ viewport: { width: 900, height: 800 } });
-  const figures = [];
-  try {
-    await page.setContent(`<style>
-      * { box-sizing: border-box }
-      body { margin: 0; background: white; color: #24382d; font: 16px system-ui }
-      main { padding: 22px 26px }
-      h1 { font-size: 21px; margin: 5px 0 }
-      p { margin: 0 0 12px }
-      small { color: #51655a }
-      pre { font: 14px/1.45 monospace; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; background: #f5f6f2 }
-      pre span { display: block; padding: 0 7px; min-height: 1.45em }
-      .add { background: #e0f2e3 }
-      .del { background: #fae7e4 }
-    </style><main><small></small><h1></h1><p></p><pre></pre></main>`);
-    for (const [topic, [path, needle]] of Object.entries(references)) {
-      const lines = git('show', head + ':' + path).split('\n');
-      const start = lines.findIndex((l) => l.toLowerCase().includes(needle.toLowerCase()));
-      assert.ok(start >= 0, 'Missing source excerpt: ' + topic);
-      const id = 'reference-' + digest(topic).slice(0, 12);
-      const right = await captureExcerpt(
-        page,
-        staging,
-        id,
-        topic,
-        path,
-        lines.slice(start, start + 15),
-        'Source at ' + head.slice(0, 8) + ' · line ' + (start + 1)
-      );
-      figures.push({
-        id,
-        topic,
-        name: topic,
-        module: 'Source and documentation',
-        status: 'Source excerpt',
-        right,
-        rightLabel: 'Source excerpt',
-        source: repo + '/blob/' + head + '/' + path + '#L' + (start + 1),
-      });
-    }
-    for (const c of commits) {
-      const id = 'commit-' + c.hash;
-      const { path, lines, label } = commitExcerpt(c);
-      const right = await captureExcerpt(
-        page,
-        staging,
-        id,
-        c.subject,
-        path,
-        lines,
-        label + ' · ' + c.date + ' · ' + c.hash.slice(0, 8)
-      );
-      figures.push({
-        id,
-        name: c.subject,
-        module: 'Commit history',
-        status: label,
-        right,
-        rightLabel: label,
-        source: repo + '/commit/' + c.hash,
-      });
-      c.figure = id;
-    }
-  } finally {
-    await page.close();
   }
   return figures;
 }

@@ -1,8 +1,8 @@
 // Verify the static bundle offline and under its requested deployment prefix, including keyboard and mobile navigation.
 import assert from 'node:assert/strict';
-import { readFile, mkdir } from 'node:fs/promises';
-import { resolve, extname, sep, join } from 'node:path';
+import { mkdir, readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
+import { extname, join, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const root = resolve('build/whatsnew'),
@@ -13,10 +13,14 @@ const figures = new Map(data.figures.map((x) => [x.id, x]));
 assert.equal(figures.size, data.figures.length);
 for (const [, , items] of data.topics) {
   for (const [title, , , ...ids] of items) {
-    assert.ok(ids.length && ids.every((id) => figures.has(id)), 'Missing evidence for ' + title);
+    assert.ok(
+      ids.every((id) => figures.has(id)),
+      'Missing evidence for ' + title
+    );
   }
 }
-assert.ok(data.commits.every((c) => figures.get(c.figure)?.source.endsWith('/commit/' + c.hash)));
+assert.ok(data.figures.every((f) => !f.id.startsWith('reference-') && !f.id.startsWith('commit-')));
+assert.ok(data.commits.some((c) => c.excerpt?.text.startsWith('@@')));
 const issue = data.topics.flatMap((t) => t[2]).find(([title]) => title === 'Chord clearance across barlines');
 assert.match(figures.get(issue[3]).source, /issues\/375#issuecomment-/);
 assert.ok(figures.get(issue[3]).left);
@@ -64,6 +68,13 @@ try {
     assert.equal(await page.title(), "VexFlow · What's New?");
     assert.equal(await page.locator('h1').innerText(), "What's New?");
     assert.equal(await page.locator('.tiles img').count(), 24);
+    const download = page
+      .locator('.change')
+      .filter({ has: page.getByRole('heading', { name: 'Smaller production package' }) });
+    assert.match(await download.innerText(), /11\.24 MiB/);
+    assert.match(await download.innerText(), /2\.33 MiB/);
+    assert.equal(await download.locator('img').count(), 0);
+    assert.ok((await page.locator('.change:not([data-exhibits]) .refs a').count()) > 2);
     const before = await page.locator('.change:visible').count();
     await page.locator('#search').fill('rasgueado');
     assert.ok((await page.locator('.change:visible').count()) < before);
@@ -74,7 +85,7 @@ try {
     await page.locator('#search').fill('');
     // A change's pictures follow editorial order, then continue into the next change.
     const changes = await page
-      .locator('.change')
+      .locator('.change[data-exhibits]')
       .evaluateAll((rows) => rows.flatMap((el) => el.dataset.exhibits.split(' ')));
     await page.locator('.change [data-plate]').first().click();
     assert.equal(await page.locator('#previous-plate').isDisabled(), true);

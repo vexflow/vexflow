@@ -3,17 +3,19 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { access, copyFile, mkdir, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import { basename, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createRequire } from 'node:module';
+
 import { historicalEngravingBundle } from '../historical-engraving.mjs';
 import { siteTheme } from '../site-theme.mjs';
+import { comparisons } from './comparisons.mjs';
+import { collectIssueEvidence, printFigures } from './evidence.mjs';
+import { apiChanges, base, collectHistory, git, repo } from './history.mjs';
+import { renderReport } from './page.mjs';
 import { captureScores } from './scores.mjs';
 import { captureExamples, captureTools } from './screens.mjs';
-import { apiChanges, base, git, history, repo } from './history.mjs';
-import { collectIssueEvidence, printFigures, sourceFigures } from './evidence.mjs';
 import { topics } from './topics.mjs';
-import { renderReport } from './page.mjs';
 
 process.chdir(fileURLToPath(new URL('../../', import.meta.url)));
 const output = resolve('build/whatsnew'),
@@ -44,11 +46,24 @@ async function exhibit(directory, row, prefix) {
   return path;
 }
 
+// These fixtures test state or source lookup. Their final frame cannot show the operation.
+// Keep their hashes in the render inventory and their runnable examples in the guide.
+const nonvisualFixtures = new Set([
+  'case-87bbdb963607a449', // Repeated articulation draw
+  'case-e07e32e7ff453379', // Tuplet child bookkeeping
+  'example-easyscore-references',
+  'example-managed-batch',
+  'example-named-notes',
+  'example-option-validation',
+  'example-parse-diagnostics',
+]);
+
 /** Retain all visible suite differences and all new examples. Explicitly label unmatched fixture output. */
 async function compare(oldRows, newRows, directories, keepAll = false, intermediate = new Map()) {
   const old = new Map(oldRows.map((r) => [r.id, r]));
   const result = [];
   for (const row of newRows) {
+    if (nonvisualFixtures.has(row.id)) continue;
     const control = old.get(row.id);
     const laterControl = !control?.hash && intermediate.get(row.id);
     const intermediatePair = laterControl && laterControl.hash !== row.hash;
@@ -138,7 +153,7 @@ try {
   run(process.execPath, 'tools/tests-site.mjs', 'build');
   if (!(await exists(quality))) run(process.execPath, 'tools/reports/cli.mjs', 'build');
   const browser = await web('playwright').chromium.launch();
-  const revision = history(head);
+  const revision = collectHistory(head);
   let figures, stats, version;
   try {
     version = browser.version();
@@ -184,7 +199,6 @@ try {
       });
     figures.push(...(await printFigures(browser, staging, head)));
     figures.push(...(await collectIssueEvidence(staging, work)));
-    figures.push(...(await sourceFigures(browser, staging, head, revision.commits)));
     stats = {
       old: old.scores.images.length,
       current: now.scores.images.length,
@@ -208,6 +222,7 @@ try {
     version,
     stats,
     topics,
+    comparisons,
     figures,
     ...revision,
     api: await apiChanges(work),
@@ -219,6 +234,7 @@ try {
     (f) => f.topic
   );
   const titles = new Set(topics.flatMap(([, , items]) => items.map(([title]) => title)));
+  for (const title of Object.keys(comparisons)) assert.ok(titles.has(title), 'Unassigned measurement: ' + title);
   for (const title of byTopic.keys()) assert.ok(titles.has(title), 'Unassigned evidence: ' + title);
   data.topics = topics.map(([category, group, items]) => [
     category,
@@ -227,7 +243,6 @@ try {
       const originals = byTopic.get(title) ?? [];
       for (const figure of originals) figure.description = body;
       const evidence = [...originals.map((f) => f.id), ...examples];
-      assert.ok(evidence.length, 'Missing visual or source evidence: ' + title);
       for (const id of evidence) assert.ok(ids.has(id), 'Missing figure for ' + title + ': ' + id);
       return [title, body, path, ...evidence];
     }),

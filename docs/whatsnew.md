@@ -44,8 +44,8 @@ The versioned engineering metrics archive uses its own publisher. [Quality repor
 
 ## Add evidence for a change
 
-Add a summary and source to `tools/whatsnew/topics.mjs`. After the source path, list the IDs of its score studies or print pages in reading order. The first exhibit appears beside the summary. The build checks that every summary has evidence and every ID resolves.
+Add a summary and source to `tools/whatsnew/topics.mjs`. After the source path, list the IDs of its score studies or print pages in reading order. The first exhibit appears beside the summary. Use a score or interface image when the reader can see the specific change in it. The build checks each exhibit ID. A summary with a source link can stand alone.
 
 For existing issue screenshots, add a record to `tools/whatsnew/issue-evidence.json` with the matching topic title, original issue comment URL, attachment ID, caption and SHA-256 of each PNG. Use one image for a study or an already-combined review sheet. Use two images in before/after order only when the comment identifies both sides. The first build fetches missing attachments from GitHub and caches verified originals in `build/whatsnew-work/issue-images/`. The published and offline viewers serve their own copies.
 
-For a change without visible notation, select a source or documentation excerpt in `tools/whatsnew/evidence.mjs`. Every commit in the range also has a first-parent diff excerpt or file inventory in the commit history, with a link to the full change. These records are separate from the score and reference gallery.
+For a measurable change, add versioned values and their measurement basis in `tools/whatsnew/comparisons.mjs`. Measure npm download sizes in bytes from the published tarballs. The report displays the values in MiB. Commit history includes selectable text excerpts, changed paths and links to the full diffs.
